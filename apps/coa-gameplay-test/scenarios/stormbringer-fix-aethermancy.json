@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Aethermancy rank 2 grants its critical strike chance to Invigorating Surge (#2801)",
+  "contract": "Aethermancy rank 2 (705691) tooltip: 'Increases the critical strike chance of your Invigorating Surge by $s1%.' $s1 is effect0's value, and effect0 in Spell.dbc (/home/fab/CoaServer/dbc_clientset, read with coa-dbc-viewer) is EffectBasePoints 39 + EffectDieSides 1 = 40 (SpellEffectInfo::CalcValue adds 1 for DieSides == 1, SpellInfo.cpp:489-493), so the tooltip number is 40. Rank 1 (705690) delivers the same tooltip sentence with EffectApplyAuraName 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), 19+1 = 20, and is observed natively as base 100 -> 120 (scenario stormbringer-utility-passive-mods-crit-chance.json). Rank 2 ships the same op as EffectApplyAuraName 108 SPELL_AURA_ADD_PCT_MODIFIER instead, and Player::ApplySpellMod's PCT branch returns early for SPELLMOD_CRITICAL_CHANCE unless HasSpellModApplied(mod, spell) is already true for that cast (Player.cpp:10264-10266, the 'surge of light' exception); the aura can never register itself because the early return skips ApplyModToSpell, and rank 2's only other effect is a SPELLMOD_DOT (MiscValue 22) mod that never fires on Invigorating Surge (500038), whose effect0 is SPELL_EFFECT_HEAL with no periodic effect. Rank 2 therefore contributes nothing on the current binary. The fix is a load-time contract in src/server/coa/AscensionStormbringerContracts.cpp rewriting 705691's effect0 ApplyAuraName to SPELL_AURA_ADD_FLAT_MODIFIER, the shape rank 1 already uses, keeping the DBC amount so the modifier equals the tooltip's 40. Expected values on the same spell_modifier metric and actor fixture as the native scenario: base 100 -> 100 before the fix (failing), base 100 -> 100 + 40 = 140 after it.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    },
+    {
+      "id": "rank2",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "assert", "label": "BASELINE: before learning Aethermancy rank 2, Invigorating Surge carries no crit-chance modifier",
+      "actor": "rank2", "metric": "spell_modifier", "spell": 500038, "op": 7, "base": 100, "equals": 100 },
+    { "action": "learn", "label": "Learn Aethermancy rank 2", "actor": "rank2", "spell": 705691 },
+    { "action": "assert", "label": "DISCRIMINATING: Aethermancy rank 2 adds its tooltip's 40 crit chance to Invigorating Surge (100 + 40 = 140; unfixed binary yields 100)",
+      "actor": "rank2", "metric": "spell_modifier", "spell": 500038, "op": 7, "base": 100, "equals": 140 },
+    { "action": "assert", "label": "Aethermancy rank 2 leaves an unrelated spell's crit chance untouched",
+      "actor": "rank2", "metric": "spell_modifier", "spell": 804020, "op": 7, "base": 100, "equals": 100 },
+    { "action": "assert", "label": "A character without Aethermancy is unaffected by the contract",
+      "actor": "control", "metric": "spell_modifier", "spell": 500038, "op": 7, "base": 100, "equals": 100 }
+  ]
+}

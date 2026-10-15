@@ -1,0 +1,255 @@
+{
+  "schema": 1,
+  "name": "Primalist Earthmothers Binding: AP, healing and native redirect",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "binder",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "self",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "enemy",
+      "race": 5,
+      "class": 8,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "pvp",
+      "actor": "binder",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "self",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "learn",
+      "actor": "binder",
+      "spell": 805107
+    },
+    {
+      "action": "learn",
+      "actor": "self",
+      "spell": 805107
+    },
+    {
+      "action": "learn",
+      "actor": "enemy",
+      "spell": 2136
+    },
+    {
+      "action": "snapshot",
+      "actor": "binder",
+      "metric": "spell_healing_done",
+      "spell": 805107,
+      "target": "self",
+      "save_as": "base_heal",
+      "label": "base_heal"
+    },
+    {
+      "action": "set_aura",
+      "actor": "binder",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "binder",
+      "metric": "spell_healing_done",
+      "spell": 805107,
+      "target": "self",
+      "relative_to": "base_heal",
+      "label": "ap100",
+      "equals": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "binder",
+      "spell": 18787,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "binder",
+      "spell": 37342,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "binder",
+      "metric": "spell_healing_done",
+      "spell": 805107,
+      "target": "self",
+      "relative_to": "base_heal",
+      "label": "healing150",
+      "equals": 150
+    },
+    {
+      "action": "set_aura",
+      "actor": "binder",
+      "spell": 37342,
+      "stacks": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "self",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "binder",
+      "spell": 805107,
+      "target": "self"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "binder",
+      "metric": "spell_heal_count",
+      "spell": 805107,
+      "target": "self",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "self",
+      "metric": "aura_amount",
+      "spell": 807858,
+      "effect": 1,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "self",
+      "metric": "aura_duration_ms",
+      "spell": 807858,
+      "min": 5000,
+      "max": 6000
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 2136,
+      "target": "self"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_damage_total",
+      "spell": 2136,
+      "target": "self",
+      "save_as": "remaining_damage",
+      "label": "remaining_damage"
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_damage_total",
+      "spell": 807858,
+      "target": "binder",
+      "save_as": "redirect_damage",
+      "label": "redirect_damage"
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "assert",
+      "actor": "self",
+      "metric": "aura_stacks",
+      "spell": 807858,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_damage_count",
+      "spell": 807858,
+      "target": "binder",
+      "save_as": "expired_redirects"
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 2136,
+      "target": "self"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_damage_count",
+      "spell": 807858,
+      "target": "binder",
+      "relative_to": "expired_redirects",
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "self",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "self",
+      "spell": 805107,
+      "target": "self"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "self",
+      "metric": "spell_heal_count",
+      "spell": 805107,
+      "target": "self",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "self",
+      "metric": "aura_stacks",
+      "spell": 807858,
+      "equals": 0
+    }
+  ]
+}

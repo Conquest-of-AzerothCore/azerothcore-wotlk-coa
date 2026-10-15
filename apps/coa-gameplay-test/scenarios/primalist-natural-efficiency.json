@@ -1,0 +1,419 @@
+{
+  "schema": 1,
+  "name": "Primalist Natural Efficiency: applied control heals once",
+  "contract": "Incoming root, stun and incapacitate applications heal 4% maximum health once; slows, fears, immunities and talent removal do not trigger.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 4.72687
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "enemy",
+      "race": 5,
+      "class": 8,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "max_health",
+      "save_as": "victim_max_health"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "max_health",
+      "equals": 8288
+    },
+    {
+      "action": "pvp",
+      "actor": "primalist",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "learn",
+      "actor": "enemy",
+      "spell": 339
+    },
+    {
+      "action": "learn",
+      "actor": "enemy",
+      "spell": 853
+    },
+    {
+      "action": "learn",
+      "actor": "enemy",
+      "spell": 118
+    },
+    {
+      "action": "learn",
+      "actor": "enemy",
+      "spell": 116
+    },
+    {
+      "action": "learn",
+      "actor": "enemy",
+      "spell": 5782
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 339,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 339,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 707806,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 339,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 706167
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 706167,
+      "equals": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 339,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 339,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 707806,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 707806,
+      "equals": 331
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 339,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 339,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 707806,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 707806,
+      "equals": 662
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 339,
+      "stacks": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 853,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 853,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 707806,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 707806,
+      "equals": 993
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 853,
+      "stacks": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 118,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 118,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 707806,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 707806,
+      "equals": 1324
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 118,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 116,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 4200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 116,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 707806,
+      "equals": 4
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 116,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 5782,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 4200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 5782,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 707806,
+      "equals": 4
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 5782,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 1044,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 339,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 339,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 339,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 707806,
+      "equals": 4
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 1044,
+      "stacks": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706167
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 339,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 339,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 707806,
+      "equals": 4
+    }
+  ]
+}

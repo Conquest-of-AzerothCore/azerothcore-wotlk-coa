@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Bloody Sacrifice applies its 15% healing-received aura (#2832)",
+  "contract": "Bloody Sacrifice 705742 has a single effect in Spell.dbc: SPELL_EFFECT_APPLY_AURA with aura 118 SPELL_AURA_MOD_HEALING_PCT, BasePoints 14 + DieSides 1 = 15%, MiscValue 126, TargetA 1 and duration index 21 (permanent). It is registered on AuraEffect::HandleNoImmediateEffect and lives in Unit::SpellHealingBonusTaken, which reads GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT). The harness exposes no healing-taken metric - spell_healing_done calls SpellHealingBonusDone, the caster-side half - so this scenario locks the applied aura and its shipped amount rather than an observed heal. Two shipped oddities are recorded with the audit rather than fixed here: the record's ProcChance 5 is vestigial (aura 118 is not an isTriggerAura and the record's ProcFlags are 0, so SpellMgr generates no SpellProcEntry and nothing rolls 5%), and MiscValue 126 is ignored because the core's consumption of aura 118 applies no school filter.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 20, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "The talent is absent to begin with",
+      "actor": "caster", "metric": "aura", "spell": 705742, "equals": 0
+    },
+    { "action": "learn", "actor": "caster", "spell": 705742 },
+    {
+      "action": "assert", "label": "Learning it applies the passive",
+      "actor": "caster", "metric": "aura", "spell": 705742, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The healing-received bonus is the shipped 15%",
+      "actor": "caster", "metric": "aura_amount", "spell": 705742, "effect": 0, "equals": 15
+    },
+    {
+      "action": "assert", "label": "It is a permanent, beneficial aura",
+      "actor": "caster", "metric": "aura_duration_ms", "spell": 705742, "equals": -1
+    }
+  ]
+}

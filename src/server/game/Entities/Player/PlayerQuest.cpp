@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AscensionQuestLog.h"
 #include "CreatureAI.h"
 #include "DisableMgr.h"
 #include "GameEventMgr.h"
@@ -38,13 +39,27 @@
 /***                    QUEST SYSTEM                   ***/
 /*********************************************************/
 
+void Player::RefreshQuestLogQueries()
+{
+    for (auto const& [questId, status] : getQuestStatusMap())
+    {
+        if (status.Status != QUEST_STATUS_INCOMPLETE && status.Status != QUEST_STATUS_COMPLETE &&
+            status.Status != QUEST_STATUS_FAILED)
+            continue;
+
+        if (Quest const* quest = sObjectMgr->GetQuestTemplate(questId))
+            PlayerTalkClass->SendQuestQueryResponse(quest);
+    }
+
+    AscensionQuestLog::SendAll(this);
+}
+
 int32 Player::GetQuestLevel(Quest const* quest) const
 {
     if (!quest)
         return GetLevel();
-    if (LocalLevelScaling::QuestEnabled.load(std::memory_order_relaxed))
-        return LocalLevelScaling::ScaleQuestLevel(quest->GetQuestLevel(), GetLevel());
-    return quest->GetQuestLevel() > 0 ? quest->GetQuestLevel() : GetLevel();
+    return LocalLevelScaling::EffectiveQuestLevel(quest->GetQuestLevel(), GetLevel(),
+        LocalLevelScaling::ScalingCurveFor(LocalLevelScaling::QuestScalingEnabled(this), quest->GetQuestId()));
 }
 
 void Player::PrepareQuestMenu(ObjectGuid guid)
@@ -247,6 +262,9 @@ Quest const* Player::GetNextQuest(ObjectGuid guid, Quest const* quest)
 
 bool Player::CanSeeStartQuest(Quest const* quest)
 {
+    if (!sScriptMgr->OnPlayerCanTakeQuest(this, quest))
+        return false;
+
     if (!sDisableMgr->IsDisabledFor(DISABLE_TYPE_QUEST, quest->GetQuestId(), this) && SatisfyQuestClass(quest, false) && SatisfyQuestRace(quest, false) &&
         SatisfyQuestSkill(quest, false) && SatisfyQuestExclusiveGroup(quest, false) && SatisfyQuestReputation(quest, false) &&
         SatisfyQuestPreviousQuest(quest, false) && SatisfyQuestNextChain(quest, false) &&
@@ -261,7 +279,8 @@ bool Player::CanSeeStartQuest(Quest const* quest)
 
 bool Player::CanTakeQuest(Quest const* quest, bool msg)
 {
-    return !sDisableMgr->IsDisabledFor(DISABLE_TYPE_QUEST, quest->GetQuestId(), this)
+    return sScriptMgr->OnPlayerCanTakeQuest(this, quest)
+           && !sDisableMgr->IsDisabledFor(DISABLE_TYPE_QUEST, quest->GetQuestId(), this)
            && SatisfyQuestStatus(quest, msg) && SatisfyQuestExclusiveGroup(quest, msg)
            && SatisfyQuestClass(quest, msg) && SatisfyQuestRace(quest, msg) && SatisfyQuestLevel(quest, msg)
            && SatisfyQuestSkill(quest, msg) && SatisfyQuestReputation(quest, msg)
@@ -396,6 +415,9 @@ bool Player::CanCompleteRepeatableQuest(Quest const* quest)
 
 bool Player::CanRewardQuest(Quest const* quest, bool msg)
 {
+    if (!sScriptMgr->OnPlayerCanRewardQuest(this, quest))
+        return false;
+
     // not auto complete quest and not completed quest (only cheating case, then ignore without message)
     if (!quest->IsDFQuest() && !quest->IsAutoComplete() && quest->GetQuestMethod() && GetQuestStatus(quest->GetQuestId()) != QUEST_STATUS_COMPLETE)
         return false;
@@ -497,12 +519,14 @@ bool Player::CanRewardQuest(Quest const* quest, uint32 reward, bool msg)
     ItemPosCountVec dest;
     if (quest->GetRewChoiceItemsCount() > 0)
     {
-        if (quest->RewardChoiceItemId[reward])
+        if (uint32 const itemId = LocalLevelScaling::QuestRewardItemFor(this, quest->RewardChoiceItemId[reward],
+            quest))
         {
-            InventoryResult res = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, quest->RewardChoiceItemId[reward], quest->RewardChoiceItemCount[reward]);
+            InventoryResult res = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId,
+                quest->RewardChoiceItemCount[reward]);
             if (res != EQUIP_ERR_OK)
             {
-                SendEquipError(res, nullptr, nullptr, quest->RewardChoiceItemId[reward]);
+                SendEquipError(res, nullptr, nullptr, itemId);
                 return false;
             }
         }
@@ -512,12 +536,13 @@ bool Player::CanRewardQuest(Quest const* quest, uint32 reward, bool msg)
     {
         for (uint32 i = 0; i < quest->GetRewItemsCount(); ++i)
         {
-            if (quest->RewardItemId[i])
+            if (uint32 const itemId = LocalLevelScaling::QuestRewardItemFor(this, quest->RewardItemId[i],
+                quest))
             {
-                InventoryResult res = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, quest->RewardItemId[i], quest->RewardItemIdCount[i]);
+                InventoryResult res = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, quest->RewardItemIdCount[i]);
                 if (res != EQUIP_ERR_OK)
                 {
-                    SendEquipError(res, nullptr, nullptr, quest->RewardItemId[i]);
+                    SendEquipError(res, nullptr, nullptr, itemId);
                     return false;
                 }
             }
@@ -591,7 +616,14 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
         UpdatePvPState();
     }
 
+    // The client caches quest queries per quest ID across characters, so refresh the per-player scaled
+    // level and rewards here as well, scaled or not: the copy it holds from another character would
+    // otherwise colour the log.
+    if (LocalLevelScaling::QuestEnabled.load(std::memory_order_relaxed))
+        PlayerTalkClass->SendQuestQueryResponse(quest);
+
     SetQuestSlot(log_slot, quest_id, qtime);
+    AscensionQuestLog::SendSlot(this, log_slot);
 
     m_QuestStatusSave[quest_id] = true;
 
@@ -717,13 +749,15 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
 
     if (quest->GetRewChoiceItemsCount())
     {
-        if (uint32 itemId = quest->RewardChoiceItemId[reward])
+        if (uint32 itemId = LocalLevelScaling::QuestRewardItemFor(this, quest->RewardChoiceItemId[reward],
+            quest))
         {
             ItemPosCountVec dest;
             if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, quest->RewardChoiceItemCount[reward]) == EQUIP_ERR_OK)
             {
                 Item* item = StoreNewItem(dest, itemId, true);
                 SendNewItem(item, quest->RewardChoiceItemCount[reward], true, false, false, false);
+                LocalLevelScaling::NotifyQuestRewardItem(this, item, quest);
 
                 sScriptMgr->OnPlayerQuestRewardItem(this, item, quest->RewardChoiceItemCount[reward]);
             }
@@ -738,13 +772,15 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     {
         for (uint32 i = 0; i < quest->GetRewItemsCount(); ++i)
         {
-            if (uint32 itemId = quest->RewardItemId[i])
+            if (uint32 itemId = LocalLevelScaling::QuestRewardItemFor(this, quest->RewardItemId[i],
+                quest))
             {
                 ItemPosCountVec dest;
                 if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, quest->RewardItemIdCount[i]) == EQUIP_ERR_OK)
                 {
                     Item* item = StoreNewItem(dest, itemId, true);
                     SendNewItem(item, quest->RewardItemIdCount[i], true, false, false, false);
+                    LocalLevelScaling::NotifyQuestRewardItem(this, item, quest);
 
                     sScriptMgr->OnPlayerQuestRewardItem(this, item, quest->RewardItemIdCount[i]);
                 }
@@ -775,7 +811,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     int32 moneyRew = 0;
     if (GetLevel() >= sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) || sScriptMgr->OnPlayerShouldBeRewardedWithMoneyInsteadOfExp(this))
     {
-        moneyRew = quest->GetRewMoneyMaxLevel();
+        moneyRew = quest->GetRewMoneyMaxLevel(LocalLevelScaling::QuestScalingEnabled(this));
     }
     else
     {
@@ -784,7 +820,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     }
 
     // Give player extra money if GetRewOrReqMoney > 0 and get ReqMoney if negative
-    if (int32 rewOrReqMoney = quest->GetRewOrReqMoney(GetLevel()))
+    if (int32 rewOrReqMoney = quest->GetRewOrReqMoney(GetLevel(), LocalLevelScaling::QuestScalingEnabled(this)))
     {
         moneyRew += rewOrReqMoney;
     }
@@ -1488,14 +1524,18 @@ uint32 Player::CalculateQuestRewardXP(Quest const* quest)
     sScriptMgr->OnPlayerBeforeGetLevelForXPGain(this, level);
 
     // apply world quest rate
-    uint32 xp = uint32(quest->XPValue(level) * GetQuestRate(quest->IsDFQuest()));
+    uint32 xp = uint32(quest->XPValue(level, LocalLevelScaling::QuestScalingEnabled(this)) * GetQuestRate(quest->IsDFQuest(), quest->GetQuestLevel()));
 
-    // handle SPELL_AURA_MOD_XP_QUEST_PCT auras
+    // handle SPELL_AURA_MOD_XP_QUEST_PCT auras; a NO_BONUS_EXPERIENCE challenge drops
+    // the positive bonuses but keeps penalties.
     bool const recruitAFriend = GetsRecruitAFriendBonus(true);
-    xp *= GetTotalAuraMultiplier(SPELL_AURA_MOD_XP_QUEST_PCT, [recruitAFriend](AuraEffect const* effect)
+    bool const noBonusExperience = sScriptMgr->OnPlayerHasNoBonusExperience(this);
+    xp *= GetTotalAuraMultiplier(SPELL_AURA_MOD_XP_QUEST_PCT, [recruitAFriend, noBonusExperience](AuraEffect const* effect)
     {
         // CoA's party Aura of Experience explicitly excludes the recruit-a-friend bonus.
-        return effect->GetId() != 818059 || !recruitAFriend;
+        if (effect->GetId() == 818059 && recruitAFriend)
+            return false;
+        return !noBonusExperience || effect->GetAmount() <= 0;
     });
 
     return xp;
@@ -2450,12 +2490,12 @@ void Player::SendQuestReward(Quest const* quest, uint32 XP)
     sGameEventMgr->HandleQuestComplete(questid);
     WorldPackets::Quest::QuestGiverQuestComplete questGiverQuestComplete;
     questGiverQuestComplete.QuestId = questid;
-    uint32 rewardMoney = quest->GetRewOrReqMoney(GetLevel());
+    uint32 rewardMoney = quest->GetRewOrReqMoney(GetLevel(), LocalLevelScaling::QuestScalingEnabled(this));
 
     if (!IsMaxLevel())
         questGiverQuestComplete.Experience = XP;
     else
-        rewardMoney += quest->GetRewMoneyMaxLevel();
+        rewardMoney += quest->GetRewMoneyMaxLevel(LocalLevelScaling::QuestScalingEnabled(this));
 
     questGiverQuestComplete.RewardMoney = rewardMoney;
     questGiverQuestComplete.RewardHonor = 10 * quest->CalculateHonorGain(GetQuestLevel(quest));

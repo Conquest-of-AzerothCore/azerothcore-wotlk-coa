@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "name": "Dark Blood cuts Cursed Form costs and raises Blood Rituals healing (#3447)",
+  "contract": "Dark Blood ships two ranks, 804807 and 807919, both SpellFamilyName 26. Effect 0 of each is aura 108 with MiscValue 14 (SPELLMOD_COST), BasePoints -26 -> -25% (rank 1) and -51 -> -50% (rank 2), over EffectSpellClassMask (16777216, 9437185, 67127433), which selects the Cursed Form kit including the ten Bloodfang Bite records (501695-501697, 503613-503615, 572549-572551, 800156). Effect 1 of each is aura 108 with MiscValue 0 (SPELLMOD_DAMAGE), +25% / +50%, over (0, 0, 512) = word 2 bit 9 = Blood Rituals 704119, whose effect 0 is SPELL_EFFECT_HEAL; Unit::SpellHealingBonusDone applies SPELLMOD_DAMAGE to direct healing. Tooltip: \"Reduces the cost of your abilities that require Cursed Form and increases the healing done by Blood Rituals by $s1%.\" Both ranks are asserted separately, with the first unlearned before the second so the two modifiers never coexist. Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Bloodfang Bite costs its authored amount before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 501697,
+      "op": 14,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Blood Rituals heals its authored amount before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 704119,
+      "op": 0,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 804807
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 cuts Bloodfang Bite's cost by 25%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 501697,
+      "op": 14,
+      "base": 100,
+      "equals": 75
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises Blood Rituals healing by 25%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 704119,
+      "op": 0,
+      "base": 100,
+      "equals": 125
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 804807
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807919
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 cuts Bloodfang Bite's cost by 50%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 501697,
+      "op": 14,
+      "base": 100,
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises Blood Rituals healing by 50%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 704119,
+      "op": 0,
+      "base": 100,
+      "equals": 150
+    },
+    {
+      "action": "assert",
+      "label": "Dark Blood does not touch Bloodbolt's cost",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 14,
+      "base": 100,
+      "equals": 100
+    }
+  ]
+}

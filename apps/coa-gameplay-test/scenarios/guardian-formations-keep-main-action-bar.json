@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Guardian formations reach the client without a bonus action bar",
+  "contract": [
+    "Assault, Line and Tower Formation are shapeshift forms 37, 35 and 36, and the client's SpellShapeshiftForm.dbc gives",
+    "them BonusActionBar 1, 2 and 3 like the warrior stances, so entering one pages the main bar and its hotkeys to an",
+    "empty formation bar. coa_client_shapeshift_form lists them with BonusActionBar 0, and the login patch stream sends",
+    "each row as SMSG_PATCH_SPELL_SHAPESHIFT_FORM (0x0949): form id, bonus action bar, then the remaining 16 numeric",
+    "fields and the name. Expected: the client receives a row for each formation and its bonus action bar is 0.",
+    "Socketless packet construction does not establish how the client pages its bar."
+  ],
+  "timeout_ms": 30000,
+  "players": [
+    {"id": "guardian", "race": 1, "class": 18, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the login patch stream finish", "ms": 6000},
+    {"action": "assert", "label": "Line Formation's row reaches the client", "actor": "guardian",
+     "metric": "server_packets", "opcode": 2377, "row": 35, "equals": 1},
+    {"action": "assert", "label": "Line Formation keeps the main bar", "actor": "guardian",
+     "metric": "server_packet_u32", "opcode": 2377, "row": 35, "index": 1, "equals": 0},
+    {"action": "assert", "label": "Tower Formation's row reaches the client", "actor": "guardian",
+     "metric": "server_packets", "opcode": 2377, "row": 36, "equals": 1},
+    {"action": "assert", "label": "Tower Formation keeps the main bar", "actor": "guardian",
+     "metric": "server_packet_u32", "opcode": 2377, "row": 36, "index": 1, "equals": 0},
+    {"action": "assert", "label": "Assault Formation's row reaches the client", "actor": "guardian",
+     "metric": "server_packets", "opcode": 2377, "row": 37, "equals": 1},
+    {"action": "assert", "label": "Assault Formation keeps the main bar", "actor": "guardian",
+     "metric": "server_packet_u32", "opcode": 2377, "row": 37, "index": 1, "equals": 0},
+    {"action": "assert", "label": "Assault Formation keeps its stance flags", "actor": "guardian",
+     "metric": "server_packet_u32", "opcode": 2377, "row": 37, "index": 2, "equals": 13}
+  ]
+}

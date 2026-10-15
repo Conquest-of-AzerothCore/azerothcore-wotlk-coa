@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Cunning Nature applies its authored hit chance and Shadow threat reduction natively (#830)",
+  "contract": "Cunning Nature 706915 (Spell.dbc, read for this scenario) is a passive with two SPELL_EFFECT_APPLY_AURA effects targeting TARGET_UNIT_CASTER: effect 0 is aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 2 DieSides 1 (+3, matching CalcValue's DieSides==1 => +1 rule in SpellInfo.cpp); effect 1 is aura 10 SPELL_AURA_MOD_THREAT, BasePoints -16 DieSides 1 (-15), EffectMiscValue 32 (SPELL_SCHOOL_MASK_SHADOW). Neither is Cultist-specific: aura 333's handler AuraEffect::HandleAscensionModHitChanceAll (SpellAuraEffects.cpp:398,4845) delegates to the stock hit-chance path that feeds player->m_modSpellHitChance; aura 10's handler AuraEffect::HandleModThreat (SpellAuraEffects.cpp:75,3662) is the stock threat-percent-by-school aura present since 3.3.5a. grep across src/server/coa/ and src/server/game confirms zero occurrences of 706915, matching the issue's own evidence, but that evidence only shows no per-spell script exists -- none is needed. The harness's metric table (README) has no threat-observation metric, so the threat half is proven by asserting aura_amount on the passive's own effect 1, which is the value AuraEffect::HandleModThreat reads at threat-calculation time, not a live combat threat delta.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: Cunning Nature is not yet known", "actor": "cultist", "metric": "aura", "spell": 706915, "equals": 0 },
+    { "action": "snapshot", "label": "Baseline spell hit chance", "actor": "cultist", "metric": "spell_hit_chance", "save_as": "hit_before" },
+
+    { "action": "learn", "actor": "cultist", "spell": 706915 },
+    { "action": "assert", "label": "Learning the passive applies its own self-aura", "actor": "cultist", "metric": "aura", "spell": 706915, "equals": 1, "within_ms": 3000 },
+
+    { "action": "assert", "label": "Effect 0 carries the authored +3 hit chance", "actor": "cultist", "metric": "aura_amount", "spell": 706915, "effect": 0, "equals": 3 },
+    { "action": "assert", "label": "Effect 1 carries the authored -15 Shadow threat modifier", "actor": "cultist", "metric": "aura_amount", "spell": 706915, "effect": 1, "equals": -15 },
+
+    { "action": "assert", "label": "CONTRACT: spell hit chance rises by exactly 3 percentage points", "actor": "cultist", "metric": "spell_hit_chance", "relative_to": "hit_before", "min": 2.99, "max": 3.01 },
+
+    { "action": "unlearn", "actor": "cultist", "spell": 706915 },
+    { "action": "assert", "label": "Unlearning removes the self-aura", "actor": "cultist", "metric": "aura", "spell": 706915, "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "Hit chance returns to its baseline", "actor": "cultist", "metric": "spell_hit_chance", "relative_to": "hit_before", "min": -0.01, "max": 0.01 }
+  ]
+}

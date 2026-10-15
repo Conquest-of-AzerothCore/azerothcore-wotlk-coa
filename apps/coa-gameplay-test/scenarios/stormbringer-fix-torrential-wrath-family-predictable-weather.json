@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Predictable Weather is spent by the next cast it makes instant (#3665)",
+  "contract": "Predictable Weather 807233 reads 'Every 30 sec, your next Storm Alert or Torrential Wrath is instant cast.' Its single effect is SPELL_AURA_PERIODIC_TRIGGER_SPELL with EffectAmplitude 30000 and TriggerSpell 807481 on TargetA 1 (caster), which is generic core behaviour. The buff 807481 is SPELL_AURA_ADD_PCT_MODIFIER with MiscValue 10 (SPELLMOD_CASTING_TIME), EffectBasePoints -101 + EffectDieSides 1 = -100 and EffectSpellClassMask 0x4000000/0x1/0x0, which is Storm Alert 707044 (SpellFamilyFlags0 0x4000000) plus Torrential Wrath 804017 (SpellFamilyFlags1 0x1); family 22 has no special case in SpellInfo::IsAffectedBySpellMod, so the generic mask test applies and Player::ApplySpellMod computes (base + flat) * 0 = 0 for a CASTING_TIME op. What the DBC does not deliver is 'your next': 807481 ships ProcCharges 0, so Aura::CalcMaxCharges returns 0, Aura::SetCharges leaves m_isUsingCharges false and Player::RemoveSpellMods never consumes the modifier - and its non-zero DBC ProcFlags (4) generates a spell_proc entry, which RemoveSpellMods explicitly skips anyway. The buff therefore lasts its full 30000 ms (DurationIndex 9), which is also its retrigger period, making both spells permanently instant. The fix clears ProcFlags and sets ProcCharges 1 at load, so one affected cast spends the window. Stormflow 567555 is family 22 outside the mask and is the control. The base of 2500 in every spell_modifier read is Torrential Wrath's own CastingTimeIndex 19 = 2500 ms from SpellCastTimes.dbc.",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "storm",
+      "race": 8,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "storm",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "storm", "spell": 804017 },
+    { "action": "learn", "actor": "storm", "spell": 707044 },
+    {
+      "action": "assert", "label": "BASELINE: Torrential Wrath's cast time is unmodified",
+      "actor": "storm", "metric": "spell_modifier", "spell": 804017, "op": 10, "base": 2500, "equals": 2500
+    },
+    {
+      "action": "assert", "label": "BASELINE: Storm Alert's cast time is unmodified",
+      "actor": "storm", "metric": "spell_modifier", "spell": 707044, "op": 10, "base": 2500, "equals": 2500
+    },
+    {
+      "action": "assert", "label": "BASELINE: no Predictable Weather window before the passive",
+      "actor": "storm", "metric": "aura", "spell": 807481, "equals": 0
+    },
+    { "action": "learn", "actor": "storm", "spell": 807233 },
+    {
+      "action": "assert", "label": "SETUP: the Predictable Weather passive is active",
+      "actor": "storm", "metric": "aura", "spell": 807233, "equals": 1
+    },
+    { "action": "wait", "label": "One 30 sec period of the passive's periodic trigger", "ms": 31000 },
+    {
+      "action": "assert", "label": "SETUP: the 30 sec tick granted the window 807481",
+      "actor": "storm", "metric": "aura", "spell": 807481, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "BASELINE: the native half makes Torrential Wrath instant (-100% of 2500)",
+      "actor": "storm", "metric": "spell_modifier", "spell": 804017, "op": 10, "base": 2500, "equals": 0
+    },
+    {
+      "action": "assert", "label": "BASELINE: the native half makes Storm Alert instant as well",
+      "actor": "storm", "metric": "spell_modifier", "spell": 707044, "op": 10, "base": 2500, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: Stormflow is family 22 outside the mask and keeps its cast time",
+      "actor": "storm", "metric": "spell_modifier", "spell": 567555, "op": 10, "base": 2500, "equals": 2500
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the window carries exactly one charge",
+      "actor": "storm", "metric": "aura_charges", "spell": 807481, "equals": 1
+    },
+    { "action": "set_aura", "actor": "storm", "spell": 803102, "stacks": 100 },
+    { "action": "cast", "actor": "storm", "spell": 804017, "target": "dummy" },
+    {
+      "action": "assert", "label": "SETUP: the instant Torrential Wrath cast was accepted",
+      "actor": "storm", "metric": "cast_failure", "spell": 804017, "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: that one cast spends the window",
+      "actor": "storm", "metric": "aura", "spell": 807481, "equals": 0, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Torrential Wrath's cast time is back to its own 2500 ms",
+      "actor": "storm", "metric": "spell_modifier", "spell": 804017, "op": 10, "base": 2500, "equals": 2500
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Storm Alert is no longer instant either",
+      "actor": "storm", "metric": "spell_modifier", "spell": 707044, "op": 10, "base": 2500, "equals": 2500
+    }
+  ]
+}

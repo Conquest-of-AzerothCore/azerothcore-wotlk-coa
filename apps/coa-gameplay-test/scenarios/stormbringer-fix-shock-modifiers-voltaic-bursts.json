@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Voltaic Bursts raises Shock's periodic share (#707)",
+  "contract": "#707. Voltaic Bursts (705639) is aura 108 (ADD_PCT_MODIFIER) with EffectMiscValue 3 (SPELLMOD_EFFECT1), EffectBasePoints 49 + DieSides 1 = +50%, and EffectSpellClassMask [0, 0, 268435456], which matches Shock Hidden Passive (707058, SpellFamilyFlags [0, 0, 268435456]) and nothing else. Shock's own tooltip computes its periodic part as ($560336d*1000/$560336T1)*($707058m1)% of the initial damage, so 707058's effect 0 value is the authoritative percentage per tick: EffectBasePoints 9 + DieSides 1 = 10. Shock's DoT 560336 has DurationIndex 36 (1000 ms) and EffectAmplitude 500 ms, so it ticks twice and its total is 2 x that percentage of the hit. The module cast the DoT with a hardcoded damage/10, so the modifier could never reach it. The fix reads 707058's live effect value with Unit::CalculateSpellDamage, which runs Unit::ApplyEffectModifiers and therefore SPELLMOD_EFFECT1. Shock rank 9 (504634) is used because its damage (EffectBasePoints 433 + int(7 x 3.85) level scaling + irand(1, 45), i.e. 460..504) makes the per-tick integer truncation negligible; no absolute damage number is asserted, only the DoT total divided by the same cast's direct damage, which is 0.20 at a 10% share and 0.30 at a 15% share.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "s",
+      "race": 1,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "s",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 504634
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Shock Hidden Passive's periodic share is 10 (Spell.dbc 9 + 1)",
+      "actor": "s",
+      "metric": "spell_effect_value",
+      "spell": 707058,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 504634,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "label": "Cast time (2000 ms) plus the two DoT ticks (500 ms and 1000 ms)",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the unmodified Shock landed",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 504634,
+      "target": "target",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "s",
+      "metric": "spell_damage_total",
+      "spell": 504634,
+      "target": "target",
+      "save_as": "direct_base"
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: without Voltaic Bursts the DoT totals 20% of the hit (2 ticks x 10%)",
+      "actor": "s",
+      "metric": "spell_damage_total",
+      "spell": 560336,
+      "target": "target",
+      "ratio_to": "direct_base",
+      "min": 0.15,
+      "max": 0.25
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 705639
+    },
+    {
+      "action": "assert",
+      "label": "Voltaic Bursts' passive aura is applied",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 705639,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Voltaic Bursts raises the hidden passive's share to 15 (10 x 1.5, Spell.dbc 49 + 1 = +50%)",
+      "actor": "s",
+      "metric": "spell_effect_value",
+      "spell": 707058,
+      "effect": 0,
+      "equals": 15
+    },
+    {
+      "action": "snapshot",
+      "actor": "s",
+      "metric": "spell_damage_total",
+      "spell": 504634,
+      "target": "target",
+      "save_as": "direct_before_boosted"
+    },
+    {
+      "action": "snapshot",
+      "actor": "s",
+      "metric": "spell_damage_total",
+      "spell": 560336,
+      "target": "target",
+      "save_as": "dot_before_boosted"
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 504634,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "label": "Cast time plus the two DoT ticks",
+      "ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "label": "Direct damage of the boosted cast alone",
+      "actor": "s",
+      "metric": "spell_damage_total",
+      "spell": 504634,
+      "target": "target",
+      "relative_to": "direct_before_boosted",
+      "save_as": "direct_boosted"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: with Voltaic Bursts the DoT totals 30% of the hit (2 ticks x 15%), not 20%",
+      "actor": "s",
+      "metric": "spell_damage_total",
+      "spell": 560336,
+      "target": "target",
+      "relative_to": "dot_before_boosted",
+      "ratio_to": "direct_boosted",
+      "min": 0.27,
+      "max": 0.33
+    }
+  ]
+}

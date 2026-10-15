@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Test tuning: .mythic health and .mythic damage change one dungeon instance",
+  "contract": "Inside a Mythic Stockade instance, .mythic health 100 rescales the spawned creatures there, and a creature that appears after .mythic health 50 gets 1.5 times its health (Mythic Bruegal 490200 -> 735300). .mythic damage accepts a percent and a type. Requires CoA.DungeonTuning.Enable = 1 (default).",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_health", "actor": "hero", "value": 5000000, "maximum": 5000000 },
+    { "action": "ascension_dungeon_difficulty_packet", "actor": "hero", "value": 2 },
+    { "action": "wait", "ms": 250 },
+    { "action": "teleport", "actor": "hero", "map": 34, "x": 54.23, "y": 0.28, "z": -18.34 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "summon", "actor": "hero", "entry": 1720, "as": "first", "distance": 30 },
+    { "action": "wait", "ms": 300 },
+    { "action": "assert", "label": "CONTROL: Mythic Bruegal health", "actor": "first", "metric": "max_health", "equals": 490200 },
+    { "action": "command", "actor": "hero", "command": ".mythic health 100" },
+    { "action": "command", "actor": "hero", "command": ".mythic damage 10" },
+    { "action": "command", "actor": "hero", "command": ".mythic damage -20 magic" },
+    { "action": "command", "actor": "hero", "command": ".mythic health 50" },
+    { "action": "summon", "actor": "hero", "entry": 1720, "as": "second", "distance": 35 },
+    { "action": "wait", "ms": 300 },
+    { "action": "assert", "label": "a creature spawned at health 50 gets 150%", "actor": "second", "metric": "max_health", "equals": 735300 }
+  ]
+}

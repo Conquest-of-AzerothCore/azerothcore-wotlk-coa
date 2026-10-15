@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Cultist: Devourer adds 2 chain targets to Devour Magic (#1536)",
+  "contract": "300265 has a single effect, ADD_FLAT_MODIFIER (aura 107), EffectMiscValue 17 = SPELLMOD_JUMP_TARGETS, EffectBasePoints 1 + DieSides 1 = +2, EffectSpellClassMask word0 bit23 (8388608). Devour Magic 520151 (SpellFamilyName 31, SpellFamilyFlags word0 bit23, exact match) is Effect 0 = SPELL_EFFECT_DISPEL, EffectImplicitTargetA 21 (TARGET_UNIT_TARGET_ALLY, a single explicit target) and EffectChainTarget 1. Spell::SelectImplicitTargetObjectTargets (Spell.cpp ~1856-1881) unconditionally calls SelectImplicitChainTargets after adding the explicit target for this implicit-target category, and that function (Spell.cpp ~1884-1906) reads ChainTarget, applies SPELLMOD_JUMP_TARGETS through the ordinary spell_modifier path (making it 1 + 2 = 3), and calls SearchChainTargets to add up to 2 more nearby allies whenever the modified value exceeds 1 - so the mechanism applies to TARGET_UNIT_TARGET_ALLY exactly as it would to a dedicated chain-target category, matching '2 nearby allies' (1 explicit + 2 chained). 300265 is not in SpellInfo::IsAffectedBySpellMod's family-31 collision table, so the plain classmask match applies directly. spell_modifier applies the caster's real spell mods to a synthetic base of 1 (Devour Magic's own native ChainTarget). 500712 (Ancient Curse, SpellFamilyFlags all zero) is the negative control. Numbers read from Spell.dbc via coa-dbc-viewer; the target-selection code path was read directly rather than assumed from the target-type category alone. No script or SQL references 300265 or 520151. Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 25,
+      "level": 32
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Devour Magic's native chain target is 1 before Devourer",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 520151,
+      "op": 17,
+      "base": 1,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the control spell's chain target of 1 is unaffected before Devourer",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 500712,
+      "op": 17,
+      "base": 1,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 300265
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "knows_spell",
+      "spell": 300265,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Devourer raises Devour Magic's chain target from 1 to 3, i.e. 2 more allies (#1536)",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 520151,
+      "op": 17,
+      "base": 1,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Devourer does not leak onto an unrelated Cultist spell (negative control)",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 500712,
+      "op": 17,
+      "base": 1,
+      "equals": 1
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Barbarian audit: Symbol of the Warspear spell modifier reaches its target spells (#3437)",
+  "contract": "Audit report #3437 asked for a script for a passive whose effects are native spell-mod auras (107 flat, 108 percent). The effect BasePoints and EffectSpellClassMask in Spell.dbc name the spell-mod operation, amount and affected Barbarian spells; Player::ApplySpellMod, which the spell_modifier metric calls, must deliver base+flat or base*(100+pct)/100. Expected values are computed from the DBC amount, not from the implementation.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "before: 804137 has no modifier for op 11",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 804137,
+      "op": 11,
+      "base": 100000,
+      "min": 99998,
+      "max": 100002
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 804730
+    },
+    {
+      "action": "assert",
+      "label": "Symbol of the Warspear (804730) is active",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 804730,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "804730 op 11 flat -2000 reaches 804137 (mask selects 2 Barbarian spell(s))",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 804137,
+      "op": 11,
+      "base": 100000,
+      "min": 97998,
+      "max": 98002
+    }
+  ]
+}

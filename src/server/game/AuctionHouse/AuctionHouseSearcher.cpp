@@ -20,6 +20,7 @@
 #include "CharacterCache.h"
 #include "DBCStores.h"
 #include "GameTime.h"
+#include "LocalLevelScaling.h"
 #include "Player.h"
 
 AuctionHouseWorkerThread::AuctionHouseWorkerThread(ProducerConsumerQueue<AuctionSearcherRequest*>* requestQueue, MPSCQueue<AuctionSearcherResponse>* responseQueue)
@@ -400,6 +401,7 @@ void AuctionHouseSearcher::AddAuction(AuctionEntry const* auctionEntry)
     searchableAuctionEntry->item.count = item->GetCount();
     searchableAuctionEntry->item.spellCharges = item->GetSpellCharges();
     searchableAuctionEntry->item.itemTemplate = item->GetTemplate();
+    searchableAuctionEntry->item.guidLow = item->GetGUID().GetCounter();
 
     searchableAuctionEntry->SetItemNames();
 
@@ -447,7 +449,8 @@ void SearchableAuctionEntry::BuildAuctionInfo(WorldPacket& data) const
     data << uint32(item.suffixFactor);                              // SuffixFactor
     data << uint32(item.count);                                     // item->count
     data << uint32(item.spellCharges);                              // item->charge FFFFFFF
-    data << uint32(0);                                              // item->flags (client doesnt do anything with it)
+    // Stock leaves item->flags unused; the Ascension client shows the auction at the scaling level sent here
+    data << uint32(LocalLevelScaling::AuctionPreviewLevel(item.guidLow, item.itemTemplate));
     data << ownerGuid;                                              // Auction->owner
     data << uint32(startbid);                                       // Auction->startbid (not sure if useful)
     data << uint32(bid ? AuctionEntry::CalculateAuctionOutBid(bid) : 0);

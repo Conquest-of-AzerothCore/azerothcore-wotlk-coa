@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "name": "Ranger Pathfinder cuts Adrenaline Rush's cooldown by 90% only while Elude is active (#1874)",
+  "contract": "Pathfinder 706284 (Ranger Archery talent, CharacterAdvancement 31281, SpellFamilyName 27, SPELL_ATTR0_PASSIVE) reads 'Your Adrenaline Rush now incurs a $s1% reduced cooldown when used while Elude is active.' Its only effect is SPELL_AURA_ADD_FLAT_MODIFIER (107), MiscValue 3 = SPELLMOD_EFFECT1, BasePoints -91 + DieSides 1 = -90, masked to family 27 word 0 0x20000. The only family-27 record carrying that flag is the hidden Elude SLS3 524969, whose effect 0 is SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 11 = SPELLMOD_COOLDOWN, value 0, masked to family 27 word 1 0x20 = Adrenaline Rush 520578 (RecoveryTime 90000). So with the talent SLS3's effect 0 reads -90 and, while SLS3 is on the Ranger, Adrenaline Rush's 90 sec cooldown becomes 9 sec. Nothing put SLS3 on the Ranger: AscensionClassMechanics applies Elude SLS 524862 and SLS2 524886 with Elude 801345 but not SLS3, so the talent never acted. Expected: SLS3 follows the Elude aura; without the talent it reads 0 and Adrenaline Rush keeps 90 sec even in Elude; with the talent but outside Elude the cooldown stays 90 sec; with the talent in Elude it is 9 sec. Adrenaline Rush carries SPELL_ATTR1_ALLOW_WHILE_STEALTHED, so casting it keeps Elude. Before the fix the SLS3 presence assertion and the 9 sec cooldown assertion fail.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the character settle", "ms": 3000 },
+    { "action": "learn", "actor": "ranger", "spell": 801345 },
+    { "action": "learn", "actor": "ranger", "spell": 520578 },
+    { "action": "cast", "label": "Enter Elude without Pathfinder", "actor": "ranger", "spell": 801345 },
+    {
+      "action": "assert", "label": "SETUP: the Ranger is in Elude", "actor": "ranger",
+      "metric": "aura", "spell": 801345, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Elude carries its hidden SLS3 companion", "actor": "ranger",
+      "metric": "aura", "spell": 524969, "caster": "ranger", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Without Pathfinder the companion's cooldown modifier is zero", "actor": "ranger",
+      "metric": "aura_amount", "spell": 524969, "caster": "ranger", "effect": 0, "equals": 0
+    },
+    { "action": "cast", "label": "Adrenaline Rush in Elude without Pathfinder", "actor": "ranger", "spell": 520578 },
+    {
+      "action": "assert", "label": "Control: without Pathfinder Adrenaline Rush keeps its 90 sec cooldown in Elude",
+      "actor": "ranger", "metric": "cooldown_ms", "spell": 520578, "min": 85000, "max": 90000, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Adrenaline Rush does not break Elude", "actor": "ranger",
+      "metric": "aura", "spell": 801345, "equals": 1
+    },
+    { "action": "cancel_aura", "label": "Leave Elude", "actor": "ranger", "spell": 801345 },
+    {
+      "action": "assert", "label": "The companion leaves with Elude", "actor": "ranger",
+      "metric": "aura", "spell": 524969, "equals": 0, "within_ms": 2000
+    },
+    { "action": "reset_cooldown", "actor": "ranger", "spell": 520578 },
+    { "action": "reset_cooldown", "actor": "ranger", "spell": 801345 },
+    { "action": "learn", "actor": "ranger", "spell": 706284 },
+    {
+      "action": "assert", "label": "SETUP: Pathfinder is active on the Ranger", "actor": "ranger",
+      "metric": "aura", "spell": 706284, "equals": 1, "within_ms": 3000
+    },
+    { "action": "cast", "label": "Adrenaline Rush with Pathfinder outside Elude", "actor": "ranger", "spell": 520578 },
+    {
+      "action": "assert", "label": "Control: outside Elude Pathfinder leaves the 90 sec cooldown", "actor": "ranger",
+      "metric": "cooldown_ms", "spell": 520578, "min": 85000, "max": 90000, "within_ms": 2000
+    },
+    { "action": "reset_cooldown", "actor": "ranger", "spell": 520578 },
+    { "action": "cast", "label": "Enter Elude with Pathfinder", "actor": "ranger", "spell": 801345 },
+    {
+      "action": "assert", "label": "SETUP: the Ranger is in Elude again", "actor": "ranger",
+      "metric": "aura", "spell": 801345, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Pathfinder makes the companion a 90% cooldown reduction", "actor": "ranger",
+      "metric": "aura_amount", "spell": 524969, "caster": "ranger", "effect": 0, "equals": -90, "within_ms": 2000
+    },
+    { "action": "cast", "label": "Adrenaline Rush with Pathfinder in Elude", "actor": "ranger", "spell": 520578 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: in Elude Pathfinder cuts the cooldown to 9 sec", "actor": "ranger",
+      "metric": "cooldown_ms", "spell": 520578, "min": 8000, "max": 9000, "within_ms": 2000
+    }
+  ]
+}

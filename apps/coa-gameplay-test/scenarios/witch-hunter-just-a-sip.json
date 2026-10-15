@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Just A Sip restores 5% of maximum health and mana when a Tonic is drunk (#1143)",
+  "contract": "Just A Sip 705533 reads 'Drinking Tonics now also restores $680616s1% of your maximum health and mana.' In the installed Spell.dbc it is a passive (attribute 0xc0), family 21, with one effect: SPELL_AURA_PROC_TRIGGER_SPELL (42) triggering 680616, whose effect 0 is SPELL_EFFECT_ENERGIZE_PCT (137, mana) and effect 1 SPELL_EFFECT_HEAL_PCT (136), both BasePoints 4 (DieSides 1, so 5%), both aimed at the caster. The proc conditions are the spell_proc row in data/sql/updates/pending_db_world/rev_20260907_12_witch_hunter_tonic_procs.sql (family 21, SpellFamilyMask2 512, ProcFlags 81920, SpellTypeMask 7, SpellPhaseMask 4, Chance 100), which matches every Tonic (flag word 2 0x200, DmgClass 1). Vampiric Tonic 802276 is used because it heals nothing itself, so the 5% is not mixed with a Tonic heal. With the maximum health fixed at 10000 and current health at 5000 the heal is exactly 5% of 10000 = 500 (HEAL_PCT uses maximum health). The mana half is asserted positive and equal to the native energize log entry, because the character's maximum mana is not fixed by the scenario. A control cast without the talent must restore nothing.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 80, "allow_regeneration": false}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Vampiric Tonic", "actor": "hunter", "spell": 802276},
+    {"action": "assert", "label": "The character has a mana pool", "actor": "hunter", "metric": "max_power", "power": 0, "min": 1},
+    {"action": "set_health", "label": "Fix health at 5000 of a 10000 maximum", "actor": "hunter", "value": 5000, "maximum": 10000},
+    {"action": "set_power", "label": "Empty the mana bar", "actor": "hunter", "power": 0, "value": 0},
+    {"action": "snapshot", "actor": "hunter", "metric": "health", "save_as": "health_control"},
+    {"action": "snapshot", "actor": "hunter", "metric": "power", "power": 0, "save_as": "mana_control"},
+    {"action": "cast", "label": "Control: drink a Tonic without the talent", "actor": "hunter", "spell": 802276},
+    {"action": "assert", "label": "The Tonic was drunk", "actor": "hunter", "metric": "aura", "spell": 802276, "equals": 1, "within_ms": 3000},
+    {"action": "wait", "label": "Give a wrongly present proc time to fire", "ms": 1500},
+    {"action": "assert", "label": "No health restored without the talent", "actor": "hunter", "metric": "health", "relative_to": "health_control", "equals": 0},
+    {"action": "assert", "label": "No mana restored without the talent", "actor": "hunter", "metric": "power", "power": 0, "relative_to": "mana_control", "equals": 0},
+    {"action": "set_aura", "label": "Remove the control Tonic", "actor": "hunter", "spell": 802276, "stacks": 0},
+    {"action": "reset_cooldown", "label": "Clear the Tonic cooldown", "actor": "hunter", "spell": 802276},
+    {"action": "wait", "label": "Let the global cooldown pass", "ms": 2500},
+    {"action": "learn", "label": "Just A Sip", "actor": "hunter", "spell": 705533},
+    {"action": "assert", "label": "The passive is active", "actor": "hunter", "metric": "aura", "spell": 705533, "equals": 1},
+    {"action": "set_health", "label": "Fix health at 5000 again", "actor": "hunter", "value": 5000},
+    {"action": "set_power", "label": "Empty the mana bar again", "actor": "hunter", "power": 0, "value": 0},
+    {"action": "snapshot", "actor": "hunter", "metric": "health", "save_as": "health_before"},
+    {"action": "snapshot", "actor": "hunter", "metric": "power", "power": 0, "save_as": "mana_before"},
+    {"action": "cast", "label": "Drink a Tonic with the talent", "actor": "hunter", "spell": 802276},
+    {"action": "assert", "label": "The proc fired", "actor": "hunter", "metric": "spell_proc_count", "spell": 705533, "min": 1, "within_ms": 3000},
+    {"action": "assert", "label": "Health rose by 5% of the 10000 maximum", "actor": "hunter", "metric": "health", "relative_to": "health_before", "min": 495, "max": 505, "within_ms": 3000},
+    {"action": "assert", "label": "The heal log records 500", "actor": "hunter", "metric": "spell_effective_heal_total", "spell": 680616, "min": 495, "max": 505},
+    {"action": "assert", "label": "Mana rose", "actor": "hunter", "metric": "power", "power": 0, "relative_to": "mana_before", "min": 1},
+    {"action": "assert", "label": "The energize log records a positive mana gain", "actor": "hunter", "metric": "spell_energize_total", "spell": 680616, "power": 0, "min": 1}
+  ]
+}

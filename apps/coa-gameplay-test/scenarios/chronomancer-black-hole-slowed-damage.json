@@ -1,0 +1,177 @@
+{
+  "schema": 1,
+  "name": "Black Hole raises Melt Reality and Unmake damage by 15% against slowed enemies (#786)",
+  "contract": "#786: Black Hole 707557 reads 'Increases the damage of Chromatic Shard, Melt Reality and Unmake by $s1% against slowed enemies.' Its only effect is aura 112 with EffectMiscValue 20007 (the class-mask aura-state damage selector the core already converts to aura 303 for Ravager, Hunting Tactics and others), EffectMiscValueB 26, EffectBasePoints 14 + DieSides 1 = 15 and EffectSpellClassMask [0, 33554944, 0] in family 28, which is exactly Melt Reality's word-1 bit 512 (806335 and ranks) plus Unmake's word-1 bit 33554432 (503784 and ranks). State 26 means a slowed target on every client record that carries it: Reckless Assault 804610, The Time Has Come 572879 and Shard of True Ice 805425 all describe the same selector as 'against slowed enemies/targets', and Felsworn's Reckless Assault is already scored as SPELL_AURA_MOD_DECREASE_SPEED. Before the fix the effect was never converted and AuraStateType has no state 26, so the bonus never applied. The query is the native spell_damage_done on each DoT's periodic path (Unit::SpellPctDamageModsDone folds aura 303 into the done multiplier), against two identical dummies of which only one carries Slow 31589 (aura 33 SPELL_AURA_MOD_DECREASE_SPEED). Before Black Hole is learned the slow changes nothing; after it, both masked DoTs gain exactly 15% against the slowed dummy only, and Timerend 801291 (word-1 bit 16777216, outside the mask) gains nothing. Chromatic Shard is named by the tooltip but is not in the mask and is not asserted.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "slowed",
+      "owner": "chronomancer",
+      "entry": 36,
+      "distance": 3
+    },
+    {
+      "id": "unslowed",
+      "owner": "chronomancer",
+      "entry": 36,
+      "distance": 6
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 31589
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 31589,
+      "target": "slowed"
+    },
+    {
+      "action": "assert",
+      "label": "Slow lands on one dummy",
+      "actor": "slowed",
+      "metric": "aura",
+      "spell": 31589,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The other dummy is not slowed",
+      "actor": "unslowed",
+      "metric": "aura",
+      "spell": 31589,
+      "caster": "chronomancer",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Unmake periodic damage against the unslowed dummy",
+      "actor": "chronomancer",
+      "metric": "spell_damage_done",
+      "spell": 503784,
+      "target": "unslowed",
+      "periodic": true,
+      "save_as": "unmake_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Melt Reality periodic damage against the unslowed dummy",
+      "actor": "chronomancer",
+      "metric": "spell_damage_done",
+      "spell": 806335,
+      "target": "unslowed",
+      "periodic": true,
+      "save_as": "melt_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Timerend periodic damage against the unslowed dummy",
+      "actor": "chronomancer",
+      "metric": "spell_damage_done",
+      "spell": 801291,
+      "target": "unslowed",
+      "periodic": true,
+      "save_as": "timerend_base"
+    },
+    {
+      "action": "assert",
+      "label": "Without Black Hole the slow alone leaves Unmake unchanged",
+      "actor": "chronomancer",
+      "metric": "spell_damage_done",
+      "spell": 503784,
+      "target": "slowed",
+      "periodic": true,
+      "ratio_to": "unmake_base",
+      "min": 0.995,
+      "max": 1.005
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 707557
+    },
+    {
+      "action": "assert",
+      "label": "Black Hole's passive is applied",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 707557,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Black Hole raises Unmake by 15% against the slowed dummy",
+      "actor": "chronomancer",
+      "metric": "spell_damage_done",
+      "spell": 503784,
+      "target": "slowed",
+      "periodic": true,
+      "ratio_to": "unmake_base",
+      "min": 1.145,
+      "max": 1.155
+    },
+    {
+      "action": "assert",
+      "label": "Black Hole raises Melt Reality by 15% against the slowed dummy",
+      "actor": "chronomancer",
+      "metric": "spell_damage_done",
+      "spell": 806335,
+      "target": "slowed",
+      "periodic": true,
+      "ratio_to": "melt_base",
+      "min": 1.145,
+      "max": 1.155
+    },
+    {
+      "action": "assert",
+      "label": "Unmake gains nothing against the unslowed dummy",
+      "actor": "chronomancer",
+      "metric": "spell_damage_done",
+      "spell": 503784,
+      "target": "unslowed",
+      "periodic": true,
+      "ratio_to": "unmake_base",
+      "min": 0.995,
+      "max": 1.005
+    },
+    {
+      "action": "assert",
+      "label": "Timerend, outside Black Hole's mask, gains nothing against the slowed dummy",
+      "actor": "chronomancer",
+      "metric": "spell_damage_done",
+      "spell": 801291,
+      "target": "slowed",
+      "periodic": true,
+      "ratio_to": "timerend_base",
+      "min": 0.995,
+      "max": 1.005
+    }
+  ]
+}

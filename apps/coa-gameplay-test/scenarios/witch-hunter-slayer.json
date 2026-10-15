@@ -1,0 +1,238 @@
+{
+  "schema": 1,
+  "name": "Slayer grants the party 3 percent critical strike and its holder 3 more (#3912)",
+  "contract": "Slayer 300968 is SpellFamily 21, passive (Attributes 0x40), with two effects. Effect 0 is SPELL_EFFECT_APPLY_AREA_AURA_RAID (65) applying SPELL_AURA_MOD_CRIT_PCT (290), BasePoints 2 + DieSides 1 = +3 percent, RadiusIndex 12 (100 yards). Effect 1 is SPELL_AURA_ASCENSION_MOD_CRIT_CHANCE (350), MiscValue 127 (all schools), +3 percent, applied to the caster only, which is the 'in addition, increases your critical strike chance' half; Unit::SpellDoneCritChance adds it for every school (Unit.cpp:9692). 300968 belongs to spell group 2000181 (rev_20260908_05_guardian_completion.sql:320) whose stack rule is 3, SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT (line 331), over the aura types MOD_CRIT_PCT, MOD_WEAPON_CRIT_PERCENT and MOD_SPELL_CRIT_CHANCE (SpellMgr.cpp:1874); Unit::GetTotalAuraModifier keeps only the highest amount of a same-effect group (Unit.cpp:6559-6575). That is the 'does not stack with similar effects' clause: a second holder grouped with the same member leaves the member at +3. Everything is native aura and spell group data, no script is involved. The holder's spell_done_crit_chance is read on Quickdraw 804193 (DmgClass ranged, physical, not CANT_CRIT), which reads the melee crit field plus aura 350: +3 + +3 = +6. Stacking is exercised with a second Slayer holder rather than a foreign buff so that every step uses only learn and group; the receiver never learns the talent. A fresh character's melee crit field reads 0 until a crit aura first recomputes it (measured on slot 3: a crit passive gave 4.664 from a 0 baseline, and exactly 4.000 after a learn and unlearn of the same passive, the primed baseline being 0.664), so the baselines are snapshotted after a priming learn and unlearn. Night Stalker 300792 (a self-only crit passive) primes the three characters, so Slayer itself is not learned before its baselines.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    },
+    {
+      "id": "receiver",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "hunter",
+      "entry": 36,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "label": "Group the second Slayer holder with the first",
+      "actor": "hunter",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "label": "Group the receiver",
+      "actor": "hunter",
+      "target": "receiver"
+    },
+    {
+      "action": "learn",
+      "label": "Prime the crit fields with a learn",
+      "actor": "receiver",
+      "spell": 300792
+    },
+    {
+      "action": "unlearn",
+      "label": "Prime the crit fields with an unlearn",
+      "actor": "receiver",
+      "spell": 300792
+    },
+    {
+      "action": "learn",
+      "label": "Prime the crit fields with a learn",
+      "actor": "ally",
+      "spell": 300792
+    },
+    {
+      "action": "unlearn",
+      "label": "Prime the crit fields with an unlearn",
+      "actor": "ally",
+      "spell": 300792
+    },
+    {
+      "action": "learn",
+      "label": "Prime the crit fields with a learn",
+      "actor": "hunter",
+      "spell": 300792
+    },
+    {
+      "action": "unlearn",
+      "label": "Prime the crit fields with an unlearn",
+      "actor": "hunter",
+      "spell": 300792
+    },
+    {
+      "action": "wait",
+      "label": "Let the recomputed fields settle",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "label": "Receiver melee critical chance before Slayer",
+      "actor": "receiver",
+      "metric": "melee_crit_chance",
+      "save_as": "recv_melee_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Receiver spell critical chance before Slayer",
+      "actor": "receiver",
+      "metric": "spell_crit_chance",
+      "save_as": "recv_spell_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Slayer holder melee critical chance before Slayer",
+      "actor": "hunter",
+      "metric": "melee_crit_chance",
+      "save_as": "own_melee_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Slayer holder spell critical chance before Slayer",
+      "actor": "hunter",
+      "metric": "spell_crit_chance",
+      "save_as": "own_spell_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Second holder melee critical chance before any Slayer",
+      "actor": "ally",
+      "metric": "melee_crit_chance",
+      "save_as": "ally_melee_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Slayer holder Quickdraw critical chance before Slayer",
+      "actor": "hunter",
+      "metric": "spell_done_crit_chance",
+      "save_as": "own_quick_before",
+      "spell": 804193,
+      "target": "dummy"
+    },
+    {
+      "action": "learn",
+      "label": "Learn 300968",
+      "actor": "hunter",
+      "spell": 300968
+    },
+    {
+      "action": "assert",
+      "label": "The party member receives the Slayer raid aura",
+      "actor": "receiver",
+      "metric": "aura",
+      "spell": 300968,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Party member: melee critical chance is 3 percentage points higher (effect 0, aura 290)",
+      "actor": "receiver",
+      "metric": "melee_crit_chance",
+      "relative_to": "recv_melee_before",
+      "min": 2.99,
+      "max": 3.01
+    },
+    {
+      "action": "assert",
+      "label": "Party member: spell critical chance is 3 percentage points higher",
+      "actor": "receiver",
+      "metric": "spell_crit_chance",
+      "relative_to": "recv_spell_before",
+      "min": 2.99,
+      "max": 3.01
+    },
+    {
+      "action": "assert",
+      "label": "Holder: the raid aura also covers the holder, +3 melee",
+      "actor": "hunter",
+      "metric": "melee_crit_chance",
+      "relative_to": "own_melee_before",
+      "min": 2.99,
+      "max": 3.01
+    },
+    {
+      "action": "assert",
+      "label": "Holder: +3 spell from the raid aura",
+      "actor": "hunter",
+      "metric": "spell_crit_chance",
+      "relative_to": "own_spell_before",
+      "min": 2.99,
+      "max": 3.01
+    },
+    {
+      "action": "assert",
+      "label": "Holder: the extra self aura (effect 1, aura 350) makes the native crit chance +6 in total",
+      "actor": "hunter",
+      "metric": "spell_done_crit_chance",
+      "spell": 804193,
+      "target": "dummy",
+      "relative_to": "own_quick_before",
+      "min": 5.99,
+      "max": 6.01
+    },
+    {
+      "action": "learn",
+      "label": "Learn 300968",
+      "actor": "ally",
+      "spell": 300968
+    },
+    {
+      "action": "wait",
+      "label": "Let the second Slayer area aura reach the receiver",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Two Slayer holders do not stack on the party member (spell group 2000181, same-effect rule)",
+      "actor": "receiver",
+      "metric": "melee_crit_chance",
+      "relative_to": "recv_melee_before",
+      "min": 2.99,
+      "max": 3.01
+    },
+    {
+      "action": "assert",
+      "label": "Two Slayer holders do not stack on spell critical chance either",
+      "actor": "receiver",
+      "metric": "spell_crit_chance",
+      "relative_to": "recv_spell_before",
+      "min": 2.99,
+      "max": 3.01
+    },
+    {
+      "action": "assert",
+      "label": "The second holder holds two Slayer auras (its own and the first holder's) and still gets the raid bonus once",
+      "actor": "ally",
+      "metric": "melee_crit_chance",
+      "relative_to": "ally_melee_before",
+      "min": 2.99,
+      "max": 3.01
+    }
+  ]
+}

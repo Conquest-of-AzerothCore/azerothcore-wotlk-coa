@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Tormenting the Tormented lets Tormentor's damage over time critically strike (#692)",
+  "contract": "Tormenting the Tormented 805758 reads 'Your Tormentor can now critically strike.' In the installed Spell.dbc it is passive, family 21, with one effect: SPELL_AURA_ABILITY_PERIODIC_CRIT (286) and class mask word 2 = 0x10000000, the flag word of every Tormentor rank (Tormentor has periodic damage on effect 0 and does not carry SPELL_ATTR2_CANT_CRIT). AuraEffect::CalcPeriodicCritChance (SpellAuraEffects.cpp:1175) returns the caster's crit chance for a spell matched by an aura-286 mask and 0 otherwise, and AuraEffect::PeriodicTick recomputes it on every tick (SpellAuraEffects.cpp:1160), so it must go from 0 to positive on the live aura once the passive is learned. The pattern is the one of scenarios/witchdoctor-hex-of-malice-periodic-crit.json. The class base crit is not fixed by any fixture rating, so Houndfeeder 705477 (SPELL_AURA_MOD_CRIT_PCT +4, DBC) supplies a guaranteed positive crit chance; without 805758 the periodic effect still reads 0 because CalcPeriodicCritChance returns 0 with no aura 286 in range. CORRECTION from a slot 3 run: the crit chance is not recomputed on each tick. AuraEffect::CalculatePeriodicData (SpellAuraEffects.cpp:658-671) is the only writer of the stored crit chance and runs when the aura effect is created or its timers are refreshed (Aura::RefreshTimers, SpellAuras.cpp:855), so an aura applied before the talent was learned keeps 0 (measured: still 0 six seconds later). The scenario therefore recasts Tormentor after learning the talent, as a player would when the passive is taken before the cast.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 80, "spell_hit_rating": 10000, "ranged_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "enemy", "owner": "hunter", "entry": 36, "level": 80, "distance": 8, "health": 1000000}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Crossbows skill, as in shadowblast-shadow-rage.json", "actor": "hunter", "spell": 5011},
+    {"action": "add_item", "actor": "hunter", "item": 15807},
+    {"action": "equip", "actor": "hunter", "item": 15807, "slot": 17},
+    {"action": "wait", "label": "Let the weapon swap cooldown expire", "ms": 2000},
+    {"action": "learn", "label": "Houndfeeder, for a guaranteed positive crit chance", "actor": "hunter", "spell": 705477},
+    {"action": "learn", "label": "Tormentor", "actor": "hunter", "spell": 501355},
+    {"action": "set_power", "label": "Give Rage for the cast", "actor": "hunter", "power": 1, "value": 1000},
+    {"action": "cast", "label": "Cast Tormentor without the talent", "actor": "hunter", "spell": 501355, "target": "enemy"},
+    {"action": "assert", "label": "Tormentor is on the enemy", "actor": "enemy", "metric": "aura", "spell": 501355, "caster": "hunter", "equals": 1, "within_ms": 5000},
+    {"action": "assert", "label": "Without the talent the periodic effect cannot critically strike", "actor": "enemy", "metric": "aura_crit_chance", "spell": 501355, "caster": "hunter", "effect": 0, "equals": 0},
+    {"action": "learn", "label": "Tormenting the Tormented", "actor": "hunter", "spell": 805758},
+    {"action": "assert", "label": "The passive is active", "actor": "hunter", "metric": "aura", "spell": 805758, "equals": 1},
+    {"action": "set_power", "label": "Give Rage for the second cast", "actor": "hunter", "power": 1, "value": 1000},
+    {"action": "assert", "label": "The global cooldown has ended", "actor": "hunter", "metric": "global_cooldown_ms", "spell": 501355, "equals": 0, "within_ms": 5000},
+    {"action": "cast", "label": "Recast Tormentor so its aura is created with the talent active", "actor": "hunter", "spell": 501355, "target": "enemy"},
+    {"action": "assert", "label": "The recast aura carries the caster's crit chance", "actor": "enemy", "metric": "aura_crit_chance", "spell": 501355, "caster": "hunter", "effect": 0, "min": 1, "within_ms": 6000}
+  ]
+}

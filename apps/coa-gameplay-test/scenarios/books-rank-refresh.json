@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Book of Ascension: ranks are bought in a row without the list moving",
+  "contract": "The window is the book's whole offer set. A rank the character holds stays in it as a used row, so a purchase re-publishes the same rows in the same order and the client's own restore of its selection and scroll position lands on the row the player was on. A rank whose prerequisite is missing, or whose level is above the character, is unavailable and refused by the server. Each purchase is announced exactly once: the window sends no learned-spell packet of its own, so a rank up is announced only by the core's supersede cue.",
+  "timeout_ms": 180000,
+  "players": [
+    { "id": "wh", "race": 1, "class": 15, "level": 60 }
+  ],
+  "steps": [
+    { "action": "money", "actor": "wh", "copper": 200000, "label": "fixture: a purse deep enough for the ladder" },
+    { "action": "learn", "actor": "wh", "spell": 680494, "label": "fixture: the tree granted Witchblight's first rank" },
+    { "action": "learn", "actor": "wh", "spell": 97930, "label": "learn the book companion spell" },
+    { "action": "cast", "actor": "wh", "spell": 97930, "label": "summon the Book of Ascension" },
+    { "action": "assert", "actor": "wh", "metric": "owned_creature_count", "entry": 75115, "equals": 1, "within_ms": 5000, "label": "the book is out" },
+
+    { "action": "gossip_hello", "actor": "wh", "label": "open the book" },
+    { "action": "assert", "actor": "wh", "metric": "gossip_options", "equals": 0, "label": "the book answered with a trainer window" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_list_packets", "equals": 1, "label": "one window was sent" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_rows", "min": 1, "label": "the window carries rows" },
+    { "action": "snapshot", "actor": "wh", "metric": "trainer_window_rows", "save_as": "opened", "label": "the row set the player is looking at" },
+
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_state", "spell": 681540, "equals": 0, "label": "rank 2 is offered: its prerequisite is held" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_ability", "spell": 681540, "equals": 680494, "label": "rank 2 requires rank 1, as the original window did" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_state", "spell": 681218, "equals": 1, "label": "rank 3 is unavailable: rank 2 is not held" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_ability", "spell": 681218, "equals": 681540, "label": "rank 3 requires rank 2, not the superseded rank 1" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_ability", "spell": 681219, "equals": 681218, "label": "rank 4 requires rank 3" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_ability", "spell": 681220, "equals": 681219, "label": "rank 5 requires rank 4" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_state", "spell": 681221, "equals": 1, "label": "rank 6 needs level 68 and stays unavailable" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_state", "spell": 680494, "equals": -1, "label": "the tree's own rank is never sold" },
+
+    { "action": "trainer_buy", "actor": "wh", "spell": 681219, "label": "try to jump the ladder to rank 4" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_buy_failed", "spell": 681219, "equals": 1, "label": "rank 4 was refused: its prerequisite is missing" },
+    { "action": "assert", "actor": "wh", "metric": "knows_spell", "spell": 681219, "equals": 0, "label": "nothing was learned by jumping the ladder" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_list_packets", "equals": 1, "label": "a refusal sends no window either" },
+
+    { "action": "trainer_buy", "actor": "wh", "spell": 681540, "label": "buy rank 2" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_buy_succeeded", "spell": 681540, "equals": 1, "label": "rank 2 was granted" },
+    { "action": "assert", "actor": "wh", "metric": "knows_spell", "spell": 681540, "equals": 1, "label": "rank 2 was learned" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_learned_alerts", "spell": 681540, "equals": 0, "label": "the window announced nothing of its own" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_superseded_for", "spell": 681540, "equals": 1, "label": "exactly one supersede cue announced rank 2" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_list_packets", "equals": 2, "label": "the window was re-published with the row set the purchase changed" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_rows", "relative_to": "opened", "equals": 0, "label": "the re-sent window holds the same number of rows" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_state", "spell": 681540, "equals": 2, "label": "rank 2 stays in the list as a used row" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_state", "spell": 681218, "equals": 0, "label": "the rank above it turned available" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_ability", "spell": 681218, "equals": 681540, "label": "and it still requires the rank now held" },
+
+    { "action": "trainer_buy", "actor": "wh", "spell": 681218, "label": "buy rank 3 in the same window" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_buy_succeeded", "spell": 681218, "equals": 1, "label": "rank 3 was granted in the same window" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_learned_alerts", "spell": 681218, "equals": 0, "label": "rank 3 was not announced twice either" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_superseded_for", "spell": 681218, "equals": 1, "label": "rank 3 came with one supersede cue" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_rows", "relative_to": "opened", "equals": 0, "label": "still the same rows, in the same places" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_state", "spell": 681219, "equals": 0, "label": "rank 4 turned available in place" },
+
+    { "action": "trainer_buy", "actor": "wh", "spell": 681219, "label": "buy rank 4 in the same window" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_buy_succeeded", "spell": 681219, "equals": 1, "label": "rank 4 was granted in the same window" },
+    { "action": "assert", "actor": "wh", "metric": "knows_spell", "spell": 681219, "equals": 1, "label": "rank 4 is on the character" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_learned_alerts", "spell": 681219, "equals": 0, "label": "rank 4 was not announced twice either" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_superseded_for", "spell": 681219, "equals": 1, "label": "rank 4 came with one supersede cue" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_state", "spell": 681220, "equals": 0, "label": "rank 5 turned available in place" },
+
+    { "action": "trainer_buy", "actor": "wh", "spell": 681220, "label": "buy rank 5 in the same window" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_buy_succeeded", "spell": 681220, "equals": 1, "label": "rank 5 was granted" },
+    { "action": "assert", "actor": "wh", "metric": "knows_spell", "spell": 681220, "equals": 1, "label": "the ladder was bought to its top" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_learned_alerts", "spell": 681220, "equals": 0, "label": "the top rank was announced once as well" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_superseded_for", "spell": 681220, "equals": 1, "label": "rank 5 came with one supersede cue" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_state", "spell": 681220, "equals": 2, "label": "the top rank is a used row now" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_state", "spell": 681221, "equals": 1, "label": "rank 6 is still out of reach at level 60" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_rows", "relative_to": "opened", "equals": 0, "label": "four purchases and the list never changed shape" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_misannounced_buys", "equals": 0, "label": "no purchase was announced more than once" }
+  ]
+}

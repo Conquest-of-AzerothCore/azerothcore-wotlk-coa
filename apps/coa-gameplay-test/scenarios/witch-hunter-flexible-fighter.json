@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Flexible Fighter raises Agility by 6% (#2236)",
+  "contract": "Flexible Fighter 681341 (installed Spell.dbc) is a passive family-21 spell with one effect: SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (137), misc 1 (Agility), base 5 die 1 -> +6%; the Description reads 'Increases your Agility by 6%.' Its proc chance of 5 is inert (no proc flags). Control and holder are the same race, class and level with no gear, so their base Agility is identical; the holder's must be 1.06 times the control's. The band 1.05-1.07 absorbs the integer truncation of a stat value in the low hundreds.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ctl",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    },
+    {
+      "id": "ff",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "ctl",
+      "metric": "stat",
+      "save_as": "agi_base",
+      "label": "Agility without the talent",
+      "stat": 1
+    },
+    {
+      "action": "learn",
+      "actor": "ff",
+      "spell": 681341,
+      "label": "Learn Flexible Fighter"
+    },
+    {
+      "action": "assert",
+      "label": "The aura is +6% Agility",
+      "actor": "ff",
+      "metric": "aura_amount",
+      "spell": 681341,
+      "effect": 0,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "Agility is 6% above the untalented control",
+      "actor": "ff",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "agi_base",
+      "min": 1.05,
+      "max": 1.07
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "name": "Pooled Vitality banks a charge when an ability is paid with health (#2229)",
+  "contract": "Pooled Vitality 681078: 'abilities paid with health grant Pooled Vitality, stacking $680687u times'. The talent's own effect is an aura 4 (SPELL_AURA_DUMMY) marker; the behaviour is already native to this fork. Spell::TakePower (Spell.cpp:5416-5422) flags a non-triggered SpellFamilyName 26 cast paid with POWER_HEALTH when the caster holds 681078, and AscensionBloodmageVitality.cpp:78-79 then casts Pooled Vitality 680687, whose Spell.dbc StackAmount is 10. Rotclaw 503486, the rank a level-80 character owns per AscensionSpellProgressionData.h, has PowerType -2 (POWER_HEALTH) with ManaCostPercentage 10, so it is a health-paid family 26 ability. This is a regression guard over the existing handler, not a new fix; the stack arithmetic and the consumption guard are covered by the CoA unit test in apps/coa-tests/pooled_vitality/.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Enter Accursed Form so the Cursed Form kit is castable",
+      "actor": "caster",
+      "spell": 562572,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 681078
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 503486
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 680687,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Pooled Vitality can stack ten times",
+      "actor": "caster",
+      "metric": "spell_max_stacks",
+      "spell": 680687,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "No charge is banked before the cast",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 680687,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "A health-paid family 26 ability",
+      "actor": "caster",
+      "spell": 503486
+    },
+    {
+      "action": "assert",
+      "label": "The health-paid cast banks one charge",
+      "actor": "caster",
+      "metric": "aura_stacks",
+      "spell": 680687,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+#
+# CoA: Wildcard (Darkmoon - Season 10)
+#
+# A Wildcard realm also sets, in their own files:
+#     CoAChallenges.GameModes.Realm = WildCard
+#     CoA.GameModeMask = 64
+#     CoA.ClientBooleanConfigs = "CONFIG_LEGACY_CHARACTER_ADVANCEMENT_ENABLED=0"
+#     CoA.ClassModel = "hero"
+#     CoA.MapClass10ToWarrior = 0
+#     CoA.RealmType = "live seasonal"
+#     PlayerStart.CustomSpells = 1
+#     AlwaysMaxSkillForLevel = 1
+#
+
+[worldserver]
+
+#    Wildcard.Synergy.ChancePercent
+#        Description: Percent chance that a Wildcard level, scroll or rapid roll is a synergy roll.
+#                     A synergy roll draws each candidate in proportion to its synergy score, the
+#                     sum of the weights below over every entry the build already has; candidates
+#                     with score 0 are left out. Every other roll, and a synergy roll without any
+#                     scored candidate, draws evenly from the whole pool.
+#                     Range 0-100: 0 = never, 100 = always when a candidate fits the build.
+#                     All Wildcard.Synergy options apply at once after .reload config; the
+#                     worldserver log then shows the values in use.
+#        Default:     65
+
+Wildcard.Synergy.ChancePercent = 65
+
+#    Wildcard.Synergy.LinkWeight
+#    Wildcard.Synergy.RelatedWeight
+#    Wildcard.Synergy.SpecTagWeight
+#    Wildcard.Synergy.SchoolTagWeight
+#    Wildcard.Synergy.TooltipWeight
+#        Description: Range 0-1000 each; larger values are lowered to 1000. Only the ratio between
+#                     the weights matters: 3/2/2/1/3 rolls exactly like 30/20/20/10/30, and raising
+#                     one weight makes that kind of synergy more likely than the others. 0 turns a
+#                     kind off. Negative values are not possible: the server rejects them, logs an
+#                     error and keeps the default.
+
+#    Wildcard.Synergy.LinkWeight
+#        Description: Score for each spell-modifier link between the candidate and a build entry:
+#                     a talent that modifies the ability through its spell class mask, or the
+#                     ability such a talent modifies (e.g. Improved Fireball and Fireball).
+#        Default:     3
+
+Wildcard.Synergy.LinkWeight = 3
+
+#    Wildcard.Synergy.RelatedWeight
+#        Description: Score for each cross-class relation: a talent and another class's ability of
+#                     the same spell school and effect as the abilities the talent modifies (e.g. a
+#                     talent for Fireball and Incinerate, both fire direct damage). Weapon attacks
+#                     relate only to weapon attacks, so a spell talent does not pull in melee strikes.
+#        Default:     2
+
+Wildcard.Synergy.RelatedWeight = 2
+
+#    Wildcard.Synergy.SpecTagWeight
+#        Description: Score for each specialization the candidate shares with a build entry, taken
+#                     from the spell tags such as "Mage: Fire" or "Warrior: Arms".
+#        Default:     2
+
+Wildcard.Synergy.SpecTagWeight = 2
+
+#    Wildcard.Synergy.SchoolTagWeight
+#        Description: Score for each spell school the candidate shares with a build entry
+#                     (physical, fire, frost, nature, holy, shadow, arcane). Weapon attacks keep
+#                     their schools apart: a fire melee or ranged strike matches other fire weapon
+#                     attacks, not fire spells, so a caster is not pulled into melee. Talents count
+#                     the schools of the abilities they modify.
+#        Default:     1
+
+Wildcard.Synergy.SchoolTagWeight = 1
+
+#    Wildcard.Synergy.TooltipWeight
+#        Description: Score for each ability a talent's tooltip names, in both directions (table
+#                     ascension_wildcard_tooltip_links, e.g. Conductive Venom with Lightning Bolt,
+#                     Chain Lightning and Serpent Sting). Many of Ascension's talent interactions
+#                     are scripted and visible only in the tooltip.
+#        Default:     3
+
+Wildcard.Synergy.TooltipWeight = 3
+
+#    Wildcard.Synergy.TalentsNeedTarget
+#        Description: A talent that changes specific abilities (spell modifiers, or abilities its
+#                     tooltip names, e.g. a glyph) is only rolled when the build has at least one
+#                     of them. Talents without such targets are always possible, and a slotted
+#                     talent card is still granted.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+Wildcard.Synergy.TalentsNeedTarget = 1
+
+#    Wildcard.Synergy.LogRolls
+#        Description: Write the reason of every level, scroll and rapid roll to the worldserver
+#                     log: synergy or random roll, the entry's score, its share of the total and
+#                     which build entries gave the points.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+Wildcard.Synergy.LogRolls = 1

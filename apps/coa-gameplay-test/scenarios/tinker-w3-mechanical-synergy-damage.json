@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "Tinker: Mechanical Synergy raises only its routed spells",
+  "contract": "#1047: Mechanical Synergy (680200 rank 1, 681482 rank 2) is a plain SPELLMOD_DAMAGE modifier routed in SpellInfo::IsAffectedBySpellMod's family-34 switch to Sticky Bomb Explosion (801009 and its chain), Combustion (801388) and the Mechsuit abilities - and to nothing else. Rank 1 must raise the native outgoing damage of 801009 and 801388 by 15% and rank 2 by 30%, while Scrap Shot (500549), which the switch excludes, must not move. Mechsuit: Laser Beam (805372) and Jet Exhaust (801390) are covered by the same switch but are not asserted here; see the report.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "t",
+      "entry": 299,
+      "level": 80,
+      "distance": 5
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Sticky Bomb Explosion damage without the talent",
+      "actor": "t",
+      "metric": "spell_damage_done",
+      "spell": 801009,
+      "target": "d",
+      "save_as": "bomb0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Combustion damage without the talent",
+      "actor": "t",
+      "metric": "spell_damage_done",
+      "spell": 801388,
+      "target": "d",
+      "save_as": "comb0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Scrap Shot damage without the talent (control)",
+      "actor": "t",
+      "metric": "melee_spell_damage_done",
+      "spell": 500549,
+      "target": "d",
+      "save_as": "scrap0"
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 680200
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises Sticky Bomb Explosion by 15%",
+      "actor": "t",
+      "metric": "spell_damage_done",
+      "spell": 801009,
+      "target": "d",
+      "ratio_to": "bomb0",
+      "min": 1.145,
+      "max": 1.155,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises Combustion by 15%",
+      "actor": "t",
+      "metric": "spell_damage_done",
+      "spell": 801388,
+      "target": "d",
+      "ratio_to": "comb0",
+      "min": 1.145,
+      "max": 1.155
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 leaves Scrap Shot alone",
+      "actor": "t",
+      "metric": "melee_spell_damage_done",
+      "spell": 500549,
+      "target": "d",
+      "ratio_to": "scrap0",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "t",
+      "spell": 680200
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning rank 1 restores Sticky Bomb Explosion",
+      "actor": "t",
+      "metric": "spell_damage_done",
+      "spell": 801009,
+      "target": "d",
+      "ratio_to": "bomb0",
+      "min": 0.999,
+      "max": 1.001,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 681482
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises Sticky Bomb Explosion by 30%",
+      "actor": "t",
+      "metric": "spell_damage_done",
+      "spell": 801009,
+      "target": "d",
+      "ratio_to": "bomb0",
+      "min": 1.295,
+      "max": 1.305,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises Combustion by 30%",
+      "actor": "t",
+      "metric": "spell_damage_done",
+      "spell": 801388,
+      "target": "d",
+      "ratio_to": "comb0",
+      "min": 1.295,
+      "max": 1.305
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 leaves Scrap Shot alone",
+      "actor": "t",
+      "metric": "melee_spell_damage_done",
+      "spell": 500549,
+      "target": "d",
+      "ratio_to": "scrap0",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

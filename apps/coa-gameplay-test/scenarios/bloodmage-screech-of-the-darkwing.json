@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "name": "Screech of the Darkwing doubles every Call of the Darkwing (#1533)",
+  "contract": "Screech of the Darkwing 300260's single effect is SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on Call of the Darkwing 801958. Spell.dbc gives 300260 ProcFlags 0 and no spell_proc row existed, so Aura::GetProcEffectMask returned 0 and the aura was inert. The tooltip is 'Your effects that trigger Call of the Darkwing now trigger an additional Call of the Darkwing. Can only occur once per sec' at ProcChance 100. Call of the Darkwing 801958 is SPELL_EFFECT_SUMMON with MiscValue 50069 (Shadow Bat), BasePoints 0 and DieSides 2, so every Call summons one or two bats, uniformly. Casting it five times, at least 1.1 s apart so the row's 1000 ms internal cooldown never suppresses a proc, yields five Calls today (five to ten bats, never more than ten) and ten Calls with the fix (ten to twenty bats). The assertion 'at least eleven living Shadow Bats' is therefore impossible without the fix and fails with the fix only if all ten Calls roll their minimum, i.e. one time in 1024. The bats live 15 s (DurationIndex 8), longer than the 7.5 s the five casts take, so every one of them is still alive at the assertion. Aura::GetProcEffectMask refuses to proc an aura from a spell its own effect triggered, so the extra Call cannot cascade.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 801958
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 300260
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 801958,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 801958,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 801958,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 801958,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 801958,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: five casts produced more bats than five Calls ever could",
+      "actor": "bloodmage",
+      "metric": "owned_creature_count",
+      "entry": 50069,
+      "min": 11,
+      "within_ms": 3000
+    }
+  ]
+}

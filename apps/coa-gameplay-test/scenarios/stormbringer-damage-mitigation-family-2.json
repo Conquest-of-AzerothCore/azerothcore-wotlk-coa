@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Residual Power reduces magic damage taken (#3414)",
+  "contract": "#3414: Residual Power (804605) is a passive (Attributes 464, IS_ABILITY|PASSIVE|DO_NOT_DISPLAY|DO_NOT_LOG) with effect 0 = APPLY_AURA, EffectImplicitTargetA[0] = 1 TARGET_UNIT_CASTER (so the parity contract's enemy-implicit-target trap does not apply), EffectApplyAuraName[0] = 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, EffectMiscValue[0] = 126 = SPELL_SCHOOL_MASK_MAGIC (SharedDefines.h:368), EffectBasePoints[0] = -11 + DieSides 1 = -10%. Unit::SpellDamageBonusTaken (Unit.cpp:9423-9431) multiplies by GetTotalAuraMultiplier(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN) gated on effect->GetMiscValue() & spellProto->GetSchoolMask(); Unit.cpp:9407 early-returns only for melee DIRECT_DAMAGE, and the harness's spell_damage_taken metric passes SPELL_DIRECT_DAMAGE (CoAGameplayTest.cpp:1083-1092), so the aura is visible to the metric. The issue body mislabels aura 87 as 'Mod Power Regen'; this core's SpellAuraDefines.h:150 defines 87 as SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, and the DBC record's own school-mask/target fields match the tooltip's magic-damage-reduction clause exactly. 804605's only source occurrence is AscensionStockCoefficientData.h:116 (the EffectBonusMultiplier-zeroing list, not a handler); no module code exists or is needed. The magic-school probe is Shock (804020, SchoolMask 8, a subset of magic mask 126) and the physical control is Heroic Strike (78, SchoolMask 1), which is outside the school-mask gate and must stay untouched to distinguish the mask-gated reduction from a blanket one. spell_damage_taken always starts from a fixed base of 1000 (CoAGameplayTest.cpp:1091), so 1000 x (1 + (-10)/100) = 900 is the expected post-learn reading on Shock.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "attacker",
+      "owner": "s",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+
+    { "action": "assert", "label": "BASELINE #3414: magic-school damage taken is unmodified without Residual Power",
+      "actor": "s", "metric": "spell_damage_taken", "spell": 804020, "target": "attacker", "equals": 1000 },
+    { "action": "assert", "label": "BASELINE #3414 control: physical damage taken is unmodified without Residual Power",
+      "actor": "s", "metric": "spell_damage_taken", "spell": 78, "target": "attacker", "equals": 1000 },
+
+    { "action": "learn", "label": "Learn Residual Power", "actor": "s", "spell": 804605 },
+    { "action": "assert", "label": "SETUP #3414: Residual Power is applied to the caster",
+      "actor": "s", "metric": "aura", "spell": 804605, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING #3414: Residual Power reduces magic-school damage taken by 10%",
+      "actor": "s", "metric": "spell_damage_taken", "spell": 804020, "target": "attacker", "equals": 900 },
+    { "action": "assert", "label": "DISCRIMINATING #3414 control: physical damage taken still equals 1000 (the school mask, not a blanket reduction, distinguishes the effect)",
+      "actor": "s", "metric": "spell_damage_taken", "spell": 78, "target": "attacker", "equals": 1000 }
+  ]
+}

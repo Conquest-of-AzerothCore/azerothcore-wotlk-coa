@@ -1,0 +1,2110 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Forked Lightning transforms into Thunder Wave (#2802)",
+  "contract": "#2802 Thunder Wave 705692 (Spell.dbc, server set /srv/coa/server-data/dbc): PASSIVE, ProcFlags 0, ProcChance 5 (the tooltip's $h), Effect[0] APPLY_AURA with SPELL_AURA_PROC_TRIGGER_SPELL and EffectTriggerSpell 712353. ProcFlags 0 with no spell_proc row makes SpellMgr::LoadSpellProcs skip the spell (SpellMgr.cpp:2255-2257), so the aura was never offered a proc; and 712353 'Thunder Wave' is a bare 10 s self SPELL_AURA_DUMMY that no code reads, so even a proc entry would have delivered nothing. The real payload is 707220 'Thunder Wave', the spell the talent's Description embeds as @s:707220:0@: Effect[0] SCHOOL_DAMAGE with EffectBasePoints 405 + EffectDieSides 48 and EffectRealPointsPerLevel 1.65 (the tooltip's 406 at its base level), SchoolMask 72 (Nature|Arcane = Spellstorm), TargetB 16 DEST_AREA_ENEMY with EffectRadiusIndex 29 = 6 yd, and Effect[1] SPELL_EFFECT_ASCENSION_REFRESH_AURA with EffectMiscValue 500928 (Volt) and EffectBasePoints 17999 + EffectDieSides 1 = 18000 ms, which is Volt's own SpellDuration id 85. Damage dealt by Forked Lightning 501438 now rolls the talent's own ProcChance of 5 and casts 707220 at the victim on success, at most once per Forked Lightning cast. The payload leg is deterministic and passes before and after the fix (BASELINE): it casts 707220 by hand on a Volt-affected dummy whose Volt was left to decay, and shows the native refresh put it back to 18000 ms. The proc leg is statistical, as the README requires for a chance below 100%: one dummy takes 120 Forked Lightning casts, so a fix that never fires fails with probability 1 - 0.95^100 > 99.4% even if a tenth of the casts are dropped, while the unfixed server can only ever reach the single hand-cast Thunder Wave.",
+  "timeout_ms": 480000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "p",
+      "entry": 36,
+      "level": 80,
+      "health": 5000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 501438
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 500928
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 707220
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 705692
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Thunder Wave passive is active",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 705692,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the fixture can pay for every Forked Lightning cast below",
+      "actor": "p",
+      "metric": "spell_power_cost",
+      "spell": 501438,
+      "max": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the fixture's mana pool holds the fixture value used below",
+      "actor": "p",
+      "metric": "max_power",
+      "power": 0,
+      "min": 2500
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500928,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Volt is on the dummy",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 500928,
+      "caster": "p",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Let Volt decay well below its 18000 ms SpellDuration id 85",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Volt has decayed",
+      "actor": "dummy",
+      "metric": "aura_duration_ms",
+      "spell": 500928,
+      "caster": "p",
+      "max": 13000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 707220,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the payload's native effect 173 refreshes Volt to its 18000 ms",
+      "actor": "dummy",
+      "metric": "aura_duration_ms",
+      "spell": 500928,
+      "caster": "p",
+      "min": 16000,
+      "max": 18000,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the payload deals its Spellstorm damage",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 707220,
+      "target": "dummy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the only Thunder Wave so far is the hand-cast one",
+      "actor": "p",
+      "metric": "spell_cast_count",
+      "spell": 707220,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy",
+      "label": "Forked Lightning cast 1 of 120, each one rolling the talent's 5% chance"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501438,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "wait",
+      "label": "Let the last proc land",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the trigger really ran, so the roll count below is real",
+      "actor": "p",
+      "metric": "spell_cast_count",
+      "spell": 501438,
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Forked Lightning turned into Thunder Wave at least once",
+      "actor": "p",
+      "metric": "spell_cast_count",
+      "spell": 707220,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the transformed cast dealt Thunder Wave damage",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 707220,
+      "target": "dummy",
+      "min": 2
+    }
+  ]
+}

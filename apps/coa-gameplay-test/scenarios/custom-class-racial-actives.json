@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "name": "New CoA-class characters start with their race's active racial and seeded bar (#5356, #5211, #4971, #3952)",
+  "contract": "SkillLineAbility splits Blood Fury (skill 125), Arcane Torrent (756) and Gift of the Naaru (11760) into class-masked variants by resource and by attack power, spell power or both, but the masks omit several CoA classes. Every CoA class must learn exactly one variant at creation, chosen from ascension_custom_class power_type and primary_stat and from the variant the same class already receives for the other racials: an Orc Reaper gets the hybrid Blood Fury 814285, a Blood Elf Witch Doctor and Venomancer the mana Arcane Torrent 814287, a Draenei Ranger the attack-power Gift of the Naaru 814281 and a Draenei Witch Doctor the spell-power Gift 814280. Classes already covered by the DBC masks keep their variant (Orc Barbarian 814283, Blood Elf Templar 814286) and a Human Ranger keeps Every Man for Himself 59752. With the shipped PlayerStart.CustomSpells = 0 each character still starts with Attack 6603 and its class spell from playercreateinfo_action (#5272).",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "human_ranger", "race": 1, "class": 21, "level": 1 },
+    { "id": "orc_reaper", "race": 2, "class": 30, "level": 1 },
+    { "id": "orc_barbarian", "race": 2, "class": 12, "level": 1 },
+    { "id": "blood_elf_witch_doctor", "race": 10, "class": 13, "level": 1 },
+    { "id": "blood_elf_templar", "race": 10, "class": 19, "level": 1 },
+    { "id": "blood_elf_venomancer", "race": 10, "class": 29, "level": 1 },
+    { "id": "draenei_ranger", "race": 11, "class": 21, "level": 1 },
+    { "id": "draenei_witch_doctor", "race": 11, "class": 13, "level": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 2000 },
+    {
+      "action": "assert", "label": "Human Ranger knows Every Man for Himself", "actor": "human_ranger",
+      "metric": "knows_spell", "spell": 59752, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Human Ranger has Attack in button 0", "actor": "human_ranger",
+      "metric": "action_button", "button": 0, "equals": 6603
+    },
+    {
+      "action": "assert", "label": "Human Ranger has its first class spell in button 1", "actor": "human_ranger",
+      "metric": "action_button", "button": 1, "equals": 500074
+    },
+    {
+      "action": "assert", "label": "Orc Reaper knows the hybrid Blood Fury", "actor": "orc_reaper",
+      "metric": "knows_spell", "spell": 814285, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Orc Reaper does not know the attack-power Blood Fury", "actor": "orc_reaper",
+      "metric": "knows_spell", "spell": 814283, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Orc Reaper has its first class spell in button 1", "actor": "orc_reaper",
+      "metric": "action_button", "button": 1, "equals": 500357
+    },
+    {
+      "action": "assert", "label": "Orc Barbarian keeps the attack-power Blood Fury", "actor": "orc_barbarian",
+      "metric": "knows_spell", "spell": 814283, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Blood Elf Witch Doctor knows the mana Arcane Torrent", "actor": "blood_elf_witch_doctor",
+      "metric": "knows_spell", "spell": 814287, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Blood Elf Witch Doctor has its first class spell in button 1",
+      "actor": "blood_elf_witch_doctor", "metric": "action_button", "button": 1, "equals": 801670
+    },
+    {
+      "action": "assert", "label": "Blood Elf Templar keeps the energy Arcane Torrent", "actor": "blood_elf_templar",
+      "metric": "knows_spell", "spell": 814286, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Blood Elf Templar has its first class spell in button 1", "actor": "blood_elf_templar",
+      "metric": "action_button", "button": 1, "equals": 801443
+    },
+    {
+      "action": "assert", "label": "Blood Elf Venomancer knows the mana Arcane Torrent", "actor": "blood_elf_venomancer",
+      "metric": "knows_spell", "spell": 814287, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Draenei Ranger knows the attack-power Gift of the Naaru", "actor": "draenei_ranger",
+      "metric": "knows_spell", "spell": 814281, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Draenei Ranger has its first class spell in button 1", "actor": "draenei_ranger",
+      "metric": "action_button", "button": 1, "equals": 500074
+    },
+    {
+      "action": "assert", "label": "Draenei Witch Doctor knows the spell-power Gift of the Naaru",
+      "actor": "draenei_witch_doctor", "metric": "knows_spell", "spell": 814280, "equals": 1
+    }
+  ]
+}

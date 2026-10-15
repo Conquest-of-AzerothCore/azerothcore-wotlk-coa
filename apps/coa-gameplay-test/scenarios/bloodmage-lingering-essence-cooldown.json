@@ -1,0 +1,165 @@
+{
+  "schema": 1,
+  "name": "Lingering Essence shortens Vampyr's Kiss from periodic damage (#647)",
+  "contract": "Lingering Essence 680695's single effect is SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on Lingering Essence 680824, a single SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN with BasePoints -1001 and MiscValue 504275 = Vampyr's Kiss. Spell.dbc gives 680695 ProcFlags 0 and no spell_proc row existed, so the aura was inert. The tooltip is 'Periodic damage and healing done now has a $h% chance to reduce the cooldown of Vampyr's Kiss by $/1000;680824s1 sec' and the record's own ProcChance is 50. Spell::EffectAscensionModifyCooldown resolves MiscValue as an exact spell id and 680824's MiscValueB is 0, so only rank 1's stored cooldown moves, while Player::AddSpellAndCategoryCooldowns gives every Vampyr's Kiss rank the same 60000 ms from Category 512 when the owned rank 504281 is cast. Comparing 504275's remaining cooldown with 504281's at the same moment is therefore time-independent: they start equal and only the proc can separate them. Crimson Tide is cast as rank 504134, the rank a level-80 character owns per AscensionSpellProgressionData.h. Its single effect is aura 3 SPELL_AURA_PERIODIC_DAMAGE with Amplitude 3000, DurationIndex 8 (15 s) and MaxAffectedTargets 10, so one cast against eight dummies produces 5 ticks x 8 targets = 40 separate PROC_FLAG_DONE_PERIODIC events, and two casts 15 s apart produce about 80. At 50% per event the chance that none of roughly 80 events procs is beyond astronomical, so the real proc chance is left untouched.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy1",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 4
+    },
+    {
+      "id": "dummy2",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 5
+    },
+    {
+      "id": "dummy3",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 6
+    },
+    {
+      "id": "dummy4",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 7
+    },
+    {
+      "id": "dummy5",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 8
+    },
+    {
+      "id": "dummy6",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 9
+    },
+    {
+      "id": "dummy7",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 10
+    },
+    {
+      "id": "dummy8",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 11
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504134
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504281
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 680695
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 504281,
+      "target": "dummy1"
+    },
+    {
+      "action": "assert",
+      "label": "Vampyr's Kiss is on its full category cooldown",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 504281,
+      "min": 55000,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 shares that category cooldown",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 504275,
+      "min": 55000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 504134,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "label": "Five ticks on every dummy in range",
+      "ms": 15000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 504134,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "label": "Five more ticks",
+      "ms": 14000
+    },
+    {
+      "action": "snapshot",
+      "label": "Cooldown still on the owned Vampyr's Kiss rank",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 504281,
+      "save_as": "cd_rank7"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: rank 1's cooldown has been cut below the untouched rank's",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 504275,
+      "relative_to": "cd_rank7",
+      "max": -900
+    }
+  ]
+}

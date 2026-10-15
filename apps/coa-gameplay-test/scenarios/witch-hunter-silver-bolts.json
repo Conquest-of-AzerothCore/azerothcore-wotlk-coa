@@ -1,0 +1,195 @@
+{
+  "schema": 1,
+  "name": "Silver Bolts doubles its bonus against Undead and Demons (#3342)",
+  "contract": "Silver Bolts 804026 reads 'Damage dealt by Heartseeking Bolt, Shadowblast, and Damnation is increased by $s1%, doubled against Undead or Demons or enemies affected by Shadow Trap' with $s1 = 15 (Spell.dbc 2026-09-17). Effect 2 is a SPELLMOD_DAMAGE +15% on Damnation and Heartseeking Bolt. Effect 0 is a raw aura 112 record with the private selector 20014 and MiscValueB 36 (creature-type mask: Demon 1 << (3 - 1) = 4 plus Undead 1 << (6 - 1) = 32), class mask (0x10000, 0x800, 0x10), which nothing reads; native aura 168 honours the effect's class mask once the selector is in MiscValueB (Unit.cpp:8863, 10808). Both factors multiply in MeleeDamageBonusDone (Heartseeking Bolt 805754 and Damnation 520062 are DmgClass 3), so Undead and Demons read 1.15 x 1.15 = 1.3225, inside 1.29..1.33 which also admits an exact 1.30 'doubled'; a non-Undead target reads 1.15. On main the Undead and Demon ratios equal the control's 1.15. Creature types come from data/sql/base/db_world/creature_template.sql: 201 Brittlebones Skeleton type 6 (Undead), 49 Lesser Succubus type 3 (Demon), 36 Harvest Golem type 9 (Mechanical). Shadowblast is not asserted: its class mask sits only in effect 0, so it gets no base +15%, a separate open question. The Shadow Trap clause is a different effect and is not covered.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wh",
+      "race": 1,
+      "class": 15,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "undead",
+      "owner": "wh",
+      "entry": 201,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "demon",
+      "owner": "wh",
+      "entry": 49,
+      "level": 80,
+      "health": 1000000,
+      "distance": 6
+    },
+    {
+      "id": "plain",
+      "owner": "wh",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 9
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "wh",
+      "spell": 804026
+    },
+    {
+      "action": "snapshot",
+      "label": "Heartseeking Bolt against the Undead without Silver Bolts",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 805754,
+      "target": "undead",
+      "save_as": "heart_undead"
+    },
+    {
+      "action": "snapshot",
+      "label": "Heartseeking Bolt against the Demon without Silver Bolts",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 805754,
+      "target": "demon",
+      "save_as": "heart_demon"
+    },
+    {
+      "action": "snapshot",
+      "label": "Heartseeking Bolt against the Mechanical control without Silver Bolts",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 805754,
+      "target": "plain",
+      "save_as": "heart_plain"
+    },
+    {
+      "action": "snapshot",
+      "label": "Damnation against the Undead without Silver Bolts",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 520062,
+      "target": "undead",
+      "save_as": "damna_undead"
+    },
+    {
+      "action": "snapshot",
+      "label": "Damnation against the Demon without Silver Bolts",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 520062,
+      "target": "demon",
+      "save_as": "damna_demon"
+    },
+    {
+      "action": "snapshot",
+      "label": "Damnation against the Mechanical control without Silver Bolts",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 520062,
+      "target": "plain",
+      "save_as": "damna_plain"
+    },
+    {
+      "action": "learn",
+      "label": "Silver Bolts",
+      "actor": "wh",
+      "spell": 804026
+    },
+    {
+      "action": "assert",
+      "label": "Heartseeking Bolt: +15% against the Mechanical control (effect 2)",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 805754,
+      "target": "plain",
+      "ratio_to": "heart_plain",
+      "min": 1.14,
+      "max": 1.16
+    },
+    {
+      "action": "assert",
+      "label": "Heartseeking Bolt: the Undead bonus stacks on it, 1.15 x 1.15 (effect 0); 'doubled' reads as 1.30",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 805754,
+      "target": "undead",
+      "ratio_to": "heart_undead",
+      "min": 1.29,
+      "max": 1.33
+    },
+    {
+      "action": "assert",
+      "label": "Heartseeking Bolt: the same against a Demon",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 805754,
+      "target": "demon",
+      "ratio_to": "heart_demon",
+      "min": 1.29,
+      "max": 1.33
+    },
+    {
+      "action": "assert",
+      "label": "Damnation: +15% against the Mechanical control (effect 2)",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 520062,
+      "target": "plain",
+      "ratio_to": "damna_plain",
+      "min": 1.14,
+      "max": 1.16
+    },
+    {
+      "action": "assert",
+      "label": "Damnation: the Undead bonus stacks on it, 1.15 x 1.15 (effect 0); 'doubled' reads as 1.30",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 520062,
+      "target": "undead",
+      "ratio_to": "damna_undead",
+      "min": 1.29,
+      "max": 1.33
+    },
+    {
+      "action": "assert",
+      "label": "Damnation: the same against a Demon",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 520062,
+      "target": "demon",
+      "ratio_to": "damna_demon",
+      "min": 1.29,
+      "max": 1.33
+    },
+    {
+      "action": "unlearn",
+      "actor": "wh",
+      "spell": 804026
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning removes the bonus",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 805754,
+      "target": "undead",
+      "ratio_to": "heart_undead",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

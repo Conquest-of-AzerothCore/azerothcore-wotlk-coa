@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Tales of Woe halves Dark Veil's duration and tick period through a native spell mod plus a dedicated routing carve-out (#1959)",
+  "contract": "520682 has two ADD_PCT_MODIFIER (108) effects, both BasePoints -51+1=-50%, same classmask word C bit14 (16384), matching Dark Veil's (520345) own SpellFamilyFlags[2]=16384 exactly: Effect[0] Misc=19=SPELLMOD_ACTIVATION_TIME (tick period), Effect[1] Misc=1=SPELLMOD_DURATION. AuraEffect::CalculatePeriodicData (SpellAuraEffects.cpp:713-720) applies the activation-time mod per periodic effect at aura creation (Dark Veil's own tick amplitude, 1000 ms, halves to 500 ms); Spell.cpp:4153 applies the duration mod at cast (Dark Veil's SpellDuration.dbc id 28 = 5000 ms halves to 2500 ms), so 5 ticks still land, just twice as fast -- 'performs its effect 50% faster', matching the tooltip. This talent also has an explicit native carve-out independent of the classmask match: SpellInfo::IsAffectedBySpellMod's family-31 collision table (SpellInfo.cpp:1504) has 'case 520682: case 520810: return Id == 520345;', routing Tales of Woe's (and its higher rank's) modifiers only to Dark Veil's chain root even if another family-31 spell's classmask collided -- the maintainers actively guarding this exact interaction. Dark Veil's EffectImplicitTargetA[0]=21 (TARGET_UNIT_TARGET_ALLY) combined with AttributesEx SPELL_ATTR1_EXCLUDE_CASTER (Spell.dbc, verified via coa-dbc-viewer) means the caster is not itself a legal target: a self-cast fails targeting with SPELL_FAILED_BAD_TARGETS (12), confirmed by this scenario's own first native run. A second player fixture stands in as the ally recipient, and the aura is read off that ally (the aura holder), not the caster. Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 80 },
+    { "id": "ally", "race": 1, "class": 1, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "cultist", "spell": 520345 },
+    { "action": "cast", "actor": "cultist", "spell": 520345, "target": "ally" },
+    {
+      "action": "assert", "label": "SETUP: Dark Veil's tick period is its own base 1000 ms",
+      "actor": "ally", "metric": "aura_amplitude_ms", "spell": 520345, "effect": 0, "caster": "cultist",
+      "min": 990, "max": 1010, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: Dark Veil's duration is its own base 5000 ms",
+      "actor": "ally", "metric": "aura_duration_ms", "spell": 520345, "caster": "cultist",
+      "min": 4700, "max": 5000, "within_ms": 2000
+    },
+    { "action": "learn", "actor": "cultist", "spell": 520682 },
+    { "action": "reset_cooldown", "actor": "cultist", "spell": 520345 },
+    {
+      "action": "wait", "ms": 1700,
+      "label": "Let the global cooldown from the first Dark Veil cast clear (StartRecoveryCategory 133 = 1500 ms); reset_cooldown only clears 520345's own 120000 ms cooldown, not the GCD"
+    },
+    { "action": "cast", "actor": "cultist", "spell": 520345, "target": "ally" },
+    {
+      "action": "assert", "label": "Tales of Woe halves Dark Veil's tick period to 500 ms (#1959)",
+      "actor": "ally", "metric": "aura_amplitude_ms", "spell": 520345, "effect": 0, "caster": "cultist",
+      "min": 490, "max": 510, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Tales of Woe halves Dark Veil's duration to 2500 ms (#1959)",
+      "actor": "ally", "metric": "aura_duration_ms", "spell": 520345, "caster": "cultist",
+      "min": 2300, "max": 2500, "within_ms": 2000
+    }
+  ]
+}

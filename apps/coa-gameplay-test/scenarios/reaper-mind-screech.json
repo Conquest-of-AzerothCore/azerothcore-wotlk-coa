@@ -1,0 +1,181 @@
+{
+  "schema": 1,
+  "name": "Mind Screech silences on Soulrend and scales with missing health (#2684)",
+  "contract": [
+    "Mind Screech 705448 (live): 'Shrieking Scythe now silences the target for 3.5 sec and causes up to 200% bonus",
+    "weapon damage based on how low your health is. Fails on silence immune enemies.' Live Shrieking Scythe is the",
+    "client's Soulrend (572342 at level 60). 802086 carries the 200% weapon damage, the 3.5 sec silence and effect 168.",
+    "A Reaper at full health silences for no bonus damage; a Reaper at a tenth of its health deals the weapon hit too."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "healthy",
+      "race": 2,
+      "class": 30,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "wounded",
+      "race": 2,
+      "class": 30,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "healthy_target",
+      "owner": "healthy",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "wounded_target",
+      "owner": "wounded",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "healthy",
+      "spell": 705448
+    },
+    {
+      "action": "learn",
+      "actor": "healthy",
+      "spell": 572342
+    },
+    {
+      "action": "learn",
+      "actor": "wounded",
+      "spell": 705448
+    },
+    {
+      "action": "learn",
+      "actor": "wounded",
+      "spell": 572342
+    },
+    {
+      "action": "set_health",
+      "label": "The wounded Reaper is at a tenth of its health",
+      "actor": "wounded",
+      "maximum": 100000,
+      "value": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The wounded Reaper is low",
+      "actor": "wounded",
+      "metric": "health_pct",
+      "max": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "healthy",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "healthy",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "healthy",
+      "spell": 572342,
+      "target": "healthy_target"
+    },
+    {
+      "action": "assert",
+      "label": "healthy Soulrend lands",
+      "actor": "healthy",
+      "metric": "spell_damage_count",
+      "spell": 572342,
+      "target": "healthy_target",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "healthy target is silenced by Mind Screech",
+      "actor": "healthy_target",
+      "metric": "aura",
+      "spell": 802086,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "wounded",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "wounded",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "wounded",
+      "spell": 572342,
+      "target": "wounded_target"
+    },
+    {
+      "action": "assert",
+      "label": "wounded Soulrend lands",
+      "actor": "wounded",
+      "metric": "spell_damage_count",
+      "spell": 572342,
+      "target": "wounded_target",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "wounded target is silenced by Mind Screech",
+      "actor": "wounded_target",
+      "metric": "aura",
+      "spell": 802086,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "At full health the bonus weapon damage is zero",
+      "actor": "healthy",
+      "metric": "spell_damage_count",
+      "spell": 802086,
+      "target": "healthy_target",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "At low health Mind Screech deals bonus weapon damage",
+      "actor": "wounded",
+      "metric": "spell_damage_count",
+      "spell": 802086,
+      "target": "wounded_target",
+      "min": 1
+    }
+  ]
+}

@@ -1,0 +1,379 @@
+{
+  "schema": 1,
+  "name": "Shadowhound incarnations apply to existing pets, resummons and owned hounds (#5809)",
+  "contract": [
+    "AppearanceCategories.dbc category 68 is Shadowhound. The captured Appearances.dbc CREATURE rows 5034, 5048, 5740 and 5745 name creatures 81043, 81044, 81196 and 81197; AscensionCollectionModelData.h independently captures their displays 80434, 80435, 80563 and 80564.",
+    "Wardrobe choices must update the existing hound and subsequent summons, persist through logout, clear to the native model and obey spell-appearance visibility. An ammunition appearance cannot be selected as a Shadowhound.",
+    "The harness observes native models and accepted/rejected collection packets, not final client rendering."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 801343
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 801343
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: main Shadowhound is summoned",
+      "actor": "hunter",
+      "metric": "pet_entry",
+      "equals": 50124,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: default captured display",
+      "actor": "hunter",
+      "metric": "pet_display",
+      "equals": 16049
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "pet_scale",
+      "save_as": "native_scale"
+    },
+    {
+      "action": "apply_appearances",
+      "actor": "hunter",
+      "selection": {
+        "68": 5034
+      }
+    },
+    {
+      "action": "assert",
+      "label": "Appearance 5034 selects captured display 80434",
+      "actor": "hunter",
+      "metric": "pet_display",
+      "equals": 80434,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "Changing appearance preserves hound scale",
+      "actor": "hunter",
+      "metric": "pet_scale",
+      "ratio_to": "native_scale",
+      "equals": 1
+    },
+    {
+      "action": "apply_appearances",
+      "actor": "hunter",
+      "selection": {
+        "68": 5048
+      }
+    },
+    {
+      "action": "assert",
+      "label": "Appearance 5048 selects captured display 80435",
+      "actor": "hunter",
+      "metric": "pet_display",
+      "equals": 80435,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "Changing appearance preserves hound scale",
+      "actor": "hunter",
+      "metric": "pet_scale",
+      "ratio_to": "native_scale",
+      "equals": 1
+    },
+    {
+      "action": "apply_appearances",
+      "actor": "hunter",
+      "selection": {
+        "68": 5740
+      }
+    },
+    {
+      "action": "assert",
+      "label": "Appearance 5740 selects captured display 80563",
+      "actor": "hunter",
+      "metric": "pet_display",
+      "equals": 80563,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "Changing appearance preserves hound scale",
+      "actor": "hunter",
+      "metric": "pet_scale",
+      "ratio_to": "native_scale",
+      "equals": 1
+    },
+    {
+      "action": "apply_appearances",
+      "actor": "hunter",
+      "selection": {
+        "68": 5745
+      }
+    },
+    {
+      "action": "assert",
+      "label": "Appearance 5745 selects captured display 80564",
+      "actor": "hunter",
+      "metric": "pet_display",
+      "equals": 80564,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "Changing appearance preserves hound scale",
+      "actor": "hunter",
+      "metric": "pet_scale",
+      "ratio_to": "native_scale",
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "hunter",
+      "spell": 118,
+      "pet": true,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Polymorph transforms the hound",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 118,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the transformed model differs from any selected incarnation",
+      "actor": "hunter",
+      "metric": "pet_display",
+      "max": 70000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "pet_display",
+      "save_as": "transformed_display"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Wardrobe refresh preserves an active transform",
+      "actor": "hunter",
+      "metric": "pet_display",
+      "ratio_to": "transformed_display",
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "hunter",
+      "spell": 118,
+      "pet": true,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Wardrobe resumes after the transform ends",
+      "actor": "hunter",
+      "metric": "pet_display",
+      "equals": 80564,
+      "within_ms": 2500
+    },
+    {
+      "action": "relog",
+      "actor": "hunter"
+    },
+    {
+      "action": "assert",
+      "label": "Wardrobe selection survives a real character reload",
+      "actor": "hunter",
+      "metric": "pet_display",
+      "equals": 80564,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "actor": "hunter",
+      "opcode": 1699,
+      "fields": [
+        {
+          "u8": 1
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Hiding spell appearances restores the native hound",
+      "actor": "hunter",
+      "metric": "pet_display",
+      "equals": 16049,
+      "within_ms": 2500
+    },
+    {
+      "action": "client_packet",
+      "actor": "hunter",
+      "opcode": 1699,
+      "fields": [
+        {
+          "u8": 1
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Showing spell appearances reapplies the chosen hound",
+      "actor": "hunter",
+      "metric": "pet_display",
+      "equals": 80564,
+      "within_ms": 2500
+    },
+    {
+      "action": "apply_appearances",
+      "actor": "hunter",
+      "selection": {
+        "68": 2196
+      }
+    },
+    {
+      "action": "assert",
+      "label": "Ammunition is rejected as a hound incarnation",
+      "actor": "hunter",
+      "metric": "server_packet_contains",
+      "opcode": 1688,
+      "text": "APPLY_APPEARANCES_INVALID_CATEGORY",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Rejected selection preserves the chosen model",
+      "actor": "hunter",
+      "metric": "pet_display",
+      "equals": 80564
+    },
+    {
+      "action": "client_packet",
+      "label": "Dismiss the summoned pet through its native pet command",
+      "actor": "hunter",
+      "opcode": 373,
+      "consumed": false,
+      "fields": [
+        {
+          "pet_guid": "hunter"
+        },
+        {
+          "u32": 117440515
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Ordinary Dismiss Pet removes the pet",
+      "actor": "hunter",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hunter",
+      "spell": 801343
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 801343
+    },
+    {
+      "action": "assert",
+      "label": "A fresh summon uses the saved wardrobe selection",
+      "actor": "hunter",
+      "metric": "pet_display",
+      "equals": 80564,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 807918
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 807918
+    },
+    {
+      "action": "assert",
+      "label": "Lesser hounds share the Shadowhound incarnation",
+      "actor": "hunter",
+      "metric": "owned_creature_display",
+      "entry": 50224,
+      "equals": 80564,
+      "within_ms": 3000
+    },
+    {
+      "action": "apply_appearances",
+      "actor": "hunter",
+      "selection": {}
+    },
+    {
+      "action": "assert",
+      "label": "Clearing the selection restores the main pet native model",
+      "actor": "hunter",
+      "metric": "pet_display",
+      "equals": 16049,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "Clearing the selection restores the lesser hound native model",
+      "actor": "hunter",
+      "metric": "owned_creature_display",
+      "entry": 50224,
+      "equals": 16049,
+      "within_ms": 2500
+    }
+  ]
+}

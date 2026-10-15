@@ -1,0 +1,1021 @@
+{
+  "schema": 1,
+  "name": "Primalist Running on Instinct line healing and damage stacks",
+  "contract": "Rush heals allies along its forward line, excluding the caster and an off-line ally, up to five targets. Each ally grants 5% Wildclaw/Seismic damage, capped at five for twenty seconds. Verify coefficients, first/highest Rush, expiry and removal.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "extra1",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "extra2",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "extra3",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "extra4",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "extra5",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "outside",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 240000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 58
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 300744,
+      "all_specs": true
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9612.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "extra1",
+      "map": 0,
+      "x": -9611.06,
+      "y": -268.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "extra1",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "extra2",
+      "map": 0,
+      "x": -9610.06,
+      "y": -268.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "extra2",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "extra3",
+      "map": 0,
+      "x": -9609.06,
+      "y": -268.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "extra3",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "extra4",
+      "map": 0,
+      "x": -9608.06,
+      "y": -268.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "extra4",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "extra5",
+      "map": 0,
+      "x": -9607.06,
+      "y": -268.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "extra5",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "outside",
+      "map": 0,
+      "x": -9606.06,
+      "y": -268.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "outside",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 582532,
+      "effect": 0,
+      "periodic": false,
+      "target": "target",
+      "save_as": "damage_582532"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 681114,
+      "effect": 1,
+      "periodic": true,
+      "target": "target",
+      "save_as": "damage_681114"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 503264,
+      "effect": 0,
+      "periodic": true,
+      "target": "target",
+      "save_as": "damage_503264"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 300693,
+      "effect": 0,
+      "periodic": false,
+      "target": "target",
+      "save_as": "damage_300693"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 805462,
+      "effect": 1,
+      "periodic": false,
+      "target": "target",
+      "save_as": "damage_805462"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "spell": 800140,
+      "target": "target",
+      "save_as": "wild"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_healing_done",
+      "spell": 301203,
+      "target": "ally",
+      "save_as": "heal_base"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_healing_done",
+      "spell": 301203,
+      "target": "ally",
+      "relative_to": "heal_base",
+      "min": 24,
+      "max": 26
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 26395,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_healing_done",
+      "spell": 301203,
+      "target": "ally",
+      "relative_to": "heal_base",
+      "min": 24,
+      "max": 26
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 26395,
+      "stacks": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502724,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502723,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500771,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500770,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500769,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500768,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500696,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301203,
+      "save_as": "baseline"
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 500696,
+      "power": 1,
+      "min": 200,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301203,
+      "relative_to": "baseline",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301203,
+      "target": "outside",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301203,
+      "target": "primalist",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 300744
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502724,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502723,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500771,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500770,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500769,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500768,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500696,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301203,
+      "save_as": "first"
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 500696,
+      "power": 1,
+      "min": 200,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301203,
+      "relative_to": "first",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301203,
+      "target": "outside",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301203,
+      "target": "primalist",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 572029,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 572029,
+      "effect": 0,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "spell": 800140,
+      "target": "target",
+      "ratio_to": "wild",
+      "min": 1.048,
+      "max": 1.052
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 582532,
+      "effect": 0,
+      "periodic": false,
+      "target": "target",
+      "ratio_to": "damage_582532",
+      "min": 1.048,
+      "max": 1.052
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 681114,
+      "effect": 1,
+      "periodic": true,
+      "target": "target",
+      "ratio_to": "damage_681114",
+      "min": 1.048,
+      "max": 1.052
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 503264,
+      "effect": 0,
+      "periodic": true,
+      "target": "target",
+      "ratio_to": "damage_503264",
+      "min": 1.048,
+      "max": 1.052
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 300693,
+      "effect": 0,
+      "periodic": false,
+      "target": "target",
+      "ratio_to": "damage_300693",
+      "min": 1.048,
+      "max": 1.052
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 805462,
+      "effect": 1,
+      "periodic": false,
+      "target": "target",
+      "ratio_to": "damage_805462",
+      "min": 1.048,
+      "max": 1.052
+    },
+    {
+      "action": "teleport",
+      "actor": "extra1",
+      "map": 0,
+      "x": -9611.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "extra2",
+      "map": 0,
+      "x": -9610.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "extra3",
+      "map": 0,
+      "x": -9609.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "extra4",
+      "map": 0,
+      "x": -9608.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "extra5",
+      "map": 0,
+      "x": -9607.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502724,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502723,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500771,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500770,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500769,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500768,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500696,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301203,
+      "save_as": "highest"
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 502724,
+      "power": 1,
+      "min": 200,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301203,
+      "relative_to": "highest",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301203,
+      "target": "outside",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301203,
+      "target": "primalist",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 572029,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 572029,
+      "effect": 0,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "spell": 800140,
+      "target": "target",
+      "ratio_to": "wild",
+      "min": 1.248,
+      "max": 1.252
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 582532,
+      "effect": 0,
+      "periodic": false,
+      "target": "target",
+      "ratio_to": "damage_582532",
+      "min": 1.248,
+      "max": 1.252
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 681114,
+      "effect": 1,
+      "periodic": true,
+      "target": "target",
+      "ratio_to": "damage_681114",
+      "min": 1.248,
+      "max": 1.252
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 503264,
+      "effect": 0,
+      "periodic": true,
+      "target": "target",
+      "ratio_to": "damage_503264",
+      "min": 1.248,
+      "max": 1.252
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 300693,
+      "effect": 0,
+      "periodic": false,
+      "target": "target",
+      "ratio_to": "damage_300693",
+      "min": 1.248,
+      "max": 1.252
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 805462,
+      "effect": 1,
+      "periodic": false,
+      "target": "target",
+      "ratio_to": "damage_805462",
+      "min": 1.248,
+      "max": 1.252
+    },
+    {
+      "action": "wait",
+      "ms": 20500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 572029,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 300744,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502724,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502723,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500771,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500770,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500769,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500768,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500696,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301203,
+      "save_as": "removed"
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 502724,
+      "power": 1,
+      "min": 200,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301203,
+      "relative_to": "removed",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301203,
+      "target": "outside",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301203,
+      "target": "primalist",
+      "equals": 0
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

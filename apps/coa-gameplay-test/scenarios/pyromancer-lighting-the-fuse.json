@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Pyromancer Lighting the Fuse adds Intellect-based spell crit rating (#681)",
+  "contract": "#681: Lighting the Fuse raises spell crit rating by 15% of Intellect. The periodic-crit half is asserted for Blaze by pyromancer-lighting-the-fuse-blaze-crit.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 24,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    },
+    {
+      "id": "fuse",
+      "race": 1,
+      "class": 24,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Spell crit rating before Lighting the Fuse",
+      "actor": "fuse",
+      "metric": "combat_rating",
+      "save_as": "crit0",
+      "rating": 10
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 805500
+    },
+    {
+      "action": "learn",
+      "actor": "fuse",
+      "spell": 805500
+    },
+    {
+      "action": "learn",
+      "actor": "fuse",
+      "spell": 807509
+    },
+    {
+      "action": "assert",
+      "label": "Lighting the Fuse raises spell crit rating (15% of Intellect)",
+      "actor": "fuse",
+      "metric": "combat_rating",
+      "rating": 10,
+      "relative_to": "crit0",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "Lithic Lance Ready supersedes only the highest known Geode Barrage rank",
+  "contract": "Lithic Lance Ready retargets one action-bar slot, the highest Geode Barrage rank the caster knows, to Lithic Lance. Gaining or losing the buff sends exactly one SMSG_SUPERCEDED_SPELL packet regardless of how many earlier Geode Barrage ranks remain in the spellbook.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "timeout_ms": 30000,
+  "steps": [
+    { "action": "learn", "actor": "primalist", "spell": 706159 },
+    { "action": "learn", "actor": "primalist", "spell": 500402 },
+    { "action": "learn", "actor": "primalist", "spell": 502769 },
+    { "action": "learn", "actor": "primalist", "spell": 502770 },
+    { "action": "assert", "actor": "primalist", "metric": "knows_spell", "spell": 502770, "equals": 1 },
+    {
+      "action": "snapshot", "actor": "primalist", "metric": "spellbook_superseded_packets",
+      "save_as": "packets_before_apply"
+    },
+    { "action": "set_aura", "actor": "primalist", "spell": 807048, "stacks": 1 },
+    { "action": "assert", "actor": "primalist", "metric": "aura", "spell": 807048, "equals": 1 },
+    {
+      "action": "assert", "label": "One superseded-spell packet regardless of how many ranks are known",
+      "actor": "primalist", "metric": "spellbook_superseded_packets",
+      "relative_to": "packets_before_apply", "equals": 1
+    },
+    {
+      "action": "assert", "label": "Only the highest known rank is retargeted to Lithic Lance",
+      "actor": "primalist", "metric": "temporary_spell_replacement", "spell": 502770, "equals": 681251
+    },
+    {
+      "action": "assert", "label": "Lower ranks are left untouched",
+      "actor": "primalist", "metric": "temporary_spell_replacement", "spell": 500402, "equals": 500402
+    },
+    {
+      "action": "snapshot", "actor": "primalist", "metric": "spellbook_superseded_packets",
+      "save_as": "packets_before_remove"
+    },
+    { "action": "set_aura", "actor": "primalist", "spell": 807048, "stacks": 0 },
+    { "action": "assert", "actor": "primalist", "metric": "aura", "spell": 807048, "equals": 0 },
+    {
+      "action": "assert", "label": "One superseded-spell packet again when the buff drops",
+      "actor": "primalist", "metric": "spellbook_superseded_packets",
+      "relative_to": "packets_before_remove", "equals": 1
+    },
+    {
+      "action": "assert", "label": "The action bar reverts to the highest rank",
+      "actor": "primalist", "metric": "temporary_spell_replacement", "spell": 502770, "equals": 502770
+    }
+  ]
+}

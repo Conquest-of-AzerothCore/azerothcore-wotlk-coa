@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Into The Shadow Realm reduces the cooldown of Deathstalker, Soulstone Lure and Soul Shear",
+  "contract": "Into The Shadow Realm 561342 is a passive SpellMod: its single effect (SPELLMOD_COOLDOWN, ADD_PCT_MODIFIER) carries SpellFamilyFlags[2]=4 (bit2), which is shared verbatim by Deathstalker 804054, Soulstone Lure 561376 and Soul Shear 520862 (each has SpellFamilyFlags[2]=4), base points -26 (raw -25%). This is a native, generic SpellMod op requiring no CoA-specific code. Issue #2050 reported no handler exists for any of the three named spells; this proves the one shared classmask bit already reaches all three.",
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "Deathstalker cooldown unmodified before the talent", "actor": "reaper",
+      "metric": "spell_modifier", "spell": 804054, "op": 11, "base": 10000, "equals": 10000 },
+    { "action": "assert", "label": "Soulstone Lure cooldown unmodified before the talent", "actor": "reaper",
+      "metric": "spell_modifier", "spell": 561376, "op": 11, "base": 10000, "equals": 10000 },
+    { "action": "assert", "label": "Soul Shear cooldown unmodified before the talent", "actor": "reaper",
+      "metric": "spell_modifier", "spell": 520862, "op": 11, "base": 10000, "equals": 10000 },
+    { "action": "learn", "actor": "reaper", "spell": 561342 },
+    { "action": "assert", "label": "Into The Shadow Realm aura settles on the caster", "actor": "reaper",
+      "metric": "aura", "spell": 561342, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Deathstalker cooldown is reduced by 25%", "actor": "reaper",
+      "metric": "spell_modifier", "spell": 804054, "op": 11, "base": 10000, "equals": 7500 },
+    { "action": "assert", "label": "Soulstone Lure cooldown is reduced by 25%", "actor": "reaper",
+      "metric": "spell_modifier", "spell": 561376, "op": 11, "base": 10000, "equals": 7500 },
+    { "action": "assert", "label": "Soul Shear cooldown is reduced by 25%", "actor": "reaper",
+      "metric": "spell_modifier", "spell": 520862, "op": 11, "base": 10000, "equals": 7500 }
+  ]
+}

@@ -1,0 +1,194 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Thorim's Gift leaves a damaging patch under the Arm of Thorim target (#2056)",
+  "contract": "#2056: Thorim's Gift (570173) is a passive whose single effect is SPELL_EFFECT_APPLY_AURA with aura 354, EffectBasePoints 14 + DieSides 1 = 15 (the $s1 of its own description) and EffectTriggerSpell 570174. Aura 354 is nullptr in AuraEffectHandler (SpellAuraEffects.cpp:419) and has no case in AuraEffect::HandleProc, and 570173's own Spell.dbc ProcFlags are 4 (PROC_FLAG_DONE_MELEE_AUTO_ATTACK), which Arm of Thorim never raises, so nothing ever cast 570174. 570174 is SPELL_EFFECT_PERSISTENT_AREA_AURA with SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 1000 ms, DurationIndex 27 (3000 ms) and EffectRadiusIndex 193 (6 yd), so it ticks 3000/1000 = 3 times, and its EffectBasePoints -1 + DieSides 1 = 0 means the per-tick amount must be supplied by the caller. 570173's description reads 'dealing damage equal to $s1% of its damage dealt to enemies within every $570174t1 sec for $570174d', i.e. 15% per tick, the same per-tick convention Shock (804020) states explicitly as '($560336d*1000/$560336T1)*($707058m1)% of the initial damage'. The expected total is therefore 3 x 15% = 45% of the Arm of Thorim hit recorded in this same run; the asserted band allows the per-tick integer truncation (up to 3 damage out of a ~140 hit) and a small partial Nature resist on the ticks. 570174's own description ('20% ... over $570173d', where 570173's DurationIndex 21 is -1) contradicts its flavour text and its parent's data and is treated as stale.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "storm",
+      "race": 1,
+      "class": 16,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "storm",
+      "entry": 36,
+      "level": 60,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "label": "SETUP: start without Thorim's Gift",
+      "actor": "storm",
+      "spell": 570173
+    },
+    {
+      "action": "learn",
+      "actor": "storm",
+      "spell": 801847
+    },
+    {
+      "action": "set_aura",
+      "label": "SETUP: Arm of Thorim needs its CasterAuraSpell 803102 (Static)",
+      "actor": "storm",
+      "spell": 803102,
+      "stacks": 20
+    },
+    {
+      "action": "snapshot",
+      "actor": "storm",
+      "metric": "spell_damage_total",
+      "spell": 801847,
+      "target": "enemy",
+      "save_as": "arm_control_before"
+    },
+    {
+      "action": "cast",
+      "actor": "storm",
+      "spell": 801847,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the control Arm of Thorim cast lands",
+      "actor": "storm",
+      "metric": "spell_damage_total",
+      "spell": 801847,
+      "target": "enemy",
+      "relative_to": "arm_control_before",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without Thorim's Gift no patch aura reaches the target",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 570174,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without Thorim's Gift the patch deals no damage",
+      "actor": "storm",
+      "metric": "spell_damage_count",
+      "spell": 570174,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 21000
+    },
+    {
+      "action": "learn",
+      "actor": "storm",
+      "spell": 570173
+    },
+    {
+      "action": "assert",
+      "label": "DIAGNOSTIC: Thorim's Gift is applied as a passive aura after learn",
+      "actor": "storm",
+      "metric": "aura",
+      "spell": 570173,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "storm",
+      "spell": 803102,
+      "stacks": 20
+    },
+    {
+      "action": "snapshot",
+      "actor": "storm",
+      "metric": "spell_damage_total",
+      "spell": 801847,
+      "target": "enemy",
+      "save_as": "arm_before"
+    },
+    {
+      "action": "cast",
+      "actor": "storm",
+      "spell": 801847,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Thorim's Gift creates the 570174 ground effect under the target",
+      "actor": "storm",
+      "metric": "dynamic_object",
+      "spell": 570174,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the patch applies its periodic aura to the enemy in its 6 yd radius",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 570174,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the measured Arm of Thorim cast lands",
+      "actor": "storm",
+      "metric": "spell_damage_total",
+      "spell": 801847,
+      "target": "enemy",
+      "relative_to": "arm_before",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "snapshot",
+      "actor": "storm",
+      "metric": "spell_damage_total",
+      "spell": 801847,
+      "target": "enemy",
+      "relative_to": "arm_before",
+      "save_as": "arm_hit"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the patch ticks 3000 ms / 1000 ms = 3 times",
+      "actor": "storm",
+      "metric": "spell_damage_count",
+      "spell": 570174,
+      "target": "enemy",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the three ticks total 3 x 15% = 45% of this run's own Arm of Thorim hit",
+      "actor": "storm",
+      "metric": "spell_damage_total",
+      "spell": 570174,
+      "target": "enemy",
+      "ratio_to": "arm_hit",
+      "min": 0.41,
+      "max": 0.46
+    }
+  ]
+}

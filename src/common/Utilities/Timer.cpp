@@ -29,6 +29,8 @@ namespace Acore::TimeDiff // in us
     constexpr uint64 DAYS = 24 * HOURS;
 }
 
+std::atomic<int64> Acore::Time::SimulatedMSTime{-1};
+
 template<>
 AC_COMMON_API uint32 Acore::Time::TimeStringTo<Seconds>(std::string_view timestring)
 {
@@ -299,14 +301,14 @@ std::string Acore::Time::TimeToHumanReadable(Seconds time /*= 0s*/, std::string_
     return ss.str();
 }
 
-time_t Acore::Time::GetNextTimeWithDayAndHour(int8 dayOfWeek, int8 hour)
+time_t Acore::Time::GetNextTimeWithDayAndHour(int8 dayOfWeek, int8 hour, time_t from)
 {
     if (hour < 0 || hour > 23)
     {
         hour = 0;
     }
 
-    tm localTm = TimeBreakdown();
+    tm localTm = TimeBreakdown(from);
     localTm.tm_hour = hour;
     localTm.tm_min = 0;
     localTm.tm_sec = 0;
@@ -330,14 +332,14 @@ time_t Acore::Time::GetNextTimeWithDayAndHour(int8 dayOfWeek, int8 hour)
     return mktime(&localTm) + add;
 }
 
-time_t Acore::Time::GetNextTimeWithMonthAndHour(int8 month, int8 hour)
+time_t Acore::Time::GetNextTimeWithMonthAndHour(int8 month, int8 hour, time_t from)
 {
     if (hour < 0 || hour > 23)
     {
         hour = 0;
     }
 
-    tm localTm = TimeBreakdown();
+    tm localTm = TimeBreakdown(from);
     localTm.tm_mday = 1;
     localTm.tm_hour = hour;
     localTm.tm_min = 0;

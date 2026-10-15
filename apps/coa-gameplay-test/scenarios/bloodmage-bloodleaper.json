@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Bloodleaper cuts ten seconds off Lunge (#851)",
+  "contract": "Bloodleaper 806423 is one effect: aura 107 with MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -10001 + DieSides 1 = -10000 ms, over EffectSpellClassMask (16777216, 0, 0) = word 0 bit 24 = Lunge 500126 and no other family-26 row, so there is no collateral. Lunge ships RecoveryTime 25000, and Player::ApplySpellMod consumes SPELLMOD_COOLDOWN in the cooldown path, so it becomes 15000. Tooltip: \"Reduces the cooldown of your Lunge by $/1000;s1 sec.\" Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Lunge keeps its authored 25 s cooldown before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 500126,
+      "op": 11,
+      "base": 25000,
+      "equals": 25000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 806423
+    },
+    {
+      "action": "assert",
+      "label": "Bloodleaper cuts Lunge's cooldown to 15 s",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 500126,
+      "op": 11,
+      "base": 25000,
+      "equals": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Bloodleaper does not touch Bloodbolt's cooldown",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 11,
+      "base": 25000,
+      "equals": 25000
+    }
+  ]
+}

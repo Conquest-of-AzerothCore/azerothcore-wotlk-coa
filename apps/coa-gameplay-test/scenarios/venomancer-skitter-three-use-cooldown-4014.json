@@ -1,0 +1,227 @@
+{
+  "schema": 1,
+  "name": "venomancer-skitter-three-use-cooldown-4014",
+  "contract": [
+    "Original Spell.dbc 800848 allows three uses in its ten-second window before its forty-second cooldown.",
+    "Normal first/second casts must leave no cooldown; the third must start it. A fresh first-use window must",
+    "also start the cooldown when it expires without using the remaining casts. Let the original cooldown",
+    "expire naturally before the next window; no cooldown reset is used."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "venomancer",
+      "race": 1,
+      "class": 29,
+      "level": 20
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "venomancer",
+      "spell": 800841
+    },
+    {
+      "action": "cast",
+      "actor": "venomancer",
+      "spell": 800841
+    },
+    {
+      "action": "assert",
+      "actor": "venomancer",
+      "metric": "aura",
+      "spell": 800841,
+      "equals": 1,
+      "within_ms": 1500,
+      "label": "Spider Form enables Skitter"
+    },
+    {
+      "action": "wait",
+      "ms": 1800
+    },
+    {
+      "action": "learn",
+      "actor": "venomancer",
+      "spell": 800848
+    },
+    {
+      "action": "set_power",
+      "actor": "venomancer",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "venomancer",
+      "spell": 800848
+    },
+    {
+      "action": "wait",
+      "ms": 1800
+    },
+    {
+      "action": "assert",
+      "actor": "venomancer",
+      "metric": "aura_stacks",
+      "spell": 800848,
+      "equals": 1,
+      "label": "Skitter use 1 is recorded in its window"
+    },
+    {
+      "action": "assert",
+      "label": "Skitter use 1 cooldown",
+      "actor": "venomancer",
+      "metric": "cooldown_ms",
+      "spell": 800848,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "venomancer",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "venomancer",
+      "spell": 800848
+    },
+    {
+      "action": "wait",
+      "ms": 1800
+    },
+    {
+      "action": "assert",
+      "actor": "venomancer",
+      "metric": "aura_stacks",
+      "spell": 800848,
+      "equals": 2,
+      "label": "Skitter use 2 is recorded in its window"
+    },
+    {
+      "action": "assert",
+      "label": "Skitter use 2 cooldown",
+      "actor": "venomancer",
+      "metric": "cooldown_ms",
+      "spell": 800848,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "venomancer",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "venomancer",
+      "spell": 800848
+    },
+    {
+      "action": "wait",
+      "ms": 1800
+    },
+    {
+      "action": "assert",
+      "label": "Skitter use 3 cooldown",
+      "actor": "venomancer",
+      "metric": "cooldown_ms",
+      "spell": 800848,
+      "min": 30000,
+      "max": 40000
+    },
+    {
+      "action": "wait",
+      "ms": 41000,
+      "label": "Let the ordinary third-use cooldown expire naturally"
+    },
+    {
+      "action": "assert",
+      "actor": "venomancer",
+      "metric": "cooldown_ms",
+      "spell": 800848,
+      "equals": 0,
+      "label": "The original forty-second cooldown has expired"
+    },
+    {
+      "action": "set_power",
+      "actor": "venomancer",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "venomancer",
+      "spell": 800848
+    },
+    {
+      "action": "assert",
+      "label": "A fresh first use opens the three-use window",
+      "actor": "venomancer",
+      "metric": "aura_stacks",
+      "spell": 800848,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "label": "An expired unfinished window starts the forty-second cooldown",
+      "actor": "venomancer",
+      "metric": "cooldown_ms",
+      "spell": 800848,
+      "min": 30000,
+      "max": 40000
+    },
+    {
+      "action": "wait",
+      "ms": 41000,
+      "label": "Let the unfinished-window cooldown expire naturally"
+    },
+    {
+      "action": "assert",
+      "actor": "venomancer",
+      "metric": "cooldown_ms",
+      "spell": 800848,
+      "equals": 0,
+      "label": "The unfinished-window cooldown expires after forty seconds"
+    },
+    {
+      "action": "set_power",
+      "actor": "venomancer",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "venomancer",
+      "spell": 800848
+    },
+    {
+      "action": "assert",
+      "actor": "venomancer",
+      "metric": "aura_stacks",
+      "spell": 800848,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Skitter becomes usable after the unfinished-window cooldown"
+    },
+    {
+      "action": "assert",
+      "actor": "venomancer",
+      "metric": "cooldown_ms",
+      "spell": 800848,
+      "equals": 0,
+      "label": "The new first use resets its cooldown normally"
+    }
+  ]
+}

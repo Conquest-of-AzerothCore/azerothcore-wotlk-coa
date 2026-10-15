@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Cutting Edge Technology speeds and strengthens Nanobot Reconstruction (#689)",
+  "contract": "#689: Cutting Edge Technology 707398 is a native ADD_PCT_MODIFIER (aura 108) passive with two effects, both on EffectSpellClassMask (1048576,0,0) = family-34 flag bit 20: EffectMiscValue 22 SPELLMOD_DOT with BasePoints 19 DieSides 1 (+20%) and EffectMiscValue 19 SPELLMOD_ACTIVATION_TIME with BasePoints -21 DieSides 1 (-20%). Nanobot Reconstruction rank 13 is 502563: SpellFamilyName 34, SpellFamilyFlags (1048576,0,0), effect 0 SPELL_AURA_PERIODIC_HEAL with Amplitude 1000 and DurationIndex 3 (SpellDuration.dbc row 3 = 60000 ms). Unit::SpellHealingBonusDone selects SPELLMOD_DOT when damagetype is DOT, and AuraEffect::CalculatePeriodic applies SPELLMOD_ACTIVATION_TIME to the tick period at aura application, so the period becomes 800 ms and each tick heals 20% more. Its AttributesEx3 268435456 is SPELL_ATTR3_IGNORE_CASTER_AND_TARGET_RESTRICTIONS, not SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, so the IsAffectedBySpellMods gate does not reject these modifiers. The talent has no SPELLMOD_DURATION effect, so the 60 sec duration must stay unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 28, "level": 80 },
+    { "id": "cutting", "race": 1, "class": 28, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "cutting", "spell": 707398 },
+
+    { "action": "assert", "label": "Nanobot's periodic healing is unmodified without the talent",
+      "actor": "control", "metric": "spell_modifier", "spell": 502563, "op": 22, "base": 1000, "equals": 1000 },
+    { "action": "assert", "label": "Cutting Edge Technology raises Nanobot's periodic healing by 20%",
+      "actor": "cutting", "metric": "spell_modifier", "spell": 502563, "op": 22, "base": 1000, "equals": 1200 },
+    { "action": "assert", "label": "Nanobot's tick period is unmodified without the talent",
+      "actor": "control", "metric": "spell_modifier", "spell": 502563, "op": 19, "base": 1000, "equals": 1000 },
+    { "action": "assert", "label": "Cutting Edge Technology shortens Nanobot's tick period by 20%",
+      "actor": "cutting", "metric": "spell_modifier", "spell": 502563, "op": 19, "base": 1000, "equals": 800 },
+
+    { "action": "set_aura", "label": "Apply Nanobot Reconstruction with the unmodified Tinker as its caster",
+      "actor": "control", "spell": 502563, "stacks": 1 },
+    { "action": "set_aura", "label": "Apply Nanobot Reconstruction with Cutting Edge Technology as its caster",
+      "actor": "cutting", "spell": 502563, "stacks": 1 },
+
+    { "action": "assert", "label": "The unmodified Nanobot aura ticks every second",
+      "actor": "control", "metric": "aura_amplitude_ms", "spell": 502563, "effect": 0, "equals": 1000 },
+    { "action": "assert", "label": "Cutting Edge Technology makes the applied aura tick every 800 ms",
+      "actor": "cutting", "metric": "aura_amplitude_ms", "spell": 502563, "effect": 0, "equals": 800 },
+    { "action": "assert", "label": "The unmodified Nanobot aura lasts 60 sec",
+      "actor": "control", "metric": "aura_duration_ms", "spell": 502563, "min": 59000, "max": 60000 },
+    { "action": "assert", "label": "Cutting Edge Technology leaves the 60 sec duration alone",
+      "actor": "cutting", "metric": "aura_duration_ms", "spell": 502563, "min": 59000, "max": 60000 }
+  ]
+}

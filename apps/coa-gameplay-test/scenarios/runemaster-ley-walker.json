@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "name": "Issue 1096: Ley Walker removes roots and snares when Warpdagger is cast or reactivated",
+  "contract": [
+    "Ley Walker 500250 (Arcane talent) reads 'Casting or reactivating Warpdagger now removes all root and snare",
+    "effects from you.' Effect 0 is aura 42 triggering 503734, whose three SPELL_EFFECT_DISPEL_MECHANIC effects",
+    "on the caster name mechanics 7 (root), 11 (snare) and 17. Spell.dbc gives 500250 ProcFlags 0, so SpellMgr",
+    "generated no proc entry and the talent never fired. Warpdagger 500287 (family 38 mask1 0x800000) and its",
+    "reactivation Warp 500587 (mask1 0x40), which the server substitutes for 500287 while the dagger is out, are",
+    "DmgClass NONE casts. Expected: with the talent, the toss and the reactivation each remove Frostbite 12494",
+    "(root) and Hamstring 1715 (a 50% snare) and restore normal speed; without it both stay after the toss."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80},
+    {"id": "plain", "race": 1, "class": 32, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the characters settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 1180},
+    {"action": "add_item", "actor": "rm", "item": 2092},
+    {"action": "equip", "actor": "rm", "item": 2092, "slot": 15},
+    {"action": "learn", "actor": "rm", "spell": 500287},
+    {"action": "learn", "actor": "plain", "spell": 1180},
+    {"action": "add_item", "actor": "plain", "item": 2092},
+    {"action": "equip", "actor": "plain", "item": 2092, "slot": 15},
+    {"action": "learn", "actor": "plain", "spell": 500287},
+    {"action": "learn", "actor": "rm", "spell": 500250},
+    {
+      "action": "assert", "label": "Ley Walker passive is active", "actor": "rm", "metric": "aura", "spell": 500250,
+      "equals": 1, "within_ms": 2000
+    },
+    {"action": "snapshot", "actor": "rm", "metric": "run_speed_rate", "save_as": "rm_speed"},
+    {"action": "snapshot", "actor": "plain", "metric": "run_speed_rate", "save_as": "plain_speed"},
+    {"action": "set_aura", "label": "Frostbite roots", "actor": "rm", "spell": 12494, "stacks": 1},
+    {"action": "set_aura", "label": "Hamstring snares by 50%", "actor": "rm", "spell": 1715, "stacks": 1},
+    {"action": "assert", "label": "SETUP: rooted", "actor": "rm", "metric": "rooted", "equals": 1, "within_ms": 1000},
+    {
+      "action": "assert", "label": "SETUP: snared", "actor": "rm", "metric": "run_speed_rate", "ratio_to": "rm_speed",
+      "min": 0.45, "max": 0.55
+    },
+    {"action": "set_aura", "label": "Frostbite roots", "actor": "plain", "spell": 12494, "stacks": 1},
+    {"action": "set_aura", "label": "Hamstring snares by 50%", "actor": "plain", "spell": 1715, "stacks": 1},
+    {
+      "action": "assert", "label": "SETUP: rooted", "actor": "plain", "metric": "rooted", "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "SETUP: snared", "actor": "plain", "metric": "run_speed_rate",
+      "ratio_to": "plain_speed", "min": 0.45, "max": 0.55
+    },
+    {"action": "cast", "label": "Toss Warpdagger while rooted and snared", "actor": "rm", "spell": 500287},
+    {"action": "cast", "label": "Toss Warpdagger without Ley Walker", "actor": "plain", "spell": 500287},
+    {
+      "action": "assert", "label": "SETUP: Warpdagger is cast", "actor": "rm", "metric": "spell_cast_count",
+      "spell": 500287, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "SETUP: Warpdagger is cast without the talent", "actor": "plain",
+      "metric": "spell_cast_count", "spell": 500287, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Casting Warpdagger triggers Ley Walker once", "actor": "rm",
+      "metric": "spell_proc_count", "spell": 500250, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Casting Warpdagger removes the root", "actor": "rm", "metric": "aura",
+      "spell": 12494, "equals": 0, "within_ms": 1000
+    },
+    {"action": "assert", "actor": "rm", "metric": "rooted", "equals": 0},
+    {
+      "action": "assert", "label": "Casting Warpdagger removes the snare", "actor": "rm", "metric": "aura",
+      "spell": 1715, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Movement speed returns to normal", "actor": "rm", "metric": "run_speed_rate",
+      "ratio_to": "rm_speed", "min": 0.99, "max": 1.01
+    },
+    {
+      "action": "assert", "label": "Without Ley Walker the root stays", "actor": "plain", "metric": "rooted",
+      "equals": 1
+    },
+    {
+      "action": "assert", "label": "Without Ley Walker the snare stays", "actor": "plain", "metric": "aura",
+      "spell": 1715, "equals": 1
+    },
+    {"action": "assert", "actor": "plain", "metric": "spell_cast_count", "spell": 503734, "equals": 0},
+    {
+      "action": "assert", "label": "SETUP: the Warpdagger can be reactivated", "actor": "rm",
+      "metric": "temporary_spell_replacement", "spell": 500287, "equals": 500587
+    },
+    {"action": "set_aura", "label": "Rooted again before the reactivation", "actor": "rm", "spell": 12494, "stacks": 1},
+    {"action": "set_aura", "label": "Snared again before the reactivation", "actor": "rm", "spell": 1715, "stacks": 1},
+    {
+      "action": "assert", "label": "SETUP: rooted again", "actor": "rm", "metric": "rooted", "equals": 1,
+      "within_ms": 1000
+    },
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "cast", "label": "Reactivate Warpdagger", "actor": "rm", "spell": 500287},
+    {
+      "action": "assert", "label": "SETUP: the reactivation casts Warp", "actor": "rm", "metric": "spell_cast_count",
+      "spell": 500587, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Reactivating Warpdagger triggers Ley Walker again", "actor": "rm",
+      "metric": "spell_proc_count", "spell": 500250, "equals": 2, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Reactivating Warpdagger removes the root", "actor": "rm", "metric": "aura",
+      "spell": 12494, "equals": 0, "within_ms": 1000
+    },
+    {"action": "assert", "actor": "rm", "metric": "rooted", "equals": 0},
+    {
+      "action": "assert", "label": "Reactivating Warpdagger removes the snare", "actor": "rm", "metric": "aura",
+      "spell": 1715, "equals": 0
+    }
+  ]
+}

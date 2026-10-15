@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Mucking Around halves Scarlet Delirium's cast time and doubles its cost (#2242)",
+  "contract": "Mucking Around 681444 has both effects over EffectSpellClassMask (0, 0, 256) = word 2 bit 8 = the six Scarlet Delirium records (801074, 803684-803688) and no other family-26 row. Effect 0 is aura 108 with MiscValue 14 (SPELLMOD_COST), BasePoints 99 + DieSides 1 = +100%; Scarlet Delirium is PowerType -2 (POWER_HEALTH) with ManaCostPercentage 20, and SpellInfo::CalcPowerCost applies SPELLMOD_COST after its POWER_HEALTH branch, so the health cost really doubles. Effect 1 is aura 107 with MiscValue 10 (SPELLMOD_CASTING_TIME) and BasePoints -1001 + DieSides 1 = -1000 ms; 803688 has CastingTimeIndex 5 = 2000 ms, so it becomes 1000 ms. Tooltip: \"Reduces the cast time of Scarlet Delirium by $/1000;S2 sec, but increases the health cost by $s1%.\" Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Scarlet Delirium takes its authored 2000 ms before the talent",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 803688,
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Scarlet Delirium costs its authored amount before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 803688,
+      "op": 14,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 681444
+    },
+    {
+      "action": "assert",
+      "label": "Mucking Around cuts one second off the cast",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 803688,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Mucking Around doubles Scarlet Delirium's health cost",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 803688,
+      "op": 14,
+      "base": 100,
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "label": "Mucking Around does not touch Bloodbolt",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 10,
+      "base": 2000,
+      "equals": 2000
+    }
+  ]
+}

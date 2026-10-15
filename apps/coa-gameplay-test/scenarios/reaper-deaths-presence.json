@@ -1,0 +1,21 @@
+{
+ "schema": 1,
+ "name": "Death's Presence raises party/raid damage dealt",
+ "contract": "Death's Presence 520371 promises party/raid members deal 3% more damage. Its single effect is native SPELL_EFFECT_APPLY_AREA_AURA_RAID (65) with EffectApplyAuraName SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79) and EffectBasePoints 2 + DieSides 1 = 3. #3724 read the aura as 'Mod School Immunity (79)' - that label does not match this repository's DBCStructure.h enum, where 79 is SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, a completely standard raid buff aura with no CoA-specific handling. Both the area-aura target and the percent-damage aura are handled generically by the core spell/aura system.",
+ "timeout_ms": 90000,
+ "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+ "players": [
+  {"id": "reaper", "race": 10, "class": 30, "level": 80},
+  {"id": "ally", "race": 1, "class": 1, "level": 80}
+ ],
+ "steps": [
+  {"action": "wait", "label": "Let the world settle", "ms": 6000},
+  {"action": "group", "actor": "reaper", "target": "ally"},
+  {"action": "learn", "actor": "reaper", "spell": 520371},
+  {"action": "cast", "actor": "reaper", "spell": 520371},
+  {"action": "assert", "label": "Cast was accepted", "actor": "reaper", "metric": "cast_failure", "spell": 520371, "equals": 0},
+  {"action": "assert", "label": "Death's Presence applied to the caster", "actor": "reaper", "metric": "aura", "spell": 520371, "equals": 1, "within_ms": 3000},
+  {"action": "assert", "label": "Death's Presence spread to the party member", "actor": "ally", "metric": "aura", "spell": 520371, "equals": 1, "within_ms": 3000},
+  {"action": "assert", "label": "The buff grants 3% damage done", "actor": "ally", "metric": "aura_amount", "spell": 520371, "effect": 0, "equals": 3}
+ ]
+}

@@ -1,0 +1,150 @@
+{
+  "schema": 1,
+  "name": "Tinker Kinetic Shield reduces damage and blocks stuns (#3616)",
+  "contract": "Kinetic Shield 806224 carries two stock auras and needs no script: SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN with amount -40 (DBC EffectBasePoints -41, DieSides 1) and MiscValue 127, which covers every school in Unit::SpellDamageBonusTaken and the melee path, plus SPELL_AURA_MECHANIC_IMMUNITY with MiscValue 12 (MECHANIC_STUN). DurationIndex 31 is 8000 ms, so both end after 8 s. Hammer of Justice 853 is the stun probe: its spell-level Mechanic is 12, which Unit::IsImmunedToSpell tests against the mechanic immunity list.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "t",
+      "entry": 36,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 806224
+    },
+    {
+      "action": "assert",
+      "label": "The Tinker can be stunned before the shield",
+      "actor": "t",
+      "metric": "spell_immune",
+      "spell": 853,
+      "target": "d",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "save_as": "spell0",
+      "actor": "t",
+      "metric": "spell_damage_taken",
+      "spell": 801009,
+      "target": "d"
+    },
+    {
+      "action": "snapshot",
+      "save_as": "melee0",
+      "actor": "t",
+      "metric": "melee_damage_taken",
+      "target": "d"
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 806224
+    },
+    {
+      "action": "assert",
+      "label": "The shield is up",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 806224,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "It lasts the DBC's 8 seconds",
+      "actor": "t",
+      "metric": "aura_duration_ms",
+      "spell": 806224,
+      "min": 5000,
+      "max": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Incoming spell damage is cut by 40%",
+      "actor": "t",
+      "metric": "spell_damage_taken",
+      "spell": 801009,
+      "target": "d",
+      "ratio_to": "spell0",
+      "min": 0.59,
+      "max": 0.61
+    },
+    {
+      "action": "assert",
+      "label": "Incoming melee damage is cut by 40%",
+      "actor": "t",
+      "metric": "melee_damage_taken",
+      "target": "d",
+      "ratio_to": "melee0",
+      "min": 0.59,
+      "max": 0.61
+    },
+    {
+      "action": "assert",
+      "label": "The shielded Tinker is immune to stuns",
+      "actor": "t",
+      "metric": "spell_immune",
+      "spell": 853,
+      "target": "d",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The shield has expired",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 806224,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Damage taken is back to normal",
+      "actor": "t",
+      "metric": "spell_damage_taken",
+      "spell": 801009,
+      "target": "d",
+      "ratio_to": "spell0",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "assert",
+      "label": "Stun immunity is gone with it",
+      "actor": "t",
+      "metric": "spell_immune",
+      "spell": 853,
+      "target": "d",
+      "equals": 0
+    }
+  ]
+}

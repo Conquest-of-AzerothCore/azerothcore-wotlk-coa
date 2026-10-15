@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Cultist: Darkward boosts the caster's own absorption effects through the native aura 317 multiplier (#3020)",
+  "contract": "706180/706181 (SpellFamilyName 31) each carry effect0 as the CoA-custom aura 317 (SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT), MiscValue=127 (all schools), SpellClassMask [0,0,0] (unrestricted), BasePoints 9/19 -> CalcValue 10/20. AuraEffect::CalculateAmount (SpellAuraEffects.cpp ~628-649) multiplies any SPELL_AURA_SCHOOL_ABSORB/SPELL_AURA_MANA_SHIELD effect computed on a CLASS_CULTIST caster by GetTotalAuraMultiplier(SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT, ...), unconditionally for this unrestricted classmask -- no custom C++ needed for the boost itself, but only when the base amount reaching that multiplier check is greater than zero (the check is gated by `amount > 0`). 582591 (Embrace the Void) is the wrong witness for this: AscensionCultistAuras.cpp's aura_ascension_cultist_lifecycle::Calculate() hard-codes `amount = index == 0 ? -1 : ...` for spell id 582591 specifically, unconditionally overriding effect0's computed amount to the sentinel -1 (its real absorb budget is tracked separately, in effect1's amount, repurposed to hold the caster's max health) -- so effect0 never reaches the multiplier's `amount > 0` gate and 582591 can never demonstrate the boost, regardless of Darkward. This scenario instead uses 807068 (Saronite Shield, SpellFamilyName 31, single-effect self/ally school-absorb, MiscValue=127 all schools, SpellClassMask [0,0,0], BasePoints=19/DieSides=1 [deterministic]/RealPointsPerLevel=2.5 -> CalcValue=195 at level 80), which has zero script hooks anywhere in the codebase and reaches the multiplier through the plain default CalcValue path with a positive amount. It snapshots the aura's effect0 amount without any rank learned, then asserts the ratio after each rank. Regression guard for behaviour that already works natively; the auditor's tool read aura 317 as unknown and reported it as missing.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "c", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "set_aura", "actor": "c", "spell": 807068, "stacks": 1 },
+    { "action": "snapshot", "actor": "c", "metric": "aura_amount", "spell": 807068, "effect": 0, "save_as": "absorb_base" },
+    { "action": "set_aura", "actor": "c", "spell": 807068, "stacks": 0 },
+    { "action": "learn", "actor": "c", "spell": 706180 },
+    { "action": "set_aura", "actor": "c", "spell": 807068, "stacks": 1 },
+    {
+      "action": "assert", "label": "Darkward rank 1 raises the absorb amount by 10% (#3020)",
+      "actor": "c", "metric": "aura_amount", "spell": 807068, "effect": 0, "ratio_to": "absorb_base", "min": 1.09, "max": 1.11
+    },
+    { "action": "set_aura", "actor": "c", "spell": 807068, "stacks": 0 },
+    { "action": "unlearn", "actor": "c", "spell": 706180 },
+    { "action": "learn", "actor": "c", "spell": 706181 },
+    { "action": "set_aura", "actor": "c", "spell": 807068, "stacks": 1 },
+    {
+      "action": "assert", "label": "Darkward rank 2 raises the absorb amount by 20% (#3020)",
+      "actor": "c", "metric": "aura_amount", "spell": 807068, "effect": 0, "ratio_to": "absorb_base", "min": 1.19, "max": 1.21
+    }
+  ]
+}

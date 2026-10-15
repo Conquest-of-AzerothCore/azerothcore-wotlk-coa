@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "name": "Cursed Blood's Bloodbolt debuff lands on the target (#806)",
+  "contract": "Cursed Blood 681792 has three effects. Effects 1 and 2 (aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 19) are native damage modifiers and already work. Effect 0 is SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on Cursed Blood 803722, a native debuff (aura 22 SPELL_AURA_MOD_RESISTANCE BasePoints -21 with RealPointsPerLevel -1.14583 and MiscValue 126, plus aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN BasePoints 1, both TargetA 6 = enemy). Spell.dbc gives 681792 ProcFlags 0 and no spell_proc row existed, so the aura was inert. The tooltip is 'damage dealt by Bloodbolt now reduces all resistances ... and increases the target's Magic damage taken by $803722s2%' at ProcChance 100, so a single Bloodbolt must apply 803722 to the unit it hits. Bloodbolt is cast as rank 578305, the rank a level-80 character owns per AscensionSpellProgressionData.h; it is DmgClass 1 and its SpellFamilyFlags (0, 131072, 0) are the bit the row's SpellFamilyMask1 names. No proc roll is involved.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy1",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 578305
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 578305,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Bloodbolt alone leaves no debuff",
+      "actor": "dummy1",
+      "metric": "aura",
+      "spell": 803722,
+      "caster": "bloodmage",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 681792
+    },
+    {
+      "action": "assert",
+      "label": "The native damage modifier half is in effect",
+      "actor": "bloodmage",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 0,
+      "base": 100,
+      "min": 115
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 578305,
+      "target": "dummy1"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bloodbolt's damage now applies Cursed Blood",
+      "actor": "dummy1",
+      "metric": "aura",
+      "spell": 803722,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

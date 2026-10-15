@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "name": "Native fixture teardown removes hostile descendants before phase reuse: consumer",
+  "contract": [
+    "The producer first creates a native Risen Lackey 10482 under fixture 11582. Its teardown must leave no such",
+    "creature for a fresh Felsworn reusing the same private phase. Require zero nearby lackeys, the original",
+    "out-of-combat restriction, and the unchanged normal Fel Rift portal and destination assertions. The",
+    "mandatory companion checker requires both completed cases in order, on the same server batch and phase."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "felsworn",
+      "race": 1,
+      "class": 14,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "nearby_creature_count",
+      "entry": 10482,
+      "equals": 0,
+      "label": "The reused phase has no hostile descendant from the previous fixture"
+    },
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 535603
+    },
+    {
+      "action": "assert",
+      "label": "No Altar of Storms rift portal before the cast",
+      "actor": "felsworn",
+      "metric": "owned_gameobject_count",
+      "entry": 9000147,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "label": "SETUP: 535603's DBC reagent (5565)",
+      "actor": "felsworn",
+      "item": 5565
+    },
+    {
+      "action": "assert",
+      "label": "Fel Rift requires the caster to be out of combat normally",
+      "actor": "felsworn",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "global_cooldown_ms",
+      "spell": 535603,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 535603
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 535603,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the cast spawns the rift's own gameobject_template entry (9000147), not the raw\u2026",
+      "actor": "felsworn",
+      "metric": "owned_gameobject_count",
+      "entry": 9000147,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "use_gameobject",
+      "label": "Click the spawned rift",
+      "actor": "felsworn",
+      "entry": 9000147
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: clicking the rift teleports the caster to the Altar of Storms map",
+      "actor": "felsworn",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Teleported to the rift's authored destination, not left in place",
+      "actor": "felsworn",
+      "metric": "position_x",
+      "min": -7626.9,
+      "max": -7606.9
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "position_y",
+      "min": -754.571,
+      "max": -734.571
+    }
+  ]
+}

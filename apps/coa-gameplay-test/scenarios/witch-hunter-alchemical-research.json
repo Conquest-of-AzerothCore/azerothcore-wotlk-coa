@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Alchemical Research scales Tonic effects by 25% and 50% (#2704)",
+  "contract": "Alchemical Research 705498 (rank 1) and 707862 (rank 2) read 'Increases the effectiveness of your Tonics by $s1%.' In the installed Spell.dbc both are passive, family 21, effect 0 = SPELL_AURA_ADD_PCT_MODIFIER (108), misc 8 = SPELLMOD_ALL_EFFECTS, class mask word 2 = 0x200, BasePoints 24 and 49 (DieSides 1, so 25% and 50%). Every Tonic carries family 21 and flag word 2 0x200 (Vampiric Tonic 802276, Pyro Tonic 802277 ...), so the stock chain applies with no script: SpellEffectInfo::CalcValue (SpellInfo.cpp:520) calls Unit::ApplyEffectModifiers (Unit.cpp:12149), which applies SPELLMOD_ALL_EFFECTS through Player::ApplySpellMod (Player.cpp:10219). The base values are DBC BasePoints + 1: Vampiric Tonic effect 0 = 39 + 1 = 40 (the Tonic contract only turns its aura type into a dummy, AscensionWitchHunterTonics.cpp), Pyro Tonic effect 0 = 29 + 1 = 30. The result is int32-truncated (SpellInfo.cpp:582), so 40 becomes 50 and 60, and 30 becomes 37 (37.5) and 45. The scenario reads the resolved effect values with the spell_effect_value probe, then checks the live aura amount of a real Vampiric Tonic cast.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Vampiric Tonic", "actor": "hunter", "spell": 802276},
+    {"action": "learn", "label": "Pyro Tonic", "actor": "hunter", "spell": 802277},
+    {"action": "assert", "label": "Vampiric Tonic effect 0 without the talent is 40 (DBC 39 + 1)", "actor": "hunter", "metric": "spell_effect_value", "spell": 802276, "effect": 0, "equals": 40},
+    {"action": "assert", "label": "Pyro Tonic effect 0 without the talent is 30 (DBC 29 + 1)", "actor": "hunter", "metric": "spell_effect_value", "spell": 802277, "effect": 0, "equals": 30},
+    {"action": "learn", "label": "Alchemical Research rank 1", "actor": "hunter", "spell": 705498},
+    {"action": "assert", "label": "The passive is active", "actor": "hunter", "metric": "aura", "spell": 705498, "equals": 1},
+    {"action": "assert", "label": "Vampiric Tonic is 40 * 1.25 = 50", "actor": "hunter", "metric": "spell_effect_value", "spell": 802276, "effect": 0, "equals": 50},
+    {"action": "assert", "label": "Pyro Tonic is 30 * 1.25 = 37.5, truncated to 37", "actor": "hunter", "metric": "spell_effect_value", "spell": 802277, "effect": 0, "equals": 37},
+    {"action": "unlearn", "label": "Drop rank 1", "actor": "hunter", "spell": 705498},
+    {"action": "learn", "label": "Alchemical Research rank 2", "actor": "hunter", "spell": 707862},
+    {"action": "assert", "label": "Rank 1 is gone", "actor": "hunter", "metric": "aura", "spell": 705498, "equals": 0},
+    {"action": "assert", "label": "Vampiric Tonic is 40 * 1.5 = 60", "actor": "hunter", "metric": "spell_effect_value", "spell": 802276, "effect": 0, "equals": 60},
+    {"action": "assert", "label": "Pyro Tonic is 30 * 1.5 = 45", "actor": "hunter", "metric": "spell_effect_value", "spell": 802277, "effect": 0, "equals": 45},
+    {"action": "cast", "label": "Drink a real Vampiric Tonic with rank 2", "actor": "hunter", "spell": 802276},
+    {"action": "assert", "label": "The live aura carries the scaled amount", "actor": "hunter", "metric": "aura_amount", "spell": 802276, "effect": 0, "equals": 60, "within_ms": 3000},
+    {"action": "unlearn", "label": "Drop rank 2", "actor": "hunter", "spell": 707862},
+    {"action": "assert", "label": "Vampiric Tonic returns to 40", "actor": "hunter", "metric": "spell_effect_value", "spell": 802276, "effect": 0, "equals": 40}
+  ]
+}

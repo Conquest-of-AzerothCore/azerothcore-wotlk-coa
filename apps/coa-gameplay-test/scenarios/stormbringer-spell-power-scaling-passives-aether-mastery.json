@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Aether Mastery applies its interrupted mana regeneration and crit chance natively (#3674)",
+  "contract": "Aether Mastery rank 1 (807462) has two effects: effect0 aura 134 SPELL_AURA_MOD_MANA_REGEN_INTERRUPT, EffectBasePoints 29 + DieSides 1 = 30; effect1 aura 290 SPELL_AURA_MOD_CRIT_PCT, EffectBasePoints 1 + DieSides 1 = +2, unconditional. Rank 2 (807887) carries the same two auras with EffectBasePoints 59 + DieSides 1 = 60 and EffectBasePoints 3 + DieSides 1 = +4. AuraEffect::HandleAuraModRegenInterrupt -> Player::UpdateManaRegen (StatSystem.cpp:1091-1093) clamps GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT) at 100 and writes power_regen_mp5 + CalculatePct(power_regen, modManaRegenInterrupt) into UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER, exactly the 'X% of your mana regeneration continues while casting' mechanic named in the tooltip - the same aura type and precedent as Chronomancer's Luck (chronomancer-luck-mana-regen-interrupt.json, #2963). COVERAGE LIMIT (identical to that precedent): the harness exposes power only as net state, which also moves with absorbs, procs and other effects, so a power-delta observation would not discriminate; this scenario proves the DATA half only - that each rank's regen-interrupt aura applies and resolves to the DBC's own 30/60 value via aura_amount. A decisive assertion needs a power_regen_interrupted metric added to CoAGameplayTest.cpp (not added here; not requested by #3674). The aura 290 crit-chance half of each rank IS decisively provable: AuraEffect::HandleAuraModCritPct (SpellAuraEffects.cpp:4892-4909) calls Player::UpdateAllSpellCritChances synchronously on apply, which spell_crit_chance reads back directly. No module code exists for either rank; both close as a regression scenario only.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "sb", "race": 8, "class": 16, "level": 80 }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "assert", "label": "No Aether Mastery aura before the passive is learned",
+      "actor": "sb", "metric": "aura", "spell": 807462, "equals": 0 },
+    { "action": "snapshot", "label": "BASELINE: spell crit chance before either rank",
+      "actor": "sb", "metric": "spell_crit_chance", "save_as": "crit0" },
+    { "action": "learn", "label": "Learn Aether Mastery rank 1", "actor": "sb", "spell": 807462 },
+    { "action": "assert", "label": "Learning rank 1 applies its aura",
+      "actor": "sb", "metric": "aura", "spell": 807462, "equals": 1 },
+    { "action": "assert", "label": "Rank 1's regen-interrupt effect resolves to 30 (data only, see contract)",
+      "actor": "sb", "metric": "aura_amount", "spell": 807462, "effect": 0, "equals": 30 },
+    { "action": "assert", "label": "DISCRIMINATING: rank 1 adds 2 crit chance",
+      "actor": "sb", "metric": "spell_crit_chance", "relative_to": "crit0", "min": 1.9, "max": 2.1 },
+    { "action": "learn", "label": "Learn Aether Mastery rank 2", "actor": "sb", "spell": 807887 },
+    { "action": "assert", "label": "Learning rank 2 applies its aura",
+      "actor": "sb", "metric": "aura", "spell": 807887, "equals": 1 },
+    { "action": "assert", "label": "Rank 2's regen-interrupt effect resolves to 60 (data only, see contract)",
+      "actor": "sb", "metric": "aura_amount", "spell": 807887, "effect": 0, "equals": 60 },
+    { "action": "assert", "label": "DISCRIMINATING: both ranks now add 6 crit chance total (2 + 4)",
+      "actor": "sb", "metric": "spell_crit_chance", "relative_to": "crit0", "min": 5.9, "max": 6.1 }
+  ]
+}

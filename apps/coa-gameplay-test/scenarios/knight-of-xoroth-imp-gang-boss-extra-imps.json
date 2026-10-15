@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Imp Gang Boss adds 2 extra imps to Call: Hellfire Imp via native value forwarding (#3093)",
+  "contract": "Imp Gang Boss 706754 reads 'Your Call: Hellfire Imp now summons $s1 additional imps.' Effect 0 is native aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER), EffectMiscValue 3 -> SpellModOp::SPELLMOD_EFFECT1 (src/server/game/Spells/SpellDefines.h:79), EffectBasePoints 1 with DieSides 1 -> 2, EffectSpellClassMask [32,0,0] (all verified directly in the installed Spell.dbc). SPELLMOD_EFFECT1 modifies effect index 0 of the affected spell (Unit::ApplyEffectModifiers, src/server/game/Entities/Unit/Unit.cpp:12150-12159, case 0). The affected spell is Call: Hellfire Imp 804883, whose own SpellFamilyFlags are {32,4096,0} (verified directly in the installed Spell.dbc), intersecting Imp Gang Boss's classMask on dword0 bit 5. 804883's effect 0 is native effect type 142 (a launch/launch-target trigger-with-value dispatch per .agents/docs/systems/ascension-spell-parity.md's 'Effect 142 already dispatches native trigger-with-value' lesson), EffectBasePoints 0 with DieSides 1 -> 1, trigger_spell 805966, description 'Beckon 1 Hellfire Imp'; SpellEffectInfo::CalcValue (src/server/game/Spells/SpellInfo.cpp:520) calls caster->ApplyEffectModifiers for every effect resolution, so the SPELLMOD_EFFECT1 bonus is folded into the forwarded value automatically on every read, not merely available. modules/mod-ascension-compat/docs/knight-of-xoroth-completion.md:105-106 states 'Implosion summons one plus reserved Demonfire; native forwarded values retain Imp Gang Boss's extra Call imps' -- confirming this class's own completion package already relies on this native forwarding path rather than a dedicated script. spell_effect_value reads SpellEffectInfo::CalcValue(caster) directly, exercising the exact same forwarding path the real cast uses.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: Call: Hellfire Imp's forwarded value is the base 1 before Imp Gang Boss",
+      "actor": "knight", "metric": "spell_effect_value", "spell": 804883, "effect": 0, "equals": 1
+    },
+    { "action": "learn", "actor": "knight", "spell": 706754 },
+    { "action": "set_aura", "actor": "knight", "spell": 706754, "stacks": 1, "label": "Force the Imp Gang Boss passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Imp Gang Boss passive is active",
+      "actor": "knight", "metric": "aura", "spell": 706754, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Call: Hellfire Imp's forwarded value rises to 3 (base 1 plus 2 extra imps)",
+      "actor": "knight", "metric": "spell_effect_value", "spell": 804883, "effect": 0, "equals": 3
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the raw SPELLMOD_EFFECT1 modifier is +2",
+      "actor": "knight", "metric": "spell_modifier", "spell": 804883, "op": 3, "base": 0, "equals": 2
+    }
+  ]
+}

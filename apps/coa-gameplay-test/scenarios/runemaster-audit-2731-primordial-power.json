@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Runemaster audit #2731: Primordial Power extends Frigid Fusion and boosts spell crit damage",
+  "contract": [
+    "Primordial Power rank1 705556: 'Increases the duration of Frigid Fusion by 2 sec.' Rank2 705557: 'Increases",
+    "spell critical strike damage by 100%.' Re-verified in Spell.dbc: rank1 Effect0 is SPELL_AURA_ADD_FLAT_MODIFIER",
+    "(107), MiscValue 1 = SPELLMOD_DURATION, EffectBasePoints0 1999 with DieSides 1 = +2000ms,",
+    "EffectSpellClassMask mask1(effect0) 1 on family 38. Frigid Fusion 803225 carries SpellFamilyName 38,",
+    "SpellFamilyFlags[1] 1 - an exact match. Rank2 Effect0 is SPELL_AURA_MOD_CRIT_DAMAGE_BONUS (163), MiscValue",
+    "126 (all magic schools, excludes physical), EffectBasePoints0 99 with DieSides 1 = +100%. Both are generic",
+    "engine paths (the spellmod system; Unit.cpp:10181's native consumption of SPELL_AURA_MOD_CRIT_DAMAGE_BONUS",
+    "via GetTotalAuraModifierByMiscMask); no occurrence of 705556/705557 exists in src/server/coa/. Expected:",
+    "rank1 adds exactly 2000ms to Frigid Fusion's duration modifier; rank2 raises the caster's spell critical",
+    "damage bonus against a target: Unit::SpellCriticalDamageBonus on a magic-class (DmgClass 1) 1000 base",
+    "normally returns 1500 (damage + damage/2); rank2's +100% SPELL_AURA_MOD_CRIT_DAMAGE_BONUS doubles that",
+    "bonus, so the function returns 3000 - a 2x ratio over the unmodified baseline."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [{"id": "rm", "race": 1, "class": 32, "level": 80}],
+  "creatures": [{"id": "dummy", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 3}],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "snapshot", "label": "Base Frigid Fusion duration modifier", "actor": "rm",
+      "metric": "spell_modifier", "spell": 803225, "op": 1, "base": 0, "save_as": "base_dur"},
+    {"action": "learn", "actor": "rm", "spell": 705556},
+    {"action": "assert", "label": "CONTRACT: rank 1 is active", "actor": "rm", "metric": "aura",
+      "spell": 705556, "equals": 1, "within_ms": 1500},
+    {"action": "assert", "label": "CONTRACT: rank 1 adds 2000ms to Frigid Fusion duration", "actor": "rm",
+      "metric": "spell_modifier", "spell": 803225, "op": 1, "base": 0, "relative_to": "base_dur", "equals": 2000},
+    {"action": "snapshot", "label": "Baseline magic-class crit damage bonus (1000 + 1000/2 = 1500)", "actor": "rm",
+      "metric": "spell_critical_damage", "spell": 800732, "target": "dummy", "save_as": "crit_base"},
+    {"action": "assert", "label": "SETUP: baseline crit damage bonus is exactly 1500 (no bonus applied yet)",
+      "actor": "rm", "metric": "spell_critical_damage", "spell": 800732, "target": "dummy", "equals": 1500},
+    {"action": "learn", "actor": "rm", "spell": 705557},
+    {"action": "assert", "label": "CONTRACT: rank 2 is active", "actor": "rm", "metric": "aura",
+      "spell": 705557, "equals": 1, "within_ms": 1500},
+    {"action": "assert", "label": "CONTRACT: +100% doubles the crit damage bonus to 3000", "actor": "rm",
+      "metric": "spell_critical_damage", "spell": 800732, "target": "dummy", "ratio_to": "crit_base",
+      "min": 1.99, "max": 2.01}
+  ]
+}

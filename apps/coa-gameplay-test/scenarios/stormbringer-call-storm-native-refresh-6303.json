@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "name": "Call of the Storm rank two refreshes its owner in a party (#6303)",
+  "contract": "578312 is the reported level14 rank with authored30minute duration. A normal self cast after ten real game seconds must restore the full duration while grouped, and an explicit ally cast must still work.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 16,
+      "level": 18,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 18,
+      "level": 18,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "p",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 578312
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 10040,
+      "stacks": 3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "max_power",
+      "power": 0,
+      "min": 20000,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 578312,
+      "target": "p"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura_duration_ms",
+      "spell": 578312,
+      "min": 1798000,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura_duration_ms",
+      "spell": 578312,
+      "max": 1791000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 578312,
+      "target": "p"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 578312,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura_duration_ms",
+      "spell": 578312,
+      "min": 1798000,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 578312,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 578312,
+      "caster": "p",
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

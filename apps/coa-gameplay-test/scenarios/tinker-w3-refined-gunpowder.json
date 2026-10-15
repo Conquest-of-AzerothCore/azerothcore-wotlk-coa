@@ -1,0 +1,180 @@
+{
+  "schema": 1,
+  "name": "Tinker: Refined Gunpowder hastes the Tinker and hits Mechanical targets harder",
+  "contract": "#995: Refined Gunpowder (705781 rank 1, 705782 rank 2) carries three stock auras with live handlers and needs no script: SPELL_AURA_MOD_DAMAGE_DONE_VERSUS with MiscValue 256 (the Mechanical creature-type mask), SPELL_AURA_MOD_MELEE_RANGED_HASTE and SPELL_AURA_HASTE_SPELLS, all at 3 for rank 1 and 6 for rank 2. The main-hand swing time and the cast-time multiplier must each fall by that percentage, and outgoing melee damage must rise by it against a Mechanical target (entry 36, creature_template.type 9) while a Beast control target (entry 299, type 1) stays untouched.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "mech",
+      "owner": "t",
+      "entry": 36,
+      "level": 80,
+      "distance": 4
+    },
+    {
+      "id": "beast",
+      "owner": "t",
+      "entry": 299,
+      "level": 80,
+      "distance": 8
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Main-hand swing time without the talent",
+      "actor": "t",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "save_as": "atk0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Cast-time multiplier without the talent",
+      "actor": "t",
+      "metric": "cast_speed_multiplier",
+      "save_as": "cast0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Melee damage against the Mechanical target without the talent",
+      "actor": "t",
+      "metric": "melee_damage_done",
+      "target": "mech",
+      "save_as": "mech0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Melee damage against the Beast control target without the talent",
+      "actor": "t",
+      "metric": "melee_damage_done",
+      "target": "beast",
+      "save_as": "beast0"
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 705781
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 makes the main-hand swing 3% faster",
+      "actor": "t",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "ratio_to": "atk0",
+      "min": 0.968,
+      "max": 0.973,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 makes casts 3% faster",
+      "actor": "t",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "cast0",
+      "min": 0.968,
+      "max": 0.973
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises damage against Mechanical targets by 3%",
+      "actor": "t",
+      "metric": "melee_damage_done",
+      "target": "mech",
+      "ratio_to": "mech0",
+      "min": 1.028,
+      "max": 1.032
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 leaves damage against the Beast control target alone",
+      "actor": "t",
+      "metric": "melee_damage_done",
+      "target": "beast",
+      "ratio_to": "beast0",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "t",
+      "spell": 705781
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning rank 1 restores the swing time",
+      "actor": "t",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "ratio_to": "atk0",
+      "min": 0.999,
+      "max": 1.001,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 705782
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 makes the main-hand swing 6% faster",
+      "actor": "t",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "ratio_to": "atk0",
+      "min": 0.941,
+      "max": 0.946,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 makes casts 6% faster",
+      "actor": "t",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "cast0",
+      "min": 0.941,
+      "max": 0.946
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises damage against Mechanical targets by 6%",
+      "actor": "t",
+      "metric": "melee_damage_done",
+      "target": "mech",
+      "ratio_to": "mech0",
+      "min": 1.058,
+      "max": 1.062
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 leaves damage against the Beast control target alone",
+      "actor": "t",
+      "metric": "melee_damage_done",
+      "target": "beast",
+      "ratio_to": "beast0",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

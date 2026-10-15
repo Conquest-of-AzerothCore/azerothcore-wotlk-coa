@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Trickster shortens Smoke Grenade by 30 s and lengthens the cloud by 1 s (#2715)",
+  "contract": "Trickster 705526 reads 'Reduces the cooldown of Smoke Grenade by $/1000;s1 sec and increases its duration by $/1000;s2 sec.' In the installed Spell.dbc it is passive, family 21, effect 0 = SPELL_AURA_ADD_FLAT_MODIFIER misc 11 = SPELLMOD_COOLDOWN BasePoints -30001 (-30000 ms) and effect 1 the same aura with misc 1 = SPELLMOD_DURATION BasePoints 999 (+1000 ms), both with class mask word 2 = 0x01000000, which is Smoke Grenade 805756's flag word. Smoke Grenade has a 120000 ms cooldown and SpellDuration index 31 = 8000 ms, and its effects are persistent area auras (effect 27). The cooldown goes through Player::AddSpellAndCategoryCooldowns (Player.cpp:11451-11456), the cloud's aura duration through Aura::CalcMaxDuration (SpellAuras.cpp:812) for the aura Spell::EffectPersistentAA creates with the player as caster (SpellEffects.cpp:2166), and DynamicObject::GetDuration reads that aura. So the cooldown is 90000 ms and the cloud 9000 ms. The scenario reads the probes, then throws a real grenade and checks that the cloud lasts longer than the 8000 ms base could ever read and that the cooldown started at 90 s. The helper buff 805757 is not part of the tooltip and is not asserted.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 80}
+  ],
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "steps": [
+    {"action": "wait", "label": "Let level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Smoke Grenade", "actor": "hunter", "spell": 805756},
+    {"action": "assert", "label": "Smoke Grenade cooldown is 120000 ms without the talent", "actor": "hunter", "metric": "spell_modifier", "spell": 805756, "op": 11, "base": 120000, "equals": 120000},
+    {"action": "assert", "label": "Smoke Grenade duration is 8000 ms without the talent (SpellDuration 31)", "actor": "hunter", "metric": "spell_modifier", "spell": 805756, "op": 1, "base": 8000, "equals": 8000},
+    {"action": "learn", "label": "Trickster", "actor": "hunter", "spell": 705526},
+    {"action": "assert", "label": "The passive is active", "actor": "hunter", "metric": "aura", "spell": 705526, "equals": 1},
+    {"action": "assert", "label": "Cooldown is 90000 ms", "actor": "hunter", "metric": "spell_modifier", "spell": 805756, "op": 11, "base": 120000, "equals": 90000},
+    {"action": "assert", "label": "Duration is 9000 ms", "actor": "hunter", "metric": "spell_modifier", "spell": 805756, "op": 1, "base": 8000, "equals": 9000},
+    {"action": "cast", "label": "Throw a real Smoke Grenade at the caster's feet", "actor": "hunter", "spell": 805756, "destination": {"x": -8915.41, "y": -115.853, "z": 82.3711}},
+    {"action": "assert", "label": "The smoke cloud exists", "actor": "hunter", "metric": "dynamic_object", "spell": 805756, "equals": 1, "within_ms": 6000},
+    {"action": "assert", "label": "The cloud outlasts the 8000 ms base and cannot exceed 9000 ms", "actor": "hunter", "metric": "dynamic_object_duration_ms", "spell": 805756, "min": 8010, "max": 9000},
+    {"action": "assert", "label": "The live cooldown started at 90 s", "actor": "hunter", "metric": "cooldown_ms", "spell": 805756, "min": 88000, "max": 90000},
+    {"action": "unlearn", "label": "Drop Trickster", "actor": "hunter", "spell": 705526},
+    {"action": "assert", "label": "Cooldown probe returns to 120000 ms", "actor": "hunter", "metric": "spell_modifier", "spell": 805756, "op": 11, "base": 120000, "equals": 120000}
+  ]
+}

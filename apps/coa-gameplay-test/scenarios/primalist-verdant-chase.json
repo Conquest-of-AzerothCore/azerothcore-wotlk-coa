@@ -1,0 +1,1482 @@
+{
+  "schema": 1,
+  "name": "Primalist Verdant Chase remaining cooldown recovery",
+  "contract": "The native 2.5-second pulse subtracts 5% of each remaining Spirit Charge/Primal Rush cooldown. Real first/highest casts start both cooldowns; two measurement windows distinguish remaining cooldown from full duration. Baseline and removal recover only elapsed time. Each Spirit Charge (16% base Mana) and Primal Rush (10% base Mana) pair costs about 915 Mana at level 80 (base Mana about 3,520), so the sixth pair ran out of Mana; Mana is restored before every pair so a failed cast cannot hide the cooldown behavior.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 240000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 58
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 560305,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 800144,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504570,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502811,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502810,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502809,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800144
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502724,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502723,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500771,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500770,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500769,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500768,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500696,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9607.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 800144
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000,
+      "label": "Restore Mana spent by the earlier Spirit Charge and Primal Rush casts"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800144,
+      "target": "ally",
+      "save_as": "baseline_first_heal_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800144,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800144,
+      "target": "ally",
+      "relative_to": "baseline_first_heal_before",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_count",
+      "spell": 500696,
+      "power": 1,
+      "save_as": "baseline_first_rush_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_count",
+      "spell": 500696,
+      "power": 1,
+      "relative_to": "baseline_first_rush_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800144,
+      "save_as": "baseline_first_charge_start"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500696,
+      "save_as": "baseline_first_rush_start"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800144,
+      "save_as": "baseline_first_charge_middle"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500696,
+      "save_as": "baseline_first_rush_middle"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800144,
+      "save_as": "baseline_first_charge_end"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500696,
+      "save_as": "baseline_first_rush_end"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 560305,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 800144,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504570,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502811,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502810,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502809,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 504570
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502724,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502723,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500771,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500770,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500769,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500768,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500696,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9607.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 504570
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000,
+      "label": "Restore Mana spent by the earlier Spirit Charge and Primal Rush casts"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 504570,
+      "target": "ally",
+      "save_as": "baseline_highest_heal_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 504570,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 504570,
+      "target": "ally",
+      "relative_to": "baseline_highest_heal_before",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_count",
+      "spell": 502724,
+      "power": 1,
+      "save_as": "baseline_highest_rush_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_count",
+      "spell": 502724,
+      "power": 1,
+      "relative_to": "baseline_highest_rush_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 504570,
+      "save_as": "baseline_highest_charge_start"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "save_as": "baseline_highest_rush_start"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 504570,
+      "save_as": "baseline_highest_charge_middle"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "save_as": "baseline_highest_rush_middle"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 504570,
+      "save_as": "baseline_highest_charge_end"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "save_as": "baseline_highest_rush_end"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 560305,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 800144,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504570,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502811,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502810,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502809,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800144
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502724,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502723,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500771,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500770,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500769,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500768,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500696,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9607.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 800144
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000,
+      "label": "Restore Mana spent by the earlier Spirit Charge and Primal Rush casts"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800144,
+      "target": "ally",
+      "save_as": "talented_first_heal_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800144,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800144,
+      "target": "ally",
+      "relative_to": "talented_first_heal_before",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_count",
+      "spell": 500696,
+      "power": 1,
+      "save_as": "talented_first_rush_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_count",
+      "spell": 500696,
+      "power": 1,
+      "relative_to": "talented_first_rush_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 560305
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amplitude_ms",
+      "spell": 560305,
+      "effect": 0,
+      "equals": 2500
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800144,
+      "save_as": "talented_first_charge_start"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500696,
+      "save_as": "talented_first_rush_start"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800144,
+      "save_as": "talented_first_charge_middle"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500696,
+      "save_as": "talented_first_rush_middle"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800144,
+      "save_as": "talented_first_charge_end"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500696,
+      "save_as": "talented_first_rush_end"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 560305,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 800144,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504570,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502811,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502810,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502809,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 504570
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502724,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502723,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500771,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500770,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500769,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500768,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500696,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9607.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 504570
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000,
+      "label": "Restore Mana spent by the earlier Spirit Charge and Primal Rush casts"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 504570,
+      "target": "ally",
+      "save_as": "talented_highest_heal_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 504570,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 504570,
+      "target": "ally",
+      "relative_to": "talented_highest_heal_before",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_count",
+      "spell": 502724,
+      "power": 1,
+      "save_as": "talented_highest_rush_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_count",
+      "spell": 502724,
+      "power": 1,
+      "relative_to": "talented_highest_rush_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 560305
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amplitude_ms",
+      "spell": 560305,
+      "effect": 0,
+      "equals": 2500
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 504570,
+      "save_as": "talented_highest_charge_start"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "save_as": "talented_highest_rush_start"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 504570,
+      "save_as": "talented_highest_charge_middle"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "save_as": "talented_highest_rush_middle"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 504570,
+      "save_as": "talented_highest_charge_end"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "save_as": "talented_highest_rush_end"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 560305,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 800144,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504570,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502811,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502810,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502809,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800144
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502724,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502723,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500771,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500770,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500769,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500768,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500696,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9607.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 800144
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000,
+      "label": "Restore Mana spent by the earlier Spirit Charge and Primal Rush casts"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800144,
+      "target": "ally",
+      "save_as": "removed_first_heal_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800144,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800144,
+      "target": "ally",
+      "relative_to": "removed_first_heal_before",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_count",
+      "spell": 500696,
+      "power": 1,
+      "save_as": "removed_first_rush_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_count",
+      "spell": 500696,
+      "power": 1,
+      "relative_to": "removed_first_rush_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800144,
+      "save_as": "removed_first_charge_start"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500696,
+      "save_as": "removed_first_rush_start"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800144,
+      "save_as": "removed_first_charge_middle"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500696,
+      "save_as": "removed_first_rush_middle"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800144,
+      "save_as": "removed_first_charge_end"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500696,
+      "save_as": "removed_first_rush_end"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 560305,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 800144,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504570,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502811,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502810,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502809,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 504570
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502724,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502723,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500771,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500770,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500769,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500768,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500696,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9607.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 504570
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000,
+      "label": "Restore Mana spent by the earlier Spirit Charge and Primal Rush casts"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 504570,
+      "target": "ally",
+      "save_as": "removed_highest_heal_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 504570,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 504570,
+      "target": "ally",
+      "relative_to": "removed_highest_heal_before",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_count",
+      "spell": 502724,
+      "power": 1,
+      "save_as": "removed_highest_rush_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_count",
+      "spell": 502724,
+      "power": 1,
+      "relative_to": "removed_highest_rush_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 504570,
+      "save_as": "removed_highest_charge_start"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "save_as": "removed_highest_rush_start"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 504570,
+      "save_as": "removed_highest_charge_middle"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "save_as": "removed_highest_rush_middle"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 504570,
+      "save_as": "removed_highest_charge_end"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "save_as": "removed_highest_rush_end"
+    }
+  ]
+}

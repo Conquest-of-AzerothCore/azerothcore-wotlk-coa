@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "name": "Gleaming Light raises Illumination and Daybreak healing by 20% (#2312)",
+  "contract": "Gleaming Light 704568 (SpellFamilyName 33) has one live effect: SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue 0 (SPELLMOD_DAMAGE) and EffectBasePoints 19 -> real 20, and EffectSpellClassMask word 2 bits 0x200|0x20000000 (536871424). Illumination's base spell (500143) carries SpellFamilyFlags_2 0x200 (512) and Daybreak (500147) carries SpellFamilyFlags_2 0x20000000 (536870912) -- together exactly the shipped mask, so both named spells are affected. Unit::SpellHealingBonusDone calls modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, heal) for heals the same way damage does, a PCT-type op that multiplies the base by (100 + mod)/100 -- 1000 -> 1200 for each. The 'spell_modifier' query metric calls this same native Player::ApplySpellMod(spell, SPELLMOD_DAMAGE, base) path directly, without casting or needing a target. Native handlers only; regression scenario for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 27, "level": 80 },
+    { "id": "talent", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talent", "spell": 704568 },
+    {
+      "action": "assert",
+      "label": "Without the talent Illumination's modifier base is unchanged",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 500143,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Gleaming Light raises Illumination's healing by 20%",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 500143,
+      "op": 0,
+      "base": 1000,
+      "equals": 1200
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent Daybreak's modifier base is unchanged",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 500147,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Gleaming Light raises Daybreak's healing by 20%",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 500147,
+      "op": 0,
+      "base": 1000,
+      "equals": 1200
+    }
+  ]
+}

@@ -1,0 +1,182 @@
+{
+  "schema": 1,
+  "name": "Runemaster Prismatic Flow gives 40% movement speed for 2 sec when casting Phase Out (#593)",
+  "contract": [
+    "Prismatic Flow 705581 (Class talent, passive): 'Casting Phase Out now increases your movement speed by",
+    "$705582s1% for the first $705582d of its duration.' Effect 0 is aura 42 SPELL_AURA_PROC_TRIGGER_SPELL",
+    "naming",
+    "705582, whose effect 0 is SPELL_AURA_MOD_INCREASE_SPEED BasePoints 39 + DieSides 1 = 40% on the caster",
+    "for",
+    "SpellDuration 39 = 2000 ms. Spell.dbc gives 705581 ProcFlags 0, so SpellMgr generated no proc entry and",
+    "the",
+    "talent never fired. Phase Out 500671 is the only family 38 spell with mask0 0x40. Expected: casting",
+    "Phase Out",
+    "with the talent applies 705582, running speed becomes 1.4 times its baseline and returns after 2 sec;",
+    "the same",
+    "cast without the talent changes neither."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 80
+    },
+    {
+      "id": "plain",
+      "race": 1,
+      "class": 32,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the characters settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 500671
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 500671
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 705581
+    },
+    {
+      "action": "assert",
+      "label": "Prismatic Flow is active",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 705581,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "run_speed_rate",
+      "save_as": "rm_speed"
+    },
+    {
+      "action": "snapshot",
+      "actor": "plain",
+      "metric": "run_speed_rate",
+      "save_as": "plain_speed"
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 500671
+    },
+    {
+      "action": "cast",
+      "actor": "plain",
+      "spell": 500671
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Phase Out is cast",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 500671,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Phase Out is cast without the talent",
+      "actor": "plain",
+      "metric": "spell_cast_count",
+      "spell": 500671,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Casting Phase Out applies Prismatic Flow",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 705582,
+      "caster": "rm",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Prismatic Flow lasts 2 sec",
+      "actor": "rm",
+      "metric": "aura_duration_ms",
+      "spell": 705582,
+      "min": 1000,
+      "max": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "run_speed_rate",
+      "ratio_to": "plain_speed",
+      "min": 0.69,
+      "max": 0.71,
+      "label": "Phase Out applies the authored 30 percent Runeshroud slow"
+    },
+    {
+      "action": "snapshot",
+      "actor": "plain",
+      "metric": "run_speed_rate",
+      "save_as": "plain_phase_speed"
+    },
+    {
+      "action": "assert",
+      "label": "Prismatic Flow is 40 percent faster than the same Phase Out without the talent",
+      "actor": "rm",
+      "metric": "run_speed_rate",
+      "ratio_to": "plain_phase_speed",
+      "min": 1.39,
+      "max": 1.41
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent Phase Out gives no speed buff",
+      "actor": "plain",
+      "metric": "aura",
+      "spell": 705582,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The untalented Phase Out control keeps its Runeshroud speed",
+      "actor": "plain",
+      "metric": "run_speed_rate",
+      "ratio_to": "plain_phase_speed",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "assert",
+      "label": "The speed buff expires after its 2 sec",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 705582,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "After Prismatic Flow expires both actors have the same Runeshroud speed",
+      "actor": "rm",
+      "metric": "run_speed_rate",
+      "ratio_to": "plain_phase_speed",
+      "min": 0.99,
+      "max": 1.01
+    }
+  ]
+}

@@ -1,0 +1,477 @@
+{
+  "schema": 1,
+  "name": "Primalist Shattering positive hammer damage stacks",
+  "contract": "Actual native three-hammer sequences add three crit/damage stacks, cap at ten and expire after ten seconds. Check real melee/spell crit and weapon damage, baseline and talent removal.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 240000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 196
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520469,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 680405,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 520468
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 520467
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 82888,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_crit_chance",
+      "save_as": "base_melee_crit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_crit_chance",
+      "save_as": "base_spell_crit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "weapon_damage_min",
+      "save_as": "base_weapon"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "baseline_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520467,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "baseline_before",
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 520729,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_crit_chance",
+      "relative_to": "base_melee_crit",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_crit_chance",
+      "relative_to": "base_spell_crit",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "weapon_damage_min",
+      "ratio_to": "base_weapon",
+      "min": 0.998,
+      "max": 1.002
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 520469
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "first_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520467,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "first_before",
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 520729,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_crit_chance",
+      "relative_to": "base_melee_crit",
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_crit_chance",
+      "relative_to": "base_spell_crit",
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "weapon_damage_min",
+      "ratio_to": "base_weapon",
+      "min": 1.028,
+      "max": 1.032
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "cap2_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520467,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "cap2_before",
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 520729,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_crit_chance",
+      "relative_to": "base_melee_crit",
+      "min": 5.999,
+      "max": 6.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_crit_chance",
+      "relative_to": "base_spell_crit",
+      "min": 5.999,
+      "max": 6.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "weapon_damage_min",
+      "ratio_to": "base_weapon",
+      "min": 1.058,
+      "max": 1.062
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "cap3_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520467,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "cap3_before",
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 520729,
+      "equals": 9
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_crit_chance",
+      "relative_to": "base_melee_crit",
+      "min": 8.999,
+      "max": 9.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_crit_chance",
+      "relative_to": "base_spell_crit",
+      "min": 8.999,
+      "max": 9.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "weapon_damage_min",
+      "ratio_to": "base_weapon",
+      "min": 1.088,
+      "max": 1.092
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "cap4_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520467,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "cap4_before",
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 520729,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_crit_chance",
+      "relative_to": "base_melee_crit",
+      "min": 9.999,
+      "max": 10.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_crit_chance",
+      "relative_to": "base_spell_crit",
+      "min": 9.999,
+      "max": 10.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "weapon_damage_min",
+      "ratio_to": "base_weapon",
+      "min": 1.098,
+      "max": 1.102
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520729,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520469,
+      "all_specs": true
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "removed_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520467,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "removed_before",
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 520729,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_crit_chance",
+      "relative_to": "base_melee_crit",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_crit_chance",
+      "relative_to": "base_spell_crit",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "weapon_damage_min",
+      "ratio_to": "base_weapon",
+      "min": 0.998,
+      "max": 1.002
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    }
+  ]
+}

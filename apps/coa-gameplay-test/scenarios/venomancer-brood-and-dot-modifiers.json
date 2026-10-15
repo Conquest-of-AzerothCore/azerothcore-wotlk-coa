@@ -1,0 +1,361 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Venomous Bite and Protraction work natively (#1289, #1306)",
+  "contract": "#1289, #1306: both are Spell.dbc spell modifiers. Venomous Bite (630900) is a flat SPELLMOD_MAX_AURA_STACKS (aura 107, misc 31, bp 1 so +2) on mask (0,1,0), which selects Brood Mark (804972, StackAmount 5), so its cap must go 5 to 7; the harness set_aura fixture enforces that same limit, so a 7-stack fixture only succeeds with the passive. Protraction (706942 rank 1, 707871 rank 2) effect 1 is a flat SPELLMOD_DURATION (aura 107, misc 1, bp 2999/5999 so +3000/+6000 ms) on mask (0x2042,0x8,0x10180), which selects Wilt, Spore, Miasma, Facemelter and Blight Venom; it is asserted through the native spell-modifier query on a 10000 ms base, with Antivenom Dispel (mask outside) as the control. Protraction's tooltip says periodic damage effects, yet its mask also reaches Debilitating Venom's slow (805895) and Hivebreak (no duration); that overreach is not asserted.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Brood Mark stacks to 5 without Venomous Bite (Spell.dbc StackAmount)",
+      "actor": "v",
+      "metric": "spell_max_stacks",
+      "spell": 804972,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: no stack-limit modifier on Brood Mark",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 804972,
+      "op": 31,
+      "base": 5,
+      "equals": 5
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 630900
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Venomous Bite raises the Brood Mark stack modifier by 2",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 804972,
+      "op": 31,
+      "base": 5,
+      "equals": 7
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Brood Mark now stacks to 7",
+      "actor": "v",
+      "metric": "spell_max_stacks",
+      "spell": 804972,
+      "equals": 7
+    },
+    {
+      "action": "set_aura",
+      "label": "The harness accepts 7 stacks only because the limit is now 7",
+      "actor": "v",
+      "spell": 804972,
+      "stacks": 7
+    },
+    {
+      "action": "assert",
+      "label": "Brood Mark holds 7 stacks",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "spell": 804972,
+      "equals": 7,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "v",
+      "spell": 804972,
+      "stacks": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "v",
+      "spell": 630900
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning Venomous Bite returns the Brood Mark cap to 5",
+      "actor": "v",
+      "metric": "spell_max_stacks",
+      "spell": 804972,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Blight Venom Damage duration modifier is 0 without Protraction",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 805896,
+      "op": 1,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Facemelter rank 1 duration modifier is 0 without Protraction",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 800871,
+      "op": 1,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Facemelter rank 9 duration modifier is 0 without Protraction",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 572903,
+      "op": 1,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Wilt rank 1 duration modifier is 0 without Protraction",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 804982,
+      "op": 1,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Spore rank 1 duration modifier is 0 without Protraction",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 804983,
+      "op": 1,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Miasma duration modifier is 0 without Protraction",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 570208,
+      "op": 1,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE control: Antivenom Dispel (mask outside Protraction's)",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803680,
+      "op": 1,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 706942
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: Blight Venom Damage lasts 3000 ms longer",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 805896,
+      "op": 1,
+      "base": 10000,
+      "equals": 13000,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: Facemelter rank 1 lasts 3000 ms longer",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 800871,
+      "op": 1,
+      "base": 10000,
+      "equals": 13000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: Facemelter rank 9 lasts 3000 ms longer",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 572903,
+      "op": 1,
+      "base": 10000,
+      "equals": 13000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: Wilt rank 1 lasts 3000 ms longer",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 804982,
+      "op": 1,
+      "base": 10000,
+      "equals": 13000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: Spore rank 1 lasts 3000 ms longer",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 804983,
+      "op": 1,
+      "base": 10000,
+      "equals": 13000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: Miasma lasts 3000 ms longer",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 570208,
+      "op": 1,
+      "base": 10000,
+      "equals": 13000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: an unrelated Venomancer spell is not lengthened",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803680,
+      "op": 1,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: the modifier effect carries 3000",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 706942,
+      "effect": 1,
+      "equals": 3000
+    },
+    {
+      "action": "unlearn",
+      "actor": "v",
+      "spell": 706942
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning rank 1 restores Blight Venom's duration",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 805896,
+      "op": 1,
+      "base": 10000,
+      "equals": 10000,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 707871
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: Blight Venom Damage lasts 6000 ms longer",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 805896,
+      "op": 1,
+      "base": 10000,
+      "equals": 16000,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: Facemelter rank 1 lasts 6000 ms longer",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 800871,
+      "op": 1,
+      "base": 10000,
+      "equals": 16000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: Facemelter rank 9 lasts 6000 ms longer",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 572903,
+      "op": 1,
+      "base": 10000,
+      "equals": 16000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: Wilt rank 1 lasts 6000 ms longer",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 804982,
+      "op": 1,
+      "base": 10000,
+      "equals": 16000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: Spore rank 1 lasts 6000 ms longer",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 804983,
+      "op": 1,
+      "base": 10000,
+      "equals": 16000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: Miasma lasts 6000 ms longer",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 570208,
+      "op": 1,
+      "base": 10000,
+      "equals": 16000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: an unrelated Venomancer spell is not lengthened",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803680,
+      "op": 1,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: the modifier effect carries 6000",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 707871,
+      "effect": 1,
+      "equals": 6000
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Render converts 30% of Strength into melee haste rating natively (#985)",
+  "contract": [
+    "Render 704951 (Knight of Xoroth War level-40 passive, CharacterAdvancement 9262; granted by the War specialization tree, see knight-spec-tree-free-nodes) reads 'Level 40 Passive. Increases your melee haste rating by $s1% of your Strength.' in the live client Spell.dbc.",
+    "Spell.dbc: one SPELL_EFFECT_APPLY_AURA effect, aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, BasePoints 29 DieSides 1 (30), EffectMiscValue 131072 = 1 << CR_HASTE_MELEE (17), EffectMiscValueB 0 = STAT_STRENGTH, target caster. EquippedItemClass is -1, so its EquippedItemSubClassMask 1378 imposes no weapon requirement.",
+    "Player::UpdateRating adds CalculatePct(GetStat(MiscValueB), amount) for every aura 220 whose MiscValue has the rating's bit and applies the melee haste rating through ApplyRatingHaste; Player::UpdateStats refreshes those ratings when Strength changes. The mechanic is native, so no per-spell script is needed.",
+    "Expected: learning Render raises only melee haste rating (not ranged or spell haste rating) by 30% of Strength, shortens the melee attack time, follows a Strength change, and unlearning restores the baseline."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 5000 },
+    { "action": "assert", "label": "SETUP no specialization granted Render already", "actor": "knight", "metric": "knows_spell", "spell": 704951, "equals": 0 },
+    { "action": "snapshot", "actor": "knight", "metric": "stat", "stat": 0, "save_as": "strength0" },
+    { "action": "assert", "label": "SETUP Strength is large enough for a 1-point rating rounding tolerance", "actor": "knight", "metric": "stat", "stat": 0, "min": 100 },
+    { "action": "snapshot", "actor": "knight", "metric": "combat_rating", "rating": 17, "save_as": "melee_haste0" },
+    { "action": "snapshot", "actor": "knight", "metric": "combat_rating", "rating": 18, "save_as": "ranged_haste0" },
+    { "action": "snapshot", "actor": "knight", "metric": "combat_rating", "rating": 19, "save_as": "spell_haste0" },
+    { "action": "snapshot", "actor": "knight", "metric": "attack_time_ms", "hand": 0, "save_as": "attack_time0" },
+
+    { "action": "learn", "actor": "knight", "spell": 704951 },
+    { "action": "assert", "label": "Render passive is active", "actor": "knight", "metric": "aura", "spell": 704951, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "The aura carries the authored 30 percent", "actor": "knight", "metric": "aura_amount", "spell": 704951, "effect": 0, "equals": 30 },
+    { "action": "assert", "label": "CONTRACT melee haste rating rises by 30% of Strength", "actor": "knight", "metric": "combat_rating", "rating": 17, "relative_to": "melee_haste0", "ratio_to": "strength0", "min": 0.29, "max": 0.3001 },
+    { "action": "assert", "label": "CONTROL ranged haste rating is untouched", "actor": "knight", "metric": "combat_rating", "rating": 18, "relative_to": "ranged_haste0", "equals": 0 },
+    { "action": "assert", "label": "CONTROL spell haste rating is untouched", "actor": "knight", "metric": "combat_rating", "rating": 19, "relative_to": "spell_haste0", "equals": 0 },
+    { "action": "assert", "label": "CONTRACT the haste rating shortens the melee attack time", "actor": "knight", "metric": "attack_time_ms", "hand": 0, "ratio_to": "attack_time0", "max": 0.999 },
+
+    { "action": "snapshot", "actor": "knight", "metric": "combat_rating", "rating": 17, "save_as": "melee_haste1" },
+    { "action": "set_aura", "label": "Raise Strength with Mighty Strength (+50 Strength)", "actor": "knight", "spell": 53748, "stacks": 1 },
+    { "action": "snapshot", "actor": "knight", "metric": "stat", "stat": 0, "relative_to": "strength0", "save_as": "strength_gain" },
+    { "action": "assert", "label": "SETUP Strength rose", "actor": "knight", "metric": "stat", "stat": 0, "relative_to": "strength0", "min": 40 },
+    { "action": "assert", "label": "CONTRACT the rating follows the Strength change at 30%", "actor": "knight", "metric": "combat_rating", "rating": 17, "relative_to": "melee_haste1", "ratio_to": "strength_gain", "min": 0.27, "max": 0.33 },
+    { "action": "set_aura", "actor": "knight", "spell": 53748, "stacks": 0 },
+
+    { "action": "unlearn", "actor": "knight", "spell": 704951 },
+    { "action": "assert", "label": "Unlearning removes the passive", "actor": "knight", "metric": "aura", "spell": 704951, "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "Melee haste rating returns to baseline", "actor": "knight", "metric": "combat_rating", "rating": 17, "relative_to": "melee_haste0", "equals": 0 },
+    { "action": "assert", "label": "Melee attack time returns to baseline (float round trip)", "actor": "knight", "metric": "attack_time_ms", "hand": 0, "relative_to": "attack_time0", "min": -2, "max": 2 }
+  ]
+}

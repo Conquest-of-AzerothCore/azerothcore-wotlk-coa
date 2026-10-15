@@ -1,5 +1,3 @@
-"""Cache ownership, invalidation and startup-barrier behavior without a MySQL service."""
-
 import copy
 import json
 from pathlib import Path
@@ -10,6 +8,8 @@ import unittest
 from unittest.mock import patch
 
 from world_cache import WorldCache, input_fingerprint, world_fingerprint
+
+SERVER_UUID = '11111111-2222-3333-4444-555555555555'
 
 
 class DatabaseFixture:
@@ -23,7 +23,7 @@ class DatabaseFixture:
 
     def sql(self, role, statement, timeout=60):
         if statement == 'SELECT @@server_uuid;':
-            return 'test-server'
+            return SERVER_UUID
         name = re.search(r'`([^`]+)`', statement)[1]
         if statement.startswith('CREATE DATABASE'):
             if name in self.schemas:
@@ -157,6 +157,39 @@ class WorldCacheTests(unittest.TestCase):
         second.finish()
         self.assertEqual(self.database.dropped, [])
 
+    def test_empty_server_identity_is_retried_without_creating_a_different_cache(self):
+        first = self.cache()
+        with patch.object(self.database, 'sql', side_effect=['', SERVER_UUID]) as query:
+            second = self.cache()
+        self.assertEqual(first.identity, second.identity)
+        self.assertEqual(query.call_count, 2)
+
+    def test_missing_server_identity_never_acquires_a_cache(self):
+        with patch.object(self.database, 'sql', return_value='') as query:
+            with self.assertRaisesRegex(ValueError, 'no data after three reads'):
+                self.cache()
+        self.assertEqual(query.call_count, 3)
+        self.assertEqual(self.database.copies, 0)
+        self.assertEqual(self.database.dropped, [])
+
+    def test_truncated_server_identity_is_not_a_new_cache_key(self):
+        with patch.object(self.database, 'sql', return_value=SERVER_UUID[:8]):
+            with self.assertRaisesRegex(ValueError, 'not a complete MySQL UUID'):
+                self.cache()
+        self.assertEqual(self.database.copies, 0)
+
+    def test_empty_ownership_read_retries_but_a_real_mismatch_still_fails(self):
+        first = self.cache()
+        self.run_clean(first)
+        with patch.object(self.database, 'sql', side_effect=['', first.metadata['token']]) as query:
+            first.verify_owner()
+        self.assertEqual(query.call_count, 2)
+        with patch.object(self.database, 'sql', side_effect=['', 'somebody else']) as query:
+            with self.assertRaisesRegex(ValueError, 'ownership mismatch'):
+                first.verify_owner()
+        self.assertEqual(query.call_count, 2)
+        self.assertEqual(self.database.dropped, [])
+
     def test_concurrent_run_does_not_remove_other_lease(self):
         first = self.cache()
         first.prepare()
@@ -182,7 +215,6 @@ class WorldCacheTests(unittest.TestCase):
         self.assertTrue(first.lock.exists())
         with self.assertRaisesRegex(ValueError, 'leased'):
             self.cache().prepare(refresh=True)
-        # The fixture's simulated child has stopped; normal cleanup can now run.
         first.finish()
 
     def test_copy_rejects_concurrent_source_changes(self):
@@ -282,6 +314,19 @@ class FingerprintTests(unittest.TestCase):
         with patch.object(database, 'sql', side_effect=responses):
             with self.assertRaisesRegex(ValueError, 'excludes triggers/routines/events'):
                 world_fingerprint(database, 'world')
+
+    def test_incomplete_definitions_are_retried_but_never_used_as_a_fingerprint(self):
+        database = SimpleNamespace(sql=None)
+        prefix = ['spells\tBASE TABLE', 'world.spells\t123']
+        definitions = 'spells\tCREATE TABLE spells (...)'
+        with patch.object(database, 'sql', side_effect=prefix + [definitions, '0']):
+            expected = world_fingerprint(database, 'world')
+        with patch.object(database, 'sql', side_effect=prefix + ['', definitions, '0']):
+            self.assertEqual(world_fingerprint(database, 'world'), expected)
+        with patch.object(database, 'sql', side_effect=prefix + ['', '', '']) as query:
+            with self.assertRaisesRegex(ValueError, 'Incomplete world table definitions'):
+                world_fingerprint(database, 'world')
+        self.assertEqual(query.call_count, 5)
 
 
 if __name__ == '__main__':

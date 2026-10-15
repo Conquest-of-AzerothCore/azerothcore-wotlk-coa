@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Aviana's Blessing native radius modifier and threat aura (#2816)",
+  "contract": "#2816: Aviana's Blessing (705720) is a passive with two self-targeted aura effects. Effect 0 is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 6 (SPELLMOD_RADIUS), EffectBasePoints 2 -> amount 3, class mask dword2 = 67108896 (0x04000020), SpellFamilyName 22. Gust of Wind (500932) is SpellFamilyName 22 with SpellFamilyFlags dword2 = 67108896, an exact bitwise match, and its EffectRadiusIndex resolves to SpellRadius.dbc RadiusMin/RadiusMax 12.0 yd. SPELLMOD_RADIUS is applied generically by SpellInfo::GetRadius via ApplySpellMod (SpellInfo.cpp:624) for any classmask match, so learning 705720 must raise Gust of Wind's radius modifier from a 12-yd base to 15 (12 + 3). Effect 1 is aura 103 SPELL_AURA_MOD_TOTAL_THREAT, EffectBasePoints -31 -> amount -30, no class mask required: ThreatManager::UpdateMyTempModifiers (ThreatManager.cpp:801) sums every SPELL_AURA_MOD_TOTAL_THREAT effect on the unit unconditionally, so the aura's own DBC-derived amount (-30) is what reaches that generic sum regardless of which spell granted it. Zero hits for 705720 under modules/ or src/server/ (matching the issue's own grep) is correct: both effects are delivered by stock engine spellmod/aura systems, no module code is needed, and this closes as a regression scenario only.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "sb",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "label": "Learn Gust of Wind", "actor": "sb", "spell": 500932 },
+    { "action": "assert", "label": "BASELINE: no radius modifier on Gust of Wind before Aviana's Blessing",
+      "actor": "sb", "metric": "spell_modifier", "spell": 500932, "op": 6, "base": 12, "equals": 12 },
+    { "action": "learn", "label": "Learn Aviana's Blessing", "actor": "sb", "spell": 705720 },
+    { "action": "assert", "label": "DISCRIMINATING: Aviana's Blessing adds 3 yd to Gust of Wind's radius modifier",
+      "actor": "sb", "metric": "spell_modifier", "spell": 500932, "op": 6, "base": 12, "equals": 15 },
+    { "action": "assert", "label": "DISCRIMINATING: Aviana's Blessing effect 1 carries the DBC-derived -30 threat-reduction amount",
+      "actor": "sb", "metric": "aura_amount", "spell": 705720, "effect": 1, "equals": -30 }
+  ]
+}

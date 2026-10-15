@@ -1,0 +1,24 @@
+-- Worldforged pickup "Munitions Crate" (entry 90289, spawn 6900882) renders nothing in Duskwood: the sparkle
+-- and the tooltip are there beside the overturned hearse, but there is no crate to look at.
+--
+-- That is not a slip in the restoration. Entry 90289 carries displayId 980926, which GameObjectDisplayInfo.dbc
+-- resolves to world\Generic\DOODADS\invisible_cube.mdx, and two independent sources agree on the value: the
+-- client gameobjectcache captures the pickups were built from, and the exil.es database export of 2026-09-13.
+-- 207 other Worldforged pickups carry the same invisible display. It is what CoA itself sends.
+--
+-- Giving this one a real crate is therefore a deliberate departure from the captured value, made knowingly: the
+-- pickup is a crate in its name and in its loot, so it should be one on screen. displayId 6708 is the display
+-- the client's own Alliance munitions crate uses - entry 190032 "Wintergarde Munitions Crate",
+-- World\Generic\PassiveDoodads\WeaponCrates\WeaponCrateAllianceSword.mdx - and Duskwood is Alliance ground.
+-- Its 2.28 x 0.90 yd footprint sits clear of the hearse's collision hull, which the boxier crates only graze.
+--
+-- The spawn's height has to come down with it. 42.958 cost nothing while the object drew no model, but every
+-- crate model has its origin on its own base, so the crate would hang 0.92 yd in the air. 42.037 is the ground
+-- under that spawn, read through the interpolation GridTerrainData itself uses over 0005232.map; the terrain
+-- there is flat to within 0.1 yd across the crate's whole footprint. Nothing else about the pickup changes -
+-- same entry, same loot, same one-open-per-character rule, same observed x/y.
+--
+-- A regenerated pickups file would restore the invisible display and the old height; upstream keeps such
+-- corrections in data/placements/overrides.csv, which is not carried in this repository.
+UPDATE `gameobject_template` SET `displayId` = 6708 WHERE `entry` = 90289;
+UPDATE `gameobject` SET `position_z` = 42.037 WHERE `guid` = 6900882 AND `id` = 90289;

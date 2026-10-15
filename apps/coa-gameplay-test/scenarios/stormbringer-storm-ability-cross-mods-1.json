@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Stormcaller and Lingering Storm are native cross-spell modifiers (#1683, #2777)",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+
+    { "action": "learn", "actor": "s", "spell": 806307 },
+    { "action": "assert", "label": "BASELINE: Eye of the Storm's cooldown is unmodified before Stormcaller",
+      "actor": "s", "metric": "spell_modifier", "spell": 806307, "op": 11, "base": 30000, "equals": 30000 },
+    { "action": "assert", "label": "BASELINE: Eye of the Storm's cost is unmodified before Stormcaller",
+      "actor": "s", "metric": "spell_modifier", "spell": 806307, "op": 14, "base": 100, "equals": 100 },
+
+    { "action": "learn", "actor": "s", "spell": 804833 },
+    { "action": "assert", "label": "BASELINE: Stormcloak's duration is unmodified before Lingering Storm",
+      "actor": "s", "metric": "spell_modifier", "spell": 804833, "op": 1, "base": 15000, "equals": 15000 },
+
+    { "action": "learn", "actor": "s", "spell": 500041 },
+    { "action": "assert", "label": "BASELINE: Body of Lightning's duration is unmodified before Lingering Storm",
+      "actor": "s", "metric": "spell_modifier", "spell": 500041, "op": 1, "base": 12000, "equals": 12000 },
+
+    { "action": "learn", "actor": "s", "spell": 501415 },
+    { "action": "assert", "label": "BASELINE: Conjure Storm's duration is unmodified before Lingering Storm",
+      "actor": "s", "metric": "spell_modifier", "spell": 501415, "op": 1, "base": 12000, "equals": 12000 },
+
+    { "action": "learn", "actor": "s", "spell": 300611 },
+    { "action": "assert", "label": "DISCRIMINATING: Stormcaller rank 1 cuts Eye of the Storm's cooldown by 15%",
+      "actor": "s", "metric": "spell_modifier", "spell": 806307, "op": 11, "base": 30000, "min": 25499.9, "max": 25500.1 },
+    { "action": "assert", "label": "DISCRIMINATING: Stormcaller rank 1 cuts Eye of the Storm's cost by 15%",
+      "actor": "s", "metric": "spell_modifier", "spell": 806307, "op": 14, "base": 100, "min": 84.9, "max": 85.1 },
+    { "action": "assert", "label": "Stormcaller does not touch Stormcloak's duration modifier",
+      "actor": "s", "metric": "spell_modifier", "spell": 804833, "op": 1, "base": 15000, "equals": 15000 },
+
+    { "action": "unlearn", "actor": "s", "spell": 300611 },
+    { "action": "learn", "actor": "s", "spell": 300615 },
+    { "action": "assert", "label": "DISCRIMINATING: Stormcaller rank 2 cuts Eye of the Storm's cooldown by 30%",
+      "actor": "s", "metric": "spell_modifier", "spell": 806307, "op": 11, "base": 30000, "min": 20999.9, "max": 21000.1 },
+    { "action": "assert", "label": "DISCRIMINATING: Stormcaller rank 2 cuts Eye of the Storm's cost by 30%",
+      "actor": "s", "metric": "spell_modifier", "spell": 806307, "op": 14, "base": 100, "min": 69.9, "max": 70.1 },
+
+    { "action": "learn", "actor": "s", "spell": 705652 },
+    { "action": "assert", "label": "DISCRIMINATING: Lingering Storm lengthens Stormcloak's duration by 30%",
+      "actor": "s", "metric": "spell_modifier", "spell": 804833, "op": 1, "base": 15000, "min": 19499.9, "max": 19500.1 },
+    { "action": "assert", "label": "DISCRIMINATING: Lingering Storm lengthens Body of Lightning's duration by 30%",
+      "actor": "s", "metric": "spell_modifier", "spell": 500041, "op": 1, "base": 12000, "min": 15599.9, "max": 15600.1 },
+    { "action": "assert", "label": "DISCRIMINATING: Lingering Storm lengthens Conjure Storm's duration by 30%",
+      "actor": "s", "metric": "spell_modifier", "spell": 501415, "op": 1, "base": 12000, "min": 15599.9, "max": 15600.1 },
+    { "action": "assert", "label": "Lingering Storm does not touch Eye of the Storm's cooldown modifier",
+      "actor": "s", "metric": "spell_modifier", "spell": 806307, "op": 11, "base": 30000, "min": 20999.9, "max": 21000.1 }
+  ],
+  "contract": "#1683: Stormcaller (300611/300615) is SpellFamilyName 22, effect 0/1 both APPLY_AURA -> SPELL_AURA_ADD_PCT_MODIFIER (108) over EffectMiscValue 11/14 = SPELLMOD_COOLDOWN/SPELLMOD_COST, classmask word2=1024, which matches only the obtainable rank of Eye of the Storm (806307, SpellFamilyFlags word2=1024; CategoryRecoveryTime 30000, ManaCostPercentage-based cost). EffectBasePoints are -16/-31 with EffectDieSides=1 on every effect; SpellEffectInfo::CalcValue (SpellInfo.cpp:495) adds 1 when DieSides==1, so the applied percentages are -15%/-30%, matching the tooltip exactly. SPELLMOD_COOLDOWN is applied generically at Player.cpp:11452/11456 (and the charge path at 17199); SPELLMOD_COST at SpellInfo::CalcPowerCost (SpellInfo.cpp:3077) -- neither is a Stormbringer-specific script. #2777: Lingering Storm (705652) is a single APPLY_AURA -> ADD_PCT_MODIFIER over EffectMiscValue 1 = SPELLMOD_DURATION, EffectBasePoints=29 with DieSides=1 (applied value = 30%, same +1 convention), classmask (524288, 32, 16) matching Stormcloak (804833, word0), Body of Lightning (500041, word1) and the whole Conjure Storm progression chain (501415-501420, word2 bit 16, a subset of their own word2=48). SPELLMOD_DURATION is applied at the shared aura-duration pipeline (SpellEffects.cpp:2688/3543/6394, Spell.cpp:4153), used by every class. Both mechanisms are read straight from Spell.dbc/Player::ApplySpellMod with no module or core override (grepped module src, module SQL and pending_db_world: zero hits on any of the six spell ids); rank-2 replacement is exercised by unlearning rank 1 before learning rank 2 to avoid any ambiguity about stacking two active ranks of the same talent. Base numbers (30000 ms CategoryRecoveryTime for Eye of the Storm, 15000/12000/12000 ms SpellDuration for Stormcloak/Body of Lightning/Conjure Storm) are the values actually read from Spell.dbc/SpellDuration.dbc via coa-dbc-viewer against /home/fab/CoaServer/dbc_clientset, not invented; the cost baseline uses a representative 100-unit base since Eye of the Storm's real cost is ManaCostPercentage-driven rather than a flat ManaCost, and SPELLMOD_COST's percentage multiplier is independent of that base. No overlap with the open #4612 (it only restores 806307's spell_bonus_data SP/AP damage coefficients, an unrelated mechanism to cooldown/cost/duration spellmods)."
+}

@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Homebound Runestone summons its marker creature (#4979)",
+  "contract": [
+    "Homebound Runestone 560316 (Spell.dbc BaseLevel/SpellLevel 32) Effect0 is SPELL_EFFECT_SUMMON",
+    "targeting TARGET_DEST_CASTER_FRONT, EffectMiscValue0 50058 (creature entry), EffectMiscValueB0 61",
+    "(SummonProperties.dbc, a stock numSummons id native AzerothCore already handles). Before the fix,",
+    "entry 50058 had no creature_template row anywhere in the repo, so Spell::EffectSummonType's",
+    "SummonCreature(50058, ...) call silently returned null and nothing appeared. After the fix, a",
+    "living creature 50058 must exist near the caster shortly after the cast."
+  ],
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "rm", "spell": 560316 },
+    { "action": "assert", "label": "SETUP: no Homebound Runestone marker exists yet",
+      "actor": "rm", "metric": "owned_creature_count", "entry": 50058, "equals": 0 },
+    { "action": "cast", "actor": "rm", "spell": 560316 },
+    { "action": "assert", "label": "Casting Homebound Runestone summons creature 50058 near the caster",
+      "actor": "rm", "metric": "owned_creature_count", "entry": 50058, "min": 1, "within_ms": 5000 }
+  ]
+}

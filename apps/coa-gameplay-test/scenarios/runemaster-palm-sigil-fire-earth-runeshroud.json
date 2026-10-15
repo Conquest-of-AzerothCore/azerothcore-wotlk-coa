@@ -1,0 +1,152 @@
+{
+  "schema": 1,
+  "name": "Runemaster: Palm Sigil: Fire and Palm Sigil: Earth open under Runeshroud like Palm Sigil: Arcane",
+  "contract": "Every Palm Sigil is gated by CasterAuraSpell 808089, the marker 'Runeshroud or Waveforged' that SyncRuneshroudOrWaveforged grants while Runeshroud 500288, the Waveforged window 500469 or the Runic Breakout window 520767 is on the player. Only Arcane 805380 was covered (#4017, runemaster-palm-sigil-runeshroud.json); Fire 534803 (ranks 534804-534807) and Earth 805382 were never exercised, and #4760, #5175, #5410 and #5414 report exactly those two as unusable. All three sigils must be refused with SPELL_FAILED_CASTER_AURASTATE (22) outside Runeshroud and must complete while it is on, and the 808089 marker must follow Runeshroud in both directions.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 24,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 534803
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 805382
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Palm Sigil gate at rest",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 808089,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 534803
+    },
+    {
+      "action": "assert",
+      "label": "Palm Sigil: Fire is refused outside Runeshroud",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 534803,
+      "equals": 22,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 805382
+    },
+    {
+      "action": "assert",
+      "label": "Palm Sigil: Earth is refused outside Runeshroud",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 805382,
+      "equals": 22,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500288,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Runeshroud syncs the Palm Sigil marker",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 808089,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 534803
+    },
+    {
+      "action": "assert",
+      "label": "Palm Sigil: Fire completes while in Runeshroud",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 534803,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 805382
+    },
+    {
+      "action": "assert",
+      "label": "Palm Sigil: Earth completes while in Runeshroud",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 805382,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500288,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "The marker clears when Runeshroud ends",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 808089,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 534803,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 805382,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 534803
+    },
+    {
+      "action": "assert",
+      "label": "Palm Sigil: Fire is refused again once Runeshroud has ended",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 534803,
+      "equals": 22,
+      "within_ms": 1000
+    }
+  ]
+}

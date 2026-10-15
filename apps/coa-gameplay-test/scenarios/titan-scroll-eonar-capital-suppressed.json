@@ -1,0 +1,22 @@
+{
+ "schema": 1,
+ "name": "Titan Scroll: Eonar kill hook never procs inside a capital city",
+ "contract": "AREA_FLAG_CAPITAL gates the hook before the 10% roll (mirrors PlayerUpdates.cpp:1419's own capital check). A kill inside Stormwind must never cast 993963, whatever the RNG roll. The buff does not stack (993957 StackAmount 1), so the fixture carries its single stack.",
+ "timeout_ms": 60000,
+ "players": [
+  { "id": "killer", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+ ],
+ "location": { "map": 0, "x": -8833.38, "y": 628.628, "z": 94.0066, "o": 0.0, "ignore_access": true },
+ "creatures": [
+  { "id": "prey1", "owner": "killer", "entry": 68, "health": 1, "level": 60 }
+ ],
+ "steps": [
+  { "action": "wait", "label": "Let login and zone updates settle before the fixture buff", "ms": 2000 },
+  { "action": "set_aura", "actor": "killer", "spell": 993957, "stacks": 1 },
+  { "action": "attack", "actor": "killer", "target": "prey1" },
+  { "action": "assert", "label": "The buffed killer lands a kill inside Stormwind", "actor": "prey1", "metric": "alive", "equals": 0, "within_ms": 5000 },
+  { "action": "wait", "ms": 1500 },
+  { "action": "assert", "label": "The Eonar buff stayed on through the kill", "actor": "killer", "metric": "aura", "spell": 993957, "equals": 1 },
+  { "action": "assert", "label": "No ground heal was cast inside Stormwind", "actor": "killer", "metric": "spell_cast_count", "spell": 993963, "equals": 0 }
+ ]
+}

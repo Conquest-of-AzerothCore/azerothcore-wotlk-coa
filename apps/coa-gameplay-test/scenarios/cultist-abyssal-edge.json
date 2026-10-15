@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Abyssal Edge reaches Blade of the Empire's crit chance and mana cost through the native spellmod system (#874)",
+  "contract": "Abyssal Edge 582836 (Spell.dbc, read for this scenario) is a passive with two SPELL_EFFECT_APPLY_AURA effects, target caster: effect 0 is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 1 DieSides 1 (+2), EffectSpellClassMask word 1 bit 20 (1048576); effect 1 is aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 14 (SPELLMOD_COST), BasePoints -26 DieSides 1 (-25), same classmask word/bit. Blade of the Empire 502114 (a representative rank, read for this scenario) is SpellFamilyName 31 with SpellFamilyFlags word 1 = 1048576, an exact match. SpellInfo::IsAffectedBySpellMod's family-31 switch (SpellInfo.cpp) lists only 520682/520810/680600/802047/805115/681102/681389/806768 as needing special routing; 582836 is not among them, so it falls through to the generic IsAffected(family, classmask) check used by every class's percentage/flat spellmods -- no script is needed. grep confirms zero occurrences of 582836 in src/server/coa or src/server/game, matching the issue's own evidence that no per-spell script exists; none is needed here. spell_modifier calls player->ApplySpellMod directly, so the assertions exercise the exact runtime path (including IsAffectedBySpellMod), not just the DBC value.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+
+    { "action": "assert", "label": "BASELINE: Blade of the Empire's crit chance modifier is untouched", "actor": "cultist", "metric": "spell_modifier", "spell": 502114, "op": 7, "base": 100, "min": 99.99, "max": 100.01 },
+    { "action": "assert", "label": "BASELINE: Blade of the Empire's cost modifier is untouched", "actor": "cultist", "metric": "spell_modifier", "spell": 502114, "op": 14, "base": 100, "min": 99.99, "max": 100.01 },
+
+    { "action": "learn", "actor": "cultist", "spell": 582836 },
+    { "action": "assert", "label": "Learning the passive applies its own self-aura", "actor": "cultist", "metric": "aura", "spell": 582836, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Effect 0 carries the authored +2 crit chance flat modifier", "actor": "cultist", "metric": "aura_amount", "spell": 582836, "effect": 0, "equals": 2 },
+    { "action": "assert", "label": "Effect 1 carries the authored -25% cost modifier", "actor": "cultist", "metric": "aura_amount", "spell": 582836, "effect": 1, "equals": -25 },
+
+    { "action": "assert", "label": "CONTRACT: Blade of the Empire's crit chance modifier rises by +2 (SPELLMOD_CRITICAL_CHANCE)", "actor": "cultist", "metric": "spell_modifier", "spell": 502114, "op": 7, "base": 100, "min": 101.99, "max": 102.01 },
+    { "action": "assert", "label": "CONTRACT: Blade of the Empire's mana cost modifier is -25% (100 -> 75, SPELLMOD_COST)", "actor": "cultist", "metric": "spell_modifier", "spell": 502114, "op": 14, "base": 100, "min": 74.99, "max": 75.01 },
+
+    { "action": "unlearn", "actor": "cultist", "spell": 582836 },
+    { "action": "assert", "label": "Unlearning removes the self-aura", "actor": "cultist", "metric": "aura", "spell": 582836, "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "Crit chance modifier returns to baseline", "actor": "cultist", "metric": "spell_modifier", "spell": 502114, "op": 7, "base": 100, "min": 99.99, "max": 100.01 },
+    { "action": "assert", "label": "Cost modifier returns to baseline", "actor": "cultist", "metric": "spell_modifier", "spell": 502114, "op": 14, "base": 100, "min": 99.99, "max": 100.01 }
+  ]
+}

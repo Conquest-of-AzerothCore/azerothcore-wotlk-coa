@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Extravagant Order: Tharynn Bouden is a quest giver again and takes the order back (#6129)",
+  "contract": "Quest 17001 Extravagant Order is started and ended by Tharynn Bouden 66 (rev_20260923_01 starter and ender rows), and its objective names him. rev_20260930_98 replaced his template with npcflag 128 (vendor only), so the server prepared no quest menu and the order could not be handed in. rev_20261003_10 restored the quest-giver bit (npcflag 130). Expected: with the quest complete, talking to Tharynn lists 17001 in his quest menu.",
+  "timeout_ms": 30000,
+  "location": { "map": 0, "x": -9494.13, "y": 83.91, "z": 56.66, "o": 0 },
+  "players": [
+    { "id": "courier", "race": 1, "class": 1, "level": 10 }
+  ],
+  "creatures": [
+    { "id": "tharynn", "owner": "courier", "entry": 66, "distance": 2, "faction": 12 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Finish Extravagant Order", "actor": "courier", "quest": 17001 },
+    { "action": "gossip_hello", "label": "Talk to Tharynn Bouden", "actor": "courier", "target": "tharynn" },
+    {
+      "action": "assert", "label": "Tharynn offers Extravagant Order for turn-in", "actor": "courier",
+      "metric": "quest_menu_has", "quest": 17001, "equals": 1
+    }
+  ]
+}

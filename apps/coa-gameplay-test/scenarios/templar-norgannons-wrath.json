@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Norgannon's Wrath scales with AP and Holy SP, debuffs every enemy hit and uses Chastise modifiers (#931)",
-  "contract": "Norgannon's Wrath 524739 leaps, then its blast 524740 deals 1506 + 100% Holy spell power + 100% attack power Holy damage to up to 10 enemies within 5 yd, piercing absorbs and resistances, and applies 520842 (-10% damage and healing done for 5 sec) to each of them. It scales with modifiers to Chastise.",
+  "contract": "Norgannon's Wrath 524739 leaps, then its blast 524740 deals 1506 + 100% Holy spell power + 100% attack power Holy damage to up to 10 enemies within 5 yd, piercing absorbs and resistances, and applies 520842 (-10% damage and healing done for 5 sec) to each of them. It scales with modifiers to Chastise. The blast is a missile (Speed 30): its trigger effect applies 520842 at launch, while its damage lands on impact at least 5 yd / 30 yd/s later, so the damage checks wait for the impact.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -112,14 +112,16 @@
       "label": "Primary target is damaged",
       "actor": "primary",
       "metric": "health",
-      "max": 999000
+      "max": 999000,
+      "within_ms": 2000
     },
     {
       "action": "assert",
       "label": "Nearby enemy is damaged",
       "actor": "nearby",
       "metric": "health",
-      "max": 999000
+      "max": 999000,
+      "within_ms": 2000
     }
   ]
 }

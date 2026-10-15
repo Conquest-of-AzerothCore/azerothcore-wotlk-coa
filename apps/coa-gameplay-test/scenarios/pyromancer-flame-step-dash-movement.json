@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Flame Step leaves a moving caster's movement alone (#6527)",
+  "contract": "#6527: with a key held, using Flame Step still moves the character, but with auto-run it stops them - auto-run is a client-side toggle that a server displacement clears. spell_ascension_pyromancer_ability's Flame Step hook called StartDash, which always forced a charge spline on the caster (MotionMaster::MoveCharge, velocity 35 over 801929 effect 0's radius, SpellRadius 9 = 20 yd). A forced spline packet hands the local client's movement over to the server, which is what dropped auto-run; the reporter's held key simply resumed on its own. The fix keeps the same lunge only when the caster is not already moving (MOVEMENTFLAG_FORWARD/BACKWARD/STRAFE_LEFT/STRAFE_RIGHT all clear) and otherwise carries the dash with a run-speed surge of the same length, leaving the client's own movement and its auto-run state untouched. This scenario pins both halves: a fixture that is moving forward casts Flame Step and must not be displaced by the server at all (distance to the dummy 35 yd ahead is unchanged) while the surge shows up as a run speed rate above 1.5 and is then restored to its previous rate, and a stationary fixture keeps the original 20 yd lunge. The dummy is placed on +X, which is the direction the fixture faces at orientation 0, and the surge speed is the dash's own 35 yd/s. Expected before the fix: the moving cast displaces the fixture roughly 20 yd toward the dummy and never raises the run speed rate. Expected after: the moving cast changes neither the distance nor leaves the rate raised, and the stationary cast still closes at least 10 yd.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "pyro", "race": 1, "class": 24, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "pyro", "entry": 36, "level": 80, "health": 1000000, "distance": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "pyro", "spell": 801911 },
+    { "action": "learn", "actor": "pyro", "spell": 801929 },
+    { "action": "assert", "label": "SETUP: the Pyromancer knows Flame Step", "actor": "pyro", "metric": "knows_spell", "spell": 801911, "equals": 1 },
+    { "action": "snapshot", "label": "Baseline distance to the dummy ahead", "actor": "pyro", "metric": "distance_2d", "target": "dummy", "save_as": "d0" },
+    { "action": "snapshot", "label": "Baseline run speed rate", "actor": "pyro", "metric": "run_speed_rate", "save_as": "rate0" },
+    { "action": "assert", "label": "SETUP: the fixture starts at an unsurging run speed rate", "actor": "pyro", "metric": "run_speed_rate", "min": 0.5, "max": 1.2 },
+
+    { "action": "set_moving", "label": "Start moving forward, as auto-run or a held key does", "actor": "pyro", "enabled": true },
+    { "action": "assert", "label": "SETUP: the Pyromancer is moving", "actor": "pyro", "metric": "moving", "equals": 1 },
+    { "action": "cast", "label": "Flame Step while moving", "actor": "pyro", "spell": 801911 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the moving dash carries the caster with a run speed surge instead of a forced spline",
+      "actor": "pyro", "metric": "run_speed_rate", "relative_to": "rate0", "min": 1.5, "within_ms": 1000
+    },
+    { "action": "wait", "label": "Let the surge run its 20 yd at 35 yd/s and any charge spline finish", "ms": 2000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the moving cast left the caster where the client is steering it",
+      "actor": "pyro", "metric": "distance_2d", "target": "dummy", "relative_to": "d0", "min": -0.5, "max": 0.5
+    },
+    {
+      "action": "assert", "label": "The dash restored the run speed rate it borrowed",
+      "actor": "pyro", "metric": "run_speed_rate", "relative_to": "rate0", "min": -0.05, "max": 0.05, "within_ms": 2000
+    },
+    { "action": "assert", "label": "SETUP: the caster is still flagged as moving", "actor": "pyro", "metric": "moving", "equals": 1 },
+
+    { "action": "set_moving", "label": "Stop moving", "actor": "pyro", "enabled": false },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "SETUP: the Pyromancer is standing still", "actor": "pyro", "metric": "moving", "equals": 0 },
+    { "action": "snapshot", "label": "Distance to the dummy before the standing dash", "actor": "pyro", "metric": "distance_2d", "target": "dummy", "save_as": "d1" },
+    { "action": "reset_cooldown", "label": "Flame Step is back from its 20 s cooldown", "actor": "pyro", "spell": 801911 },
+    { "action": "cast", "label": "Flame Step while standing still", "actor": "pyro", "spell": 801911 },
+    { "action": "wait", "label": "Let the standing lunge finish", "ms": 2000 },
+    {
+      "action": "assert", "label": "REGRESSION: a standing caster still lunges forward, here 20 yd of SpellRadius 9 on 801929",
+      "actor": "pyro", "metric": "distance_2d", "target": "dummy", "relative_to": "d1", "min": -30, "max": -10
+    }
+  ]
+}

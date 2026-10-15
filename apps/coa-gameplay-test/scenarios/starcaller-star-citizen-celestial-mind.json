@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "name": "Star Citizen raises Celestial Mind's Intellect by 20% (#685)",
+  "contract": "Star Citizen 704776 (Spell.dbc, SpellFamilyName 32, passive) carries one effect: SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue 8 (SPELLMOD_ALL_EFFECTS), EffectBasePoints 19 with DieSides 1 -> +20, EffectSpellClassMask word2 0x10000. That mask selects, among SpellFamilyName 32 records, exactly Celestial Mind ranks 1-5 (300255, 301222, 301223, 301224, 301225) and Greater Celestial Mind 680301, whose SpellFamilyFlags word2 is 0x10000; each is SPELL_AURA_MOD_STAT (29) on Intellect (misc 3) with EffectBasePoints 2, 6, 14, 21, 30, 30 and DieSides 1 (resolved 3, 7, 15, 22, 31, 31). The tooltip is 'Increases effectiveness of Celestial Mind by 20%.'. No script or SQL touches 704776 or those ids (grep over src/server and data/sql). Native path only: AuraEffect::CalculateSpellMod builds the SpellModifier, SpellInfo::IsAffectedBySpellMod admits it on the shared family and mask, and SpellEffectInfo::CalcValue passes the value through Unit::ApplyEffectModifiers, which calls Player::ApplySpellMod for SPELLMOD_ALL_EFFECTS (basevalue * (1 + 20/100)), then truncates with int32(value). The spell_effect_value metric returns SpellEffectInfo::CalcValue(player), so it reads exactly this path. Expected: rank 5 (301225) 31 -> int(37.2) = 37 (+6); rank 4 (301224) 22 -> int(26.4) = 26 (+4); Greater Celestial Mind 680301 31 -> 37 (+6). Both fixtures are the same race, class and level and the control never learns the talent, so only the modifier can move the difference. Ranks 1-3 are not asserted because 3, 7 and 15 either truncate back to a +0/+1 step or sit on a float rounding edge (15 * 1.2f).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 704776
+    },
+    {
+      "action": "assert",
+      "label": "Learning the talent applies its passive aura",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 704776,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Celestial Mind rank 5 Intellect without the talent",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "save_as": "cm5_base",
+      "spell": 301225,
+      "effect": 0
+    },
+    {
+      "action": "assert",
+      "label": "Control keeps the authored 31 (bp 30 + 1)",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 301225,
+      "effect": 0,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "label": "Rank 5 gives 6 more Intellect with Star Citizen (31 -> 37)",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 301225,
+      "effect": 0,
+      "relative_to": "cm5_base",
+      "equals": 6
+    },
+    {
+      "action": "snapshot",
+      "label": "Celestial Mind rank 4 Intellect without the talent",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "save_as": "cm4_base",
+      "spell": 301224,
+      "effect": 0
+    },
+    {
+      "action": "assert",
+      "label": "Rank 4 gives 4 more Intellect with Star Citizen (22 -> 26)",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 301224,
+      "effect": 0,
+      "relative_to": "cm4_base",
+      "equals": 4
+    },
+    {
+      "action": "snapshot",
+      "label": "Greater Celestial Mind Intellect without the talent",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "save_as": "gcm_base",
+      "spell": 680301,
+      "effect": 0
+    },
+    {
+      "action": "assert",
+      "label": "Greater Celestial Mind gives 6 more Intellect with Star Citizen (31 -> 37)",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 680301,
+      "effect": 0,
+      "relative_to": "gcm_base",
+      "equals": 6
+    }
+  ]
+}

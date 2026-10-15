@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Necromancer audit: Cycle of Death grants 5% spell haste (#968)",
+  "contract": "Cycle of Death 560727 (CharacterAdvancement 11904, Death tab, class 23) reads 'Increases your spell haste by $s1%.' Spell.dbc: a passive (SPELL_ATTR0_PASSIVE) whose only effect is aura 216 SPELL_AURA_HASTE_SPELLS on the caster, BasePoints 4 + DieSides 1 = 5. AuraEffect::HandleModCastingSpeed applies it natively to UNIT_MOD_CAST_SPEED, so the cast-speed multiplier falls to 1/1.05 = 0.95238, and a hasted magic cast such as Sacrifice Undead 805027 (SpellCastTimes 16 = 1500 ms, DmgClass magic) takes 1428 ms instead of 1500 ms. Unlearning the passive restores both.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "snapshot", "actor": "necro", "metric": "cast_speed_multiplier", "save_as": "speed0" },
+    { "action": "snapshot", "actor": "necro", "metric": "spell_cast_time_ms", "spell": 805027, "save_as": "cast0" },
+    {
+      "action": "assert", "label": "CONTROL: Sacrifice Undead starts as a 1.5 s cast", "actor": "necro",
+      "metric": "spell_cast_time_ms", "spell": 805027, "min": 1499, "max": 1501
+    },
+    { "action": "learn", "actor": "necro", "spell": 560727 },
+    {
+      "action": "assert", "label": "SETUP: the Cycle of Death passive is active", "actor": "necro",
+      "metric": "aura", "spell": 560727, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The passive carries 5% spell haste", "actor": "necro",
+      "metric": "aura_amount", "spell": 560727, "effect": 0, "equals": 5
+    },
+    {
+      "action": "assert", "label": "Cast speed multiplier falls to 1/1.05", "actor": "necro",
+      "metric": "cast_speed_multiplier", "ratio_to": "speed0", "min": 0.9523, "max": 0.9525, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Sacrifice Undead casts 5% faster", "actor": "necro",
+      "metric": "spell_cast_time_ms", "spell": 805027, "ratio_to": "cast0", "min": 0.951, "max": 0.954
+    },
+    { "action": "unlearn", "actor": "necro", "spell": 560727 },
+    {
+      "action": "assert", "label": "Unlearning removes the passive", "actor": "necro",
+      "metric": "aura", "spell": 560727, "equals": 0, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Unlearning restores the cast speed multiplier", "actor": "necro",
+      "metric": "cast_speed_multiplier", "ratio_to": "speed0", "min": 0.9999, "max": 1.0001, "within_ms": 3000
+    }
+  ]
+}

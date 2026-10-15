@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Storm Ascendance companion aura and Static generation (#975)",
+  "contract": "#975: Storm Ascendance is two Spell.dbc rows. The learned one, 681110, carries only the magic damage done half (effect 1, aura 79 MOD_DAMAGE_PERCENT_DONE, EffectMiscValue 126 = the six magic schools, EffectBasePoints 19 + DieSides 1 = 20). The transform and the magic damage taken reduction its tooltip promises come from 681187 (effect 0 aura 56 TRANSFORM, effect 1 aura 87 MOD_DAMAGE_PERCENT_TAKEN, EffectMiscValue 126, EffectBasePoints -51 + DieSides 1 = -50), which the tooltip reaches through the cross-spell token $681187s2 and which nothing cast or linked. The Static clause is 681110's effect 0, an aura 42 proc triggering 804084 'Add 10 Static' (effect 175, EffectMiscValue 10, EffectTriggerSpell 803102), dead because 681110's ProcFlags are 0 and no spell_proc row existed. The fix links 681187 as SPELL_LINK_AURA and gives 681110 a spell_proc row for the caster's own damaging casts with the authored one second internal cooldown. Shock 804020 is the damaging carrier: family 22, DmgClass 1, one SCHOOL_DAMAGE effect and no 804084 of its own, unlike Electrocute whose effect 2 already triggers 804084.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "p1", "race": 1, "class": 16, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "t", "owner": "p1", "entry": 36, "level": 80, "health": 1000000, "distance": 5 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "p1", "spell": 681110 },
+    { "action": "learn", "actor": "p1", "spell": 804020 },
+    { "action": "set_aura", "actor": "p1", "spell": 803102, "stacks": 0 },
+    { "action": "cast", "actor": "p1", "spell": 681110 },
+    {
+      "action": "assert", "label": "BASELINE: Storm Ascendance is applied to the caster",
+      "actor": "p1", "metric": "aura", "spell": 681110, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "BASELINE: the native half raises magic damage dealt by 20 (681110 EffectBasePoints[1] 19 + DieSides 1)",
+      "actor": "p1", "metric": "aura_amount", "spell": 681110, "effect": 1, "equals": 20
+    },
+    {
+      "action": "assert", "label": "BASELINE: Storm Ascendance lasts 15000 ms (SpellDuration.dbc row 8)",
+      "actor": "p1", "metric": "aura_duration_ms", "spell": 681110, "min": 13000, "max": 15000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the companion 681187 is applied alongside Storm Ascendance",
+      "actor": "p1", "metric": "aura", "spell": 681187, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the companion reduces magic damage taken by 50 (681187 EffectBasePoints[1] -51 + DieSides 1)",
+      "actor": "p1", "metric": "aura_amount", "spell": 681187, "effect": 1, "equals": -50
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the companion shares the 15000 ms duration (681187 DurationIndex 8)",
+      "actor": "p1", "metric": "aura_duration_ms", "spell": 681187, "min": 13000, "max": 15000
+    },
+    {
+      "action": "snapshot", "label": "Static before the damaging cast",
+      "actor": "p1", "metric": "aura_stacks", "spell": 803102, "save_as": "static_before"
+    },
+    { "action": "cast", "actor": "p1", "spell": 804020, "target": "t" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the damaging cast triggered 804084 Add 10 Static",
+      "actor": "p1", "metric": "spell_cast_count", "spell": 804084, "min": 1, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the trigger is credited to Storm Ascendance's own proc",
+      "actor": "p1", "metric": "spell_proc_count", "spell": 681110, "min": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Static rose by at least the authored 10 (804084 EffectMiscValue[1])",
+      "actor": "p1", "metric": "aura_stacks", "spell": 803102, "relative_to": "static_before", "min": 10, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "The damaging cast left Storm Ascendance and its companion in place",
+      "actor": "p1", "metric": "aura", "spell": 681187, "equals": 1
+    }
+  ]
+}

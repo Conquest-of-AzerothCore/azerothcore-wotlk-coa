@@ -1,0 +1,649 @@
+{
+  "schema": 1,
+  "name": "Bloodmage Night Hunter's Howl, Aortic Assault and Mortal Form abilities scale with their tooltip stats",
+  "contract": [
+    "Every rank's client tooltip advertises its coefficient as a description token, with EffectBonusMultiplier 0:",
+    "Night Hunter's Howl ${$m1+0+$AP*0.285}; Aortic Assault strikes ${$m1+0+$AP*0.12} (strike 806502) and",
+    "ends with ${$806214m1+$806214ppl1+$AP*0.6} (finale 806214); Veinburst ${$m1+0+$AP*.25+$sps*0.85)};",
+    "Crimson Tide ($m1+0+$SP*.28) per tick; Scarlet Delirium siphons ${$m2+0+$SP*0.15} every $t2 sec;",
+    "Vampiric Fang ${$m1+0+$SP*0.34}; Dark Liturgy heals ${$m1+0+$SP*0.35+$SPI*0.25};",
+    "Sanguine Mend heals ${$m1+0+$SPI*0.25+$AP*.2+$SP*.58}.",
+    "The AP and SP coefficients reach Unit::SpellDamageBonusDone and Unit::SpellHealingBonusDone only through",
+    "spell_bonus_data, looked up by the first rank, so the level-56 to level-60 ranks tested here also prove",
+    "the rank fallback; at level 60 they carry no level penalty, and the Aortic Assault spells have none.",
+    "spell_damage_done and spell_healing_done use a fixed base of 1000, so the gain after +1000 attack power",
+    "(10031), +2000 spell damage to every school (44505) and +2000 bonus healing (QATest 51041) measures each",
+    "coefficient. The Spirit terms are base-value bonuses, measured with spell_effect_value after +1000 Spirit",
+    "(QA Test 486). That value includes the effect's die roll (Dark Liturgy 23 sides, Sanguine Mend 52), so two",
+    "snapshots can differ by up to DieSides - 1 points, and each Spirit window spans that over a 900 Spirit gain."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "ally",
+      "owner": "bloodmage",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 501682
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 807785
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504819
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504134
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 803688
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 553272
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 572575
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504085
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 501682,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "howl_before_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 806502,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "strike_before_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 806214,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "finale_before_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 504819,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "veinburst_before_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 504134,
+      "effect": 0,
+      "target": "dummy",
+      "periodic": true,
+      "save_as": "tide_before_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 803688,
+      "effect": 1,
+      "target": "dummy",
+      "periodic": true,
+      "save_as": "delirium_before_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 553272,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "fang_before_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_healing_done",
+      "spell": 572575,
+      "effect": 0,
+      "target": "ally",
+      "save_as": "liturgy_before_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_healing_done",
+      "spell": 504085,
+      "effect": 0,
+      "target": "ally",
+      "save_as": "mend_before_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "attack_power",
+      "save_as": "ap_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_power",
+      "school": 5,
+      "save_as": "sp_before_ap"
+    },
+    {
+      "action": "set_aura",
+      "label": "QA Test +1000 Melee and Ranged AP",
+      "actor": "bloodmage",
+      "spell": 10031,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "attack_power",
+      "save_as": "ap_gain",
+      "relative_to": "ap_before"
+    },
+    {
+      "action": "assert",
+      "label": "The fixture adds 1000 melee attack power",
+      "actor": "bloodmage",
+      "metric": "attack_power",
+      "relative_to": "ap_before",
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The attack power fixture leaves spell power unchanged",
+      "actor": "bloodmage",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "sp_before_ap",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Night Hunter's Howl gains 0.285 per attack power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 501682,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "howl_before_ap",
+      "ratio_to": "ap_gain",
+      "min": 0.28,
+      "max": 0.29
+    },
+    {
+      "action": "assert",
+      "label": "Aortic Assault strike gains 0.12 per attack power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 806502,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "strike_before_ap",
+      "ratio_to": "ap_gain",
+      "min": 0.115,
+      "max": 0.125
+    },
+    {
+      "action": "assert",
+      "label": "Aortic Assault finale gains 0.6 per attack power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 806214,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "finale_before_ap",
+      "ratio_to": "ap_gain",
+      "min": 0.595,
+      "max": 0.605
+    },
+    {
+      "action": "assert",
+      "label": "Veinburst gains 0.25 per attack power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 504819,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "veinburst_before_ap",
+      "ratio_to": "ap_gain",
+      "min": 0.245,
+      "max": 0.255
+    },
+    {
+      "action": "assert",
+      "label": "Crimson Tide tick gains 0 per attack power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 504134,
+      "effect": 0,
+      "target": "dummy",
+      "periodic": true,
+      "relative_to": "tide_before_ap",
+      "ratio_to": "ap_gain",
+      "min": -0.005,
+      "max": 0.005
+    },
+    {
+      "action": "assert",
+      "label": "Scarlet Delirium tick gains 0 per attack power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 803688,
+      "effect": 1,
+      "target": "dummy",
+      "periodic": true,
+      "relative_to": "delirium_before_ap",
+      "ratio_to": "ap_gain",
+      "min": -0.005,
+      "max": 0.005
+    },
+    {
+      "action": "assert",
+      "label": "Vampiric Fang gains 0 per attack power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 553272,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "fang_before_ap",
+      "ratio_to": "ap_gain",
+      "min": -0.005,
+      "max": 0.005
+    },
+    {
+      "action": "assert",
+      "label": "Dark Liturgy heals 0 more per attack power",
+      "actor": "bloodmage",
+      "metric": "spell_healing_done",
+      "spell": 572575,
+      "effect": 0,
+      "target": "ally",
+      "relative_to": "liturgy_before_ap",
+      "ratio_to": "ap_gain",
+      "min": -0.005,
+      "max": 0.005
+    },
+    {
+      "action": "assert",
+      "label": "Sanguine Mend heals 0.2 more per attack power",
+      "actor": "bloodmage",
+      "metric": "spell_healing_done",
+      "spell": 504085,
+      "effect": 0,
+      "target": "ally",
+      "relative_to": "mend_before_ap",
+      "ratio_to": "ap_gain",
+      "min": 0.195,
+      "max": 0.205
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 501682,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "howl_before_sp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 806502,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "strike_before_sp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 806214,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "finale_before_sp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 504819,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "veinburst_before_sp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 504134,
+      "effect": 0,
+      "target": "dummy",
+      "periodic": true,
+      "save_as": "tide_before_sp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 803688,
+      "effect": 1,
+      "target": "dummy",
+      "periodic": true,
+      "save_as": "delirium_before_sp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 553272,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "fang_before_sp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_power",
+      "school": 5,
+      "save_as": "sp_before"
+    },
+    {
+      "action": "set_aura",
+      "label": "+2000 spell damage to every school",
+      "actor": "bloodmage",
+      "spell": 44505,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_power",
+      "school": 5,
+      "save_as": "sp_gain",
+      "relative_to": "sp_before"
+    },
+    {
+      "action": "assert",
+      "label": "The fixture adds 2000 Shadow spell power",
+      "actor": "bloodmage",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "sp_before",
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Night Hunter's Howl gains 0 per spell power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 501682,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "howl_before_sp",
+      "ratio_to": "sp_gain",
+      "min": -0.005,
+      "max": 0.005
+    },
+    {
+      "action": "assert",
+      "label": "Aortic Assault strike gains 0 per spell power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 806502,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "strike_before_sp",
+      "ratio_to": "sp_gain",
+      "min": -0.005,
+      "max": 0.005
+    },
+    {
+      "action": "assert",
+      "label": "Aortic Assault finale gains 0 per spell power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 806214,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "finale_before_sp",
+      "ratio_to": "sp_gain",
+      "min": -0.005,
+      "max": 0.005
+    },
+    {
+      "action": "assert",
+      "label": "Veinburst gains 0.85 per spell power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 504819,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "veinburst_before_sp",
+      "ratio_to": "sp_gain",
+      "min": 0.845,
+      "max": 0.855
+    },
+    {
+      "action": "assert",
+      "label": "Crimson Tide tick gains 0.28 per spell power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 504134,
+      "effect": 0,
+      "target": "dummy",
+      "periodic": true,
+      "relative_to": "tide_before_sp",
+      "ratio_to": "sp_gain",
+      "min": 0.275,
+      "max": 0.285
+    },
+    {
+      "action": "assert",
+      "label": "Scarlet Delirium tick gains 0.15 per spell power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 803688,
+      "effect": 1,
+      "target": "dummy",
+      "periodic": true,
+      "relative_to": "delirium_before_sp",
+      "ratio_to": "sp_gain",
+      "min": 0.145,
+      "max": 0.155
+    },
+    {
+      "action": "assert",
+      "label": "Vampiric Fang gains 0.34 per spell power",
+      "actor": "bloodmage",
+      "metric": "spell_damage_done",
+      "spell": 553272,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "fang_before_sp",
+      "ratio_to": "sp_gain",
+      "min": 0.335,
+      "max": 0.345
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_healing_done",
+      "spell": 572575,
+      "effect": 0,
+      "target": "ally",
+      "save_as": "liturgy_before_healing"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_healing_done",
+      "spell": 504085,
+      "effect": 0,
+      "target": "ally",
+      "save_as": "mend_before_healing"
+    },
+    {
+      "action": "set_aura",
+      "label": "QATest +2000 Spell Healing",
+      "actor": "bloodmage",
+      "spell": 51041,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Dark Liturgy gains 0.35 of 2000 bonus healing",
+      "actor": "bloodmage",
+      "metric": "spell_healing_done",
+      "spell": 572575,
+      "effect": 0,
+      "target": "ally",
+      "relative_to": "liturgy_before_healing",
+      "min": 698,
+      "max": 702
+    },
+    {
+      "action": "assert",
+      "label": "Sanguine Mend gains 0.58 of 2000 bonus healing",
+      "actor": "bloodmage",
+      "metric": "spell_healing_done",
+      "spell": 504085,
+      "effect": 0,
+      "target": "ally",
+      "relative_to": "mend_before_healing",
+      "min": 1158,
+      "max": 1162
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_effect_value",
+      "spell": 572575,
+      "effect": 0,
+      "save_as": "liturgy_base_before_spirit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_effect_value",
+      "spell": 504085,
+      "effect": 0,
+      "save_as": "mend_base_before_spirit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "stat",
+      "stat": 4,
+      "save_as": "spirit_before"
+    },
+    {
+      "action": "set_aura",
+      "label": "QA Test +1000 Spirit",
+      "actor": "bloodmage",
+      "spell": 486,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "stat",
+      "stat": 4,
+      "save_as": "spirit_gain",
+      "relative_to": "spirit_before"
+    },
+    {
+      "action": "assert",
+      "label": "The fixture raises Spirit enough to dominate int32 truncation",
+      "actor": "bloodmage",
+      "metric": "stat",
+      "stat": 4,
+      "relative_to": "spirit_before",
+      "min": 900
+    },
+    {
+      "action": "assert",
+      "label": "Dark Liturgy's base heal gains 0.25 per Spirit",
+      "actor": "bloodmage",
+      "metric": "spell_effect_value",
+      "spell": 572575,
+      "effect": 0,
+      "relative_to": "liturgy_base_before_spirit",
+      "ratio_to": "spirit_gain",
+      "min": 0.22,
+      "max": 0.28
+    },
+    {
+      "action": "assert",
+      "label": "Sanguine Mend's base heal gains 0.25 per Spirit",
+      "actor": "bloodmage",
+      "metric": "spell_effect_value",
+      "spell": 504085,
+      "effect": 0,
+      "relative_to": "mend_base_before_spirit",
+      "ratio_to": "spirit_gain",
+      "min": 0.18,
+      "max": 0.32
+    }
+  ]
+}

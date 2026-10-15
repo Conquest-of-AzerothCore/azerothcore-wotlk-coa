@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Sun Stride frees the caster from roots and slows and boosts speed (#2211)",
+  "contract": "Sun Stride 680700 (Spell.dbc, SpellFamilyName 33, RecoveryTime 24000) carries SPELL_AURA_MECHANIC_IMMUNITY (77) twice, with EffectMiscValue 7 (MECHANIC_ROOT) and 11 (MECHANIC_SNARE), plus SPELL_AURA_MOD_INCREASE_SPEED (31) with EffectBasePoints 149 resolving to +150 (percent). Its AttributesEx carries SPELL_ATTR1_IMMUNITY_PURGES_EFFECT (0x8000, value 32768). SpellInfo::ApplyAllSpellImmunitiesTo (SpellInfo.cpp), invoked from AuraEffect::HandleModMechanicImmunity on every mechanic-immunity aura apply, calls target->RemoveAurasWithMechanic(mechanicImmunity, ...) whenever that attribute is set -- so casting Sun Stride purges any currently-applied root or snare, not merely blocking new ones, with no script needed. Frost Nova (122, EffectMechanic word for effect 1 = 7/ROOT) and Hamstring (1715, EffectMechanic for effect 0 = 11/SNARE) are used here only as real, DBC-verified root/snare fixtures, unrelated to their normal casters.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "set_aura", "actor": "cleric", "spell": 122, "stacks": 1 },
+    { "action": "set_aura", "actor": "cleric", "spell": 1715, "stacks": 1 },
+    { "action": "assert", "label": "Fixture root is present", "actor": "cleric", "metric": "aura", "spell": 122, "caster": "cleric", "equals": 1 },
+    { "action": "assert", "label": "Fixture snare is present", "actor": "cleric", "metric": "aura", "spell": 1715, "caster": "cleric", "equals": 1 },
+    { "action": "learn", "actor": "cleric", "spell": 680700 },
+    { "action": "cast", "actor": "cleric", "spell": 680700 },
+    { "action": "assert", "label": "Sun Stride purges the fixture root", "actor": "cleric", "metric": "aura", "spell": 122, "caster": "cleric", "equals": 0 },
+    { "action": "assert", "label": "Sun Stride purges the fixture snare", "actor": "cleric", "metric": "aura", "spell": 1715, "caster": "cleric", "equals": 0 },
+    { "action": "assert", "label": "Sun Stride raises run speed to 2.5x", "actor": "cleric", "metric": "run_speed_rate", "min": 2.4, "max": 2.6 }
+  ]
+}

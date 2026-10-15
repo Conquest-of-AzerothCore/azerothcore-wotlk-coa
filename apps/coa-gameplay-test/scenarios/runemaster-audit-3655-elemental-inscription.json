@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Runemaster Elemental Inscription cuts Zenith and Primordial Fury cooldowns on Smolder cast (#3655)",
+  "contract": [
+    "Elemental Inscription 806737 Effect0 is SPELL_AURA_PROC_TRIGGER_SPELL, ProcChance 100, trigger 706522",
+    "(two SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN effects: -5000ms on Zenith 712325, RecoveryTime 45000ms;",
+    "-10000ms on Primordial Fury 806543, RecoveryTime 90000ms; matching the tooltip exactly). Spell.dbc ProcFlags",
+    "is 0 and, before the fix, no spell_proc row existed, so casting Smolder never reduced either cooldown.",
+    "Smolder (801087) is family 38, SpellFamilyFlags0 512, DmgClass melee, a harmful SPELL_EFFECT_NORMALIZED_",
+    "WEAPON_DMG hit: at cast phase Spell.cpp only distinguishes magic-class casts, so a harmful non-magic cast",
+    "sets PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG (0x1000), so the fix scopes the row to that ProcFlags, cast",
+    "phase, Smolder's own family/classmask. Smolder requires a two-handed weapon (per runemaster-windsage.json)."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 80, "health": 2000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 227},
+    {"action": "add_item", "actor": "rm", "item": 35},
+    {"action": "equip", "label": "Bent Staff in the main hand", "actor": "rm", "item": 35, "slot": 15},
+    {"action": "learn", "actor": "rm", "spell": 712325},
+    {"action": "learn", "actor": "rm", "spell": 806543},
+    {"action": "learn", "actor": "rm", "spell": 801087},
+    {"action": "learn", "actor": "rm", "spell": 806737},
+    {"action": "assert", "label": "SETUP: Elemental Inscription is active", "actor": "rm", "metric": "aura",
+      "spell": 806737, "equals": 1, "within_ms": 1500},
+    {"action": "set_aura", "label": "Fixture: mana pool for the repeated casts", "actor": "rm",
+      "spell": 10040, "stacks": 3},
+    {"action": "assert", "label": "SETUP: the mana fixture landed", "actor": "rm", "metric": "max_power",
+      "power": 0, "min": 20000, "within_ms": 3000},
+
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 20000},
+    {"action": "cast", "actor": "rm", "spell": 712325, "target": "dummy"},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 20000},
+    {"action": "cast", "actor": "rm", "spell": 806543, "target": "dummy"},
+    {"action": "wait", "label": "Let the global cooldown pass", "ms": 1500},
+    {"action": "assert", "label": "SETUP: Zenith is on its 45 sec cooldown", "actor": "rm", "metric": "cooldown_ms",
+      "spell": 712325, "min": 42500},
+    {"action": "assert", "label": "SETUP: Primordial Fury is on its 90 sec cooldown", "actor": "rm",
+      "metric": "cooldown_ms", "spell": 806543, "min": 87500},
+
+    {"action": "snapshot", "actor": "rm", "metric": "cooldown_ms", "spell": 712325, "save_as": "zenith_before"},
+    {"action": "snapshot", "actor": "rm", "metric": "cooldown_ms", "spell": 806543, "save_as": "pf_before"},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 20000},
+    {"action": "cast", "actor": "rm", "spell": 801087, "target": "dummy"},
+    {"action": "assert", "label": "CONTRACT: casting Smolder removes 5 sec from Zenith", "actor": "rm",
+      "metric": "cooldown_ms", "spell": 712325, "relative_to": "zenith_before", "min": -5700, "max": -4700},
+    {"action": "assert", "label": "CONTRACT: casting Smolder removes 10 sec from Primordial Fury", "actor": "rm",
+      "metric": "cooldown_ms", "spell": 806543, "relative_to": "pf_before", "min": -10700, "max": -9700}
+  ]
+}

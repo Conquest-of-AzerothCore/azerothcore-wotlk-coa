@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Dreadsteed Portal shows the shadow portal model (#5503)",
+  "contract": [
+    "Dreadsteed Portal 804774 summons creature 50268 in front of the knight after its 10 s cast.",
+    "The live client creature cache (WDB, captured 2026-09-04) gives 50268 display 461007,",
+    "the 7fx_warlock_shadowportal_artifactvariant_state model in the installed CreatureDisplayInfo.dbc.",
+    "The previous data used display 9510, the generic Creature_SpellPortal model.",
+    "This observes the server display id, not client rendering or animation."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 46
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 4000 },
+    { "action": "learn", "actor": "knight", "spell": 804774 },
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000 },
+    { "action": "cast", "actor": "knight", "spell": 804774, "label": "cast Dreadsteed Portal" },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "owned_creature_count",
+      "entry": 50268,
+      "equals": 1,
+      "within_ms": 15000,
+      "label": "SETUP: the portal is summoned"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "owned_creature_display",
+      "entry": 50268,
+      "equals": 461007,
+      "label": "the portal uses the live shadow portal display"
+    }
+  ]
+}

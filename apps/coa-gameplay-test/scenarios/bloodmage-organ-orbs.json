@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Organ Orbs gives Pooled Vitality 3% Spirit per stack (#605)",
+  "contract": "Organ Orbs 807490 is one effect: aura 107 with MiscValue 23 (SPELLMOD_EFFECT3, which Unit::ApplyEffectModifiers maps to effect index 2) and BasePoints 2 + DieSides 1 = +3, over EffectSpellClassMask (536870912, 0, 0) = word 0 bit 29 = Pooled Vitality 680687 and Running Wild 800175. Pooled Vitality's effect 2 is aura 137 MOD_TOTAL_STAT_PERCENTAGE with MiscValue 4 (STAT_SPIRIT) and value 0, so it becomes 3, and AuraEffect::CalculateAmount multiplies by the stack amount. Running Wild's effect 2 is aura 42 PROC_TRIGGER_SPELL, whose amount is unread. Tooltip: \"Each stack of Pooled Vitality now increases your Spirit by $s1%.\" Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Pooled Vitality grants no Spirit before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 680687,
+      "op": 23,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807490
+    },
+    {
+      "action": "assert",
+      "label": "Organ Orbs gives Pooled Vitality 3% Spirit per stack",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 680687,
+      "op": 23,
+      "base": 0,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Organ Orbs does not touch Bloodbolt",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 23,
+      "base": 0,
+      "equals": 0
+    }
+  ]
+}

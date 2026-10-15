@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Issue 2745: Surging Slash arms after the 3rd Runeblade cast",
+  "contract": [
+    "Surging Slash 705579 reads 'Every 3rd cast of Runeblade now transforms your next Runeblade within $572358d",
+    "into Surging Slash.' Its only effect is a PROC_TRIGGER_SPELL of 572358, ProcChance 100, but Spell.dbc gives",
+    "705579 itself ProcFlags 0, so the aura never registered a proc and 572358 never applied on any Runeblade",
+    "cast. Runeblade (707141-707148, 573444-573447) is the only family 38 spell with mask2 0x40000 (DmgClass",
+    "melee); 572358 carries its own StackAmount 3 (DurationIndex 8, 15 sec), so once the proc fires on every",
+    "Runeblade cast the native aura system stacks it by 1 per cast, capped at 3 -- the 'every 3rd cast' counter",
+    "already lives in the DBC record. Expected: the 1st and 2nd Runeblade cast leave 572358 at 1 and 2 stacks;",
+    "the 3rd reaches 3. Consuming that stack to actually recast Runeblade as 803736 is a separate, unread",
+    "mechanic and out of scope for this issue."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80, "melee_hit_rating": 10000, "spell_hit_rating": 10000,
+      "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 707141},
+    {"action": "learn", "actor": "rm", "spell": 705579},
+    {"action": "assert", "label": "SETUP: Surging Slash is known", "actor": "rm", "metric": "aura",
+      "spell": 705579, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "SETUP: the transform buff is absent", "actor": "rm", "metric": "aura_stacks",
+      "spell": 572358, "equals": 0},
+    {"action": "restore_charges", "actor": "rm", "spell": 707141},
+    {"action": "assert", "label": "SETUP: Runeblade holds 3 charges", "actor": "rm", "metric": "spell_charges",
+      "spell": 707141, "equals": 3},
+    {"action": "cast", "label": "Runeblade 1", "actor": "rm", "spell": 707141, "target": "dummy"},
+    {"action": "assert", "label": "After the 1st cast the buff has 1 stack", "actor": "rm",
+      "metric": "aura_stacks", "spell": 572358, "equals": 1, "within_ms": 2000},
+    {"action": "wait", "label": "Runeblade global cooldown", "ms": 1300},
+    {"action": "cast", "label": "Runeblade 2", "actor": "rm", "spell": 707141, "target": "dummy"},
+    {"action": "assert", "label": "After the 2nd cast the buff has 2 stacks", "actor": "rm",
+      "metric": "aura_stacks", "spell": 572358, "equals": 2, "within_ms": 2000},
+    {"action": "wait", "label": "Runeblade global cooldown", "ms": 1300},
+    {"action": "cast", "label": "Runeblade 3", "actor": "rm", "spell": 707141, "target": "dummy"},
+    {"action": "assert", "label": "CONTRACT: the 3rd cast arms Surging Slash at 3 stacks", "actor": "rm",
+      "metric": "aura_stacks", "spell": 572358, "equals": 3, "within_ms": 2000}
+  ]
+}

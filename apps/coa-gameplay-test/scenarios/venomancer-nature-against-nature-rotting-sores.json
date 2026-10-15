@@ -1,0 +1,374 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Nature Against Nature amplifies Widowmaker and Venom Fang per Sting stack, Rotting Sores speeds and crits Rotfang (#1101, #1121)",
+  "contract": "#1101: Nature Against Nature 680871 effect 0 is aura 107 (ADD_FLAT_MODIFIER) misc 23 SPELLMOD_EFFECT3, BasePoints 7 DieSides 1 (+8), EffectSpellClassMask (0,0x800,0). Nerubian Sting 800882 (SpellFamilyFlags word 1 0x800, StackAmount 3) has effect 2 aura 271 (MOD_DAMAGE_FROM_CASTER), BasePoints -1 DieSides 1 (base 0) and EffectSpellClassMask (0,0x14001,0), which selects Venom Fang (word 1 0x4000) and Widowmaker (0x10000). SpellEffectInfo::CalcValue reaches Unit::ApplyEffectModifiers, so the effect resolves to 0+8; AuraEffect::CalculateAmount multiplies it by the stack count (8/16/24), and Unit::SpellDamageBonusTaken multiplies damage from the aura's own caster by that amount when the spell matches the mask. The fixture applies the Sting to the Venomancer itself (caster = victim) so the taken-damage query has both ends; Venom Bolt (word 1 0x80) is outside the mask and is asserted unchanged. A Sting-free baseline of each taken value is snapshotted before the talent is learned. The amount is fixed when the stacks are set, which mirrors a real application. #1121: Rotting Sores 807601 has effect 0 aura 108 (ADD_PCT_MODIFIER) misc 19 SPELLMOD_ACTIVATION_TIME, BasePoints -21 DieSides 1 (-20 percent) and effect 1 aura 286 (ABILITY_PERIODIC_CRIT), both with EffectSpellClassMask (0,0x100000,0), the Rotfang rank mask (Rotfang ranks 578342, 578343, 804977, 807602..807607 each carry word 1 0x100000, aura 3 with a 3000 ms Amplitude). AuraEffect::CalculatePeriodicData applies SPELLMOD_ACTIVATION_TIME to the amplitude and AuraEffect::CalcPeriodicCritChance returns the caster's SpellDoneCritChance only while an aura 286 matching the spell is held. The data is a 20 percent shorter interval (2400 ms), so a tooltip reading 'tick rate increased by 20%' is an interpretation of that value, not a delivery bug; the scenario asserts the DBC value. Both players carry the same spell_crit_rating so the talent is the only difference; the crit chance is snapshotted at aura creation, which is why the talent is learned before the aura is applied. Rotfang is applied with set_aura on the Venomancer itself, as the cast needs Spider Form and Brood Marks. No script or SQL is needed; this is a regression scenario for behaviour that already works.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 29,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    },
+    {
+      "id": "nature",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "sores",
+      "race": 1,
+      "class": 29,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Nerubian Sting's third effect carries no value without the talent",
+      "actor": "nature",
+      "metric": "spell_effect_value",
+      "spell": 800882,
+      "effect": 2,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline damage taken from the Venomancer's Widowmaker (no Sting yet)",
+      "actor": "nature",
+      "metric": "spell_damage_taken",
+      "save_as": "wm0",
+      "spell": 804961,
+      "target": "nature"
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline damage taken from the Venomancer's Venom Fang (no Sting yet)",
+      "actor": "nature",
+      "metric": "spell_damage_taken",
+      "save_as": "vf0",
+      "spell": 800880,
+      "target": "nature"
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline damage taken from the Venomancer's Venom Bolt (no Sting yet)",
+      "actor": "nature",
+      "metric": "spell_damage_taken",
+      "save_as": "vb0",
+      "spell": 800869,
+      "target": "nature"
+    },
+    {
+      "action": "learn",
+      "actor": "nature",
+      "spell": 680871,
+      "label": "Learn Nature Against Nature"
+    },
+    {
+      "action": "assert",
+      "label": "Nature Against Nature adds 8 to Nerubian Sting's third effect",
+      "actor": "nature",
+      "metric": "spell_effect_value",
+      "spell": 800882,
+      "effect": 2,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "Control Sting effect stays at 0",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 800882,
+      "effect": 2,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply Nerubian Sting with 1 stack(s) owned by the talented Venomancer",
+      "actor": "nature",
+      "spell": 800882,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Sting applied (1 stacks)",
+      "actor": "nature",
+      "metric": "aura_stacks",
+      "spell": 800882,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Sting's damage-from-caster effect is 8 after 1 stack(s)",
+      "actor": "nature",
+      "metric": "aura_amount",
+      "spell": 800882,
+      "effect": 2,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "Widowmaker's damage taken rises by 8 percent at 1 stack(s)",
+      "actor": "nature",
+      "metric": "spell_damage_taken",
+      "spell": 804961,
+      "target": "nature",
+      "ratio_to": "wm0",
+      "min": 1.0770000000000002,
+      "max": 1.083
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply Nerubian Sting with 2 stack(s) owned by the talented Venomancer",
+      "actor": "nature",
+      "spell": 800882,
+      "stacks": 2
+    },
+    {
+      "action": "assert",
+      "label": "Sting applied (2 stacks)",
+      "actor": "nature",
+      "metric": "aura_stacks",
+      "spell": 800882,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Sting's damage-from-caster effect is 16 after 2 stack(s)",
+      "actor": "nature",
+      "metric": "aura_amount",
+      "spell": 800882,
+      "effect": 2,
+      "equals": 16
+    },
+    {
+      "action": "assert",
+      "label": "Widowmaker's damage taken rises by 16 percent at 2 stack(s)",
+      "actor": "nature",
+      "metric": "spell_damage_taken",
+      "spell": 804961,
+      "target": "nature",
+      "ratio_to": "wm0",
+      "min": 1.157,
+      "max": 1.1629999999999998
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply Nerubian Sting with 3 stack(s) owned by the talented Venomancer",
+      "actor": "nature",
+      "spell": 800882,
+      "stacks": 3
+    },
+    {
+      "action": "assert",
+      "label": "Sting applied (3 stacks)",
+      "actor": "nature",
+      "metric": "aura_stacks",
+      "spell": 800882,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Sting's damage-from-caster effect is 24 after 3 stack(s)",
+      "actor": "nature",
+      "metric": "aura_amount",
+      "spell": 800882,
+      "effect": 2,
+      "equals": 24
+    },
+    {
+      "action": "assert",
+      "label": "Widowmaker's damage taken rises by 24 percent at 3 stack(s)",
+      "actor": "nature",
+      "metric": "spell_damage_taken",
+      "spell": 804961,
+      "target": "nature",
+      "ratio_to": "wm0",
+      "min": 1.237,
+      "max": 1.2429999999999999
+    },
+    {
+      "action": "assert",
+      "label": "Venom Fang's damage taken rises by 24 percent at 3 stacks",
+      "actor": "nature",
+      "metric": "spell_damage_taken",
+      "spell": 800880,
+      "target": "nature",
+      "ratio_to": "vf0",
+      "min": 1.237,
+      "max": 1.243
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt is outside the mask and is not amplified",
+      "actor": "nature",
+      "metric": "spell_damage_taken",
+      "spell": 800869,
+      "target": "nature",
+      "ratio_to": "vb0",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply the same Sting with 3 stacks on a Venomancer without the talent",
+      "actor": "control",
+      "spell": 800882,
+      "stacks": 3
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent the 3-stack Sting's effect is 0",
+      "actor": "control",
+      "metric": "aura_amount",
+      "spell": 800882,
+      "effect": 2,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Remove the Sting",
+      "actor": "nature",
+      "spell": 800882,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Removing the Sting removes the amplification",
+      "actor": "nature",
+      "metric": "spell_damage_taken",
+      "spell": 804961,
+      "target": "nature",
+      "ratio_to": "wm0",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "label": "Rotfang keeps its 3000 ms interval without Rotting Sores (lowest rank 804977)",
+      "actor": "sores",
+      "metric": "spell_modifier",
+      "spell": 804977,
+      "op": 19,
+      "base": 3000,
+      "equals": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "sores",
+      "spell": 807601,
+      "label": "Learn Rotting Sores"
+    },
+    {
+      "action": "assert",
+      "label": "Rotting Sores shortens Rotfang's interval by 20 percent (rank 804977)",
+      "actor": "sores",
+      "metric": "spell_modifier",
+      "spell": 804977,
+      "op": 19,
+      "base": 3000,
+      "min": 2399,
+      "max": 2401
+    },
+    {
+      "action": "assert",
+      "label": "Rotting Sores shortens Rotfang's interval by 20 percent (top rank 807607)",
+      "actor": "sores",
+      "metric": "spell_modifier",
+      "spell": 807607,
+      "op": 19,
+      "base": 3000,
+      "min": 2399,
+      "max": 2401
+    },
+    {
+      "action": "assert",
+      "label": "The control's Rotfang interval is unchanged",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 807607,
+      "op": 19,
+      "base": 3000,
+      "equals": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rotting Sores does not touch Venom Bolt's activation time",
+      "actor": "sores",
+      "metric": "spell_modifier",
+      "spell": 800869,
+      "op": 19,
+      "base": 3000,
+      "equals": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply Rotfang owned by the control",
+      "actor": "control",
+      "spell": 807607,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply Rotfang owned by the talented Venomancer",
+      "actor": "sores",
+      "spell": 807607,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "The control's Rotfang ticks every 3000 ms",
+      "actor": "control",
+      "metric": "aura_amplitude_ms",
+      "spell": 807607,
+      "effect": 0,
+      "equals": 3000
+    },
+    {
+      "action": "assert",
+      "label": "With Rotting Sores Rotfang ticks every 2400 ms",
+      "actor": "sores",
+      "metric": "aura_amplitude_ms",
+      "spell": 807607,
+      "effect": 0,
+      "min": 2399,
+      "max": 2401
+    },
+    {
+      "action": "assert",
+      "label": "Without Rotting Sores Rotfang's ticks cannot critically strike",
+      "actor": "control",
+      "metric": "aura_crit_chance",
+      "spell": 807607,
+      "effect": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "With Rotting Sores Rotfang's ticks carry the caster's spell crit chance",
+      "actor": "sores",
+      "metric": "aura_crit_chance",
+      "spell": 807607,
+      "effect": 0,
+      "min": 1
+    }
+  ]
+}

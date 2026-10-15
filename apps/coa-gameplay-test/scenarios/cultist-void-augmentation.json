@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Void Augmentation fills Dreadnought's inert cooldown slot and adds jump targets to Eldritch Shock natively (#1184)",
+  "contract": "680575 effect0 is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 23 = SPELLMOD_EFFECT3 (modifies effect-index-2), BasePoints -3001 / DieSides 1 -> value -3000, EffectSpellClassMask dwordB bit10 (1024), which matches Dreadnought (567525)'s own SpellFamilyFlags dwordB bits 0+10 (1025) -- verified from Spell.dbc, not assumed. Dreadnought's own effect-index-2 is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, misc 11 = SPELLMOD_COOLDOWN, BasePoints -1 (baseline value 0, an inert placeholder), EffectSpellClassMask dwordB bit14 (16384) matching Twilight Shieldtoss (804208)'s own SpellFamilyFlags dwordB bit14. This is the same 'talent fills a placeholder effect slot on a different, already-shipped buff spell' pattern as #1165's 680556, and the harness's spell_effect_value metric observes it the same way, via SpellEffectInfo::CalcValue's own internal Unit::ApplyEffectModifiers call, independent of any live buff-cast timing. Effect1 of 680575 is aura 107, misc 17 = SPELLMOD_JUMP_TARGETS, BasePoints 2 / DieSides 1 -> value 3, EffectSpellClassMask dwordC bit19 (524288), which matches Eldritch Shock (808043)'s own SpellFamilyFlags dwordC bit19 (524288) -- this spell is the live DBC row behind the tooltip's 'Twilight Shock' name (a beta/community tooltip-name drift, not an implementation defect, per the docs/systems/ascension-spell-parity.md Cultist lessons). Spell::SelectImplicitChainTargets computes maxTargets = ChainTarget(0) + the SPELLMOD_JUMP_TARGETS flat total, then searches maxTargets-1 additional targets, so a spell_modifier reading of 3 directly proves the tooltip's '2 additional enemies' without needing a live multi-target hit count (avoiding a hit-roll-dependent assertion).",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 40 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn/level settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: Dreadnought's cooldown-reduction slot on Twilight Shieldtoss is inert (0)",
+      "actor": "cultist", "metric": "spell_effect_value", "spell": 567525, "effect": 2, "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: Eldritch Shock has no extra jump targets before the talent",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 808043, "op": 17, "base": 0, "equals": 0
+    },
+    { "action": "learn", "actor": "cultist", "spell": 680575 },
+    {
+      "action": "assert", "label": "Void Augmentation fills Dreadnought's cooldown-reduction slot with -3000 ms",
+      "actor": "cultist", "metric": "spell_effect_value", "spell": 567525, "effect": 2, "equals": -3000
+    },
+    {
+      "action": "assert", "label": "Void Augmentation adds 3 to Eldritch Shock's jump-target total (2 additional enemies)",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 808043, "op": 17, "base": 0, "equals": 3
+    }
+  ]
+}

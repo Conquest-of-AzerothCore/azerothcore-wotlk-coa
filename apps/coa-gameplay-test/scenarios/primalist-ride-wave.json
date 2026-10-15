@@ -1,0 +1,529 @@
+{
+  "schema": 1,
+  "name": "Primalist Ride the Wave affected allies",
+  "contract": "First/highest Seismic Wave heals grant 30% movement speed for four seconds to their actual ally targets. Baseline, expiry and removal are checked.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 58
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9612.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 300867,
+      "all_specs": true
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "run_speed_rate",
+      "save_as": "base_speed"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 805462,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572878,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572877,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572876,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572875,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572874,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572873,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 805462
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 805462
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 805462,
+      "target": "ally",
+      "save_as": "baseline"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 805462
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 805462,
+      "target": "ally",
+      "relative_to": "baseline",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300868,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 4500
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300868,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 300867
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 805462,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572878,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572877,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572876,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572875,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572874,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572873,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 805462
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 805462
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 805462,
+      "target": "ally",
+      "save_as": "first"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 805462
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 805462,
+      "target": "ally",
+      "relative_to": "first",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300868,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 300868,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "run_speed_rate",
+      "ratio_to": "base_speed",
+      "min": 1.299,
+      "max": 1.301
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_duration_ms",
+      "spell": 300868,
+      "min": 2500,
+      "max": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 4500
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300868,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 805462,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572878,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572877,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572876,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572875,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572874,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572873,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 572878
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 572878
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 572878,
+      "target": "ally",
+      "save_as": "highest"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 572878
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 572878,
+      "target": "ally",
+      "relative_to": "highest",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300868,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 300868,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "run_speed_rate",
+      "ratio_to": "base_speed",
+      "min": 1.299,
+      "max": 1.301
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_duration_ms",
+      "spell": 300868,
+      "min": 2500,
+      "max": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 4500
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300868,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 300867,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 805462,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572878,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572877,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572876,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572875,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572874,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 572873,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 572878
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 572878
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 572878,
+      "target": "ally",
+      "save_as": "removed"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 572878
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 572878,
+      "target": "ally",
+      "relative_to": "removed",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300868,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 4500
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300868,
+      "equals": 0
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

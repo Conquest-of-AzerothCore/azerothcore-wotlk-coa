@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "name": "Crusader purchases and Lights Chosen survive specialization changes and resets (#4447, #4463)",
+  "contract": "CharacterAdvancement entries 34343, 6861, 7024, 30607 and 34369 have no RequiredEntry gate in the active\nDBC. A level 60 Crusader may buy them. Light's Chosen 301310 (entry 11287) is automatic at level 20 in\nCrusader 24. Leaving removes it; returning and talent reset restore or preserve the passive and aura.\nNative removals and resets retain their original prices; fixture actors have 100 gold to pay them.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_money",
+      "label": "Fund the original native removal and purge prices",
+      "actor": "templar",
+      "value": 1000000
+    },
+    {
+      "action": "specialization",
+      "actor": "templar",
+      "id": 24
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "spell": 301310,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 301310,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "templar",
+      "entry": 34343,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "spell": 680891,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "templar",
+      "entry": 6861,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "spell": 520009,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "templar",
+      "entry": 7024,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "spell": 705291,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "templar",
+      "entry": 30607,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "spell": 524822,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "templar",
+      "entry": 34369,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "spell": 705255,
+      "equals": 1
+    },
+    {
+      "action": "specialization",
+      "actor": "templar",
+      "id": 23
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "spell": 301310,
+      "equals": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "templar",
+      "id": 24
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "spell": 301310,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 301310,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The returning upload does not restore an omitted paid Crusader talent",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 680891
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Repurchase through the complete native upload",
+      "actor": "templar",
+      "entry": 34343,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "spell": 680891,
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "actor": "templar",
+      "opcode": 531
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "spell": 680891,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "knows_spell",
+      "spell": 301310,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 301310,
+      "equals": 1
+    }
+  ]
+}

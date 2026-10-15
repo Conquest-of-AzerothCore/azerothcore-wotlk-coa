@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "name": "Sanguine Scion raises Bloodbolt's critical strike chance (#915)",
+  "contract": "Sanguine Scion 807292's tooltip is \"Increases the critical strike chance of Sanguine Mend and Bloodbolt by $s1%\", with $s1 = 10 (BasePoints 9 + DieSides 1). Its single effect is aura 107 with MiscValue 7 (SPELLMOD_CRITICAL_CHANCE) over EffectSpellClassMask (524288, 8192, 0): word 0 bit 19 selects the nine Sanguine Mend records (504079-504086, 802310), which the tooltip names, and word 1 bit 13 selects Bloodmoon Blast, which it does not; Bloodbolt is word 1 bit 17 (131072) and that bit is absent, so the second spell the tooltip names received nothing. The discriminating assertion is the crit modifier on Bloodbolt 578305: 0 on today's tree, 10 with the missing bit added. The Sanguine Mend assertion already passes. Bloodmoon Blast is deliberately left unasserted: removing a bit the record carries is a separate question from adding the one it is missing, and this issue reports only the missing Bloodbolt.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Bloodbolt has no crit bonus before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Sanguine Mend has no crit bonus before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 504086,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807292
+    },
+    {
+      "action": "assert",
+      "label": "Sanguine Scion raises Bloodbolt's crit chance by 10",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Sanguine Scion raises Sanguine Mend's crit chance by 10",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 504086,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Sanguine Scion does not reach Claw Sweep",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 500444,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    }
+  ]
+}

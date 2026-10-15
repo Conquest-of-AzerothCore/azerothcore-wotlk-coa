@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "name": "Cheating Time extends Flux Emitter when Shatter Echo is cast (#1979)",
+  "contract": "Cheating Time 524945 applies aura 42 (proc trigger spell) on Cheating Time 524944, whose single effect is 173 SPELL_EFFECT_ASCENSION_REFRESH_AURA with EffectBasePoints 3999 / DieSides 1 (4000 ms), EffectMiscValue 804435 (Flux Emitter) and EffectMiscValueB 1, the additive branch of Spell::EffectAscensionRefreshAura. Spell.dbc gives 524945's record ProcFlags 0 and no spell_proc row existed, so the extension could never fire. With a spell_proc row on the cast phase of Shatter Echo (family 28, word2 0x10, carried by 804503 and its ranks) at the record's own 100% ProcChance, casting Shatter Echo must raise Flux Emitter's remaining duration instead of letting it decay. Both spells carry CasterAuraSpell 804455 (Echo Fragment), so the resource is fixtured with set_aura before each cast; five stacks also give Flux Emitter its per-fragment duration bonus (Echo Fragment's effect 1 is SPELLMOD_DURATION, 5000 ms per stack), so its DurationIndex 28 base of 5000 ms becomes long enough to observe. The assertion is relative to a snapshot taken 1.5 s after the Flux Emitter cast: without the fix the remaining duration can only have fallen, so a positive delta discriminates and needs no randomness.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 524945
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 804435
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 804503
+    },
+    {
+      "action": "set_aura",
+      "label": "Echo Fragments satisfy Flux Emitter's CasterAuraSpell",
+      "actor": "chronomancer",
+      "spell": 804455,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 804435
+    },
+    {
+      "action": "assert",
+      "label": "Flux Emitter is active on the Chronomancer",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 804435,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Continuum duration decay measurably",
+      "ms": 1500
+    },
+    {
+      "action": "snapshot",
+      "label": "Flux Emitter duration before Shatter Echo",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 804435,
+      "caster": "chronomancer",
+      "save_as": "flux_before"
+    },
+    {
+      "action": "set_aura",
+      "label": "Echo Fragments satisfy Shatter Echo's CasterAuraSpell",
+      "actor": "chronomancer",
+      "spell": 804455,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 804503,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Casting Shatter Echo extends Flux Emitter",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 804435,
+      "caster": "chronomancer",
+      "relative_to": "flux_before",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

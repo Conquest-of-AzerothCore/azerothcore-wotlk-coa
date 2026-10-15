@@ -1,0 +1,50 @@
+[worldserver]
+
+################################################################################################################
+#    Spellbook
+#        Description: the Books of Ascension as a real class trainer. Right-clicking a book
+#                     opens the trainer window with the viewer's own class abilities, ranked
+#                     and gated by level, and the Train button learns the selected one.
+#
+#        Spellbook.Enable: 1 (Default) Serve the books.
+#                          0            Leave them inert, as if this module were absent.
+#
+#        The books' behaviour comes from the creature script "npc_spellbook_trainer"; the
+#        templates that carry it are set by the world database updates, not here.
+#
+
+#        Spellbook.Notify.Enable: 1 (Default) Announce every purchase. Before a spell is
+#                                 learned the client is sent the row its own SpellCustomAttr
+#                                 table holds for it with the "notable" bit set, which is what
+#                                 makes it show the New Spell Learned alert and play its sound.
+#                                 Without this the client stays silent for every spell whose row
+#                                 lacks that bit (rank ups of abilities that are not mana
+#                                 powered, and spells the table has no row for at all): the
+#                                 purchase succeeds and only the chat line appears.
+#                                 0            Leave the client's table alone.
+#
+#        Spellbook.Notify.OnClientReady: 1  Also mark every spell the viewer's book offers, as
+#                                        soon as the client reports its extension handlers are
+#                                        up, so abilities the realm grants outside the window
+#                                        (automatic progression) are announced as well.
+#                                        0 (Default) Announce only what the book itself learns.
+#                                        Left off by default because the client rebuilds its
+#                                        whole spell index once per row it already knew, so this
+#                                        is a visible pause at login.
+#
+Spellbook.Enable = 1
+Spellbook.Notify.Enable = 1
+Spellbook.Notify.OnClientReady = 0
+
+#        Spellbook.Cost.Enable: 1 (Default) Charge the prices the window shows. The curve is
+#                               the realm's own trainer table halved - level driven, quadratic,
+#                               with the same band breaks - and utility rows (kits, leathers,
+#                               keys, movement forms) cost half again. See
+#                               SpellbookCostData.h for the bands and the list.
+#                               0            Serve everything free.
+#
+#        Spellbook.Cost.Multiplier: 1.0 (Default) Scale every price by this, for retuning
+#                                   without a rebuild.
+#
+Spellbook.Cost.Enable = 1
+Spellbook.Cost.Multiplier = 1.0

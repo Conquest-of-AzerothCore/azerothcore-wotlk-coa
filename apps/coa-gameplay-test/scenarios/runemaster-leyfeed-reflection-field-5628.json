@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Issue 5628: Leyfeed steals from Arcane Nullifier X-21 but is reflected by Reflection Field",
+  "contract": [
+    "#5628 reports that Leyfeed 520269 cannot steal Arcane Nullifier X-21's (6232) reflect buff. Its SmartAI casts",
+    "Reflection Field 10831 on itself: Dispel magic, SPELL_AURA_REFLECT_SPELLS BasePoints 99 = 100%, 5 s, caster",
+    "and nearby allies. Leyfeed is SPELL_EFFECT_STEAL_BENEFICIAL_BUFF on TARGET_UNIT_TARGET_ENEMY, DmgClass magic,",
+    "without SPELL_ATTR0_IS_ABILITY or SPELL_ATTR1_NO_REFLECTION, so Spell.cpp marks it reflectable and a 100%",
+    "reflect sends it back to its caster, where a steal from oneself does nothing. The same holds for Spellsteal",
+    "30449. Expected: Leyfeed steals a magic buff from the Nullifier without Reflection Field; with Reflection Field",
+    "up Leyfeed is reflected and the Nullifier keeps both Reflection Field and its other magic buff."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 32, "melee_hit_rating": 10000, "spell_hit_rating": 10000,
+      "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "nullifier", "owner": "rm", "entry": 6232, "level": 32, "health": 1000000, "distance": 8}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks and fixture AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 520269},
+
+    {"action": "cast", "label": "The Nullifier buffs itself with Power Word: Fortitude", "actor": "nullifier",
+      "spell": 1243},
+    {"action": "assert", "label": "SETUP: the Nullifier holds Power Word: Fortitude", "actor": "nullifier",
+      "metric": "aura", "spell": 1243, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "SETUP: no Reflection Field yet", "actor": "nullifier", "metric": "aura",
+      "spell": 10831, "equals": 0},
+    {"action": "cast", "label": "Leyfeed without Reflection Field", "actor": "rm", "spell": 520269,
+      "target": "nullifier"},
+    {"action": "assert", "label": "CONTROL: Leyfeed steals the magic buff", "actor": "rm", "metric": "aura",
+      "spell": 1243, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "CONTROL: the Nullifier lost the stolen buff", "actor": "nullifier",
+      "metric": "aura", "spell": 1243, "equals": 0},
+
+    {"action": "reset_cooldown", "actor": "rm", "spell": 520269},
+    {"action": "wait", "label": "Global cooldown", "ms": 1600},
+    {"action": "cast", "label": "The Nullifier buffs itself again", "actor": "nullifier", "spell": 1243},
+    {"action": "cast", "label": "The Nullifier raises Reflection Field", "actor": "nullifier", "spell": 10831},
+    {"action": "assert", "label": "SETUP: Reflection Field is up", "actor": "nullifier", "metric": "aura",
+      "spell": 10831, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "SETUP: Power Word: Fortitude is up", "actor": "nullifier", "metric": "aura",
+      "spell": 1243, "equals": 1},
+    {"action": "cast", "label": "Leyfeed into Reflection Field", "actor": "rm", "spell": 520269,
+      "target": "nullifier"},
+    {"action": "wait", "label": "Leyfeed cast time and travel", "ms": 1800},
+    {"action": "assert", "label": "CONTRACT: the reflected Leyfeed steals no Reflection Field", "actor": "rm",
+      "metric": "aura", "spell": 10831, "equals": 0},
+    {"action": "assert", "label": "CONTRACT: the Nullifier keeps Reflection Field", "actor": "nullifier",
+      "metric": "aura", "spell": 10831, "equals": 1},
+    {"action": "assert", "label": "CONTRACT: the Nullifier keeps its other magic buff", "actor": "nullifier",
+      "metric": "aura", "spell": 1243, "equals": 1}
+  ]
+}

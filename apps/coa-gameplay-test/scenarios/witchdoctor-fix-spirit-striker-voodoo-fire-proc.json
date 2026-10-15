@@ -1,0 +1,302 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Spirit Striker raises the Serpent Ward's Voodoo Fire proc chance (#824)",
+  "contract": "#824: Spirit Striker 806286 carries ADD_FLAT_MODIFIER (aura 107), EffectMiscValue 18 (SPELLMOD_CHANCE_OF_SUCCESS), EffectBasePoints 9 (real value 10) and EffectSpellClassMask word1 bit 27 (134217728), the SpellFamilyFlags[1] of Voodoo Fire One 802262 (ProcChance 20) and Voodoo Fire Two 803846 (ProcChance 40). The ward AI in AscensionWitchDoctorSummons.cpp rolls Voodoo Fire on every attack of a Serpent Ward (50105), a Call of Sseratus Serpent Ward (50587) or a Viper Ward: it casts Serpent Ward Attack 573055 at its target, then rolls the chance of the rank whose aura the owner holds and casts Voodoo Fire 500473 at up to three enemies on success. The bug rolled the literal 20 or 40 and never called Player::ApplySpellMod, so Spirit Striker's registered +10 had no effect; the fix applies SPELLMOD_CHANCE_OF_SUCCESS before the roll. spell_modifier only proves the modifier is registered, so the proof is the rolled rate itself: spell_go_count with entry 50587 counts the SMSG_SPELL_GO packets the caster sees from its Call of Sseratus wards, one Serpent Ward Attack per roll and, with the fixture as the only enemy within 10 yards, one Voodoo Fire per success. The expected rates come from the DBC alone: 0.20 with Voodoo Fire One (802262's ProcChance) and 0.30 once Spirit Striker adds 10 points; the unfixed code keeps 0.20. Learning 802262 grants the aura the roll requires (Effect[1] SPELL_AURA_DUMMY on the caster); its Effect[0] proc aura has no spell_proc row and never fires, so every Voodoo Fire counted comes from the roll. 572899 is the summon that Call of Sseratus 681222 triggers: each cast summons four wards without a ward slot, so ten casts keep 40 wards (the target of Hex of Malice 501158 keeps the caster in combat, which the ward AI requires to pick an enemy). Each ward first attacks 2000 ms after it appears, attacks every 2000 ms and despawns after 572899's 15000 ms (SpellDuration 8), so a 16000 ms wave gives 40 x 7 = 280 rolls and ends with every ward gone. Five waves per phase give 1400 rolls, where the binomial standard deviation is 0.011 at 0.20 and 0.012 at 0.30, so the bounds [0.15, 0.25] and [0.25, 0.35] sit four standard deviations or more from each expected rate, and an unfixed build fails the second phase. The Serpent Ward 50105 that Serpent Ward 500960 summons takes the same branch. It holds the ward slot and despawns after 500960's 60000 ms (SpellDuration 3), so the Spirit Striker phase summons one and replaces it once before wave 4; it attacks about 40 times, and the scenario requires at least 30 of its rolls and at least one Voodoo Fire from entry 50105 (at 0.30 no Voodoo Fire in 40 rolls has probability 0.7^40, about 6e-7). That proves the player's own Serpent Ward attacks and reaches the Voodoo Fire roll; 40 rolls cannot separate 0.20 from 0.30, so the modified rate is measured on the 50587 wards that share its branch. The previous design compared the fixture's health loss over two 280 s phases of a single ward (about 140 rolls each) and required a 2% rise against a theoretical 3.6%; recorded ratios ranged from 0.97 to 1.12 and its 590.5 s of waits exceeded the 600000 ms timeout once setup was counted.",
+  "timeout_ms": 300000,
+  "players": [
+    {"id": "caster", "race": 1, "class": 13, "level": 80}
+  ],
+  "creatures": [
+    {"id": "enemy0", "owner": "caster", "entry": 36, "level": 80, "distance": 4, "health": 4000000}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let level scaling settle", "ms": 3000},
+    {
+      "action": "assert", "label": "Voodoo Fire One's success chance is its authored 20 before Spirit Striker",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802262, "op": 18, "base": 20, "equals": 20
+    },
+    {"action": "learn", "actor": "caster", "spell": 802262},
+    {
+      "action": "assert", "label": "Voodoo Fire One's aura, which the ward roll requires, is on the caster",
+      "actor": "caster", "metric": "aura", "spell": 802262, "equals": 1, "within_ms": 1000
+    },
+    {"action": "learn", "actor": "caster", "spell": 572899},
+    {"action": "learn", "actor": "caster", "spell": 501158},
+    {"action": "learn", "actor": "caster", "spell": 500960},
+    {
+      "action": "cast", "actor": "caster", "label": "Hex of Malice puts the caster in combat with the fixture",
+      "spell": 501158, "target": "enemy0"
+    },
+    {
+      "action": "assert", "label": "The caster is in combat, so the wards pick the fixture", "actor": "caster",
+      "metric": "combat", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "snapshot", "actor": "caster", "metric": "spell_go_count", "spell": 573055, "entry": 50587,
+      "save_as": "base_rolls_before"
+    },
+    {
+      "action": "snapshot", "actor": "caster", "metric": "spell_go_count", "spell": 500473, "entry": 50587,
+      "save_as": "base_fires_before"
+    },
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {
+      "action": "assert", "label": "Without Spirit Striker wave 1: ten casts keep 40 Call of Sseratus wards",
+      "actor": "caster", "metric": "owned_creature_count", "entry": 50587, "equals": 40, "within_ms": 1000
+    },
+    {
+      "action": "wait", "label": "Without Spirit Striker wave 1: seven attacks per ward, then every ward despawns",
+      "ms": 16000
+    },
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {
+      "action": "assert", "label": "Without Spirit Striker wave 2: ten casts keep 40 Call of Sseratus wards",
+      "actor": "caster", "metric": "owned_creature_count", "entry": 50587, "equals": 40, "within_ms": 1000
+    },
+    {
+      "action": "wait", "label": "Without Spirit Striker wave 2: seven attacks per ward, then every ward despawns",
+      "ms": 16000
+    },
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {
+      "action": "assert", "label": "Without Spirit Striker wave 3: ten casts keep 40 Call of Sseratus wards",
+      "actor": "caster", "metric": "owned_creature_count", "entry": 50587, "equals": 40, "within_ms": 1000
+    },
+    {
+      "action": "wait", "label": "Without Spirit Striker wave 3: seven attacks per ward, then every ward despawns",
+      "ms": 16000
+    },
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {
+      "action": "assert", "label": "Without Spirit Striker wave 4: ten casts keep 40 Call of Sseratus wards",
+      "actor": "caster", "metric": "owned_creature_count", "entry": 50587, "equals": 40, "within_ms": 1000
+    },
+    {
+      "action": "wait", "label": "Without Spirit Striker wave 4: seven attacks per ward, then every ward despawns",
+      "ms": 16000
+    },
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {
+      "action": "assert", "label": "Without Spirit Striker wave 5: ten casts keep 40 Call of Sseratus wards",
+      "actor": "caster", "metric": "owned_creature_count", "entry": 50587, "equals": 40, "within_ms": 1000
+    },
+    {
+      "action": "wait", "label": "Without Spirit Striker wave 5: seven attacks per ward, then every ward despawns",
+      "ms": 16000
+    },
+    {
+      "action": "snapshot", "actor": "caster", "metric": "spell_go_count", "spell": 573055, "entry": 50587,
+      "relative_to": "base_rolls_before", "save_as": "base_rolls"
+    },
+    {
+      "action": "assert", "label": "Without Spirit Striker: the wards attacked and rolled 1400 times",
+      "actor": "caster", "metric": "spell_go_count", "spell": 573055, "entry": 50587,
+      "relative_to": "base_rolls_before", "min": 1300, "max": 1500
+    },
+    {
+      "action": "assert", "label": "Without Spirit Striker Voodoo Fire fires on 20% of the rolls (802262 ProcChance)",
+      "actor": "caster", "metric": "spell_go_count", "spell": 500473, "entry": 50587,
+      "relative_to": "base_fires_before", "ratio_to": "base_rolls", "min": 0.15, "max": 0.25
+    },
+    {"action": "learn", "actor": "caster", "spell": 806286},
+    {
+      "action": "assert", "label": "Spirit Striker registers +10 on Voodoo Fire One's success chance",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802262, "op": 18, "base": 20, "equals": 30
+    },
+    {
+      "action": "assert", "label": "The caster is still in combat for the second phase", "actor": "caster",
+      "metric": "combat", "equals": 1
+    },
+    {
+      "action": "snapshot", "actor": "caster", "metric": "spell_go_count", "spell": 573055, "entry": 50587,
+      "save_as": "striker_rolls_before"
+    },
+    {
+      "action": "snapshot", "actor": "caster", "metric": "spell_go_count", "spell": 500473, "entry": 50587,
+      "save_as": "striker_fires_before"
+    },
+    {
+      "action": "snapshot", "actor": "caster", "metric": "spell_go_count", "spell": 573055, "entry": 50105,
+      "save_as": "serpent_rolls_before"
+    },
+    {
+      "action": "snapshot", "actor": "caster", "metric": "spell_go_count", "spell": 500473, "entry": 50105,
+      "save_as": "serpent_fires_before"
+    },
+    {
+      "action": "cast", "actor": "caster", "label": "Summon the player's Serpent Ward for the whole phase",
+      "spell": 500960, "target": "enemy0"
+    },
+    {
+      "action": "assert", "label": "The Serpent Ward is summoned", "actor": "caster", "metric": "owned_creature_count",
+      "entry": 50105, "equals": 1, "within_ms": 3000
+    },
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {
+      "action": "assert", "label": "With Spirit Striker wave 1: ten casts keep 40 Call of Sseratus wards",
+      "actor": "caster", "metric": "owned_creature_count", "entry": 50587, "equals": 40, "within_ms": 1000
+    },
+    {
+      "action": "wait", "label": "With Spirit Striker wave 1: seven attacks per ward, then every ward despawns",
+      "ms": 16000
+    },
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {
+      "action": "assert", "label": "With Spirit Striker wave 2: ten casts keep 40 Call of Sseratus wards",
+      "actor": "caster", "metric": "owned_creature_count", "entry": 50587, "equals": 40, "within_ms": 1000
+    },
+    {
+      "action": "wait", "label": "With Spirit Striker wave 2: seven attacks per ward, then every ward despawns",
+      "ms": 16000
+    },
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {
+      "action": "assert", "label": "With Spirit Striker wave 3: ten casts keep 40 Call of Sseratus wards",
+      "actor": "caster", "metric": "owned_creature_count", "entry": 50587, "equals": 40, "within_ms": 1000
+    },
+    {
+      "action": "wait", "label": "With Spirit Striker wave 3: seven attacks per ward, then every ward despawns",
+      "ms": 16000
+    },
+    {
+      "action": "cast", "actor": "caster", "label": "Replace the Serpent Ward before its 60000 ms run out",
+      "spell": 500960, "target": "enemy0"
+    },
+    {
+      "action": "assert", "label": "The replacement leaves one Serpent Ward", "actor": "caster",
+      "metric": "owned_creature_count", "entry": 50105, "equals": 1, "within_ms": 3000
+    },
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {
+      "action": "assert", "label": "With Spirit Striker wave 4: ten casts keep 40 Call of Sseratus wards",
+      "actor": "caster", "metric": "owned_creature_count", "entry": 50587, "equals": 40, "within_ms": 1000
+    },
+    {
+      "action": "wait", "label": "With Spirit Striker wave 4: seven attacks per ward, then every ward despawns",
+      "ms": 16000
+    },
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {"action": "cast", "actor": "caster", "spell": 572899},
+    {
+      "action": "assert", "label": "With Spirit Striker wave 5: ten casts keep 40 Call of Sseratus wards",
+      "actor": "caster", "metric": "owned_creature_count", "entry": 50587, "equals": 40, "within_ms": 1000
+    },
+    {
+      "action": "wait", "label": "With Spirit Striker wave 5: seven attacks per ward, then every ward despawns",
+      "ms": 16000
+    },
+    {
+      "action": "snapshot", "actor": "caster", "metric": "spell_go_count", "spell": 573055, "entry": 50587,
+      "relative_to": "striker_rolls_before", "save_as": "striker_rolls"
+    },
+    {
+      "action": "assert", "label": "With Spirit Striker: the wards attacked and rolled 1400 times", "actor": "caster",
+      "metric": "spell_go_count", "spell": 573055, "entry": 50587, "relative_to": "striker_rolls_before", "min": 1300,
+      "max": 1500
+    },
+    {
+      "action": "assert",
+      "label": "FIX PROOF: with Spirit Striker Voodoo Fire fires on 30% of the rolls; the unfixed roll stays at 20%",
+      "actor": "caster", "metric": "spell_go_count", "spell": 500473, "entry": 50587,
+      "relative_to": "striker_fires_before", "ratio_to": "striker_rolls", "min": 0.25, "max": 0.35
+    },
+    {
+      "action": "assert", "label": "The Serpent Ward attacked and rolled about 40 times over the phase",
+      "actor": "caster", "metric": "spell_go_count", "spell": 573055, "entry": 50105,
+      "relative_to": "serpent_rolls_before", "min": 30, "max": 45
+    },
+    {
+      "action": "assert", "label": "The Serpent Ward's own rolls cast Voodoo Fire", "actor": "caster",
+      "metric": "spell_go_count", "spell": 500473, "entry": 50105, "relative_to": "serpent_fires_before", "min": 1
+    }
+  ]
+}

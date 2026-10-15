@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Felwrath can be cast while moving; Ruin cannot (#1486)",
+  "contract": "Issue #1486 asks whether Felwrath should be cancelled by movement. Live client Spell.dbc: Felwrath rank 1 520236 has a 1500 ms cast (CastingTimeIndex 16) and InterruptFlags 0x2 (SPELL_INTERRUPT_FLAG_PUSH_BACK only, no SPELL_INTERRUPT_FLAG_MOVEMENT 0x1), and its description names no movement restriction; every Felwrath rank (520688-520693) carries the same InterruptFlags 0x2. The same tree's Ruin rank 1 801895 has a 2500 ms cast (CastingTimeIndex 19) and InterruptFlags 0xF, which includes the movement bit. Spell::prepare refuses a player's cast-time spell while moving with SPELL_FAILED_MOVING (51) only when its InterruptFlags carry SPELL_INTERRUPT_FLAG_MOVEMENT, and Spell::update cancels a started cast on movement only under the same flag. Both spells cost 30 Energy and require the caster aura 803468 'At Least 2 Felfury' (CasterAuraSpell), so Energy, two Felfury (800058) stacks and 803468 are fixtured before each cast. Expected: while the Felsworn moves forward, Ruin is refused with reason 51 and deals nothing, and Felwrath starts, is not refused, keeps casting and deals damage to the target.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "fel", "race": 1, "class": 14, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "fel", "entry": 36, "level": 80, "health": 1000000, "distance": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "fel", "spell": 520236 },
+    { "action": "learn", "actor": "fel", "spell": 801895 },
+    { "action": "assert", "label": "SETUP: the Felsworn knows Felwrath rank 1", "actor": "fel", "metric": "knows_spell", "spell": 520236, "equals": 1 },
+    { "action": "assert", "label": "SETUP: the Felsworn knows Ruin rank 1", "actor": "fel", "metric": "knows_spell", "spell": 801895, "equals": 1 },
+
+    { "action": "set_power", "actor": "fel", "power": 3, "value": 100, "label": "Ruin costs 30 Energy" },
+    { "action": "set_aura", "actor": "fel", "spell": 800058, "stacks": 2, "label": "Two Felfury stacks" },
+    { "action": "set_aura", "actor": "fel", "spell": 803468, "stacks": 1, "label": "Ruin requires 'At Least 2 Felfury' (CasterAuraSpell 803468)" },
+    { "action": "set_moving", "label": "Start moving forward", "actor": "fel", "enabled": true },
+    { "action": "assert", "label": "SETUP: the Felsworn is moving", "actor": "fel", "metric": "moving", "equals": 1 },
+    { "action": "cast", "label": "CONTROL: Ruin while moving", "actor": "fel", "spell": 801895, "target": "dummy" },
+    {
+      "action": "assert", "label": "CONTROL: Ruin (InterruptFlags 0xF, movement bit set) is refused with SPELL_FAILED_MOVING",
+      "actor": "fel", "metric": "cast_failure", "spell": 801895, "equals": 51, "within_ms": 1000
+    },
+    { "action": "wait", "label": "Let any Ruin cast that was allowed complete", "ms": 3500 },
+    {
+      "action": "assert", "label": "CONTROL: the refused Ruin deals nothing",
+      "actor": "fel", "metric": "spell_damage_count", "spell": 801895, "target": "dummy", "equals": 0
+    },
+
+    { "action": "set_power", "actor": "fel", "power": 3, "value": 100, "label": "Felwrath costs 30 Energy" },
+    { "action": "set_aura", "actor": "fel", "spell": 800058, "stacks": 2, "label": "Two Felfury stacks" },
+    { "action": "set_aura", "actor": "fel", "spell": 803468, "stacks": 1, "label": "Felwrath requires 'At Least 2 Felfury' (CasterAuraSpell 803468)" },
+    { "action": "assert", "label": "SETUP: the Felsworn is still moving", "actor": "fel", "metric": "moving", "equals": 1 },
+    { "action": "cast", "label": "Felwrath while moving", "actor": "fel", "spell": 520236, "target": "dummy" },
+    {
+      "action": "assert", "label": "CONTRACT: the moving Felsworn is casting Felwrath",
+      "actor": "fel", "metric": "cast_remaining_ms", "spell": 520236, "min": 1, "within_ms": 500
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Felwrath (InterruptFlags 0x2, no movement bit) is not refused",
+      "actor": "fel", "metric": "cast_failure", "spell": 520236, "equals": 0
+    },
+    { "action": "assert", "label": "SETUP: the Felsworn kept moving during the cast", "actor": "fel", "metric": "moving", "equals": 1 },
+    {
+      "action": "assert", "label": "CONTRACT: the Felwrath cast completes while moving and damages the target",
+      "actor": "fel", "metric": "spell_damage_count", "spell": 520236, "target": "dummy", "min": 1, "within_ms": 4000
+    },
+    { "action": "set_moving", "label": "Stop moving", "actor": "fel", "enabled": false }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "name": "Fix-o-Tron 5000 summons its companion",
+  "contract": "Using item 97330 teaches summon 92981, and casting it produces the Fix-o-Tron 5000 creature (80879) owned by the player. The client's rendering of the model is outside this harness's reach.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the character settle", "ms": 4000 },
+    { "action": "add_item", "actor": "p", "item": 97330, "count": 1 },
+    { "action": "use_item", "label": "Using the item teaches its summon", "actor": "p", "item": 97330, "spell": 55884 },
+    { "action": "assert", "actor": "p", "metric": "knows_spell", "spell": 92981, "equals": 1, "within_ms": 3000 },
+    { "action": "cast", "label": "Summon the Fix-o-Tron", "actor": "p", "spell": 92981 },
+    { "action": "assert", "label": "The cast produced a creature this player owns", "actor": "p", "metric": "owned_creature_count", "entry": 80879, "min": 1, "within_ms": 5000 }
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "name": "Unearthed Pools cuts Unmake's cast time and instant mana costs natively (#2181)",
+  "contract": "Spell.dbc gives Unearthed Pools 574309 two self-targeted APPLY_AURA effects. Effect 0 is aura 357 SPELL_AURA_ASCENSION_MOD_INSTANT_MANA_COST_PCT, EffectBasePoints 9 with DieSides 1 -> 10; SpellInfo::CalcPowerCost subtracts it from powerCostMultiplier for POWER_MANA spells that are not channeled and whose CastTimeEntry->CastTime is 0, then applies powerCost = int32(powerCost * (1.0f + powerCostMultiplier)), i.e. a flat 10% cut on intrinsically instant mana spells. Effect 1 is aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 10 (SPELLMOD_CASTING_TIME), EffectBasePoints -16 with DieSides 1 -> -15, EffectSpellClassMask [32, 33554432, 0]; word 1 bit 25 is Unmake and word 0 bit 5 is Artificer's Wand, the two arms of the tooltip's $?s804478 conditional. The tooltip reads 'Reduces the cast time of Unmake by -15% and reduces the mana cost of your instant spells by 10%'. Fixtures: Unmake 503784 has SpellFamilyFlags word 1 bit 25, CastingTimeIndex 16 = 1500 ms, DmgClass 1 (magic, so Unit::ModSpellCastTime multiplies by UNIT_MOD_CAST_SPEED, which is 1.0 for an unhasted fixture) and no SPELL_ATTR0_USES_RANGED_SLOT, so 1500 ms becomes 1275 ms. Timerend 801291 is the instant mana control: CastingTimeIndex 1 = 0 ms, PowerType 0, ManaCostPercentage 17, and SpellFamilyFlags word 1 bit 24, which is OUTSIDE the cast-time class mask - so its power cost must drop 10% while its SPELLMOD_CASTING_TIME modifier must stay untouched. All metrics here are native queries; no cast is submitted. No script or SQL is needed; this is a regression scenario for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "chronomancer", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "chronomancer", "spell": 503784 },
+    { "action": "learn", "actor": "chronomancer", "spell": 801291 },
+    {
+      "action": "snapshot",
+      "label": "Unmake's unmodified cast time (1500 ms)",
+      "actor": "chronomancer",
+      "metric": "spell_cast_time_ms",
+      "spell": 503784,
+      "save_as": "unmake_cast_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Timerend's unmodified mana cost",
+      "actor": "chronomancer",
+      "metric": "spell_power_cost",
+      "spell": 801291,
+      "save_as": "timerend_cost_base"
+    },
+    { "action": "learn", "actor": "chronomancer", "spell": 574309 },
+    {
+      "action": "assert",
+      "label": "Learning the passive applies its aura",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 574309,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Instant mana cost reduction resolves to 10",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 574309,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Cast time modifier resolves to -15",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 574309,
+      "effect": 1,
+      "equals": -15
+    },
+    {
+      "action": "assert",
+      "label": "Unmake's cast time drops 15% (1275 ms)",
+      "actor": "chronomancer",
+      "metric": "spell_cast_time_ms",
+      "spell": 503784,
+      "equals": 1275
+    },
+    {
+      "action": "assert",
+      "label": "Unmake's cast time is 0.85 of its unmodified value",
+      "actor": "chronomancer",
+      "metric": "spell_cast_time_ms",
+      "spell": 503784,
+      "ratio_to": "unmake_cast_base",
+      "min": 0.84,
+      "max": 0.86
+    },
+    {
+      "action": "assert",
+      "label": "Timerend, an instant mana spell, costs 10% less",
+      "actor": "chronomancer",
+      "metric": "spell_power_cost",
+      "spell": 801291,
+      "ratio_to": "timerend_cost_base",
+      "min": 0.88,
+      "max": 0.92
+    },
+    {
+      "action": "assert",
+      "label": "The cast-time cut does not reach Timerend, which is outside the class mask",
+      "actor": "chronomancer",
+      "metric": "spell_modifier",
+      "spell": 801291,
+      "op": 10,
+      "base": 1000,
+      "equals": 1000
+    }
+  ]
+}

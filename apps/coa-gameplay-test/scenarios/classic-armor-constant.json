@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "name": "Classic+ combat: vanilla armor constant at level 60, WotLK above",
+  "contract": "Needs ClassicPlus.CombatRules=1 (default). The attackers are Mages, which carry no armor penetration. The fixtures have fixed template levels and ArmorModifier 1, so they carry the stock unit_class 1 base armor: 3750 for Hevram Bristol (level 60) and 4047 for Illusory Wraith (level 61). Vanilla 1.12 mitigates armor / (armor + 85 * attackerLevel + 400), so a level-60 attacker takes 1000 * (1 - 3750 / 9250) = 594.6 through 3750 armor; the WotLK constant 467.5 * 60 - 22167.5 = 5882.5 would leave 610.7. Level 61 players keep the WotLK rules: 1000 * (1 - 4047 / (4047 + 6350)) = 610.7, where the vanilla constant 5585 would leave 579.8.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "classic",
+      "race": 1,
+      "class": 8,
+      "level": 60
+    },
+    {
+      "id": "wotlk",
+      "race": 1,
+      "class": 8,
+      "level": 61
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target60",
+      "owner": "classic",
+      "entry": 1288,
+      "level": 60,
+      "distance": 3
+    },
+    {
+      "id": "target61",
+      "owner": "wotlk",
+      "entry": 11027,
+      "level": 61,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "target60",
+      "metric": "armor",
+      "equals": 3750
+    },
+    {
+      "action": "assert",
+      "actor": "target61",
+      "metric": "armor",
+      "equals": 4047
+    },
+    {
+      "action": "assert",
+      "label": "Level 60 attacker uses the vanilla armor constant",
+      "actor": "classic",
+      "metric": "armor_reduced_damage",
+      "spell": 78,
+      "target": "target60",
+      "min": 593,
+      "max": 596
+    },
+    {
+      "action": "assert",
+      "label": "Level 61 attacker keeps the WotLK armor constant",
+      "actor": "wotlk",
+      "metric": "armor_reduced_damage",
+      "spell": 78,
+      "target": "target61",
+      "min": 609,
+      "max": 612
+    }
+  ]
+}

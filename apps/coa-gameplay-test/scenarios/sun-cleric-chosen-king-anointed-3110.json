@@ -1,0 +1,173 @@
+{
+  "schema": 1,
+  "name": "The Chosen King grants the authored critical buff on Hammer of Kings (#3110)",
+  "contract": [
+    "The supplied description of The Chosen King (707079) names Anointed (524998) as the buff gained when",
+    "casting Hammer of Kings (804751). The helper supplies 10% critical strike chance for ten seconds. A",
+    "successful talented cast grants that buff to its caster, an untalented cast does not, and periodic",
+    "Hammer ticks do not refresh the cast-triggered buff. Native aura amount, remaining duration, live",
+    "critical chance and expiry are measured independently of damage modifiers. Client rendering is",
+    "outside this regression."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 804751
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 804751
+    },
+    {
+      "action": "assert",
+      "label": "The untalented Hammer of Kings cast succeeds",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 804751,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Hammer of Kings alone grants no Anointed buff",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 524998,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "cleric",
+      "spell": 804751,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "cleric",
+      "spell": 804751
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 707079
+    },
+    {
+      "action": "assert",
+      "label": "The Chosen King is active",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 707079,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "spell_crit_chance",
+      "save_as": "critical_before_hammer"
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 804751
+    },
+    {
+      "action": "assert",
+      "label": "The talented Hammer of Kings cast succeeds",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 804751,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Casting Hammer of Kings applies the promised critical buff",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 524998,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Anointed grants its authored 10% critical chance",
+      "actor": "cleric",
+      "metric": "aura_amount",
+      "spell": 524998,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "The live critical chance increases by 10 percentage points",
+      "actor": "cleric",
+      "metric": "spell_crit_chance",
+      "relative_to": "critical_before_hammer",
+      "min": 9.99,
+      "max": 10.01
+    },
+    {
+      "action": "assert",
+      "label": "Anointed has a ten-second lifetime",
+      "actor": "cleric",
+      "metric": "aura_duration_ms",
+      "spell": 524998,
+      "min": 9500,
+      "max": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Another cleric does not receive the caster buff",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 524998,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "label": "Hammer ticks do not keep the ten-second buff alive",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 524998,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Critical chance returns to its pre-cast value",
+      "actor": "cleric",
+      "metric": "spell_crit_chance",
+      "relative_to": "critical_before_hammer",
+      "min": -0.01,
+      "max": 0.01
+    }
+  ]
+}

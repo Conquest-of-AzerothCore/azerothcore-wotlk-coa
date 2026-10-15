@@ -18,7 +18,7 @@ namespace CoAChallenges
  *               u32 n_float,n_float x {str,float},
  *               u32 n_rate, n_rate  x {str,float}, then integer-list and
  *               float-list maps (empty counts when unused); str = u32 len + bytes.
- *   This REPLACES all six maps; WorldSession shares a snapshot across producers.
+ *   This REPLACES all six maps; the CoA collector includes every registered producer.
  *   CMSG 0x592: u32 challengeID, u32 level.            (confirmed live: 188,1)
  *   SMSG 0x593 (CHALLENGE_START_RESPONSE): u32 id, u32 level, u32 code,
  *               u32, u32, u8 + {u32 len, bytes} response string.
@@ -179,10 +179,11 @@ namespace CoAChallenges
 
     // Player name with the class icon, the class color, the class name and a
     // clickable inspect link.
-    std::string PlayerNameLink(Player* player)
+    // `klass` = 0 when the class is unknown (offline character): the link still
+    // works, just without the class icon/color.
+    std::string PlayerNameLink(std::string const& name, uint8 klass)
     {
-        std::string name = player->GetName();
-        std::string token = ClassToken(player->getClass());
+        std::string token = ClassToken(klass);
         std::string icon;
         if (!token.empty())
         {
@@ -193,12 +194,17 @@ namespace CoAChallenges
         }
         std::string link = icon + Acore::StringFormat("|Hplayer:{}|h{}{}|h|r",
             name, ClassColorForToken(token), name);
-        if (ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(player->getClass()))
+        if (ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(klass))
         {
             if (cEntry->name[0] && *cEntry->name[0])
                 link += Acore::StringFormat(" |cffB2B2B2({})|r", cEntry->name[0]);
         }
         return link;
+    }
+
+    std::string PlayerNameLink(Player* player)
+    {
+        return PlayerNameLink(player->GetName(), player->getClass());
     }
 
     // Realm-wide completion announcement (config-gated).
@@ -261,16 +267,17 @@ namespace CoAChallenges
         return it == LastKiller.end() ? std::string() : it->second.name;
     }
 
-    // Test helper: does a plain cast of `spellId` get blocked by the player's
-    // rules (drives the real OnSpellCheckCast dispatcher)?
-    bool Test_SpellCheckCastBlocked(Player* player, uint32 spellId)
+    // Test helper: does a cast of `spellId` get blocked by the player's rules
+    // (drives the real OnSpellCheckCast dispatcher)? `triggered` models a
+    // buff/proc re-trigger (TRIGGERED_FULL_MASK) rather than the player's own cast.
+    bool Test_SpellCheckCastBlocked(Player* player, uint32 spellId, bool triggered)
     {
         if (!player)
             return false;
         SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
         if (!info)
             return false;
-        Spell spell(player, info, TRIGGERED_NONE);
+        Spell spell(player, info, triggered ? TRIGGERED_FULL_MASK : TRIGGERED_NONE);
         return spell.CheckCast(true) != SPELL_CAST_OK;
     }
 
@@ -280,7 +287,7 @@ namespace CoAChallenges
     // The creature link is |Hcreature:<entry>|h: the client's handler calls
     // DressUpCreature -> SetDisplayInfo, which Model.lua overrides to
     // Creature:CreateFromID(entry) + SetCreature(entry).
-    void AnnounceFailure(Player* player, PendingFail const& fail)
+    void AnnounceFailure(std::string const& name, uint32 level, PendingFail const& fail, uint8 klass)
     {
         if (g_testQuiet)
             return;
@@ -293,10 +300,10 @@ namespace CoAChallenges
             return;
         // The official only announces from level 10 up.
         uint32 minLevel = sConfigMgr->GetOption<uint32>("CoAChallenges.AnnounceFailureMinLevel", 10);
-        if (player->GetLevel() < minLevel)
+        if (level < minLevel)
         {
             LOG_INFO("module.coa_challenges", "Failure broadcast suppressed for {} (level {} < {})",
-                player->GetName(), player->GetLevel(), minLevel);
+                name, level, minLevel);
             return;
         }
 
@@ -310,10 +317,14 @@ namespace CoAChallenges
             ? Acore::StringFormat("{}[{}]|r", TRIAL_COLOR, fail.displayName)
             : Acore::StringFormat("{}{}|r", TRIAL_COLOR, ChallengeBracket(fail.challengeID, fail.level));
 
-        msg += Acore::StringFormat("{} {} (Level {}) has been killed by ",
-            bracket, PlayerNameLink(player), player->GetLevel());
+        // A rule failure (e.g. FAILABLE_NO_KILL_BEASTS) is not a death: the
+        // player failed the trial by slaying a forbidden creature.
+        bool const slaying = (fail.killerKind == KillerKind::Rule);
+        msg += Acore::StringFormat("{} {} (Level {}) {} ",
+            bracket, PlayerNameLink(name, klass), level,
+            slaying ? "has failed the challenge by slaying" : "has been killed by");
 
-        if (fail.killerKind == KillerKind::Creature)
+        if (fail.killerKind == KillerKind::Creature || fail.killerKind == KillerKind::Rule)
             msg += Acore::StringFormat("{}|Hcreature:{}|h[{}]|h|r.",
                 KILLER_COLOR, fail.killerEntry, fail.killerName);
         else if (fail.killerKind == KillerKind::Player)
@@ -338,25 +349,35 @@ namespace CoAChallenges
         ChatHandler::BuildChatPacket(data, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, nullptr, nullptr, msg);
         sWorldSessionMgr->SendGlobalMessage(&data);
         LOG_INFO("module.coa_challenges", "Failure broadcast for {} (challenge {}): {}",
-            player->GetName(), fail.challengeID, msg);
+            name, fail.challengeID, msg);
     }
 
     // Called each world tick: broadcast and clear pending failures (by now the
     // killer, if the player was killed by a creature/player, has been captured).
     void FlushFailureBroadcasts()
     {
-        std::vector<std::pair<Player*, PendingFail>> sends;
+        std::vector<std::pair<ObjectGuid, PendingFail>> sends;
         {
             std::lock_guard<std::mutex> lock(PendingFailMutex);
             for (auto it = PendingFailBroadcast.begin(); it != PendingFailBroadcast.end();)
             {
-                if (Player* p = ObjectAccessor::FindPlayer(ObjectGuid::Create<HighGuid::Player>(it->first)))
-                    sends.emplace_back(p, it->second);
+                sends.emplace_back(ObjectGuid::Create<HighGuid::Player>(it->first), it->second);
                 it = PendingFailBroadcast.erase(it);
             }
         }
-        for (auto& [p, fail] : sends)
-            AnnounceFailure(p, fail);
+        for (auto& [guid, fail] : sends)
+        {
+            if (Player* p = ObjectAccessor::FindPlayer(guid))
+            {
+                AnnounceFailure(p->GetName(), p->GetLevel(), fail, p->getClass());
+                continue;
+            }
+            // Offline SharedFate partner: announce from the character cache.
+            std::string name;
+            if (!sCharacterCache->GetCharacterNameByGuid(guid, name) || name.empty())
+                continue;
+            AnnounceFailure(name, sCharacterCache->GetCharacterLevelByGuid(guid), fail, 0);
+        }
     }
 
     // GM test harness: drop pending failure broadcasts without announcing them,

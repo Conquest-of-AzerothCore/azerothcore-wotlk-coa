@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "Whipvine Arrow deals Nature damage and roots its target natively (#3630)",
+  "contract": [
+    "Original Whipvine Arrow 806342 deals Nature damage and roots its target. Advantage 804329 gates the",
+    "normal cast; its range is five to thirty yards. The original ranged damage class uses ranged hit despite",
+    "the Nature school, so this fixture supplies ranged hit and places the enemy fifteen yards away.",
+    "EquippedItemClass -1 does not require a weapon. The native root and damage effects must both land.",
+    "Separate ranger-whipvine-advantage-targets-3630 and one/five-stack boundary scenarios cover additional",
+    "targets; this case verifies one ordinary cast against one enemy."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "ranger",
+      "entry": 16542,
+      "level": 80,
+      "health": 500000,
+      "faction": 14,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and setup settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 806342
+    },
+    {
+      "action": "set_aura",
+      "label": "Grant one stack of Advantage so the cast is not rejected",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "baseline: the target carries no root yet",
+      "actor": "dummy",
+      "metric": "rooted",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 806342,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the target is rooted",
+      "actor": "dummy",
+      "metric": "rooted",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the target took Nature damage from Whipvine Arrow",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 806342,
+      "target": "dummy",
+      "min": 1
+    }
+  ]
+}

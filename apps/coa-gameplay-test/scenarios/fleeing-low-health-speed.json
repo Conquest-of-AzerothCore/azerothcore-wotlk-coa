@@ -1,0 +1,255 @@
+{
+  "schema": 1,
+  "name": "Fleeing creature honours the low-health movement speed penalty",
+  "contract": [
+    "A non-boss, non-pet, snare-vulnerable creature at 1% health has 52% of its full-health run speed: the",
+    "original 1.66% penalty per percent below 30 truncates to 48%. An already active flee spline must adopt",
+    "that speed without waiting for a new flee leg. Psychic Scream 8122 fears two identical creatures for the",
+    "original 6000ms. Select a native spline with at least 500ms remaining, record its actual movement",
+    "velocity, and lower only the runner to 1% health. Within 100ms its in-flight spline velocity must become",
+    "52% of its own baseline, while the control's run rate remains unchanged. A pre-drop remaining-time check",
+    "ensures the old leg cannot finish within that observation window. The original movement generator",
+    "deliberately pauses 800-1500ms between legs, so continuous displacement through two arbitrary 600ms",
+    "windows is not a valid requirement."
+  ],
+  "timeout_ms": 240000,
+  "location": {
+    "map": 1,
+    "x": 16226.2,
+    "y": 16257.0,
+    "z": 13.2022,
+    "o": 1.65007
+  },
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 8,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "control",
+      "owner": "caster",
+      "entry": 87,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    },
+    {
+      "id": "runner",
+      "owner": "caster",
+      "entry": 87,
+      "level": 80,
+      "health": 100000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Control keeps its declared maximum health",
+      "actor": "control",
+      "metric": "max_health",
+      "equals": 100000
+    },
+    {
+      "action": "assert",
+      "label": "Control keeps its declared level",
+      "actor": "control",
+      "metric": "level",
+      "equals": 80
+    },
+    {
+      "action": "assert",
+      "label": "Runner keeps its declared maximum health",
+      "actor": "runner",
+      "metric": "max_health",
+      "equals": 100000
+    },
+    {
+      "action": "assert",
+      "label": "Runner keeps its declared level",
+      "actor": "runner",
+      "metric": "level",
+      "equals": 80
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 8122
+    },
+    {
+      "action": "snapshot",
+      "actor": "runner",
+      "metric": "distance",
+      "target": "caster",
+      "save_as": "runner_spawn"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 8122
+    },
+    {
+      "action": "assert",
+      "label": "Area fear reached the runner",
+      "actor": "runner",
+      "metric": "aura",
+      "spell": 8122,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Area fear reached the control",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 8122,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "OBSERVED fear duration when it lands",
+      "actor": "runner",
+      "metric": "aura_duration_ms",
+      "spell": 8122,
+      "caster": "caster",
+      "min": 0.0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 8122,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Select an active flee leg with enough remaining flight time",
+      "actor": "runner",
+      "metric": "spline_remaining_ms",
+      "min": 500,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The selected flee leg is moving",
+      "actor": "runner",
+      "metric": "moving",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "runner",
+      "metric": "spline_speed",
+      "save_as": "runner_spline_full"
+    },
+    {
+      "action": "assert",
+      "actor": "runner",
+      "metric": "spline_speed",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "runner",
+      "metric": "run_speed_rate",
+      "save_as": "runner_rate_fleeing"
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "run_speed_rate",
+      "save_as": "control_rate_fleeing"
+    },
+    {
+      "action": "assert",
+      "label": "Fear has enough duration for the in-flight speed observation",
+      "actor": "runner",
+      "metric": "aura_duration_ms",
+      "spell": 8122,
+      "caster": "caster",
+      "min": 500
+    },
+    {
+      "action": "assert",
+      "label": "The original leg cannot finish within the 100ms speed observation",
+      "actor": "runner",
+      "metric": "spline_remaining_ms",
+      "min": 300
+    },
+    {
+      "action": "set_health",
+      "actor": "runner",
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "runner",
+      "metric": "health_pct",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The runner's unit run speed drops to the independently expected 52%",
+      "actor": "runner",
+      "metric": "run_speed_rate",
+      "ratio_to": "runner_rate_fleeing",
+      "min": 0.515,
+      "max": 0.525
+    },
+    {
+      "action": "assert",
+      "label": "The already active flee spline adopts the low-health speed",
+      "actor": "runner",
+      "metric": "spline_speed",
+      "ratio_to": "runner_spline_full",
+      "min": 0.515,
+      "max": 0.525,
+      "within_ms": 100
+    },
+    {
+      "action": "assert",
+      "label": "The slowed spline is still in flight",
+      "actor": "runner",
+      "metric": "spline_remaining_ms",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The runner continues moving on its slowed flee leg",
+      "actor": "runner",
+      "metric": "moving",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The untouched control's run speed is unchanged",
+      "actor": "control",
+      "metric": "run_speed_rate",
+      "ratio_to": "control_rate_fleeing",
+      "min": 0.995,
+      "max": 1.005
+    },
+    {
+      "action": "assert",
+      "label": "The runner remains feared through the speed change",
+      "actor": "runner",
+      "metric": "aura",
+      "spell": 8122,
+      "caster": "caster",
+      "equals": 1
+    }
+  ]
+}

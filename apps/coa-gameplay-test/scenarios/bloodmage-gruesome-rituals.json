@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Gruesome Rituals gives Pooled Vitality 1% damage per stack (#740)",
+  "contract": "Gruesome Rituals 680696 is one effect: aura 107 with MiscValue 12 (SPELLMOD_EFFECT2, which Unit::ApplyEffectModifiers maps to effect index 1) and BasePoints 0 + DieSides 1 = +1, over EffectSpellClassMask (536870912, 0, 0) = word 0 bit 29 = Pooled Vitality 680687 and Running Wild 800175. Pooled Vitality is the class resource for class 20 and its effect 1 is aura 79 MOD_DAMAGE_PERCENT_DONE with MiscValue 127 (all schools) and value 0, so it becomes 1, and AuraEffect::CalculateAmount multiplies by the stack amount, which is the \"for each stack\" the tooltip promises. Running Wild's effect 1 is aura 56 TRANSFORM, whose amount the core never reads. Tooltip: \"Your damage dealt is now increased by $s1% for each stack of Pooled Vitality.\" Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Pooled Vitality grants no damage bonus before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 680687,
+      "op": 12,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680696
+    },
+    {
+      "action": "assert",
+      "label": "Gruesome Rituals gives Pooled Vitality 1% damage per stack",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 680687,
+      "op": 12,
+      "base": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Gruesome Rituals does not touch Bloodbolt",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 12,
+      "base": 0,
+      "equals": 0
+    }
+  ]
+}

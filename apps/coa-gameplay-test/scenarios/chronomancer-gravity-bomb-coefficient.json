@@ -1,0 +1,205 @@
+{
+  "schema": 1,
+  "name": "Gravity Bomb retains spell-power scaling and adds ranged attack power (#3202)",
+  "contract": [
+    "Gravity Bomb 801281 advertises its delayed explosion as base plus 120% spell power and 30% ranged attack power.",
+    "Child 801282 does the damage. Its SQL spell-power coefficient must remain 1.2; ap_bonus 0.3 must select ranged attack power without changing its native magic damage class.",
+    "Wand Expert 574308 adds 100% of Spirit to ranged attack power without adding melee attack power or spell power. The explosion calculation's gain must match 30% of that independent stat gain, including integer rounding.",
+    "The normal parent cast must still plant its aura and cause its native delayed explosion. Native calculation probes exclude hit rolls and mitigation; the parent damage log observes a real hit.",
+    "The level-58 rank is tested at the current rank cap of 60, so the native level penalty does not change its advertised 120% spell-power term. Higher-level downranking behavior is preserved."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 801281
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_power",
+      "school": 5,
+      "equals": 0,
+      "label": "The ranged-attack-power control begins without spell power"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "spell_damage_done",
+      "save_as": "damage_before_rap",
+      "spell": 801282,
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "ranged_attack_power",
+      "save_as": "rap_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "attack_power",
+      "save_as": "ap_before"
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 574308
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "ranged_attack_power",
+      "save_as": "rap_gain",
+      "relative_to": "rap_before"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "ranged_attack_power",
+      "relative_to": "rap_before",
+      "min": 10,
+      "label": "Wand Expert supplies a measurable ranged-only stat gain"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "attack_power",
+      "relative_to": "ap_before",
+      "equals": 0,
+      "label": "The ranged stat fixture does not alter melee attack power"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_power",
+      "school": 5,
+      "equals": 0,
+      "label": "Wand Expert does not add spell power to the ranged-only control"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_damage_done",
+      "spell": 801282,
+      "target": "dummy",
+      "relative_to": "damage_before_rap",
+      "ratio_to": "rap_gain",
+      "min": 0.29,
+      "max": 0.31,
+      "label": "Gravity Bomb gains exactly its advertised ranged attack power share"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "spell_damage_done",
+      "spell": 801282,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "damage_before_sp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "spell_power",
+      "school": 5,
+      "save_as": "sp_before"
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 44505,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "The fixture grants at least 2000 spell damage",
+      "actor": "chronomancer",
+      "metric": "spell_power",
+      "school": 5,
+      "min": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "sp_before",
+      "save_as": "sp_gain"
+    },
+    {
+      "action": "assert",
+      "label": "The explosion now carries its 120% spell power coefficient",
+      "actor": "chronomancer",
+      "metric": "spell_damage_done",
+      "spell": 801282,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "damage_before_sp",
+      "ratio_to": "sp_gain",
+      "min": 1.19,
+      "max": 1.21
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "metric": "health",
+      "save_as": "before_bomb"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801281,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "The bomb is planted on the target",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 801281,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the 6 second delay and the explosion resolve",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "The delayed explosion damages the bomb's target",
+      "actor": "dummy",
+      "metric": "health",
+      "relative_to": "before_bomb",
+      "max": -1
+    }
+  ]
+}

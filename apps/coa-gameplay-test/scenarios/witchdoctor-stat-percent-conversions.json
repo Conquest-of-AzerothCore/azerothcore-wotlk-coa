@@ -1,0 +1,260 @@
+{
+    "schema": 1,
+    "name": "Witch Doctor: Sen'jin's Apprentice and Voodoo Power convert stats natively (#761, #782)",
+    "contract": "Sen'jin's Apprentice 681199: three SPELL_EFFECT_APPLY_AURA effects, all stock aura types with generic engine consumers, no module code involved (confirmed absent from spell_script_names, src/server/coa and src/server/scripts). Effect 0 is SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT (212), MiscValue 3 (Intellect), BasePoints 99 (real 100 with DieSides 1). Effect 1 is the same aura, MiscValue 1 (Agility), BasePoints 24 (real 25). Effect 2 is SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT (174), MiscValue 127 (all schools), MiscValueB 1 (Agility), BasePoints 24 (real 25). Effects 0-1 are summed generically in Unit::UpdateAttackPowerAndDamage (StatSystem.cpp) via GetAuraEffectsByType(SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT); effect 2 is summed generically in Unit::SpellBaseDamageBonusDone (Unit.cpp), which the harness's spell_power metric calls directly. Voodoo Power 706482: two SPELL_EFFECT_APPLY_AURA effects, same pattern. Effect 0 is SPELL_AURA_MOD_RATING_FROM_STAT (220), MiscValue 128 (bit 7, CR_HIT_SPELL, Unit.h), MiscValueB 4 (Spirit), BasePoints 4 (real 5); consumed generically in Player::UpdateRating (PlayerUpdates.cpp) via GetAuraEffectsByType(SPELL_AURA_MOD_RATING_FROM_STAT). Effect 1 is SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT (174), MiscValue 127, MiscValueB 4 (Spirit), BasePoints 49 (real 50), same generic consumer as above. All DBC fields re-verified directly against the installed Spell.dbc via coa-dbc-viewer in this session (ids 681199, 706482), not taken from the issue bodies or the investigator's report alone. Each assertion checks the actual post-learn total (ranged_attack_power, spell_power, combat_rating) moved off its pre-learn baseline in the same run and returned to it on unlearn, plus the aura's own live percentage (aura_amount) against the DBC-derived tooltip number, so a broken handler, a wrong DBC percentage or a dropped effect all fail this scenario.",
+    "timeout_ms": 60000,
+    "players": [
+        {
+            "id": "senjin",
+            "race": 1,
+            "class": 13,
+            "level": 80
+        },
+        {
+            "id": "voodoo",
+            "race": 1,
+            "class": 13,
+            "level": 80
+        }
+    ],
+    "steps": [
+        {
+            "action": "wait",
+            "label": "Let level scaling settle",
+            "ms": 3000
+        },
+        {
+            "action": "assert",
+            "label": "Sen'jin's Apprentice not yet known",
+            "actor": "senjin",
+            "metric": "aura",
+            "spell": 681199,
+            "caster": "senjin",
+            "equals": 0
+        },
+        {
+            "action": "snapshot",
+            "label": "Ranged attack power before Sen'jin's Apprentice",
+            "actor": "senjin",
+            "metric": "ranged_attack_power",
+            "save_as": "senjin_rap0"
+        },
+        {
+            "action": "snapshot",
+            "label": "Shadow spell power before Sen'jin's Apprentice",
+            "actor": "senjin",
+            "metric": "spell_power",
+            "school": 5,
+            "save_as": "senjin_sp0"
+        },
+        {
+            "action": "learn",
+            "actor": "senjin",
+            "spell": 681199
+        },
+        {
+            "action": "assert",
+            "label": "Self-buff is present",
+            "actor": "senjin",
+            "metric": "aura",
+            "spell": 681199,
+            "caster": "senjin",
+            "equals": 1
+        },
+        {
+            "action": "assert",
+            "label": "Ranged attack power rises (100% Intellect + 25% Agility)",
+            "actor": "senjin",
+            "metric": "ranged_attack_power",
+            "relative_to": "senjin_rap0",
+            "min": 1,
+            "within_ms": 3000
+        },
+        {
+            "action": "assert",
+            "label": "Shadow spell power rises (25% Agility)",
+            "actor": "senjin",
+            "metric": "spell_power",
+            "school": 5,
+            "relative_to": "senjin_sp0",
+            "min": 1,
+            "within_ms": 3000
+        },
+        {
+            "action": "assert",
+            "label": "Effect 0 grants 100% of Intellect to ranged attack power",
+            "actor": "senjin",
+            "metric": "aura_amount",
+            "spell": 681199,
+            "effect": 0,
+            "caster": "senjin",
+            "equals": 100
+        },
+        {
+            "action": "assert",
+            "label": "Effect 1 grants 25% of Agility to ranged attack power",
+            "actor": "senjin",
+            "metric": "aura_amount",
+            "spell": 681199,
+            "effect": 1,
+            "caster": "senjin",
+            "equals": 25
+        },
+        {
+            "action": "assert",
+            "label": "Effect 2 grants 25% of Agility to spell power",
+            "actor": "senjin",
+            "metric": "aura_amount",
+            "spell": 681199,
+            "effect": 2,
+            "caster": "senjin",
+            "equals": 25
+        },
+        {
+            "action": "unlearn",
+            "actor": "senjin",
+            "spell": 681199
+        },
+        {
+            "action": "assert",
+            "label": "Unlearning removes the self-buff",
+            "actor": "senjin",
+            "metric": "aura",
+            "spell": 681199,
+            "caster": "senjin",
+            "equals": 0
+        },
+        {
+            "action": "assert",
+            "label": "Ranged attack power returns to baseline",
+            "actor": "senjin",
+            "metric": "ranged_attack_power",
+            "relative_to": "senjin_rap0",
+            "equals": 0,
+            "within_ms": 3000
+        },
+        {
+            "action": "assert",
+            "label": "Shadow spell power returns to baseline",
+            "actor": "senjin",
+            "metric": "spell_power",
+            "school": 5,
+            "relative_to": "senjin_sp0",
+            "equals": 0,
+            "within_ms": 3000
+        },
+        {
+            "action": "assert",
+            "label": "Voodoo Power not yet known",
+            "actor": "voodoo",
+            "metric": "aura",
+            "spell": 706482,
+            "caster": "voodoo",
+            "equals": 0
+        },
+        {
+            "action": "snapshot",
+            "label": "Spell hit rating before Voodoo Power",
+            "actor": "voodoo",
+            "metric": "combat_rating",
+            "rating": 7,
+            "save_as": "voodoo_hit0"
+        },
+        {
+            "action": "snapshot",
+            "label": "Shadow spell power before Voodoo Power",
+            "actor": "voodoo",
+            "metric": "spell_power",
+            "school": 5,
+            "save_as": "voodoo_sp0"
+        },
+        {
+            "action": "learn",
+            "actor": "voodoo",
+            "spell": 706482
+        },
+        {
+            "action": "assert",
+            "label": "Self-buff is present",
+            "actor": "voodoo",
+            "metric": "aura",
+            "spell": 706482,
+            "caster": "voodoo",
+            "equals": 1
+        },
+        {
+            "action": "assert",
+            "label": "Spell hit rating rises (5% Spirit)",
+            "actor": "voodoo",
+            "metric": "combat_rating",
+            "rating": 7,
+            "relative_to": "voodoo_hit0",
+            "min": 1,
+            "within_ms": 3000
+        },
+        {
+            "action": "assert",
+            "label": "Shadow spell power rises (50% Spirit)",
+            "actor": "voodoo",
+            "metric": "spell_power",
+            "school": 5,
+            "relative_to": "voodoo_sp0",
+            "min": 1,
+            "within_ms": 3000
+        },
+        {
+            "action": "assert",
+            "label": "Effect 0 grants 5% of Spirit to spell hit rating",
+            "actor": "voodoo",
+            "metric": "aura_amount",
+            "spell": 706482,
+            "effect": 0,
+            "caster": "voodoo",
+            "equals": 5
+        },
+        {
+            "action": "assert",
+            "label": "Effect 1 grants 50% of Spirit to spell power",
+            "actor": "voodoo",
+            "metric": "aura_amount",
+            "spell": 706482,
+            "effect": 1,
+            "caster": "voodoo",
+            "equals": 50
+        },
+        {
+            "action": "unlearn",
+            "actor": "voodoo",
+            "spell": 706482
+        },
+        {
+            "action": "assert",
+            "label": "Unlearning removes the self-buff",
+            "actor": "voodoo",
+            "metric": "aura",
+            "spell": 706482,
+            "caster": "voodoo",
+            "equals": 0
+        },
+        {
+            "action": "assert",
+            "label": "Spell hit rating returns to baseline",
+            "actor": "voodoo",
+            "metric": "combat_rating",
+            "rating": 7,
+            "relative_to": "voodoo_hit0",
+            "equals": 0,
+            "within_ms": 3000
+        },
+        {
+            "action": "assert",
+            "label": "Shadow spell power returns to baseline",
+            "actor": "voodoo",
+            "metric": "spell_power",
+            "school": 5,
+            "relative_to": "voodoo_sp0",
+            "equals": 0,
+            "within_ms": 3000
+        }
+    ]
+}

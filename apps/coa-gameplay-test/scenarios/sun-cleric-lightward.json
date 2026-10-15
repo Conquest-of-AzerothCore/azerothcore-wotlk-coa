@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Lightward is a native flat duration modifier on Blessing of Purity (#3177)",
+  "contract": "Spell.dbc 800233 (\"Lightward\", SpellFamilyName 33, Passive) effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 1 (SPELLMOD_DURATION), EffectBasePoints 1999 (amount 2000, i.e. 2000 ms = 2 sec), and EffectSpellClassMask word 1 = 512, which a repository-wide Spell.dbc scan for family-33 spells shows matches exactly one spell: 680889 'Blessing of Purity'. Player::ApplySpellMod's SPELLMOD_DURATION branch (Player.cpp:10219, the CASTING_TIME/DURATION special case) computes basevalue = (basevalue+totalflat)*totalmul, so base 0 with a single +2000 flat modifier and no pct modifier reads back exactly 2000 — the tooltip's '+2 sec' precisely. This is a fully generic native pipeline; no server script exists or is needed. (Effect 1 of 800233 carries a different class mask, word 3 = 2048, matching Sunshine/Final Vows — an unrelated modifier bundled into the same passive, out of scope for this issue and noted separately.)",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "Sanity: no duration modifier on Blessing of Purity before learning",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 680889, "op": 1, "base": 0, "equals": 0
+    },
+    { "action": "learn", "actor": "cleric", "spell": 800233 },
+    {
+      "action": "assert", "label": "Blessing of Purity's duration is increased by exactly 2000 ms",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 680889, "op": 1, "base": 0, "equals": 2000
+    },
+    {
+      "action": "assert", "label": "An unrelated family-33 spell (Radiant Cascade) keeps its normal duration",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 500141, "op": 1, "base": 0, "equals": 0
+    }
+  ]
+}

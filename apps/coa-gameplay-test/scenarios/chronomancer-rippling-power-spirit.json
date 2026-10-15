@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Rippling Power increases Spirit by 8% at rank 1 and 15% at rank 2 (#959)",
+  "contract": "Rippling Power 806300 (Spell.dbc Rank text \"Rank 1\") and 807893 (\"Rank 2\") both carry SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (137) on effect 1 with EffectMiscValue Stats::STAT_SPIRIT (4); EffectBasePoints 7 and 14 resolve to 8 and 15 with DieSides 1, matching the tooltip \"Increases your Spirit by $s2%.\" Effect 0 is the same aura on STAT_INTELLECT with EffectBasePoints -1, i.e. an amount of 0, so it must not move Intellect. Native path only: AuraEffect::HandleModTotalPercentStat calls Unit::SetStatPctModifier with the TOTAL_PCT multiplier and Unit::UpdateStatBuffMod, and the resulting Unit::UpdateUnitMod writes the int32 UNIT_FIELD_STAT that the stat metric reads. All three fixtures are the same race, class and level so their base Spirit is identical; the ratio windows absorb that int32 truncation. The two ranks are learned by separate actors because Spell.dbc gives them no shared chain, so one actor learning both would stack the two auras.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 22, "level": 80 },
+    { "id": "rank_one", "race": 1, "class": 22, "level": 80 },
+    { "id": "rank_two", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "rank_one", "spell": 806300 },
+    { "action": "learn", "actor": "rank_two", "spell": 807893 },
+    {
+      "action": "snapshot",
+      "label": "Baseline Spirit without the talent",
+      "actor": "control",
+      "metric": "stat",
+      "stat": 4,
+      "save_as": "spirit_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline Intellect without the talent",
+      "actor": "control",
+      "metric": "stat",
+      "stat": 3,
+      "save_as": "intellect_base"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises Spirit by 8%",
+      "actor": "rank_one",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "spirit_base",
+      "min": 1.07,
+      "max": 1.09
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises Spirit by 15%",
+      "actor": "rank_two",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "spirit_base",
+      "min": 1.14,
+      "max": 1.16
+    },
+    {
+      "action": "assert",
+      "label": "The inert Intellect effect leaves Intellect untouched",
+      "actor": "rank_two",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "intellect_base",
+      "equals": 0
+    }
+  ]
+}

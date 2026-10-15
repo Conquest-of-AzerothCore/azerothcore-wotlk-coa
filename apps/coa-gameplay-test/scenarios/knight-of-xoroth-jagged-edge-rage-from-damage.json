@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Jagged Edge raises Rage generated from damage dealt by 20% (#678)",
+  "contract": "Jagged Edge 707614 reads 'Increases your Rage generated from damage dealt by $s1%.' Its sole effect is native aura 213 (SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT), MiscValue 0, EffectBasePoints 19 with DieSides 1 -> resolved 20 (matching the installed moa_description '+20%'), verified via csv.DictReader against /home/fab/CoaServer/reference/snapshots/ascension-data/tables/spell.csv.gz. The dispatch table comment at SpellAuraEffects.cpp:278 reads '213 SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT implemented in Player::RewardRage' -- the actual function is Unit::RewardRage (Unit.cpp:16768; the comment names the wrong class but the same code), a real wired consumer: on the attacker-side branch it computes addRage from the damage dealt, then AddPct(addRage, GetTotalAuraModifier(SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT)) scales it by this aura's total before ModifyPower(POWER_RAGE, ...). The Knight of Xoroth is a Rage-primary class (power_type 1, no special form needed, unlike the Venomancer precedent in apps/coa-gameplay-test/scenarios/venomancer-rage-and-stat-auras.json). The exact +20 percent ratio has no deterministic harness metric (rage per hit follows the weapon damage roll, per that same precedent), so the aura amount is asserted directly and melee Rage generation is proven to occur.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "knight",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: the Knight of Xoroth has a Rage pool",
+      "actor": "knight", "metric": "max_power", "power": 1, "min": 1
+    },
+    { "action": "learn", "actor": "knight", "spell": 707614 },
+    { "action": "set_aura", "actor": "knight", "spell": 707614, "stacks": 1, "label": "Force the Jagged Edge passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Jagged Edge passive is active",
+      "actor": "knight", "metric": "aura", "spell": 707614, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Jagged Edge carries +19+1 = 20 percent rage from damage dealt (aura 213)",
+      "actor": "knight", "metric": "aura_amount", "spell": 707614, "effect": 0, "equals": 20
+    },
+    { "action": "snapshot", "label": "Rage before the melee", "actor": "knight", "metric": "power", "power": 1, "save_as": "rage0" },
+    { "action": "attack", "actor": "knight", "target": "dummy" },
+    {
+      "action": "assert", "label": "Auto attacks build Rage with Jagged Edge learned (the +20 percent itself has no deterministic harness metric: rage per hit depends on the weapon damage roll)",
+      "actor": "knight", "metric": "power", "power": 1, "relative_to": "rage0", "min": 1, "within_ms": 20000
+    }
+  ]
+}

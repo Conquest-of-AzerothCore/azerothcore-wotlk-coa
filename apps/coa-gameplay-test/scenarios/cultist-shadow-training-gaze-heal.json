@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Cultist: Shadow Training doubles Gaze of C'Thun's healing (#1238)",
+  "contract": "Shadow Training 805607 tooltip: 'Increases the healing done by Eldritch Mending by 50% and Gaze of C'Thun by 100%.' Spell.dbc effect 2 (ADD_PCT_MODIFIER, mask {0,4096,0}) already gives Eldritch Mending 500711 its native +50% (SPELLMOD_DAMAGE). Every Gaze of C'Thun rank (500110, 502135-502143) triggers 520335 which triggers 520333 (SpellFamilyFlags {2097152,0,1073741824}, family 31); a full Spell.dbc scan for family-31 spells with SpellFamilyFlags word0 bit 2097152 set returns only 520333, so a SPELLMOD_DAMAGE modifier masked to that single bit can only ever affect Gaze's heal helper. Before this fix no DBC row, SQL row or C++ script carried a second modifier for that helper.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "c", "race": 1, "class": 25, "level": 30 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    {
+      "action": "assert", "label": "Gaze's heal trigger carries no modifier before learning Shadow Training",
+      "actor": "c", "metric": "spell_modifier", "spell": 520333, "op": 0, "base": 1000, "equals": 1000
+    },
+    {
+      "action": "assert", "label": "Eldritch Mending carries no modifier before learning Shadow Training",
+      "actor": "c", "metric": "spell_modifier", "spell": 500711, "op": 0, "base": 1000, "equals": 1000
+    },
+    { "action": "learn", "actor": "c", "spell": 805607 },
+    { "action": "assert", "actor": "c", "metric": "aura", "spell": 805607, "equals": 1, "within_ms": 3000 },
+    {
+      "action": "assert", "label": "Eldritch Mending keeps its native +50% (regression)",
+      "actor": "c", "metric": "spell_modifier", "spell": 500711, "op": 0, "base": 1000, "equals": 1500
+    },
+    {
+      "action": "assert", "label": "Gaze of C'Thun's heal trigger now carries the promised +100%",
+      "actor": "c", "metric": "spell_modifier", "spell": 520333, "op": 0, "base": 1000, "equals": 2000
+    },
+    {
+      "action": "assert", "label": "Gaze's damage trigger is untouched; the tooltip promises healing only",
+      "actor": "c", "metric": "spell_modifier", "spell": 520332, "op": 0, "base": 1000, "equals": 1000
+    },
+    { "action": "unlearn", "actor": "c", "spell": 805607 },
+    { "action": "assert", "actor": "c", "metric": "aura", "spell": 805607, "equals": 0, "within_ms": 3000 },
+    {
+      "action": "assert", "label": "Removing Shadow Training removes Gaze's heal modifier too",
+      "actor": "c", "metric": "spell_modifier", "spell": 520333, "op": 0, "base": 1000, "equals": 1000
+    },
+    {
+      "action": "assert", "label": "Removing Shadow Training removes Eldritch Mending's modifier too",
+      "actor": "c", "metric": "spell_modifier", "spell": 500711, "op": 0, "base": 1000, "equals": 1000
+    }
+  ]
+}

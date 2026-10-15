@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Studious and Master Elementalist native spell modifiers (#864, #2784)",
+  "contract": "#864: Studious (705657) effect 0 is aura 108 SPELLMOD_CASTING_TIME, BasePoints -16 (raw) = -15%, class mask (2048, 128, 0) matching Shock (dword0 bit11) and Brine (dword1 bit7, Tempest Sovereign's transformed Shock). SPELLMOD_CASTING_TIME is applied generically in SpellInfo::CalcCastTime via ApplySpellMod (Unit.cpp:12317), gated only by SpellInfo::IsAffectedBySpellMod, which has no exemption for SpellFamilyName 22 (Stormbringer). The rank this scenario learns (804020) has CastingTimeIndex 16 -> SpellCastTimes.dbc id 16 CastTime 1500 ms (the investigation's original 1700 ms/index 90 figure was read off rank 503326, not 804020: every other Shock rank id, including 804020, uses index 5 or 16, never 90), so the -15% reduction lands at 1275 ms. #2784: Master Elementalist (705662) has two aura-107 SPELLMOD_BONUS_MULTIPLIER effects: effect 0 BasePoints 9 (raw) = +10, class mask (2048, 0, 0) matching Shock; effect 1 BasePoints 19 (raw) = +20, class mask (8388608, 0, 0) matching Aeroblast. Its own tooltip reads 'Increases the spell damage scaling of Shock by 10% and Aeroblast by 20%', matching both raw+1 values and both classmask targets exactly. SPELLMOD_BONUS_MULTIPLIER is applied generically in Unit::SpellBonusDamage (Unit.cpp:9358-9360) after the base coefficient is sourced from spell_bonus_data or the native EffectBonusMultiplier, so the modifier itself is proven with Player::ApplySpellMod against an arbitrary base, independent of PR #4612's pending coefficient restoration for Shock/Aeroblast. Neither passive has any module code (zero hits for 705657 or 705662 under modules/ or src/server/), and none is needed; both close as regression scenarios only.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "sb",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "label": "Learn Shock", "actor": "sb", "spell": 804020 },
+    { "action": "assert", "label": "BASELINE: Shock (804020) casts in 1500 ms per SpellCastTimes index 16",
+      "actor": "sb", "metric": "spell_cast_time_ms", "spell": 804020, "equals": 1500 },
+    { "action": "assert", "label": "BASELINE: no casting-time modifier on Shock before Studious",
+      "actor": "sb", "metric": "spell_modifier", "spell": 804020, "op": 10, "base": 1500, "equals": 1500 },
+    { "action": "assert", "label": "BASELINE: no bonus-multiplier modifier on Shock before Master Elementalist",
+      "actor": "sb", "metric": "spell_modifier", "spell": 804020, "op": 24, "base": 100, "equals": 100 },
+    { "action": "assert", "label": "BASELINE: no bonus-multiplier modifier on Aeroblast before Master Elementalist",
+      "actor": "sb", "metric": "spell_modifier", "spell": 801839, "op": 24, "base": 100, "equals": 100 },
+    { "action": "learn", "label": "Learn Studious", "actor": "sb", "spell": 705657 },
+    { "action": "assert", "label": "DISCRIMINATING: Studious is a -15% casting-time modifier on Shock, relative to the observed 1500 ms baseline (rank 804020's own CastingTimeIndex 16, not the 1700 ms/index 90 of a different rank)",
+      "actor": "sb", "metric": "spell_modifier", "spell": 804020, "op": 10, "base": 1500, "equals": 1275 },
+    { "action": "assert", "label": "DISCRIMINATING: Shock now casts in 1275 ms (1500 x 0.85)",
+      "actor": "sb", "metric": "spell_cast_time_ms", "spell": 804020, "equals": 1275 },
+    { "action": "assert", "label": "Studious leaves Shock's bonus-multiplier modifier untouched",
+      "actor": "sb", "metric": "spell_modifier", "spell": 804020, "op": 24, "base": 100, "equals": 100 },
+    { "action": "learn", "label": "Learn Master Elementalist", "actor": "sb", "spell": 705662 },
+    { "action": "assert", "label": "DISCRIMINATING: Master Elementalist adds +10 to Shock's bonus-multiplier modifier",
+      "actor": "sb", "metric": "spell_modifier", "spell": 804020, "op": 24, "base": 100, "equals": 110 },
+    { "action": "assert", "label": "DISCRIMINATING: Master Elementalist adds +20 to Aeroblast's bonus-multiplier modifier",
+      "actor": "sb", "metric": "spell_modifier", "spell": 801839, "op": 24, "base": 100, "equals": 120 },
+    { "action": "assert", "label": "Master Elementalist leaves Shock's casting-time modifier at Studious's -15%",
+      "actor": "sb", "metric": "spell_modifier", "spell": 804020, "op": 10, "base": 1500, "equals": 1275 },
+    { "action": "assert", "label": "Master Elementalist leaves Shock's cast time at 1275 ms",
+      "actor": "sb", "metric": "spell_cast_time_ms", "spell": 804020, "equals": 1275 }
+  ]
+}

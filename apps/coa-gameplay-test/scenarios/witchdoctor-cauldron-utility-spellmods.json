@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Cauldron utility spellmods work natively (#1255, #2300, #1379)",
+  "contract": "#1255 Plentiful Potions 803463 is SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 14 (SPELLMOD_COST), EffectBasePoints -11 (-10% at DieSides 1), EffectSpellClassMask word1 8519680 = Loa's Brew 801670 (SpellFamilyFlags word1 131072) | Hexbreak 806240 (SpellFamilyFlags word1 8388608). SpellInfo::CalcPowerCost applies SPELLMOD_COST generically, so both named spells cost about 90% of baseline once learned, no module code needed. #2300 Brewmaster 704512/707856 is SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), EffectSpellClassMask word1 131072 matching Loa's Brew only; rank 1 EffectBasePoints -251 resolves to -250 ms, rank 2 -501 resolves to -500 ms. Unit::CalcCastTime calls ApplySpellMod(SPELLMOD_CASTING_TIME) generically (Unit.cpp, Player::ApplySpellMod at Player.cpp:10219). #1379 Blessing of Hir'eek 572870 is SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), EffectBasePoints 0 / DieSides 1 (+1), EffectSpellClassMask word1 8388608 matching Hexbreak only. Hexbreak's own effect 0 is SPELL_EFFECT_DISPEL with EffectBasePoints 0 / DieSides 1 (dispel count 1, matching its tooltip '$s1 curse effect'); SpellEffectInfo::CalcValue (SpellInfo.cpp) runs every effect, including SPELL_EFFECT_DISPEL, through Unit::ApplyEffectModifiers -> ApplySpellMod(SPELLMOD_EFFECT1), so the resolved effect value read by spell_effect_value is exactly what Spell::EffectDispel uses as dispelCount (SpellEffects.cpp:2925, dispelCount = damage). Player::ApplySpellMod's per-mod dispel-chance gate does not apply here; Aura::CalcDispelChance (SpellAuras.cpp:1142) defaults resistChance to 0 for a friendly (non-offensive) dispel, so a same-run Hexbreak cast against curses on an ally is a deterministic 100% dispel; with two distinct curses present and Blessing's dispel count raised to 2, Spell::EffectDispel's loop (SpellEffects.cpp:2947) consumes the whole 2-entry dispel list regardless of its random per-entry selection order, so both are removed deterministically. All three mechanisms are stock engine paths under src/server/game/Spells and src/server/game/Entities/Player, not src/server/coa; no fix is proposed. Curse of Weakness 702 (SpellFamilyName 5/Warlock, Dispel 2/DISPEL_CURSE) and Curse of Stalvan 3105 (SpellFamilyName 0/generic, Dispel 2/DISPEL_CURSE) are used as the two simultaneous curses: SpellInfo::GetSpellSpecific (SpellInfo.cpp) only assigns SPELL_SPECIFIC_CURSE to SPELLFAMILY_WARLOCK spells with Dispel==DISPEL_CURSE, and Aura::CanStackWith's same-caster SPELL_SPECIFIC_CURSE exclusivity (SpellAuras.cpp:1996, SpellInfo::IsAuraExclusiveBySpecificPerCasterWith) removes a second self-applied Warlock curse from the same caster (e.g. 702+980, both Warlock-family) before it can land; a generic (family 0) DISPEL_CURSE debuff such as 3105 is unaffected by that exclusivity while still matching Hexbreak's dispel mask, which only checks each aura's own Dispel field (Spell::EffectDispel -> GetDispellableAuraList, SpellEffects.cpp:2930), not its SpellFamilyName.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "doctor", "race": 1, "class": 13, "level": 80 },
+    { "id": "ally", "race": 1, "class": 1, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+
+    { "action": "learn", "actor": "doctor", "spell": 801670, "label": "Learn Loa's Brew" },
+    { "action": "learn", "actor": "doctor", "spell": 806240, "label": "Learn Hexbreak" },
+
+    { "action": "assert", "label": "#1379 baseline: Hexbreak's own dispel count is 1 without Blessing of Hir'eek",
+      "actor": "doctor", "metric": "spell_effect_value", "spell": 806240, "effect": 0, "equals": 1 },
+
+    { "action": "snapshot", "actor": "doctor", "metric": "spell_power_cost", "spell": 801670, "save_as": "loa_cost_base" },
+    { "action": "snapshot", "actor": "doctor", "metric": "spell_power_cost", "spell": 806240, "save_as": "hex_cost_base" },
+    { "action": "snapshot", "actor": "doctor", "metric": "spell_cast_time_ms", "spell": 801670, "save_as": "loa_cast_base" },
+
+    { "action": "learn", "actor": "doctor", "spell": 803463, "label": "Learn Plentiful Potions" },
+    { "action": "assert", "label": "Plentiful Potions applies itself",
+      "actor": "doctor", "metric": "aura", "spell": 803463, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "#1255: Loa's Brew costs about 90% of its unbuffed cost",
+      "actor": "doctor", "metric": "spell_power_cost", "spell": 801670, "ratio_to": "loa_cost_base",
+      "min": 0.89, "max": 0.901, "within_ms": 3000 },
+    { "action": "assert", "label": "#1255: Hexbreak costs about 90% of its unbuffed cost",
+      "actor": "doctor", "metric": "spell_power_cost", "spell": 806240, "ratio_to": "hex_cost_base",
+      "min": 0.89, "max": 0.901, "within_ms": 3000 },
+
+    { "action": "learn", "actor": "doctor", "spell": 704512, "label": "Learn Brewmaster rank 1" },
+    { "action": "assert", "label": "Brewmaster rank 1 applies itself",
+      "actor": "doctor", "metric": "aura", "spell": 704512, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "#2300: Brewmaster rank 1 cuts Loa's Brew's cast time by 250 ms",
+      "actor": "doctor", "metric": "spell_cast_time_ms", "spell": 801670, "relative_to": "loa_cast_base",
+      "equals": -250 },
+    { "action": "unlearn", "actor": "doctor", "spell": 704512 },
+    { "action": "learn", "actor": "doctor", "spell": 707856, "label": "Learn Brewmaster rank 2" },
+    { "action": "assert", "label": "Brewmaster rank 2 applies itself",
+      "actor": "doctor", "metric": "aura", "spell": 707856, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "#2300: Brewmaster rank 2 cuts Loa's Brew's cast time by 500 ms",
+      "actor": "doctor", "metric": "spell_cast_time_ms", "spell": 801670, "relative_to": "loa_cast_base",
+      "equals": -500 },
+
+    { "action": "set_aura", "label": "Put one curse on the ally", "actor": "ally", "spell": 702, "stacks": 1 },
+    { "action": "assert", "label": "Curse of Weakness landed",
+      "actor": "ally", "metric": "aura", "spell": 702, "equals": 1, "within_ms": 3000 },
+    { "action": "cast", "label": "#1379 baseline: cast Hexbreak without Blessing of Hir'eek",
+      "actor": "doctor", "spell": 806240, "target": "ally" },
+    { "action": "assert", "label": "The single curse is dispelled",
+      "actor": "ally", "metric": "aura", "spell": 702, "equals": 0, "within_ms": 4000 },
+
+    { "action": "wait", "label": "Let the global cooldown expire", "ms": 2000 },
+    { "action": "learn", "actor": "doctor", "spell": 572870, "label": "Learn Blessing of Hir'eek" },
+    { "action": "assert", "label": "Blessing of Hir'eek applies itself",
+      "actor": "doctor", "metric": "aura", "spell": 572870, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "#1379: Hexbreak's dispel count becomes 2 with Blessing of Hir'eek",
+      "actor": "doctor", "metric": "spell_effect_value", "spell": 806240, "effect": 0, "equals": 2 },
+
+    { "action": "set_aura", "label": "Put two distinct curses on the ally", "actor": "ally", "spell": 702, "stacks": 1 },
+    { "action": "set_aura", "label": "Put a second, non-Warlock-family curse on the ally (avoids the same-caster SPELL_SPECIFIC_CURSE exclusivity between two Warlock curses)",
+      "actor": "ally", "spell": 3105, "stacks": 1 },
+    { "action": "assert", "label": "Curse of Weakness landed again",
+      "actor": "ally", "metric": "aura", "spell": 702, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Curse of Stalvan landed",
+      "actor": "ally", "metric": "aura", "spell": 3105, "equals": 1, "within_ms": 3000 },
+    { "action": "cast", "label": "#1379: cast Hexbreak with Blessing of Hir'eek active",
+      "actor": "doctor", "spell": 806240, "target": "ally" },
+    { "action": "assert", "label": "Both curses are dispelled in one cast",
+      "actor": "ally", "metric": "aura", "spell": 702, "equals": 0, "within_ms": 4000 },
+    { "action": "assert", "label": "Both curses are dispelled in one cast (second curse)",
+      "actor": "ally", "metric": "aura", "spell": 3105, "equals": 0, "within_ms": 4000 }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Casting Fortify Timeline grants the Converge the Infinite buff (#1939)",
+  "contract": "Converge the Infinite 520045's only effect is aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) on the 520840 buff, and its tooltip is \"Casting Fortify Timeline now grants you Converge the Infinite\". Spell.dbc gives 520045 ProcFlags 0x0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and Aura::GetProcEffectMask returned 0 - the buff could never be granted. Fortify Timeline is 804491 (SpellFamilyName 28, SpellFamilyFlags word1 4194304, DmgClass 1, effect 0 SPELL_EFFECT_HEAL). With a spell_proc row keyed on that family mask at 100% chance, one Fortify Timeline cast must grant 520840. The caster's health is lowered first so the raid heal has real healing to do and Unit::ProcSkillsAndAuras sees a HealInfo.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "chronomancer", "spell": 520045 },
+    { "action": "learn", "actor": "chronomancer", "spell": 804491 },
+    {
+      "action": "assert",
+      "label": "No Converge the Infinite buff before any cast",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 520840,
+      "caster": "chronomancer",
+      "equals": 0
+    },
+    { "action": "set_health", "actor": "chronomancer", "value": 2000 },
+    { "action": "cast", "actor": "chronomancer", "spell": 804491 },
+    {
+      "action": "assert",
+      "label": "Fortify Timeline's heal grants the Converge the Infinite buff",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 520840,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

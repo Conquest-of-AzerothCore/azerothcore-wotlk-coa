@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "name": "Inquisitor's Trap silences the first enemy to approach it and all enemies within 5 yd (#783)",
+  "contract": "Inquisitor's Trap 681445 (installed Spell.dbc) is a 60000 ms cooldown SUMMON of creature 506251 in front of the caster (TARGET_DEST_CASTER_FRONT), duration index 3 = 60 s; its silence helper 681447 is SPELL_AURA_MOD_SILENCE (27) with duration index 32 = 6000 ms and radius index 8 = 5 yd. Tooltip: 'Place a cruel trap on the ground lasting 1 min that will curse the first enemy to approach it silencing them and all enemies in a 5 yd radius for 6 sec.' The behaviour is not in Spell.dbc alone: spell_script_names binds 681445 to spell_ascension_witch_hunter_summon and creature_template 506251 to npc_ascension_witch_hunter_field (AscensionWitchHunterSummons.cpp), whose AI polls every 250 ms for a valid enemy within 3 yd, casts 681447 on every valid enemy within 5 yd of it and despawns. The fixture layout does not depend on the player's facing: enemy a stands 2 yd from the caster, enemy b 3 yd (1 yd from a, so inside the silence radius whichever of them triggers the trap) and enemy c 20 yd away. All are level-60 hostile dummies and the hunter has spell hit rating 10000. GEOMETRY CORRECTED after slot 3 runs: the field AI finds enemies with Acore::AnyUnitInObjectRangeCheck, whose WorldObject::IsWithinDistInMap adds both units' object size (combat reach; Object.cpp _IsWithinDist), so the ranges are edge to edge: creature_model_info gives the trap model 1.0 and Harvest Golem 36 1.275, hence the 3 yd trigger reaches an enemy up to 5.275 yd from the trap and the silence radius around the triggering enemy reaches 5 + 2 x 1.275 = 7.55 yd. Measured with owned_creature_count min_distance: the trap stands 2 to 3 yd from the caster. Enemies at 6 or 9 yd were therefore inside the ranges (and an enemy standing exactly on the caster was never picked as the trigger in five runs), so the fixture now uses an enemy at 2 yd (always inside the trigger range whatever the trap's direction) and a far enemy at 20 yd (beyond 3 + 5.275 + 7.55).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "a",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 60,
+      "distance": 2
+    },
+    {
+      "id": "b",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 60,
+      "distance": 3
+    },
+    {
+      "id": "c",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 60,
+      "distance": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 681445,
+      "label": "Learn Inquisitor's Trap"
+    },
+    {
+      "action": "assert",
+      "label": "Fixture: the far enemy is 20 yards away",
+      "actor": "hunter",
+      "metric": "distance",
+      "target": "c",
+      "min": 19
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 681445,
+      "label": "Drop Inquisitor's Trap in front of the hunter"
+    },
+    {
+      "action": "assert",
+      "label": "The first enemy in reach is silenced",
+      "actor": "a",
+      "metric": "aura",
+      "spell": 681447,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "An enemy within 5 yd of it is silenced too",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 681447,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "An enemy 20 yd away is not",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 681447,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The caster is not silenced",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 681447,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The silence lasts at most 6 seconds",
+      "actor": "a",
+      "metric": "aura_duration_ms",
+      "spell": 681447,
+      "caster": "hunter",
+      "min": 4000,
+      "max": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The trap is used up",
+      "actor": "hunter",
+      "metric": "owned_creature_count",
+      "entry": 506251,
+      "equals": 0,
+      "within_ms": 4000
+    }
+  ]
+}

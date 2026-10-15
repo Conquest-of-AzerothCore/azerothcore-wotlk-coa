@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "name": "Timeguard spends a charge only on a qualifying hit (#3390)",
+  "contract": "Timeguard 804441: 'the next 3 instances of direct damage that deal more than 20% of their total health or reduce the target below 35% health to deal $s3% less damage'. Effect 0 is aura 69 SPELL_AURA_SCHOOL_ABSORB with EffectBasePoints 1 (die 1 => an absorb of two points), effects 1 and 2 are SPELL_AURA_DUMMY carrying EffectBasePoints 34 (die 1 => 35, the health threshold) and 49 (die 1 => 50, the reduction). With no script, the two-point shield is consumed by the first hit of any size and Unit::CalcAbsorbResist removes the whole aura, so the record's ProcCharges 3 budget never survives one hit. Injure Self 19806 is the probe: a single SPELL_EFFECT_SCHOOL_DAMAGE of EffectBasePoints 69, die 1 => 70, implicit target 1 (caster), SPELL_DAMAGE_CLASS_NONE so Unit::IsSpellCrit returns 0 and it can never crit, no cooldown, no GCD category and no mana. At full health 70 damage is under a fifth of maximum health and leaves the Chronomancer far above 35%, so it must not touch the shield; at 400 health it leaves the target under 35% of a maximum of at least 1200, so it must spend exactly one of the three charges.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "400 health is under 35% of maximum and survives a 70 damage hit",
+      "actor": "chronomancer",
+      "metric": "max_health",
+      "min": 1200
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 804441
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 19806
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 804441
+    },
+    {
+      "action": "assert",
+      "label": "Timeguard lands on the ally target",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 804441,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Timeguard starts with the record's three charges",
+      "actor": "chronomancer",
+      "metric": "aura_charges",
+      "spell": 804441,
+      "equals": 3
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 19806
+    },
+    {
+      "action": "wait",
+      "label": "Let the self damage resolve",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "A small hit at full health leaves Timeguard up",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 804441,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "A small hit at full health spends no charge",
+      "actor": "chronomancer",
+      "metric": "aura_charges",
+      "spell": 804441,
+      "equals": 3
+    },
+    {
+      "action": "set_health",
+      "actor": "chronomancer",
+      "value": 400
+    },
+    {
+      "action": "assert",
+      "label": "The Chronomancer is below the 35% threshold",
+      "actor": "chronomancer",
+      "metric": "health_pct",
+      "max": 34
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 19806
+    },
+    {
+      "action": "wait",
+      "label": "Let the qualifying hit resolve",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The qualifying hit spends exactly one charge",
+      "actor": "chronomancer",
+      "metric": "aura_charges",
+      "spell": 804441,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "The guarded Chronomancer survives the qualifying hit",
+      "actor": "chronomancer",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

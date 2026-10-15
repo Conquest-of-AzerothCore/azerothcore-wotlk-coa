@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Tinker: Improved Emergency Heal changes Emergency Heal's cost and healing",
+  "contract": "#1158: Improved Emergency Heal (504918) is a pair of percent spell modifiers whose class mask (0x80000000,0,0) selects only the Emergency Heal ranks. With it known, the native cost consumer must return 80% of the unmodified mana cost and the native healing consumer 120% of the unmodified heal.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "t", "race": 1, "class": 28, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "d", "owner": "t", "entry": 299, "level": 80, "distance": 5 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "No cost modifier on Emergency Heal before the passive",
+      "actor": "t", "metric": "spell_modifier", "spell": 802684, "op": 14, "base": 100, "equals": 100 },
+    { "action": "assert", "label": "No healing modifier on Emergency Heal before the passive",
+      "actor": "t", "metric": "spell_modifier", "spell": 802684, "op": 0, "base": 100, "equals": 100 },
+    { "action": "snapshot", "save_as": "cost0",
+      "actor": "t", "metric": "spell_power_cost", "spell": 802684 },
+    { "action": "snapshot", "save_as": "heal0",
+      "actor": "t", "metric": "spell_healing_done", "spell": 802684, "target": "d" },
+    { "action": "learn", "actor": "t", "spell": 504918 },
+    { "action": "assert", "label": "The passive cuts the Emergency Heal cost modifier to 80%",
+      "actor": "t", "metric": "spell_modifier", "spell": 802684, "op": 14, "base": 100,
+      "min": 79.5, "max": 80.5 },
+    { "action": "assert", "label": "The passive raises the Emergency Heal healing modifier to 120%",
+      "actor": "t", "metric": "spell_modifier", "spell": 802684, "op": 0, "base": 100,
+      "min": 119.5, "max": 120.5 },
+    { "action": "assert", "label": "Emergency Heal's real mana cost drops by 20%",
+      "actor": "t", "metric": "spell_power_cost", "spell": 802684, "ratio_to": "cost0",
+      "min": 0.79, "max": 0.81 },
+    { "action": "assert", "label": "Emergency Heal's calculated healing rises by 20%",
+      "actor": "t", "metric": "spell_healing_done", "spell": 802684, "target": "d",
+      "ratio_to": "heal0", "min": 1.19, "max": 1.21 }
+  ]
+}

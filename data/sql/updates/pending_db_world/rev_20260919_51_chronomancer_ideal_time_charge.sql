@@ -1,0 +1,45 @@
+-- Ideal Time (807036) grants its buff 807210 every 30 sec (two SPELL_AURA_PERIODIC_TRIGGER_SPELL effects,
+-- EffectAmplitude 30000, DurationIndex 21 = permanent). The buff's own Description and AuraDescription both
+-- read "Your next ability is guaranteed to critically strike", and Spell.dbc gives 807210 DurationIndex 1
+-- = 10000 ms, ProcFlags 0, ProcCharges 0, ProcChance 100. Effect 0 is Aura=290 SPELL_AURA_MOD_CRIT_PCT
+-- (EffectBasePoints 99, DieSides 1 => +100) and effect 1 is Aura=107 SPELL_AURA_ADD_FLAT_MODIFIER,
+-- EffectMiscValue 7 = SPELLMOD_CRITICAL_CHANCE, class-masked to [0,268435456,0].
+-- Without a charge the +100 stat bonus of effect 0 lasts the whole 10 sec, so every ability in the window
+-- critically strikes instead of only the next one. A charge is the only mechanism that ends it: an aura
+-- loses one in exactly two places, Player::RemoveSpellMods (Player.cpp:10447) and
+-- Aura::PrepareProcToTrigger (SpellAuras.cpp:2133-2137), and Aura::ConsumeProcCharges
+-- (SpellAuras.cpp:2344-2355) removes the aura once the last charge is spent.
+-- The spellmod route cannot reach the charge. Effect 0 is a stat aura handled by
+-- AuraEffect::HandleAuraModCritPct (SpellAuraEffects.cpp:4872), which feeds the player's crit fields and
+-- can never register in Spell::m_appliedMods. Effect 1's class mask only covers Accelerated Recovery /
+-- Accelerated Mending, all SPELL_AURA_PERIODIC_HEAL records whose crit is decided by
+-- AuraEffect::CalcPeriodicCritChance and never passes through SPELLMOD_CRITICAL_CHANCE
+-- (Unit.cpp:9623). So the proc system must be the consumer, and Aura::GetProcEffectMask
+-- (SpellAuras.cpp:2148-2153) returns 0 for any aura without a `spell_proc` row.
+-- Having a row does not disable the modifier it gates: Player::ApplySpellMod
+-- (Player.cpp:10187-10296) never consults the proc table, and Player::RemoveSpellMods skipping
+-- proc-entry spells (Player.cpp:10466) is exactly what keeps the charge from being spent twice.
+-- ProcFlags 87312 = the six DONE spell flags 0x10 | 0x100 | 0x400 | 0x1000 | 0x4000 | 0x10000, i.e. every
+-- ability the player uses, whatever its DmgClass and whether it harms or helps. Auto-attack flags and
+-- PROC_FLAG_DONE_PERIODIC are deliberately left out: a white swing and a damage-over-time tick are not
+-- "abilities", and a tick could not benefit anyway (CalcPeriodicCritChance ignores aura 290).
+-- SpellTypeMask 3 = PROC_SPELL_TYPE_DAMAGE | PROC_SPELL_TYPE_HEAL; an ability that neither damages nor
+-- heals cannot critically strike, so it must not eat the charge.
+-- SpellPhaseMask 2 = PROC_SPELL_PHASE_HIT. The hit-phase event is raised after the damage or heal has been
+-- resolved (Spell.cpp:2831 for heals, Spell.cpp:2926 for damage), so the empowered ability keeps its
+-- guaranteed critical and the charge is spent on it. PROC_SPELL_PHASE_CAST fires before the effects
+-- (Spell.cpp:4046-4047) and would remove the buff before it could apply.
+-- HitMask 2 = PROC_HIT_CRITICAL, the tooltip's own condition: the charge is spent only on an ability that
+-- actually critically struck, which keeps a miss, a full resist or a spell flagged SPELL_ATTR2_CANT_CRIT
+-- from consuming it. Crit heals set the same bit (Spell.cpp:2804-2805).
+-- AttributesMask 0. PROC_ATTR_REQ_SPELLMOD is deliberately not set: it would require the proccing spell to
+-- carry this aura's spellmod, whose class mask only reaches Accelerated Recovery, making the buff
+-- consumable by that heal-over-time alone. PROC_ATTR_TRIGGERED_CAN_PROC is also left unset, so a triggered
+-- sub-spell cannot spend the charge (Aura::GetProcEffectMask, SpellAuras.cpp:2164-2173).
+-- Chance 100 matches the record's own ProcChance; the tooltip states no percentage.
+-- Charges 1 is stated explicitly rather than relying on the DBC fallback in SpellMgr::LoadSpellProcs
+-- ("if (!procEntry.Charges) procEntry.Charges = spellInfo->ProcCharges"), because
+-- Aura::CalcMaxCharges (SpellAuras.cpp:909-919) prefers the proc entry's value whenever a row exists.
+DELETE FROM `spell_proc` WHERE `SpellId` = 807210;
+INSERT INTO `spell_proc` (`SpellId`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `ProcFlags`, `SpellTypeMask`, `SpellPhaseMask`, `HitMask`, `AttributesMask`, `DisableEffectsMask`, `ProcsPerMinute`, `Chance`, `Cooldown`, `Charges`) VALUES
+(807210, 0, 0, 0, 0, 0, 87312, 3, 2, 2, 0, 0, 0, 100, 0, 1);

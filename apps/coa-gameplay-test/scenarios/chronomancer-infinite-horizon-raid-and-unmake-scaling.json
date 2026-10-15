@@ -1,0 +1,140 @@
+{
+  "schema": 1,
+  "name": "Infinite Horizon's raid damage aura and Unmake scaling bonus already work (#894)",
+  "contract": "Infinite Horizon 560528 (Chronomancer Duality talent, CharacterAdvancement 6158) reads \"Increases the all damage dealt by party and raid members by $s1%. Does not stack with similar effects. In addition, your Unmake and Timerend gain an additional $s2% bonus spell scaling.\" Effect 0 is SPELL_EFFECT_APPLY_AREA_AURA_RAID with SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 127, EffectBasePoints 2 + DieSides 1 = 3, radius 287 = 100 yd; it is a member of the CoA raid damage group 2000184 (rev_20260922_27_raid_damage_percent_group.sql), whose non-stacking is proven by stormbringer-fix-conductor-in-charge. Effect 1 is SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 24 = SPELLMOD_BONUS_MULTIPLIER, 19 + 1 = 20, masked to SpellFamily 28 word1 0x03000000 = Unmake (0x02000000) and Timerend (0x01000000). Unit::SpellDamageBonusDone multiplies an existing coefficient by that modifier. With a fixture +2000 spell damage (Drink Fel Infusion 44505), Unmake rank 11 574345's periodic coefficient (DBC 0.0624; SpellLevel 60, MaxLevel 78, so a level factor of 66/80) adds c = about 103 to the harness's 1000 base. Learning the talent must raise that query by (1000 + 1.2c) * 1.03 - (1000 + c) = about 54; the raid effect alone would give about 33, so the rise must be at least 45 (at most 110 even if the world carried a 0.12 dot row). A grouped ally's spell damage must rise by exactly 3%. The modifier also reaches Timerend rank 7 572578, but every Timerend rank has EffectBonusMultiplier 0.0 (801291's 0.1 is cleared by AscensionStockCoefficients) and its description states no spell power term, so that half has no coefficient to multiply; it is recorded in docs/coa/chronomancer-completion.md, not asserted here.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 4000
+    },
+    {
+      "action": "group",
+      "actor": "chronomancer",
+      "target": "ally"
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture +2000 spell damage",
+      "actor": "chronomancer",
+      "spell": 44505,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Ally Nature damage before the raid aura",
+      "actor": "ally",
+      "metric": "spell_damage_done",
+      "spell": 5176,
+      "target": "dummy",
+      "save_as": "ally_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Unmake periodic damage before the talent",
+      "actor": "chronomancer",
+      "metric": "spell_damage_done",
+      "spell": 574345,
+      "effect": 0,
+      "periodic": true,
+      "target": "dummy",
+      "save_as": "unmake_base"
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: no bonus multiplier on Unmake",
+      "actor": "chronomancer",
+      "metric": "spell_modifier",
+      "spell": 574345,
+      "op": 24,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 560528
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the raid aura reaches the grouped ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 560528,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ally deals 3% more damage",
+      "actor": "ally",
+      "metric": "spell_damage_done",
+      "spell": 5176,
+      "target": "dummy",
+      "ratio_to": "ally_base",
+      "min": 1.028,
+      "max": 1.032
+    },
+    {
+      "action": "assert",
+      "label": "Unmake's spell power coefficient gains 20%",
+      "actor": "chronomancer",
+      "metric": "spell_modifier",
+      "spell": 574345,
+      "op": 24,
+      "base": 100,
+      "min": 119.99,
+      "max": 120.01
+    },
+    {
+      "action": "assert",
+      "label": "The same modifier reaches Timerend",
+      "actor": "chronomancer",
+      "metric": "spell_modifier",
+      "spell": 572578,
+      "op": 24,
+      "base": 100,
+      "min": 119.99,
+      "max": 120.01
+    },
+    {
+      "action": "assert",
+      "label": "Unmake's periodic damage rises by the 20% scaling bonus as well as the raid 3%",
+      "actor": "chronomancer",
+      "metric": "spell_damage_done",
+      "spell": 574345,
+      "effect": 0,
+      "periodic": true,
+      "target": "dummy",
+      "relative_to": "unmake_base",
+      "min": 45,
+      "max": 110
+    }
+  ]
+}

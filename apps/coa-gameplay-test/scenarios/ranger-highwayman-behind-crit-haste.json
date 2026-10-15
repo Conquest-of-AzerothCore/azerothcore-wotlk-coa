@@ -1,0 +1,224 @@
+{
+  "schema": 1,
+  "name": "Highwayman grants 15% haste on critical strikes from behind the target only (#925)",
+  "contract": "Highwayman 707744 (Ranger Dueling talent, CharacterAdvancement 6671) reads \"Direct critical strikes while behind your target increase your haste by $704545s1% for $704545d, or for your next 2 attacks.\" It is aura 42 on 705063, whose SPELL_EFFECT_TRIGGER_SPELL casts 704545 (SPELL_AURA_MOD_MELEE_RANGED_HASTE, EffectBasePoints 14 + DieSides 1 = 15, TARGET_UNIT_CASTER, DurationIndex 28 = 5000 ms; its two charges come from rev_20260921_40_ranger_dead_procs.sql), but Spell.dbc gives 707744 ProcFlags 0 and no spell_proc row existed, so it never fired. Fixture golems are summoned with the Ranger's orientation (facing +X). The Ranger first stands 3 yd beyond front_golem facing it, so the golem faces the Ranger: white hits with fixtured hit, expertise and crit land as critical strikes from the front and must grant no haste. The Ranger then stands 3 yd behind back_golem, which faces away: the first critical white hit must put 704545 on the Ranger with amount 15. Before the fix the buff never appears.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "melee_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "back_golem",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "front_golem",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 6
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Fixture stun, so the golems keep their spawn facing instead of turning toward the Ranger",
+      "actor": "ranger",
+      "spell": 23775
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 23775,
+      "target": "front_golem"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the front golem is stunned",
+      "actor": "front_golem",
+      "metric": "aura",
+      "spell": 23775,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 23775,
+      "target": "back_golem"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the back golem is stunned",
+      "actor": "back_golem",
+      "metric": "aura",
+      "spell": 23775,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 707744
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Highwayman is active on the Ranger",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 707744,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: fixtured melee critical strike chance",
+      "actor": "ranger",
+      "metric": "melee_crit_chance",
+      "min": 95
+    },
+    {
+      "action": "teleport",
+      "label": "Stand 3 yd beyond front_golem, facing it",
+      "actor": "ranger",
+      "map": 0,
+      "x": -8908.41,
+      "y": -115.853,
+      "z": 82.3711,
+      "o": 3.14159265
+    },
+    {
+      "action": "wait",
+      "label": "Let the teleport complete",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Ranger is in melee range of front_golem",
+      "actor": "ranger",
+      "metric": "distance",
+      "target": "front_golem",
+      "max": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "ranger",
+      "metric": "melee_damage_count",
+      "save_as": "front_hits_before"
+    },
+    {
+      "action": "attack",
+      "label": "White hits from the front",
+      "actor": "ranger",
+      "target": "front_golem"
+    },
+    {
+      "action": "wait",
+      "label": "Let several swings land",
+      "ms": 7000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ranger"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: several white hits landed from the front",
+      "actor": "ranger",
+      "metric": "melee_damage_count",
+      "relative_to": "front_hits_before",
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "Critical strikes from the front grant no Highwayman haste",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 704545,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "label": "Stand 3 yd behind back_golem",
+      "actor": "ranger",
+      "map": 0,
+      "x": -8917.41,
+      "y": -115.853,
+      "z": 82.3711,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the teleport complete",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Ranger is in melee range of back_golem",
+      "actor": "ranger",
+      "metric": "distance",
+      "target": "back_golem",
+      "max": 4
+    },
+    {
+      "action": "attack",
+      "label": "White hits from behind",
+      "actor": "ranger",
+      "target": "back_golem"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a critical strike from behind grants Highwayman",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 704545,
+      "caster": "ranger",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Highwayman increases haste by 15%",
+      "actor": "ranger",
+      "metric": "aura_amount",
+      "spell": 704545,
+      "caster": "ranger",
+      "effect": 0,
+      "equals": 15
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ranger"
+    }
+  ]
+}

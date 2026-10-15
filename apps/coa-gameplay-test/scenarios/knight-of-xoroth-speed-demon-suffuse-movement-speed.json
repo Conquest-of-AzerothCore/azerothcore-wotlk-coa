@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "Speed Demon makes Suffuse grant 20% movement speed (#1223)",
+  "contract": "Speed Demon 707232 reads 'Your Suffuse now increases your movement speed by 20%' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z). Suffuse (801063) claims its previously inert effect index 2 as the native aura 31 (SPELL_AURA_MOD_INCREASE_SPEED), targeted at the caster; aura_ascension_xoroth_lifecycle::Calculate (AscensionXorothAuras.cpp) sets that effect's amount to Speed Demon's own tooltip value only while the caster has aura 707232, and to 0 otherwise, so the bonus exists only for the duration Suffuse itself is applied. Speed Demon's own raw effect (a SPELLMOD_EFFECT3 flat modifier targeting the same then-inert slot) is re-tagged SPELL_AURA_DUMMY in ApplyContracts (zeroing the effect type outright, as the original fix did, leaves no valid unit-owned aura effect at all - the same bug class as Murderous Might, 520290 - confirmed empirically: set_aura threw 'Could not apply fixture aura' before this correction). Suffuse is a Spender ability gated on Demonfire (500906) stacks; set_aura forces those stacks directly, matching Chop Shop's (#486) established pattern. Two further gaps found while debugging #1223: (1) Suffuse carries no SpellDuration.dbc entry, so SpellInfo::GetDuration() returns exactly 0 and any aura effect placed on it - including EFFECT_2 - expired in the same tick it was applied; OnCalcMaxDuration (the same global hook already scaling sibling Spender-consumption buff 801064) now gives it 3000ms per Demonfire stack spent. (2) Suffuse had no spell_script_names row binding it to aura_ascension_xoroth_lifecycle at all, so Calculate() never ran for it; a new pending_db_world migration adds that row. Because Calculate() only recomputes an aura's amount when the Aura object is (re)created, not on a same-target refresh of an aura that has not yet expired, the scenario clears the untalented Suffuse application before recasting with Speed Demon known.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "knight", "metric": "run_speed_rate", "save_as": "speed_before" },
+    {
+      "action": "assert", "label": "SETUP: baseline run speed is unmodified",
+      "actor": "knight", "metric": "run_speed_rate", "ratio_to": "speed_before", "min": 0.999, "max": 1.001
+    },
+    { "action": "learn", "actor": "knight", "spell": 801063 },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 6, "label": "Set Demonfire to the 6-stack cap so Suffuse is castable" },
+    { "action": "cast", "actor": "knight", "spell": 801063 },
+    { "action": "wait", "label": "Let Suffuse's aura apply", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: Suffuse landed without Speed Demon",
+      "actor": "knight", "metric": "aura", "spell": 801063, "equals": 1
+    },
+    {
+      "action": "assert", "label": "BASELINE: Suffuse alone does not change movement speed",
+      "actor": "knight", "metric": "run_speed_rate", "ratio_to": "speed_before", "min": 0.99, "max": 1.01
+    },
+    { "action": "learn", "actor": "knight", "spell": 707232 },
+    { "action": "set_aura", "actor": "knight", "spell": 707232, "stacks": 1, "label": "Force the Speed Demon passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Speed Demon passive is active",
+      "actor": "knight", "metric": "aura", "spell": 707232, "equals": 1
+    },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 6, "label": "Refill Demonfire before recasting Suffuse" },
+    { "action": "set_aura", "actor": "knight", "spell": 801063, "stacks": 0, "label": "Clear the untalented Suffuse application first: a refresh of the still-active aura from the first cast would not recompute EFFECT_2's amount, which is only calculated once at Aura creation" },
+    { "action": "reset_cooldown", "actor": "knight", "spell": 801063 },
+    { "action": "wait", "label": "Clear the global cooldown from the first Suffuse cast", "ms": 1700 },
+    { "action": "cast", "actor": "knight", "spell": 801063 },
+    { "action": "wait", "label": "Let the fresh Suffuse application recompute its speed effect", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: Suffuse is active with Speed Demon known",
+      "actor": "knight", "metric": "aura", "spell": 801063, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: movement speed rises by ~20% while Suffuse is active",
+      "actor": "knight", "metric": "run_speed_rate", "ratio_to": "speed_before", "min": 1.19, "max": 1.21
+    }
+  ]
+}

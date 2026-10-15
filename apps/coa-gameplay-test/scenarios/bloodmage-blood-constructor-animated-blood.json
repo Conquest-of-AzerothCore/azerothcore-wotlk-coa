@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "name": "Blood Constructor adds 1 sec of Animated Blood per Thirst stack (#2042)",
+  "contract": "Blood Constructor 561196's tooltip is \"Increases the duration of Animated Blood by $/1000;s1 sec per stack of Thirst.\" Its single effect is aura 107 with MiscValue 3 (SPELLMOD_EFFECT1) and BasePoints 999 + DieSides 1 = +1000, over EffectSpellClassMask (0, 64, 0) = word 1 bit 6 = Sated 532125 and the helper \"Thirst Val/Kal Cast/Anim Blood\" 300796. 300796 is the intended target: its effect 0 is itself aura 107 with MiscValue 1 (SPELLMOD_DURATION), amount 0, over EffectSpellClassMask (1, 0, 0) = the three Animated Blood records 573299, 573356 and 573357, so the talent raises that inner per-stack duration from 0 to 1000 ms. No Spell.dbc row references 300796 in any field and no acquisition route reaches it, so the inner modifier was never installed. Animated Blood 573357 has DurationIndex 8 = 15000 ms and summons creature 315301 through SPELL_EFFECT_SUMMON, whose lifetime Spell::EffectSummonType takes from the spell duration after SPELLMOD_DURATION. With ten Thirst stacks the amalgam must therefore live 25000 ms instead of 15000 ms. The discriminating assertion is the amalgam still being alive 18 seconds after the cast: on today's tree it despawned at 15 seconds. The final assertion pins the upper end so the extension is exactly the ten seconds the record authorises, not an unbounded one.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 573357
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 561196
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "label": "Ten stacks of Thirst",
+      "spell": 706613,
+      "stacks": 10
+    },
+    {
+      "action": "assert",
+      "label": "Thirst is carrying ten stacks",
+      "actor": "caster",
+      "metric": "aura_stacks",
+      "spell": 706613,
+      "equals": 10
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 573357
+    },
+    {
+      "action": "assert",
+      "label": "The amalgam is summoned",
+      "actor": "caster",
+      "metric": "owned_creature_count",
+      "entry": 315301,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Past Animated Blood's own 15 s duration",
+      "ms": 18000
+    },
+    {
+      "action": "assert",
+      "label": "Ten Thirst stacks keep the amalgam alive past 15 s",
+      "actor": "caster",
+      "metric": "owned_creature_count",
+      "entry": 315301,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "label": "Past the extended 25 s duration",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "label": "The amalgam despawns at the extended duration, not later",
+      "actor": "caster",
+      "metric": "owned_creature_count",
+      "entry": 315301,
+      "equals": 0
+    }
+  ]
+}

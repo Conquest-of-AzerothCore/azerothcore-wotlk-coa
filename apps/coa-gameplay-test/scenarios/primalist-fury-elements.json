@@ -1,0 +1,503 @@
+{
+  "schema": 1,
+  "name": "Primalist Fury of the Elements: additional Primal Rush Rage",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 500696,
+      "effect": 0,
+      "equals": 200
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 500696,
+      "power": 1,
+      "save_as": "baseline_500696"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502723
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500771
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500770
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500769
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500768
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 500696,
+      "power": 1,
+      "relative_to": "baseline_500696",
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500696,
+      "min": 23500,
+      "max": 25000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 502724,
+      "effect": 0,
+      "equals": 200
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 502724,
+      "power": 1,
+      "save_as": "baseline_502724"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 502724,
+      "power": 1,
+      "relative_to": "baseline_502724",
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "min": 23500,
+      "max": 25000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 706165
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 500696,
+      "effect": 0,
+      "equals": 300
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 500696,
+      "power": 1,
+      "save_as": "talented_500696"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502723
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500771
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500770
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500769
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500768
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 500696,
+      "power": 1,
+      "relative_to": "talented_500696",
+      "equals": 300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500696,
+      "min": 23500,
+      "max": 25000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 502724,
+      "effect": 0,
+      "equals": 300
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 502724,
+      "power": 1,
+      "save_as": "talented_502724"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 502724,
+      "power": 1,
+      "relative_to": "talented_502724",
+      "equals": 300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "min": 23500,
+      "max": 25000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706165
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 500696,
+      "effect": 0,
+      "equals": 200
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 500696,
+      "power": 1,
+      "save_as": "removed_500696"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502723
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500771
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500770
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500769
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500768
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 500696,
+      "power": 1,
+      "relative_to": "removed_500696",
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500696,
+      "min": 23500,
+      "max": 25000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 502724,
+      "effect": 0,
+      "equals": 200
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 502724,
+      "power": 1,
+      "save_as": "removed_502724"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502724
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 502724,
+      "power": 1,
+      "relative_to": "removed_502724",
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "min": 23500,
+      "max": 25000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    }
+  ],
+  "contract": "The active talent adds 10 Rage to Primal Rush. Both first and highest ranks use the normal cast path and energize logs: baseline/removal grant 20 Rage, talented casts grant 30. Reset only the native spell cooldown between independent cases. Lower-rank casts explicitly unlearn higher weapon ranks first, then relearn the tested rank; the native cast path stays enabled."
+}

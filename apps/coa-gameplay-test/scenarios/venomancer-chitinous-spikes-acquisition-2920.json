@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Chitinous Spikes is acquired as 504406, not the unreachable 705986/705987 (#2920)",
+  "contract": "Chitinous Spikes reaches a Venomancer through CharacterAdvancement 7237, whose only rank is 504406: taking direct damage has a 20% chance to retaliate with 503793. 705986 and 705987 belong only to Talent 27211 in TalentTab 0, which no talent tree shows, so no player learns them and their missing handlers cannot be reached.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "Chitinous Spikes is not known before it is chosen", "actor": "v",
+      "metric": "knows_spell", "spell": 504406, "equals": 0
+    },
+    {
+      "action": "advancement_rank", "label": "Choose Chitinous Spikes", "actor": "v",
+      "entry": 7237, "rank": 1
+    },
+    {
+      "action": "assert", "label": "The advancement teaches the live Chitinous Spikes 504406", "actor": "v",
+      "metric": "knows_spell", "spell": 504406, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "It does not teach the unreachable damage shield 705986", "actor": "v",
+      "metric": "knows_spell", "spell": 705986, "equals": 0
+    },
+    {
+      "action": "assert", "label": "It does not teach the unreachable crit trigger 705987", "actor": "v",
+      "metric": "knows_spell", "spell": 705987, "equals": 0
+    }
+  ]
+}

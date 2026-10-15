@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "name": "Blast Mine remote detonation and expiry keep one Remote Detonation known (#4029)",
+  "contract": [
+    "The DBC promises destruction and remote detonation triggers. Remote Detonation stays known while the Tinker knows a mine spell; a normal remote cast damages a nearby enemy and removes both mines, and a later mine naturally expires, without the spell being taken away. Client action-bar duplication is outside this server-side control."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 801718
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 801718
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801718,
+      "destination": {
+        "x": -8914.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50045,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 801718
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801718,
+      "destination": {
+        "x": -8914.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50045,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "knows_spell",
+      "spell": 801798,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 500354,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "before_remote"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801798
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50045,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "golem",
+      "metric": "health",
+      "relative_to": "before_remote",
+      "max": -1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "knows_spell",
+      "spell": 801798,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 801718
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801718,
+      "destination": {
+        "x": -8914.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50045,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "knows_spell",
+      "spell": 801798,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 62000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50045,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "knows_spell",
+      "spell": 801798,
+      "equals": 1
+    }
+  ],
+  "creatures": [
+    {
+      "id": "golem",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 6,
+      "distance": 4,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  }
+}

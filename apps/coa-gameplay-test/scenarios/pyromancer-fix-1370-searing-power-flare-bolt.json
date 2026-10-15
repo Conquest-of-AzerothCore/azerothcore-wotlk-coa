@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Searing Power raises Flare Bolt's spell power scaling by 20% (#1370)",
+  "contract": "#1370: Searing Power 680959 (family 30, CharacterAdvancement 29552, class 24 Incineration tab) reads 'Increases the spell power scaling of Flare Bolt by $s1%' with s1 = 20. Its effect 0 is the native aura 108 (SPELL_AURA_ADD_PCT_MODIFIER), MiscValue 24 (SPELLMOD_BONUS_MULTIPLIER), BasePoints 19 + DieSides 1 = +20%, mask (0, 0x2, 0), which in family 30 matches exactly the Flare Bolt chain 800790 and 502011-502019 (and the unlisted 807202). Flare Bolt reads '${$m1+0+$spfi*.571} Fire damage': its stock coefficient is zeroed (AscensionStockCoefficientData / spell_bonus_data) and pyromancer_scaling::ModifySpellEffectBaseValue adds the 0.571 spell power term to effect 0's base value, so the stock SpellDamageBonusDone never ran the BONUS_MULTIPLIER modifier on it. Only Lava Shard (803950, Searing Flames #1904) had that modifier applied to the module coefficient. Expected: with Searing Power the spell power term becomes 0.571 x 1.20 = 0.6852 of fire spell power; the talented term divided by the untalented one is 1.20 (1.00 before the fix). The term is isolated as value minus the value with no spell power. Every spell_effect_value sample rolls the effect's 1..6 die sides, so with at least 2000 spell power (Drink Fel Infusion 44505) the ratio stays within 1.20 +/- 0.01 for ranks 1 and 2, while an unaffected ratio stays within 1.00 +/- 0.01. Lava Shard's term (0.95, die 1..7) is a control that Searing Power does not change.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 24, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "snapshot", "label": "Flare Bolt rank 1 effect value with no spell power",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 800790, "effect": 0, "save_as": "v0"
+    },
+    {
+      "action": "snapshot", "label": "Flare Bolt rank 2 effect value with no spell power",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 502011, "effect": 0, "save_as": "v0_rank2"
+    },
+    {
+      "action": "snapshot", "label": "Lava Shard effect value with no spell power (control)",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 803950, "effect": 0, "save_as": "v0_lava"
+    },
+    { "action": "set_aura", "actor": "caster", "spell": 44505, "stacks": 1 },
+    {
+      "action": "assert", "label": "SETUP: the fixture grants at least 2000 fire spell power",
+      "actor": "caster", "metric": "spell_power", "school": 2, "min": 2000
+    },
+    {
+      "action": "snapshot", "label": "Spell power added to Flare Bolt rank 1 before Searing Power",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 800790, "effect": 0,
+      "relative_to": "v0", "save_as": "d1"
+    },
+    {
+      "action": "snapshot", "label": "Spell power added to Flare Bolt rank 2 before Searing Power",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 502011, "effect": 0,
+      "relative_to": "v0_rank2", "save_as": "d1_rank2"
+    },
+    {
+      "action": "snapshot", "label": "Spell power added to Lava Shard before Searing Power",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 803950, "effect": 0,
+      "relative_to": "v0_lava", "save_as": "d1_lava"
+    },
+    {
+      "action": "assert", "label": "SETUP: Flare Bolt's 0.571 spell power term is present",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 800790, "effect": 0,
+      "relative_to": "v0", "min": 1000
+    },
+    { "action": "learn", "actor": "caster", "spell": 680959 },
+    { "action": "set_aura", "actor": "caster", "spell": 680959, "stacks": 1, "label": "Force the Searing Power passive aura" },
+    {
+      "action": "assert", "label": "SETUP: the Searing Power passive is active",
+      "actor": "caster", "metric": "aura", "spell": 680959, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: Searing Power's native bonus multiplier modifier reaches Flare Bolt (57.1 -> 68.52)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 800790, "op": 24, "base": 57.1, "min": 68.51, "max": 68.53
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Flare Bolt rank 1's spell power term rises by 20% (0.571 -> 0.6852)",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 800790, "effect": 0,
+      "relative_to": "v0", "ratio_to": "d1", "min": 1.185, "max": 1.215
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Flare Bolt rank 2's spell power term rises by 20% too",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 502011, "effect": 0,
+      "relative_to": "v0_rank2", "ratio_to": "d1_rank2", "min": 1.185, "max": 1.215
+    },
+    {
+      "action": "assert", "label": "CONTROL: Lava Shard's spell power term is unchanged by Searing Power",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 803950, "effect": 0,
+      "relative_to": "v0_lava", "ratio_to": "d1_lava", "min": 0.99, "max": 1.01
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "name": "A Pious Life increases Horusath Blast and Rapture damage by 15% (#886)",
+  "contract": "A Pious Life 570027 is family 33, Attributes 192 (SPELL_ATTR0_PASSIVE), EquippedItemClass -1, no Stances, so it self-applies on learn. Its single effect is SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue 0 (SPELLMOD_DAMAGE) and EffectSpellClassMask word1 524352 (bits 0x40 and 0x80000), EffectBasePoints 14 + DieSides 1 = 15. Horusath Blast 500154 carries SpellFamilyFlags word1 64 (0x40); Rapture 806477 carries word1 524288 (0x80000). Unit::SpellDamageBonusDone applies modOwner->ApplySpellMod(id, SPELLMOD_DAMAGE, tmpDamage) unconditionally at the end of the function, regardless of any spell_bonus_data coefficient; this is not \"no server-side implementation\", the +15% already applies to both named spells. spell_damage_done queries SpellDamageBonusDone directly with a fixed base of 1000 and no cast submitted.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "control",
+      "entry": 36,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 570027
+    },
+    {
+      "action": "assert",
+      "label": "Talent self-applies its passive",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 570027,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_damage_done",
+      "spell": 500154,
+      "target": "dummy",
+      "save_as": "control_horusath"
+    },
+    {
+      "action": "assert",
+      "label": "Horusath Blast deals 15% more damage",
+      "actor": "talent",
+      "metric": "spell_damage_done",
+      "spell": 500154,
+      "target": "dummy",
+      "ratio_to": "control_horusath",
+      "min": 1.13,
+      "max": 1.17
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_damage_done",
+      "spell": 806477,
+      "target": "dummy",
+      "save_as": "control_rapture"
+    },
+    {
+      "action": "assert",
+      "label": "Rapture deals 15% more damage",
+      "actor": "talent",
+      "metric": "spell_damage_done",
+      "spell": 806477,
+      "target": "dummy",
+      "ratio_to": "control_rapture",
+      "min": 1.13,
+      "max": 1.17
+    }
+  ]
+}

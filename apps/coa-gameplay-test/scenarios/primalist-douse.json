@@ -1,0 +1,731 @@
+{
+  "schema": 1,
+  "name": "Primalist Douse Seismic procs, AP coefficient and vulnerability",
+  "contract": "A Seismic Spike hit and each of five Seismic Crash ticks trigger Douse. Geode damage, baseline and removal do not. The active tooltip specifies zero base plus eight percent AP without SP, and Doused applies its native scaled resistance reduction plus two percent increased magic damage taken.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "outsider",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 100000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 95
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9617.06,
+      "y": -285.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 807558,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 804433,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 582532,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 560175,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 560174,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 560173,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 560172,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 560171,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 582532
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 803981,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 503266,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 503265,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 503264,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 503263,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 503262,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 503261,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 503260,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 503259,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 503258,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 503264
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681117,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681116,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681115,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681114,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 680442,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 680442
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502777,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502776,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502775,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502774,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502773,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502772,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502771,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502770,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502769,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500402,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 355467,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706159,
+      "all_specs": true,
+      "label": "Lithic Lance's 20% Ready proc would replace Geode Barrage with Lithic Lance"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500402
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 582532
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 807559,
+      "save_as": "baselinebefore"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "save_as": "input53"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 582532,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "relative_to": "input53",
+      "min": 1,
+      "label": "The tested trigger must actually deal damage"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 807559,
+      "relative_to": "baselinebefore",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 807558
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "save_as": "baseap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 807559,
+      "target": "ally",
+      "save_as": "basequery",
+      "label": "Isolate the AP coefficient from PvE-only damage modifiers"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 47436,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "save_as": "apap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 807559,
+      "target": "ally",
+      "save_as": "apquery",
+      "label": "Isolate the AP coefficient from PvE-only damage modifiers"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 26395,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "save_as": "spap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 807559,
+      "target": "ally",
+      "save_as": "spquery",
+      "label": "Isolate the AP coefficient from PvE-only damage modifiers"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 582532
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 807559,
+      "save_as": "directbefore"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "save_as": "input71"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 582532,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "relative_to": "input71",
+      "min": 1,
+      "label": "The tested trigger must actually deal damage"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 807559,
+      "relative_to": "directbefore",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_amount",
+      "spell": 803514,
+      "effect": 0,
+      "equals": -74,
+      "label": "Copied resistance amount includes the native one-point die adjustment"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_amount",
+      "spell": 803514,
+      "effect": 1,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "spell_damage_taken",
+      "spell": 403,
+      "target": "primalist",
+      "equals": 1020
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 503264
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 807559,
+      "save_as": "periodicbefore"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "save_as": "input83"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 503264,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 4500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "relative_to": "input83",
+      "min": 1,
+      "label": "The tested trigger must actually deal damage"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 807559,
+      "relative_to": "periodicbefore",
+      "equals": 5
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 500402
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 807559,
+      "save_as": "geodebefore"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "save_as": "input92"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500402,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 4500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "relative_to": "input92",
+      "min": 1,
+      "label": "The tested trigger must actually deal damage"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 807559,
+      "relative_to": "geodebefore",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 807558,
+      "all_specs": true
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 582532
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 807559,
+      "save_as": "removedbefore"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "save_as": "input102"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 582532,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "relative_to": "input102",
+      "min": 1,
+      "label": "The tested trigger must actually deal damage"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 807559,
+      "relative_to": "removedbefore",
+      "equals": 0
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

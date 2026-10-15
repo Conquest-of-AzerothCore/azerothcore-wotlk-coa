@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Dread boosts Darkwither's DoT and Eldritch Shock's direct hit through native spell mods (#1819)",
+  "contract": "301315 has two ADD_PCT_MODIFIER (108) effects, natively applied by Player::ApplySpellMod (Player.cpp:10219), keyed by SpellModOp==EffectMiscValue and matched to a target spell through SpellInfo::IsAffectedBySpellMod (SpellInfo.cpp:1472), which compares the modifier's per-effect classmask against the target's own top-level SpellFamilyFlags. Effect[0]: Misc=22=SPELLMOD_DOT (SpellDefines.h:98), BasePoints 29+1=+30%, classmask word B bit21 (2097152) == Darkwither's (502213) own SpellFamilyFlags[1]=2097152 exactly. Effect[1]: Misc=0=SPELLMOD_DAMAGE (SpellDefines.h:76), BasePoints 14+1=+15%, classmask word C bit19 (524288) == Eldritch Shock's (808043) own SpellFamilyFlags[2]=524288 exactly. The harness's spell_modifier metric calls this same player->ApplySpellMod(spell, op, base) path directly on a fixed base, so it observes the exact mechanism without submitting a cast. Negative controls swap op and target to confirm the match is exact, not merely same-family: Darkwither's own SPELLMOD_DAMAGE stays unmodified (Dread only grants it SPELLMOD_DOT) and Eldritch Shock's SPELLMOD_DOT stays unmodified (Dread only grants it SPELLMOD_DAMAGE). Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: Darkwither's DoT coefficient is unmodified before Dread",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 502213, "op": 22, "base": 1000,
+      "min": 1000, "max": 1000
+    },
+    {
+      "action": "assert", "label": "SETUP: Eldritch Shock's direct-damage coefficient is unmodified before Dread",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 808043, "op": 0, "base": 1000,
+      "min": 1000, "max": 1000
+    },
+    { "action": "learn", "actor": "cultist", "spell": 301315 },
+    {
+      "action": "assert", "label": "Dread adds 30% to Darkwither's DoT coefficient (#1819)",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 502213, "op": 22, "base": 1000,
+      "min": 1299, "max": 1301
+    },
+    {
+      "action": "assert", "label": "Dread adds 15% to Eldritch Shock's direct-damage coefficient (#1819)",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 808043, "op": 0, "base": 1000,
+      "min": 1149, "max": 1151
+    },
+    {
+      "action": "assert", "label": "Dread leaves Darkwither's direct-damage op alone (exact classmask/op match, not same-family)",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 502213, "op": 0, "base": 1000,
+      "min": 1000, "max": 1000
+    },
+    {
+      "action": "assert", "label": "Dread leaves Eldritch Shock's DoT op alone (exact classmask/op match, not same-family)",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 808043, "op": 22, "base": 1000,
+      "min": 1000, "max": 1000
+    }
+  ]
+}

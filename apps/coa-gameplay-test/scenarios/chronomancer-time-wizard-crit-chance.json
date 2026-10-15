@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "name": "Time Wizard raises the critical chance of Epoch, Correct the Mistake and Reverse Wound (#1126)",
+  "contract": "Time Wizard 706779 (rank 1) and 707829 (rank 2) are passives whose only effect is SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 7 = SPELLMOD_CRITICAL_CHANCE; EffectBasePoints 7 resolves to 8 and 14 resolves to 15 with DieSides 1. Their shared EffectSpellClassMask [4,2048,1] intersects the SpellFamilyName 28 family flags of exactly the three tooltip spells: Epoch 501779 ([4,0,0]), Correct the Mistake 572352 ([0,2048,0]) and Reverse Wound 501805 ([0,131072,1]). SPELLMOD_CRITICAL_CHANCE is consumed natively inside Unit::SpellDoneCritChance, which ends in modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance) (Unit.cpp), and Player::ApplySpellMod has dedicated flat handling for the op. All three spells are SPELL_DAMAGE_CLASS_MAGIC with a SPELL_EFFECT_HEAL, so SpellInfo::IsCritCapable is true and the crit path is reached. Native handlers only; no script or DB row is involved. Note that Orderly Protector 707602/712444 shares the [0,2048,0] bit and therefore also receives the bonus, which is what the shipped Spell.dbc asks for. Regression scenario for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 22, "level": 80 },
+    { "id": "rank1", "race": 1, "class": 22, "level": 80 },
+    { "id": "rank2", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "rank1", "spell": 706779 },
+    { "action": "learn", "actor": "rank2", "spell": 707829 },
+    {
+      "action": "assert",
+      "label": "Epoch gets no critical chance modifier without the talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 501779,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds 8 critical chance to Epoch",
+      "actor": "rank1",
+      "metric": "spell_modifier",
+      "spell": 501779,
+      "op": 7,
+      "base": 0,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds 8 critical chance to Correct the Mistake",
+      "actor": "rank1",
+      "metric": "spell_modifier",
+      "spell": 572352,
+      "op": 7,
+      "base": 0,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds 8 critical chance to Reverse Wound",
+      "actor": "rank1",
+      "metric": "spell_modifier",
+      "spell": 501805,
+      "op": 7,
+      "base": 0,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 adds 15 critical chance to Epoch",
+      "actor": "rank2",
+      "metric": "spell_modifier",
+      "spell": 501779,
+      "op": 7,
+      "base": 0,
+      "equals": 15
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline Epoch critical chance without the talent",
+      "actor": "control",
+      "metric": "spell_done_crit_chance",
+      "spell": 501779,
+      "target": "control",
+      "save_as": "epoch_crit_base"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 moves Epoch's native critical chance by 8 points",
+      "actor": "rank1",
+      "metric": "spell_done_crit_chance",
+      "spell": 501779,
+      "target": "rank1",
+      "relative_to": "epoch_crit_base",
+      "min": 7.5,
+      "max": 8.5
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 moves Epoch's native critical chance by 15 points",
+      "actor": "rank2",
+      "metric": "spell_done_crit_chance",
+      "spell": 501779,
+      "target": "rank2",
+      "relative_to": "epoch_crit_base",
+      "min": 14.5,
+      "max": 15.5
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline Reverse Wound critical chance without the talent",
+      "actor": "control",
+      "metric": "spell_done_crit_chance",
+      "spell": 501805,
+      "target": "control",
+      "save_as": "reverse_wound_crit_base"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 moves Reverse Wound's native critical chance by 8 points",
+      "actor": "rank1",
+      "metric": "spell_done_crit_chance",
+      "spell": 501805,
+      "target": "rank1",
+      "relative_to": "reverse_wound_crit_base",
+      "min": 7.5,
+      "max": 8.5
+    }
+  ]
+}

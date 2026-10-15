@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Releasing in a dungeon revives the player at the dungeon's start",
+  "contract": "Issue #5241: a player who dies in a dungeon and releases the spirit is revived at the start of the instance instead of being sent as a ghost to the nearest graveyard outside. The start is the destination of the map's entrance trigger (areatrigger_teleport 145, Shadowfang Keep Entrance: -229.135, 2109.18 on map 33). The player returns alive at 50% health, as a ghost entering the instance to its corpse would. A player who dies in Shadowfang Keep's courtyard, 220 yards from the entrance, releases, stays on map 33, is alive at half health and stands on the entrance point. Releasing in the open world is unchanged: a player who dies in Silverpine Forest at the reported position becomes a ghost on map 0 and is moved away from the body to a graveyard.",
+  "timeout_ms": 90000,
+  "location": { "map": 33, "x": -278.912, "y": 2323.63, "z": 95.8664, "o": 0 },
+  "players": [
+    { "id": "inside", "race": 1, "class": 1, "level": 15 },
+    { "id": "outside", "race": 1, "class": 1, "level": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "teleport", "actor": "outside", "map": 0, "x": -284.971, "y": 1466.26, "z": 38.6926 },
+    { "action": "assert", "actor": "inside", "metric": "map_id", "equals": 33, "label": "the player is in Shadowfang Keep" },
+    { "action": "assert", "actor": "outside", "metric": "map_id", "equals": 0, "within_ms": 15000, "label": "the control stands in Silverpine Forest" },
+    { "action": "wait", "ms": 1000 },
+
+    { "action": "die", "actor": "inside" },
+    { "action": "assert", "actor": "inside", "metric": "alive", "equals": 0, "label": "the player dies in the courtyard" },
+    { "action": "release_spirit", "actor": "inside", "label": "release the spirit inside the dungeon" },
+    { "action": "assert", "actor": "inside", "metric": "map_id", "equals": 33, "within_ms": 5000, "label": "the player stays in Shadowfang Keep" },
+    { "action": "assert", "actor": "inside", "metric": "alive", "equals": 1, "label": "the player is revived" },
+    { "action": "assert", "actor": "inside", "metric": "health_pct", "min": 49, "max": 51, "label": "the player is revived at half health" },
+    { "action": "assert", "actor": "inside", "metric": "point_distance_2d", "x": -229.135, "y": 2109.18, "max": 3, "label": "the player stands at the dungeon's start" },
+
+    { "action": "die", "actor": "outside" },
+    { "action": "release_spirit", "actor": "outside", "label": "release the spirit in the open world" },
+    { "action": "assert", "actor": "outside", "metric": "map_id", "equals": 0, "within_ms": 5000, "label": "the control stays in Eastern Kingdoms" },
+    { "action": "assert", "actor": "outside", "metric": "alive", "equals": 0, "label": "the control is a ghost, not revived" },
+    { "action": "assert", "actor": "outside", "metric": "point_distance_2d", "x": -284.971, "y": 1466.26, "min": 50, "label": "the control's ghost is moved to a graveyard" }
+  ]
+}

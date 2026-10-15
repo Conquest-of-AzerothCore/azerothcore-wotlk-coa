@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "name": "warrior-of-elune-haste-speed|Warrior of Elune adds 5% melee haste and 10% movement speed that stacks with Moonwalk (#499)",
+  "contract": "Warrior of Elune 704798 (Spell.dbc, SpellFamilyName 32, Attributes 0x401d0 with the passive bit 0x40) has effect 1 = SPELL_AURA_MOD_INCREASE_SPEED (31) with EffectBasePoints 9 and effect 2 = SPELL_AURA_MOD_MELEE_HASTE (138) with EffectBasePoints 4; DieSides 1 makes them 10 and 5, matching the tooltip 'melee haste by $s3% and movement speed by $s2%'. Effect 0 is a dummy aura (4) that no text refers to. Native path only: AuraEffect::HandleModMeleeSpeedPct rescales the swing timer, and Unit::UpdateSpeed (Unit.cpp) takes main_speed_mod = GetMaxPositiveAuraModifier(31) and computes speed = max(non_stack_bonus, stack_bonus) then AddPct(speed, main_speed_mod). Moonwalk's night buff 301328 is SPELL_AURA_MOD_SPEED_NOT_STACK (171) with base 19 (+20%), so it feeds non_stack_bonus and the two multiply: 1.20 x 1.10 = 1.32, which is what 'stacks with Moonwalk' promises. The fixture gives 301328 directly with set_aura and does not learn the Moonwalk passive 300256, whose periodic script would strip the buff outside the realm's night hours. Three fixtures share race, class and level: 'plain' has neither, 'control' has Moonwalk only, 'talent' has Moonwalk plus the talent. The swing time (attack_time_ms reads the hasted UNIT_FIELD_BASEATTACKTIME) must shrink by 1/1.05 = 0.9524 against 'plain'; run_speed_rate must be 1.20 for control and 1.32 for talent against 'plain'. Only the talent's speed effect can turn 1.20 into 1.32; a non-stacking talent would leave talent at 1.20.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "plain",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 704798
+    },
+    {
+      "action": "set_aura",
+      "label": "Moonwalk night buff on control",
+      "actor": "control",
+      "spell": 301328,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Moonwalk night buff on talent",
+      "actor": "talent",
+      "spell": 301328,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Main-hand swing time without the talent",
+      "actor": "plain",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "save_as": "swing_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Run speed rate without Moonwalk or the talent",
+      "actor": "plain",
+      "metric": "run_speed_rate",
+      "save_as": "speed_base"
+    },
+    {
+      "action": "assert",
+      "label": "Talent shortens the swing time by 5% haste",
+      "actor": "talent",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "ratio_to": "swing_base",
+      "min": 0.95,
+      "max": 0.956
+    },
+    {
+      "action": "assert",
+      "label": "Control without the talent keeps the base swing time",
+      "actor": "control",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "ratio_to": "swing_base",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "label": "Moonwalk alone gives +20% run speed",
+      "actor": "control",
+      "metric": "run_speed_rate",
+      "ratio_to": "speed_base",
+      "min": 1.19,
+      "max": 1.21
+    },
+    {
+      "action": "assert",
+      "label": "The talent's +10% run speed stacks with Moonwalk (1.20 x 1.10)",
+      "actor": "talent",
+      "metric": "run_speed_rate",
+      "ratio_to": "speed_base",
+      "min": 1.31,
+      "max": 1.33
+    }
+  ]
+}

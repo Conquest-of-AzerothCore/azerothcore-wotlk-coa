@@ -44,6 +44,15 @@
 //  see: https://github.com/azerothcore/azerothcore-wotlk/issues/9766
 #include "GridNotifiersImpl.h"
 
+// CoA boss probe (src/server/coa/CoABossProbe.cpp): records SmartAI casts that did not happen
+void (*CoABossProbeSmartCastHook)(Creature* creature, uint32 spellId, int32 result, char const* stage) = nullptr;
+
+static void CoABossProbeSmartCast(Creature* creature, uint32 spellId, int32 result, char const* stage)
+{
+    if (CoABossProbeSmartCastHook)
+        CoABossProbeSmartCastHook(creature, spellId, result, stage);
+}
+
 namespace
 {
     // Returns the GUID of whoever brought this object into the world: its owner/charmer if any,
@@ -665,6 +674,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                 Acore::Containers::RandomResize(targets, e.action.cast.targetsLimit);
 
             bool failedSpellCast = false, successfulSpellCast = false;
+            int32 probeResult = 0; // CoA boss probe: <0 SmartAI positioning, >0 SpellCastResult
 
             for (WorldObject* target : targets)
             {
@@ -699,6 +709,34 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                         me->InterruptNonMeleeSpells(false);
 
                     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(e.action.cast.spell);
+
+                    // CoA: in dungeons a timer never breaks a running channel (Illyanna's Volley was cut short by
+                    // her Shoot every time); it waits until the channel is over unless it interrupts on purpose
+                    if (me->GetMap() && me->GetMap()->IsDungeon() && me->GetCurrentSpell(CURRENT_CHANNELED_SPELL)
+                        && !(e.action.cast.castFlags & (SMARTCAST_INTERRUPT_PREVIOUS | SMARTCAST_TRIGGERED)))
+                    {
+                        failedSpellCast = true;
+                        probeResult = int32(SPELL_FAILED_SPELL_IN_PROGRESS);
+                        continue;
+                    }
+
+                    // CoA: a cast on itself needs no positioning (range/line of sight checks against itself failed
+                    // for some self-centered spells in dungeons, e.g. Lord Pythas' Thunderclap)
+                    if (target == me && me->GetMap() && me->GetMap()->IsDungeon())
+                    {
+                        TriggerCastFlags selfFlags = (e.action.cast.castFlags & SMARTCAST_TRIGGERED) ? TRIGGERED_FULL_MASK : TRIGGERED_NONE;
+                        SpellCastResult selfResult = me->CastSpell(me, e.action.cast.spell, selfFlags);
+                        if (selfResult == SPELL_CAST_OK)
+                            successfulSpellCast = true;
+                        else
+                        {
+                            bool retryWhenFree = selfResult == SPELL_FAILED_SPELL_IN_PROGRESS;
+                            failedSpellCast = failedSpellCast || selfResult != SPELL_FAILED_SPELL_IN_PROGRESS || retryWhenFree;
+                            probeResult = int32(selfResult);
+                        }
+                        continue;
+                    }
+
                     float distanceToTarget = me->GetDistance(target->ToUnit());
                     float spellMaxRange = me->GetSpellMaxRangeForTarget(target->ToUnit(), spellInfo);
                     float spellMinRange = me->GetSpellMinRangeForTarget(target->ToUnit(), spellInfo);
@@ -716,6 +754,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                     if (isWithinLOSInMap && isWithinMeleeRange && isRangedAttack && isTargetRooted && canCastSpell && !me->IsVehicle())
                     {
                         failedSpellCast = true; // Mark spellcast as failed so we can retry it later
+                        probeResult = -1;
 
                         if (me->IsRooted()) // Rooted inhabit type, never move/reposition
                             continue;
@@ -728,6 +767,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                     if (distanceToTarget > spellMaxRange && isWithinLOSInMap)
                     {
                         failedSpellCast = true;
+                        probeResult = -2;
 
                         if (me->IsRooted()) // Rooted inhabit type, never move/reposition
                             continue;
@@ -740,6 +780,7 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                     else if (distanceToTarget < spellMinRange || !(isWithinLOSInMap || isSpellIgnoreLOS))
                     {
                         failedSpellCast = true;
+                        probeResult = -3;
 
                         if (me->IsRooted()) // Rooted inhabit type, never move/reposition
                             continue;
@@ -760,7 +801,12 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                     }
 
                     SpellCastResult result = me->CastSpell(target->ToUnit(), e.action.cast.spell, triggerFlags);
-                    bool spellCastFailed = (result != SPELL_CAST_OK && result != SPELL_FAILED_SPELL_IN_PROGRESS);
+                    // CoA: in dungeons a cast blocked by the creature's own running cast is retried once it is free,
+                    // instead of being dropped until the next timer (boss mechanics next to a constant nuke)
+                    bool retryWhenFree = result == SPELL_FAILED_SPELL_IN_PROGRESS && me->GetMap() && me->GetMap()->IsDungeon();
+                    bool spellCastFailed = (result != SPELL_CAST_OK && (result != SPELL_FAILED_SPELL_IN_PROGRESS || retryWhenFree));
+                    if (result != SPELL_CAST_OK)
+                        probeResult = int32(result);
 
                     if (e.action.cast.castFlags & SMARTCAST_COMBAT_MOVE)
                     {
@@ -779,6 +825,9 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                               me->GetGUID().ToString(), e.action.cast.spell, target->GetGUID().ToString(), e.action.cast.castFlags);
                 }
             }
+
+            if (probeResult && me)
+                CoABossProbeSmartCast(me, e.action.cast.spell, probeResult, failedSpellCast && !successfulSpellCast ? "smartfail" : "smartbusy");
 
             // If there is at least 1 failed cast and no successful casts at all, retry again on next loop
             if (failedSpellCast && !successfulSpellCast)
@@ -2809,6 +2858,8 @@ void SmartScript::ProcessAction(SmartScriptHolder& e, Unit* unit, uint32 var0, u
                         if (e.action.castCustom.bp3)
                             values.AddSpellMod(SPELLVALUE_BASE_POINT2, e.action.castCustom.bp3);
                         SpellCastResult result = me->CastCustomSpell(spellInfo, values, target->ToUnit(), (e.action.castCustom.flags & SMARTCAST_TRIGGERED) ? TRIGGERED_FULL_MASK : TRIGGERED_NONE);
+                        if (result != SPELL_CAST_OK)
+                            CoABossProbeSmartCast(me, e.action.castCustom.spell, int32(result), "smartfail");
 
                         float spellMaxRange = me->GetSpellMaxRangeForTarget(target->ToUnit(), spellInfo);
                         if (e.action.cast.castFlags & SMARTCAST_COMBAT_MOVE)

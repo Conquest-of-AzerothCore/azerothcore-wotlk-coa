@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Chaos Omen cuts Gravity Bomb's cooldown by 30 sec and its explosion by 3 sec (#1366)",
+  "contract": "Chaos Omen 706063 carries three SPELL_AURA_ADD_FLAT_MODIFIER (107) effects, all with EffectSpellClassMask word1 bit 0x80000000: EffectMiscValue SPELLMOD_COOLDOWN (11) with EffectBasePoints -30001, SPELLMOD_DURATION (1) with -3001 and SPELLMOD_ACTIVATION_TIME (19) with -3001, which resolve to -30000, -3000 and -3000 with DieSides 1 and match the tooltip \"Reduces the cooldown of your Gravity Bomb by $/1000;s1 sec, and its explosion occurs $/1000;s2 sec faster.\" Every Gravity Bomb rank (501820-501824, 801281) has SpellFamilyFlags word1 2147483648, RecoveryTime and CategoryRecoveryTime 90000, DurationIndex 32 (SpellDuration.dbc row 32 = 6000ms) and effect amplitudes of 6000, and AttributesEx3 0x100000, not IGNORE_CASTER_MODIFIERS. Cutting duration and amplitude by the same 3000 keeps the explosion landing exactly at aura expiry. Native path only: Player::AddSpellAndCategoryCooldowns for the cooldown, Aura::CalcMaxDuration for the duration and AuraEffect::CalculatePeriodic for the amplitude.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 22, "level": 80 },
+    { "id": "talent", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talent", "spell": 706063 },
+    {
+      "action": "assert",
+      "label": "Gravity Bomb keeps its 90 sec cooldown without the talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 501820,
+      "op": 11,
+      "base": 90000,
+      "equals": 90000
+    },
+    {
+      "action": "assert",
+      "label": "Gravity Bomb's cooldown drops to 60 sec with the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 501820,
+      "op": 11,
+      "base": 90000,
+      "equals": 60000
+    },
+    {
+      "action": "assert",
+      "label": "Gravity Bomb keeps its 6 sec duration without the talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 501820,
+      "op": 1,
+      "base": 6000,
+      "equals": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Gravity Bomb's duration drops to 3 sec with the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 501820,
+      "op": 1,
+      "base": 6000,
+      "equals": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Gravity Bomb keeps its 6 sec periodic interval without the talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 501820,
+      "op": 19,
+      "base": 6000,
+      "equals": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Gravity Bomb's periodic interval drops to 3 sec with the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 501820,
+      "op": 19,
+      "base": 6000,
+      "equals": 3000
+    }
+  ]
+}

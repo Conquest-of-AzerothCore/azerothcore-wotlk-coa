@@ -1,14 +1,15 @@
 {
  "schema": 1,
  "name": "Necromancer: Raised Gargoyle attacks with Putrid Claw (#4156)",
- "contract": "Without a Command a Raised Gargoyle only auto-attacks and uses Putrid Claw; Command: Gargoyle is cast on order only.",
+ "contract": "Without a Command a Raised Gargoyle only auto-attacks and uses Putrid Claw; Command: Gargoyle is cast on order only. Command: Gargoyle (707598) triggers Bone Toss (704706, 5 s) on its target, and nothing else the Gargoyle casts does, so Bone Toss stays absent from the target throughout an unordered 10 s fight (the old auto-cast, every 3 s, kept it up) and appears once the Necromancer orders Command: Gargoyle (504052, 50 Runic Power). The Necromancer's spell hit rating, which the Gargoyle inherits, keeps the order's miss chance at the 1% floor, and the order is given twice. The Gargoyle occupies 3 Life Force, so the Necromancer first learns Scourge Apprentice Training (680283, +1 Life Force over the base 2).",
  "timeout_ms": 120000,
  "players": [
   {
    "id": "n",
    "race": 5,
    "class": 23,
-   "level": 60
+   "level": 60,
+   "spell_hit_rating": 10000
   }
  ],
  "creatures": [
@@ -34,7 +35,17 @@
   },
   {
    "action": "learn",
+   "spell": 680283,
+   "actor": "n"
+  },
+  {
+   "action": "learn",
    "spell": 500329,
+   "actor": "n"
+  },
+  {
+   "action": "learn",
+   "spell": 504052,
    "actor": "n"
   },
   {
@@ -68,16 +79,82 @@
   },
   {
    "action": "wait",
-   "ms": 10000
+   "ms": 3500
   },
   {
    "action": "assert",
-   "label": "damage taken without a Command",
+   "label": "no Command: Gargoyle without an order (3.5 s)",
+   "actor": "d",
+   "metric": "aura",
+   "spell": 704706,
+   "equals": 0
+  },
+  {
+   "action": "wait",
+   "ms": 3500
+  },
+  {
+   "action": "assert",
+   "label": "no Command: Gargoyle without an order (7 s)",
+   "actor": "d",
+   "metric": "aura",
+   "spell": 704706,
+   "equals": 0
+  },
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "assert",
+   "label": "no Command: Gargoyle without an order (10 s)",
+   "actor": "d",
+   "metric": "aura",
+   "spell": 704706,
+   "equals": 0
+  },
+  {
+   "action": "assert",
+   "label": "the Gargoyle and its owner damage the target",
    "actor": "d",
    "metric": "health",
    "relative_to": "h0",
-   "min": -2200,
-   "max": 0
+   "max": -1
+  },
+  {
+   "action": "set_power",
+   "power": 6,
+   "value": 500,
+   "actor": "n"
+  },
+  {
+   "action": "cast",
+   "spell": 504052,
+   "actor": "n"
+  },
+  {
+   "action": "wait",
+   "ms": 1600
+  },
+  {
+   "action": "set_power",
+   "power": 6,
+   "value": 500,
+   "actor": "n"
+  },
+  {
+   "action": "cast",
+   "spell": 504052,
+   "actor": "n"
+  },
+  {
+   "action": "assert",
+   "label": "an ordered Command: Gargoyle applies Bone Toss",
+   "actor": "d",
+   "metric": "aura",
+   "spell": 704706,
+   "equals": 1,
+   "within_ms": 2000
   }
  ]
 }

@@ -1,0 +1,130 @@
+{
+  "schema": 1,
+  "name": "Starlit Finesse adds 3% hit and 3% critical strike chance (#1374)",
+  "contract": "Starlit Finesse 574350 (Spell.dbc, SpellFamilyName 32 (Starcaller). Effect 0 SPELL_AURA_MOD_CRIT_PCT (290), EffectBasePoints 2 with DieSides 1 resolves to 3; Effect 1 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT (333), EffectBasePoints 2 resolves to 3. This matches the tooltip 'Increases your hit and critical strike chance by $s2%'. Native path: AuraEffect::HandleAuraModCritPct refreshes the weapon-dependent flat crit (UpdateWeaponDependentCritAuras, SPELL_AURA_MOD_CRIT_PCT is included unconditionally) and the spell crit (UpdateSpellCritChance sums MOD_SPELL_CRIT_CHANCE and MOD_CRIT_PCT); Player::UpdateMeleeHitChances and UpdateSpellHitChances sum the 333 aura. The four metrics melee_crit_chance, spell_crit_chance (arcane, school 6), melee_hit_chance and spell_hit_chance read exactly those fields; each is a delta against the control. Both fixtures are the same race, class and level with no ratings or gear, so only the learned passive can move the difference. Nothing in AscensionStarcallerContracts.cpp touches this spell id, and the scenario is a regression guard: it is expected to pass on the shipped data. The player's melee crit field (PLAYER_CRIT_PERCENTAGE) is only recomputed when an aura or stat change triggers it; the untouched control reads 0 while the talent fixture, recomputed when the passive applies, reads its full base plus 3 (run 20260921T092016449466192Z: control 0, talent 6.70). Both fixtures therefore get the same baseline aura 14139, as the Templar crit scenarios do, so both carry a computed base before the snapshots.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Baseline crit aura computes crit chance",
+      "actor": "control",
+      "spell": 14139,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Baseline crit aura computes crit chance",
+      "actor": "talent",
+      "spell": 14139,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 574350
+    },
+    {
+      "action": "assert",
+      "label": "Effect 0 resolves to 3% crit",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 574350,
+      "effect": 0,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Effect 1 resolves to 3% hit",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 574350,
+      "effect": 1,
+      "equals": 3
+    },
+    {
+      "action": "snapshot",
+      "label": "Melee crit without the passive",
+      "actor": "control",
+      "metric": "melee_crit_chance",
+      "save_as": "mcrit"
+    },
+    {
+      "action": "snapshot",
+      "label": "Arcane spell crit without the passive",
+      "actor": "control",
+      "metric": "spell_crit_chance",
+      "save_as": "scrit",
+      "school": 6
+    },
+    {
+      "action": "snapshot",
+      "label": "Melee hit without the passive",
+      "actor": "control",
+      "metric": "melee_hit_chance",
+      "save_as": "mhit"
+    },
+    {
+      "action": "snapshot",
+      "label": "Spell hit without the passive",
+      "actor": "control",
+      "metric": "spell_hit_chance",
+      "save_as": "shit"
+    },
+    {
+      "action": "assert",
+      "label": "Melee crit rises by 3",
+      "actor": "talent",
+      "metric": "melee_crit_chance",
+      "relative_to": "mcrit",
+      "min": 2.99,
+      "max": 3.01
+    },
+    {
+      "action": "assert",
+      "label": "Arcane spell crit rises by 3",
+      "actor": "talent",
+      "metric": "spell_crit_chance",
+      "school": 6,
+      "relative_to": "scrit",
+      "min": 2.99,
+      "max": 3.01
+    },
+    {
+      "action": "assert",
+      "label": "Melee hit rises by 3",
+      "actor": "talent",
+      "metric": "melee_hit_chance",
+      "relative_to": "mhit",
+      "min": 2.99,
+      "max": 3.01
+    },
+    {
+      "action": "assert",
+      "label": "Spell hit rises by 3",
+      "actor": "talent",
+      "metric": "spell_hit_chance",
+      "relative_to": "shit",
+      "min": 2.99,
+      "max": 3.01
+    }
+  ]
+}

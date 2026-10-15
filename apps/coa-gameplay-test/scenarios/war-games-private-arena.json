@@ -1,0 +1,182 @@
+{
+  "schema": 1,
+  "name": "War Games: Teri Glozilk sends two consenting leaders into a private Nagrand Arena match",
+  "contract": "Teri Glozilk (creature 9990001) lists the fifteen original War Games destinations and an explanation. A destination whose map is not restored (Random Arena) is refused, and so is an unknown opponent. Naming an online player for Nagrand Arena sends that player the challenge as a two-option gossip window on their next update; accepting it transfers both players into a fresh private Nagrand Arena instance (map 559) on opposite sides. The match is a normal arena fight: when one side dies after the gates open, the match ends and the arena revives its dead, both participants - the winner and the loser - are credited Path to Ascension tutorial 32 (\"Wargames\"), and both return to where they were challenged.",
+  "timeout_ms": 480000,
+  "players": [
+    {
+      "id": "challenger",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "rival",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "teri",
+      "owner": "challenger",
+      "entry": 9990001,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8809.6,
+    "y": 625.0,
+    "z": 94.979,
+    "o": 2.1
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let both characters settle",
+      "ms": 3000
+    },
+    {
+      "action": "gossip_hello",
+      "label": "Talk to Teri",
+      "actor": "challenger",
+      "target": "teri"
+    },
+    {
+      "action": "assert",
+      "label": "Teri lists the fifteen destinations and the explanation",
+      "actor": "challenger",
+      "metric": "gossip_options",
+      "equals": 16
+    },
+    {
+      "action": "gossip_select",
+      "label": "Challenge the rival to the unrestored Random Arena",
+      "actor": "challenger",
+      "option": 0,
+      "code_actor": "rival"
+    },
+    {
+      "action": "assert",
+      "label": "An unrestored destination is refused",
+      "actor": "challenger",
+      "metric": "system_message_contains",
+      "text": "isn't ready for a match",
+      "equals": 1
+    },
+    {
+      "action": "gossip_hello",
+      "label": "Talk to Teri again",
+      "actor": "challenger",
+      "target": "teri"
+    },
+    {
+      "action": "gossip_select",
+      "label": "Challenge a player who is not online",
+      "actor": "challenger",
+      "option": 1,
+      "code": "Nobodyhere"
+    },
+    {
+      "action": "assert",
+      "label": "An unknown opponent is refused",
+      "actor": "challenger",
+      "metric": "system_message_contains",
+      "text": "can't arrange that match",
+      "equals": 1
+    },
+    {
+      "action": "gossip_hello",
+      "label": "Talk to Teri once more",
+      "actor": "challenger",
+      "target": "teri"
+    },
+    {
+      "action": "gossip_select",
+      "label": "Challenge the rival to Nagrand Arena",
+      "actor": "challenger",
+      "option": 1,
+      "code_actor": "rival"
+    },
+    {
+      "action": "assert",
+      "label": "Teri sends the challenge",
+      "actor": "challenger",
+      "metric": "system_message_contains",
+      "text": "The challenge is on its way",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The rival sees the challenge: accept or decline",
+      "actor": "rival",
+      "metric": "gossip_options",
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "gossip_select",
+      "label": "The rival accepts",
+      "actor": "rival",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "The challenger enters Nagrand Arena",
+      "actor": "challenger",
+      "metric": "map_id",
+      "equals": 559,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "and so does the rival",
+      "actor": "rival",
+      "metric": "map_id",
+      "equals": 559,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "label": "Wait for the arena gates to open",
+      "ms": 75000
+    },
+    {
+      "action": "die",
+      "label": "The rival falls; the match ends and the arena revives its dead",
+      "actor": "rival",
+      "revived": true
+    },
+    {
+      "action": "assert",
+      "label": "The winner is credited the War Games tutorial",
+      "actor": "challenger",
+      "metric": "player_setting",
+      "source": "core.ascension.tutorial_verified",
+      "index": 32,
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "and so is the loser",
+      "actor": "rival",
+      "metric": "player_setting",
+      "source": "core.ascension.tutorial_verified",
+      "index": 32,
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The challenger returns to Stormwind after the match",
+      "actor": "challenger",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 240000
+    }
+  ]
+}

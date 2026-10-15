@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Hellfire Forgemaster raises block value by 30% and converts fierce blows to blocks (#833)",
+  "contract": "Hellfire Forgemaster 560655 reads 'Increases your block value by $s1%. Additionally, you have a X% increased chance to block fierce blows.' Effect 0 is native aura 150 (SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT), EffectBasePoints 29 with DieSides 1 -> 30 (verified in the installed Spell.dbc: EffectApplyAuraName[0]=150, EffectBasePoints[0]=29, EffectDieSides[0]=1). Its handler AuraEffect::HandleShieldBlockValuePercent (src/server/game/Spells/Auras/SpellAuraEffects.cpp:215,5232) multiplies GetTotalAuraMultiplier(SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT) into the shield's block value -- a fully native, generic stat aura; no script is required for this clause. The fierce-blow clause is a dedicated local hook, not a stub: src/server/game/Entities/Unit/Unit.cpp:3232-3236, inside Unit::RollMeleeOutcomeAgainst's crushing-blow branch, reads 'if (Player const* knight = victim->ToPlayer(); knight && knight->getClass() == 17 && knight->HasAura(560655) && knight->CanBlock() && knight->GetShield(true) && victim->HasInArc(float(M_PI), this) && roll_chance_i(60)) return MELEE_HIT_BLOCK;' immediately before the native 'return MELEE_HIT_CRUSHING;' -- both clauses are delivered, one by a native generic aura, one by a class-17-gated script hook; nothing was missing. HARNESS LIMIT: the fierce-blow clause only fires inside RollMeleeOutcomeAgainst's crushing-blow branch, which requires a live melee attacker 4+ levels above the Knight with a 15+ weapon-skill gap and a frontal roll -- conditions this harness's passive/non-attacking fixtures cannot reliably reproduce, so only the block-value clause is asserted numerically here; the fierce-blow conversion needs a Ghost e2e encounter against a higher-level attacker.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "add_item", "actor": "knight", "item": 629951 },
+    { "action": "equip", "label": "Swap the class's two-handed starter weapon for a one-hander so a shield can be equipped", "actor": "knight", "item": 629951, "slot": 15 },
+    { "action": "add_item", "actor": "knight", "item": 2362 },
+    { "action": "equip", "label": "Equip a shield in the off hand", "actor": "knight", "item": 2362, "slot": 16 },
+    { "action": "wait", "label": "Let the equipment update settle", "ms": 1000 },
+    { "action": "snapshot", "label": "Block value without the passive", "actor": "knight", "metric": "block_value", "save_as": "block_value_base" },
+    { "action": "assert", "label": "SETUP: the baseline block value is positive", "actor": "knight", "metric": "block_value", "min": 1 },
+    { "action": "learn", "actor": "knight", "spell": 560655 },
+    { "action": "set_aura", "actor": "knight", "spell": 560655, "stacks": 1, "label": "Force the Hellfire Forgemaster passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    { "action": "assert", "label": "SETUP: the Hellfire Forgemaster passive is active", "actor": "knight", "metric": "aura", "spell": 560655, "equals": 1 },
+    { "action": "assert", "label": "CONTRACT: block value rises by ~30%", "actor": "knight", "metric": "block_value", "ratio_to": "block_value_base", "min": 1.27, "max": 1.33 }
+  ]
+}

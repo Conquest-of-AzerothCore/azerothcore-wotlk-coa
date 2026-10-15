@@ -1,0 +1,178 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Storm Barrier shields the caster while Lightning Cage is active (#3112)",
+  "contract": "#3112: Storm Barrier 707204 (Spell.dbc, SpellFamilyName 22, Attributes 448 = PASSIVE|DO_NOT_DISPLAY|DO_NOT_LOG) promises 'While Lightning Cage is active your Magic Damage taken is now reduced by $s1% and you are unable to be hit by ranged attacks.'. Its two effects are aura 107 SPELL_AURA_ADD_FLAT_MODIFIER with EffectMiscValue 3 (SPELLMOD_EFFECT1) and 12 (SPELLMOD_EFFECT2), EffectBasePoints -26 and -101 with DieSides 1, i.e. flat -25 and -100, both scoped to EffectSpellClassMask[2]/[5] = 134217728 (family 22, dword 2, bit 27). A full Spell.dbc scan for SpellFamilyName 22 with SpellFamilyFlags[2] bit 27 returns exactly one row: 560032 Lightning Cage rank 'SLS' (AttributesEx 268435456 = SPELL_ATTR1_NO_AURA_ICON, DurationIndex 8 = 15000 ms), whose effect 0 is aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN on misc 126 (SPELL_SCHOOL_MASK_MAGIC) and effect 1 is aura 185 SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE, both with EffectBasePoints -1 and DieSides 1, i.e. amount 0. Player::ApplySpellMod (Player.cpp:10325) resolves those zeros to basevalue * 1 + flat = -25 and -100 (the null-basevalue guard at Player.cpp:10258 skips percent mods only). Nothing in the server ever applied 560032: it has no CharacterAdvancement row, no SkillLineAbility, no module grant and no trigger, and the spell the player actually casts is 560030 Lightning Cage (SpellFamilyFlags[2] = 33554432, bit 25, DurationIndex 9 = 30000 ms, all three effects on TARGET_UNIT_CASTER), which carries no damage-taken or ranged-hit effect of its own. The fix registers aura_ascension_lightning_cage on 560030: while the cage is up on a player who knows 707204, the hidden companion 560032 is applied to that player with the cage's own duration, so Storm Barrier's modifiers have something to modify. Expected numbers: spell_effect_value on 560032 effect 0 = -25 and effect 1 = -100 (this layer already read correctly before the fix and proves the DBC reading); spell_damage_taken with Shock 804020 (SchoolMask 8 = Nature, inside misc 126) falls to 1000 * (1 - 25/100) = 750, ratio 0.75, while Heroic Strike 78 (SchoolMask 1 = Physical, outside misc 126) stays at 1.0. The ranged-hit clause is covered through the effect-value layer only: the harness has no attacker-side ranged-miss metric, and the -100 to 105% miss conversion is core-native at Unit.cpp:3977-3978.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    },
+    {
+      "id": "plain",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "attacker",
+      "owner": "s",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 707204
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 560030
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 560030
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Storm Barrier resolves the companion's magic reduction to -25 (0 base + flat -25)",
+      "actor": "s",
+      "metric": "spell_effect_value",
+      "spell": 560032,
+      "effect": 0,
+      "equals": -25
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Storm Barrier resolves the companion's ranged hit chance to -100 (0 base + flat -100)",
+      "actor": "s",
+      "metric": "spell_effect_value",
+      "spell": 560032,
+      "effect": 1,
+      "equals": -100
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the companion aura is absent before the cage is cast",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 560032,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Nature damage taken before the cage (Shock 804020, SchoolMask 8)",
+      "actor": "s",
+      "metric": "spell_damage_taken",
+      "save_as": "magic_base",
+      "spell": 804020,
+      "target": "attacker"
+    },
+    {
+      "action": "snapshot",
+      "label": "Physical damage taken before the cage (Heroic Strike 78, SchoolMask 1)",
+      "actor": "s",
+      "metric": "spell_damage_taken",
+      "save_as": "phys_base",
+      "spell": 78,
+      "target": "attacker"
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 560030
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Lightning Cage is up on the Storm Barrier caster",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 560030,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the cage brings up the hidden companion 560032",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 560032,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the companion runs on the cage's 30 s (SpellDuration row 9), not its own 15 s (row 8)",
+      "actor": "s",
+      "metric": "aura_duration_ms",
+      "spell": 560032,
+      "min": 20000,
+      "max": 30000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: magic damage taken drops to 75% while the cage is up",
+      "actor": "s",
+      "metric": "spell_damage_taken",
+      "spell": 804020,
+      "target": "attacker",
+      "ratio_to": "magic_base",
+      "min": 0.74,
+      "max": 0.76
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: physical damage taken is untouched, misc 126 excludes the Physical school",
+      "actor": "s",
+      "metric": "spell_damage_taken",
+      "spell": 78,
+      "target": "attacker",
+      "ratio_to": "phys_base",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "cast",
+      "actor": "plain",
+      "spell": 560030
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Lightning Cage is up on the player without Storm Barrier",
+      "actor": "plain",
+      "metric": "aura",
+      "spell": 560030,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without Storm Barrier the cage brings up no companion aura",
+      "actor": "plain",
+      "metric": "aura",
+      "spell": 560032,
+      "equals": 0
+    }
+  ]
+}

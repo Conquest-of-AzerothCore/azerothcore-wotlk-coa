@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "name": "Runemaster Windsage makes the next 3 Runeblades after Smolder strike again for 75% as Nature (#1005)",
+  "contract": [
+    "Tooltip 705568: Smolder envelops you in wind, so your next 3 Runeblades strike an additional time equal to",
+    "$705569s1% (75%) of the damage dealt as Nature damage.",
+    "705568 effect 0 is PROC_TRIGGER_SPELL 705569; Spell.dbc gives it ProcFlags 0, so no proc entry existed.",
+    "Smolder ranks (801087, 502623-502633) are the only melee-class family 38 spells with mask0 0x200.",
+    "705569 (10 sec) effect 0 is Ascension aura 354 with BasePoints 74 (75) and trigger 706457, a Nature",
+    "melee-class hit that cannot crit and ignores caster and taken modifiers. Its ProcFlags are 0 as well.",
+    "Runeblade ranks (707141-707148, 573444-573447) are the only family 38 spells with mask2 0x40000.",
+    "The 3 in the tooltip is the buff's charge count; each Runeblade hit consumes one and adds one strike.",
+    "Each strike deals 75% of that hit's damage, so the strikes' total is 72-76% of Runeblade's total.",
+    "A fourth Runeblade adds nothing, and a Runemaster without the talent gains no Windsage from Smolder.",
+    "Smolder requires a two-handed weapon (subclass mask 1378 includes staves); skill 227 is fixture setup."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "rm", "race": 1, "class": 32, "level": 80, "melee_hit_rating": 10000, "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "plain", "race": 1, "class": 32, "level": 80, "melee_hit_rating": 10000, "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 3},
+    {"id": "plain_dummy", "owner": "plain", "entry": 36, "level": 80, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and the characters settle", "ms": 5000},
+    {"action": "learn", "actor": "rm", "spell": 227},
+    {"action": "learn", "actor": "rm", "spell": 801087},
+    {"action": "learn", "actor": "rm", "spell": 707141},
+    {"action": "learn", "actor": "rm", "spell": 705568},
+    {"action": "learn", "actor": "plain", "spell": 227},
+    {"action": "learn", "actor": "plain", "spell": 801087},
+    {"action": "add_item", "actor": "rm", "item": 35},
+    {"action": "equip", "label": "Bent Staff in the main hand", "actor": "rm", "item": 35, "slot": 15},
+    {"action": "add_item", "actor": "plain", "item": 35},
+    {"action": "equip", "label": "Bent Staff in the main hand", "actor": "plain", "item": 35, "slot": 15},
+    {"action": "wait", "ms": 1000},
+    {
+      "action": "assert", "label": "Windsage passive is active", "actor": "rm", "metric": "aura", "spell": 705568,
+      "equals": 1, "within_ms": 2000
+    },
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Smolder", "actor": "rm", "spell": 801087, "target": "dummy"},
+    {
+      "action": "assert", "label": "Smolder envelops the Runemaster in Windsage", "actor": "rm", "metric": "aura",
+      "spell": 705569, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Windsage holds 3 Runeblade charges", "actor": "rm", "metric": "aura_charges",
+      "spell": 705569, "equals": 3
+    },
+    {
+      "action": "assert", "label": "One Smolder cast grants one Windsage", "actor": "rm",
+      "metric": "spell_proc_count", "spell": 705568, "equals": 1
+    },
+    {"action": "wait", "label": "Global cooldown", "ms": 1400},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runeblade 1", "actor": "rm", "spell": 707141, "target": "dummy"},
+    {
+      "action": "assert", "label": "Runeblade 1 hits", "actor": "rm", "metric": "spell_damage_count", "spell": 707141,
+      "target": "dummy", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Runeblade 1 strikes again as Nature damage", "actor": "rm",
+      "metric": "spell_damage_count", "spell": 706457, "target": "dummy", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Runeblade 1 spends one Windsage charge", "actor": "rm",
+      "metric": "aura_charges", "spell": 705569, "equals": 2
+    },
+    {"action": "wait", "label": "Runeblade global cooldown", "ms": 1400},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runeblade 2", "actor": "rm", "spell": 707141, "target": "dummy"},
+    {
+      "action": "assert", "label": "Runeblade 2 strikes again", "actor": "rm", "metric": "spell_damage_count",
+      "spell": 706457, "target": "dummy", "equals": 2, "within_ms": 2000
+    },
+    {"action": "wait", "label": "Runeblade global cooldown", "ms": 1400},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runeblade 3", "actor": "rm", "spell": 707141, "target": "dummy"},
+    {
+      "action": "assert", "label": "Runeblade 3 strikes again", "actor": "rm", "metric": "spell_damage_count",
+      "spell": 706457, "target": "dummy", "equals": 3, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The third Runeblade uses up Windsage", "actor": "rm", "metric": "aura",
+      "spell": 705569, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Three Runeblades hit", "actor": "rm", "metric": "spell_damage_count",
+      "spell": 707141, "target": "dummy", "equals": 3
+    },
+    {
+      "action": "snapshot", "label": "Runeblade damage dealt", "actor": "rm", "metric": "spell_damage_total",
+      "spell": 707141, "target": "dummy", "save_as": "runeblade_damage"
+    },
+    {
+      "action": "assert", "label": "The extra strikes deal 75% of the Runeblade damage", "actor": "rm",
+      "metric": "spell_damage_total", "spell": 706457, "target": "dummy", "ratio_to": "runeblade_damage",
+      "min": 0.72, "max": 0.76
+    },
+    {"action": "wait", "label": "Runeblade global cooldown", "ms": 1400},
+    {"action": "restore_charges", "actor": "rm", "spell": 707141},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runeblade 4 without Windsage", "actor": "rm", "spell": 707141, "target": "dummy"},
+    {
+      "action": "assert", "label": "Runeblade 4 hits", "actor": "rm", "metric": "spell_damage_count", "spell": 707141,
+      "target": "dummy", "equals": 4, "within_ms": 2000
+    },
+    {"action": "wait", "label": "Allow any extra strike to land", "ms": 500},
+    {
+      "action": "assert", "label": "Without Windsage Runeblade does not strike again", "actor": "rm",
+      "metric": "spell_damage_count", "spell": 706457, "target": "dummy", "equals": 3
+    },
+    {"action": "set_power", "actor": "plain", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Control Smolder", "actor": "plain", "spell": 801087, "target": "plain_dummy"},
+    {
+      "action": "assert", "label": "Control: Smolder hits", "actor": "plain", "metric": "spell_damage_count",
+      "spell": 801087, "target": "plain_dummy", "min": 1, "within_ms": 2000
+    },
+    {"action": "wait", "label": "Allow any proc to land", "ms": 500},
+    {
+      "action": "assert", "label": "Control: no Windsage without the talent", "actor": "plain", "metric": "aura",
+      "spell": 705569, "equals": 0
+    }
+  ]
+}

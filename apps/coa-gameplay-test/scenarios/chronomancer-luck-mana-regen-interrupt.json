@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Luck applies its interrupted mana regeneration aura natively (#2963)",
+  "contract": "Spell.dbc gives both Luck ranks a single self-targeted APPLY_AURA effect of aura 134 SPELL_AURA_MOD_MANA_REGEN_INTERRUPT: 706085 has EffectBasePoints 39 with DieSides 1 -> 40, and 707828 has 79 -> 80. The 706085 tooltip reads 'Allows 40% of your mana regeneration to continue while in combat' (its AuraDescription says 'while casting'; the core implements the interrupted/five-second-rule regeneration, which matches the aura type and the aura description). The aura type has a real handler: AuraEffect::HandleAuraModRegenInterrupt -> Player::UpdateManaRegen, which clamps GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT) at 100 and writes power_regen_mp5 + CalculatePct(power_regen, modManaRegenInterrupt) into UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER. No script or SQL is needed; this is a regression scenario for behaviour that already works. COVERAGE LIMIT: this scenario proves the DATA half only - that each rank applies and resolves to 40 and 80. The regeneration itself lands in UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER and the harness exposes power only as net state, which also moves with absorbs, procs and other effects; a power-delta observation would not discriminate, so none is written here. A decisive assertion needs a power_regen_interrupted metric added to CoAGameplayTest.cpp.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "chronomancer", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert",
+      "label": "No Luck aura before the passive is learned",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 706085,
+      "equals": 0
+    },
+    { "action": "learn", "actor": "chronomancer", "spell": 706085 },
+    {
+      "action": "assert",
+      "label": "Learning the first rank applies its aura",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 706085,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "First rank resolves to 40 (data only, see contract)",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 706085,
+      "effect": 0,
+      "equals": 40
+    },
+    { "action": "learn", "actor": "chronomancer", "spell": 707828 },
+    {
+      "action": "assert",
+      "label": "Learning the second rank applies its aura",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 707828,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Second rank resolves to 80 (data only, see contract)",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 707828,
+      "effect": 0,
+      "equals": 80
+    }
+  ]
+}

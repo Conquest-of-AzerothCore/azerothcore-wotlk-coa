@@ -1,0 +1,396 @@
+{
+  "schema": 1,
+  "name": "Roll Back cleanses one eligible effect; Time Skip cleanses two newest effects",
+  "contract": "Native Roll Back removes one total Magic, Poison, Curse or Disease effect. Physical bleeds and friendly buffs remain. Time Skip removes two distinct newest harmful effects, including auras applied in the same second. Combat-log packet classification and hostile purge are source-reviewed; this scenario checks allied aura removal only.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "base",
+      "race": 1,
+      "class": 22,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 22,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 22,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "base",
+      "spell": 804490
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 804490
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 500000,
+      "value": 500000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 116,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 703,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 1459,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 116,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "base",
+      "spell": 804490,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 116,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 703,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 1459,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 702,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 703,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 1459,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 702,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "base",
+      "spell": 804490,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 702,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 703,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 1459,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 2818,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 703,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 1459,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 2818,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "base",
+      "spell": 804490,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 2818,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 703,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 1459,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55095,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 703,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 1459,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 55095,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "base",
+      "spell": 804490,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 55095,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 703,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 1459,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 702,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55095,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 2818,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 804490,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 702,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 55095,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 2818,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 702,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55095,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 804451
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 702,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55095,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 2818,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 804490,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 702,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 55095,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 2818,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 703,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 1459,
+      "equals": 1
+    }
+  ]
+}

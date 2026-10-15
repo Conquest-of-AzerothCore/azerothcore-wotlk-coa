@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "name": "Final Prayer makes Prayer of Elune dispel one additional effect (#863)",
+  "contract": "Final Prayer 704745 (SpellFamilyName 32) reads \"Your Prayer of Elune now dispels $s1 additional effect\". Its effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 12 = SPELLMOD_EFFECT2, EffectBasePoints 0 with DieSides 1 resolving to +1, and EffectSpellClassMask word1 0x1000, which is the SpellFamilyFlags word1 of every Prayer of Elune rank (801987 rank 1, 502348..502351, 575334 rank 6; SpellFamilyName 32). Prayer's effect index 1 is SPELL_EFFECT_DISPEL (38) with EffectMiscValue 1 (Magic), DieSides 1 and EffectBasePoints 0, so its base amount is 1. Native path: SpellEffectInfo::CalcValue passes effect index 1 to Unit::ApplyEffectModifiers, which applies SPELLMOD_EFFECT2, and Spell::EffectDispel loops for count < damage, so the dispel count is the resolved value. The metric spell_effect_value with effect 1 returns exactly that CalcValue(player), so control must read 1 and the talented fixture 2, on the lowest and the highest rank. The module's coefficient rows for Prayer in AscensionStarcallerData.h are effect 0 only, and ModifySpellEffectBaseValue matches on the effect index, so effect 1 is untouched. Effect 1 of the passive (SPELLMOD_EFFECT1 on mask word2 0x80000) is a leftover selecting only Star Pupil 680821, and is not a tooltip clause. Both fixtures are the same race, class and level.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 801987
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 801987
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 575334
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 575334
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 704745
+    },
+    {
+      "action": "assert",
+      "label": "The passive self-applies once learned",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 704745,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 Prayer of Elune dispels one effect without the talent",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 801987,
+      "effect": 1,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 Prayer of Elune dispels two effects with the talent",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 801987,
+      "effect": 1,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Rank 6 Prayer of Elune dispels one effect without the talent",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 575334,
+      "effect": 1,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 6 Prayer of Elune dispels two effects with the talent",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 575334,
+      "effect": 1,
+      "equals": 2
+    }
+  ]
+}

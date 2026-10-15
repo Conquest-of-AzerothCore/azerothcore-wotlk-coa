@@ -1,0 +1,364 @@
+{
+  "schema": 1,
+  "name": "Portable gadgets: item summons, lifetimes, portal use and expiry",
+  "contract": "Items summon timed objects; portals teleport home. Mailbox and enchanting UI are not tested.",
+  "timeout_ms": 450000,
+  "location": {
+    "map": 0,
+    "x": -9465.0,
+    "y": 64.0,
+    "z": 56.0,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "mail",
+      "race": 1,
+      "class": 8,
+      "level": 80
+    },
+    {
+      "id": "altar",
+      "race": 1,
+      "class": 8,
+      "level": 80
+    },
+    {
+      "id": "gnomish",
+      "race": 1,
+      "class": 8,
+      "level": 80
+    },
+    {
+      "id": "fel",
+      "race": 1,
+      "class": 8,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "console",
+      "command": "portablemail status"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "mail",
+      "metric": "owned_gameobject_count",
+      "entry": 1903511,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "mail",
+      "item": 1903512
+    },
+    {
+      "action": "use_item",
+      "label": "Summon mail gadget through normal item use",
+      "actor": "mail",
+      "item": 1903512,
+      "spell": 985210,
+      "destination": {
+        "x": -9464.0,
+        "y": 64.0,
+        "z": 56.0
+      }
+    },
+    {
+      "action": "assert",
+      "label": "mail item creates its world object",
+      "actor": "mail",
+      "metric": "owned_gameobject_count",
+      "entry": 1903511,
+      "equals": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "mail object has the authored lifetime",
+      "actor": "mail",
+      "metric": "gameobject_remaining_ms",
+      "entry": 1903511,
+      "min": 178000,
+      "max": 180000
+    },
+    {
+      "action": "assert",
+      "actor": "altar",
+      "metric": "owned_gameobject_count",
+      "entry": 1903512,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "altar",
+      "item": 1903513
+    },
+    {
+      "action": "use_item",
+      "label": "Summon altar gadget through normal item use",
+      "actor": "altar",
+      "item": 1903513,
+      "spell": 985211,
+      "destination": {
+        "x": -9464.0,
+        "y": 64.0,
+        "z": 56.0
+      }
+    },
+    {
+      "action": "assert",
+      "label": "altar item creates its world object",
+      "actor": "altar",
+      "metric": "owned_gameobject_count",
+      "entry": 1903512,
+      "equals": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "altar object has the authored lifetime",
+      "actor": "altar",
+      "metric": "gameobject_remaining_ms",
+      "entry": 1903512,
+      "min": 298000,
+      "max": 300000
+    },
+    {
+      "action": "assert",
+      "actor": "gnomish",
+      "metric": "owned_gameobject_count",
+      "entry": 1903510,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "gnomish",
+      "item": 1903510
+    },
+    {
+      "action": "use_item",
+      "label": "Summon gnomish gadget through normal item use",
+      "actor": "gnomish",
+      "item": 1903510,
+      "spell": 979611,
+      "destination": {
+        "x": -9464.0,
+        "y": 64.0,
+        "z": 56.0
+      }
+    },
+    {
+      "action": "assert",
+      "label": "gnomish item creates its world object",
+      "actor": "gnomish",
+      "metric": "owned_gameobject_count",
+      "entry": 1903510,
+      "equals": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "gnomish object has the authored lifetime",
+      "actor": "gnomish",
+      "metric": "gameobject_remaining_ms",
+      "entry": 1903510,
+      "min": 28000,
+      "max": 30000
+    },
+    {
+      "action": "assert",
+      "actor": "gnomish",
+      "metric": "at_homebind",
+      "equals": 0
+    },
+    {
+      "action": "use_gameobject",
+      "label": "Click gnomish portal through native session handler",
+      "actor": "gnomish",
+      "entry": 1903510
+    },
+    {
+      "action": "assert",
+      "label": "gnomish portal teleports its user home",
+      "actor": "gnomish",
+      "metric": "at_homebind",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "Return fixture to the summon location to observe expiry",
+      "actor": "gnomish",
+      "map": 0,
+      "x": -9465.0,
+      "y": 64.0,
+      "z": 56.0,
+      "o": 0.0
+    },
+    {
+      "action": "assert",
+      "actor": "gnomish",
+      "metric": "owned_gameobject_count",
+      "entry": 1903510,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "fel",
+      "metric": "owned_gameobject_count",
+      "entry": 1903520,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "fel",
+      "item": 1903515
+    },
+    {
+      "action": "use_item",
+      "label": "Summon fel gadget through normal item use",
+      "actor": "fel",
+      "item": 1903515,
+      "spell": 979411,
+      "destination": {
+        "x": -9464.0,
+        "y": 64.0,
+        "z": 56.0
+      }
+    },
+    {
+      "action": "assert",
+      "label": "fel item creates its world object",
+      "actor": "fel",
+      "metric": "owned_gameobject_count",
+      "entry": 1903520,
+      "equals": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "fel object has the authored lifetime",
+      "actor": "fel",
+      "metric": "gameobject_remaining_ms",
+      "entry": 1903520,
+      "min": 28000,
+      "max": 30000
+    },
+    {
+      "action": "assert",
+      "actor": "fel",
+      "metric": "at_homebind",
+      "equals": 0
+    },
+    {
+      "action": "use_gameobject",
+      "label": "Click fel portal through native session handler",
+      "actor": "fel",
+      "entry": 1903520
+    },
+    {
+      "action": "assert",
+      "label": "fel portal teleports its user home",
+      "actor": "fel",
+      "metric": "at_homebind",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "Return fixture to the summon location to observe expiry",
+      "actor": "fel",
+      "map": 0,
+      "x": -9465.0,
+      "y": 64.0,
+      "z": 56.0,
+      "o": 0.0
+    },
+    {
+      "action": "assert",
+      "actor": "fel",
+      "metric": "owned_gameobject_count",
+      "entry": 1903520,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Wait beyond both portals complete lifetime",
+      "ms": 31000
+    },
+    {
+      "action": "assert",
+      "label": "mail presence after portal expiry",
+      "actor": "mail",
+      "metric": "owned_gameobject_count",
+      "entry": 1903511,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "altar presence after portal expiry",
+      "actor": "altar",
+      "metric": "owned_gameobject_count",
+      "entry": 1903512,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "gnomish presence after portal expiry",
+      "actor": "gnomish",
+      "metric": "owned_gameobject_count",
+      "entry": 1903510,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "fel presence after portal expiry",
+      "actor": "fel",
+      "metric": "owned_gameobject_count",
+      "entry": 1903520,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Wait beyond the mailbox lifetime",
+      "ms": 150000
+    },
+    {
+      "action": "assert",
+      "label": "mail presence after mailbox expiry",
+      "actor": "mail",
+      "metric": "owned_gameobject_count",
+      "entry": 1903511,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "altar presence after mailbox expiry",
+      "actor": "altar",
+      "metric": "owned_gameobject_count",
+      "entry": 1903512,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Wait beyond the altar lifetime",
+      "ms": 120000
+    },
+    {
+      "action": "assert",
+      "label": "Altar despawns after five minutes",
+      "actor": "altar",
+      "metric": "owned_gameobject_count",
+      "entry": 1903512,
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Barbarian audit: Ancestor's Fury spell modifier reaches its target spells (#2548)",
+  "contract": "Audit report #2548 asked for a script for a passive whose effects are native spell-mod auras (107 flat, 108 percent). The effect BasePoints and EffectSpellClassMask in Spell.dbc name the spell-mod operation, amount and affected Barbarian spells; Player::ApplySpellMod, which the spell_modifier metric calls, must deliver base+flat or base*(100+pct)/100. Expected values are computed from the DBC amount, not from the implementation.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "before: 801761 has no modifier for op 23",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 801761,
+      "op": 23,
+      "base": 100000,
+      "min": 99998,
+      "max": 100002
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 705168
+    },
+    {
+      "action": "assert",
+      "label": "Ancestor's Fury (705168) is active",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 705168,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "705168 op 23 flat +10 reaches 801761 (mask selects 1 Barbarian spell(s))",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 801761,
+      "op": 23,
+      "base": 100000,
+      "min": 100008,
+      "max": 100012
+    },
+    {
+      "action": "assert",
+      "label": "705168 op 23 flat +10 reaches 801762 (mask selects 1 Barbarian spell(s))",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 801762,
+      "op": 23,
+      "base": 100000,
+      "min": 100008,
+      "max": 100012
+    }
+  ]
+}

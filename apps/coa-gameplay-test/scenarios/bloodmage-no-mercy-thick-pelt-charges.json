@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "No Mercy gives Thick Pelt one extra charge (#2340)",
+  "contract": "No Mercy 704660 is one effect: aura 107 SPELL_AURA_ADD_FLAT_MODIFIER with MiscValue 4 (SPELLMOD_CHARGES), BasePoints 0 + DieSides 1 = +1, over EffectSpellClassMask (1073741824, 0, 0) = word 0 bit 30 = Thick Pelt 556233, Vital Shield 504849/804309 and Coagulated Shield 504897. Thick Pelt 556233 ships ProcCharges 1 and aura 14 MOD_DAMAGE_TAKEN, and Aura::CalcMaxCharges applies SPELLMOD_CHARGES to maxProcCharges, so 1 becomes 2. Tooltip: \"Allows your Thick Pelt to affect an additional hit.\" Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Thick Pelt keeps its single authored charge before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 556233,
+      "op": 4,
+      "base": 1,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 704660
+    },
+    {
+      "action": "assert",
+      "label": "No Mercy adds one charge to Thick Pelt",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 556233,
+      "op": 4,
+      "base": 1,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "No Mercy does not touch Bloodbolt",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 4,
+      "base": 1,
+      "equals": 1
+    }
+  ]
+}

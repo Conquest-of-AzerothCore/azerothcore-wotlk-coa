@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "name": "Timewalking takes 4 seconds off Waves of Time's cooldown (#2143)",
+  "contract": "Timewalking 572527 is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER with EffectMiscValue 11 (SPELLMOD_COOLDOWN), EffectBasePoints -4001 (die 1 => -4000 ms) and EffectSpellClassMask [4096, 8, 0]; Waves of Time 801277 is SpellFamilyName 28 with SpellFamilyFlags [0, 8, 0], so word1 bit 0x8 matches. The modifier is applied by AuraEffect::CalculateSpellMod and reaches both the cooldown and the category cooldown in Player::AddSpellAndCategoryCooldowns, which matters because 801277 carries RecoveryTime 20000 and CategoryRecoveryTime 20000. No script is involved, so this is a regression check on the native modifier path. The other spell named by the issue, 800864, has no CharacterAdvancement entry, no module grant, no reachable trigger and no live-capture record and is not exercised.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "walker",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_control",
+      "owner": "control",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "dummy_walker",
+      "owner": "walker",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 801277
+    },
+    {
+      "action": "learn",
+      "actor": "walker",
+      "spell": 801277
+    },
+    {
+      "action": "learn",
+      "actor": "walker",
+      "spell": 572527
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 801277,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "walker",
+      "spell": 801277,
+      "target": "dummy_walker"
+    },
+    {
+      "action": "assert",
+      "label": "Waves of Time keeps its 20 second cooldown without the talent",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 801277,
+      "min": 19000,
+      "max": 20000,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Timewalking brings the same cooldown down to 16 seconds",
+      "actor": "walker",
+      "metric": "cooldown_ms",
+      "spell": 801277,
+      "min": 15000,
+      "max": 16000,
+      "within_ms": 3000
+    }
+  ]
+}

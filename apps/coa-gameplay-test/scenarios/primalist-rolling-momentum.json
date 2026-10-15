@@ -1,0 +1,177 @@
+{
+  "schema": 1,
+  "name": "Primalist Rolling Momentum: Boulder Dash speed and removal",
+  "contract": "Boulder Dash grants 70% movement speed, or 100% with Rolling Momentum. Normal casts, cancellation and talent removal restore the native baseline. Forward motion is server state; no client navigation is simulated.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500692
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 500692
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500692
+    },
+    {
+      "action": "wait",
+      "ms": 50
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 500692,
+      "effect": 1,
+      "equals": 70
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "min": 1.699,
+      "max": 1.7009999999999998
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 500692,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 680446
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 500692
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500692
+    },
+    {
+      "action": "wait",
+      "ms": 50
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 500692,
+      "effect": 1,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "min": 1.999,
+      "max": 2.001
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 500692,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 680446
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 500692
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500692
+    },
+    {
+      "action": "wait",
+      "ms": 50
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 500692,
+      "effect": 1,
+      "equals": 70
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "min": 1.699,
+      "max": 1.7009999999999998
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 500692,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    }
+  ]
+}

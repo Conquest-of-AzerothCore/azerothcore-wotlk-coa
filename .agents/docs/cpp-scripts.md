@@ -9,6 +9,10 @@ Then declare and call `AddSC_<name>()` from the regional loader (`Spells/spells_
 
 **SmartAI** (data-driven creature behaviour) lives in the world DB's `smart_scripts` table, not C++ (engine: `src/server/game/AI/SmartScripts/`). For new creature behaviour prefer SmartAI (via the SQL update workflow); reach for `CreatureScript` only when SmartAI's event/action vocabulary isn't enough.
 
+**SmartAI row scope — prefer the unique spawn.** Rows keyed to a spawn (`entryorguid = -guid`) are used first; the entry's rows are only a fallback, so a spawn script silently hides the entry script for that spawn (`CREATURE_FLAG_EXTRA_DONT_OVERRIDE_ENTRY_SAI`, `flags_extra` 0x08000000, is the only way to load both). When a creature has exactly one spawn, author its rows on that spawn's guid and leave the entry clean. For a unit that is not single-spawn (multiple spawns, or summoned-only with no spawn id), entry scope is the default — confirm the intended scope before authoring. Gameobjects resolve identically (spawn script first, template fallback), and a negative key must reference an existing spawn row or the row is skipped at load. Smart-event condition rows key on the same `entryorguid` value (negative for spawn scripts), so a script moved between scopes must take its conditions with it.
+
+**SmartAIMgr skips rejected rows with only a log line.** A validated parameter with an unexpected value drops the whole row at load (`SmartAIMgr: … skipped.`); only some actions are checked, and the executor can support more than the validator allows — `SUMMON_CREATURE.attackInvoker` was boolean-checked (0/1) while the executor also implements 2 (attack the event invoker). When a row seemingly never fires, grep the startup log for its entry before suspecting the data or the engine.
+
 **Module hooks** (e.g. `OnPlayerLogin`, `OnWorldUpdate`, `OnSpellCast`) are declared in `src/server/game/Scripting/ScriptDefines/*.h`. Implement by inheriting the matching base (`PlayerScript`, `WorldScript`, …) and registering with `new MyClass();` (or its `RegisterXxxScript` macro) inside `AddSC_<name>()`. Full list: https://www.azerothcore.org/wiki/hooks-script.
 
 **Conventions:**

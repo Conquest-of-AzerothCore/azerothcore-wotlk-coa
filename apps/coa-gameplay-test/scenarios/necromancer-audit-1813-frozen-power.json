@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Frozen Power raises Frost spell critical damage by 50% (#1813)",
+  "contract": "Frozen Power 301303 (CharacterAdvancement 29779, Rime tab, class 23) reads 'Increases your critical damage with Frost spells by $s1%.' Its only effect is SPELL_AURA_MOD_CRIT_DAMAGE_BONUS (163) on the caster, MiscValue 16 (SPELL_SCHOOL_MASK_FROST), EffectBasePoints 49 + DieSides 1 = 50, in SpellFamilyName 29. The Necromancer contracts dummy only auras 42 and 354, so aura 163 stays native: Unit::SpellCriticalDamageBonus adds the caster's aura 163 total for the spell's school mask to the critical modifier and applies it to the whole critical hit, so a magic spell's 150% critical becomes 150% x 1.5 = 225%. Lichfrost 801722 is a Frost magic spell (SchoolMask 16, DmgClass 1); Flesh to Worms 500338 (SchoolMask 40, Nature and Shadow) is the school control. From a fixed base of 1000, Lichfrost's critical must rise from 1500 to 2250 (ratio 1.5) when the talent is learned, while Flesh to Worms stays unchanged. The audit's premise (no source reference to 301303) does not apply to native aura types.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "necro", "spell": 801722 },
+    { "action": "learn", "actor": "necro", "spell": 500338 },
+    {
+      "action": "snapshot", "label": "Untalented Frost critical", "actor": "necro",
+      "metric": "spell_critical_damage", "spell": 801722, "target": "golem", "save_as": "frost0"
+    },
+    {
+      "action": "snapshot", "label": "Untalented Nature/Shadow critical", "actor": "necro",
+      "metric": "spell_critical_damage", "spell": 500338, "target": "golem", "save_as": "plague0"
+    },
+    {
+      "action": "assert", "label": "CONTROL: a magic critical is 150% without the talent", "actor": "necro",
+      "metric": "spell_critical_damage", "spell": 801722, "target": "golem", "equals": 1500
+    },
+    { "action": "learn", "actor": "necro", "spell": 301303 },
+    {
+      "action": "assert", "label": "SETUP: the Frozen Power passive is active", "actor": "necro",
+      "metric": "aura", "spell": 301303, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Frost critical damage rises by 50%", "actor": "necro",
+      "metric": "spell_critical_damage", "spell": 801722, "target": "golem", "ratio_to": "frost0",
+      "min": 1.49, "max": 1.51
+    },
+    {
+      "action": "assert", "label": "A Lichfrost critical is 225% of the hit", "actor": "necro",
+      "metric": "spell_critical_damage", "spell": 801722, "target": "golem", "equals": 2250
+    },
+    {
+      "action": "assert", "label": "Non-Frost critical damage is unchanged", "actor": "necro",
+      "metric": "spell_critical_damage", "spell": 500338, "target": "golem", "ratio_to": "plague0",
+      "min": 0.99, "max": 1.01
+    }
+  ]
+}

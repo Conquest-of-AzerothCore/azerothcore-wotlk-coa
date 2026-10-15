@@ -1,0 +1,281 @@
+{
+  "schema": 1,
+  "name": "A Random Classic Dungeon run gives one Dungeon Spoils whose single item fits the level it is opened at",
+  "contract": "A level 20 group finishes a Random Classic Dungeon (258) from the Dungeon Finder. The Classic Random 15-25 reward quest gives every member one Dungeon Spoils (2021814), and the final boss does not add a second. Used or opened as a container, the spoils are used up and put exactly one vanilla dungeon item in the bags, chosen when they are opened from the items that fit the opener's level: opened at level 20 the item requires level 15-20, kept unopened until level 60 it requires level 50-60.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p1",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    },
+    {
+      "id": "p2",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    },
+    {
+      "id": "p3",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    },
+    {
+      "id": "p4",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    },
+    {
+      "id": "p5",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p2"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p3"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p4"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p5"
+    },
+    {
+      "action": "lfg_join",
+      "label": "The leader queues the group for Random Classic Dungeon",
+      "actor": "p1",
+      "dungeons": [
+        258
+      ],
+      "roles": 3
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p2",
+      "roles": 4
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p3",
+      "roles": 8
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p4",
+      "roles": 8
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p5",
+      "roles": 8
+    },
+    {
+      "action": "wait",
+      "ms": 20000
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p1"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p2"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p3"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p4"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p5"
+    },
+    {
+      "action": "assert",
+      "label": "p1 enters the dungeon the proposal chose",
+      "actor": "p1",
+      "metric": "map_id",
+      "min": 33,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p2 enters the dungeon the proposal chose",
+      "actor": "p2",
+      "metric": "map_id",
+      "min": 33,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p3 enters the dungeon the proposal chose",
+      "actor": "p3",
+      "metric": "map_id",
+      "min": 33,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p4 enters the dungeon the proposal chose",
+      "actor": "p4",
+      "metric": "map_id",
+      "min": 33,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p5 enters the dungeon the proposal chose",
+      "actor": "p5",
+      "metric": "map_id",
+      "min": 33,
+      "within_ms": 20000
+    },
+    {
+      "action": "lfg_final_credit",
+      "label": "The final boss of the chosen dungeon is credited",
+      "actor": "p1"
+    },
+    {
+      "action": "assert",
+      "label": "p1 is rewarded the Classic Random 15-25 quest and its Dungeon Spoils",
+      "actor": "p1",
+      "metric": "quest_rewarded",
+      "quest": 24882,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p1 holds one Dungeon Spoils",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p2 holds one Dungeon Spoils",
+      "actor": "p2",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p5 holds one Dungeon Spoils",
+      "actor": "p5",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "use_item",
+      "label": "p1 opens the spoils at level 20",
+      "actor": "p1",
+      "item": 2021814,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "p1 no longer holds the opened spoils",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The spoils put exactly one of their items in p1's bags",
+      "actor": "p1",
+      "metric": "carried_pool_item_count",
+      "cache": 2021814,
+      "table": "loot",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The item opened at level 20 requires level 15-20",
+      "actor": "p1",
+      "metric": "carried_pool_item_count",
+      "cache": 2021814,
+      "table": "loot",
+      "min_required_level": 15,
+      "max_required_level": 20,
+      "equals": 1
+    },
+    {
+      "action": "set_level",
+      "label": "p2 keeps the spoils unopened until level 60",
+      "actor": "p2",
+      "value": 60
+    },
+    {
+      "action": "open_item",
+      "label": "p2 opens the spoils as a container at level 60",
+      "actor": "p2",
+      "item": 2021814
+    },
+    {
+      "action": "assert",
+      "label": "p2 no longer holds the opened spoils",
+      "actor": "p2",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The spoils put exactly one of their items in p2's bags",
+      "actor": "p2",
+      "metric": "carried_pool_item_count",
+      "cache": 2021814,
+      "table": "loot",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The item opened at level 60 requires level 50-60",
+      "actor": "p2",
+      "metric": "carried_pool_item_count",
+      "cache": 2021814,
+      "table": "loot",
+      "min_required_level": 50,
+      "max_required_level": 60,
+      "equals": 1
+    }
+  ]
+}

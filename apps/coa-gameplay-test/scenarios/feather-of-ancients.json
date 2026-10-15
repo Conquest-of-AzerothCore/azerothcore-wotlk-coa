@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "Feather of Ancients: Azeroth: learn Azeroth's own-faction flight paths and consume once",
+  "contract": "Item 977025 teaches the Azeroth (Classic) flight paths of the user's faction, consumes one feather and keeps a feather that has nothing left to teach.",
+  "players": [
+    {
+      "id": "user",
+      "race": 10,
+      "class": 17,
+      "level": 18
+    },
+    {
+      "id": "other",
+      "race": 10,
+      "class": 17,
+      "level": 18
+    }
+  ],
+  "location": {
+    "map": 530,
+    "x": 7633.86,
+    "y": -6810.22,
+    "z": 79.5987
+  },
+  "steps": [
+    {
+      "action": "assert",
+      "actor": "user",
+      "metric": "taxi_node",
+      "entry": 23,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "user",
+      "metric": "taxi_node",
+      "entry": 120,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "user",
+      "item": 977025,
+      "count": 2
+    },
+    {
+      "action": "use_item",
+      "actor": "user",
+      "item": 977025,
+      "spell": 18282
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Orgrimmar, Durotar",
+      "actor": "user",
+      "metric": "taxi_node",
+      "entry": 23,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Undercity, Tirisfal",
+      "actor": "user",
+      "metric": "taxi_node",
+      "entry": 11,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Neutral Ratchet, The Barrens",
+      "actor": "user",
+      "metric": "taxi_node",
+      "entry": 80,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Tranquillien sits on map 530 but belongs to Azeroth",
+      "actor": "user",
+      "metric": "taxi_node",
+      "entry": 83,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "No TBC node (Zul'Aman)",
+      "actor": "user",
+      "metric": "taxi_node",
+      "entry": 205,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No quest flight node (Sunwell daily)",
+      "actor": "user",
+      "metric": "taxi_node",
+      "entry": 210,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No Alliance node (Stormwind)",
+      "actor": "user",
+      "metric": "taxi_node",
+      "entry": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No Outland node (Garadar)",
+      "actor": "user",
+      "metric": "taxi_node",
+      "entry": 120,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Consume exactly one Azeroth feather",
+      "actor": "user",
+      "metric": "item_count",
+      "item": 977025,
+      "equals": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "user",
+      "item": 977025,
+      "spell": 18282
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Nothing left to learn preserves the feather",
+      "actor": "user",
+      "metric": "item_count",
+      "item": 977025,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "other",
+      "metric": "taxi_node",
+      "entry": 23,
+      "equals": 0
+    },
+    {
+      "action": "console",
+      "command": "server info"
+    }
+  ]
+}

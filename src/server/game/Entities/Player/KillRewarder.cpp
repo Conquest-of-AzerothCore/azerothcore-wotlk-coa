@@ -104,8 +104,11 @@ void KillRewarder::_InitGroupData()
                         }
                         // 2.4. _maxNotGrayMember - maximum level of alive group member within reward distance,
                         //      for whom victim is not gray;
+                        // Gray is decided per member: with open-world scaling the victim stands at a
+                        // different level for each of them, so one member's scaled kill can be another
+                        // member's gray kill. Without a view this is the object's own level.
                         uint32 grayLevel = Acore::XP::GetGrayLevel(lvl);
-                        if (_victim->GetLevel() > grayLevel && (!_maxNotGrayMember || _maxNotGrayMemberLevel < lvl))
+                        if (_victim->getLevelForTarget(member) > grayLevel && (!_maxNotGrayMember || _maxNotGrayMemberLevel < lvl))
                         {
                             _maxNotGrayMember = member;
                             _maxNotGrayMemberLevel = lvl;
@@ -171,18 +174,23 @@ void KillRewarder::_RewardXP(Player* player, float rate)
         {
             uint8 const referenceLevel = _group ? _maxLevel : player->GetLevel();
             uint8 const highestLevel = creature->GetHighestPlayerAttackerLevel();
-            if (highestLevel > referenceLevel && creature->GetLevel() <= Acore::XP::GetGrayLevel(highestLevel))
+            if (highestLevel > referenceLevel && creature->getLevelForTarget(player) <= Acore::XP::GetGrayLevel(highestLevel))
                 xp = xp / 2 + 1;
         }
 
     if (xp)
     {
-        // 4.2.2. Apply auras modifying rewarded XP (SPELL_AURA_MOD_XP_PCT).
+        // 4.2.2. Apply auras modifying rewarded XP (SPELL_AURA_MOD_XP_PCT). A
+        // NO_BONUS_EXPERIENCE challenge drops the positive bonuses but keeps penalties
+        // (XP Lock, challenge drawbacks).
         bool const recruitAFriend = player->GetsRecruitAFriendBonus(true);
-        xp *= player->GetTotalAuraMultiplier(SPELL_AURA_MOD_XP_PCT, [recruitAFriend](AuraEffect const* effect)
+        bool const noBonusExperience = sScriptMgr->OnPlayerHasNoBonusExperience(player);
+        xp *= player->GetTotalAuraMultiplier(SPELL_AURA_MOD_XP_PCT, [recruitAFriend, noBonusExperience](AuraEffect const* effect)
         {
             // CoA's party Aura of Experience explicitly excludes the recruit-a-friend bonus.
-            return effect->GetId() != 818059 || !recruitAFriend;
+            if (effect->GetId() == 818059 && recruitAFriend)
+                return false;
+            return !noBonusExperience || effect->GetAmount() <= 0;
         });
 
         // 4.2.3. Give XP to player.

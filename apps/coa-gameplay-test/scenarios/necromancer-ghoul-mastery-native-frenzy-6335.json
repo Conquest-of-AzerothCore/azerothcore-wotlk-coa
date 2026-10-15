@@ -1,0 +1,222 @@
+{
+  "schema": 1,
+  "name": "Normal commanded Ghoul damage activates Ghoul Mastery (#6335)",
+  "contract": "Ghoul Mastery 503740 promises a 15% chance for ghoul damage to trigger Frenzied Ghoul 707014. Raise an actual ghoul and skeleton, then command both to attack a durable enemy. Observe a native proc on the ghoul, no procs on the skeleton or owner, and removal and natural expiry after unlearning the talent.",
+  "timeout_ms": 240000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "p",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 6
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 500971
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 500969
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 500991
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 503740
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 10040,
+      "stacks": 3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "max_power",
+      "power": 0,
+      "min": 20000,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500971
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "spell": 503740,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500969
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "entry": 50078,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "entry": 50078,
+      "spell": 503740,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500991,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "owned_creature_spell_proc_count",
+      "entry": 50073,
+      "spell": 503740,
+      "min": 1,
+      "within_ms": 180000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "spell": 707014,
+      "caster": "p",
+      "equals": 1,
+      "within_ms": 180000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "health",
+      "max": 999999
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 707014,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "owned_creature_spell_proc_count",
+      "entry": 50078,
+      "spell": 503740,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "owned_creature_spell_proc_count",
+      "entry": 50073,
+      "spell": 503740,
+      "save_as": "ghoul_procs"
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 503740,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "spell": 503740,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 12000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "spell": 707014,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "owned_creature_spell_proc_count",
+      "entry": 50073,
+      "spell": 503740,
+      "relative_to": "ghoul_procs",
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,286 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Boding Dread and Fury of Shadra deliver their damage, crit and healing bonuses",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "v",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "ally_low",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "ally_high",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "low",
+      "owner": "v",
+      "entry": 27228,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "high",
+      "owner": "v",
+      "entry": 27228,
+      "level": 80,
+      "health": 1000000,
+      "distance": 6
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "label": "Put one enemy at 30% health",
+      "actor": "low",
+      "value": 300000
+    },
+    {
+      "action": "set_health",
+      "label": "Put one ally at far below 35% health",
+      "actor": "ally_low",
+      "value": 100
+    },
+    {
+      "action": "wait",
+      "label": "Let Unit::Update refresh the health aura states",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Shadow crit before Boding Dread",
+      "actor": "v",
+      "metric": "spell_crit_chance",
+      "school": 5,
+      "save_as": "shadow_crit0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Fire crit before Boding Dread",
+      "actor": "v",
+      "metric": "spell_crit_chance",
+      "school": 2,
+      "save_as": "fire_crit0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Shadow Bolt damage vs the healthy enemy, no passives",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "spell": 686,
+      "target": "high",
+      "save_as": "shadow_high0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Fireball damage vs the healthy enemy, no passives",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "spell": 133,
+      "target": "high",
+      "save_as": "fire_high0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Shadow Bolt damage vs the 30% enemy, no passives",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "spell": 686,
+      "target": "low",
+      "save_as": "shadow_low0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Flash Heal on the healthy ally, no passives",
+      "actor": "v",
+      "metric": "spell_healing_done",
+      "spell": 2061,
+      "target": "ally_high",
+      "save_as": "heal_high0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Flash Heal on the ally below 35%, no passives",
+      "actor": "v",
+      "metric": "spell_healing_done",
+      "spell": 2061,
+      "target": "ally_low",
+      "save_as": "heal_low0"
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 804975
+    },
+    {
+      "action": "assert",
+      "label": "Boding Dread's aura is applied",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 804975,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Boding Dread adds 3 points of Shadow spell crit",
+      "actor": "v",
+      "metric": "spell_crit_chance",
+      "school": 5,
+      "relative_to": "shadow_crit0",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "assert",
+      "label": "Boding Dread leaves Fire spell crit alone",
+      "actor": "v",
+      "metric": "spell_crit_chance",
+      "school": 2,
+      "relative_to": "fire_crit0",
+      "min": -0.1,
+      "max": 0.1
+    },
+    {
+      "action": "assert",
+      "label": "Boding Dread raises Shadow Bolt damage by 3%",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "spell": 686,
+      "target": "high",
+      "ratio_to": "shadow_high0",
+      "min": 1.029,
+      "max": 1.031
+    },
+    {
+      "action": "assert",
+      "label": "Boding Dread does not raise Fireball damage",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "spell": 133,
+      "target": "high",
+      "ratio_to": "fire_high0",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "snapshot",
+      "label": "Shadow Bolt vs healthy enemy with Boding Dread only",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "spell": 686,
+      "target": "high",
+      "save_as": "shadow_high1"
+    },
+    {
+      "action": "snapshot",
+      "label": "Shadow Bolt vs the 30% enemy with Boding Dread only",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "spell": 686,
+      "target": "low",
+      "save_as": "shadow_low1"
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 503850
+    },
+    {
+      "action": "assert",
+      "label": "Fury of Shadra's aura is applied",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 503850,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Fury of Shadra effect 0 (damage versus aura state) is 15",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 503850,
+      "effect": 0,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "Fury of Shadra effect 1 (healing versus aura state) is 15",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 503850,
+      "effect": 1,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "Fury of Shadra raises Shadow Bolt damage by 15% against the target below 35% health",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "spell": 686,
+      "target": "low",
+      "ratio_to": "shadow_low1",
+      "min": 1.149,
+      "max": 1.151
+    },
+    {
+      "action": "assert",
+      "label": "Fury of Shadra does not change damage against the healthy target",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "spell": 686,
+      "target": "high",
+      "ratio_to": "shadow_high1",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "label": "Fury of Shadra raises healing by 15% on the ally below 35% health",
+      "actor": "v",
+      "metric": "spell_healing_done",
+      "spell": 2061,
+      "target": "ally_low",
+      "ratio_to": "heal_low0",
+      "min": 1.149,
+      "max": 1.151
+    },
+    {
+      "action": "assert",
+      "label": "Fury of Shadra does not change healing on the healthy ally",
+      "actor": "v",
+      "metric": "spell_healing_done",
+      "spell": 2061,
+      "target": "ally_high",
+      "ratio_to": "heal_high0",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ],
+  "contract": "#690 and #802 report these two passives as unimplemented; both are native auras. Boding Dread (804975) has effect 0 aura 79 MOD_DAMAGE_PERCENT_DONE, misc 32 (Shadow), BasePoints 2 DieSides 1 (+3%) and effect 1 aura 71 MOD_SPELL_CRIT_CHANCE_SCHOOL, misc 32 (+3). Fury of Shadra (503850) has effect 0 aura 303 MOD_DAMAGE_DONE_VERSUS_AURASTATE and effect 1 aura 360 ASCENSION_MOD_HEALING_DONE_VERSUS_AURASTATE, both misc 13 = AURA_STATE_HEALTHLESS_35_PERCENT, BasePoints 14 DieSides 1 (+15%); the damage aura is read in Unit::SpellDamageBonusDone, the healing aura in Unit::SpellHealingBonusDone, and the aura state is refreshed in Unit::Update. Every number is measured against the same actor's own baseline: Shadow Bolt (686, school 32) and Fireball (133, school 4) for damage, Flash Heal (2061) for healing, and a below-35% and a full-health target for each. The wait after set_health lets the once-per-tick aura state refresh."
+}

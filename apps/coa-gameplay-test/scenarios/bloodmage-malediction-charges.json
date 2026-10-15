@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Malediction's damage-taken debuff lasts exactly five direct damage spells (#3921)",
+  "contract": "Malediction 800776 is a single 64 SPELL_EFFECT_TRIGGER_SPELL on 704120, which carries the whole tooltip: 'increasing the damage they take from your next 5 direct damage spells by $704120s1%'. 704120 effect 0 is aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER, BasePoints 19 -> +20%, with EffectSpellClassMask (262144, 2826240, 0); effect 1 is aura 3 SPELL_AURA_PERIODIC_DAMAGE over DurationIndex 29 = 12000 ms. Spell.dbc gives 704120 ProcCharges 0 and StackAmount 0 and no spell_proc row existed, so Aura::CalcMaxCharges returned 0, Aura::IsUsingCharges was false and the +20% applied to every matching spell for the full twelve seconds instead of the first five. The fix gives 704120 a spell_proc row with Charges 5 and a SpellFamilyMask copied from effect 0's own class mask, so a charge is spent by exactly the spells the bonus applies to. Valanar's Vengeance is inside that mask: every rank 560315/561027-561029/572793-572795 carries SpellFamilyFlags (262144, 0, 0), read directly from Spell.dbc, and a level-80 character owns only 572795. It is DmgClass 1 (MAGIC) and School 32 (Shadow), so its hit raises PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG on the victim, which is the row's ProcFlags. Its six-second cast fits inside the twelve-second window, and the final assertion checks the debuff is still present when the charge count is read, so a charge reading of four cannot be an expiry artefact. Malediction's own DoT ticks are periodic and PROC_FLAG_TAKEN_PERIODIC is deliberately absent from the row, so they must not move the count. Known consequence of the shipped record fusing both halves into 704120: once the fifth charge is spent, Aura::ConsumeProcCharges removes the aura and the remaining DoT ticks go with it; only one charge is spent here, so the aura is still present at the last assertion. NOT covered: the tooltip's SP coefficient $sps*0.193333 on the DoT (no spell_bonus_data row, a separate coefficient question), and the 'only from your own Malediction' restriction that the companion CheckProc script enforces - that needs a second Bloodmage attacking the same victim, and the harness has no way to put two casters' damage on one target under two separate Maledictions; a Ghost e2e test would have to put two class-20 characters on one victim, have only the second one cast direct damage spells, and check that the first one's aura_charges on 704120 stay at five.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "bloodmage", "spell": 800776 },
+    { "action": "learn", "actor": "bloodmage", "spell": 572795 },
+    { "action": "set_power", "actor": "bloodmage", "power": 1, "value": 1000 },
+    { "action": "cast", "actor": "bloodmage", "spell": 800776, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "Malediction's debuff lands on the target (native half)",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 704120,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the debuff carries five charges",
+      "actor": "dummy",
+      "metric": "aura_charges",
+      "spell": 704120,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let Malediction's 1500 ms global cooldown (category 133) lapse",
+      "ms": 2000
+    },
+    { "action": "cast", "actor": "bloodmage", "spell": 572795, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: one direct damage spell spends exactly one charge",
+      "actor": "dummy",
+      "metric": "aura_charges",
+      "spell": 704120,
+      "equals": 4,
+      "within_ms": 9000
+    },
+    {
+      "action": "assert",
+      "label": "The debuff is still applied when the charge count is read",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 704120,
+      "equals": 1
+    }
+  ]
+}

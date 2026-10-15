@@ -1,0 +1,178 @@
+{
+  "schema": 1,
+  "name": "Hero's Call and Warchief's Command boards start their zone quests and the named officer ends them",
+  "contract": "The Ascension WDB captures (2026-09-08) hold Hero's Call 14204-14228 and Warchief's Command 14229-14252, missing from the server. Each is taken from its faction's call board (Hero's Call Board 402000, Warchief's Command Board 402001) and handed in to the officer its objective names, at the client QuestSuperTrack turn-in point. Hero's Call: Redridge Mountains! 14209 (level 20) is handed in to Guard Howe 903 and pays 150 Rune of Ascension 375250; Warchief's Command: The Barrens! 14232 (level 10) is handed in to Sergra Darkthorn 3338 and pays no runes. The board window lists these zone-sorted orders in its PvE category, next to the PvE dailies. The duplicate Hillsbrad quest 14217 is not offered by the board.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "alliance",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    },
+    {
+      "id": "horde",
+      "race": 2,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "creatures": [
+    {
+      "id": "howe",
+      "owner": "alliance",
+      "entry": 903,
+      "distance": 4,
+      "faction": 12,
+      "level": 30
+    },
+    {
+      "id": "sergra",
+      "owner": "horde",
+      "entry": 3338,
+      "distance": 4,
+      "faction": 29,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "alliance",
+      "entry": 402000
+    },
+    {
+      "label": "open the Hero's Call Board window",
+      "action": "use_gameobject",
+      "actor": "alliance",
+      "entry": 402000
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "gossip_option_text",
+      "index": 0,
+      "text": "PvE Quests",
+      "equals": 1
+    },
+    {
+      "label": "open the PvE category",
+      "action": "gossip_select",
+      "actor": "alliance",
+      "option": 0
+    },
+    {
+      "label": "the PvE category lists the zone order",
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "quest_menu_has",
+      "quest": 14209,
+      "equals": 1
+    },
+    {
+      "label": "take Hero's Call: Redridge Mountains! from the Hero's Call Board",
+      "action": "quest_accept",
+      "actor": "alliance",
+      "quest": 14209,
+      "gameobject": 402000
+    },
+    {
+      "label": "the report quest is complete as soon as it is taken",
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "quest_status",
+      "quest": 14209,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "hand it in to Guard Howe",
+      "action": "quest_turn_in",
+      "actor": "alliance",
+      "quest": 14209,
+      "entry": 903
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "quest_rewarded",
+      "quest": 14209,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "Guard Howe pays 150 Rune of Ascension",
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "item_count",
+      "item": 375250,
+      "equals": 150
+    },
+    {
+      "label": "try to take the duplicate Hillsbrad quest from the board",
+      "action": "quest_accept",
+      "actor": "alliance",
+      "quest": 14217,
+      "gameobject": 402000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "label": "the board does not offer the duplicate",
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "quest_status",
+      "quest": 14217,
+      "equals": 0
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "horde",
+      "entry": 402001
+    },
+    {
+      "label": "take Warchief's Command: The Barrens! from the Warchief's Command Board",
+      "action": "quest_accept",
+      "actor": "horde",
+      "quest": 14232,
+      "gameobject": 402001
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "quest_status",
+      "quest": 14232,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "hand it in to Sergra Darkthorn",
+      "action": "quest_turn_in",
+      "actor": "horde",
+      "quest": 14232,
+      "entry": 3338
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "quest_rewarded",
+      "quest": 14232,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "label": "the level 10 order pays no runes",
+      "action": "assert",
+      "actor": "horde",
+      "metric": "item_count",
+      "item": 375250,
+      "equals": 0
+    }
+  ]
+}

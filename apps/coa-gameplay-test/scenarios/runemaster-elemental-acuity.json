@@ -1,0 +1,274 @@
+{
+  "schema": 1,
+  "name": "Issue 684: Elemental Acuity adds 25% attack power scaling to Runeblade and 5% elemental damage",
+  "contract": [
+    "Elemental Acuity 706671 (Riftblade passive) reads 'Increases all Fire, Frost, and Nature damage dealt by $s1%",
+    "(5%) and adds $s2% (25%) to the attack power scaling of Runeblade.' Effect 0 is aura 79 with school mask 28",
+    "(Fire, Nature, Frost), BasePoints 4. Effect 1 is a flat modifier (aura 107), BasePoints 24, on family 38 mask2",
+    "0x40000, which only the Runeblade ranks carry, with MiscValue 32: Ascension's private attack power coefficient",
+    "operation, outside the 3.3.5a SpellModOp range, which AuraEffect::CalculateSpellMod ignores. A flat private",
+    "coefficient modifier adds coefficient points (Cinder and Ashes 707317: flat 25 on op 41 adds 0.25 spell power).",
+    "Runeblade's tooltip damage is $m1+$SP*0.3+$AP*0.3 and spell_bonus_data gives 707141 ap_bonus 0.3. Expected:",
+    "Runeblade's damage per point of attack power is 0.30 without the talent and (0.30 + 0.25) * 1.05 = 0.5775 with",
+    "it; Fire, Frost and Nature spells deal x1.05 and an Arcane spell is unchanged. AP is varied by the fixture aura",
+    "980002 (+400 attack power), and the ratio divides the damage change by the measured attack power change.",
+    "The caster's own damage-done multiplier (1.11 on the fixture, as in runemaster-primordial-salvos) scales both measurements: 0.30 x 1.11 = 0.333 without the talent, 0.55 x 1.05 x 1.11 = 0.641 with it, and 0.30 x 1.05 x 1.11 = 0.350 if the private coefficient operation is ignored."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "rm",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "attack_power",
+      "save_as": "ap_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_done",
+      "spell": 707141,
+      "target": "dummy",
+      "save_as": "runeblade_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_done",
+      "spell": 653212,
+      "target": "dummy",
+      "save_as": "fire_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_done",
+      "spell": 805730,
+      "effect": 1,
+      "target": "dummy",
+      "save_as": "frost_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_done",
+      "spell": 653220,
+      "target": "dummy",
+      "save_as": "nature_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_done",
+      "spell": 520098,
+      "target": "dummy",
+      "save_as": "arcane_base"
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture +400 attack power",
+      "actor": "rm",
+      "spell": 980002,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: attack power rises",
+      "actor": "rm",
+      "metric": "attack_power",
+      "relative_to": "ap_base",
+      "min": 300,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "attack_power",
+      "relative_to": "ap_base",
+      "save_as": "ap_gain"
+    },
+    {
+      "action": "assert",
+      "label": "Without Elemental Acuity Runeblade scales with 30% of attack power (times the caster's 1.11 damage multiplier)",
+      "actor": "rm",
+      "metric": "spell_damage_done",
+      "spell": 707141,
+      "target": "dummy",
+      "relative_to": "runeblade_base",
+      "ratio_to": "ap_gain",
+      "min": 0.325,
+      "max": 0.345
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 980002,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "attack_power",
+      "relative_to": "ap_base",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 706671
+    },
+    {
+      "action": "assert",
+      "label": "Elemental Acuity passive is active",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 706671,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Fire damage +5%",
+      "actor": "rm",
+      "metric": "spell_damage_done",
+      "spell": 653212,
+      "target": "dummy",
+      "ratio_to": "fire_base",
+      "min": 1.045,
+      "max": 1.055
+    },
+    {
+      "action": "assert",
+      "label": "Frost damage +5%",
+      "actor": "rm",
+      "metric": "spell_damage_done",
+      "spell": 805730,
+      "effect": 1,
+      "target": "dummy",
+      "ratio_to": "frost_base",
+      "min": 1.045,
+      "max": 1.055
+    },
+    {
+      "action": "assert",
+      "label": "Nature damage +5%",
+      "actor": "rm",
+      "metric": "spell_damage_done",
+      "spell": 653220,
+      "target": "dummy",
+      "ratio_to": "nature_base",
+      "min": 1.045,
+      "max": 1.055
+    },
+    {
+      "action": "assert",
+      "label": "Arcane damage is unchanged",
+      "actor": "rm",
+      "metric": "spell_damage_done",
+      "spell": 520098,
+      "target": "dummy",
+      "ratio_to": "arcane_base",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_done",
+      "spell": 707141,
+      "target": "dummy",
+      "save_as": "runeblade_acuity"
+    },
+    {
+      "action": "set_aura",
+      "label": "The same +400 attack power",
+      "actor": "rm",
+      "spell": 980002,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the attack power change is the same",
+      "actor": "rm",
+      "metric": "attack_power",
+      "relative_to": "ap_base",
+      "ratio_to": "ap_gain",
+      "min": 0.999,
+      "max": 1.001,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "With Elemental Acuity Runeblade scales with (30% + 25%) x 1.05 of attack power (times the caster's 1.11 damage multiplier)",
+      "actor": "rm",
+      "metric": "spell_damage_done",
+      "spell": 707141,
+      "target": "dummy",
+      "relative_to": "runeblade_acuity",
+      "ratio_to": "ap_gain",
+      "min": 0.62,
+      "max": 0.66
+    },
+    {
+      "action": "unlearn",
+      "actor": "rm",
+      "spell": 706671
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 706671,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Removing Elemental Acuity restores the 30% scaling (times the caster's 1.11 damage multiplier)",
+      "actor": "rm",
+      "metric": "spell_damage_done",
+      "spell": 707141,
+      "target": "dummy",
+      "relative_to": "runeblade_base",
+      "ratio_to": "ap_gain",
+      "min": 0.325,
+      "max": 0.345
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 980002,
+      "stacks": 0
+    }
+  ]
+}

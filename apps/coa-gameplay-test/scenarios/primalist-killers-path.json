@@ -1,0 +1,644 @@
+{
+  "schema": 1,
+  "name": "Primalist Killer Path native group AP, personal crit and exclusive bonuses",
+  "contract": "The group aura grants 5% melee/ranged AP without giving allies its personal 3% crit. Two casters do not stack; 10% Trueshot supersedes the AP bonus. An ungrouped friendly player stays unaffected. Removing the talents restores the baseline.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "outsider",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 120000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "ally"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706633,
+      "all_specs": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 24932,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 24932,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "save_as": "p_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "ranged_attack_power",
+      "save_as": "p_rap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_crit_chance",
+      "save_as": "p_mc"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_crit_chance",
+      "save_as": "p_sc"
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 24932,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 24932,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "attack_power",
+      "save_as": "a_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "ranged_attack_power",
+      "save_as": "a_rap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "melee_crit_chance",
+      "save_as": "a_mc"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "spell_crit_chance",
+      "save_as": "a_sc"
+    },
+    {
+      "action": "set_aura",
+      "actor": "outsider",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "outsider",
+      "spell": 24932,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "outsider",
+      "spell": 24932,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "attack_power",
+      "save_as": "o_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "ranged_attack_power",
+      "save_as": "o_rap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "melee_crit_chance",
+      "save_as": "o_mc"
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "spell_crit_chance",
+      "save_as": "o_sc"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 706633
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "ratio_to": "p_ap",
+      "min": 1.0410000000000001,
+      "max": 1.059
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "ranged_attack_power",
+      "ratio_to": "p_rap",
+      "min": 1.0410000000000001,
+      "max": 1.059
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_crit_chance",
+      "relative_to": "p_mc",
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_crit_chance",
+      "relative_to": "p_sc",
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "attack_power",
+      "ratio_to": "a_ap",
+      "min": 1.0410000000000001,
+      "max": 1.059
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "ranged_attack_power",
+      "ratio_to": "a_rap",
+      "min": 1.0410000000000001,
+      "max": 1.059
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "melee_crit_chance",
+      "relative_to": "a_mc",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_crit_chance",
+      "relative_to": "a_sc",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "attack_power",
+      "ratio_to": "o_ap",
+      "min": 0.991,
+      "max": 1.009
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "ranged_attack_power",
+      "ratio_to": "o_rap",
+      "min": 0.991,
+      "max": 1.009
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "melee_crit_chance",
+      "relative_to": "o_mc",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "spell_crit_chance",
+      "relative_to": "o_sc",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "aura",
+      "spell": 706633,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "ally",
+      "spell": 706633
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "ratio_to": "p_ap",
+      "min": 1.0410000000000001,
+      "max": 1.059
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "ranged_attack_power",
+      "ratio_to": "p_rap",
+      "min": 1.0410000000000001,
+      "max": 1.059
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_crit_chance",
+      "relative_to": "p_mc",
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_crit_chance",
+      "relative_to": "p_sc",
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "attack_power",
+      "ratio_to": "a_ap",
+      "min": 1.0410000000000001,
+      "max": 1.059
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "ranged_attack_power",
+      "ratio_to": "a_rap",
+      "min": 1.0410000000000001,
+      "max": 1.059
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "melee_crit_chance",
+      "relative_to": "a_mc",
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_crit_chance",
+      "relative_to": "a_sc",
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "attack_power",
+      "ratio_to": "o_ap",
+      "min": 0.991,
+      "max": 1.009
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "ranged_attack_power",
+      "ratio_to": "o_rap",
+      "min": 0.991,
+      "max": 1.009
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "melee_crit_chance",
+      "relative_to": "o_mc",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "spell_crit_chance",
+      "relative_to": "o_sc",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "aura",
+      "spell": 706633,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 19506
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "ratio_to": "p_ap",
+      "min": 1.0910000000000002,
+      "max": 1.109
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "ranged_attack_power",
+      "ratio_to": "p_rap",
+      "min": 1.0910000000000002,
+      "max": 1.109
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_crit_chance",
+      "relative_to": "p_mc",
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_crit_chance",
+      "relative_to": "p_sc",
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "attack_power",
+      "ratio_to": "a_ap",
+      "min": 1.0910000000000002,
+      "max": 1.109
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "ranged_attack_power",
+      "ratio_to": "a_rap",
+      "min": 1.0910000000000002,
+      "max": 1.109
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "melee_crit_chance",
+      "relative_to": "a_mc",
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_crit_chance",
+      "relative_to": "a_sc",
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "attack_power",
+      "ratio_to": "o_ap",
+      "min": 0.991,
+      "max": 1.009
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "ranged_attack_power",
+      "ratio_to": "o_rap",
+      "min": 0.991,
+      "max": 1.009
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "melee_crit_chance",
+      "relative_to": "o_mc",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "spell_crit_chance",
+      "relative_to": "o_sc",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "aura",
+      "spell": 706633,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 19506,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706633,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "ally",
+      "spell": 706633,
+      "all_specs": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "ratio_to": "p_ap",
+      "min": 0.991,
+      "max": 1.009
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "ranged_attack_power",
+      "ratio_to": "p_rap",
+      "min": 0.991,
+      "max": 1.009
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_crit_chance",
+      "relative_to": "p_mc",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_crit_chance",
+      "relative_to": "p_sc",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "attack_power",
+      "ratio_to": "a_ap",
+      "min": 0.991,
+      "max": 1.009
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "ranged_attack_power",
+      "ratio_to": "a_rap",
+      "min": 0.991,
+      "max": 1.009
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "melee_crit_chance",
+      "relative_to": "a_mc",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_crit_chance",
+      "relative_to": "a_sc",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "attack_power",
+      "ratio_to": "o_ap",
+      "min": 0.991,
+      "max": 1.009
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "ranged_attack_power",
+      "ratio_to": "o_rap",
+      "min": 0.991,
+      "max": 1.009
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "melee_crit_chance",
+      "relative_to": "o_mc",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "spell_crit_chance",
+      "relative_to": "o_sc",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "aura",
+      "spell": 706633,
+      "equals": 0
+    }
+  ]
+}

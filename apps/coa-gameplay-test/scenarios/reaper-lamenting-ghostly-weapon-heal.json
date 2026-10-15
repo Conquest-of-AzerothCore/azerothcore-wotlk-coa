@@ -1,0 +1,223 @@
+{
+  "schema": 1,
+  "name": "Lamenting heals from Ghostly Weapon Frost damage (#2652)",
+  "contract": [
+    "Ghostly Weapon Frost child 804474 deals damage from landed melee attacks.",
+    "With Lamenting 705397 active, healing spell 807420 restores 50% of that resolved Frost damage."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "location": { "map": 530, "x": 10349.6, "y": -6357.29, "z": 33.4026, "o": 5.31605 },
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "reaper",
+      "entry": 1601,
+      "level": 80,
+      "health": 1000000,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 803997
+    },
+    {
+      "action": "set_health",
+      "actor": "reaper",
+      "value": 10000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_power",
+      "actor": "reaper",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 803997
+    },
+    {
+      "action": "assert",
+      "label": "Ghostly Weapon aura is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803997,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack",
+      "actor": "reaper",
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let untalented Ghostly Weapon damage resolve",
+      "ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "reaper"
+    },
+    {
+      "action": "assert",
+      "label": "Untalented Ghostly Weapon dealt Frost damage",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 804474,
+      "target": "enemy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "No Lamenting heal without the talent",
+      "actor": "reaper",
+      "metric": "spell_heal_count",
+      "spell": 807420,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_damage_total",
+      "spell": 804474,
+      "target": "enemy",
+      "save_as": "untalented_frost_total"
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 804474,
+      "target": "enemy",
+      "save_as": "untalented_frost_count"
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 705397
+    },
+    {
+      "action": "assert",
+      "label": "Lamenting passive is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 705397,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803997,
+      "stacks": 0
+    },
+    {
+      "action": "restore_charges",
+      "actor": "reaper",
+      "spell": 803997
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 803997
+    },
+    {
+      "action": "set_health",
+      "actor": "reaper",
+      "value": 10000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_power",
+      "actor": "reaper",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 803997
+    },
+    {
+      "action": "assert",
+      "label": "Talented Ghostly Weapon aura is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803997,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack",
+      "actor": "reaper",
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Let talented Ghostly Weapon damage and healing resolve",
+      "ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "reaper"
+    },
+    {
+      "action": "assert",
+      "label": "Talented Ghostly Weapon dealt more Frost damage",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 804474,
+      "target": "enemy",
+      "relative_to": "untalented_frost_count",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_damage_total",
+      "spell": 804474,
+      "target": "enemy",
+      "relative_to": "untalented_frost_total",
+      "save_as": "talented_frost_damage"
+    },
+    {
+      "action": "assert",
+      "label": "Lamenting triggered a heal",
+      "actor": "reaper",
+      "metric": "spell_heal_count",
+      "spell": 807420,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Lamenting healed for half of Ghostly Weapon damage",
+      "actor": "reaper",
+      "metric": "spell_heal_total",
+      "spell": 807420,
+      "ratio_to": "talented_frost_damage",
+      "min": 0.45,
+      "max": 0.55
+    }
+  ]
+}

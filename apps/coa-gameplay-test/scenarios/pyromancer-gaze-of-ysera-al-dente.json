@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Al Dente adds 15% Fire damage taken to Gaze of Ysera targets (#1777)",
+  "contract": "#1777: Al Dente 300921 is a passive ADD_FLAT_MODIFIER with MiscValue 23 = SPELLMOD_EFFECT3, value 14+1 = +15, class mask B 0x40000000, which selects Gaze of Ysera 806148 and its Sleep rank 503229. Their effect 3 is aura 87 MOD_DAMAGE_TAKEN_PCT (Fire) with base 0, and flat effect modifiers are applied through SpellEffectInfo::CalcValue -> ApplyEffectModifiers (SpellInfo.cpp:520) even on a zero base. Asserts the effect-3 value of Gaze of Ysera is 0 before and 15 after learning the passive.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Without Al Dente the effect 3 modifier is nil",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 806148,
+      "op": 23,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 300921
+    },
+    {
+      "action": "assert",
+      "label": "Al Dente adds 15 to Gaze of Ysera effect 3",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 806148,
+      "op": 23,
+      "base": 0,
+      "equals": 15,
+      "within_ms": 3000
+    }
+  ]
+}

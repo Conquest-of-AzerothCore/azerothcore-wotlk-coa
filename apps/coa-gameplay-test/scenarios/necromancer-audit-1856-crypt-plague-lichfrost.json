@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Necromancer: the Crypt Plague passive makes Lichfrost apply two Crypt Plague stacks (#1856)",
+  "contract": "#1856 names 500117 and 800108, neither of which a player can hold: neither has a CharacterAdvancement row, trainer, class_spell, module grant or triggering spell; each sits only on skill line 82 with AcquireMethod 0. 500117 is ranked 'Spec Passive Visual Show' (a tooltip carrier) and 800108 is a legacy 15 Runic Power active whose stack effect (SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS) names 500339 with MiscValue 0. The mechanic 500117 describes, 'Your Lichfrost and Crypt Swarm now apply Crypt Plague', is delivered by the acquirable Death passive Crypt Plague 92121 (CharacterAdvancement 4034): 'Damage dealt by Crypt Swarm now applies 1 stack of Crypt Plague and Lichfrost applies 2 stacks.' Crypt Plague 570131 (PERIODIC_DAMAGE every 2000 ms, StackAmount 10) is the stacking disease. necromancer-rotting-flesh-level-passive covers Crypt Swarm's single stack; this case covers Lichfrost: without 92121 a Lichfrost hit applies no Crypt Plague, and with it one Lichfrost hit applies exactly two stacks.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "necro", "spell": 801722 },
+    {
+      "action": "cast", "label": "Lichfrost without the passive", "actor": "necro", "spell": 801722,
+      "target": "golem"
+    },
+    {
+      "action": "assert", "label": "SETUP: Lichfrost hits the golem", "actor": "golem",
+      "metric": "aura", "spell": 801722, "caster": "necro", "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let any Crypt Plague application land", "ms": 1000 },
+    {
+      "action": "assert", "label": "CONTROL: no Crypt Plague without the passive", "actor": "golem",
+      "metric": "aura", "spell": 570131, "caster": "necro", "equals": 0
+    },
+    { "action": "learn", "actor": "necro", "spell": 92121 },
+    {
+      "action": "assert", "label": "SETUP: the Crypt Plague passive is active", "actor": "necro",
+      "metric": "aura", "spell": 92121, "equals": 1, "within_ms": 2000
+    },
+    { "action": "cast", "label": "Lichfrost with the passive", "actor": "necro", "spell": 801722, "target": "golem" },
+    {
+      "action": "assert", "label": "Lichfrost applies Crypt Plague", "actor": "golem",
+      "metric": "aura", "spell": 570131, "caster": "necro", "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let the hit settle", "ms": 500 },
+    {
+      "action": "assert", "label": "One Lichfrost hit adds exactly two stacks", "actor": "golem",
+      "metric": "aura_stacks", "spell": 570131, "caster": "necro", "equals": 2
+    }
+  ]
+}

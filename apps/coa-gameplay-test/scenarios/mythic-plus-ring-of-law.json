@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Mythic+ Blackrock Depths: a Ring of Law arena boss clears Ring of Law",
+  "contract": "In a Blackrock Depths Prison keystone run, killing Hedrum the Creeper (one of the six arena bosses) sends that boss's own encounter 2986 in the progress packet, as the client lists each arena boss with its own final encounter (DungeonEncounterExtra.dbc 2981-2986 for lfg 2030) and its tracker expects.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_health", "actor": "hero", "value": 5000000, "maximum": 5000000 },
+    { "action": "ascension_dungeon_difficulty_packet", "actor": "hero", "value": 2 },
+    { "action": "wait", "ms": 250 },
+    { "action": "teleport", "actor": "hero", "map": 230, "x": 458.32, "y": 26.52, "z": -70.67 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "wait", "ms": 300 },
+    { "action": "add_item", "actor": "hero", "item": 400326, "count": 1 },
+    { "action": "use_item", "actor": "hero", "item": 400326, "spell": 161 },
+    { "action": "assert", "label": "CONTROL: socket window", "actor": "hero", "metric": "server_packets", "opcode": 2310, "equals": 1, "within_ms": 1000 },
+    { "action": "client_packet", "actor": "hero", "opcode": 1319 },
+    { "action": "wait", "ms": 10500 },
+    { "action": "summon", "actor": "hero", "entry": 9032, "as": "hedrum", "distance": 4 },
+    { "action": "wait", "ms": 300 },
+    { "action": "attack_nearby", "actor": "hero", "entry": 9032, "kill": true },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "progress: one encounter", "actor": "hero", "metric": "server_packet_u32", "opcode": 2313, "index": 0, "equals": 1 },
+    { "action": "assert", "label": "progress: it is Hedrum the Creeper", "actor": "hero", "metric": "server_packet_u32", "opcode": 2313, "index": 1, "equals": 2986 }
+  ]
+}

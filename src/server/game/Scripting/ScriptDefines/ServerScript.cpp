@@ -16,9 +16,13 @@
  */
 
 #include "IoContext.h"
+#include "Log.h"
+#include "Opcodes.h"
 #include "ScriptMgr.h"
 #include "ScriptMgrMacros.h"
 #include "ServerScript.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 
 void ScriptMgr::OnNetworkStart(Acore::Asio::IoContext& ioContext)
 {
@@ -78,8 +82,19 @@ bool ScriptMgr::CanPacketReceiveEarly(WorldSession* session, WorldPacket const& 
     if (ScriptRegistry<ServerScript>::ScriptPointerList.empty())
         return true;
 
-    CALL_ENABLED_BOOLEAN_HOOKS(ServerScript, SERVERHOOK_CAN_PACKET_RECEIVE_EARLY,
-        !script->CanPacketReceiveEarly(session, packet));
+    // Runs on the socket thread, where an escaping exception terminates the worldserver.
+    try
+    {
+        CALL_ENABLED_BOOLEAN_HOOKS(ServerScript, SERVERHOOK_CAN_PACKET_RECEIVE_EARLY,
+            !script->CanPacketReceiveEarly(session, packet));
+    }
+    catch (ByteBufferException const&)
+    {
+        LOG_ERROR("network", "Dropped malformed {} ({} bytes) from account {}",
+            GetOpcodeNameForLogging(static_cast<Opcodes>(packet.GetOpcode())), packet.size(),
+            session->GetAccountId());
+        return false;
+    }
 }
 
 ServerScript::ServerScript(char const* name, std::vector<uint16> enabledHooks)

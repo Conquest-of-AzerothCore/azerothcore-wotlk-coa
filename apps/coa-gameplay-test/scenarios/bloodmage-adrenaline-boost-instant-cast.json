@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "name": "Adrenaline Boost's Adrenaline makes the next Bloodmoon Blast instant (#2208)",
+  "contract": "Adrenaline Boost 680675 effect 1 is aura 42 SPELL_AURA_PROC_TRIGGER_SPELL on Adrenaline 680678, with Spell.dbc ProcFlags 0 and ProcChance 50. SpellMgr::LoadSpellProcs skips auto-generating an entry for a record without proc flags (SpellMgr.cpp:2249), so Aura::GetProcEffectMask returned 0 and the aura could never fire; the migration adds the spell_proc row (melee auto attacks plus melee-class spells, critical hits only, 50%). 680678's payload is sound: aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -101 / DieSides 1 = -100%, class mask (0, 10240, 0) = Bloodmoon Blast + Dark Liturgy, StackAmount 1 - 'your next Dark Liturgy or Bloodmoon Blast is instant cast'. 572332 is the Bloodmoon Blast rank a level-80 character owns per AscensionSpellProgressionData.h and carries CastingTimeIndex 5, a real cast time. This scenario proves the payload contract only. The proc itself is gated on a melee critical strike, and the harness has no melee critical rating fixture and no forced melee critical, so no assertion here discriminates on the spell_proc row; that half needs a Ghost e2e run with a geared melee bot.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 680678,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "snapshot",
+      "label": "Bloodmoon Blast cast time without Adrenaline",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 572332,
+      "save_as": "normal_cast"
+    },
+    {
+      "action": "assert",
+      "label": "Bloodmoon Blast is not instant on its own",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 572332,
+      "min": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture the Adrenaline payload",
+      "actor": "caster",
+      "spell": 680678,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Adrenaline makes the next Bloodmoon Blast instant",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 572332,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 680678,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Removing Adrenaline restores the cast time",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 572332,
+      "ratio_to": "normal_cast",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

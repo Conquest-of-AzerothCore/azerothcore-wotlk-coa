@@ -1,0 +1,566 @@
+{
+  "schema": 1,
+  "name": "Primalist Everlasting Rage native duration and tick speed",
+  "contract": "First/highest Seismic Tremor gains six seconds of periodic duration and a ten percent shorter tick interval. Actual casts produce direct and periodic damage, and unlearning restores the baseline duration and interval.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 95
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 561190,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681117,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681116,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681115,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681114,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 680442,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 680442
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 561190
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 680442
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 680442,
+      "target": "target",
+      "save_as": "first_baseline_hit_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 680442,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 680442,
+      "target": "target",
+      "relative_to": "first_baseline_hit_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 680442,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "aura_duration_ms",
+      "spell": 680442,
+      "effect": 1,
+      "save_as": "first_baseline_duration"
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "aura_amplitude_ms",
+      "spell": 680442,
+      "effect": 1,
+      "save_as": "first_baseline_interval"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 680442,
+      "target": "target",
+      "relative_to": "first_baseline_hit_before",
+      "min": 2
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 561190
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 680442
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 680442,
+      "target": "target",
+      "save_as": "first_talented_hit_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 680442,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 680442,
+      "target": "target",
+      "relative_to": "first_talented_hit_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 680442,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "aura_duration_ms",
+      "spell": 680442,
+      "effect": 1,
+      "save_as": "first_talented_duration"
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "aura_amplitude_ms",
+      "spell": 680442,
+      "effect": 1,
+      "save_as": "first_talented_interval"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 680442,
+      "target": "target",
+      "relative_to": "first_talented_hit_before",
+      "min": 2
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 561190
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 680442
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 680442,
+      "target": "target",
+      "save_as": "first_removed_hit_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 680442,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 680442,
+      "target": "target",
+      "relative_to": "first_removed_hit_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 680442,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "aura_duration_ms",
+      "spell": 680442,
+      "effect": 1,
+      "save_as": "first_removed_duration"
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "aura_amplitude_ms",
+      "spell": 680442,
+      "effect": 1,
+      "save_as": "first_removed_interval"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 680442,
+      "target": "target",
+      "relative_to": "first_removed_hit_before",
+      "min": 2
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681117,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681116,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681115,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681114,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 680442,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 681114
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 561190
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 681114
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681114,
+      "target": "target",
+      "save_as": "highest_baseline_hit_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681114,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681114,
+      "target": "target",
+      "relative_to": "highest_baseline_hit_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 681114,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "aura_duration_ms",
+      "spell": 681114,
+      "effect": 1,
+      "save_as": "highest_baseline_duration"
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "aura_amplitude_ms",
+      "spell": 681114,
+      "effect": 1,
+      "save_as": "highest_baseline_interval"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681114,
+      "target": "target",
+      "relative_to": "highest_baseline_hit_before",
+      "min": 2
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 561190
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 681114
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681114,
+      "target": "target",
+      "save_as": "highest_talented_hit_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681114,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681114,
+      "target": "target",
+      "relative_to": "highest_talented_hit_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 681114,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "aura_duration_ms",
+      "spell": 681114,
+      "effect": 1,
+      "save_as": "highest_talented_duration"
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "aura_amplitude_ms",
+      "spell": 681114,
+      "effect": 1,
+      "save_as": "highest_talented_interval"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681114,
+      "target": "target",
+      "relative_to": "highest_talented_hit_before",
+      "min": 2
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 561190
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 681114
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681114,
+      "target": "target",
+      "save_as": "highest_removed_hit_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681114,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681114,
+      "target": "target",
+      "relative_to": "highest_removed_hit_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 681114,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "aura_duration_ms",
+      "spell": 681114,
+      "effect": 1,
+      "save_as": "highest_removed_duration"
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "aura_amplitude_ms",
+      "spell": 681114,
+      "effect": 1,
+      "save_as": "highest_removed_interval"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681114,
+      "target": "target",
+      "relative_to": "highest_removed_hit_before",
+      "min": 2
+    }
+  ]
+}

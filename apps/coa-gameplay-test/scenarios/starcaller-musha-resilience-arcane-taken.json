@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "name": "Mu'sha's Resilience reduces Arcane damage taken by 15% (#776)",
+  "contract": "Mu'sha's Resilience 704774 (Spell.dbc, passive) has one effect: SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN (87, SpellAuraDefines.h; the issue labels it 'Mod Power Regen' by mistake), EffectMiscValue 64 (Arcane school mask), EffectBasePoints -16 with DieSides 1 -> -15, matching the tooltip 'Reduces Arcane damage taken by 15%.'. Nothing in the module or SQL touches 704774. Native path: Unit::SpellDamageBonusTaken multiplies TakenTotalMod by GetTotalAuraMultiplier(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN) over effects whose misc value intersects the spell's school mask. The spell_damage_taken metric calls SpellDamageBonusTaken(attacker, spell, 1000, SPELL_DIRECT_DAMAGE) with no hit roll, crit or mitigation. Fixture spells: Arcane Blast 30451 (SchoolMask 64) must drop to 0.85 (849-850 of 1000 after float truncation, band 0.84-0.86); Fireball 133 (SchoolMask 4) and Frostbolt 116 (SchoolMask 16) must stay at 1.0 because 64 does not intersect them. Both fixtures are the same race, class and level and the same creature is the attacker for both readings, so anything else in the damage-taken path cancels.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "attacker",
+      "owner": "talent",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 704774
+    },
+    {
+      "action": "assert",
+      "label": "Learning the talent applies its passive aura",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 704774,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The aura resolves to -15 percent",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 704774,
+      "effect": 0,
+      "equals": -15
+    },
+    {
+      "action": "snapshot",
+      "label": "Arcane damage taken without the talent",
+      "actor": "control",
+      "metric": "spell_damage_taken",
+      "save_as": "arcane_base",
+      "spell": 30451,
+      "target": "attacker"
+    },
+    {
+      "action": "snapshot",
+      "label": "Fire damage taken without the talent",
+      "actor": "control",
+      "metric": "spell_damage_taken",
+      "save_as": "fire_base",
+      "spell": 133,
+      "target": "attacker"
+    },
+    {
+      "action": "snapshot",
+      "label": "Frost damage taken without the talent",
+      "actor": "control",
+      "metric": "spell_damage_taken",
+      "save_as": "frost_base",
+      "spell": 116,
+      "target": "attacker"
+    },
+    {
+      "action": "assert",
+      "label": "Arcane damage taken drops by 15%",
+      "actor": "talent",
+      "metric": "spell_damage_taken",
+      "spell": 30451,
+      "target": "attacker",
+      "ratio_to": "arcane_base",
+      "min": 0.84,
+      "max": 0.86
+    },
+    {
+      "action": "assert",
+      "label": "Fire damage taken is untouched",
+      "actor": "talent",
+      "metric": "spell_damage_taken",
+      "spell": 133,
+      "target": "attacker",
+      "ratio_to": "fire_base",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "assert",
+      "label": "Frost damage taken is untouched",
+      "actor": "talent",
+      "metric": "spell_damage_taken",
+      "spell": 116,
+      "target": "attacker",
+      "ratio_to": "frost_base",
+      "min": 0.99,
+      "max": 1.01
+    }
+  ]
+}

@@ -684,13 +684,20 @@ enum SkillRangeType
 
 SkillRangeType GetSkillRangeType(SkillRaceClassInfoEntry const* rcEntry);
 
-#define MAX_PLAYER_NAME          12                         // max allowed by client name length
-#define MAX_INTERNAL_PLAYER_NAME 15                         // max server internal player name length (> MAX_PLAYER_NAME for support declined names)
+#define MAX_PLAYER_NAME_PART     12
+#define MAX_PLAYER_NAME          25                         // two 12-letter words and one space
+#define MAX_PLAYER_NAME_BYTES    47                         // native client has a 48-byte name buffer
+#define MAX_INTERNAL_PLAYER_NAME 31                         // two declined 15-letter words and one space
 #define MAX_PET_NAME             12                         // max allowed by client name length
 #define MAX_CHARTER_NAME         24                         // max allowed by client name length
 #define MAX_CHANNEL_NAME         50                         // pussywizard
 
 bool normalizePlayerName(std::string& name);
+
+// The stock client splits typed names at the first space, so "/w "First Last" text" arrives as target "\"First".
+using PlayerNameByFirstName = std::function<std::string(std::string const&)>;
+bool joinQuotedPlayerName(std::string& name, std::string_view& rest);
+bool resolveWhisperTarget(std::string& to, std::string& msg, PlayerNameByFirstName const& uniqueNameByFirstName);
 
 struct LanguageDesc
 {
@@ -1443,6 +1450,7 @@ public:
     bool DeleteGameTele(std::string_view name);
 
     Trainer::Trainer* GetTrainer(uint32 creatureId);
+    [[nodiscard]] std::unordered_map<uint32, Trainer::Trainer> const& GetTrainers() const { return _trainers; }
     std::vector<Trainer::Trainer const*> const& GetClassTrainers(uint8 classId) const { return _classTrainers.at(classId); }
 
     [[nodiscard]] VendorItemData const* GetNpcVendorItemList(uint32 entry) const

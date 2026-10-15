@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Wasp Form grants flight through its helper aura (#3476)",
+  "contract": "#3476: Wasp Form 805141 reads 'increasing movement speed by $805142s2% and allowing you to fly'. Spell.dbc: 805141 has aura 36 (shapeshift, form 29), aura 56 (transform 5441) and aura 206 (flight speed), none of which grants flight; the helper 805142 holds aura 31 (speed) and aura 201 (SPELL_AURA_FLY) but nothing ever applied it. aura_ascension_venomancer_wasp_form now applies 805142 with the form and removes it when the form ends. Cast in Hellfire Peninsula (game_tele 475).",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 80 }
+  ],
+  "location": { "map": 530, "x": -211.237, "y": 4278.54, "z": 86.5678, "o": 4.59776 },
+  "steps": [
+    { "action": "wait", "label": "Let the fixture settle", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the flight helper is not applied before the cast",
+      "actor": "v", "metric": "aura", "spell": 805142, "equals": 0 },
+    { "action": "learn", "actor": "v", "spell": 805141 },
+    { "action": "cast", "actor": "v", "spell": 805141 },
+    { "action": "assert", "label": "SETUP: Wasp Form is applied",
+      "actor": "v", "metric": "aura", "spell": 805141, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "DISCRIMINATING: the helper aura carrying SPELL_AURA_FLY is applied with the form",
+      "actor": "v", "metric": "aura", "spell": 805142, "equals": 1, "within_ms": 3000 },
+    { "action": "set_aura", "actor": "v", "spell": 805141, "stacks": 0 },
+    { "action": "assert", "label": "Wasp Form is removed",
+      "actor": "v", "metric": "aura", "spell": 805141, "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "The helper aura ends with the form",
+      "actor": "v", "metric": "aura", "spell": 805142, "equals": 0, "within_ms": 3000 }
+  ]
+}

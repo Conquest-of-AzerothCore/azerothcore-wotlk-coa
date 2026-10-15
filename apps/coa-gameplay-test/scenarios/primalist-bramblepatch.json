@@ -1,0 +1,334 @@
+{
+  "schema": 1,
+  "name": "Primalist Bramblepatch movement restrictions and ally immunities",
+  "contract": "A real Bramblepatch applies ally grip and both native knockback immunities and prevents a hostile Primal Rush. Leaving the ground permits Rush; ground expiry removes the protections.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "enemy",
+      "race": 2,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "creatures": [],
+  "timeout_ms": 120000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 58
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706148,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 806415
+    },
+    {
+      "action": "learn",
+      "actor": "enemy",
+      "spell": 500696
+    },
+    {
+      "action": "pvp",
+      "actor": "primalist",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "ally",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 806415
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 806415
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object",
+      "spell": 806415,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 806415,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807120,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_immune",
+      "spell": 51490,
+      "effect": 2,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_immune",
+      "spell": 51469,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_immune",
+      "spell": 49560,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 806415,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 807120,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_effect_immune",
+      "spell": 51490,
+      "effect": 2,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_effect_immune",
+      "spell": 51469,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_effect_immune",
+      "spell": 49560,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 807859,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_go_count",
+      "spell": 500696,
+      "save_as": "blocked"
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 500696
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_go_count",
+      "spell": 500696,
+      "relative_to": "blocked",
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9587.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 807859,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 500696
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_go_count",
+      "spell": 500696,
+      "relative_to": "blocked",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 14000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_immune",
+      "spell": 51490,
+      "effect": 2,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_immune",
+      "spell": 51469,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_immune",
+      "spell": 49560,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_effect_immune",
+      "spell": 51490,
+      "effect": 2,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_effect_immune",
+      "spell": 51469,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_effect_immune",
+      "spell": 49560,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 0
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

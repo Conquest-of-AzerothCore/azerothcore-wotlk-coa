@@ -1,0 +1,176 @@
+{
+  "schema": 1,
+  "name": "Primalist Power Hammer two-handed equipment condition",
+  "contract": "The passive retains 10% Rage from damage; its additional native 15% Rage modifier exists only while a two-handed weapon is equipped. Verify periodic refresh, immediate weapon swaps, removal and no stale helper.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 196
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 197
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 37
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 12282
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 303014,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 303014
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 303014,
+      "effect": 1,
+      "equals": 10
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 303030,
+      "equals": 0
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 12282,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 303030,
+      "effect": 0,
+      "equals": 15,
+      "within_ms": 500
+    },
+    {
+      "action": "wait",
+      "ms": 11500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 303030,
+      "effect": 0,
+      "equals": 15
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 303030,
+      "equals": 0,
+      "within_ms": 500
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 303030,
+      "equals": 0
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 12282,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 303030,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 303014,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 303030,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 303014,
+      "equals": 0
+    }
+  ]
+}

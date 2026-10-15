@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "Crimson Expedition raises Bloodbolt's critical strike chance (#1382)",
+  "contract": "Crimson Expedition 523727's tooltip is \"Increases the critical strike chance of your Bloodbolt, Blood Shards, and Aortic Assault by $s1%\", with $s1 = 10 (BasePoints 9 + DieSides 1). Its single effect is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER with MiscValue 7 (SPELLMOD_CRITICAL_CHANCE) over EffectSpellClassMask (0, 4194306, 0): word 1 bit 22 selects Aortic Assault 806502 and word 1 bit 1 selects Blood Shard 504115, but Bloodbolt is word 1 bit 17 (131072) and that bit is absent, so the first spell the tooltip names received nothing. The eight Bloodbolt records (578304, 578305, 804685, 806928-806932) are the only family-26 rows carrying SpellFamilyFlags (0, 131072, 0). The discriminating assertion is the crit modifier on Bloodbolt 578305: 0 on today's tree, 10 with the missing bit added. The Aortic Assault and Blood Shard assertions already pass and guard against the widening reaching too far.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Bloodbolt has no crit bonus before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Aortic Assault has no crit bonus before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 806502,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 523727
+    },
+    {
+      "action": "assert",
+      "label": "Crimson Expedition raises Bloodbolt's crit chance by 10",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Crimson Expedition raises Aortic Assault's crit chance by 10",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 806502,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Crimson Expedition raises Blood Shard's crit chance by 10",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 504115,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Crimson Expedition does not reach Sanguine Mend",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 504086,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Cultist: Terror boosts the spell damage bonus of its three named spells natively (#1551)",
+  "contract": "300304 is ADD_PCT_MODIFIER (108), MiscValue=24 (SPELLMOD_BONUS_MULTIPLIER) on both effects; EffectBasePoints/DieSides give effect0 +20% (classmask dword1 bit5) and effect1 +10% (classmask dword1 bit4 + dword2 bit19). Verified against Spell.dbc: 800413 'Wrath of the Black Empire' (SpellFamilyFlags dword1=288=256+32, bit5 set) gets +20%; 800416 'Horrorbolt' (dword1=16, bit4) and 808043 'Eldritch Shock' (dword2=524288, bit19) get +10%. SPELLMOD_BONUS_MULTIPLIER is applied at the same Unit.cpp call sites (e.g. Unit.cpp:9359) that compute real spell-damage AP/SP coefficients, via Player::ApplySpellMod -- the exact call the spell_modifier metric exercises. No script needed; 300304 is not in SpellInfo::IsAffectedBySpellMod's family-31 routing table.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "c", "race": 1, "class": 25, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: Wrath of the Black Empire's coefficient is unmodified",
+      "actor": "c", "metric": "spell_modifier", "spell": 800413, "op": 24, "base": 1.0, "min": 1.0, "max": 1.0
+    },
+    {
+      "action": "assert", "label": "SETUP: Horrorbolt's coefficient is unmodified",
+      "actor": "c", "metric": "spell_modifier", "spell": 800416, "op": 24, "base": 1.0, "min": 1.0, "max": 1.0
+    },
+    {
+      "action": "assert", "label": "SETUP: Eldritch Shock's coefficient is unmodified",
+      "actor": "c", "metric": "spell_modifier", "spell": 808043, "op": 24, "base": 1.0, "min": 1.0, "max": 1.0
+    },
+    {
+      "action": "assert", "label": "SETUP: an outside-the-mask spell (Psychic Suppression) is unaffected",
+      "actor": "c", "metric": "spell_modifier", "spell": 800432, "op": 24, "base": 1.0, "min": 1.0, "max": 1.0
+    },
+    { "action": "learn", "actor": "c", "spell": 300304 },
+    {
+      "action": "assert", "label": "Terror adds 20% to Wrath of the Black Empire's coefficient",
+      "actor": "c", "metric": "spell_modifier", "spell": 800413, "op": 24, "base": 1.0, "min": 1.19, "max": 1.21
+    },
+    {
+      "action": "assert", "label": "Terror adds 10% to Horrorbolt's coefficient",
+      "actor": "c", "metric": "spell_modifier", "spell": 800416, "op": 24, "base": 1.0, "min": 1.09, "max": 1.11
+    },
+    {
+      "action": "assert", "label": "Terror adds 10% to Eldritch Shock's coefficient",
+      "actor": "c", "metric": "spell_modifier", "spell": 808043, "op": 24, "base": 1.0, "min": 1.09, "max": 1.11
+    },
+    {
+      "action": "assert", "label": "Terror leaves Psychic Suppression's coefficient alone",
+      "actor": "c", "metric": "spell_modifier", "spell": 800432, "op": 24, "base": 1.0, "min": 1.0, "max": 1.0
+    }
+  ]
+}

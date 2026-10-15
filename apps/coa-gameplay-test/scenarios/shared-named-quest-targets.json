@@ -1,0 +1,542 @@
+{
+  "schema": 1,
+  "name": "Named quest mobs share credit and loot after a bot takes the first tag",
+  "contract": "Quest 3376 requires Chief Sharptusk Thornmantle's Head 10459, guaranteed by creature loot 8554. Chief Sharptusk has a 375-second world spawn. All nearby contributors and their nearby party members need an independent quest drop, even when a bot without that quest tags first. Master loot cannot reserve quest copies. Nonparticipants and other phases receive none; contributors cannot take the original tagger's gold or ordinary loot. Quest 370 requires Captain Perrine 1662 once and must credit each participating party. Encroachment 837 needs four Razormane Quilboars 3111 and remains exclusively tagged. Summoned fixtures have no persistent spawn id, so their timer includes 60 seconds of corpse decay plus the 30-second cap; the respawn_clock native harness verifies persistent spawns respawn 30 seconds after death with either clock setting.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bot",
+      "race": 6,
+      "class": 1,
+      "level": 80,
+      "bot": true
+    },
+    {
+      "id": "solo",
+      "race": 6,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "party",
+      "race": 6,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "friend",
+      "race": 6,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "observer",
+      "race": 6,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "phased",
+      "race": 6,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "chief",
+      "owner": "bot",
+      "entry": 8554,
+      "distance": 2,
+      "health": 100000,
+      "level": 80
+    },
+    {
+      "id": "captain",
+      "owner": "bot",
+      "entry": 1662,
+      "distance": 2,
+      "health": 100000,
+      "level": 80
+    },
+    {
+      "id": "quilboar",
+      "owner": "bot",
+      "entry": 3111,
+      "distance": 2,
+      "health": 100000,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "solo",
+      "quest": 3376,
+      "complete": false
+    },
+    {
+      "action": "destroy_item",
+      "actor": "solo",
+      "item": 10459
+    },
+    {
+      "action": "assert",
+      "actor": "solo",
+      "metric": "item_count",
+      "equals": 0,
+      "item": 10459
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "party",
+      "quest": 3376,
+      "complete": false
+    },
+    {
+      "action": "destroy_item",
+      "actor": "party",
+      "item": 10459
+    },
+    {
+      "action": "assert",
+      "actor": "party",
+      "metric": "item_count",
+      "equals": 0,
+      "item": 10459
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "friend",
+      "quest": 3376,
+      "complete": false
+    },
+    {
+      "action": "destroy_item",
+      "actor": "friend",
+      "item": 10459
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "item_count",
+      "equals": 0,
+      "item": 10459
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "observer",
+      "quest": 3376,
+      "complete": false
+    },
+    {
+      "action": "destroy_item",
+      "actor": "observer",
+      "item": 10459
+    },
+    {
+      "action": "assert",
+      "actor": "observer",
+      "metric": "item_count",
+      "equals": 0,
+      "item": 10459
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "phased",
+      "quest": 3376,
+      "complete": false
+    },
+    {
+      "action": "destroy_item",
+      "actor": "phased",
+      "item": 10459
+    },
+    {
+      "action": "assert",
+      "actor": "phased",
+      "metric": "item_count",
+      "equals": 0,
+      "item": 10459
+    },
+    {
+      "action": "group",
+      "actor": "party",
+      "target": "friend",
+      "loot_method": 2
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "bot",
+      "entry": 8554,
+      "damage_pct": 10
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "solo",
+      "entry": 8554,
+      "damage_pct": 10
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "party",
+      "entry": 8554,
+      "damage_pct": 10
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "phased",
+      "entry": 8554,
+      "damage_pct": 10
+    },
+    {
+      "action": "set_phase",
+      "actor": "phased",
+      "value": 1
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "bot",
+      "entry": 8554,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "chief",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chief",
+      "metric": "respawn_remaining",
+      "min": 89,
+      "max": 90
+    },
+    {
+      "action": "set_money",
+      "actor": "solo",
+      "value": 0
+    },
+    {
+      "action": "loot_creature",
+      "actor": "solo",
+      "target": "chief"
+    },
+    {
+      "action": "loot_money",
+      "actor": "solo"
+    },
+    {
+      "action": "assert",
+      "actor": "solo",
+      "metric": "carried_money",
+      "equals": 0
+    },
+    {
+      "action": "loot_slot",
+      "actor": "solo",
+      "item": 10459
+    },
+    {
+      "action": "assert",
+      "actor": "solo",
+      "metric": "item_count",
+      "equals": 1,
+      "item": 10459
+    },
+    {
+      "action": "loot_slot",
+      "actor": "solo",
+      "slot": 0
+    },
+    {
+      "action": "assert",
+      "actor": "solo",
+      "metric": "item_count",
+      "equals": 1,
+      "item": 10459
+    },
+    {
+      "action": "close_loot",
+      "actor": "solo"
+    },
+    {
+      "action": "set_money",
+      "actor": "party",
+      "value": 0
+    },
+    {
+      "action": "loot_creature",
+      "actor": "party",
+      "target": "chief"
+    },
+    {
+      "action": "loot_money",
+      "actor": "party"
+    },
+    {
+      "action": "assert",
+      "actor": "party",
+      "metric": "carried_money",
+      "equals": 0
+    },
+    {
+      "action": "loot_slot",
+      "actor": "party",
+      "item": 10459
+    },
+    {
+      "action": "assert",
+      "actor": "party",
+      "metric": "item_count",
+      "equals": 1,
+      "item": 10459
+    },
+    {
+      "action": "loot_slot",
+      "actor": "party",
+      "slot": 0
+    },
+    {
+      "action": "assert",
+      "actor": "party",
+      "metric": "item_count",
+      "equals": 1,
+      "item": 10459
+    },
+    {
+      "action": "close_loot",
+      "actor": "party"
+    },
+    {
+      "action": "set_money",
+      "actor": "friend",
+      "value": 0
+    },
+    {
+      "action": "loot_creature",
+      "actor": "friend",
+      "target": "chief"
+    },
+    {
+      "action": "loot_money",
+      "actor": "friend"
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "carried_money",
+      "equals": 0
+    },
+    {
+      "action": "loot_slot",
+      "actor": "friend",
+      "item": 10459
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "item_count",
+      "equals": 1,
+      "item": 10459
+    },
+    {
+      "action": "loot_slot",
+      "actor": "friend",
+      "slot": 0
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "item_count",
+      "equals": 1,
+      "item": 10459
+    },
+    {
+      "action": "close_loot",
+      "actor": "friend"
+    },
+    {
+      "action": "set_money",
+      "actor": "bot",
+      "value": 0
+    },
+    {
+      "action": "loot_creature",
+      "actor": "bot",
+      "target": "chief"
+    },
+    {
+      "action": "loot_money",
+      "actor": "bot"
+    },
+    {
+      "action": "assert",
+      "actor": "bot",
+      "metric": "carried_money",
+      "min": 1
+    },
+    {
+      "action": "close_loot",
+      "actor": "bot"
+    },
+    {
+      "action": "loot_creature",
+      "actor": "observer",
+      "target": "chief"
+    },
+    {
+      "action": "loot_slot",
+      "actor": "observer"
+    },
+    {
+      "action": "assert",
+      "actor": "observer",
+      "metric": "item_count",
+      "equals": 0,
+      "item": 10459
+    },
+    {
+      "action": "loot_creature",
+      "actor": "phased",
+      "target": "chief"
+    },
+    {
+      "action": "loot_slot",
+      "actor": "phased"
+    },
+    {
+      "action": "assert",
+      "actor": "phased",
+      "metric": "item_count",
+      "equals": 0,
+      "item": 10459
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "bot",
+      "quest": 370,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "solo",
+      "quest": 370,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "party",
+      "quest": 370,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "friend",
+      "quest": 370,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "observer",
+      "quest": 370,
+      "complete": false
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "bot",
+      "entry": 1662,
+      "damage_pct": 10
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "solo",
+      "entry": 1662,
+      "damage_pct": 10
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "party",
+      "entry": 1662,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "bot",
+      "metric": "quest_objective_count",
+      "equals": 1,
+      "quest": 370
+    },
+    {
+      "action": "assert",
+      "actor": "solo",
+      "metric": "quest_objective_count",
+      "equals": 1,
+      "quest": 370
+    },
+    {
+      "action": "assert",
+      "actor": "party",
+      "metric": "quest_objective_count",
+      "equals": 1,
+      "quest": 370
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "quest_objective_count",
+      "equals": 1,
+      "quest": 370
+    },
+    {
+      "action": "assert",
+      "actor": "observer",
+      "metric": "quest_objective_count",
+      "equals": 0,
+      "quest": 370
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "bot",
+      "quest": 837,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "solo",
+      "quest": 837,
+      "complete": false
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "bot",
+      "entry": 3111,
+      "damage_pct": 10
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "solo",
+      "entry": 3111,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "bot",
+      "metric": "quest_objective_count",
+      "equals": 1,
+      "quest": 837
+    },
+    {
+      "action": "assert",
+      "actor": "solo",
+      "metric": "quest_objective_count",
+      "equals": 0,
+      "quest": 837
+    }
+  ]
+}

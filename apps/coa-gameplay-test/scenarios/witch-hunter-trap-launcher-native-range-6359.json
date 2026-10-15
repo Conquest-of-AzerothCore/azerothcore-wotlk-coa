@@ -1,0 +1,324 @@
+{
+  "schema": 1,
+  "name": "Trap Launcher reaches a native trap trigger twenty yards away (#6359)",
+  "contract": "Trap Launcher 802272 authorizes destinations up to thirty yards. A normal Shadow Trap 680238 cast at thirty-five yards must be refused and summon no trap; a twenty-yard cast must stun the enemy there while a nearby enemy remains unaffected. Expiry, later trap learning, unlearning and real relog must reconcile every temporary replacement and preserve an independently learned child. Client glow and cursor rendering remain unobserved.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "p",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 20
+    },
+    {
+      "id": "near",
+      "owner": "p",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 680238
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 802272
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 802272
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 802272,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "temporary_spell_replacement",
+      "spell": 680238,
+      "equals": 680376
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 680238,
+      "destination": {
+        "x": -8914.95,
+        "y": -132.493,
+        "z": 83.5312
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 680376,
+      "equals": 97,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "entry": 506250,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 680238,
+      "destination": {
+        "x": -8929.95,
+        "y": -132.493,
+        "z": 83.5312
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 680238,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 681179,
+      "caster": "p",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 681179,
+      "caster": "p",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 802272,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "temporary_spell_replacement",
+      "spell": 680238,
+      "equals": 680238
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 680376,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 802272,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 681445
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "temporary_spell_replacement",
+      "spell": 681445,
+      "equals": 681562
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 681562,
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 681445,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "temporary_spell_replacement",
+      "spell": 681445,
+      "equals": 681445
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 681562,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 681445
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "temporary_spell_replacement",
+      "spell": 681445,
+      "equals": 681562
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 802272,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 802272,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "temporary_spell_replacement",
+      "spell": 680238,
+      "equals": 680238
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "temporary_spell_replacement",
+      "spell": 681445,
+      "equals": 681445
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 680376,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 681562,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 680376
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 802272
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 802272,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "temporary_spell_replacement",
+      "spell": 680238,
+      "equals": 680376
+    },
+    {
+      "action": "relog",
+      "actor": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 802272,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "temporary_spell_replacement",
+      "spell": 680238,
+      "equals": 680238
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 680376,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 681562,
+      "equals": 0
+    }
+  ]
+}

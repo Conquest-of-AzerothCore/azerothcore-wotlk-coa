@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "From The Ashes raises healing on allies below 35% health (#2014, 560561 only)",
+  "contract": "#2014, first spell 560561 only: effect 1 is aura 360 (ASCENSION_MOD_HEALING_DONE_VERSUS_AURASTATE) with MiscValue 13 = AURA_STATE_HEALTHLESS_35_PERCENT, base 24 -> +25%. Unit::SpellPctHealingModsDone multiplies healing by it when the victim has that aura state (Unit.cpp:10033-10039). Probe: Cleansing Flames Heal 681141 to an ally. The same healing to the same ally at full health is unchanged, and 25% higher at 100 of 1000 health. The second spell 805492 (charge refund, category 654 present in no charge DBC) is inert and is not asserted here.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "snapshot",
+      "label": "Healing to the ally at full health before the talent",
+      "actor": "caster",
+      "metric": "spell_healing_done",
+      "save_as": "heal0",
+      "spell": 681141,
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 560561
+    },
+    {
+      "action": "assert",
+      "label": "At full health the talent changes nothing",
+      "actor": "caster",
+      "metric": "spell_healing_done",
+      "spell": 681141,
+      "target": "ally",
+      "ratio_to": "heal0",
+      "min": 0.995,
+      "max": 1.005
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 100,
+      "maximum": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The ally is below 35% health",
+      "actor": "ally",
+      "metric": "health_pct",
+      "max": 34,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Below 35% health the caster heals the ally 25% harder",
+      "actor": "caster",
+      "metric": "spell_healing_done",
+      "spell": 681141,
+      "target": "ally",
+      "ratio_to": "heal0",
+      "min": 1.24,
+      "max": 1.26,
+      "within_ms": 3000
+    }
+  ]
+}

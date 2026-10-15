@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "Enraging Wounds leeches health on melee critical strikes (#1783)",
+  "contract": "Enraging Wounds 300978's single effect is SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on Enraging Wound 560589, a SPELL_EFFECT_HEALTH_LEECH (BasePoints 95, SchoolMask 32, DmgClass 2, TargetA 6 = enemy). Spell.dbc gives 300978 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs generated no entry and the aura was inert. The tooltip is 'Melee critical strikes now leech ${$560589m1*$<scalingbp>+$STA*0.3} health from the target' at ProcChance 100, so one guaranteed melee critical strike must raise the Bloodmage's health. 560589 carries CasterAuraSpell 800157 (Eternal Curse), so the leech is only castable in a Cursed Form; that gate is the record's own and is fixtured here rather than worked around. Bloodfang Bite rank 572551 is the rank a level-80 character owns per AscensionSpellProgressionData.h; it is SchoolMask 1 DmgClass 2, i.e. the melee-damage-class event the row names, and its own CasterAuraSpell 525031 is the Cursed Form marker the module keeps in sync with Eternal Curse. Crit Test Buff 503747 (aura 290, +100 percentage points) removes the crit roll. Players have no in-combat health regeneration in 3.3.5a and Bloodfang Bite itself only deals damage, so a health gain on the Bloodmage can only come from the leech.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 572551
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 300978
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "bloodmage",
+      "spell": 800157,
+      "stacks": 1,
+      "label": "Eternal Curse 800157: the Cursed Form Bloodfang Bite's CasterAuraSpell 525031 needs"
+    },
+    {
+      "action": "set_aura",
+      "actor": "bloodmage",
+      "spell": 503747,
+      "stacks": 1,
+      "label": "Crit Test Buff 503747 (aura 290 MOD_CRIT_PCT +100) forces every strike to crit"
+    },
+    {
+      "action": "assert",
+      "label": "The crit fixture is in effect",
+      "actor": "bloodmage",
+      "metric": "melee_crit_chance",
+      "min": 100
+    },
+    {
+      "action": "set_health",
+      "actor": "bloodmage",
+      "value": 1000,
+      "label": "Leave room for the leech to heal"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "label": "Health before the critical Bloodfang Bite",
+      "actor": "bloodmage",
+      "metric": "health",
+      "save_as": "hp_before"
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the critical strike leeches health back",
+      "actor": "bloodmage",
+      "metric": "health",
+      "relative_to": "hp_before",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

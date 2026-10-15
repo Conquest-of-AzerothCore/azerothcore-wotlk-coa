@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "name": "Eternal extends Accelerated Recovery by 6 sec and Decomposition by 3 sec (#3094)",
+  "contract": "Eternal 706777 carries two SPELL_AURA_ADD_FLAT_MODIFIER (107) effects with EffectMiscValue SPELLMOD_DURATION (1): EffectBasePoints 5999 with EffectSpellClassMask word1 bit 0x10000000, and EffectBasePoints 2999 with word1 bit 0x80000, which resolve to +6000 and +3000 with DieSides 1 and match the tooltip \"Increases the duration of your Accelerated Recovery by $/1000;s1 sec and Decomposition by $/1000;s2 sec.\" Accelerated Recovery's level-80 rank 501778 has SpellFamilyFlags word1 268435456 and DurationIndex 8 (SpellDuration.dbc row 8 = 15000ms); Decomposition's level-80 rank 802597 has word1 524288 and DurationIndex 86 (21000ms). Native path only: AuraEffect::CalculateSpellMod and Aura::CalcMaxDuration, which applies SPELLMOD_DURATION; SpellInfo::IsAffectedBySpellMod deliberately skips the IsAffectedBySpellMods() attribute gate for SPELLMOD_DURATION, so Accelerated Recovery's AttributesEx3 0x80 does not block it.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 22, "level": 80 },
+    { "id": "talent", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talent", "spell": 706777 },
+    {
+      "action": "assert",
+      "label": "Accelerated Recovery keeps its 15 sec duration without the talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 501778,
+      "op": 1,
+      "base": 15000,
+      "equals": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Accelerated Recovery lasts 21 sec with the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 501778,
+      "op": 1,
+      "base": 15000,
+      "equals": 21000
+    },
+    {
+      "action": "assert",
+      "label": "Decomposition keeps its 21 sec duration without the talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 802597,
+      "op": 1,
+      "base": 21000,
+      "equals": 21000
+    },
+    {
+      "action": "assert",
+      "label": "Decomposition lasts 24 sec with the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 802597,
+      "op": 1,
+      "base": 21000,
+      "equals": 24000
+    }
+  ]
+}

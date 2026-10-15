@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Thunder King's critical strikes hit back and stack Raging Storm (#3410)",
+  "contract": "#3410: Thunder King 804591 reads 'For $d, your Call Lightning / Torrential Wrath strikes $s3 additional nearby enemies, your movement speed is increased by $800046s1%, and you generate 5 Static every $t2 sec. While active, damaging critical strikes deal bonus Spellstorm Damage scaling with your spell power, and grant Raging Storm.' Spell.dbc gives 804591 DurationIndex 18 (SpellDuration.dbc 18 = 20000 ms) and RecoveryTime 180000. Three clauses are native and are asserted as a baseline: effect 2 is aura 107 ADD_FLAT_MODIFIER with EffectMiscValue 17 (SPELLMOD_JUMP_TARGETS, SpellDefines.h:93), EffectBasePoints 2 and DieSides 1, so the modifier is 3 and its class mask word 1 = 17 selects Call Lightning (SpellFamilyFlags word 1 = 16) and Torrential Wrath (word 1 = 1); data/sql/updates/pending_db_world/rev_1789379311228000700.sql links 800046 to it as SPELL_LINK_AURA, and 800046 is aura 31 MOD_INCREASE_SPEED with BasePoints 24 and DieSides 1 (the tooltip's 25%); effect 1 triggers 804044 every 1000 ms, whose effect 1 is SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS with EffectMiscValue 5 on Static 803102, handled at SpellEffects.cpp:444. The last two clauses had no path: effect 0's SPELL_AURA_PROC_TRIGGER_SPELL on Thunder Fist 800020 has ProcFlags 0 and no spell_proc row, so SpellMgr::LoadSpellProcs skips it (SpellMgr.cpp:2256-2257), and nothing in the whole Spell.dbc, in any SQL row or in any module line references Raging Storm 800014 (aura 216 HASTE_SPELLS, BasePoints 2 + DieSides 1 = 3%, StackAmount 10). The fix casts 800020 on the victim and 800014 on the Stormbringer on every non-triggered critical hit while Thunder King is up. Call Lightning is cast as rank 501398, the rank a level-80 character owns (AscensionSpellProgressionData.h:574 gives it RequiredLevel 79), and spell_crit_rating 100000 makes the critical strike deterministic. The spell-power coefficient of Thunder Fist is a separate spell_bonus_data question and is deliberately not part of this scenario. Call Lightning is also a resource spender: AscensionCustomResourceData.h's ResourceCostRules gives class 16 spells 501388-501399 (which covers rank 501398) a Fixed cost of 50 Static (803102), and AscensionCompat.cpp's CheckCast (:2327-2337) returns SPELL_FAILED_NO_POWER when GetAuraStacks(player, 803102) is below that before the cast is even attempted. The natural 5-Static/sec generation asserted above only reaches ~15 stacks in the 3500 ms window, so a `set_aura` fixture tops Static up to the 50-stack threshold immediately before the Call Lightning cast; this is a SETUP-only precondition, unrelated to the fix under test.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "storm", "race": 1, "class": 16, "level": 80, "spell_hit_rating": 10000, "spell_crit_rating": 100000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "storm", "entry": 36, "level": 80, "health": 1000000, "distance": 3 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "storm", "spell": 804591 },
+    { "action": "learn", "actor": "storm", "spell": 501398 },
+    { "action": "assert", "label": "BASELINE: Call Lightning has no extra chain targets without Thunder King",
+      "actor": "storm", "metric": "spell_modifier", "spell": 501398, "op": 17, "base": 0, "equals": 0 },
+    { "action": "assert", "label": "BASELINE: no movement speed companion aura",
+      "actor": "storm", "metric": "aura", "spell": 800046, "equals": 0 },
+    { "action": "assert", "label": "BASELINE: no Raging Storm stacks",
+      "actor": "storm", "metric": "aura_stacks", "spell": 800014, "equals": 0 },
+    { "action": "assert", "label": "BASELINE: Thunder Fist has never been cast",
+      "actor": "storm", "metric": "spell_cast_count", "spell": 800020, "equals": 0 },
+    { "action": "cast", "actor": "storm", "spell": 804591 },
+    { "action": "assert", "label": "NATIVE: Thunder King is up",
+      "actor": "storm", "metric": "aura", "spell": 804591, "equals": 1, "within_ms": 4000 },
+    { "action": "assert", "label": "NATIVE: Thunder King lasts 20000 ms (SpellDuration.dbc 18)",
+      "actor": "storm", "metric": "aura_duration_ms", "spell": 804591, "min": 15000, "max": 20000 },
+    { "action": "assert", "label": "NATIVE: SPELLMOD_JUMP_TARGETS adds 3 to Call Lightning (BasePoints 2 + DieSides 1)",
+      "actor": "storm", "metric": "spell_modifier", "spell": 501398, "op": 17, "base": 0, "equals": 3 },
+    { "action": "assert", "label": "NATIVE: the linked movement speed aura 800046 is applied",
+      "actor": "storm", "metric": "aura", "spell": 800046, "equals": 1, "within_ms": 3000 },
+    { "action": "snapshot", "label": "Static stacks before three periodic ticks",
+      "actor": "storm", "metric": "aura_stacks", "spell": 803102, "save_as": "static_before" },
+    { "action": "wait", "label": "Three 1000 ms ticks of 804044", "ms": 3500 },
+    { "action": "assert", "label": "NATIVE: 5 Static per second (804044 effect 1, EffectMiscValue 5)",
+      "actor": "storm", "metric": "aura_stacks", "spell": 803102, "relative_to": "static_before", "min": 10, "max": 25 },
+    { "action": "set_aura", "label": "FIXTURE: top up Static to Call Lightning's 50-stack resource cost",
+      "actor": "storm", "spell": 803102, "stacks": 50 },
+    { "action": "cast", "actor": "storm", "spell": 501398, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: Call Lightning lands as a critical strike",
+      "actor": "storm", "metric": "spell_damage_count", "spell": 501398, "critical": true, "equals": 1, "within_ms": 8000 },
+    { "action": "assert", "label": "DISCRIMINATING: the critical strike casts Thunder Fist (800020)",
+      "actor": "storm", "metric": "spell_cast_count", "spell": 800020, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the critical strike grants one Raging Storm stack (800014, cap 10)",
+      "actor": "storm", "metric": "aura_stacks", "spell": 800014, "equals": 1, "within_ms": 3000 }
+  ]
+}

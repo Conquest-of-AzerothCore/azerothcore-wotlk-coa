@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Shadow Enchantments and Blatant Curse modify the whole Jinx family (#1709, #1810)",
+  "contract": "Shadow Enchantments rank 1 (300662) and rank 2 (301361), and Blatant Curse (301297), all share EffectSpellClassMask (0, 0, 32) on their Jinx-facing effects, exactly the module's own Jinx(SpellInfo*) predicate (AscensionWitchDoctorAuras.cpp: Family(info, 2, 32)) and Lethargy Jinx's (802065) own SpellFamilyFlags word2 (32). Shadow Enchantments: effect0 aura 108 (ADD_PCT_MODIFIER), MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 24/49 + DieSides 1 = 25%/50%; effect1 aura 108, MiscValue 1 (SPELLMOD_DURATION), same BasePoints/DieSides = 25%/50%. Both ranks share the identical class mask and op pair, so they are asserted with the first unlearned before the second, matching how the ranks actually replace each other on a character. Blatant Curse: effect0 aura 108, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints -1 + DieSides 1 = 0% (an inert DBC slot; the tooltip promises only the cost reduction, so a zero value here is not a missing mechanic), effect1 aura 108, MiscValue 14 (SPELLMOD_COST), BasePoints -26 + 1 = -25%. Unit::ApplyEffectModifiers (Unit.cpp) consumes SPELLMOD_ALL_EFFECTS unconditionally for every Jinx-family effect base value; SpellInfo::CalculatePowerCost consumes SPELLMOD_COST. Hex of Malice (501153, word2 = 0) is the negative control: none of these three passives' class masks reach it. spell_modifier reads each mod against a fixed synthetic base without casting. Regression guard for behaviour that already works natively; no module code touches any of these three spell ids.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 13, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+
+    { "action": "assert", "label": "BASELINE: Lethargy Jinx effectiveness unmodified",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 8, "base": 1000, "equals": 1000 },
+    { "action": "assert", "label": "BASELINE: Lethargy Jinx duration unmodified",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 1, "base": 10000, "equals": 10000 },
+    { "action": "assert", "label": "BASELINE: Lethargy Jinx mana cost unmodified",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 14, "base": 1000, "equals": 1000 },
+    { "action": "assert", "label": "CONTROL: Hex of Malice effectiveness untouched by Jinx-family passives (not a Jinx)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 501153, "op": 8, "base": 1000, "equals": 1000 },
+
+    { "action": "learn", "actor": "caster", "spell": 300662 },
+
+    { "action": "assert", "label": "Shadow Enchantments rank 1 adds 25% effectiveness to Lethargy Jinx (#1709)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 8, "base": 1000, "equals": 1250 },
+    { "action": "assert", "label": "Shadow Enchantments rank 1 adds 25% duration to Lethargy Jinx (#1709)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 1, "base": 10000, "equals": 12500 },
+    { "action": "assert", "label": "CONTROL: Hex of Malice still untouched by rank 1",
+      "actor": "caster", "metric": "spell_modifier", "spell": 501153, "op": 8, "base": 1000, "equals": 1000 },
+
+    { "action": "unlearn", "actor": "caster", "spell": 300662 },
+    { "action": "learn", "actor": "caster", "spell": 301361 },
+
+    { "action": "assert", "label": "Shadow Enchantments rank 2 adds 50% effectiveness to Lethargy Jinx (#1709)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 8, "base": 1000, "equals": 1500 },
+    { "action": "assert", "label": "Shadow Enchantments rank 2 adds 50% duration to Lethargy Jinx (#1709)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 1, "base": 10000, "equals": 15000 },
+    { "action": "assert", "label": "CONTROL: rank 1's 25% no longer applies once replaced by rank 2",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 8, "base": 1000, "equals": 1500 },
+
+    { "action": "learn", "actor": "caster", "spell": 301297 },
+
+    { "action": "assert", "label": "Blatant Curse cuts Lethargy Jinx's mana cost by 25% (#1810)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 14, "base": 1000, "equals": 750 },
+    { "action": "assert", "label": "Blatant Curse's own zero-value effectiveness clause leaves rank 2's 50% unchanged (0% + 50%)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 8, "base": 1000, "equals": 1500 },
+    { "action": "assert", "label": "CONTROL: Hex of Malice's mana cost untouched by Blatant Curse (not a Jinx)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 501153, "op": 14, "base": 1000, "equals": 1000 }
+  ]
+}

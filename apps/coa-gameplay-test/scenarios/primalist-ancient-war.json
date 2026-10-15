@@ -1,0 +1,803 @@
+{
+  "schema": 1,
+  "name": "Primalist Ancient of War form and Hammer effectiveness",
+  "contract": "The twenty-second form transforms into creature 346922 with its own Ancient of War form display 111212 (client scale 0.7) rather than NPC display 1461 at client scale 3.0 (#7519), reduces movement by thirty percent, keeps native auto-attack swinging and damaging, adds twenty points of melee/spell crit to the party, and increases Hammer of Life conversion from twenty to twenty-six percent. Expiry restores all modifiers; actual damage and healing copies are checked independently. Specialization 58 grants Infused With Power 503718 (ProcChance 20): effective Hammer of Life heals apply 503719, +5% critical strike chance to the party (SPELL_AURA_MOD_CRIT_PCT, BasePoints 4) for 10000 ms. The baseline Wildclaw's Hammer of Life heal on the ally sometimes applied it just before the crit baselines were taken, so the primalist and the ally read 5 points higher there and -5 after expiry while the ungrouped outsider did not; the scenario unlearns the unrelated proc and checks the buff is absent from the baselines.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "outsider",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 100000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 58
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9617.06,
+      "y": -285.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 196
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 803973
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 504222
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "display_id",
+      "save_as": "display"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "save_as": "speed"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 800140,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520566,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520565,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520564,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520563,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520562,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520561,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520560,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800140
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 803973,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "unlearn",
+      "label": "Remove Infused With Power, whose 20% party crit proc from Hammer of Life heals is unrelated",
+      "actor": "primalist",
+      "spell": 503718,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Infused With Power is gone",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 503718,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 800140
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 800140,
+      "target": "target",
+      "save_as": "baselinehitbefore"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 806073,
+      "target": "ally",
+      "save_as": "baselinehealbefore"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 807651,
+      "target": "target",
+      "save_as": "baselinecopybefore"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800140,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 800140,
+      "target": "target",
+      "relative_to": "baselinehitbefore",
+      "save_as": "baselinehit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 806073,
+      "target": "ally",
+      "relative_to": "baselinehealbefore",
+      "save_as": "baselineheal"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 807651,
+      "target": "target",
+      "relative_to": "baselinecopybefore",
+      "save_as": "baselinecopy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 3160,
+      "stacks": 1,
+      "label": "Recalculate native Agility crit after fixture level and weapon setup"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 3160,
+      "stacks": 0,
+      "label": "Recalculate native Agility crit after fixture level and weapon setup"
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 3160,
+      "stacks": 1,
+      "label": "Recalculate native Agility crit after fixture level and weapon setup"
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 3160,
+      "stacks": 0,
+      "label": "Recalculate native Agility crit after fixture level and weapon setup"
+    },
+    {
+      "action": "set_aura",
+      "actor": "outsider",
+      "spell": 3160,
+      "stacks": 1,
+      "label": "Recalculate native Agility crit after fixture level and weapon setup"
+    },
+    {
+      "action": "set_aura",
+      "actor": "outsider",
+      "spell": 3160,
+      "stacks": 0,
+      "label": "Recalculate native Agility crit after fixture level and weapon setup"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Infused With Power buff sits in the crit baseline",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 503719,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Infused With Power buff sits in the crit baseline",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 503719,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_crit_chance",
+      "save_as": "primalistmelee_crit_chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_crit_chance",
+      "save_as": "primalistspell_crit_chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "melee_crit_chance",
+      "save_as": "allymelee_crit_chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "spell_crit_chance",
+      "save_as": "allyspell_crit_chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "melee_crit_chance",
+      "save_as": "outsidermelee_crit_chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "spell_crit_chance",
+      "save_as": "outsiderspell_crit_chance"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 504222
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "display_id",
+      "equals": 111212,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "ratio_to": "speed",
+      "min": 0.699,
+      "max": 0.701
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_crit_chance",
+      "relative_to": "primalistmelee_crit_chance",
+      "min": 19.99999,
+      "max": 20.00001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_crit_chance",
+      "relative_to": "primalistspell_crit_chance",
+      "min": 19.99999,
+      "max": 20.00001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "melee_crit_chance",
+      "relative_to": "allymelee_crit_chance",
+      "min": 19.99999,
+      "max": 20.00001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_crit_chance",
+      "relative_to": "allyspell_crit_chance",
+      "min": 19.99999,
+      "max": 20.00001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "melee_crit_chance",
+      "relative_to": "outsidermelee_crit_chance",
+      "min": -1e-05,
+      "max": 1e-05
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "spell_crit_chance",
+      "relative_to": "outsiderspell_crit_chance",
+      "min": -1e-05,
+      "max": 1e-05
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 803973,
+      "effect": 0,
+      "equals": 26
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_attack_count",
+      "save_as": "formswingsbefore"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_damage_count",
+      "save_as": "formhitsbefore"
+    },
+    {
+      "action": "attack",
+      "actor": "primalist",
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "primalist"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_attack_count",
+      "relative_to": "formswingsbefore",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_damage_count",
+      "relative_to": "formhitsbefore",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 504222,
+      "equals": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 800140
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 800140,
+      "target": "target",
+      "save_as": "activehitbefore"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 806073,
+      "target": "ally",
+      "save_as": "activehealbefore"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 807651,
+      "target": "target",
+      "save_as": "activecopybefore"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800140,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 800140,
+      "target": "target",
+      "relative_to": "activehitbefore",
+      "save_as": "activehit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 806073,
+      "target": "ally",
+      "relative_to": "activehealbefore",
+      "save_as": "activeheal"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 807651,
+      "target": "target",
+      "relative_to": "activecopybefore",
+      "save_as": "activecopy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "wait",
+      "ms": 20500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 504222,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 504369,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "display_id",
+      "relative_to": "display",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "ratio_to": "speed",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_crit_chance",
+      "relative_to": "primalistmelee_crit_chance",
+      "min": -1e-05,
+      "max": 1e-05
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_crit_chance",
+      "relative_to": "primalistspell_crit_chance",
+      "min": -1e-05,
+      "max": 1e-05
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "melee_crit_chance",
+      "relative_to": "allymelee_crit_chance",
+      "min": -1e-05,
+      "max": 1e-05
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_crit_chance",
+      "relative_to": "allyspell_crit_chance",
+      "min": -1e-05,
+      "max": 1e-05
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "melee_crit_chance",
+      "relative_to": "outsidermelee_crit_chance",
+      "min": -1e-05,
+      "max": 1e-05
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "spell_crit_chance",
+      "relative_to": "outsiderspell_crit_chance",
+      "min": -1e-05,
+      "max": 1e-05
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 803973,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 800140
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 800140,
+      "target": "target",
+      "save_as": "expiredhitbefore"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 806073,
+      "target": "ally",
+      "save_as": "expiredhealbefore"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 807651,
+      "target": "target",
+      "save_as": "expiredcopybefore"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800140,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 800140,
+      "target": "target",
+      "relative_to": "expiredhitbefore",
+      "save_as": "expiredhit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 806073,
+      "target": "ally",
+      "relative_to": "expiredhealbefore",
+      "save_as": "expiredheal"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 807651,
+      "target": "target",
+      "relative_to": "expiredcopybefore",
+      "save_as": "expiredcopy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

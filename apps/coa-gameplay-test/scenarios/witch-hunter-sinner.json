@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "name": "Sinner doubles the damage of Torchlight (#2239)",
+  "contract": "Sinner 681411 (installed Spell.dbc) is a passive family-21 spell with one effect: SPELL_AURA_ADD_PCT_MODIFIER (108), misc 0 = SPELLMOD_DAMAGE, base 99 die 1 -> +100%, SpellClassMask[0] 0x80000. Torchlight 503662 carries SpellFamilyFlags[0] 0x80000 and is not flagged SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (its Attributes3 is 0x80), so SpellDamageBonusDone runs its total through ApplySpellMod(SPELLMOD_DAMAGE), which multiplies by 2. The Description reads 'Increases the damage of Torchlight by 100%.' The native modifier query must turn 1000 into 2000, and the native outgoing-damage query on Torchlight's damage effect (effect 1, SCHOOL_DAMAGE) must be twice the untalented control's; the ratio band 1.99-2.01 covers the integer truncation of a value near 1000.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ctl",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    },
+    {
+      "id": "sin",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "mob",
+      "owner": "ctl",
+      "entry": 36,
+      "level": 60,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "ctl",
+      "metric": "spell_damage_done",
+      "save_as": "tl_dmg",
+      "label": "Torchlight's direct damage from a fixed 1000, no talent",
+      "spell": 503662,
+      "effect": 1,
+      "target": "mob"
+    },
+    {
+      "action": "learn",
+      "actor": "sin",
+      "spell": 681411,
+      "label": "Learn Sinner"
+    },
+    {
+      "action": "assert",
+      "label": "Control: the damage modifier leaves 1000 alone",
+      "actor": "ctl",
+      "metric": "spell_modifier",
+      "spell": 503662,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Sinner doubles Torchlight's damage modifier",
+      "actor": "sin",
+      "metric": "spell_modifier",
+      "spell": 503662,
+      "op": 0,
+      "base": 1000,
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Torchlight's direct damage from a fixed base is doubled",
+      "actor": "sin",
+      "metric": "spell_damage_done",
+      "spell": 503662,
+      "effect": 1,
+      "target": "mob",
+      "ratio_to": "tl_dmg",
+      "min": 1.99,
+      "max": 2.01
+    }
+  ]
+}

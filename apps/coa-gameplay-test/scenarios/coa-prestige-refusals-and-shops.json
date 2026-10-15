@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Prestige Mode: Chromie refuses characters who cannot prestige and opens her two shops",
+  "contract": "Activation needs level 60, a Conquest of Azeroth class and a chosen specialization. A level-59 Bloodmage, a level-60 Bloodmage without a specialization and a level-60 Warrior are each told why, and each keeps their level without the Prestige Challenge aura 9930831. 'I would like to purchase Prestige items!' opens Chromie's own list of the 104 Prestige offers, and 'GOSSIP_ACTION_EXPERIENCE_ITEMS' opens the two experience items, Potion of Experience 818046 and Aura of Experience 818059, from vendor list 990782.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8816.5, "y": 627.0, "z": 94.1, "o": 3.8 },
+  "players": [
+    { "id": "young", "race": 1, "class": 20, "level": 59 },
+    { "id": "undecided", "race": 1, "class": 20, "level": 60 },
+    { "id": "warrior", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "chromie_young", "owner": "young", "entry": 178081, "distance": 2, "faction": 35 },
+    { "id": "chromie_undecided", "owner": "undecided", "entry": 178081, "distance": 2, "faction": 35 },
+    { "id": "chromie_warrior", "owner": "warrior", "entry": 178081, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixtures settle", "ms": 3000 },
+    { "action": "specialization", "actor": "young", "id": 25 },
+    { "action": "wait", "ms": 1000 },
+
+    { "action": "gossip_hello", "actor": "young", "target": "chromie_young" },
+    { "action": "gossip_select", "actor": "young", "option": 0, "label": "A level-59 character asks to prestige" },
+    { "action": "assert", "actor": "young", "metric": "system_message_contains", "text": "You must be level 60 or higher to participate in Prestige Mode", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "actor": "young", "metric": "level", "equals": 59 },
+    { "action": "assert", "actor": "young", "metric": "aura", "spell": 9930831, "equals": 0 },
+
+    { "action": "gossip_hello", "actor": "undecided", "target": "chromie_undecided" },
+    { "action": "gossip_select", "actor": "undecided", "option": 0, "label": "A character without a specialization asks to prestige" },
+    { "action": "assert", "actor": "undecided", "metric": "system_message_contains", "text": "Choose a specialization", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "actor": "undecided", "metric": "level", "equals": 60 },
+    { "action": "assert", "actor": "undecided", "metric": "aura", "spell": 9930831, "equals": 0 },
+
+    { "action": "gossip_hello", "actor": "warrior", "target": "chromie_warrior" },
+    { "action": "gossip_select", "actor": "warrior", "option": 0, "label": "A Warrior asks to prestige" },
+    { "action": "assert", "actor": "warrior", "metric": "system_message_contains", "text": "only available to Conquest of Azeroth classes", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "actor": "warrior", "metric": "level", "equals": 60 },
+    { "action": "assert", "actor": "warrior", "metric": "aura", "spell": 9930831, "equals": 0 },
+
+    { "action": "gossip_hello", "actor": "warrior", "target": "chromie_warrior" },
+    { "action": "gossip_select", "actor": "warrior", "option": 1, "label": "I would like to purchase Prestige items!" },
+    { "action": "assert", "actor": "warrior", "metric": "vendor_list_packets", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "Chromie's own list holds the 104 Prestige offers", "actor": "warrior", "metric": "vendor_items", "equals": 104 },
+
+    { "action": "gossip_hello", "actor": "warrior", "target": "chromie_warrior" },
+    { "action": "gossip_select", "actor": "warrior", "option": 2, "label": "GOSSIP_ACTION_EXPERIENCE_ITEMS" },
+    { "action": "assert", "actor": "warrior", "metric": "vendor_list_packets", "equals": 2, "within_ms": 2000 },
+    { "action": "assert", "label": "The experience list holds the potion and the aura", "actor": "warrior", "metric": "vendor_items", "equals": 2 }
+  ]
+}

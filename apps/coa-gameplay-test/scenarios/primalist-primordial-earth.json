@@ -1,0 +1,786 @@
+{
+  "schema": 1,
+  "name": "Primalist Primordial Earth: one spirit per melee critical hit",
+  "contract": "A melee critical hit summons one temporary Spirit of Life, which immediately charges a nearby ally, heals and deals nearby Nature damage with owner credit. The helper adds 20% owner AP and Nature spell power. Baseline, removal and a Nature magic critical hit do not summon. Spirits expire normally; no persistent pet slot is used.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 196
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 674
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 2134
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 2134,
+      "slot": 16
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 23881
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 403
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 82888,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "save_as": "base_charge",
+      "label": "base_charge",
+      "spell": 572830,
+      "effect": 2
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_melee",
+      "label": "baseline_melee",
+      "spell": 23881,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_magic",
+      "label": "baseline_magic",
+      "spell": 403,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_damage",
+      "label": "baseline_damage",
+      "spell": 572830,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "save_as": "baseline_heal",
+      "label": "baseline_heal",
+      "spell": 572830,
+      "target": "primalist"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 23881,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 23881,
+      "target": "target",
+      "relative_to": "baseline_melee",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "owned_creature_count",
+      "entry": 840002,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "owned_creature_count",
+      "entry": 840002,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 572830,
+      "target": "primalist",
+      "relative_to": "baseline_heal",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 572830,
+      "target": "target",
+      "relative_to": "baseline_damage",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 806536
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_melee",
+      "label": "talented_melee",
+      "spell": 23881,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_magic",
+      "label": "talented_magic",
+      "spell": 403,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_damage",
+      "label": "talented_damage",
+      "spell": 572830,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "save_as": "talented_heal",
+      "label": "talented_heal",
+      "spell": 572830,
+      "target": "primalist"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 23881,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 23881,
+      "target": "target",
+      "relative_to": "talented_melee",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "owned_creature_count",
+      "entry": 840002,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 572830,
+      "target": "primalist",
+      "relative_to": "talented_heal",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 572830,
+      "target": "target",
+      "relative_to": "talented_damage",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "owned_creature_count",
+      "entry": 840002,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 572830,
+      "effect": 2,
+      "relative_to": "base_charge",
+      "equals": 20
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "attack_power_melee",
+      "label": "attack_power_melee",
+      "spell": 23881,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "attack_power_magic",
+      "label": "attack_power_magic",
+      "spell": 403,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "attack_power_damage",
+      "label": "attack_power_damage",
+      "spell": 572830,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "save_as": "attack_power_heal",
+      "label": "attack_power_heal",
+      "spell": 572830,
+      "target": "primalist"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 23881,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 23881,
+      "target": "target",
+      "relative_to": "attack_power_melee",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "owned_creature_count",
+      "entry": 840002,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 572830,
+      "target": "primalist",
+      "relative_to": "attack_power_heal",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 572830,
+      "target": "target",
+      "relative_to": "attack_power_damage",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "owned_creature_count",
+      "entry": 840002,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 26395,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 572830,
+      "effect": 2,
+      "relative_to": "base_charge",
+      "min": 14,
+      "max": 15
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "save_as": "nature_charge",
+      "label": "nature_charge",
+      "spell": 572830,
+      "effect": 2
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 9298,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 572830,
+      "effect": 2,
+      "relative_to": "nature_charge",
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "nature_power_melee",
+      "label": "nature_power_melee",
+      "spell": 23881,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "nature_power_magic",
+      "label": "nature_power_magic",
+      "spell": 403,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "nature_power_damage",
+      "label": "nature_power_damage",
+      "spell": 572830,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "save_as": "nature_power_heal",
+      "label": "nature_power_heal",
+      "spell": 572830,
+      "target": "primalist"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 23881,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 23881,
+      "target": "target",
+      "relative_to": "nature_power_melee",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "owned_creature_count",
+      "entry": 840002,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 572830,
+      "target": "primalist",
+      "relative_to": "nature_power_heal",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 572830,
+      "target": "target",
+      "relative_to": "nature_power_damage",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "owned_creature_count",
+      "entry": 840002,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "magic_melee",
+      "label": "magic_melee",
+      "spell": 23881,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "magic_magic",
+      "label": "magic_magic",
+      "spell": 403,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "magic_damage",
+      "label": "magic_damage",
+      "spell": 572830,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "save_as": "magic_heal",
+      "label": "magic_heal",
+      "spell": 572830,
+      "target": "primalist"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 403,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 403,
+      "target": "target",
+      "relative_to": "magic_magic",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "owned_creature_count",
+      "entry": 840002,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "owned_creature_count",
+      "entry": 840002,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 572830,
+      "target": "primalist",
+      "relative_to": "magic_heal",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 572830,
+      "target": "target",
+      "relative_to": "magic_damage",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 806536
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_melee",
+      "label": "removed_melee",
+      "spell": 23881,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_magic",
+      "label": "removed_magic",
+      "spell": 403,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_damage",
+      "label": "removed_damage",
+      "spell": 572830,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "save_as": "removed_heal",
+      "label": "removed_heal",
+      "spell": 572830,
+      "target": "primalist"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 23881,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 23881,
+      "target": "target",
+      "relative_to": "removed_melee",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "owned_creature_count",
+      "entry": 840002,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "owned_creature_count",
+      "entry": 840002,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 572830,
+      "target": "primalist",
+      "relative_to": "removed_heal",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 572830,
+      "target": "target",
+      "relative_to": "removed_damage",
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Tinker: Bomb Builder buffs the Tinker's and its devices' fire damage",
+  "contract": "#1030: Bomb Builder (520811) applies +5% fire damage to the caster on effect 0 and the same aura to its summons on effect 1, through the fork's SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS area aura. The Tinker's calculated fire damage must rise 5%, and a summoned device must carry the 520811 aura the Tinker cast.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "t", "race": 1, "class": 28, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "d", "owner": "t", "entry": 299, "level": 80, "distance": 5 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "snapshot", "save_as": "fire0",
+      "actor": "t", "metric": "spell_damage_done", "spell": 504527, "target": "d" },
+    { "action": "learn", "actor": "t", "spell": 520811 },
+    { "action": "assert", "label": "Bomb Builder is applied to the Tinker",
+      "actor": "t", "metric": "aura", "spell": 520811, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "The Tinker's own fire damage rises 5%",
+      "actor": "t", "metric": "spell_damage_done", "spell": 504527, "target": "d",
+      "ratio_to": "fire0", "min": 1.045, "max": 1.055 },
+    { "action": "learn", "actor": "t", "spell": 801799 },
+    { "action": "cast", "actor": "t", "spell": 801799 },
+    { "action": "assert", "label": "The device is out",
+      "actor": "t", "metric": "owned_creature_count", "entry": 50036, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "The summon half of Bomb Builder reaches the device",
+      "actor": "t", "metric": "owned_creature_count", "entry": 50036, "spell": 520811,
+      "caster": "t", "equals": 1, "within_ms": 8000 }
+  ]
+}

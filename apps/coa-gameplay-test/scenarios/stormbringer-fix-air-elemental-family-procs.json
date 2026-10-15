@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Aeromancy and Storm Bond proc off the Air Elemental (#950, #1155)",
+  "contract": "#950 Aeromancy (705708) and #1155 Storm Bond (500580) are both SPELL_AURA_PROC_TRIGGER_SPELL passives that ship ProcFlags = 0 in Spell.dbc, so SpellMgr::LoadSpellProcs builds no proc entry for them and nothing downstream ever runs. Aeromancy should make the Air Elemental repeat Updraft: 705708 triggers 707544 (SPELL_EFFECT_FORCE_CAST on TARGET_UNIT_PET), which makes the pet cast 707545, whose TARGET_DEST_DEST trigger casts Updraft 802354 at the pet. Storm Bond should turn the Air Elemental's damage into Static for its master: 500580 puts a proc aura on the summon (SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS), the pet's proc casts 807463, whose SPELL_EFFECT_FORCE_CAST on TARGET_UNIT_MASTER makes the Stormbringer cast 807650, which adds EffectMiscValue[0] = 2 stacks of Static (803102). Only the two missing spell_proc rows are added; every other link is native. Updraft 802354 also carries CasterAuraSpell = 681016 (\"At Least 20 Static\"), the same Stormbringer resource-threshold gate as Tailwind 804035 in the sibling stormbringer-fix-unshackle-family-wrath-of-alakir.json scenario; set_aura on 803102 alone does not let AscensionCompat::SynchronizeThresholdResources re-derive 681016 before the next step, so both auras are set directly before either Updraft cast.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "s",
+      "race": 1,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "s",
+      "entry": 36,
+      "level": 80,
+      "health": 10000000,
+      "distance": 5
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "s", "spell": 804019 },
+    { "action": "cast", "actor": "s", "spell": 804019 },
+    { "action": "assert", "label": "SETUP: the Air Elemental (creature 500941) is out",
+      "actor": "s", "metric": "pet_entry", "equals": 500941, "within_ms": 25000 },
+    { "action": "learn", "actor": "s", "spell": 802354 },
+    { "action": "set_aura", "label": "SETUP: Updraft's CasterAuraSpell (681016, \"At Least 20 Static\") is not synchronised by set_aura",
+      "actor": "s", "spell": 803102, "stacks": 100 },
+    { "action": "set_aura", "actor": "s", "spell": 681016, "stacks": 1 },
+    { "action": "cast", "actor": "s", "spell": 802354, "target": "e" },
+    { "action": "wait", "label": "Let the baseline Updraft land and any relay resolve", "ms": 4000 },
+    { "action": "assert", "label": "BASELINE: without Aeromancy the Stormbringer never casts the 707544 relay",
+      "actor": "s", "metric": "spell_cast_count", "spell": 707544, "equals": 0 },
+    { "action": "assert", "label": "BASELINE: without Aeromancy the Air Elemental casts no Updraft",
+      "actor": "s", "metric": "spell_go_count", "spell": 802354, "pet": true, "equals": 0 },
+    { "action": "learn", "actor": "s", "spell": 705708 },
+    { "action": "assert", "label": "SETUP: Aeromancy is a passive and applies on learning",
+      "actor": "s", "metric": "aura", "spell": 705708, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Global cooldown of the baseline Updraft", "ms": 2500 },
+    { "action": "cast", "actor": "s", "spell": 802354, "target": "e" },
+    { "action": "assert", "label": "DISCRIMINATING: Aeromancy procs once on the Updraft cast (EffectTriggerSpell[0] = 707544)",
+      "actor": "s", "metric": "spell_proc_count", "spell": 705708, "equals": 1, "within_ms": 4000 },
+    { "action": "assert", "label": "DISCRIMINATING: the Stormbringer casts the 707544 relay exactly once",
+      "actor": "s", "metric": "spell_cast_count", "spell": 707544, "equals": 1, "within_ms": 4000 },
+    { "action": "assert", "label": "DISCRIMINATING: the Air Elemental casts Updraft 802354 once (707544 force-cast, then 707545, then 802354)",
+      "actor": "s", "metric": "spell_go_count", "spell": 802354, "pet": true, "equals": 1, "within_ms": 4000 },
+    { "action": "set_aura", "actor": "s", "spell": 803102, "stacks": 0 },
+    { "action": "snapshot", "label": "Enemy health before the baseline pet attack",
+      "actor": "e", "metric": "health", "save_as": "enemy_health_baseline" },
+    { "action": "attack", "actor": "s", "pet": true, "target": "e" },
+    { "action": "assert", "label": "BASELINE: the Air Elemental really is damaging the enemy",
+      "actor": "e", "metric": "health", "relative_to": "enemy_health_baseline", "max": -1, "within_ms": 10000 },
+    { "action": "assert", "label": "BASELINE: without Storm Bond the pet's damage grants the master no Static",
+      "actor": "s", "metric": "aura_stacks", "spell": 803102, "equals": 0 },
+    { "action": "assert", "label": "BASELINE: without Storm Bond the master never casts the 807650 Static grant",
+      "actor": "s", "metric": "spell_cast_count", "spell": 807650, "equals": 0 },
+    { "action": "set_aura", "actor": "s", "pet": true, "spell": 3618, "stacks": 1 },
+    { "action": "learn", "actor": "s", "spell": 500580 },
+    { "action": "assert", "label": "CONTROL: effect 190 already puts Storm Bond's aura on the summon today",
+      "actor": "s", "metric": "pet_aura_stacks", "spell": 500580, "equals": 1, "within_ms": 5000 },
+    { "action": "set_aura", "actor": "s", "spell": 803102, "stacks": 0 },
+    { "action": "assert", "label": "SETUP: the Stormbringer starts the measured window with no Static",
+      "actor": "s", "metric": "aura_stacks", "spell": 803102, "equals": 0 },
+    { "action": "set_aura", "actor": "s", "pet": true, "spell": 3618, "stacks": 0 },
+    { "action": "attack", "actor": "s", "pet": true, "target": "e" },
+    { "action": "assert", "label": "DISCRIMINATING: the pet's damage makes the master cast 807650 (807463 force-cast on TARGET_UNIT_MASTER)",
+      "actor": "s", "metric": "spell_cast_count", "spell": 807650, "min": 1, "within_ms": 12000 },
+    { "action": "assert", "label": "DISCRIMINATING: each 807650 grants EffectMiscValue[0] = 2 Static, so a landed swing leaves 2 or more stacks",
+      "actor": "s", "metric": "aura_stacks", "spell": 803102, "min": 2, "within_ms": 12000 }
+  ]
+}

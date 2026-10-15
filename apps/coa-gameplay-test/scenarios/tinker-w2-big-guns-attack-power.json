@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "The BIG Guns! raises party attack power and the Tinker's ranged attack power (#1271)",
+  "contract": "#1271: The BIG Guns! 560593 needs no script. Effects 0 and 1 are SPELL_EFFECT_APPLY_AREA_AURA_RAID (65) with SPELL_AURA_MOD_ATTACK_POWER_PCT (166) and SPELL_AURA_MOD_RANGED_ATTACK_POWER_PCT (167), both BasePoints 4 DieSides 1 (+5%) and EffectRadiusIndex 287 (SpellRadius.dbc row 287 = 100 yd); effect 2 is a plain APPLY_AURA on the caster with aura 167, BasePoints 2 DieSides 1 (+3%). AuraEffect::HandleAuraModAttackPowerPercent and HandleAuraModRangedAttackPowerPercent call SetStatPctModifier with GetTotalAuraMultiplier, so the caster's ranged multiplier is 1.05 * 1.03 = 1.0815 while everyone else in the group gets 1.05. The ranged handler's CLASSMASK_WAND_USERS early return covers priest, mage and warlock only, so Tinker (class 28) is unaffected by it. AttributesEx3 carries SPELL_ATTR3_ONLY_ON_PLAYER (0x100), so the group members must be players. Unit::GetTotalAttackPowerValue multiplies the attack-power fields by UNIT_FIELD_ATTACK_POWER_MULTIPLIER, which is what these ratios read. The exclusive-same-effect rule with Trueshot Aura (spell group 2000180) is generic spell_group_stack_rules data and needs a second, non-Tinker buff source; it is deliberately not asserted here.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "leader", "race": 1, "class": 28, "level": 80 },
+    { "id": "member", "race": 1, "class": 28, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "group", "label": "Put both Tinkers in one party", "actor": "leader", "target": "member" },
+
+    { "action": "snapshot", "label": "Baseline attack power of the caster",
+      "actor": "leader", "metric": "attack_power", "save_as": "ap_leader0" },
+    { "action": "snapshot", "label": "Baseline attack power of the party member",
+      "actor": "member", "metric": "attack_power", "save_as": "ap_member0" },
+    { "action": "snapshot", "label": "Baseline ranged attack power of the caster",
+      "actor": "leader", "metric": "ranged_attack_power", "save_as": "rap_leader0" },
+    { "action": "snapshot", "label": "Baseline ranged attack power of the party member",
+      "actor": "member", "metric": "ranged_attack_power", "save_as": "rap_member0" },
+
+    { "action": "learn", "actor": "leader", "spell": 560593 },
+
+    { "action": "assert", "label": "The caster carries the aura",
+      "actor": "leader", "metric": "aura", "spell": 560593, "equals": 1, "within_ms": 15000 },
+    { "action": "assert", "label": "The area aura reaches the party member",
+      "actor": "member", "metric": "aura", "spell": 560593, "equals": 1, "within_ms": 15000 },
+
+    { "action": "assert", "label": "The caster's attack power rises by 5%",
+      "actor": "leader", "metric": "attack_power", "ratio_to": "ap_leader0",
+      "min": 1.045, "max": 1.055, "within_ms": 15000 },
+    { "action": "assert", "label": "The party member's attack power rises by 5%",
+      "actor": "member", "metric": "attack_power", "ratio_to": "ap_member0",
+      "min": 1.045, "max": 1.055, "within_ms": 15000 },
+    { "action": "assert", "label": "The party member's ranged attack power rises by 5%",
+      "actor": "member", "metric": "ranged_attack_power", "ratio_to": "rap_member0",
+      "min": 1.045, "max": 1.055, "within_ms": 15000 },
+    { "action": "assert", "label": "The caster's ranged attack power rises by 1.05 * 1.03",
+      "actor": "leader", "metric": "ranged_attack_power", "ratio_to": "rap_leader0",
+      "min": 1.078, "max": 1.085, "within_ms": 15000 }
+  ]
+}

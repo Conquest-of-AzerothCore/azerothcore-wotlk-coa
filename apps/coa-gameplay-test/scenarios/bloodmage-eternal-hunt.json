@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Eternal Hunt adds 10% maximum health and cuts resource costs by 10% (#3362)",
+  "contract": "Eternal Hunt 804201 ships two SPELL_EFFECT_APPLY_AURA effects in Spell.dbc: aura 133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT with BasePoints 9 + DieSides 1 = 10% (AuraEffect::HandleAuraModIncreaseHealthPercent) and aura 72 SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT with BasePoints -11 + DieSides 1 = -10%, MiscValue 127 (all schools), consumed by SpellInfo::CalcPowerCost through AuraEffect::HandleModPowerCostPCT. 804201 is the only Eternal Hunt record in Spell.dbc. Bloodbolt 578305 is the probe for the cost half: it is the rank a level-80 character owns, its PowerType is 1 and its shipped cost is 300, and its SchoolMask 32 is inside the aura's 127. The bindmysoul snapshot says 5% on both effects while the shipped Spell.dbc says 10%; the installed DBC wins, so 10% is what is asserted here.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 20, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "caster", "metric": "max_health", "save_as": "health_before" },
+    {
+      "action": "assert", "label": "Bloodbolt costs its shipped 300 before the talent",
+      "actor": "caster", "metric": "spell_power_cost", "spell": 578305, "equals": 300
+    },
+    { "action": "learn", "actor": "caster", "spell": 804201 },
+    {
+      "action": "assert", "label": "Maximum health rises by 10%",
+      "actor": "caster", "metric": "max_health", "ratio_to": "health_before",
+      "min": 1.099, "max": 1.101, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "Bloodbolt's cost drops by 10%",
+      "actor": "caster", "metric": "spell_power_cost", "spell": 578305, "equals": 270
+    }
+  ]
+}

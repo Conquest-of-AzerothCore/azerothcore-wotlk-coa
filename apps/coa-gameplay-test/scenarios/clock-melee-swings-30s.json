@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Clock probe: main-hand swings follow the 1.9 s weapon delay for about 30 s",
+  "contract": [
+    "The warrior equips Worn Shortsword (item 25, delay 1900 ms in item_template); with no melee haste",
+    "attack_time_ms reads 1900. It is checked before the attack and right before each swing count, so a lasting",
+    "haste change fails as SETUP instead of as a count. Unit::Update counts the main-hand attack timer down by each",
+    "player update's diff, and Player::Update swings when it reaches zero and resets it to the full 1900 ms,",
+    "dropping the overshoot, so consecutive swings are 1900 ms plus at most one world step apart (1900..1925 ms with",
+    "a 25 ms step). Counted from the first swing, the k-th later swing needs k * period of game time: 7 of them by",
+    "14.4 s (the 8th cannot land before 15.2 s) and 15 by 29.6 s (the 15th is due by 28.9 s even at 1925 ms, the",
+    "16th cannot land before 30.4 s). Each count is read a few step ticks after its checkpoint, which keeps both",
+    "counts exact for world ticks up to about 75 ms. melee_attack_count counts every main-hand swing packet, misses",
+    "included; hit and expertise ratings keep them ordinary. A swing timer fed by real time instead of",
+    "fast-forwarded game time, or a wrongly sized world step, changes the counts."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "warrior", "race": 1, "class": 1, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "warrior", "entry": 36, "level": 80, "health": 100000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "add_item", "actor": "warrior", "item": 25 },
+    { "action": "equip", "actor": "warrior", "item": 25, "slot": 15 },
+    {
+      "action": "assert", "label": "SETUP: the main hand swings every 1900 ms", "actor": "warrior",
+      "metric": "attack_time_ms", "hand": 0, "min": 1899.5, "max": 1900.5
+    },
+    {
+      "action": "assert", "label": "SETUP: no swings yet", "actor": "warrior",
+      "metric": "melee_attack_count", "hand": 0, "equals": 0
+    },
+    { "action": "attack", "actor": "warrior", "target": "dummy" },
+    {
+      "action": "assert", "label": "The first swing lands", "actor": "warrior",
+      "metric": "melee_attack_count", "hand": 0, "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "snapshot", "label": "Anchor the count at the first swing", "actor": "warrior",
+      "metric": "melee_attack_count", "hand": 0, "save_as": "swings_at_anchor"
+    },
+    { "action": "wait", "ms": 14400 },
+    {
+      "action": "assert", "label": "SETUP: no melee haste after 14.4 s", "actor": "warrior",
+      "metric": "attack_time_ms", "hand": 0, "min": 1899.5, "max": 1900.5
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: 7 swings in 14.4 s", "actor": "warrior",
+      "metric": "melee_attack_count", "hand": 0, "relative_to": "swings_at_anchor", "equals": 7
+    },
+    { "action": "wait", "ms": 15200 },
+    {
+      "action": "assert", "label": "SETUP: no melee haste after 29.6 s", "actor": "warrior",
+      "metric": "attack_time_ms", "hand": 0, "min": 1899.5, "max": 1900.5
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: 15 swings in 29.6 s", "actor": "warrior",
+      "metric": "melee_attack_count", "hand": 0, "relative_to": "swings_at_anchor", "equals": 15
+    },
+    { "action": "stop_attack", "actor": "warrior" }
+  ]
+}

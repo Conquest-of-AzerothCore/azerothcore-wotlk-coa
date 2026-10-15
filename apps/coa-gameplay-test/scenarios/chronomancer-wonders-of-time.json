@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Wonders of Time grants its raid spell haste (#3796)",
+  "contract": "Wonders of Time 560541's tooltip is \"Increases the spell haste of all party and raid members by $s1%. Additionally, all healing done now has a $h% chance to grant you Endless Sands.\" Effect 0 is SPELL_EFFECT_APPLY_AREA_AURA_RAID with SPELL_AURA_HASTE_SPELLS and BasePoints 2 -> +3%, handled natively by AuraEffect::HandleModCastingSpeed, and it reaches the caster even ungrouped. Effect 2 is aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) on 806728 Endless Sands with the record's ProcChance 10, but Spell.dbc gives 560541 ProcFlags 0x0 and no spell_proc row existed, so the 10% chance never happened. The proc is restricted to direct healing; periodic healing ticks are excluded. This scenario asserts only the deterministic haste half and the absence of Endless Sands before any heal. The 10% proc cannot be asserted here without a false-failure rate far above the harness's tolerance: 806728 lasts 15 sec and a Chronomancer heal is bound by the global cooldown, so at most about ten independent trials can fall inside one aura lifetime, giving at best a 65% chance that the aura is still up when a sequential assertion runs. apps/coa-gameplay-test/README.md states that this version provides no automatic statistical test, so the proc rate is left to source review and to a Ghost e2e statistical run.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "chronomancer", "spell": 501811 },
+    {
+      "action": "snapshot",
+      "label": "Reverse Wound's cast time without Wonders of Time",
+      "actor": "chronomancer",
+      "metric": "spell_cast_time_ms",
+      "spell": 501811,
+      "save_as": "base_cast_time"
+    },
+    { "action": "learn", "actor": "chronomancer", "spell": 560541 },
+    {
+      "action": "assert",
+      "label": "Wonders of Time's raid area aura reaches its own caster",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 560541,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Wonders of Time speeds up spell casts by about 3%",
+      "actor": "chronomancer",
+      "metric": "spell_cast_time_ms",
+      "spell": 501811,
+      "ratio_to": "base_cast_time",
+      "min": 0.96,
+      "max": 0.98
+    },
+    {
+      "action": "assert",
+      "label": "No Endless Sands before any healing is done",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 806728,
+      "caster": "chronomancer",
+      "equals": 0
+    }
+  ]
+}

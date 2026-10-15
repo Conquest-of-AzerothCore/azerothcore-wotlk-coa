@@ -1,0 +1,1953 @@
+{
+  "schema": 1,
+  "name": "reaper-crimson-death-retains-slaughter-rank-6249",
+  "contract": [
+    "Crimson Death has a 20% chance to make Slaughter occur a second time at no Runic Power cost. Rank-seven",
+    "Slaughter must repeat rank seven, never the rank-one default trigger, and spend only the normal 200 internal",
+    "Runic Power per cast. Sixty-four trials leave probability below one in a million of no repeat. Removing the",
+    "talent restores one hit per cast."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 30,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "ranged_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "t",
+      "owner": "p",
+      "entry": 299,
+      "level": 80,
+      "health": 1000000,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 197
+    },
+    {
+      "action": "set_skill",
+      "actor": "p",
+      "skill": 172,
+      "value": 400,
+      "maximum": 400
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 12282
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 12282,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 705414
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 500434
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_cast_count",
+      "spell": 500434,
+      "min": 65,
+      "max": 128
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 500434,
+      "target": "t",
+      "min": 65,
+      "max": 128
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_cast_count",
+      "spell": 500373,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 705414
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spell_cast_count",
+      "save_as": "after_talent",
+      "spell": 500434
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 300000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 500434,
+      "target": "t"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_cast_count",
+      "spell": 500434,
+      "relative_to": "after_talent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "power",
+      "power": 6,
+      "equals": 800
+    }
+  ]
+}

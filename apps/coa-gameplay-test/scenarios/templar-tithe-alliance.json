@@ -1,0 +1,435 @@
+{
+  "schema": 1,
+  "name": "Templar Tithe teaches the Alliance holy-site auras",
+  "contract": "Tithe 804781 at a holy site charges 1 silver and teaches that site's party aura, keeping the hour-long cooldown; elsewhere, or at the other faction's site, nothing is learned and Reset Tithe 800981 cuts the cooldown to about 98 sec. Every fixture starts with exactly 1 silver (set_money), independent of StartPlayerMoney, so a paying Templar ends with none and one who learns nothing keeps it.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "a",
+      "race": 1,
+      "class": 19,
+      "level": 60
+    },
+    {
+      "id": "b",
+      "race": 1,
+      "class": 19,
+      "level": 60
+    },
+    {
+      "id": "c",
+      "race": 1,
+      "class": 19,
+      "level": 60
+    },
+    {
+      "id": "d",
+      "race": 1,
+      "class": 19,
+      "level": 60
+    },
+    {
+      "id": "e",
+      "race": 1,
+      "class": 19,
+      "level": 60
+    },
+    {
+      "id": "f",
+      "race": 1,
+      "class": 19,
+      "level": 60
+    },
+    {
+      "id": "g",
+      "race": 1,
+      "class": 19,
+      "level": 60
+    },
+    {
+      "id": "h",
+      "race": 1,
+      "class": 19,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8833.38,
+    "y": 628.628,
+    "z": 94.0066
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let logins settle",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "a",
+      "spell": 804781
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 804781
+    },
+    {
+      "action": "learn",
+      "actor": "c",
+      "spell": 804781
+    },
+    {
+      "action": "learn",
+      "actor": "d",
+      "spell": 804781
+    },
+    {
+      "action": "learn",
+      "actor": "e",
+      "spell": 804781
+    },
+    {
+      "action": "learn",
+      "actor": "f",
+      "spell": 804781
+    },
+    {
+      "action": "learn",
+      "actor": "g",
+      "spell": 804781
+    },
+    {
+      "action": "learn",
+      "actor": "h",
+      "spell": 804781
+    },
+    {
+      "action": "set_money",
+      "label": "Give a exactly the 1 silver tithe",
+      "actor": "a",
+      "value": 100
+    },
+    {
+      "action": "set_money",
+      "label": "Give b exactly the 1 silver tithe",
+      "actor": "b",
+      "value": 100
+    },
+    {
+      "action": "set_money",
+      "label": "Give c exactly the 1 silver tithe",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_money",
+      "label": "Give d exactly the 1 silver tithe",
+      "actor": "d",
+      "value": 100
+    },
+    {
+      "action": "set_money",
+      "label": "Give e exactly the 1 silver tithe",
+      "actor": "e",
+      "value": 100
+    },
+    {
+      "action": "set_money",
+      "label": "Give f exactly the 1 silver tithe",
+      "actor": "f",
+      "value": 100
+    },
+    {
+      "action": "set_money",
+      "label": "Give g exactly the 1 silver tithe",
+      "actor": "g",
+      "value": 100
+    },
+    {
+      "action": "set_money",
+      "label": "Give h exactly the 1 silver tithe",
+      "actor": "h",
+      "value": 100
+    },
+    {
+      "action": "console",
+      "label": "Send a to NorthshireValley",
+      "command": "tele name Harnessa NorthshireValley"
+    },
+    {
+      "action": "console",
+      "label": "Send b to CathedralOfLight",
+      "command": "tele name Harnessb CathedralOfLight"
+    },
+    {
+      "action": "console",
+      "label": "Send c to TempleOfTheMoon",
+      "command": "tele name Harnessc TempleOfTheMoon"
+    },
+    {
+      "action": "console",
+      "label": "Send d to LightsHopeChapel",
+      "command": "tele name Harnessd LightsHopeChapel"
+    },
+    {
+      "action": "console",
+      "label": "Send e to TheSepulcher",
+      "command": "tele name Harnesse TheSepulcher"
+    },
+    {
+      "action": "console",
+      "label": "Send f to EthelRethor",
+      "command": "tele name Harnessf EthelRethor"
+    },
+    {
+      "action": "console",
+      "label": "Send g to Strahnbrad",
+      "command": "tele name Harnessg Strahnbrad"
+    },
+    {
+      "action": "console",
+      "label": "Send h to Deathknell",
+      "command": "tele name Harnessh Deathknell"
+    },
+    {
+      "action": "wait",
+      "label": "Let the teleports land",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "label": "Record the area a stands in",
+      "command": "pinfo Harnessa"
+    },
+    {
+      "action": "console",
+      "label": "Record the area b stands in",
+      "command": "pinfo Harnessb"
+    },
+    {
+      "action": "console",
+      "label": "Record the area c stands in",
+      "command": "pinfo Harnessc"
+    },
+    {
+      "action": "console",
+      "label": "Record the area d stands in",
+      "command": "pinfo Harnessd"
+    },
+    {
+      "action": "console",
+      "label": "Record the area e stands in",
+      "command": "pinfo Harnesse"
+    },
+    {
+      "action": "console",
+      "label": "Record the area f stands in",
+      "command": "pinfo Harnessf"
+    },
+    {
+      "action": "console",
+      "label": "Record the area g stands in",
+      "command": "pinfo Harnessg"
+    },
+    {
+      "action": "console",
+      "label": "Record the area h stands in",
+      "command": "pinfo Harnessh"
+    },
+    {
+      "action": "cast",
+      "actor": "a",
+      "spell": 804781
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 804781
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804781
+    },
+    {
+      "action": "cast",
+      "actor": "d",
+      "spell": 804781
+    },
+    {
+      "action": "cast",
+      "actor": "e",
+      "spell": 804781
+    },
+    {
+      "action": "cast",
+      "actor": "f",
+      "spell": 804781
+    },
+    {
+      "action": "cast",
+      "actor": "g",
+      "spell": 804781
+    },
+    {
+      "action": "cast",
+      "actor": "h",
+      "spell": 804781
+    },
+    {
+      "action": "wait",
+      "label": "Reset Tithe ticks after one second",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "a at NorthshireValley learns 804816",
+      "actor": "a",
+      "metric": "knows_spell",
+      "spell": 804816,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "A paid tithe keeps the hour-long cooldown",
+      "actor": "a",
+      "metric": "cooldown_ms",
+      "spell": 804781,
+      "min": 3500000
+    },
+    {
+      "action": "assert",
+      "label": "a paid its 1 silver",
+      "actor": "a",
+      "metric": "carried_money",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "b at CathedralOfLight learns 804820",
+      "actor": "b",
+      "metric": "knows_spell",
+      "spell": 804820,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "A paid tithe keeps the hour-long cooldown",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 804781,
+      "min": 3500000
+    },
+    {
+      "action": "assert",
+      "label": "c at TempleOfTheMoon learns 804819",
+      "actor": "c",
+      "metric": "knows_spell",
+      "spell": 804819,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "A paid tithe keeps the hour-long cooldown",
+      "actor": "c",
+      "metric": "cooldown_ms",
+      "spell": 804781,
+      "min": 3500000
+    },
+    {
+      "action": "assert",
+      "label": "d at LightsHopeChapel learns 804782",
+      "actor": "d",
+      "metric": "knows_spell",
+      "spell": 804782,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "A paid tithe keeps the hour-long cooldown",
+      "actor": "d",
+      "metric": "cooldown_ms",
+      "spell": 804781,
+      "min": 3500000
+    },
+    {
+      "action": "assert",
+      "label": "e at TheSepulcher learns 804815",
+      "actor": "e",
+      "metric": "knows_spell",
+      "spell": 804815,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "A paid tithe keeps the hour-long cooldown",
+      "actor": "e",
+      "metric": "cooldown_ms",
+      "spell": 804781,
+      "min": 3500000
+    },
+    {
+      "action": "assert",
+      "label": "f at EthelRethor learns 804817",
+      "actor": "f",
+      "metric": "knows_spell",
+      "spell": 804817,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "A paid tithe keeps the hour-long cooldown",
+      "actor": "f",
+      "metric": "cooldown_ms",
+      "spell": 804781,
+      "min": 3500000
+    },
+    {
+      "action": "assert",
+      "label": "g at Strahnbrad learns 804784",
+      "actor": "g",
+      "metric": "knows_spell",
+      "spell": 804784,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "A paid tithe keeps the hour-long cooldown",
+      "actor": "g",
+      "metric": "cooldown_ms",
+      "spell": 804781,
+      "min": 3500000
+    },
+    {
+      "action": "assert",
+      "label": "h at Deathknell does not learn 804816",
+      "actor": "h",
+      "metric": "knows_spell",
+      "spell": 804816,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Reset Tithe hands most of the cooldown back",
+      "actor": "h",
+      "metric": "cooldown_ms",
+      "spell": 804781,
+      "min": 1,
+      "max": 100000
+    },
+    {
+      "action": "assert",
+      "label": "h learned nothing and keeps its 1 silver",
+      "actor": "h",
+      "metric": "carried_money",
+      "equals": 100
+    },
+    {
+      "action": "console",
+      "label": "Record the money left after paying the tithe (1s -> 0s)",
+      "command": "pinfo Harnessa"
+    }
+  ]
+}

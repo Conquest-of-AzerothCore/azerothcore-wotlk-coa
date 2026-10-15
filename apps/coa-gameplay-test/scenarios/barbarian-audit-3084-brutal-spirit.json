@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Barbarian audit: Brutal Spirit spell modifier reaches its target spells (#3084)",
+  "contract": "Audit report #3084 asked for a script for a passive whose effects are native spell-mod auras (107 flat, 108 percent). The effect BasePoints and EffectSpellClassMask in Spell.dbc name the spell-mod operation, amount and affected Barbarian spells; Player::ApplySpellMod, which the spell_modifier metric calls, must deliver base+flat or base*(100+pct)/100. Expected values are computed from the DBC amount, not from the implementation.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "before: 705387 has no modifier for op 8",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 705387,
+      "op": 8,
+      "base": 100000,
+      "min": 99998,
+      "max": 100002
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 706653
+    },
+    {
+      "action": "assert",
+      "label": "Brutal Spirit (706653) is active",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 706653,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "706653 op 8 percent +25 reaches 705387 (mask selects 8 Barbarian spell(s))",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 705387,
+      "op": 8,
+      "base": 100000,
+      "min": 124998,
+      "max": 125002
+    }
+  ]
+}

@@ -1,0 +1,373 @@
+{
+  "schema": 1,
+  "name": "Every Tinker build pet dies when its health runs out (#1411)",
+  "contract": "#1411 reports a Tinker pet that stayed alive at 0 health, without naming the pet or the damage. A pet whose health is exhausted must die like any creature: Unit::DealDamage kills a victim when the damage reaches its health, and Pet::Update removes a dead summoned pet (only hunter pets keep a corpse), so the owner loses it. The Tinker builds are SPELL_EFFECT_SUMMON_PET spells for the five permanent pets that npc_ascension_tinker_pet rescales every second: Build: Scrapmaw 500242 (50048), Build: ZIGGI-6K 524840 (500481), Build: Mechano-Bear 803405 (60671), Build: Clockwork Assistant 803436 (60070) and Build: Rusthound 803437 (60672). Each pet is set to 1 health beside its Tinker and hit by Decoy Explosive 53273 cast by a golem 3 yd away (10 yd around the golem, SPELL_ATTR3_ALWAYS_HIT, 1440 to 2160 Physical), so the blow always lands and is lethal; the Tinker's health is raised as a fixture so the same blast cannot kill it. A pet that survived at 0 health would still be reported by pet_entry.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "golem",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 80,
+      "distance": 3,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Build: Scrapmaw",
+      "actor": "tinker",
+      "spell": 500242
+    },
+    {
+      "action": "cast",
+      "label": "Build: Scrapmaw",
+      "actor": "tinker",
+      "spell": 500242
+    },
+    {
+      "action": "assert",
+      "label": "Scrapmaw is built",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 50048,
+      "within_ms": 9000
+    },
+    {
+      "action": "wait",
+      "label": "Scrapmaw settles beside the Tinker",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Scrapmaw is still out",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 50048
+    },
+    {
+      "action": "set_health",
+      "label": "The Tinker can take the blast",
+      "actor": "tinker",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_health",
+      "label": "Scrapmaw is down to 1 health",
+      "actor": "tinker",
+      "pet": true,
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "label": "The golem's blast hits Scrapmaw",
+      "actor": "golem",
+      "spell": 53273
+    },
+    {
+      "action": "assert",
+      "label": "#1411: Scrapmaw dies at 0 health and is removed",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Tinker survives the blast",
+      "actor": "tinker",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "label": "Build: ZIGGI-6K",
+      "actor": "tinker",
+      "spell": 524840
+    },
+    {
+      "action": "cast",
+      "label": "Build: ZIGGI-6K",
+      "actor": "tinker",
+      "spell": 524840
+    },
+    {
+      "action": "assert",
+      "label": "ZIGGI-6K is built",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 500481,
+      "within_ms": 9000
+    },
+    {
+      "action": "wait",
+      "label": "ZIGGI-6K settles beside the Tinker",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "ZIGGI-6K is still out",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 500481
+    },
+    {
+      "action": "set_health",
+      "label": "The Tinker can take the blast",
+      "actor": "tinker",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_health",
+      "label": "ZIGGI-6K is down to 1 health",
+      "actor": "tinker",
+      "pet": true,
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "label": "The golem's blast hits ZIGGI-6K",
+      "actor": "golem",
+      "spell": 53273
+    },
+    {
+      "action": "assert",
+      "label": "#1411: ZIGGI-6K dies at 0 health and is removed",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Tinker survives the blast",
+      "actor": "tinker",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "label": "Build: Mechano-Bear",
+      "actor": "tinker",
+      "spell": 803405
+    },
+    {
+      "action": "cast",
+      "label": "Build: Mechano-Bear",
+      "actor": "tinker",
+      "spell": 803405
+    },
+    {
+      "action": "assert",
+      "label": "Mechano-Bear is built",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 60671,
+      "within_ms": 9000
+    },
+    {
+      "action": "wait",
+      "label": "Mechano-Bear settles beside the Tinker",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Mechano-Bear is still out",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 60671
+    },
+    {
+      "action": "set_health",
+      "label": "The Tinker can take the blast",
+      "actor": "tinker",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_health",
+      "label": "Mechano-Bear is down to 1 health",
+      "actor": "tinker",
+      "pet": true,
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "label": "The golem's blast hits Mechano-Bear",
+      "actor": "golem",
+      "spell": 53273
+    },
+    {
+      "action": "assert",
+      "label": "#1411: Mechano-Bear dies at 0 health and is removed",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Tinker survives the blast",
+      "actor": "tinker",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "label": "Build: Clockwork Assistant",
+      "actor": "tinker",
+      "spell": 803436
+    },
+    {
+      "action": "cast",
+      "label": "Build: Clockwork Assistant",
+      "actor": "tinker",
+      "spell": 803436
+    },
+    {
+      "action": "assert",
+      "label": "Clockwork Assistant is built",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 60070,
+      "within_ms": 9000
+    },
+    {
+      "action": "wait",
+      "label": "Clockwork Assistant settles beside the Tinker",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Clockwork Assistant is still out",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 60070
+    },
+    {
+      "action": "set_health",
+      "label": "The Tinker can take the blast",
+      "actor": "tinker",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_health",
+      "label": "Clockwork Assistant is down to 1 health",
+      "actor": "tinker",
+      "pet": true,
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "label": "The golem's blast hits Clockwork Assistant",
+      "actor": "golem",
+      "spell": 53273
+    },
+    {
+      "action": "assert",
+      "label": "#1411: Clockwork Assistant dies at 0 health and is removed",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Tinker survives the blast",
+      "actor": "tinker",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "label": "Build: Rusthound",
+      "actor": "tinker",
+      "spell": 803437
+    },
+    {
+      "action": "cast",
+      "label": "Build: Rusthound",
+      "actor": "tinker",
+      "spell": 803437
+    },
+    {
+      "action": "assert",
+      "label": "Rusthound is built",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 60672,
+      "within_ms": 9000
+    },
+    {
+      "action": "wait",
+      "label": "Rusthound settles beside the Tinker",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Rusthound is still out",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 60672
+    },
+    {
+      "action": "set_health",
+      "label": "The Tinker can take the blast",
+      "actor": "tinker",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_health",
+      "label": "Rusthound is down to 1 health",
+      "actor": "tinker",
+      "pet": true,
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "label": "The golem's blast hits Rusthound",
+      "actor": "golem",
+      "spell": 53273
+    },
+    {
+      "action": "assert",
+      "label": "#1411: Rusthound dies at 0 health and is removed",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Tinker survives the blast",
+      "actor": "tinker",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

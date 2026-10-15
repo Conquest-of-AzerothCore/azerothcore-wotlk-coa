@@ -1,0 +1,10 @@
+[worldserver]
+
+# Enable the module's drops and equipped powers.
+CoALegendaryItems.Enable = 0
+
+# Percent chance per eligible creature kill. At most one legendary drops per corpse.
+CoALegendaryItems.DropChance = 0.5
+
+# Players at this level or higher receive no new drops. Existing items still work.
+CoALegendaryItems.StopDropLevel = 60

@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "name": "Starburst slows the attack speed of enemies it hits by 20% (#2401)",
+  "contract": "Starburst 801996 (Spell.dbc, SpellFamilyName 32, cooldown 20000, instant, Arcane) has effect 2 SPELL_EFFECT_TRIGGER_SPELL (64) with TriggerSpell 704796 on the same source-area enemy targets as its damage effect; Spell::EffectTriggerSpell in launch-target mode casts the triggered spell on each hit unit. Its description reads '... reducing their attack speed by $704796s1% for $704796d.' The debuff 704796 (record named Starburst, rank text 'ATS Slow', duration index 1) has effect 0 APPLY_AURA SPELL_AURA_MOD_MELEE_RANGED_HASTE (192), EffectBasePoints -21 with DieSides 1 resolving to -20, and aura description 'Attack speed slowed by $w1%.' (issue #2401 is this debuff spell id; the classification report numbers the effect from 1). Aura 192 is the stock haste handler AuraEffect::HandleModMeleeRangedSpeedPct, which rescales the swing timer through Unit::ApplyAttackTimePercentMod: a negative amount takes the else branch of ApplyAttackTimePercentMod and multiplies the timer by (100 + 20) / 100 = 1.20 (a positive haste amount divides instead, which is why Starbarian reads 1/1.04). The module edits 801996 only for its damage base value (block value bonus, AscensionStarcallerContracts.cpp) and a crit chance bonus (AscensionStarcallerAbilities.cpp); nothing touches 704796. The caster has spell_hit_rating 10000 so the cast cannot miss; the enemy is a hostile (faction 14) level-80 fixture creature 3 yards away, inside the spell's area. Not asserted: that the debuff drops after its 10 second duration, and exact slow on a creature whose template attack time is zero (the ratio snapshot would then fail loudly).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Enemy swing time before Starburst",
+      "actor": "enemy",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "save_as": "enemy_swing_base"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801996
+    },
+    {
+      "action": "cast",
+      "label": "Cast Starburst at the adjacent enemy",
+      "actor": "caster",
+      "spell": 801996,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Starburst's triggered debuff 704796 lands on the enemy, cast by the caster",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 704796,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Effect 0 (SPELL_AURA_MOD_MELEE_RANGED_HASTE) resolves to -20, the tooltip's $704796s1%",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 704796,
+      "effect": 0,
+      "equals": -20
+    },
+    {
+      "action": "assert",
+      "label": "The enemy's swing timer is 20% longer (x1.20)",
+      "actor": "enemy",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "ratio_to": "enemy_swing_base",
+      "min": 1.19,
+      "max": 1.21,
+      "within_ms": 1000
+    }
+  ]
+}

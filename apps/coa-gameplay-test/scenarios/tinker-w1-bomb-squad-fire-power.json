@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "name": "Tinker Bomb Squad turns Agility into Fire spell power (#1325)",
+  "contract": "Bomb Squad 520131 applies SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT with amount 50 (DBC EffectBasePoints 49, DieSides 1), MiscValue 4 (SPELL_SCHOOL_MASK_FIRE) and MiscValueB 1 (STAT_AGILITY). Unit::SpellBaseDamageBonusDone (Unit.cpp:9526-9535) reads both fields inside an IsPlayer() guard and adds CalculatePct(GetStat(AGILITY), 50) to the Fire advertised benefit only. The scenario cannot compute floor(Agility * 0.5) from inside a scenario file, so it asserts that Fire spell power rises and that no other school moves; the character's agility is snapshotted into result.json so a reviewer can check the exact figure.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "save_as": "agi",
+      "actor": "t",
+      "metric": "stat",
+      "stat": 1
+    },
+    {
+      "action": "snapshot",
+      "save_as": "fire0",
+      "actor": "t",
+      "metric": "spell_power",
+      "school": 2
+    },
+    {
+      "action": "snapshot",
+      "save_as": "shadow0",
+      "actor": "t",
+      "metric": "spell_power",
+      "school": 5
+    },
+    {
+      "action": "snapshot",
+      "save_as": "frost0",
+      "actor": "t",
+      "metric": "spell_power",
+      "school": 4
+    },
+    {
+      "action": "assert",
+      "label": "The Tinker has agility to convert",
+      "actor": "t",
+      "metric": "stat",
+      "stat": 1,
+      "min": 20
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 520131
+    },
+    {
+      "action": "assert",
+      "label": "Fire spell power rises with the passive",
+      "actor": "t",
+      "metric": "spell_power",
+      "school": 2,
+      "relative_to": "fire0",
+      "min": 10
+    },
+    {
+      "action": "assert",
+      "label": "Shadow spell power is untouched",
+      "actor": "t",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "shadow0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Frost spell power is untouched",
+      "actor": "t",
+      "metric": "spell_power",
+      "school": 4,
+      "relative_to": "frost0",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "t",
+      "spell": 520131
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning gives the Fire bonus back",
+      "actor": "t",
+      "metric": "spell_power",
+      "school": 2,
+      "relative_to": "fire0",
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

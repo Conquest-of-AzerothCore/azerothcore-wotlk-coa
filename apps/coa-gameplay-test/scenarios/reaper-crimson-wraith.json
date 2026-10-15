@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Crimson Wraith increases critical strike damage bonus at both ranks",
+  "contract": "Crimson Wraith is SPELL_AURA_MOD_CRIT_DAMAGE_BONUS (163) with EffectMiscValue SPELL_SCHOOL_MASK_ALL (127): rank 1 (504560) base points 9 (raw 10, 10%), rank 2 (504880) base points 19 (raw 20, 20%). This aura type is handled natively in Unit.cpp via GetTotalAuraModifierByMiscMask/GetTotalAuraMultiplierByMiscMask, with no per-spell CoA code required. Issue #1928 reported no handler exists for either rank; this proves both ranks deliver the tooltip's percentage through the native mechanism.",
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "reaper", "spell": 504560 },
+    { "action": "assert", "label": "Rank 1 aura settles on the caster", "actor": "reaper",
+      "metric": "aura", "spell": 504560, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Rank 1 grants 10% critical strike damage", "actor": "reaper",
+      "metric": "spell_effect_value", "spell": 504560, "effect": 0, "equals": 10 },
+    { "action": "set_aura", "actor": "reaper", "spell": 504560, "stacks": 0 },
+    { "action": "learn", "actor": "reaper", "spell": 504880 },
+    { "action": "assert", "label": "Rank 2 aura settles on the caster", "actor": "reaper",
+      "metric": "aura", "spell": 504880, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Rank 2 grants 20% critical strike damage", "actor": "reaper",
+      "metric": "spell_effect_value", "spell": 504880, "effect": 0, "equals": 20 }
+  ]
+}

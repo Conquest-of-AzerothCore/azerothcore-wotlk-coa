@@ -1,0 +1,60 @@
+###################################################################################################
+#  mod-treasure-keeper
+#
+#  CoA's Treasure Keeper and Celestial Treasure Keeper: non-combat companions whose right click
+#  opens the character's own bank. Their item text is the whole specification:
+#
+#      "Right Click to summon and dismiss your companion, that acts as a portable bank while in
+#       safe zones. Cannot be summoned in High-Risk Open World."
+#
+#  The bank needs no configuration: the pets carry the banker flag and the core answers the
+#  client's own click with the native bank window. What is configured here is the one rule the
+#  text states - where the companion may not be summoned at all. Both switches are on, which is
+#  the item text enforced: the companion cannot be summoned in High-Risk Open World or in War Mode.
+#  A companion that is already out keeps its banker flag and answers the click with the reason
+#  instead, so nothing about it is silent - in the chat log and in the middle of the screen.
+#
+#  A city - Stormwind, Orgrimmar, the Undercity, Thunder Bluff and the other capitals - is exempt
+#  from the rulesets altogether, because a city is not "Open World" and the realm's own PvP rulesets
+#  cannot reach a character inside one.
+#
+#  This code is part of the AzerothCore project. See AUTHORS file for Copyright information.
+###################################################################################################
+
+#    TreasureKeeper.BlockInHighRisk
+#        Description: Whether the companions are refused while the character carries the
+#                     High-Risk ruleset aura (1004019) - the "High-Risk Open World" of the item
+#                     text.
+#        Default:     1 - (Refused, as the item text says)
+#                     0 - (Allowed)
+TreasureKeeper.BlockInHighRisk = 1
+
+#    TreasureKeeper.BlockInWarMode
+#        Description: Whether the companions are refused in War Mode - the War Mode aura (1004119)
+#                     without the PvE marker (9931032). A character in PvE carries that same aura as
+#                     part of its set, so the marker is what keeps PvE a separate ruleset; a
+#                     character carrying neither aura is not affected either way.
+#        Default:     1 - (Refused)
+#                     0 - (Allowed)
+TreasureKeeper.BlockInWarMode = 1
+
+#    TreasureKeeper.AllowInCities
+#        Description: Whether the companions work in a city whatever the ruleset says. On, the
+#                     rulesets below are enforced in the open world only: a character inside a city
+#                     - the capitals flagged AREA_FLAG_CAPITAL, the flag the core's own rest and PvP
+#                     logic reads - can summon the companion and use it while in War Mode or
+#                     High-Risk. Off, the rulesets are enforced everywhere.
+#        Default:     1 - (Allowed in cities)
+#                     0 - (Enforced everywhere)
+TreasureKeeper.AllowInCities = 1
+
+#    TreasureKeeper.SeparatePveFromWarMode
+#        Description: Whether PvE counts as its own ruleset (the marker 9931032 on top of the shared
+#                     War Mode aura) and therefore keeps the companions. On, only War Mode and
+#                     High-Risk refuse them, which is what the item text says and what makes the
+#                     companions usable in PvE. Off, the shared aura alone is enough to refuse, which
+#                     also refuses PvE - and since this realm grants the PvE set at login, that means
+#                     every character is refused until no ruleset aura is on them at all.
+#        Default:     1 - (Separate: PvE keeps its companion)
+#                     0 - (Not separate: the buff alone refuses)
+TreasureKeeper.SeparatePveFromWarMode = 1

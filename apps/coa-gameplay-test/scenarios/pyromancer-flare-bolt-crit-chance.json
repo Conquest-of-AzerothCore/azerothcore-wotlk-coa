@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "name": "Magnitude 10 raises the critical chance of Flare Bolt (#727)",
+  "contract": "#727: Magnitude 10 520485 is SPELL_AURA_ADD_FLAT_MODIFIER 107 on SPELLMOD_CRITICAL_CHANCE (misc 7), bp 4 (+5), class mask B 0x2, which is the family flag of Flare Bolt 800790. Unit::GetUnitSpellCriticalChance applies the modifier through ApplySpellMod; nothing in src/ or modules/ references 520485. spell_done_crit_chance reads SpellDoneCritChance for a spell: Flare Bolt must gain exactly 5.0 points over its pre-passive value while Explode 800792 (mask A 0x200000, no B 0x2) is unchanged.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000,
+      "label": "Let spawn AI and level scaling settle"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_done_crit_chance",
+      "save_as": "flare_before",
+      "spell": 800790,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_done_crit_chance",
+      "save_as": "explode_before",
+      "spell": 800792,
+      "target": "target"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 520485
+    },
+    {
+      "action": "assert",
+      "label": "Flare Bolt gains 5 critical strike points",
+      "actor": "caster",
+      "metric": "spell_done_crit_chance",
+      "spell": 800790,
+      "target": "target",
+      "relative_to": "flare_before",
+      "min": 4.99,
+      "max": 5.01
+    },
+    {
+      "action": "assert",
+      "label": "Explode is not affected",
+      "actor": "caster",
+      "metric": "spell_done_crit_chance",
+      "spell": 800792,
+      "target": "target",
+      "relative_to": "explode_before",
+      "min": -0.01,
+      "max": 0.01
+    }
+  ]
+}

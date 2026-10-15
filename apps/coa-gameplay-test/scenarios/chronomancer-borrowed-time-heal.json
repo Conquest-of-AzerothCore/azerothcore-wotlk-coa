@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "name": "Borrowed Time heals the Chronomancer for 10% of Physical damage taken (#1053)",
+  "contract": "Borrowed Time 680373 reads \"Taking Physical damage now heals you equal to $s1% of the damage dealt. Can only occur once per sec.\" Its effect 0 has EffectBasePoints 9 / DieSides 1 (the 10% of $s1) but EffectApplyAuraName 354, a type this core has no handler for (SpellAuraEffects.cpp holds \"//354 unknown Ascension aura\" and a null entry falls back to HandleNoImmediateEffect), and its trigger 680374 is a single SPELL_EFFECT_HEAL with EffectBasePoints 0 / DieSides 0, so it heals zero unless a caster supplies the base point; Spell.dbc also gives 680373 ProcFlags 0, so no proc entry exists. The fix rewrites effect 0 to SPELL_AURA_DUMMY and forwards damage * 10 / 100 into 680374 as SPELLVALUE_BASE_POINT0, gated by a spell_proc row with PROC_FLAG_TAKEN_DAMAGE, SchoolMask 1 (Physical) and Cooldown 1000. The fixture damage is Gnomish Death Ray 13493: SchoolMask 1, SPELL_AURA_PERIODIC_DAMAGE, EffectBasePoints 149 / DieSides 1, Amplitude 1000, DurationIndex 35 = 4000 ms, and AttributesEx3 SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, so every application deals exactly four fixed ticks regardless of the caster's spell power and both phases lose the same raw amount. The Chronomancer auto-attacks the fixture creature throughout so it stays in combat and player health regeneration cannot add noise. The assertion compares the health lost after learning the talent against the health lost before it: without the fix the two phases are identical and the ratio is exactly 1.0, while a single 10% return over eight ticks already brings it to 0.9875 or lower, so max 0.99 discriminates without depending on how many of the eight ticks clear the one-second proc cooldown.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "melee_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "attack",
+      "label": "Stay in combat so health regeneration cannot refill the loss",
+      "actor": "chronomancer",
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "label": "Health before the untalented phase",
+      "actor": "chronomancer",
+      "metric": "health",
+      "save_as": "before_untalented"
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 13493,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 4600
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 13493,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 4600
+    },
+    {
+      "action": "snapshot",
+      "label": "Health lost to eight Physical ticks without the talent",
+      "actor": "chronomancer",
+      "metric": "health",
+      "relative_to": "before_untalented",
+      "save_as": "loss_untalented"
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 680373
+    },
+    {
+      "action": "snapshot",
+      "label": "Health before the talented phase",
+      "actor": "chronomancer",
+      "metric": "health",
+      "save_as": "before_talented"
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 13493,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 4600
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 13493,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 4600
+    },
+    {
+      "action": "assert",
+      "label": "Borrowed Time returns part of the Physical damage taken",
+      "actor": "chronomancer",
+      "metric": "health",
+      "relative_to": "before_talented",
+      "ratio_to": "loss_untalented",
+      "min": 0.4,
+      "max": 0.99
+    }
+  ]
+}

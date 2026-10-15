@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Tinker Med Pack passives: Enhanced Procedures and Emergency Circumvented (#1305, #1253)",
+  "contract": "#1305, #1253: both passives are native spell modifiers and aura types, so neither needs a script. Enhanced Procedures 506819 (passive, DurationIndex 21) carries two ADD_PCT_MODIFIER (aura 108) effects on EffectSpellClassMask (0,0,32768): MiscValue 1 SPELLMOD_DURATION BasePoints 99 DieSides 1 (+100%) and MiscValue 22 SPELLMOD_DOT BasePoints 74 DieSides 1 (+75%). Med Pack 502533 has SpellFamilyName 34, SpellFamilyFlags (0,0,32768), DurationIndex 32 (SpellDuration.dbc row 32 = 6000 ms) and effect 0 SPELL_AURA_PERIODIC_HEAL with Amplitude 1000, so the duration becomes 12000 ms and SPELLMOD_DOT turns a 1000 base tick into 1750. Emergency Circumvented 805303 carries ADD_FLAT_MODIFIER MiscValue 7 SPELLMOD_CRITICAL_CHANCE BasePoints 14 DieSides 1 (+15) on mask (2147483648,0,0), which in family 34 resolves to the Emergency Heal rows (575027 has SpellFamilyFlags (2147483648,2,0)), plus SPELL_AURA_ABILITY_PERIODIC_CRIT (286) on mask (0,0,32768), which makes Med Pack's periodic heal roll for critical hits. Native paths only: Player::ApplySpellMod, Aura::CalcMaxDuration, Unit::SpellHealingBonusDone (SPELLMOD_DOT for damagetype DOT), Unit::SpellDoneCritChance and AuraEffect::CalcPeriodicCritChance. Neither Med Pack nor Emergency Heal carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "control", "race": 1, "class": 28, "level": 80 },
+    { "id": "procedures", "race": 1, "class": 28, "level": 80 },
+    { "id": "circumvent", "race": 1, "class": 28, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "procedures", "spell": 506819 },
+    { "action": "learn", "actor": "circumvent", "spell": 805303 },
+
+    { "action": "assert", "label": "Med Pack keeps its 6 sec duration without Enhanced Procedures",
+      "actor": "control", "metric": "spell_modifier", "spell": 502533, "op": 1, "base": 6000, "equals": 6000 },
+    { "action": "assert", "label": "Enhanced Procedures doubles Med Pack's duration to 12 sec",
+      "actor": "procedures", "metric": "spell_modifier", "spell": 502533, "op": 1, "base": 6000, "equals": 12000 },
+    { "action": "assert", "label": "Med Pack rank 1 keeps its 6 sec duration without the talent",
+      "actor": "control", "metric": "spell_modifier", "spell": 800347, "op": 1, "base": 6000, "equals": 6000 },
+    { "action": "assert", "label": "Enhanced Procedures reaches Med Pack rank 1 as well",
+      "actor": "procedures", "metric": "spell_modifier", "spell": 800347, "op": 1, "base": 6000, "equals": 12000 },
+    { "action": "assert", "label": "Med Pack's periodic healing is unmodified without the talent",
+      "actor": "control", "metric": "spell_modifier", "spell": 502533, "op": 22, "base": 1000, "equals": 1000 },
+    { "action": "assert", "label": "Enhanced Procedures raises Med Pack's periodic healing by 75%",
+      "actor": "procedures", "metric": "spell_modifier", "spell": 502533, "op": 22, "base": 1000, "equals": 1750 },
+
+    { "action": "assert", "label": "Emergency Heal has no extra critical chance without Emergency Circumvented",
+      "actor": "control", "metric": "spell_modifier", "spell": 575027, "op": 7, "base": 0, "equals": 0 },
+    { "action": "assert", "label": "Emergency Circumvented adds 15 points of critical chance to Emergency Heal",
+      "actor": "circumvent", "metric": "spell_modifier", "spell": 575027, "op": 7, "base": 0, "equals": 15 },
+    { "action": "assert", "label": "The Emergency Heal crit mask does not spill onto Med Pack",
+      "actor": "circumvent", "metric": "spell_modifier", "spell": 502533, "op": 7, "base": 0, "equals": 0 },
+
+    { "action": "set_aura", "label": "Apply Med Pack with the unmodified Tinker as its caster",
+      "actor": "control", "spell": 502533, "stacks": 1 },
+    { "action": "set_aura", "label": "Apply Med Pack with Enhanced Procedures as its caster",
+      "actor": "procedures", "spell": 502533, "stacks": 1 },
+    { "action": "set_aura", "label": "Apply Med Pack with Emergency Circumvented as its caster",
+      "actor": "circumvent", "spell": 502533, "stacks": 1 },
+
+    { "action": "assert", "label": "The unmodified Med Pack aura lasts 6 sec",
+      "actor": "control", "metric": "aura_duration_ms", "spell": 502533, "min": 5500, "max": 6000 },
+    { "action": "assert", "label": "Enhanced Procedures makes the applied Med Pack aura last 12 sec",
+      "actor": "procedures", "metric": "aura_duration_ms", "spell": 502533, "min": 11500, "max": 12000 },
+    { "action": "assert", "label": "Med Pack still ticks once per second without the talent",
+      "actor": "control", "metric": "aura_amplitude_ms", "spell": 502533, "effect": 0, "equals": 1000 },
+    { "action": "assert", "label": "Enhanced Procedures changes the duration, not the tick rate",
+      "actor": "procedures", "metric": "aura_amplitude_ms", "spell": 502533, "effect": 0, "equals": 1000 },
+
+    { "action": "assert", "label": "Med Pack's periodic heal cannot crit without Emergency Circumvented",
+      "actor": "control", "metric": "aura_crit_chance", "spell": 502533, "effect": 0, "equals": 0 },
+    { "action": "assert", "label": "Emergency Circumvented lets Med Pack's periodic heal crit",
+      "actor": "circumvent", "metric": "aura_crit_chance", "spell": 502533, "effect": 0, "min": 0.01 }
+  ]
+}

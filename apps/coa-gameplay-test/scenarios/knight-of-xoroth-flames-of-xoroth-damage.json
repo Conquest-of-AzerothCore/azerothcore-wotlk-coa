@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Flames of Xoroth ranks 1 and 2 damage an enemy off the knight's centre line from level 8 (#227)",
+  "contract": "Issue #227 reports that Flames of Xoroth 801059 deals 0 damage at level 8 (core feb155c82c75). Live client Spell.dbc: rank 1 801059 has SpellLevel/BaseLevel 8, effect 0 SPELL_EFFECT_SCHOOL_DAMAGE (Fire) with EffectBasePoints 13 and EffectDieSides 2, so $m1 is 14-15 at its base level (EffectRealPointsPerLevel 0.2167 adds nothing at level 8), and both effects use implicit target 24 TARGET_UNIT_CONE_ENEMY_24 with a 12 yd radius; the description promises '${$m1+0+$spfi*0.45+$AP*.15} Fire damage' to 'enemies in front of you', increased per Demonfire consumed. Every other rank (802411-802415, 573448) has the same targets with larger base points. The suffix 24 is the DBC target id, not an angle, but Spell::SelectImplicitConeTargets read it as a 24 degree arc (+/-12 degrees) whenever spell_cone had no row, so an enemy standing plainly in front of the knight but slightly off the centre line was never selected and the cast dealt nothing; rev_20260916_13_flames_of_xoroth_cone.sql (#441, a7e6f86c8, landed after the report) restores a 90 degree cone (+/-45 degrees) for the whole rank chain. The fixture teleports the knight with orientation 0.5 rad and summons the Harvest Golem 3 yd along +X, so the golem is 28.6 degrees off the knight's facing: inside the 90 degree cone, outside the old 24 degree one, and beyond the 2 yd boundary-radius shortcut (model 367 bounding radius 0.8). Flames of Xoroth needs and spends Demonfire (CasterAuraSpell 500906) and costs 15 Rage, so one Demonfire stack and Rage are fixtured; spell hit rating 10000 removes the magic miss roll. Expected: the level-8 cast deals at least the $m1 base of 14 Fire damage to the golem (Demonfire, spell power, attack power and critical strikes only add). SpellMgr::GetSpellCone resolves the single spell_cone row through GetFirstSpellInChain, so rank 2 802411 (SpellLevel 16, EffectBasePoints 27, EffectDieSides 4: $m1 28-31 at level 16) must select the same off-centre golem once the knight reaches level 16 and learns it, dealing at least 28.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0.5 },
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 8, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "knight", "entry": 36, "level": 8, "health": 100000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 801059 },
+    { "action": "assert", "label": "SETUP: the knight knows Flames of Xoroth rank 1", "actor": "knight", "metric": "knows_spell", "spell": 801059, "equals": 1 },
+    { "action": "assert", "label": "SETUP: the knight is level 8", "actor": "knight", "metric": "level", "equals": 8 },
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000, "label": "Flames of Xoroth costs 15 Rage" },
+    {
+      "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 1,
+      "label": "Flames of Xoroth requires and spends Demonfire (CasterAuraSpell 500906)"
+    },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_damage_total", "spell": 801059, "target": "dummy", "save_as": "flames_damage" },
+    { "action": "cast", "actor": "knight", "spell": 801059, "target": "dummy" },
+    {
+      "action": "assert", "label": "The cone selects the golem 28.6 degrees off the knight's facing and damages it once",
+      "actor": "knight", "metric": "spell_damage_count", "spell": 801059, "target": "dummy", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The hit deals at least the level-8 $m1 base of 14 Fire damage",
+      "actor": "knight", "metric": "spell_damage_total", "spell": 801059, "target": "dummy",
+      "relative_to": "flames_damage", "min": 14
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 2000 },
+    { "action": "set_level", "actor": "knight", "value": 16 },
+    { "action": "assert", "label": "SETUP: the knight is level 16", "actor": "knight", "metric": "level", "equals": 16 },
+    { "action": "learn", "actor": "knight", "spell": 802411 },
+    { "action": "assert", "label": "SETUP: the knight knows Flames of Xoroth rank 2", "actor": "knight", "metric": "knows_spell", "spell": 802411, "equals": 1 },
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000, "label": "Rage for the rank 2 cast" },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 1, "label": "Demonfire for the rank 2 cast" },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_damage_total", "spell": 802411, "target": "dummy", "save_as": "rank2_damage" },
+    { "action": "cast", "actor": "knight", "spell": 802411, "target": "dummy" },
+    {
+      "action": "assert", "label": "Rank 2 inherits the rank 1 cone and damages the same off-centre golem once",
+      "actor": "knight", "metric": "spell_damage_count", "spell": 802411, "target": "dummy", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The rank 2 hit deals at least its level-16 $m1 base of 28 Fire damage",
+      "actor": "knight", "metric": "spell_damage_total", "spell": 802411, "target": "dummy",
+      "relative_to": "rank2_damage", "min": 28
+    }
+  ]
+}

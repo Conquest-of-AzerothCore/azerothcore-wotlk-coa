@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Pulse Conversion heals 3% of maximum health on a Stormbreaker dispel (#3141)",
+  "contract": "#3141: Pulse Conversion (707619) reads \"Dispelling a magic effect with Stormbreaker now heals you for $504830s1% of your maximum health.\" Nothing delivered it. Its only effect is SPELL_AURA_PROC_TRIGGER_SPELL (42) triggering 504830, but its ProcFlags are 0, so SpellMgr::LoadSpellProcs never builds a proc entry for it (src/server/game/Spells/SpellMgr.cpp:2257-2258 'if (!spellInfo->ProcFlags) continue;'), no spell_proc row exists, and 3.3.5a has no proc flag for a successful dispel at all - the aura can never fire. The trigger spell would also not honour the tooltip: 504830 'Heal 3% Max' is Effect[0] = 10 SPELL_EFFECT_HEAL with EffectBasePoints[0] = 2 + EffectDieSides[0] = 1, i.e. three raw hit points, not three percent (contrast the Wildwalker analogue 525015, which uses 136 SPELL_EFFECT_HEAL_PCT). The fix consumes the core's own OnSpellSuccessfulDispel hook (src/server/game/Spells/SpellEffects.cpp:3009), mirroring src/server/coa/AscensionPrimalistEmeraldWill.cpp, and casts 504830 on the caster with base point 0 set to CountPctFromMaxHealth(3), the 3 being read from 504830's own effect value rather than hardcoded. Deliberate decision: one heal per successful Stormbreaker dispel event, not one per removed effect - the in-repo precedent for this hook (Emerald Will) ignores the hook's count, and this scenario removes exactly one aura so both readings agree here. Spell power cannot inflate the heal: 504830 has DmgClass 0 SPELL_DAMAGE_CLASS_NONE, EffectBonusMultiplier[0] = 0 and no spell_bonus_data row, so Unit::SpellHealingBonusDone returns the amount unchanged (src/server/game/Entities/Unit/Unit.cpp:10178-10183). Stormbreaker (705669) itself is native: SPELL_EFFECT_DISPEL, EffectMiscValue 1 DISPEL_MAGIC, TARGET_UNIT_TARGET_ENEMY, and Arcane Intellect 1459 (Dispel = 1, beneficial) on a hostile player is dispellable with a 100% chance because neither side carries SPELL_AURA_MOD_DISPEL_RESIST. The maximum health of the caster is fixtured to 10000, so the promised heal is exactly 10000 * 3 / 100 = 300; the effective-heal assertion uses a minimum because a healing critical only raises it. Before the fix the heal log for 504830 stays empty, which is what the two DISCRIMINATING assertions read.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "s",
+      "race": 1,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "e",
+      "race": 2,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "pvp", "actor": "s", "enabled": true },
+    { "action": "pvp", "actor": "e", "enabled": true },
+    { "action": "teleport", "actor": "e", "map": 0, "x": -9612.06, "y": -288.949, "z": 57.3053, "o": 3.14159265 },
+    { "action": "learn", "actor": "s", "spell": 705669 },
+    { "action": "set_aura", "actor": "e", "spell": 1459, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: the hostile player carries the beneficial magic aura to dispel",
+      "actor": "e", "metric": "aura", "spell": 1459, "equals": 1 },
+    { "action": "set_health", "actor": "s", "value": 1, "maximum": 10000 },
+    { "action": "assert", "label": "SETUP: the caster's maximum health is fixtured to 10000, so 3% is 300",
+      "actor": "s", "metric": "max_health", "equals": 10000 },
+    { "action": "cast", "actor": "s", "spell": 705669, "target": "e" },
+    { "action": "assert", "label": "BASELINE: Stormbreaker's native dispel removes the beneficial magic aura",
+      "actor": "e", "metric": "aura", "spell": 1459, "equals": 0, "within_ms": 5000 },
+    { "action": "assert", "label": "BASELINE: without Pulse Conversion the dispel heals nothing",
+      "actor": "s", "metric": "spell_heal_count", "spell": 504830, "equals": 0 },
+    { "action": "learn", "actor": "s", "spell": 707619 },
+    { "action": "assert", "label": "SETUP: learning Pulse Conversion applies its passive aura on the caster",
+      "actor": "s", "metric": "aura", "spell": 707619, "equals": 1, "within_ms": 3000 },
+    { "action": "set_aura", "actor": "e", "spell": 1459, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: the hostile player carries the beneficial magic aura again",
+      "actor": "e", "metric": "aura", "spell": 1459, "equals": 1 },
+    { "action": "set_health", "actor": "s", "value": 1, "maximum": 10000 },
+    { "action": "assert", "label": "SETUP: the caster is at 1 health, so a 300 heal cannot become overhealing",
+      "actor": "s", "metric": "health", "max": 1000 },
+    { "action": "wait", "label": "Global cooldown", "ms": 2000 },
+    { "action": "cast", "actor": "s", "spell": 705669, "target": "e" },
+    { "action": "assert", "label": "SETUP: the second Stormbreaker dispel succeeds as well",
+      "actor": "e", "metric": "aura", "spell": 1459, "equals": 0, "within_ms": 5000 },
+    { "action": "assert", "label": "DISCRIMINATING: the successful dispel triggers exactly one Pulse Conversion heal",
+      "actor": "s", "metric": "spell_heal_count", "spell": 504830, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "DISCRIMINATING: that heal is 3% of the 10000 maximum health, i.e. at least 300, not the 3 raw points of the record",
+      "actor": "s", "metric": "spell_effective_heal_total", "spell": 504830, "min": 300, "within_ms": 5000 }
+  ]
+}

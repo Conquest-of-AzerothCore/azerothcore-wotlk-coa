@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "name": "End Times raises range and halves mana cost for Blade of the Empire, Netherstrike and Hammer of Twilight (#3473)",
+  "contract": "End Times 805115 (Spell.dbc, RecoveryTime 90000 = '1.5 min cooldown', DurationIndex 8 = 15000 ms = 'for 15 sec', family 31) has two spellmod aura effects: effect0 SPELLMOD_FLAT (107) on SPELLMOD_RANGE (misc 5), BasePoints 24+1=+25 yd; effect1 SPELLMOD_PCT (108) on SPELLMOD_COST (misc 14), BasePoints -51+1=-50%. Both SpellFamilyName 31 spells hit the family-31 routing override in SpellInfo::IsAffectedBySpellMod (SpellInfo.cpp:1503): 'case 805115: return root == 500720 || root == 806222 || root == 805116;' which bypasses the generic class-mask intersection entirely and instead matches by GetFirstSpellInChain(Id) against three named roots. DBC name lookup confirms all three are exactly the tooltip's three spells: 500720 = 'Blade of the Empire', 806222 = 'Netherstrike', 805116 = 'Hammer of Twilight'. This routing entry, and the whole mechanism, was already merged (commit e36bc50aa, 'Restore mechanics for five additional classes'); no further code change is needed. Both clauses are asserted with spell_modifier against an arbitrary base rather than spell_power_cost/an actual range check: Hammer of Twilight's own DBC ManaCostPercentage is 0, so a real-cost reading would be a 0/0 ratio for that spell, and no scenario metric reads effective range outside an active cast; spell_modifier (op 5 / op 14) reads the same native Player::ApplySpellMod path deterministically for all three regardless of their own base values. A control spell outside the routed roots (Dark Chants' own target, Forbidden Ritual 800105) must be unaffected. Regression guard for already-shipped native behaviour; no code change.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "p", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: Blade of the Empire's range mod is untouched before End Times",
+      "actor": "p", "metric": "spell_modifier", "spell": 500720, "op": 5, "base": 30, "equals": 30
+    },
+    {
+      "action": "assert", "label": "SETUP: Netherstrike's cost mod is untouched before End Times",
+      "actor": "p", "metric": "spell_modifier", "spell": 806222, "op": 14, "base": 100, "equals": 100
+    },
+    {
+      "action": "assert", "label": "SETUP: Hammer of Twilight's cost mod is untouched before End Times",
+      "actor": "p", "metric": "spell_modifier", "spell": 805116, "op": 14, "base": 100, "equals": 100
+    },
+    {
+      "action": "assert", "label": "SETUP: Forbidden Ritual's range mod is untouched too (control)",
+      "actor": "p", "metric": "spell_modifier", "spell": 800105, "op": 5, "base": 30, "equals": 30
+    },
+    { "action": "learn", "actor": "p", "spell": 805115 },
+    { "action": "cast", "actor": "p", "spell": 805115 },
+    {
+      "action": "assert", "label": "End Times applies its 15 sec self buff (#3473)",
+      "actor": "p", "metric": "aura", "spell": 805115, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "End Times adds 25 yd to Blade of the Empire's range mod (#3473)",
+      "actor": "p", "metric": "spell_modifier", "spell": 500720, "op": 5, "base": 30, "equals": 55
+    },
+    {
+      "action": "assert", "label": "End Times adds 25 yd to Netherstrike's range mod too (#3473)",
+      "actor": "p", "metric": "spell_modifier", "spell": 806222, "op": 5, "base": 30, "equals": 55
+    },
+    {
+      "action": "assert", "label": "End Times adds 25 yd to Hammer of Twilight's range mod too (#3473)",
+      "actor": "p", "metric": "spell_modifier", "spell": 805116, "op": 5, "base": 30, "equals": 55
+    },
+    {
+      "action": "assert", "label": "End Times halves Blade of the Empire's cost mod (#3473)",
+      "actor": "p", "metric": "spell_modifier", "spell": 500720, "op": 14, "base": 100, "equals": 50
+    },
+    {
+      "action": "assert", "label": "End Times halves Netherstrike's cost mod (#3473)",
+      "actor": "p", "metric": "spell_modifier", "spell": 806222, "op": 14, "base": 100, "equals": 50
+    },
+    {
+      "action": "assert", "label": "End Times halves Hammer of Twilight's cost mod (#3473)",
+      "actor": "p", "metric": "spell_modifier", "spell": 805116, "op": 14, "base": 100, "equals": 50
+    },
+    {
+      "action": "assert", "label": "Control: Forbidden Ritual's range mod stays unaffected",
+      "actor": "p", "metric": "spell_modifier", "spell": 800105, "op": 5, "base": 30, "equals": 30
+    },
+    {
+      "action": "assert", "label": "End Times' own cooldown is 1.5 min (#3473)",
+      "actor": "p", "metric": "cooldown_ms", "spell": 805115, "min": 88000, "within_ms": 500
+    }
+  ]
+}

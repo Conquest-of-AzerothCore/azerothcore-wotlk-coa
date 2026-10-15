@@ -1,0 +1,173 @@
+{
+  "schema": 1,
+  "name": "Ranger Brutal Shot: a 40 yd line that pierces armor and always crits during Skirmish (#1284)",
+  "contract": "Brutal Shot 570014 reads 'Fire a volley of powerful shots that pierce through Armor, dealing $s2% Ranged Weapon Damage plus ${$m1+0} to all targets in a $a1 yd line. While Skirmish is active this ability is guaranteed to critically strike.' Spell.dbc targets every effect at TARGET_UNIT_CONE_ENEMY_24 (radius index 23 = 40 yd) plus the explicit enemy; the client's SpellCustomAttr row 21100 for 570014 carries 0x8004 = SPELL_ATTR0_CU_CONE_LINE | SPELL_ATTR0_CU_IGNORE_ARMOR in AzerothCore's layout, which the server never applied, so the volley hit a 24 degree cone and was reduced by armor. 'Guaranteed to crit while Skirmish' is the hidden record 803335 'Skirmish' rank 'SLS' (a Skirmish-linked spell, like the Elude SLS records the server already applies with Elude): SPELL_AURA_ADD_FLAT_MODIFIER SPELLMOD_CRITICAL_CHANCE +100 on Brutal Shot's SpellFamilyFlags (128,0,0); nothing applied it. Its mask also names word-2 bit 2, which in family 27 is only Waterskin and Bone Reliquary Heal, so the load contract narrows it to Brutal Shot, the one ability the tooltip names. Expected: neither damage effect is armor-reduced; with Skirmish (802039) active the Ranger carries 803335 and Brutal Shot's crit chance is at least 100, and it crits; after Skirmish ends 803335 is gone; an enemy 35 yd away but 5.9 yd off the Ranger's facing (o = 0.17 rad, inside the 24 degree cone, outside a line two object sizes wide) is not hit, while the explicit target is. Both golems are stunned so they keep their positions.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 10
+    },
+    {
+      "id": "off_line",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 35
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0.17
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 6000 },
+    { "action": "learn", "label": "Fixture stun, so the golems keep their positions", "actor": "ranger", "spell": 23775 },
+    { "action": "cast", "actor": "ranger", "spell": 23775, "target": "target" },
+    {
+      "action": "assert",
+      "label": "SETUP: the target golem is stunned",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 23775,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "actor": "ranger", "spell": 23775, "target": "off_line" },
+    {
+      "action": "assert",
+      "label": "SETUP: the off-line golem is stunned",
+      "actor": "off_line",
+      "metric": "aura",
+      "spell": 23775,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    { "action": "learn", "actor": "ranger", "spell": 264 },
+    { "action": "learn", "actor": "ranger", "spell": 570014 },
+    { "action": "add_item", "actor": "ranger", "item": 2504 },
+    { "action": "equip", "actor": "ranger", "item": 2504, "slot": 17 },
+    { "action": "wait", "label": "Let the equipment settle", "ms": 1500 },
+    {
+      "action": "assert",
+      "label": "Brutal Shot's weapon damage pierces armor",
+      "actor": "ranger",
+      "metric": "spell_uses_armor",
+      "spell": 570014,
+      "effect": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Brutal Shot's weapon percentage damage pierces armor",
+      "actor": "ranger",
+      "metric": "spell_uses_armor",
+      "spell": 570014,
+      "effect": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Control: without Skirmish Brutal Shot is not guaranteed to crit",
+      "actor": "ranger",
+      "metric": "spell_done_crit_chance",
+      "spell": 570014,
+      "target": "target",
+      "max": 99
+    },
+    { "action": "set_aura", "label": "Skirmish lasts 4 sec per Advantage stack", "actor": "ranger", "spell": 804329, "stacks": 5 },
+    { "action": "set_aura", "label": "Skirmish is active", "actor": "ranger", "spell": 802039, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "SETUP: Skirmish is active",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 802039,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Skirmish brings its Brutal Shot critical strike aura",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 803335,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "While Skirmish is active Brutal Shot is guaranteed to crit",
+      "actor": "ranger",
+      "metric": "spell_done_crit_chance",
+      "spell": 570014,
+      "target": "target",
+      "min": 100
+    },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_damage_count", "spell": 570014, "target": "target", "critical": true, "save_as": "target_crits_before" },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_damage_count", "spell": 570014, "target": "off_line", "save_as": "off_line_hits_before" },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "cast", "label": "Brutal Shot during Skirmish", "actor": "ranger", "spell": 570014, "target": "target" },
+    {
+      "action": "assert",
+      "label": "Brutal Shot critically strikes its target during Skirmish",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 570014,
+      "target": "target",
+      "critical": true,
+      "relative_to": "target_crits_before",
+      "min": 1,
+      "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let the volley reach 35 yd", "ms": 2000 },
+    {
+      "action": "assert",
+      "label": "Brutal Shot is a line: an enemy 5.9 yd off the line is not hit",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 570014,
+      "target": "off_line",
+      "relative_to": "off_line_hits_before",
+      "equals": 0
+    },
+    { "action": "set_aura", "label": "Skirmish ends", "actor": "ranger", "spell": 802039, "stacks": 0 },
+    {
+      "action": "assert",
+      "label": "The critical strike aura ends with Skirmish",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 803335,
+      "equals": 0,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "After Skirmish Brutal Shot is no longer guaranteed to crit",
+      "actor": "ranger",
+      "metric": "spell_done_crit_chance",
+      "spell": 570014,
+      "target": "target",
+      "max": 99
+    }
+  ]
+}

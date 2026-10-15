@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Exorcism already makes Sanctify dispel one additional effect per type (#1571)",
+  "contract": "300341 is ADD_FLAT_MODIFIER (aura 107), MiscValue 8 = SPELLMOD_ALL_EFFECTS, EffectSpellClassMask word 1 = 0x4000. Sanctify (524968) carries that exact bit in its own SpellFamilyFlags word 1 (0x4000). SpellInfo::IsAffectedBySpellMod's generic flag96 AND matches. Its own BasePoints is unset (0), resolving to 1 (DieSides 1), matching 'Sanctify now dispels 1 additional effect'. Unit::ApplyEffectModifiers applies SPELLMOD_ALL_EFFECTS unconditionally before any per-index modifier, so the +1 lands on all three of Sanctify's SPELL_EFFECT_DISPEL effects (indices 0, 1, 2), each removing one more affliction of its own dispel type. Native only, no server code needed.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_effect_value", "spell": 524968, "effect": 0, "save_as": "sanctify_0" },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_effect_value", "spell": 524968, "effect": 1, "save_as": "sanctify_1" },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_effect_value", "spell": 524968, "effect": 2, "save_as": "sanctify_2" },
+    { "action": "learn", "label": "Sanctify now dispels 1 additional effect", "actor": "caster", "spell": 300341 },
+    {
+      "action": "assert", "label": "Sanctify's first dispel effect removes one more affliction",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 524968, "effect": 0, "relative_to": "sanctify_0", "equals": 1
+    },
+    {
+      "action": "assert", "label": "Sanctify's second dispel effect removes one more affliction",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 524968, "effect": 1, "relative_to": "sanctify_1", "equals": 1
+    },
+    {
+      "action": "assert", "label": "Sanctify's third dispel effect removes one more affliction",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 524968, "effect": 2, "relative_to": "sanctify_2", "equals": 1
+    }
+  ]
+}

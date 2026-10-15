@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Reverse Wound consumes all stacks of Endless Sands (#5031)",
+  "contract": "Endless Sands 806728 reads \"Cast time of your next Reverse Wounds within 15s is reduced by X%, stacking up to 5 times\" and \"then all stacks of Endless Sands will disappear\". Its own Spell.dbc record carries ProcCharges 0, so Aura::IsUsingCharges() was false and Player::RemoveSpellMods never called DropCharge() after a Reverse Wound cast: the whole stack survived every cast until its 15s duration expired on its own. ApplyAscensionClassMechanics19To25 now patches ProcCharges to 1 for the validated 806728 record (SPELL_AURA_ADD_PCT_MODIFIER, SPELLMOD_CASTING_TIME, class mask word1 131072 = Reverse Wound), so Aura::CalcMaxCharges gives it one usable charge and the very next affected cast drops the whole aura, all stacks at once. Fails before the fix (2 stacks survive the cast), passes after.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "chronomancer", "entry": 36, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "chronomancer", "spell": 807309 },
+    { "action": "learn", "actor": "chronomancer", "spell": 572360 },
+    { "action": "learn", "actor": "chronomancer", "spell": 501805 },
+    { "action": "set_health", "actor": "chronomancer", "value": 2000 },
+    { "action": "cast", "actor": "chronomancer", "spell": 572360 },
+    {
+      "action": "assert",
+      "label": "Correct the Mistake grants two stacks of Endless Sands",
+      "actor": "chronomancer",
+      "metric": "aura_stacks",
+      "spell": 806728,
+      "caster": "chronomancer",
+      "equals": 2,
+      "within_ms": 8000
+    },
+    { "action": "wait", "label": "Let the global cooldown clear", "ms": 2000 },
+    { "action": "cast", "actor": "chronomancer", "spell": 501805, "target": "chronomancer" },
+    { "action": "wait", "label": "Let Reverse Wound's cast resolve", "ms": 2500 },
+    {
+      "action": "assert",
+      "label": "Casting Reverse Wound removes all stacks of Endless Sands",
+      "actor": "chronomancer",
+      "metric": "aura_stacks",
+      "spell": 806728,
+      "caster": "chronomancer",
+      "equals": 0
+    }
+  ]
+}

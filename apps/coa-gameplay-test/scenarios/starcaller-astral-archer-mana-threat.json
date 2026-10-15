@@ -1,0 +1,227 @@
+{
+  "schema": 1,
+  "name": "Astral Archer: gaining mana no longer generates threat (#1321)",
+  "contract": [
+    "Astral Archer 681330 (Spell.dbc, SpellFamilyName 32, Moonbow specialization passive) ends its description with",
+    "'In addition, gaining mana no longer generates threat.' No DBC effect carries that clause (effect 0 is the",
+    "ranged-crit-rating aura, effects 1 and 2 are empty) and no source referenced the id, so the stock energize",
+    "threat applied: Unit::EnergizeBySpell and the SPELL_AURA_OBS_MOD_POWER / SPELL_AURA_PERIODIC_ENERGIZE ticks call",
+    "the recipient's ThreatManager::ForwardThreatForAssistingMe(energizer, 0.5 per point), which adds threat to the",
+    "energizer on every creature that has the recipient on its threat list and so starts that creature's combat",
+    "with the energizer. Many Starcaller energize spells carry SPELL_ATTR1_NO_THREAT (Moon Arrow's 804096/804155),",
+    "which makes them threat-free for every Starcaller and hides the difference; Innervate 29166 does not.",
+    "Setup: a mage helper learns Innervate (SPELL_AURA_PERIODIC_ENERGIZE, 1000 ms ticks, 10 s) and casts it on",
+    "each Starcaller while that Starcaller is out of combat, so the cast itself inherits no combat. Each",
+    "Starcaller then melees its own passive golem, which puts it on the golem's threat list. Every later Innervate",
+    "tick forwards the recipient's mana-gain threat to the helper: the control's helper enters combat with the",
+    "control's golem. The archer's helper must stay out of combat through three ticks (at least two energize logs",
+    "counted after the engagement), because the archer's mana gain generates no threat."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "archer",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "archer_helper",
+      "race": 1,
+      "class": 8,
+      "level": 80
+    },
+    {
+      "id": "control_helper",
+      "race": 1,
+      "class": 8,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "archer_golem",
+      "owner": "archer",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "control_golem",
+      "owner": "control",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "archer",
+      "spell": 681330
+    },
+    {
+      "action": "assert",
+      "label": "Astral Archer is active on the archer",
+      "actor": "archer",
+      "metric": "aura",
+      "spell": 681330,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "archer_helper",
+      "spell": 29166
+    },
+    {
+      "action": "learn",
+      "actor": "control_helper",
+      "spell": 29166
+    },
+    {
+      "action": "set_power",
+      "label": "Empty the archer's mana so every tick is a real gain",
+      "actor": "archer",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "set_power",
+      "label": "Empty the control's mana so every tick is a real gain",
+      "actor": "control",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the archer's helper starts out of combat",
+      "actor": "archer_helper",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the control's helper starts out of combat",
+      "actor": "control_helper",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Innervate the archer while it is out of combat",
+      "actor": "archer_helper",
+      "spell": 29166,
+      "target": "archer"
+    },
+    {
+      "action": "cast",
+      "label": "Innervate the control while it is out of combat",
+      "actor": "control_helper",
+      "spell": 29166,
+      "target": "control"
+    },
+    {
+      "action": "assert",
+      "label": "Innervate is on the archer",
+      "actor": "archer",
+      "metric": "aura",
+      "spell": 29166,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Innervate is on the control",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 29166,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "attack",
+      "actor": "archer",
+      "target": "archer_golem"
+    },
+    {
+      "action": "attack",
+      "actor": "control",
+      "target": "control_golem"
+    },
+    {
+      "action": "assert",
+      "label": "The archer's golem is engaged with the archer",
+      "actor": "archer_golem",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The control's golem is engaged with the control",
+      "actor": "control_golem",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Innervate ticks on the archer so far",
+      "actor": "archer_helper",
+      "metric": "spell_energize_count",
+      "spell": 29166,
+      "target": "archer",
+      "power": 0,
+      "save_as": "archer_ticks_engaged"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the control's mana gain puts its helper into combat with the golem",
+      "actor": "control_helper",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let three more Innervate ticks land on the engaged archer",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Innervate kept restoring the archer's mana while it was engaged",
+      "actor": "archer_helper",
+      "metric": "spell_energize_count",
+      "spell": 29166,
+      "target": "archer",
+      "power": 0,
+      "relative_to": "archer_ticks_engaged",
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "The archer's mana gain generates no threat, so its helper stays out of combat",
+      "actor": "archer_helper",
+      "metric": "combat",
+      "equals": 0
+    }
+  ]
+}

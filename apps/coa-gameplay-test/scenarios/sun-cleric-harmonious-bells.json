@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Harmonious Bells adds exactly 4 more targets to Mercy (#2446)",
+  "contract": "Harmonious Bells 704917 (SpellFamilyName 33) is SPELL_AURA_ADD_FLAT_MODIFIER (107), SPELLMOD_JUMP_TARGETS (17), EffectSpellClassMask word 1 bit 0x20, matching Mercy's (504848) own SpellFamilyFlags_1 0x20 and its own EffectChainTarget_1 6. Shipped EffectBasePoints_1 is 4; SpellEffectInfo::CalcValue resolves that to a real value of 5 (basePoints + 1, DieSides 1) -- one more than the quoted 'Your Mercy now affects 4 additional allies'. Spell::SelectImplicitChainTargets adds the raw modifier value straight onto Mercy's own ChainTarget, so the talent's own contribution to the extra-target count equals the modifier's real value regardless of Mercy's baseline (6 -> 6+mod), the same relationship Everglow's own +2 on Radiant Cascade and Radiant Cascade's own tooltip ('jumps to up to 4 additional allies' for its native ChainTarget of 4) both confirm for this class's wording convention: the modifier's value is the tooltip's 'additional' count, 1:1. ApplyAscensionSunClericRadianceContracts patches EffectBasePoints_1 down by one at load time so CalcValue returns exactly 4, making Mercy's modified target count 6+4=10. The 'spell_modifier' query metric calls the same native Player::ApplySpellMod(504848, SPELLMOD_JUMP_TARGETS, base) path Spell::SelectImplicitChainTargets uses, without casting Mercy.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 27, "level": 80 },
+    { "id": "talent", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talent", "spell": 704917 },
+    {
+      "action": "assert",
+      "label": "Without the talent Mercy keeps its own 6 chain targets",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 504848,
+      "op": 17,
+      "base": 6,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "Harmonious Bells adds exactly 4 more, for 10 chain targets total",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 504848,
+      "op": 17,
+      "base": 6,
+      "equals": 10
+    }
+  ]
+}

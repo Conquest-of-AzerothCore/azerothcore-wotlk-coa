@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "name": "End of Time increases periodic damage the Chronomancer deals to a Mind Melt target (#2292)",
+  "contract": "End of Time 704490's tooltip reads \"Mind Melt now also increases the target's periodic damage taken from you by $s1% per stack.\" In Spell.dbc the talent is a single SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 3 (SPELLMOD_EFFECT1), EffectBasePoints 5 + DieSides 1 = +6, EffectSpellClassMask [0,0,262144], which inside SpellFamilyName 28 selects the Mind Melt debuff 572851. 572851's Effect[0] is aura 214 with EffectMiscValue 127 (all schools) and EffectBasePoints -1 + DieSides 1 = 0, and its own AuraDescription confirms the wiring: \"$?s704490[ Periodic damage taken by the Chronomancer increased by $704490s1%.][]\". Its StackAmount is 5, and AuraEffect::CalculateAmount ends with amount *= GetStackAmount(), so the capped amount is 30. The modifier lands, but SpellAuraEffects.cpp maps aura 214 to AuraEffect::HandleNULL and nothing in src/ or modules/ reads it, so the promise is not delivered; the same gap is recorded for aura 214 in .agents/docs/systems/ascension-spell-parity.md. The clause is delivered instead in src/server/coa/AscensionChronomancerSecondary.cpp through the periodic damage taken hook, filtered on the debuff's caster GUID for \"from you\" and on EffectMiscValue's school mask, the same shape Templar's Light's Ward uses for its own periodic damage taken clause. The harness reads that hook with script_periodic_damage_taken, whose victim must be a player, so the debuff is fixtured with set_aura, which makes the holder its own caster; the cross-caster assertion below is what proves the \"from you\" restriction.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 572771
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 572771
+    },
+    {
+      "action": "snapshot",
+      "label": "The debuff's periodic damage taken effect before the talent",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 572851,
+      "effect": 0,
+      "save_as": "melt_periodic"
+    },
+    {
+      "action": "assert",
+      "label": "Without End of Time the effect resolves to zero",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 572851,
+      "effect": 0,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 704490
+    },
+    {
+      "action": "assert",
+      "label": "End of Time self-applies its passive",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 704490,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The effect resolves to 6 per stack with the talent",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 572851,
+      "effect": 0,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "That is exactly +6 against the baseline",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 572851,
+      "effect": 0,
+      "relative_to": "melt_periodic",
+      "equals": 6
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture the Mind Melt debuff at its five-stack cap",
+      "actor": "talent",
+      "spell": 572851,
+      "stacks": 5
+    },
+    {
+      "action": "set_aura",
+      "label": "The same five stacks on the untalented control",
+      "actor": "control",
+      "spell": 572851,
+      "stacks": 5
+    },
+    {
+      "action": "assert",
+      "label": "The talented holder carries five stacks",
+      "actor": "talent",
+      "metric": "aura_stacks",
+      "spell": 572851,
+      "caster": "talent",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "The control carries five stacks too",
+      "actor": "control",
+      "metric": "aura_stacks",
+      "spell": 572851,
+      "caster": "control",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "Five stacks carry 30% with the talent",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 572851,
+      "caster": "talent",
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Five stacks carry nothing without the talent",
+      "actor": "control",
+      "metric": "aura_amount",
+      "spell": 572851,
+      "caster": "control",
+      "effect": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "A 1000 damage Melt Reality tick becomes 1300 against the debuffed target",
+      "actor": "talent",
+      "metric": "script_periodic_damage_taken",
+      "spell": 503895,
+      "target": "talent",
+      "equals": 1300
+    },
+    {
+      "action": "assert",
+      "label": "Without End of Time the same tick stays at 1000",
+      "actor": "control",
+      "metric": "script_periodic_damage_taken",
+      "spell": 503895,
+      "target": "control",
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Another caster's tick is not boosted: the clause is \"from you\"",
+      "actor": "talent",
+      "metric": "script_periodic_damage_taken",
+      "spell": 503895,
+      "target": "control",
+      "equals": 1000
+    }
+  ]
+}

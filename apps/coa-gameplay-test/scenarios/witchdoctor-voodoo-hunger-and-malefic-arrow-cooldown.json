@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Improved Malefic Arrow's cooldown reduction and Voodoo Hunger's periodic stacking both work natively (#490, #670)",
+  "contract": "Improved Malefic Arrow (707855) cuts Malefic Arrow's (801674) 8000 ms cooldown by 2000 ms through the generic SPELLMOD_COOLDOWN spell-modifier system (no module code). Voodoo Hunger (705942) gates a stack of the Voodoo Hunger buff (807213, +10% per stack, 8000 ms duration, 10 max stacks) onto every 500 ms tick of Shadowstalker's StalkerSpeed (807214) periodic trigger, but only while the caster knows 705942 and still has Shadowstalker (807040) or Mirage (501136) active; AscensionWitchDoctorAuras.cpp's lifecycle Tick() intercepts the native trigger and applies that gate.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "arrow_caster", "race": 1, "class": 13, "level": 80 },
+    { "id": "hunger_caster", "race": 1, "class": 13, "level": 80 },
+    { "id": "hunger_control", "race": 1, "class": 13, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 4000 },
+
+    { "label": "#670 baseline: Malefic Arrow's own cooldown is 8000 ms unmodified",
+      "action": "assert", "actor": "arrow_caster", "metric": "spell_modifier", "spell": 801674, "op": 11, "base": 8000, "equals": 8000 },
+
+    { "label": "#670: learn Malefic Arrow talent and the empowered ability itself",
+      "action": "learn", "actor": "arrow_caster", "spell": 707854 },
+    { "action": "learn", "actor": "arrow_caster", "spell": 801674 },
+
+    { "label": "#670 control: Improved Malefic Arrow not yet known, cooldown stays 8000 ms",
+      "action": "assert", "actor": "arrow_caster", "metric": "spell_modifier", "spell": 801674, "op": 11, "base": 8000, "equals": 8000 },
+
+    { "label": "#670: learn Improved Malefic Arrow",
+      "action": "learn", "actor": "arrow_caster", "spell": 707855 },
+    { "label": "#670: the passive's own flat-modifier aura auto-applies on learn (SPELL_ATTR0_PASSIVE)",
+      "action": "assert", "actor": "arrow_caster", "metric": "aura", "spell": 707855, "equals": 1, "within_ms": 2000 },
+
+    { "label": "#670 DISCRIMINATING: Malefic Arrow's cooldown is now reduced by exactly 2000 ms (EffectBasePoints[0]=-2001 -> real -2000)",
+      "action": "assert", "actor": "arrow_caster", "metric": "spell_modifier", "spell": 801674, "op": 11, "base": 8000, "equals": 6000 },
+
+    { "label": "#490 baseline: Hunger passive auto-applies its own aura on learn",
+      "action": "learn", "actor": "hunger_caster", "spell": 705942 },
+    { "action": "assert", "actor": "hunger_caster", "metric": "aura", "spell": 705942, "equals": 1, "within_ms": 2000 },
+
+    { "label": "#490: learn and cast Shadowstalker (drives StalkerSpeed's 500 ms periodic tick)",
+      "action": "learn", "actor": "hunger_caster", "spell": 807040 },
+    { "action": "cast", "actor": "hunger_caster", "spell": 807040, "target": "hunger_caster" },
+
+    { "label": "#490 DISCRIMINATING: no stack yet 100 ms after the cast (buff is not simply always-up)",
+      "action": "wait", "ms": 100 },
+    { "action": "assert", "actor": "hunger_caster", "metric": "aura_stacks", "spell": 807213, "equals": 0 },
+    { "action": "assert", "actor": "hunger_caster", "metric": "aura", "spell": 807214, "equals": 1, "within_ms": 500, "label": "StalkerSpeed applied" },
+
+    { "label": "#490: ~1000 ms after the cast (~2 ticks of 500 ms), Voodoo Hunger has stacked up (tick-timing tolerance)",
+      "action": "wait", "ms": 900 },
+    { "action": "assert", "actor": "hunger_caster", "metric": "aura_stacks", "spell": 807213, "min": 1, "max": 3, "label": "One-to-three ticks have landed" },
+
+    { "label": "#490: continuing to the 10-stack DBC cap (StackAmount=10)",
+      "action": "wait", "ms": 4000 },
+    { "action": "assert", "actor": "hunger_caster", "metric": "aura_stacks", "spell": 807213, "equals": 10, "within_ms": 1000, "label": "Stacks cap at 10" },
+
+    { "label": "#490: magnitude per stack is +10% (EffectBasePoints[0]=9 -> real +10, ADD_PCT_MODIFIER; spell_effect_value reads the un-stacked per-application value, since aura_amount would return base * current stack count -- AuraEffect::CalculateAmount ends with `amount *= GetBase()->GetStackAmount()`, SpellAuraEffects.cpp:654 -- and by this point the aura is already capped at 10 stacks, matching the pattern in bloodmage-bloodsores-periodic-proc.json's own note on this exact engine behavior)",
+      "action": "assert", "actor": "hunger_caster", "metric": "spell_effect_value", "spell": 807213, "effect": 0, "equals": 10 },
+
+    { "label": "#490 control: same Shadowstalker cast without ever learning Hunger (705942) must never grant a stack",
+      "action": "learn", "actor": "hunger_control", "spell": 807040 },
+    { "action": "cast", "actor": "hunger_control", "spell": 807040, "target": "hunger_control" },
+    { "action": "assert", "actor": "hunger_control", "metric": "aura", "spell": 807214, "equals": 1, "within_ms": 500, "label": "StalkerSpeed applied to the control too" },
+    { "action": "wait", "ms": 1000 },
+    { "label": "#490 DISCRIMINATING: still 0 at the ~1000 ms checkpoint where hunger_caster already had 1-3 stacks",
+      "action": "assert", "actor": "hunger_control", "metric": "aura_stacks", "spell": 807213, "equals": 0 },
+    { "action": "wait", "ms": 4000 },
+    { "label": "#490 DISCRIMINATING: without the Hunger gate the control's stack count stays 0 even past the point where hunger_caster capped at 10 (proves the module's Tick() gate, not the DBC's unconditional native default)",
+      "action": "assert", "actor": "hunger_control", "metric": "aura_stacks", "spell": 807213, "equals": 0 }
+  ]
+}

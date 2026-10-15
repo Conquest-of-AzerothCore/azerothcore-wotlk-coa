@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "name": "Infinity Crash adds 50% critical damage to Discordance and Chromatic Shard (#2941)",
+  "contract": "Infinity Crash 706040's tooltip reads \"Increases the critical damage of Discordance and Chromatic Shard by $s1%.\" In Spell.dbc it is a single SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue 15 (SPELLMOD_CRIT_DAMAGE_BONUS), EffectBasePoints 49 + DieSides 1 = +50%, EffectSpellClassMask [33554432,0,33554432]. Resolved against the full SpellFamilyName 28 set, word 0 bit 0x2000000 selects the nine Discordance ranks (503875-503880, 582758-582760) and word 2 bit 0x2000000 selects the nine Chromatic Shard ranks (501836-501840, 567543, 567544, 574346); Unmake's flags are [0,33554432,0], which the mask does not reach. Unit::SpellCriticalDamageBonus consumes SPELLMOD_CRIT_DAMAGE_BONUS after crit_bonus -= damage and before crit_bonus += damage (Unit.cpp), so it scales the bonus portion, the standard \"increases critical damage by X%\" contract. Generic core machinery. This scenario is a regression guard for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Discordance's crit damage modifier before the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 503875,
+      "op": 15,
+      "base": 1000,
+      "save_as": "discord_crit_damage"
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, Discordance's crit bonus is unmodified",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 503875,
+      "op": 15,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, Chromatic Shard's crit bonus is unmodified",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 501836,
+      "op": 15,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 706040
+    },
+    {
+      "action": "assert",
+      "label": "Infinity Crash self-applies its passive",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 706040,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Discordance's crit bonus rises by half",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 503875,
+      "op": 15,
+      "base": 1000,
+      "equals": 1500
+    },
+    {
+      "action": "assert",
+      "label": "That is exactly +500 against the baseline",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 503875,
+      "op": 15,
+      "base": 1000,
+      "relative_to": "discord_crit_damage",
+      "equals": 500
+    },
+    {
+      "action": "assert",
+      "label": "Chromatic Shard's crit bonus rises by half",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 501836,
+      "op": 15,
+      "base": 1000,
+      "equals": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The mask is not over-broad: Unmake keeps its own crit damage",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 503784,
+      "op": 15,
+      "base": 1000,
+      "equals": 1000
+    }
+  ]
+}

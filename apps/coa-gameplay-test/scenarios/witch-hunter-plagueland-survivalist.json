@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "name": "Plagueland Survivalist shortens disease durations on you by 30% (#1103)",
+  "contract": "Plagueland Survivalist 681169 (installed Spell.dbc) is a passive family-21 spell with one effect: SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL (245), misc 3 = DISPEL_DISEASE, base -31 die 1 -> -30; the Description reads 'Reduces the duration of disease effects on you by 30%.' Unit::ModSpellDuration adds GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL, Dispel) for harmful auras on the cast path (Spell.cpp DoSpellHitOnUnit); the set_aura fixture bypasses it, so a real cast is needed. Ghoul Rot 83985 is a Spell.dbc entry with Dispel = 3 (disease), SPELL_ATTR0_AURA_IS_DEBUFF, a self target (effect 0 SPELL_AURA_MOD_HIT_CHANCE, base -11 die 1) and duration index 6 = 600000 ms, so a fixture player that knows it can cast it on itself. The holder's aura must last 0.70 of the control's (0.69-0.71 absorbs the few milliseconds between the two casts). The spell is chosen only as a harmless carrier with the right dispel type; it is not a Witch Hunter spell.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ctl",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    },
+    {
+      "id": "pl",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "ctl",
+      "spell": 83985,
+      "label": "Learn the self-cast disease Ghoul Rot (control)"
+    },
+    {
+      "action": "learn",
+      "actor": "pl",
+      "spell": 83985,
+      "label": "Learn the self-cast disease Ghoul Rot"
+    },
+    {
+      "action": "learn",
+      "actor": "pl",
+      "spell": 681169,
+      "label": "Learn Plagueland Survivalist"
+    },
+    {
+      "action": "assert",
+      "label": "The duration aura reads -30%",
+      "actor": "pl",
+      "metric": "aura_amount",
+      "spell": 681169,
+      "effect": 0,
+      "equals": -30
+    },
+    {
+      "action": "cast",
+      "actor": "ctl",
+      "spell": 83985,
+      "label": "Control infects itself"
+    },
+    {
+      "action": "cast",
+      "actor": "pl",
+      "spell": 83985,
+      "label": "Holder infects itself"
+    },
+    {
+      "action": "assert",
+      "label": "Control carries the disease",
+      "actor": "ctl",
+      "metric": "aura",
+      "spell": 83985,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Holder carries the disease",
+      "actor": "pl",
+      "metric": "aura",
+      "spell": 83985,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "ctl",
+      "metric": "aura_duration_ms",
+      "save_as": "ctl_duration",
+      "label": "Control's disease duration",
+      "spell": 83985
+    },
+    {
+      "action": "assert",
+      "label": "Control keeps the full 10 minute disease",
+      "actor": "ctl",
+      "metric": "aura_duration_ms",
+      "spell": 83985,
+      "min": 590000,
+      "max": 600000
+    },
+    {
+      "action": "assert",
+      "label": "Holder's disease is 30% shorter",
+      "actor": "pl",
+      "metric": "aura_duration_ms",
+      "spell": 83985,
+      "ratio_to": "ctl_duration",
+      "min": 0.69,
+      "max": 0.71
+    }
+  ]
+}

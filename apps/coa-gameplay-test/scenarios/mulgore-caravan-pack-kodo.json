@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "A Pack Kodo pulls the Mulgore caravan cart",
+  "contract": [
+    "rev_20261004_95_coa_pack_kodo_caravan seats a Pack Kodo 9303001 in draft seat 2 of the Pack Kodo Caravan Carts in",
+    "place of the invisible Caravan Harness 9303000, because the cart model holds no kodo. Expected: wherever the",
+    "Mulgore cart 9006004 is on its route, a Pack Kodo is with it and the harness is not."
+  ],
+  "timeout_ms": 30000,
+  "location": {"map": 1, "x": -3072.0, "y": 78.0, "z": 79.0, "o": 0},
+  "players": [{"id": "watcher", "race": 6, "class": 1, "level": 80}],
+  "steps": [
+    {"action": "set_phase", "actor": "watcher", "value": 1},
+    {"action": "teleport_to_spawn", "actor": "watcher", "guid": 9006004},
+    {"action": "assert", "label": "The caravan cart is beside the watcher", "actor": "watcher",
+     "metric": "nearby_creature_count", "entry": 50470, "min": 1, "within_ms": 3000},
+    {"action": "assert", "label": "A Pack Kodo pulls it", "actor": "watcher", "metric": "nearby_creature_count",
+     "entry": 9303001, "min": 1, "within_ms": 3000},
+    {"action": "assert", "label": "The invisible harness is gone", "actor": "watcher",
+     "metric": "nearby_creature_count", "entry": 9303000, "equals": 0}
+  ]
+}

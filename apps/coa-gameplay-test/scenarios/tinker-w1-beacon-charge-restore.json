@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "name": "Tinker beacon charges are restored by effect 187 (#3818)",
+  "contract": "Rapid Fire Healing's triggered half 805311 carries SPELL_EFFECT_ASCENSION_RESTORE_SPELL_CHARGES (187) with MiscValue 13 and damage 1, handled at src/server/game/Spells/SpellEffects.cpp:552-561 as RestoreSpellChargeCategory(13, 1). SpellChargesCategory.dbc row 13 is 3 charges with a 15000 ms recharge and SpellCharges.dbc puts Build: Shield Beacon 801799 in it, so spending all three charges leaves Player::GetSpellCooldownDelay reporting the recharge wait, and casting 805311 must clear it immediately. This covers the effect handler only. The talent's 15% roll (AscensionTinkerAbilities.cpp:202-203, ProcChance 15 on 705803) has no deterministic observable: the harness exposes no spell-charge metric, the only proxy is this same cooldown, and the pool recharges on its own within 15 s.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 801799
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 805311
+    },
+    {
+      "action": "assert",
+      "label": "The beacon pool starts full",
+      "actor": "t",
+      "metric": "cooldown_ms",
+      "spell": 801799,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 801799
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 801799
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 801799
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "All three charges are spent",
+      "actor": "t",
+      "metric": "cooldown_ms",
+      "spell": 801799,
+      "min": 1
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 805311
+    },
+    {
+      "action": "assert",
+      "label": "The triggered effect hands a beacon charge back",
+      "actor": "t",
+      "metric": "cooldown_ms",
+      "spell": 801799,
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

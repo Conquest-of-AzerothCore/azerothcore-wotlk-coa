@@ -39,19 +39,21 @@ namespace CoAChallenges
         player->SendDirectMessage(&data);
     }
 
-    // Mirror-timer bar fills over FatigueSecondsToFill (value/scale are in ms;
-    // a positive scale refills, like the vanilla breath regen phase).
+    // Mirror-timer bar drains over FatigueSecondsToFill (value/scale are in ms).
+    // `fatigue` is the REMAINING amount: it starts at FatigueMax and drops to 0,
+    // so the bar starts full and empties (negative scale = drains), matching
+    // Ascension ("the same mechanic as out-of-zone exploring").
     void SendFatigueBar(Player* player, int32 fatigue)
     {
         uint32 maxV = FatigueMax();
         uint32 fillMs = FatigueFillSeconds() * 1000;
         // 64-bit: fatigue * fillMs overflows uint32 for large FatigueSecondsToFill.
-        uint32 elapsedMs = uint32(uint64(std::clamp<int32>(fatigue, 0, (int32)maxV)) * fillMs / maxV);
+        uint32 remainingMs = uint32(uint64(std::clamp<int32>(fatigue, 0, (int32)maxV)) * fillMs / maxV);
         WorldPacket data(SMSG_START_MIRROR_TIMER, 21);
         data << uint32(FATIGUE_TIMER);   // timer 0 = FATIGUE (MirrorTimer1)
-        data << uint32(elapsedMs);       // current value (ms)
+        data << uint32(remainingMs);     // current value (ms)
         data << uint32(fillMs);          // max value (ms)
-        data << int32(1);                // positive scale -> fills
+        data << int32(-1);               // negative scale -> drains
         data << uint8(0);                // paused
         data << uint32(0);               // spell id
         player->SendDirectMessage(&data);
@@ -62,12 +64,19 @@ namespace CoAChallenges
         if (!player || !IsFatigueChallenge(challengeID))
             return;
         uint32 guid = player->GetGUID().GetCounter();
-        int32 fatigue = 0;
+        int32 const maxV = (int32)FatigueMax();
+        // `fatigue` is the remaining amount; a fresh/stale row starts full.
+        int32 fatigue = maxV;
         if (QueryResult r = CharacterDatabase.Query(
                 "SELECT fatigue FROM coa_character_fatigue WHERE guid = {} AND challengeId = {}",
                 guid, challengeID))
+        {
             fatigue = r->Fetch()[0].Get<int32>();
-        bool resting = player->HasPlayerFlag(PLAYER_FLAGS_RESTING);
+            if (fatigue <= 0 || fatigue > maxV)
+                fatigue = maxV;
+        }
+        // Starter zones are sanctuaries (no inn): treated as safe, like a rest area.
+        bool resting = player->HasPlayerFlag(PLAYER_FLAGS_RESTING) || player->IsInSanctuary();
         {
             std::lock_guard<std::mutex> lock(FatigueMutex);
             FatigueStates[guid] = FatigueState{ challengeID, fatigue, 0, resting };
@@ -111,28 +120,39 @@ namespace CoAChallenges
     {
         if (!player)
             return;
+        RefreshFatigueTracking(player, LoadActiveChallengeRows(player->GetGUID().GetCounter()));
+    }
+
+    void RefreshFatigueTracking(Player* player, std::vector<ActiveChallengeRow> const& rows)
+    {
+        if (!player)
+            return;
         uint32 guid = player->GetGUID().GetCounter();
         uint32 found = 0;
-        if (QueryResult r = CharacterDatabase.Query(
-                "SELECT challengeId FROM coa_character_challenge WHERE guid = {}", guid))
-        {
-            do
+        for (ActiveChallengeRow const& row : rows)
+            if (IsFatigueChallenge(row.challengeId))
             {
-                uint32 cid = r->Fetch()[0].Get<uint32>();
-                if (IsFatigueChallenge(cid)) { found = cid; break; }
-            } while (r->NextRow());
-        }
+                found = row.challengeId;
+                break;
+            }
         if (!found)
         {
             ClearFatigue(player);
             return;
         }
-        int32 fatigue = 0;
+        int32 const maxV = (int32)FatigueMax();
+        // `fatigue` is the remaining amount; a fresh/stale row starts full.
+        int32 fatigue = maxV;
         if (QueryResult r = CharacterDatabase.Query(
                 "SELECT fatigue FROM coa_character_fatigue WHERE guid = {} AND challengeId = {}",
                 guid, found))
+        {
             fatigue = r->Fetch()[0].Get<int32>();
-        bool resting = player->HasPlayerFlag(PLAYER_FLAGS_RESTING);
+            if (fatigue <= 0 || fatigue > maxV)
+                fatigue = maxV;
+        }
+        // Starter zones are sanctuaries (no inn): treated as safe, like a rest area.
+        bool resting = player->HasPlayerFlag(PLAYER_FLAGS_RESTING) || player->IsInSanctuary();
         {
             std::lock_guard<std::mutex> lock(FatigueMutex);
             FatigueStates[guid] = FatigueState{ found, fatigue, 0, resting };
@@ -181,35 +201,62 @@ namespace CoAChallenges
 
         uint32 maxV = FatigueMax();
         uint32 perPointMs = std::max<uint32>(1, FatigueFillSeconds() * 1000 / maxV);
-        bool rested = player->HasPlayerFlag(PLAYER_FLAGS_RESTING);
+        // Safe area = rested (inn/city) or a starter-zone sanctuary.
+        bool const safeNow = player->HasPlayerFlag(PLAYER_FLAGS_RESTING) || player->IsInSanctuary();
+        // Grace before the bar returns after LEAVING a safe area, so standing at
+        // the inn/rest boundary does not flicker it. Entering a safe area applies
+        // immediately (delaying the reset could kill the player at the doorstep).
+        // ponytail: per-state timer, no timestamp needed.
+        uint32 const graceMs =
+            sConfigMgr->GetOption<uint32>("CoAChallenges.Fatigue.SafeGraceSeconds", 1) * 1000;
 
         int32 fatigue = 0;
-        bool changed = false, died = false, reset = false;
+        bool rested = safeNow;
+        bool changed = false, died = false;
         {
             std::lock_guard<std::mutex> lock(FatigueMutex);
             auto it = FatigueStates.find(guid);
             if (it == FatigueStates.end())
                 return;
             FatigueState& s = it->second;
-            if (rested != s.resting)   // transition in/out of a rested area
+            if (safeNow == s.resting)
+                s.graceMs = 0;
+            else if (safeNow)
             {
-                s.resting = rested;
+                s.resting = true;
+                s.graceMs = 0;
                 changed = true;
             }
+            else if ((s.graceMs += diff) >= graceMs)
+            {
+                s.resting = false;
+                s.graceMs = 0;
+                changed = true;
+            }
+            rested = s.resting;
             if (rested)
             {
-                if (s.fatigue != 0 || s.ms != 0) { s.fatigue = 0; s.ms = 0; reset = true; }
+                // Safe area (inn/city/starter sanctuary): the bar is off and the
+                // counter resets to full, so leaving the safe area starts a fresh
+                // drain (mirrors the original, which cleared the counter on rest).
+                if (s.fatigue != (int32)maxV)
+                {
+                    s.fatigue = (int32)maxV;
+                    changed = true;
+                }
+                s.ms = 0;
             }
             else
             {
+                // Drain toward empty; reaching 0 means falling asleep (death).
                 s.ms += diff;
-                while (s.ms >= perPointMs && s.fatigue < (int32)maxV)
+                while (s.ms >= perPointMs && s.fatigue > 0)
                 {
                     s.ms -= perPointMs;
-                    s.fatigue += 1;
+                    s.fatigue -= 1;
                     changed = true;
                 }
-                if (s.fatigue >= (int32)maxV)
+                if (s.fatigue <= 0)
                     died = true;
             }
             fatigue = s.fatigue;
@@ -224,7 +271,7 @@ namespace CoAChallenges
             }
             PersistFatigue(guid, cid, 0);
             StopFatigueBar(player);
-            LOG_INFO("module.coa_challenges", "{} fell asleep (fatigue max, challenge {})",
+            LOG_INFO("module.coa_challenges", "{} fell asleep (fatigue drained, challenge {})",
                 player->GetName(), cid);
             SetDeathCause(player, KillerKind::Mechanic, 0, "Fell Asleep");
             player->EnvironmentalDamage(DAMAGE_EXHAUSTED, player->GetMaxHealth());
@@ -234,13 +281,9 @@ namespace CoAChallenges
         if (!changed)
             return;
 
-        if (reset)
+        if (rested)
         {
-            PersistFatigue(guid, cid, 0);
-            StopFatigueBar(player);
-        }
-        else if (rested)
-        {
+            PersistFatigue(guid, cid, fatigue);
             StopFatigueBar(player);
         }
         else

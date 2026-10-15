@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Fortify Timeline's heal applies Mark of Order (#2291)",
+  "contract": "Mark of Order 704488's tooltip is \"Healing done by Fortify Timeline now applies Mark of Order\". Its only effect is aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) on 806269, the Mark itself (SPELL_AURA_MOD_HEALING_RECEIVED +10 class-masked to Reverse Wound, 20 sec, StackAmount 5). Spell.dbc gives 704488 ProcFlags 0x0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and Aura::GetProcEffectMask returned 0: the Mark was never applied. Fortify Timeline is 804491 (SpellFamilyName 28, SpellFamilyFlags word1 4194304, DmgClass 1, effect 0 SPELL_EFFECT_HEAL at TARGET_UNIT_CASTER_AREA_RAID, which reaches the caster himself when ungrouped). This scenario covers only the application half of the issue: Mark of Order's own per-second stack growth is a separate defect (806270 carries its delta in MiscValueB while Spell::EffectAscensionModifyAuraStacks reads MiscValue), so no assertion is made on stack growth here.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "chronomancer", "spell": 704488 },
+    { "action": "learn", "actor": "chronomancer", "spell": 804491 },
+    {
+      "action": "assert",
+      "label": "No Mark of Order before any cast",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 806269,
+      "caster": "chronomancer",
+      "equals": 0
+    },
+    { "action": "set_health", "actor": "chronomancer", "value": 2000 },
+    { "action": "cast", "actor": "chronomancer", "spell": 804491 },
+    {
+      "action": "assert",
+      "label": "Fortify Timeline's heal applies Mark of Order to the healed unit",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 806269,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

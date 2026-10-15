@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "name": "Tinker I Need More Explosions! boosts Sticky Bomb Explosion (#1892)",
+  "contract": "I Need More Explosions! 503550 is SPELL_AURA_ADD_PCT_MODIFIER +15 (DBC EffectBasePoints 14, DieSides 1) on SPELLMOD_DAMAGE with class mask 0x00010000/0x02000000/0. Sticky Bomb Explosion 801009 is SpellFamilyName 34 with SpellFamilyFlags[0] 0x00010000, so the mask matches, and AscensionTinkerAuras.cpp:138-144 casts 801009 from the player, which makes the player the spell-mod owner in Unit::SpellDamageBonusDone (Unit.cpp:9320). Rocket Launcher 500220 is the control: same family, SpellFamilyFlags[2] 0x01000000, outside the mask.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "t",
+      "entry": 36,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "save_as": "boom0",
+      "actor": "t",
+      "metric": "spell_damage_done",
+      "spell": 801009,
+      "target": "d"
+    },
+    {
+      "action": "snapshot",
+      "save_as": "rocket0",
+      "actor": "t",
+      "metric": "spell_damage_done",
+      "spell": 500220,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "No damage modifier applies before the talent",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 801009,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 503550
+    },
+    {
+      "action": "assert",
+      "label": "The explosion carries the talent's 15%",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 801009,
+      "op": 0,
+      "base": 1000,
+      "equals": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Native outgoing damage for the explosion rises 15%",
+      "actor": "t",
+      "metric": "spell_damage_done",
+      "spell": 801009,
+      "target": "d",
+      "ratio_to": "boom0",
+      "min": 1.14,
+      "max": 1.16
+    },
+    {
+      "action": "assert",
+      "label": "Rocket Launcher damage is untouched",
+      "actor": "t",
+      "metric": "spell_damage_done",
+      "spell": 500220,
+      "target": "d",
+      "relative_to": "rocket0",
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,7148 @@
+{
+  "schema": 1,
+  "name": "Primalist Judgement native procs, coefficients and Mountain modifiers",
+  "contract": "One hundred single-hit Fire Blasts sample 20% chance, each success delivering exactly three hammers in two seconds without recursion. Verify fifteen-second active duration, one-minute cooldown, SP/AP coefficients, +50% Mountain Hammer modifier, no legacy vulnerability, periodic-damage exclusion and aura removal.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 600000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 196
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520469,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 680405,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 520468
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 520467
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 82888,
+      "stacks": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 800140,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520566,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520565,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520564,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520563,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520562,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520561,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520560,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 520566
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 520466,
+      "min": 59000,
+      "max": 60000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "spell": 520466,
+      "min": 14000,
+      "max": 15000
+    },
+    {
+      "action": "wait",
+      "ms": 16000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_0"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_0",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_0",
+      "save_as": "trial_0"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_1"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_1",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_1",
+      "save_as": "trial_1"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_2"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_2",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_2",
+      "save_as": "trial_2"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_3"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_3",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_3",
+      "save_as": "trial_3"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_4"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_4",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_4",
+      "save_as": "trial_4"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_5"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_5",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_5",
+      "save_as": "trial_5"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_6"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_6",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_6",
+      "save_as": "trial_6"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_7"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_7",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_7",
+      "save_as": "trial_7"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_8"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_8",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_8",
+      "save_as": "trial_8"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_9"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_9",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_9",
+      "save_as": "trial_9"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_10"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_10",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_10",
+      "save_as": "trial_10"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_11"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_11",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_11",
+      "save_as": "trial_11"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_12"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_12"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_12",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_12",
+      "save_as": "trial_12"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_13"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_13"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_13",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_13",
+      "save_as": "trial_13"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_14"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_14"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_14",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_14",
+      "save_as": "trial_14"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_15"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_15"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_15",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_15",
+      "save_as": "trial_15"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_16"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_16"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_16",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_16",
+      "save_as": "trial_16"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_17"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_17",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_17",
+      "save_as": "trial_17"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_18"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_18",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_18",
+      "save_as": "trial_18"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_19"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_19"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_19",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_19",
+      "save_as": "trial_19"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_20"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_20"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_20",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_20",
+      "save_as": "trial_20"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_21"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_21"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_21",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_21",
+      "save_as": "trial_21"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_22"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_22",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_22",
+      "save_as": "trial_22"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_23"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_23"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_23",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_23",
+      "save_as": "trial_23"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_24"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_24"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_24",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_24",
+      "save_as": "trial_24"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_25"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_25"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_25",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_25",
+      "save_as": "trial_25"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_26"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_26"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_26",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_26",
+      "save_as": "trial_26"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_27"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_27"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_27",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_27",
+      "save_as": "trial_27"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_28"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_28"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_28",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_28",
+      "save_as": "trial_28"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_29"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_29"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_29",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_29",
+      "save_as": "trial_29"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_30"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_30"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_30",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_30",
+      "save_as": "trial_30"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_31"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_31"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_31",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_31",
+      "save_as": "trial_31"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_32"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_32"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_32",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_32",
+      "save_as": "trial_32"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_33"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_33"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_33",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_33",
+      "save_as": "trial_33"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_34"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_34"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_34",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_34",
+      "save_as": "trial_34"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_35"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_35"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_35",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_35",
+      "save_as": "trial_35"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_36"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_36"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_36",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_36",
+      "save_as": "trial_36"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_37"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_37"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_37",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_37",
+      "save_as": "trial_37"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_38"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_38"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_38",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_38",
+      "save_as": "trial_38"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_39"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_39"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_39",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_39",
+      "save_as": "trial_39"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_40"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_40"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_40",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_40",
+      "save_as": "trial_40"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_41"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_41"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_41",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_41",
+      "save_as": "trial_41"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_42"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_42"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_42",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_42",
+      "save_as": "trial_42"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_43"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_43"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_43",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_43",
+      "save_as": "trial_43"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_44"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_44"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_44",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_44",
+      "save_as": "trial_44"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_45"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_45"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_45",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_45",
+      "save_as": "trial_45"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_46"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_46"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_46",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_46",
+      "save_as": "trial_46"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_47"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_47"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_47",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_47",
+      "save_as": "trial_47"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_48"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_48"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_48",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_48",
+      "save_as": "trial_48"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_49"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_49"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_49",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_49",
+      "save_as": "trial_49"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_50"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_50"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_50",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_50",
+      "save_as": "trial_50"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_51"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_51"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_51",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_51",
+      "save_as": "trial_51"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_52"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_52"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_52",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_52",
+      "save_as": "trial_52"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_53"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_53"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_53",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_53",
+      "save_as": "trial_53"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_54"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_54"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_54",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_54",
+      "save_as": "trial_54"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_55"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_55"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_55",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_55",
+      "save_as": "trial_55"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_56"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_56"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_56",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_56",
+      "save_as": "trial_56"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_57"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_57"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_57",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_57",
+      "save_as": "trial_57"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_58"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_58"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_58",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_58",
+      "save_as": "trial_58"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_59"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_59"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_59",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_59",
+      "save_as": "trial_59"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_60"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_60"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_60",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_60",
+      "save_as": "trial_60"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_61"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_61"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_61",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_61",
+      "save_as": "trial_61"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_62"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_62"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_62",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_62",
+      "save_as": "trial_62"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_63"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_63"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_63",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_63",
+      "save_as": "trial_63"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_64"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_64"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_64",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_64",
+      "save_as": "trial_64"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_65"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_65"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_65",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_65",
+      "save_as": "trial_65"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_66"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_66"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_66",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_66",
+      "save_as": "trial_66"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_67"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_67"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_67",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_67",
+      "save_as": "trial_67"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_68"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_68"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_68",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_68",
+      "save_as": "trial_68"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_69"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_69"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_69",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_69",
+      "save_as": "trial_69"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_70"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_70"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_70",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_70",
+      "save_as": "trial_70"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_71"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_71"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_71",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_71",
+      "save_as": "trial_71"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_72"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_72"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_72",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_72",
+      "save_as": "trial_72"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_73"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_73"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_73",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_73",
+      "save_as": "trial_73"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_74"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_74"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_74",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_74",
+      "save_as": "trial_74"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_75"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_75"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_75",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_75",
+      "save_as": "trial_75"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_76"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_76"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_76",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_76",
+      "save_as": "trial_76"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_77"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_77"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_77",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_77",
+      "save_as": "trial_77"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_78"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_78"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_78",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_78",
+      "save_as": "trial_78"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_79"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_79"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_79",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_79",
+      "save_as": "trial_79"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_80"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_80"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_80",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_80",
+      "save_as": "trial_80"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_81"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_81"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_81",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_81",
+      "save_as": "trial_81"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_82"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_82"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_82",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_82",
+      "save_as": "trial_82"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_83"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_83"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_83",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_83",
+      "save_as": "trial_83"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_84"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_84"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_84",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_84",
+      "save_as": "trial_84"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_85"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_85"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_85",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_85",
+      "save_as": "trial_85"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_86"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_86"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_86",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_86",
+      "save_as": "trial_86"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_87"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_87"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_87",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_87",
+      "save_as": "trial_87"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_88"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_88"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_88",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_88",
+      "save_as": "trial_88"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_89"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_89"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_89",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_89",
+      "save_as": "trial_89"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_90"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_90"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_90",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_90",
+      "save_as": "trial_90"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_91"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_91"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_91",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_91",
+      "save_as": "trial_91"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_92"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_92"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_92",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_92",
+      "save_as": "trial_92"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_93"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_93"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_93",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_93",
+      "save_as": "trial_93"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_94"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_94"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_94",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_94",
+      "save_as": "trial_94"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 520466,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_95"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_95"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_95",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_95",
+      "save_as": "trial_95"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_96"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_96"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_96",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_96",
+      "save_as": "trial_96"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_97"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_97"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_97",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_97",
+      "save_as": "trial_97"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_98"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_98"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_98",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_98",
+      "save_as": "trial_98"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "trial_before_99"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "save_as": "hit_before_99"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "target",
+      "relative_to": "hit_before_99",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "trial_before_99",
+      "save_as": "trial_99"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 520466,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 887019,
+      "effect": 0,
+      "equals": -15
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "coefficient_base"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 26395,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "coefficient_base",
+      "save_as": "spell_power_gain"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 26395,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 38305,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "coefficient_base",
+      "save_as": "nature_power_gain"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 38305,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "coefficient_base",
+      "save_as": "attack_power_gain"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "base_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520468,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "base_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "base_before",
+      "save_as": "base_damage"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 520468,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 680405
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "mountain_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520468,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "mountain_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "mountain_before",
+      "save_as": "mountain_damage"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 520468,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 680405,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 503264
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520466
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "save_as": "periodic_hammers_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "target": "target",
+      "save_as": "periodic_ticks_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 503264,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "target": "target",
+      "relative_to": "periodic_ticks_before",
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "periodic_hammers_before",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 520466,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520566
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520566,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520468,
+      "target": "target",
+      "relative_to": "periodic_hammers_before",
+      "equals": 0
+    }
+  ]
+}

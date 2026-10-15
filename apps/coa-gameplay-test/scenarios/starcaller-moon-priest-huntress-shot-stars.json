@@ -1,0 +1,179 @@
+{
+  "schema": 1,
+  "name": "Moon Priest: Huntress Shot applies 2 additional Scattered Stars in Lunar Eclipse (#345)",
+  "contract": "The report (level 10 Starcaller, Moon Priest selected) expects Huntress Shot to apply 2 stacks of Scattered Stars and sees 1. Two shipped tooltips state the numbers: Moon Priest 92134 reads \"Your Huntress Shot now has a Lunar Eclipse effect. Huntress Shot: Applies 2 additional Scattered Stars\", and Huntress Shot 680220 reads \"Applies 1 Scattered Star\" with, under $?s92134, \"Lunar Eclipse: Applies an additional Scattered Star\" (singular, a disagreement between the two records that this scenario does not resolve). The code (AscensionStarcallerAbilities.cpp, hit callback) always applies 1 star and adds 2 only when the Lunar Eclipse snapshot 800386 was set on the cast (spell->GetScriptValue(800386)), which needs Moon Priest known, Lunar Phase at 4 stacks with aura 704519 and a cast of Lunar Eclipse 800386 before the shot. The reporter's steps never activate Lunar Eclipse, so the base result of 1 star is what the shipped tooltip promises there. The scenario therefore pins the two numbers the data does state: without Lunar Eclipse one Huntress Shot leaves exactly 1 Scattered Star (804378) owned by the caster on the target, and with Lunar Eclipse active it leaves 1 plus the 2 additional of the Moon Priest tooltip, 3. It cannot show that 2 (the reporter's figure) is intended: the only source for it is the singular/plural conflict above. Both fixtures know Moon Priest, Lunar Eclipse and Huntress Shot rank 1 (680220), have raised hit ratings, stand at the same spot facing +X with a hostile creature 15 yd ahead and carry a bow in the ranged slot (Worn Shortbow 2504, item_template row of the shipped repack dump, class 2 subclass 2, inventory type 15) because the spell requires an equipped weapon of subclass mask 262156. Lunar Phase stacks are set with set_aura 802985 x4 plus 704519 for the Eclipse fixture only; Lunar Eclipse's cast consumes them (IsLunarEclipseActivation). The cast is 2.0 s (SpellCastTimes idx 5), hence the waits. Class 26 bow proficiency is not verified. If equipping the bow is rejected the runner reports the inventory error before any assertion, which is a fixture problem and not a result.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    },
+    {
+      "id": "eclipse",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_control",
+      "owner": "control",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 15
+    },
+    {
+      "id": "dummy_eclipse",
+      "owner": "eclipse",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 92134
+    },
+    {
+      "action": "learn",
+      "actor": "eclipse",
+      "spell": 92134
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 800386
+    },
+    {
+      "action": "learn",
+      "actor": "eclipse",
+      "spell": 800386
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 680220
+    },
+    {
+      "action": "learn",
+      "actor": "eclipse",
+      "spell": 680220
+    },
+    {
+      "action": "add_item",
+      "actor": "control",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "actor": "control",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "add_item",
+      "actor": "eclipse",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "actor": "eclipse",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "label": "Let the equipment settle",
+      "ms": 1500
+    },
+    {
+      "action": "set_aura",
+      "label": "Four Lunar Phase stacks on the Eclipse fixture",
+      "actor": "eclipse",
+      "spell": 802985,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "The four-stack marker Lunar Eclipse needs",
+      "actor": "eclipse",
+      "spell": 704519,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "label": "Activate Lunar Eclipse",
+      "actor": "eclipse",
+      "spell": 800386
+    },
+    {
+      "action": "assert",
+      "label": "Lunar Eclipse is active on the fixture",
+      "actor": "eclipse",
+      "metric": "aura",
+      "spell": 800386,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Control fires Huntress Shot with Moon Priest but no Lunar Eclipse",
+      "actor": "control",
+      "spell": 680220,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "label": "Eclipse fixture fires Huntress Shot inside Lunar Eclipse",
+      "actor": "eclipse",
+      "spell": 680220,
+      "target": "dummy_eclipse"
+    },
+    {
+      "action": "wait",
+      "label": "Let both 2 second casts land",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Without Lunar Eclipse the shot applies exactly 1 Scattered Star",
+      "actor": "dummy_control",
+      "metric": "aura_stacks",
+      "spell": 804378,
+      "caster": "control",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Inside Lunar Eclipse the shot applies 1 plus 2 additional Scattered Stars",
+      "actor": "dummy_eclipse",
+      "metric": "aura_stacks",
+      "spell": 804378,
+      "caster": "eclipse",
+      "equals": 3
+    }
+  ]
+}

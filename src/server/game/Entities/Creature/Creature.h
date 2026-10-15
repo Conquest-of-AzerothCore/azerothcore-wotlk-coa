@@ -24,6 +24,7 @@
 #include "CreatureData.h"
 #include "LootMgr.h"
 #include "Unit.h"
+#include <algorithm>
 #include <list>
 
 class SpellInfo;
@@ -42,6 +43,38 @@ class CreatureGroup;
 //used for handling non-repeatable random texts
 typedef std::vector<uint8> CreatureTextRepeatIds;
 typedef std::unordered_map<uint8, CreatureTextRepeatIds> CreatureTextRepeatGroup;
+
+namespace CreatureRespawnClock
+{
+    // AzerothCore world data gives some spawns 0-10 s delays that relied on the corpse decay being added to them;
+    // 25 s is the vmangos default creature respawn delay.
+    constexpr uint32 MinimumDelayFromDeath = 25;
+
+    constexpr uint32 DelayAtDeath(uint32 respawnDelay, bool timerStartsAtDeath)
+    {
+        return timerStartsAtDeath ? std::max(respawnDelay, MinimumDelayFromDeath) : respawnDelay;
+    }
+
+    constexpr time_t RespawnTimeAtDeath(time_t now, uint32 respawnDelay, uint32 corpseDelay, bool timerStartsAtDeath)
+    {
+        return now + respawnDelay + (timerStartsAtDeath ? 0 : corpseDelay);
+    }
+
+    constexpr time_t RespawnTimeAfterLoot(time_t respawnTime, uint32 corpseTimeCut, bool timerStartsAtDeath)
+    {
+        return timerStartsAtDeath ? respawnTime : respawnTime - corpseTimeCut;
+    }
+
+    constexpr bool IsCorpseDue(time_t now, time_t corpseRemoveTime, time_t respawnTime, bool timerStartsAtDeath)
+    {
+        return corpseRemoveTime <= now || (timerStartsAtDeath && respawnTime != 0 && respawnTime <= now);
+    }
+
+    constexpr bool KeepsRespawnTime(time_t respawnTime, bool timerStartsAtDeath)
+    {
+        return timerStartsAtDeath && respawnTime != 0;
+    }
+}
 
 class Creature : public Unit, public GridObject<Creature>, public MovableMapObject, public UpdatableMapObject
 {
@@ -63,6 +96,7 @@ public:
 
     bool Create(ObjectGuid::LowType guidlow, Map* map, uint32 phaseMask, uint32 Entry, uint32 vehId, float x, float y, float z, float ang, CreatureData const* data = nullptr);
     bool LoadCreaturesAddon(bool reload = false);
+    static void LoadDungeonHealthOverrides();
     void SelectLevel(bool changelevel = true);
     void LoadEquipment(int8 id = 1, bool force = false);
 
@@ -134,6 +168,7 @@ public:
     [[nodiscard]] bool IsAvoidingAOE() const { return HasFlagsExtra(CREATURE_FLAG_EXTRA_AVOID_AOE); }
 
     uint8 getLevelForTarget(WorldObject const* target) const override; // overwrite Unit::getLevelForTarget for boss level support
+    [[nodiscard]] uint8 GetLootSkillLevelFor(Player const* looter) const;
 
     [[nodiscard]] bool IsInEvadeMode() const { return HasUnitState(UNIT_STATE_EVADE); }
     [[nodiscard]] bool IsEvadingAttacks() const { return IsInEvadeMode() || CanNotReachTarget(); }
@@ -234,6 +269,13 @@ public:
     [[nodiscard]] ObjectGuid::LowType GetLootRecipientGroupGUID() const { return m_lootRecipientGroup; }
     [[nodiscard]] Group* GetLootRecipientGroup() const;
     [[nodiscard]] bool hasLootRecipient() const { return m_lootRecipient || m_lootRecipientGroup; }
+    bool IsSharedQuestTarget() const;
+    void RegisterSharedQuestContributor(Unit* attacker);
+    void FinalizeSharedQuestParticipants();
+    void RewardSharedQuestParticipants(ObjectGuid rewardedPlayer, ObjectGuid rewardedGroup);
+    bool IsSharedQuestParticipant(Player const* player) const;
+    bool IsSharedQuestItem(uint32 itemId) const;
+    GuidSet const& GetSharedQuestParticipants() const { return m_sharedQuestParticipants; }
     bool isTappedBy(Player const* player) const;    // return true if the creature is tapped by the player or a member of his party.
     [[nodiscard]] bool CanGeneratePickPocketLoot() const;
     void SetPickPocketLootTime();
@@ -468,6 +510,7 @@ protected:
 
     static float _GetHealthMod(int32 Rank);
 
+    GuidSet m_sharedQuestParticipants;
     ObjectGuid m_lootRecipient;
     ObjectGuid::LowType m_lootRecipientGroup;
 
@@ -531,6 +574,7 @@ private:
     void ForcedDespawn(Milliseconds timeMSToDespawn = 0ms, Seconds forcedRespawnTimer = 0s);
 
     [[nodiscard]] bool CanPeriodicallyCallForAssistance() const;
+    [[nodiscard]] bool IsRespawnTimerFromDeath() const;
 
     // WaypointMovementGenerator variable
     uint32 m_waypointID;

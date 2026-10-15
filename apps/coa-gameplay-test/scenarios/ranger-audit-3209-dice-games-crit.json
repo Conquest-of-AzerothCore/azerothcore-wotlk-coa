@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Dice Games raises Wild Strike's crit-chance modifier by 10 (#3209)",
+  "contract": "801438 'Dice Games' reads 'Increases the critical strike chance of Wild Strike and Assault by $s1%.' It is a single SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 = SPELLMOD_CRITICAL_CHANCE, BasePoints 9+1=10, class mask (0, 33024, 0) = word1 bits {8, 15}. Wild Strike 501724 has SpellFamilyFlags (0, 256, 524288) = word1 bit 8, a direct match; the 'Assault' half of the mask (word1 bit 15) is not independently confirmed here, but Wild Strike alone already proves the native delivery this issue disputes. Unit::SpellCriticalBonus (src/server/game/Entities/Unit/Unit.cpp) calls ApplySpellMod(spellProto->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance) unconditionally, so no script is needed.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the character settle", "ms": 3000 },
+    {
+      "action": "snapshot", "actor": "ranger", "metric": "spell_modifier", "spell": 501724, "op": 7, "base": 0,
+      "save_as": "crit_before"
+    },
+    { "action": "learn", "actor": "ranger", "spell": 801438 },
+    {
+      "action": "assert", "label": "SETUP: Dice Games is active", "actor": "ranger",
+      "metric": "aura", "spell": 801438, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Wild Strike's crit-chance modifier rises by 10", "actor": "ranger",
+      "metric": "spell_modifier", "spell": 501724, "op": 7, "base": 0, "relative_to": "crit_before",
+      "min": 9.99, "max": 10.01
+    }
+  ]
+}

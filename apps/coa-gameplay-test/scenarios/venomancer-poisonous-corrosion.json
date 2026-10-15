@@ -1,0 +1,361 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Poisonous and Corrosion Nature damage modifiers (#3124, #3318)",
+  "contract": [
+    "#3124, #3318. Poisonous 707320 (Spell.dbc, passive): effect 0 is aura 237",
+    "MOD_SPELL_DAMAGE_OF_ATTACK_POWER, misc 126 (all magic schools), 29+1 = 30% of attack power, read by",
+    "Unit::SpellBaseDamageBonusDone (Unit.cpp:9592); effect 1 is aura 286 ABILITY_PERIODIC_CRIT with class",
+    "mask [0,0,0x4] = Expulsion 805094 and its ranks, read by AuraEffect::CalcPeriodicCritChance",
+    "(SpellAuraEffects.cpp:1167). The 30% is asserted through spell_power (Nature, school 3) against the",
+    "pre-learn value in the same run and against an untalented control; the periodic crit through the",
+    "snapshotted crit chance of a real Expulsion aura on a dummy, the control's aura carrying 0. Corrosion",
+    "803194: effect 0 is aura 87 MOD_DAMAGE_PERCENT_TAKEN, misc 8 (Nature), 4+1 = 5; the dummy's incoming",
+    "Nature damage from the caster (fixed base 1000) must be 5% above its own pre-cast value. Expulsion and",
+    "Corrosion require Beetle Form 803183 (Spell.dbc CasterAuraSpell) and Rage. Unverified assumption: a",
+    "class 29 fixture can hold 200 Rage via set_power. Expulsion's own effect 0 (Spell.dbc) targets",
+    "TARGET_SRC_CASTER/TARGET_UNIT_SRC_AREA_ENEMY (implicitTargetA 22, implicitTargetB 15) -- it is an AoE",
+    "around the caster, not the explicit unit target the cast packet carries -- so it also hits the other",
+    "player's dummy when both are near each other; v's cast is asserted (landing + crit) before c ever casts,",
+    "so c's later cast cannot overwrite v's non-stacking aura on dv first. Expulsion's DmgClass (Spell.dbc)",
+    "is 2 (SPELL_DAMAGE_CLASS_MELEE), so AuraEffect::CalcPeriodicCritChance routes its crit chance through",
+    "Unit::SpellDoneCritChance's melee branch (PLAYER_CRIT_PERCENTAGE, driven by CR_CRIT_MELEE), not the",
+    "spell-crit branch; both fixtures also carry melee_crit_rating so v's snapshotted crit is provably",
+    "positive while c's stays 0 because CalcPeriodicCritChance only looks at it once c is found to hold no",
+    "SPELL_AURA_ABILITY_PERIODIC_CRIT effect (Poisonous is never learned by c). Generic core machinery: a",
+    "regression guard for behaviour that already works.",
+    "Let v's cast resolve before c casts the same AoE (Expulsion targets",
+    "TARGET_SRC_CASTER/TARGET_UNIT_SRC_AREA_ENEMY, so it hits every nearby enemy, not just the explicit",
+    "target; c's later cast would otherwise overwrite v's non-stacking aura on both dummies)"
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 29,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000,
+      "melee_crit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "c",
+      "race": 1,
+      "class": 29,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000,
+      "melee_crit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dv",
+      "owner": "v",
+      "entry": 36,
+      "distance": 3
+    },
+    {
+      "id": "dc",
+      "owner": "c",
+      "entry": 36,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 803183
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 805094
+    },
+    {
+      "action": "learn",
+      "actor": "c",
+      "spell": 803183
+    },
+    {
+      "action": "learn",
+      "actor": "c",
+      "spell": 805094
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 803194
+    },
+    {
+      "action": "snapshot",
+      "label": "Nature spell power before Poisonous (v)",
+      "actor": "v",
+      "metric": "spell_power",
+      "school": 3,
+      "save_as": "sp_v"
+    },
+    {
+      "action": "snapshot",
+      "label": "Nature spell power (control)",
+      "actor": "c",
+      "metric": "spell_power",
+      "school": 3,
+      "save_as": "sp_c"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: attack power is high enough that 30% of it is at least 1",
+      "actor": "v",
+      "metric": "attack_power",
+      "min": 34
+    },
+    {
+      "action": "assert",
+      "label": "Poisonous is not active before it is learned",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 707320,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 707320
+    },
+    {
+      "action": "assert",
+      "label": "Poisonous passive is applied",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 707320,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Poisonous effect 0 is 30% of attack power (Spell.dbc BasePoints 29 + 1)",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 707320,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Poisonous raises Nature spell power (aura 237, 30% of AP) above the pre-learn value",
+      "actor": "v",
+      "metric": "spell_power",
+      "school": 3,
+      "relative_to": "sp_v",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The control without Poisonous keeps its Nature spell power",
+      "actor": "c",
+      "metric": "spell_power",
+      "school": 3,
+      "relative_to": "sp_c",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 803183
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 803183
+    },
+    {
+      "action": "assert",
+      "label": "Beetle Form is up (v)",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 803183,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Beetle Form is up (c)",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 803183,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: enough Rage for Expulsion (v)",
+      "actor": "v",
+      "metric": "power",
+      "power": 1,
+      "min": 200
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: enough Rage for Expulsion (c)",
+      "actor": "c",
+      "metric": "power",
+      "power": 1,
+      "min": 200
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 805094,
+      "target": "dv"
+    },
+    {
+      "action": "wait",
+      "label": "Let v's cast resolve before c casts the same AoE (Expulsion targets…",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Expulsion landed on v's dummy",
+      "actor": "dv",
+      "metric": "aura",
+      "spell": 805094,
+      "caster": "v",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Poisonous lets Expulsion ticks critically strike (snapshotted periodic crit chance > 0)",
+      "actor": "dv",
+      "metric": "aura_crit_chance",
+      "spell": 805094,
+      "caster": "v",
+      "effect": 0,
+      "min": 1
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 805094,
+      "target": "dc"
+    },
+    {
+      "action": "wait",
+      "label": "Let c's cast resolve",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Expulsion landed on the control's dummy",
+      "actor": "dc",
+      "metric": "aura",
+      "spell": 805094,
+      "caster": "c",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Without Poisonous Expulsion ticks cannot crit (no aura 286 on the caster)",
+      "actor": "dc",
+      "metric": "aura_crit_chance",
+      "spell": 805094,
+      "caster": "c",
+      "effect": 0,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Corrosion is not on the dummy yet",
+      "actor": "dv",
+      "metric": "aura",
+      "spell": 803194,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Nature damage taken by the dummy from v before Corrosion (fixed base 1000)",
+      "actor": "dv",
+      "metric": "spell_damage_taken",
+      "spell": 805094,
+      "target": "v",
+      "save_as": "taken_base"
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 803194,
+      "target": "dv"
+    },
+    {
+      "action": "assert",
+      "label": "Corrosion landed on the dummy",
+      "actor": "dv",
+      "metric": "aura",
+      "spell": 803194,
+      "caster": "v",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Corrosion effect 0 is 5 (Spell.dbc BasePoints 4 + 1)",
+      "actor": "dv",
+      "metric": "aura_amount",
+      "spell": 803194,
+      "caster": "v",
+      "effect": 0,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "Corrosion raises Nature damage taken by 5% against the same-run baseline",
+      "actor": "dv",
+      "metric": "spell_damage_taken",
+      "spell": 805094,
+      "target": "v",
+      "ratio_to": "taken_base",
+      "min": 1.049,
+      "max": 1.051
+    }
+  ]
+}

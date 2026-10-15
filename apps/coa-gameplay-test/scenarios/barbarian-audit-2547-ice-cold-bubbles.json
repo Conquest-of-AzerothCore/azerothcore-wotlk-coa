@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Barbarian audit: Ice Cold Bubbles registers its spell-mod aura natively (#2547) (rank 2)",
+  "contract": "Audit report #2547 asked for a script for a passive whose sole effect is a native spell-mod aura: SPELL_AURA_ADD_FLAT_MODIFIER (107), MiscValue 23 (SPELLMOD_EFFECT3), EffectSpellClassMask (0, 268435456, 0), EffectBasePoints 3 + DieSides 1 -> amount 4. AuraEffect::CalculateSpellMod (called from the AuraEffect constructor and from Player::AddSpellMod's stock registration path in AuraEffect::ApplySpellMod, both unmodified engine code) builds and registers this SpellModifier with no script needed; its delivery is proven generically by aura_amount, the same CalcValue path every other passive in this audit uses. A second assertion originally tried to prove delivery end-to-end with the spell_modifier probe (Player::ApplySpellMod) against spell 805813 'Fill Level' -- the only family-18 spell in Spell.dbc whose own SpellFamilyFlags include classmask bit 268435456 -- but 805813 carries AttributesEx3 0x60110000, which includes SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (0x20000000); SpellInfo::IsAffectedBySpellMod short-circuits to false for every op except SPELLMOD_DURATION on any spell with that attribute, before the family/classmask match is even evaluated (SpellInfo.cpp, IsAffectedBySpellMod -> IsAffectedBySpellMods). Since 805813 is the only DBC spell this classmask can ever match, Ice Cold Bubbles' spell-mod effect is inert by design -- the same kind of leftover DBC row already documented elsewhere in this audit (e.g. War Cry's periodic-energize effect) -- not a caster-side delivery bug, so this scenario no longer asserts delivery to a target spell. Two ranks exist (705161 amount 2, 707778 amount 4); this scenario exercises rank 2, the stronger/most-visible amount, per the same rank-selection convention as the existing #963 Gruesome scenario.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 707778
+    },
+    {
+      "action": "assert",
+      "label": "Ice Cold Bubbles (707778) is active",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 707778,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Effect 0 (flat spell-mod op 23) resolves to 4",
+      "actor": "b",
+      "metric": "aura_amount",
+      "spell": 707778,
+      "effect": 0,
+      "equals": 4
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 707778
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning removes it",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 707778,
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

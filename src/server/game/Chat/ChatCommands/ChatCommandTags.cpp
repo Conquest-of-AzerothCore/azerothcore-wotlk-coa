@@ -89,7 +89,7 @@ ChatCommandResult Acore::ChatCommands::AccountIdentifier::TryConsume(ChatHandler
 
 ChatCommandResult Acore::ChatCommands::PlayerIdentifier::TryConsume(ChatHandler const* handler, std::string_view args)
 {
-    Variant<Hyperlink<player>, ObjectGuid::LowType, std::string_view> val;
+    Variant<Hyperlink<player>, ObjectGuid::LowType, QuotedString> val;
     ChatCommandResult next = ArgInfo<decltype(val)>::TryConsume(val, handler, args);
     if (!next)
         return next;
@@ -114,7 +114,7 @@ ChatCommandResult Acore::ChatCommands::PlayerIdentifier::TryConsume(ChatHandler 
         if (val.holds_alternative<Hyperlink<player>>())
             _name.assign(static_cast<std::string_view>(val.get<Hyperlink<player>>()));
         else
-            _name.assign(val.get<std::string_view>());
+            _name.assign(val.get<QuotedString>());
 
         if (!normalizePlayerName(_name))
             return FormatAcoreString(handler, LANG_CMDPARSER_CHAR_NAME_INVALID, _name);

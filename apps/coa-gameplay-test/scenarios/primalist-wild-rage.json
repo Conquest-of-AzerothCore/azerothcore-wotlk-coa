@@ -1,0 +1,265 @@
+{
+  "schema": 1,
+  "name": "Primalist Wild Rage native zero-cost Rylak attacks",
+  "contract": "First/highest Rylak costs become zero and normal attacks succeed with zero Rage. Removal restores both rank costs.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 196
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 301280,
+      "all_specs": true
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 706342,
+      "save_as": "base_706342"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 707910,
+      "save_as": "base_707910"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 301280
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 707910,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706494,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706493,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706492,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706491,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706490,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706342,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 706342
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 706342,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 706342
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 706342,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 706342,
+      "target": "target",
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 707910,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706494,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706493,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706492,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706491,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706490,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706342,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 707910
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 707910,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 707910
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 707910,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 707910,
+      "target": "target",
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 301280,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 706342,
+      "relative_to": "base_706342",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 707910,
+      "relative_to": "base_707910",
+      "equals": 0
+    }
+  ]
+}

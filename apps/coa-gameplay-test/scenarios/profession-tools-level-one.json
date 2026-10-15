@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "A level 1 character can equip the starter Mining Pick and Blacksmith Hammer (#5220)",
+  "contract": "Mining Pick 2901 and Blacksmith Hammer 5956 are vendor-bought starter profession tools with required level 1 in AzerothCore's item data. The imported world data replaced their stats with a placeholder artifact-quality row (quality 6, item level 10, required level 10), so a level 1 character could not equip them. Equipping each through the native handler at level 1 must succeed.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "miner", "race": 1, "class": 21, "level": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 2000 },
+    { "action": "add_item", "label": "Buy a Mining Pick", "actor": "miner", "item": 2901 },
+    { "action": "equip", "label": "Equip the Mining Pick at level 1", "actor": "miner", "item": 2901, "slot": 15 },
+    { "action": "add_item", "label": "Buy a Blacksmith Hammer", "actor": "miner", "item": 5956 },
+    { "action": "equip", "label": "Equip the Blacksmith Hammer at level 1", "actor": "miner", "item": 5956, "slot": 15 },
+    {
+      "action": "assert", "label": "The character still owns the Mining Pick", "actor": "miner",
+      "metric": "item_count", "item": 2901, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The character still owns the Blacksmith Hammer", "actor": "miner",
+      "metric": "item_count", "item": 5956, "equals": 1
+    }
+  ]
+}

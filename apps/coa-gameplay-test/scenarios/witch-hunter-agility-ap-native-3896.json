@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "name": "Witch Hunter gains melee and ranged attack power from Agility (#3896)",
+  "contract": [
+    "The report was clarified as character-sheet display. This server-side control independently changes only Agility using Lesser Agility 2374 (+4) and measures actual melee and ranged attack power. It does not verify the client character sheet."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 59
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "attack_power",
+      "save_as": "before_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "ranged_attack_power",
+      "save_as": "before_rap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "stat",
+      "save_as": "before_agi",
+      "stat": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "stat",
+      "save_as": "before_str",
+      "stat": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "hunter",
+      "spell": 2374,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "stat",
+      "stat": 1,
+      "relative_to": "before_agi",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "stat",
+      "stat": 0,
+      "relative_to": "before_str",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "attack_power",
+      "relative_to": "before_ap",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "ranged_attack_power",
+      "relative_to": "before_rap",
+      "equals": 4
+    }
+  ]
+}

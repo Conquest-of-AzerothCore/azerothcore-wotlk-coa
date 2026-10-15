@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Viper Ward talent replaces the Call of Sseratus a player actually knows (#4101)",
+  "contract": "Viper Ward 707329 is a talent whose only mechanism is AscensionWitchDoctor::SyncReplacements (AscensionWitchDoctorAuras.cpp), which iterates player->GetSpellMap() -- the player's own learned spellbook -- and previously matched 'else if (id == CallSseratus)' where CallSseratus=572899. Call of Sseratus's CharacterAdvancement acquisition (SkillLineAbility 23796, CharacterAdvancement row 30892, ClassType 15 -> ClassID 13, Tab 36 'Shadowhunting') names RankSpell[0]=681222 as what a Witch Doctor actually learns and casts; 572899 has no CharacterAdvancement or SkillLineAbility entry at all (coa-dbc-viewer map --id 572899 returns an empty acquisition list) -- it only exists as 681222's own internal EffectTriggerSpell[0] target, read by SyncReplacements's sibling call sites (AscensionWitchDoctorAbilities.cpp:92 and AscensionWitchDoctorCompletion.cpp:233), which operate on live hit/effect SpellInfo, not the spellbook, so 572899 is correct there and untouched by this fix. Since the id check in SyncReplacements only ever iterates ids present in GetSpellMap(), 572899 could never match for a real player, and the ViperTalent branch was unreachable. The fix changes the check to CallSseratusChannel (681222), the id CharacterAdvancement proves the player knows. witch_doctor_update (a 500 ms-throttled OnUnitUpdate hook) calls SyncReplacements every tick, so no explicit cast is needed to observe the sync; a short wait after learning the talent is enough.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "witchdoctor",
+      "race": 1,
+      "class": 13,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks and class synchronisation settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "witchdoctor",
+      "spell": 681222
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the player knows Call of Sseratus's channel spell, not the internal 572899 trigger",
+      "actor": "witchdoctor",
+      "metric": "knows_spell",
+      "spell": 681222,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: without the talent, Call of Sseratus reads unreplaced",
+      "actor": "witchdoctor",
+      "metric": "temporary_spell_replacement",
+      "spell": 681222,
+      "equals": 681222
+    },
+    {
+      "action": "learn",
+      "actor": "witchdoctor",
+      "spell": 707329,
+      "label": "Learn Viper Ward"
+    },
+    {
+      "action": "wait",
+      "label": "Let the throttled OnUnitUpdate sync run at least once",
+      "ms": 1200
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Viper Ward now replaces 681222 with Viper Ward 712373, the id the player actually knows/casts",
+      "actor": "witchdoctor",
+      "metric": "temporary_spell_replacement",
+      "spell": 681222,
+      "equals": 712373,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The replacement rank was granted to the spellbook",
+      "actor": "witchdoctor",
+      "metric": "knows_spell",
+      "spell": 712373,
+      "equals": 1
+    }
+  ]
+}

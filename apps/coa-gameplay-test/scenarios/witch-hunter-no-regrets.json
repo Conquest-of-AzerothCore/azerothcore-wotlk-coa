@@ -1,0 +1,121 @@
+{
+  "schema": 1,
+  "name": "No Regrets makes March of the Black King raise Armor by 15% (#2230)",
+  "contract": "No Regrets 681093 (installed Spell.dbc) is a passive family-21 spell with two SPELL_AURA_ADD_FLAT_MODIFIER (107) effects on SpellClassMask[2] 0x4: effect 0 op 11 (COOLDOWN) base -1 die 1 = 0 (a no-op) and effect 1 op 12 (SPELLMOD_EFFECT2) base 14 die 1 -> +15. Every March of the Black King rank 681095, 681212-681217 carries family flag [2] 0x4; effect index 1 of rank 7 681217 is SPELL_AURA_MOD_RESISTANCE_PCT (101, misc 1 = physical) with base -1 die 1 = 0, so the modifier lifts a zero to 15. The tooltip reads 'Your March of the Black King now increases your Armor by 15%.' A control and a holder cast the same rank; the holder's aura effect 1 must read 15 (0 for the control) and its armor, computed with identical race, class, level and no gear, must be 1.15 times the control's (band 1.14-1.16 absorbs the int32 truncation of an armor value near 200).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ctl",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    },
+    {
+      "id": "nr",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "ctl",
+      "spell": 681217,
+      "label": "Learn March of the Black King rank 7"
+    },
+    {
+      "action": "learn",
+      "actor": "nr",
+      "spell": 681217,
+      "label": "Learn March of the Black King rank 7"
+    },
+    {
+      "action": "learn",
+      "actor": "nr",
+      "spell": 681093,
+      "label": "Learn No Regrets"
+    },
+    {
+      "action": "set_power",
+      "actor": "ctl",
+      "power": 1,
+      "value": 300
+    },
+    {
+      "action": "set_power",
+      "actor": "nr",
+      "power": 1,
+      "value": 300
+    },
+    {
+      "action": "cast",
+      "actor": "ctl",
+      "spell": 681217,
+      "label": "Control casts March of the Black King"
+    },
+    {
+      "action": "cast",
+      "actor": "nr",
+      "spell": 681217,
+      "label": "No Regrets holder casts March of the Black King"
+    },
+    {
+      "action": "assert",
+      "label": "Control has March",
+      "actor": "ctl",
+      "metric": "aura",
+      "spell": 681217,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Holder has March",
+      "actor": "nr",
+      "metric": "aura",
+      "spell": 681217,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent March's armor effect is 0%",
+      "actor": "ctl",
+      "metric": "aura_amount",
+      "spell": 681217,
+      "effect": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "With No Regrets March's armor effect is 15%",
+      "actor": "nr",
+      "metric": "aura_amount",
+      "spell": 681217,
+      "effect": 1,
+      "equals": 15
+    },
+    {
+      "action": "snapshot",
+      "actor": "ctl",
+      "metric": "armor",
+      "save_as": "ctl_armor",
+      "label": "Control armor while March is active"
+    },
+    {
+      "action": "assert",
+      "label": "Holder armor is 15% higher than the control's",
+      "actor": "nr",
+      "metric": "armor",
+      "ratio_to": "ctl_armor",
+      "min": 1.14,
+      "max": 1.16
+    }
+  ]
+}

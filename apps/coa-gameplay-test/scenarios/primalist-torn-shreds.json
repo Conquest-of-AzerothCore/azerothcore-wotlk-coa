@@ -1,0 +1,595 @@
+{
+  "schema": 1,
+  "name": "Primalist Torn to Shreds: bleed applications, cap, duration and AP scaling",
+  "contract": "Totemic Smash and Rylak's Bite apply a 12-second bleed capped at two stacks. The active tooltip promises its scaled base plus 4.5% AP across four three-second ticks. First/highest Smash ranks, nearby targets, unlearning and unrelated damage are checked; +100 AP affects each tick by 1-2 after integer rounding, and +72 SP adds no damage. Lower-rank casts explicitly unlearn higher weapon ranks first, then relearn the tested rank; the native cast path stays enabled. Rank fixtures remove the grant from all specs, including the tested lower rank, before relearning it to restore native active-rank selection. Measure the four-tick lifetime on a fresh highest-rank application after the stacking test expires.",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    },
+    {
+      "id": "near",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 196
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 674
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 2134
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 2134,
+      "slot": 16
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "level",
+      "equals": 80
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 560313,
+      "effect": 0,
+      "min": 62,
+      "max": 63,
+      "label": "quarter_of_level_scaled_total"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 706342
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 800178,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800178
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 802557
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 803138
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_uses_armor",
+      "spell": 560313,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 706342,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 706342,
+      "target": "target",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 560313,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500294
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802557,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802556,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802555,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802554,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802553,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 803914,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 800178,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800178
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800178,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 800178,
+      "target": "target",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 560313,
+      "caster": "primalist",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 800178,
+      "target": "near",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "near",
+      "metric": "aura_stacks",
+      "spell": 560313,
+      "caster": "primalist",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "aura_amount",
+      "save_as": "one_stack",
+      "label": "one_stack",
+      "spell": 560313,
+      "effect": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "save_as": "base_ap",
+      "label": "base_ap"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 706342,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 560313,
+      "caster": "primalist",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_amount",
+      "spell": 560313,
+      "effect": 0,
+      "ratio_to": "one_stack",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "near",
+      "metric": "aura_stacks",
+      "spell": 560313,
+      "caster": "primalist",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 560313,
+      "equals": 2
+    },
+    {
+      "action": "wait",
+      "ms": 12500
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 802557
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "target_ticks",
+      "label": "target_ticks",
+      "spell": 560313,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "near_ticks",
+      "label": "near_ticks",
+      "spell": 560313,
+      "target": "near"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 802557,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_duration_ms",
+      "spell": 560313,
+      "min": 11000,
+      "max": 12000,
+      "within_ms": 500
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 802557,
+      "target": "target",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 560313,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 12500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 560313,
+      "target": "target",
+      "relative_to": "target_ticks",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 560313,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 560313,
+      "target": "near",
+      "relative_to": "near_ticks",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 560313,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "relative_to": "base_ap",
+      "equals": 100
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 706342,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 560313,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_amount",
+      "spell": 560313,
+      "effect": 0,
+      "relative_to": "one_stack",
+      "min": 1,
+      "max": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "aura_amount",
+      "save_as": "ap_stack",
+      "label": "ap_stack",
+      "spell": 560313,
+      "effect": 0
+    },
+    {
+      "action": "wait",
+      "ms": 17500
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 26395,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 706342,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_amount",
+      "spell": 560313,
+      "effect": 0,
+      "relative_to": "ap_stack",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500294,
+      "all_specs": true
+    },
+    {
+      "action": "wait",
+      "ms": 17500
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 802557
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 802557,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 3300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 802557,
+      "target": "target",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 560313,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 560313,
+      "equals": 0
+    }
+  ]
+}

@@ -8,7 +8,7 @@ This is source tooling for the matching client/server data delivery. It never
 opens an MPQ or changes an installed client. Supply a separate output path when
 packaging is requested; the input and all unrelated spell rows are preserved.
 The server side of the same change lives in
-modules/mod-ascension-compat/src/AscensionFelswornContracts.cpp.
+src/server/coa/AscensionFelswornContracts.cpp.
 """
 
 import argparse

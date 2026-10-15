@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Turbo Guns speeds up Mechsuit: Combustion and boosts Combustion's damage (#758)",
+  "contract": "#758: Turbo Guns 520809 is a native spell-modifier passive with three effects. Effect 0 is ADD_FLAT_MODIFIER (aura 107), EffectMiscValue 10 SPELLMOD_CASTING_TIME, BasePoints -251 DieSides 1 (-250 ms), EffectSpellClassMask (0,0,1073741824) = bit 94, which in family 34 is Mechsuit: Combustion 801387 (SpellFamilyFlags (0,0,1073745920) = bits 76 and 94, CastingTimeIndex 16 = 1500 ms, AttributesEx3 0), so it casts in 1250 ms. Effect 2 is ADD_PCT_MODIFIER (aura 108), EffectMiscValue 0 SPELLMOD_DAMAGE, BasePoints 19 DieSides 1 (+20%), mask (0,0,16384) = bit 78, which is the triggered Combustion 801388 (flags (0,4096,16384)), whose effect 0 is SPELL_EFFECT_SCHOOL_DAMAGE and whose amount passes Unit::SpellDamageBonusDone. 520809 is not one of the modifier ids the family-34 routing switch in SpellInfo::IsAffectedBySpellMod returns for, so it falls through to the ordinary class-mask test. The two masks point at different spells on purpose: 801387 itself deals no damage (effect 0 is a trigger-with-value) and must stay unmodified by the damage percentage. Effect 1 (SPELLMOD_DURATION -2000 ms on bit 94) is inert because 801387 has DurationIndex 0 and no aura effect; it is not asserted here.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "t", "race": 1, "class": 28, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+
+    { "action": "assert", "label": "Mechsuit: Combustion casts in 1500 ms without Turbo Guns",
+      "actor": "t", "metric": "spell_cast_time_ms", "spell": 801387, "equals": 1500 },
+    { "action": "assert", "label": "Combustion's damage is unmodified without Turbo Guns",
+      "actor": "t", "metric": "spell_modifier", "spell": 801388, "op": 0, "base": 1000, "equals": 1000 },
+
+    { "action": "learn", "actor": "t", "spell": 520809 },
+
+    { "action": "assert", "label": "Turbo Guns cuts Mechsuit: Combustion's cast time to 1250 ms",
+      "actor": "t", "metric": "spell_cast_time_ms", "spell": 801387, "equals": 1250 },
+    { "action": "assert", "label": "Turbo Guns raises the triggered Combustion's damage by 20%",
+      "actor": "t", "metric": "spell_modifier", "spell": 801388, "op": 0, "base": 1000, "equals": 1200 },
+    { "action": "assert", "label": "The damage percentage does not reach the Mechsuit helper itself",
+      "actor": "t", "metric": "spell_modifier", "spell": 801387, "op": 0, "base": 1000, "equals": 1000 }
+  ]
+}

@@ -1,0 +1,349 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Vile Fury, Genesis and Enchanted Chitin (#911, #954, #1010)",
+  "contract": "#911 Vile Fury (706006): effect 0 is aura 107 (flat modifier) misc 14 (SPELLMOD_COST), BasePoints -31 + die 1 = -30, class mask word0 0x200002 selecting Hivebreak (803193, Rage 200) and Carapace Crash (803199, Rage 250) and their other ranks; SpellInfo::CalcPowerCost applies SPELLMOD_COST at SpellInfo.cpp:3069, so 200 -> 170 and 250 -> 220 (Rage is stored x10, tooltip 3 Rage). Effect 1 is aura 333 (SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT), 1 + 1 = +2, folded into m_modMeleeHitChance and m_modSpellHitChance by StatSystem.cpp:999/1011. #954 Genesis (705962): aura 192 (MOD_MELEE_RANGED_HASTE) and aura 216 (HASTE_SPELLS), 3 + 1 = 4% each, handled at SpellAuraEffects.cpp:257/281; cast_speed_multiplier and attack_time_ms are divided by 1.04 (same method as bloodmage-consolidation.json). #1010 Enchanted Chitin (706955, 707872): aura 142 (MOD_BASE_RESISTANCE_PCT) misc 1 (physical), miscB 8 (1 << ITEM_SUBCLASS_ARMOR_MAIL), 24/49 + 1 = +25/+50; SpellEffectInfo::GetItemArmorSubclassMask returns 8 for exactly these ids (SpellInfo.cpp:371) and Player::UpdateArmor multiplies only the mail item armor (StatSystem.cpp:357). Mail chest 35842 has armor 800 in the running world database (ArmorDamageModifier 0; the data/sql/base/db_world/item_template.sql dump shows a stale 706 for this row, not what the deployed acore_world.item_template and the test's isolated world DB actually serve), so rank 1 adds 200 and rank 2 adds 400; cloth chest 35859 (armor 533 in the running DB) is the control and must gain nothing. The rank 1 and rank 2 wearers are separate actors so the multipliers do not stack. Item ids and armor values were verified with `docker exec coa-s2-database mysql ... SELECT entry, armor FROM acore_world.item_template WHERE entry IN (35842, 35859)`, not from the base SQL dump.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "v",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "m1",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "m2",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "c1",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000,
+      "label": "Let spawn AI and level scaling settle"
+    },
+    {
+      "action": "add_item",
+      "actor": "m1",
+      "item": 35842
+    },
+    {
+      "action": "equip",
+      "actor": "m1",
+      "item": 35842,
+      "slot": 4,
+      "label": "Rank 1 wearer: mail chest"
+    },
+    {
+      "action": "add_item",
+      "actor": "m2",
+      "item": 35842
+    },
+    {
+      "action": "equip",
+      "actor": "m2",
+      "item": 35842,
+      "slot": 4,
+      "label": "Rank 2 wearer: mail chest"
+    },
+    {
+      "action": "add_item",
+      "actor": "c1",
+      "item": 35859
+    },
+    {
+      "action": "equip",
+      "actor": "c1",
+      "item": 35859,
+      "slot": 4,
+      "label": "Control: cloth chest"
+    },
+    {
+      "action": "wait",
+      "ms": 1000,
+      "label": "Let the equipment update settle"
+    },
+    {
+      "action": "snapshot",
+      "actor": "m1",
+      "metric": "armor",
+      "save_as": "armor_before_m1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "m2",
+      "metric": "armor",
+      "save_as": "armor_before_m2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "c1",
+      "metric": "armor",
+      "save_as": "armor_before_c1"
+    },
+    {
+      "action": "assert",
+      "label": "Hivebreak costs 200 (20 Rage) before Vile Fury",
+      "actor": "v",
+      "metric": "spell_power_cost",
+      "spell": 803193,
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "label": "Carapace Crash costs 250 (25 Rage) before Vile Fury",
+      "actor": "v",
+      "metric": "spell_power_cost",
+      "spell": 803199,
+      "equals": 250
+    },
+    {
+      "action": "snapshot",
+      "actor": "v",
+      "metric": "melee_hit_chance",
+      "save_as": "melee_hit_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "v",
+      "metric": "spell_hit_chance",
+      "save_as": "spell_hit_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "v",
+      "metric": "cast_speed_multiplier",
+      "save_as": "cast_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "v",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "save_as": "swing_before"
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 706006
+    },
+    {
+      "action": "assert",
+      "label": "Vile Fury effect 0 stores -30 (3 Rage)",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 706006,
+      "effect": 0,
+      "equals": -30,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Vile Fury effect 1 stores +2% hit",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 706006,
+      "effect": 1,
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Hivebreak now costs 170 (17 Rage)",
+      "actor": "v",
+      "metric": "spell_power_cost",
+      "spell": 803193,
+      "equals": 170,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Carapace Crash now costs 220 (22 Rage)",
+      "actor": "v",
+      "metric": "spell_power_cost",
+      "spell": 803199,
+      "equals": 220,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Cost modifier on Hivebreak is a flat -30 per 1000",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803193,
+      "op": 14,
+      "base": 1000,
+      "min": 969.9,
+      "max": 970.1
+    },
+    {
+      "action": "assert",
+      "label": "Cost modifier leaves Shadra's Prayer (outside the mask) alone",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 800870,
+      "op": 14,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "assert",
+      "label": "Melee hit chance is +2 points",
+      "actor": "v",
+      "metric": "melee_hit_chance",
+      "relative_to": "melee_hit_before",
+      "min": 1.99,
+      "max": 2.01,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Spell hit chance is +2 points",
+      "actor": "v",
+      "metric": "spell_hit_chance",
+      "relative_to": "spell_hit_before",
+      "min": 1.99,
+      "max": 2.01,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 705962
+    },
+    {
+      "action": "assert",
+      "label": "Genesis effect 0 (melee/ranged haste) stores 4",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 705962,
+      "effect": 0,
+      "equals": 4,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Genesis effect 1 (spell haste) stores 4",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 705962,
+      "effect": 1,
+      "equals": 4,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Casts get 4% faster",
+      "actor": "v",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "cast_before",
+      "min": 0.96,
+      "max": 0.963,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Melee swings get 4% faster",
+      "actor": "v",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "ratio_to": "swing_before",
+      "min": 0.959,
+      "max": 0.964,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "m1",
+      "spell": 706955
+    },
+    {
+      "action": "learn",
+      "actor": "m2",
+      "spell": 707872
+    },
+    {
+      "action": "learn",
+      "actor": "c1",
+      "spell": 706955
+    },
+    {
+      "action": "assert",
+      "label": "Enchanted Chitin rank 1 stores +25%",
+      "actor": "m1",
+      "metric": "aura_amount",
+      "spell": 706955,
+      "effect": 0,
+      "equals": 25,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Enchanted Chitin rank 2 stores +50%",
+      "actor": "m2",
+      "metric": "aura_amount",
+      "spell": 707872,
+      "effect": 0,
+      "equals": 50,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Control has Enchanted Chitin rank 1",
+      "actor": "c1",
+      "metric": "aura",
+      "spell": 706955,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds a quarter of the mail chest's 800 armor (200)",
+      "actor": "m1",
+      "metric": "armor",
+      "relative_to": "armor_before_m1",
+      "min": 199.9,
+      "max": 200.1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 adds half of the mail chest's 800 armor (400)",
+      "actor": "m2",
+      "metric": "armor",
+      "relative_to": "armor_before_m2",
+      "min": 399.9,
+      "max": 400.1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The cloth wearer gains no armor from the mail-only passive",
+      "actor": "c1",
+      "metric": "armor",
+      "relative_to": "armor_before_c1",
+      "equals": 0
+    }
+  ]
+}

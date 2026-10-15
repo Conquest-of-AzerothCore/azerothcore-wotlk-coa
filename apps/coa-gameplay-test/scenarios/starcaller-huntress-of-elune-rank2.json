@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Huntress of Elune rank 2 boosts damage to targets beyond 30 yards (#2390)",
+  "contract": "Huntress of Elune is CoA talent entry 33788 with ranks 704769 (rank 1, 5%) and 704770 (rank 2, effect 1 base points 9, i.e. 10%). The record's own effects are placeholders, so the module scripts the bonus: starcaller_scaling::Factor (AscensionStarcallerContracts.cpp) multiplies non-derived damage by 1 + Amount(rank, 1)/100 when the Starcaller is more than 30 yards from the victim. It used player->GetAuraOfRankedSpell(704769), which walks the spell_ranks chain; no spell_ranks row exists for 704769/704770 and AscensionCompat SetTalentRank removes every other rank before learning the chosen one, so a rank-2 character owns only 704770 and the lookup found nothing (rank 2 got no bonus). The fixture learns 704770 alone on the Starcaller, exactly the state SetTalentRank leaves, teleports the victim player 40 yards away (distance metric guards >30), and asserts script_spell_damage_taken, which runs sScriptMgr->ModifySpellDamageTaken(victim, attacker=target, 1000, spell) through the registered hook, for Starfire Shot 801978 (SpellFamilyName 32, not in Derived). Baseline is snapshotted before the learn on the same pair, so the ratio is 1.10 with the fix and 1.00 today. No random element.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    { "id": "caster", "race": 1, "class": 26, "level": 80 },
+    { "id": "victim", "race": 1, "class": 26, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "teleport",
+      "label": "Move the victim 40 yards from the caster",
+      "actor": "victim",
+      "map": 0,
+      "x": -8909.95,
+      "y": -132.493,
+      "z": 83.5312
+    },
+    { "action": "wait", "ms": 3000 },
+    {
+      "action": "assert",
+      "label": "Victim is beyond 30 yards of the caster",
+      "actor": "caster",
+      "metric": "distance",
+      "target": "victim",
+      "min": 31,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Scripted damage taken without the talent",
+      "actor": "victim",
+      "metric": "script_spell_damage_taken",
+      "spell": 801978,
+      "target": "caster",
+      "save_as": "base"
+    },
+    { "action": "learn", "actor": "caster", "spell": 704770 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert",
+      "label": "Rank 2 alone raises far-target damage by 10%",
+      "actor": "victim",
+      "metric": "script_spell_damage_taken",
+      "spell": 801978,
+      "target": "caster",
+      "ratio_to": "base",
+      "min": 1.0999,
+      "max": 1.1001
+    }
+  ]
+}

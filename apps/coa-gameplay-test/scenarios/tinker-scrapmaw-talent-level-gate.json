@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "A Tinker can take Scrapmaw from its first specialization point (#4442)",
+  "contract": "#4442 reports a level 15 Tinker playerbot with a Scrapmaw pet and treats it as a spell outside its level. Scrapmaw 500242 is CharacterAdvancement entry 29206 on the Mechanics tab 75: TalentEssenceCost 1, AbilityEssenceCost 0, level 0 and no required entries. AscensionDB lists it in the Mechanics tree without a level requirement, and CoA talent trees have no row gates, so the only gate is the point budget. CharacterAdvancementEssence gives class 28 no specialization point at level 10, one at 11 and three at 15. The Mechanics specialization (ChrSpecs 50) needs class entry 29203 (804673). A level 15 Tinker therefore buys Scrapmaw through the native upload, and a level 10 Tinker is refused for want of a specialization point.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "tinker15", "race": 1, "class": 28, "level": 15 },
+    { "id": "tinker10", "race": 1, "class": 28, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 5000 },
+    { "action": "specialization", "label": "The level 15 Tinker chooses Mechanics", "actor": "tinker15", "id": 50 },
+    {
+      "action": "advancement_rank", "label": "The level 15 Tinker takes the Mechanics class entry", "actor": "tinker15",
+      "entry": 29203, "rank": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the level 15 Tinker has no Scrapmaw yet", "actor": "tinker15",
+      "metric": "knows_spell", "spell": 500242, "equals": 0
+    },
+    {
+      "action": "advancement_rank", "label": "#4442: the level 15 Tinker buys Scrapmaw", "actor": "tinker15",
+      "entry": 29206, "rank": 1
+    },
+    {
+      "action": "assert", "label": "#4442: Scrapmaw is a legal level 15 Mechanics talent", "actor": "tinker15",
+      "metric": "knows_spell", "spell": 500242, "equals": 1, "within_ms": 3000
+    },
+    { "action": "specialization", "label": "The level 10 Tinker chooses Mechanics", "actor": "tinker10", "id": 50 },
+    {
+      "action": "advancement_rank", "label": "The level 10 Tinker takes the Mechanics class entry", "actor": "tinker10",
+      "entry": 29203, "rank": 1
+    },
+    {
+      "action": "advancement_rank", "label": "Regression guard: a level 10 Tinker has no specialization point",
+      "actor": "tinker10", "entry": 29206, "rank": 1, "refused": true
+    },
+    {
+      "action": "assert", "label": "Regression guard: the level 10 Tinker still has no Scrapmaw", "actor": "tinker10",
+      "metric": "knows_spell", "spell": 500242, "equals": 0
+    }
+  ]
+}

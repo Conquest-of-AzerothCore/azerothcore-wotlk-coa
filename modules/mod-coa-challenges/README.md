@@ -15,7 +15,7 @@ objectives, completions, rewards and the Gamemodes state).
 - AzerothCore WotLK, branch `coa-challenge-defs` (or `main`) of the CoA fork.
 - **Companion core opcode entries** in `src/server/game/Server/Protocol/Opcodes.h`
   (the "CoA extension range" block) — the module uses custom opcodes.
-- The **`mod-ascension-compat`** module (opcode pass-through).
+- The **CoA server component** (opcode pass-through).
 - The game client patch that ships the `Challenge*.dbc` files and the challenges
   UI addon (definitions + UI live there, not here).
 - For achievements: the client `Achievement.dbc` installed in the server

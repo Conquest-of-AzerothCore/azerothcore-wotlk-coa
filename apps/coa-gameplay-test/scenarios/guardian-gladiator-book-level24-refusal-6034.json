@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "name": "Level-24 Gladiator refuses training both Inspiration Ballads (#6034)",
+  "contract": "At the reported level 24, native Gladiator specialization 19 lacks Inspiring Leader. Book of Ascension must neither offer nor accept forged trainer purchases of Conqueror 501068 or Dragonslayer 501066. The existing guardian-gladiator-book-refuses-ballads-4551 case independently exercises working Inspiration acquisition and a normal Ballad attack.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "g",
+      "race": 1,
+      "class": 18,
+      "level": 24
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "g",
+      "id": 19
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "aura",
+      "spell": 505344,
+      "equals": 0,
+      "label": "g: aura 505344 0"
+    },
+    {
+      "action": "money",
+      "actor": "g",
+      "copper": 200000
+    },
+    {
+      "action": "learn",
+      "actor": "g",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "g",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000,
+      "label": "g: owned_creature_count 1"
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "g"
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "spellbook_offers_spell",
+      "spell": 501068,
+      "equals": 0,
+      "label": "g: spellbook_offers_spell 501068 0"
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "spellbook_offers_spell",
+      "spell": 501066,
+      "equals": 0,
+      "label": "g: spellbook_offers_spell 501066 0"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "g",
+      "spell": 501068
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 501068,
+      "equals": 0,
+      "label": "g: spellbook_buy_succeeded 501068 0"
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "spellbook_buy_failed",
+      "spell": 501068,
+      "equals": 1,
+      "label": "g: spellbook_buy_failed 501068 1"
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "knows_spell",
+      "spell": 501068,
+      "equals": 0,
+      "label": "g: knows_spell 501068 0"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "g",
+      "spell": 501066
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 501066,
+      "equals": 0,
+      "label": "g: spellbook_buy_succeeded 501066 0"
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "spellbook_buy_failed",
+      "spell": 501066,
+      "equals": 1,
+      "label": "g: spellbook_buy_failed 501066 1"
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "knows_spell",
+      "spell": 501066,
+      "equals": 0,
+      "label": "g: knows_spell 501066 0"
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": []
+}

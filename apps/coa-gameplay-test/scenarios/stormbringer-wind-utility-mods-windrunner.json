@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Windrunner raises run and mounted speed natively (#3154)",
+  "contract": "#3154 reports 'Spell Script / Aura Handler Not Implemented' for Windrunner (707719), a plain two-effect self-buff with no classmask/target-spell dependency: effect0 is aura 31 SPELL_AURA_MOD_INCREASE_SPEED and effect1 is aura 172 SPELL_AURA_MOD_MOUNTED_SPEED_NOT_STACK, both EffectBasePoints 14 + 1 = 15 (matches the tooltip's 15%). The issue's own audit tool labels effect0 'Unknown Aura (31)', but aura type 31 is one of the core's most common, universally-used speed auras, not an unresolved custom one. Both aura types are applied by the stock AuraEffect/Unit::UpdateSpeed pipeline used by every class and every mount/item speed buff, and neither is one of the parity contract's known core gaps (aura 290 misc/classmask, effect 192, aura 214). Learning the passive-flagged spell auto-applies both effects; run_speed_rate reads the live unmounted-speed effect directly, and aura_amount on effect 1 confirms the mounted-speed aura's stored value without requiring an actual mount.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "BASELINE: unbuffed run speed rate",
+      "actor": "s",
+      "metric": "run_speed_rate",
+      "save_as": "run_before"
+    },
+    {
+      "action": "learn",
+      "label": "Learn Windrunner",
+      "actor": "s",
+      "spell": 707719
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Windrunner raises run speed rate by 15% (aura 31, effect0)",
+      "actor": "s",
+      "metric": "run_speed_rate",
+      "ratio_to": "run_before",
+      "min": 1.149,
+      "max": 1.151,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Windrunner's mounted-speed aura (172, effect1) stores its DBC-calculated value of 14 (EffectBasePoints[1]=14, EffectDieSides[1]=0 -> no +1 roll, unlike effect0's EffectDieSides[0]=1 which does add 1) without requiring an active mount",
+      "actor": "s",
+      "metric": "aura_amount",
+      "spell": 707719,
+      "effect": 1,
+      "equals": 14
+    }
+  ]
+}

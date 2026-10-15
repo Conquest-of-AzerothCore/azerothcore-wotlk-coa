@@ -97,7 +97,7 @@ public:
     * .deserter bg add Tester 1h30m (using player of name 'Tester')
     * @endcode
     */
-    static bool HandleDeserterAdd(ChatHandler* handler, Optional<std::string> playerName, Optional<std::string> time, bool isInstance)
+    static bool HandleDeserterAdd(ChatHandler* handler, Optional<QuotedString> playerName, Optional<std::string> time, bool isInstance)
     {
         Player* target = handler->getSelectedPlayerOrSelf();
         ObjectGuid guid;
@@ -124,7 +124,7 @@ public:
                 }
 
                 time = playerName;
-                playerName = "";
+                playerName->clear();
             }
         }
 
@@ -135,7 +135,7 @@ public:
                 return false;
             }
 
-            playerName = target->GetName();
+            playerName.emplace().assign(target->GetName());
             guid = target->GetGUID();
         }
 
@@ -407,13 +407,13 @@ public:
     }
 
     /// @sa HandleDeserterAdd()
-    static bool HandleDeserterInstanceAdd(ChatHandler* handler, Optional<std::string> playerName, Optional<std::string> time)
+    static bool HandleDeserterInstanceAdd(ChatHandler* handler, Optional<QuotedString> playerName, Optional<std::string> time)
     {
         return HandleDeserterAdd(handler, playerName, time, true);
     }
 
     /// @sa HandleDeserterAdd()
-    static bool HandleDeserterBGAdd(ChatHandler* handler, Optional<std::string> playerName, Optional<std::string> time)
+    static bool HandleDeserterBGAdd(ChatHandler* handler, Optional<QuotedString> playerName, Optional<std::string> time)
     {
         return HandleDeserterAdd(handler, playerName, time, false);
     }

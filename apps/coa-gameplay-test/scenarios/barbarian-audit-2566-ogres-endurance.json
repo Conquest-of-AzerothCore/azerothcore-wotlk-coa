@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Barbarian audit: Ogre's Endurance raises healing received natively (#2566)",
+  "contract": "#2566 Ogre's Endurance (705206) covers only its effect 0, SPELL_AURA_MOD_HEALING_PCT (118, EffectBasePoints 10 DieSides 0 -> amount 10, MiscValue 127 = all schools) -- a stock generic percentage-healing-taken modifier consumed inside Unit::SpellHealingBonusTaken (the spell_healing_taken metric calls this directly with a synthetic 1000-point heal from probe spell 2050). Effect 1 is SPELL_AURA_DUMMY (4, EffectBasePoints 0) with no numeric payload and is explicitly out of scope for this scenario -- it is covered separately by the agent handling this audit's dummy/proc-trigger effects.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+
+    { "action": "assert", "label": "Baseline: a 1000-point heal resolves to 1000", "actor": "b", "metric": "spell_healing_taken", "spell": 2050, "target": "b", "equals": 1000 },
+
+    { "action": "learn", "actor": "b", "spell": 705206 },
+    { "action": "assert", "label": "Ogre's Endurance (705206) is active", "actor": "b", "metric": "aura", "spell": 705206, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Effect 0 (healing taken pct) resolves to 10", "actor": "b", "metric": "aura_amount", "spell": 705206, "effect": 0, "equals": 10 },
+    { "action": "assert", "label": "Healing received rises by 10% (1000 -> 1100)", "actor": "b", "metric": "spell_healing_taken", "spell": 2050, "target": "b", "equals": 1100, "within_ms": 3000 },
+
+    { "action": "unlearn", "actor": "b", "spell": 705206 },
+    { "action": "assert", "label": "Unlearning restores the baseline 1000", "actor": "b", "metric": "spell_healing_taken", "spell": 2050, "target": "b", "equals": 1000, "within_ms": 3000 }
+  ]
+}

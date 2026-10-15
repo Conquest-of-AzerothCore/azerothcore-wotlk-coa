@@ -18,4 +18,4 @@ Routine local edits need a focused diff review, not a separate review workflow o
 - Stop after the relevant checks pass unless the code changes or a specific concern remains.
 - Report known in-game results and their source. If gameplay is untested, say so; do not invent acceptance or
   require a user test before completing a source-only task. Ask for missing results only when needed for the task.
-- Client launches still require the user's permission. Review does not authorize a build or deployment.
+- Client launches still require the user's permission. Deployment remains a separate scope.

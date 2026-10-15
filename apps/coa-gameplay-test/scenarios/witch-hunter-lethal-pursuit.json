@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "name": "Lethal Pursuit lets Shadow Rage stack 4 additional times (#1274)",
+  "contract": "Lethal Pursuit 572530 has E0 aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER) MiscValue 31 (SPELLMOD_MAX_AURA_STACKS, the Ascension operation declared in SpellDefines.h), BasePoints 3 / DieSides 1 = +4, class mask (0, 0x1000, 0); its description reads 'Shadow Rage now stacks $s1 additional times'. Both Shadow Rage records 804192 and 680275 have StackAmount 1 and SpellFamilyFlags B 0x1000, and SpellInfo::CalcMaxAuraStacks applies the modifier to the DBC stack amount: 1 + 4 = 5. Heartseeking Bolt 805754 has no stack amount and is the control (a modifier must not make a non-stacking aura stackable).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 572530,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "label": "Baseline Shadow Rage stacks once",
+      "actor": "hunter",
+      "metric": "spell_max_stacks",
+      "spell": 804192,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Baseline Shadow Rage 680275 stacks once",
+      "actor": "hunter",
+      "metric": "spell_max_stacks",
+      "spell": 680275,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 572530
+    },
+    {
+      "action": "assert",
+      "label": "The passive aura is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 572530,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Rage stacks 4 additional times",
+      "actor": "hunter",
+      "metric": "spell_max_stacks",
+      "spell": 804192,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "The other Shadow Rage record stacks 4 additional times",
+      "actor": "hunter",
+      "metric": "spell_max_stacks",
+      "spell": 680275,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "A spell that cannot stack still cannot",
+      "actor": "hunter",
+      "metric": "spell_max_stacks",
+      "spell": 805754,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 572530,
+      "all_specs": true,
+      "label": "Remove the passive"
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Rage returns to one stack",
+      "actor": "hunter",
+      "metric": "spell_max_stacks",
+      "spell": 804192,
+      "equals": 1
+    }
+  ]
+}

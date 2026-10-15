@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Pulse Driver raises Singularity Core's Shatter Echo damage modifier to 30% (#2984)",
+  "contract": "Pulse Driver 706121's effect 1 is SPELL_AURA_ADD_FLAT_MODIFIER with EffectMiscValue 23 (SPELLMOD_EFFECT3, SpellDefines.h), EffectBasePoints 29 / DieSides 1 (+30) and EffectSpellClassMask word2 0x40, which matches Singularity Core 804438's own SpellFamilyFlags [0, 0, 72] and no other family 28 record. Singularity Core's own effect index 2 is SPELL_AURA_ADD_PCT_MODIFIER with EffectMiscValue 0 (SPELLMOD_DAMAGE) and EffectSpellClassMask word2 0x10 (Shatter Echo 804503), baseline EffectBasePoints -1 / DieSides 1, i.e. 0%. Pulse Driver therefore raises Singularity Core's Shatter Echo damage bonus from 0% to the 30% its tooltip's $s2 quotes, through Unit::ApplyEffectModifiers' case 2 - the same native chain the merged chronomancer-conduction-burst-continuum.json scenario already exercises. spell_effect_value queries SpellEffectInfo::CalcValue directly, so it reads the live modifier without casting. The tooltip's second clause, \"allows Shatter Echo to trigger its damage\", is already satisfied by Singularity Core itself: its Spell.dbc record carries ProcFlags 0x4001c0, which includes PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS (0x100), and its aura-42 effect has an empty EffectSpellClassMask, so SpellMgr::LoadSpellProcs generates a default proc entry with no family restriction and Shatter Echo (Spell.dbc DmgClass 3) already triggers 804437 while Singularity Core is active.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Singularity Core's Shatter Echo bonus is 0% without the talent",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 804438,
+      "effect": 2,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 706121
+    },
+    {
+      "action": "assert",
+      "label": "Pulse Driver raises it to 30%",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 804438,
+      "effect": 2,
+      "equals": 30
+    },
+    {
+      "action": "unlearn",
+      "actor": "talent",
+      "spell": 706121
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning removes the modifier",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 804438,
+      "effect": 2,
+      "equals": 0
+    }
+  ]
+}

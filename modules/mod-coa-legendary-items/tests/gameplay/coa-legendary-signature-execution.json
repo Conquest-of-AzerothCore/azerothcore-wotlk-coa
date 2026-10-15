@@ -1,0 +1,374 @@
+{
+  "schema": 1,
+  "name": "CoA Legendary Items: signature selectors preserve Stake execution",
+  "contract": "Requires CoALegendaryItems.Enable=1 and CoA.SendDisplayPatches=1. Client signature selectors preserve the effective server family flags used by existing Stake contracts. First and highest Stake ranks cast at exactly 35% target health and do not execute the removed legacy helper; above 35% is refused. Equipping the signature trinket gives a native 12% damage modifier without changing those flags or execution rules.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "hunter",
+      "entry": 1501,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Stake 680537 preserves server family word 0",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 680537,
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Stake 680537 preserves server family word 1",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 680537,
+      "index": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Stake 680537 preserves server family word 2",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 680537,
+      "index": 2,
+      "equals": 1024
+    },
+    {
+      "action": "assert",
+      "label": "Stake 681347 preserves server family word 0",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 681347,
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Stake 681347 preserves server family word 1",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 681347,
+      "index": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Stake 681347 preserves server family word 2",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 681347,
+      "index": 2,
+      "equals": 1024
+    },
+    {
+      "action": "assert",
+      "label": "Stake 681348 preserves server family word 0",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 681348,
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Stake 681348 preserves server family word 1",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 681348,
+      "index": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Stake 681348 preserves server family word 2",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 681348,
+      "index": 2,
+      "equals": 1024
+    },
+    {
+      "action": "assert",
+      "label": "Stake 681349 preserves server family word 0",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 681349,
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Stake 681349 preserves server family word 1",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 681349,
+      "index": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Stake 681349 preserves server family word 2",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 681349,
+      "index": 2,
+      "equals": 1024
+    },
+    {
+      "action": "assert",
+      "label": "Stake 681350 preserves server family word 0",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 681350,
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Stake 681350 preserves server family word 1",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 681350,
+      "index": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Stake 681350 preserves server family word 2",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 681350,
+      "index": 2,
+      "equals": 1024
+    },
+    {
+      "action": "assert",
+      "label": "Stake 681351 preserves server family word 0",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 681351,
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Stake 681351 preserves server family word 1",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 681351,
+      "index": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Stake 681351 preserves server family word 2",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 681351,
+      "index": 2,
+      "equals": 1024
+    },
+    {
+      "action": "assert",
+      "label": "Stake 681352 preserves server family word 0",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 681352,
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Stake 681352 preserves server family word 1",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 681352,
+      "index": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Stake 681352 preserves server family word 2",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 681352,
+      "index": 2,
+      "equals": 1024
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 680537
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "hunter",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "hunter",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "max_health",
+      "equals": 1000000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 681352,
+      "op": 0,
+      "base": 1000,
+      "save_as": "before_trinket"
+    },
+    {
+      "action": "add_item",
+      "actor": "hunter",
+      "item": 9701129
+    },
+    {
+      "action": "equip",
+      "actor": "hunter",
+      "item": 9701129,
+      "slot": 12
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 681352,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "before_trinket",
+      "equals": 1.12
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_family_flags",
+      "spell": 681352,
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 350001
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680537,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "cast_failure",
+      "spell": 680537,
+      "equals": 111,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 350000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680537,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 680537,
+      "target": "dummy",
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 681352
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 350000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 681352,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 681352,
+      "target": "dummy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_go_count",
+      "spell": 680548,
+      "equals": 0
+    }
+  ]
+}

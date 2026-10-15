@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Worrysome Idol regenerates missing mana, not a flat share of maximum mana (#3105)",
+  "contract": "Spell 706917's periodic aura triggers 504829 (\"Energize 10% Missing Mana\") every 10 seconds. Per the tooltip and the client's raw string, each tick restores 10% of the caster's missing mana: the deficit shrinks by 10% per tick, so the second tick's gain is 90% of the first. With the native ENERGIZE_PCT bug (10% of maximum mana, ignoring current mana) the two ticks gain the same amount, ratio 1.0. The 4% spell haste half (effect 1, native SPELL_AURA_HASTE_SPELLS) is untouched by this fix; it is asserted here only as a regression guard.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 25,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "cultist", "spell": 706917 },
+    {
+      "action": "assert", "label": "706917 is known after learn",
+      "actor": "cultist", "metric": "knows_spell", "spell": 706917, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The passive aura self-applies on learn",
+      "actor": "cultist", "metric": "aura", "spell": 706917, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The 4% spell haste half (effect 1) is present and untouched by this fix",
+      "actor": "cultist", "metric": "aura_amount", "spell": 706917, "effect": 1, "equals": 4
+    },
+    { "action": "set_power", "actor": "cultist", "power": 0, "value": 0 },
+    {
+      "action": "assert", "label": "No energize from 504829 has happened yet",
+      "actor": "cultist", "metric": "spell_energize_total", "spell": 504829, "power": 0, "equals": 0
+    },
+    { "action": "wait", "ms": 10800 },
+    {
+      "action": "snapshot", "actor": "cultist", "metric": "spell_energize_total",
+      "spell": 504829, "power": 0, "save_as": "tick1_total"
+    },
+    {
+      "action": "assert", "label": "The first periodic tick restored mana",
+      "actor": "cultist", "metric": "spell_energize_total", "spell": 504829, "power": 0, "min": 1
+    },
+    { "action": "wait", "ms": 10200 },
+    {
+      "action": "assert",
+      "label": "The second tick's gain is ~90% of the first (10% of a deficit that already shrank 10%), not the same absolute amount as a flat 10% of maximum mana would give",
+      "actor": "cultist", "metric": "spell_energize_total", "spell": 504829, "power": 0,
+      "relative_to": "tick1_total", "ratio_to": "tick1_total", "min": 0.8, "max": 0.97
+    }
+  ]
+}

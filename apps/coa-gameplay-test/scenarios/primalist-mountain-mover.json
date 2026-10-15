@@ -1,0 +1,468 @@
+{
+  "schema": 1,
+  "name": "Primalist Mountain Mover: avoidance stacks and Wildclaw consumption",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "enemy",
+      "race": 5,
+      "class": 1,
+      "level": 80,
+      "melee_hit_rating": 10000
+    },
+    {
+      "id": "striker",
+      "race": 5,
+      "class": 1,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "primalist",
+      "entry": 36,
+      "level": 80,
+      "distance": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "pvp",
+      "actor": "primalist",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159265
+    },
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 196
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 520566
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 803138
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 10020,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dodge_chance",
+      "min": 99
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "save_as": "base_cost",
+      "label": "base_cost",
+      "spell": 520566,
+      "op": 14,
+      "base": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "save_as": "base_damage",
+      "label": "base_damage",
+      "spell": 520566,
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "melee_attack_count",
+      "save_as": "baseline_attacks_before",
+      "label": "baseline_attacks_before"
+    },
+    {
+      "action": "attack",
+      "actor": "enemy",
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "melee_attack_count",
+      "relative_to": "baseline_attacks_before",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 805644,
+      "min": 0,
+      "max": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 805643
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "melee_attack_count",
+      "save_as": "talented_attacks_before",
+      "label": "talented_attacks_before"
+    },
+    {
+      "action": "attack",
+      "actor": "enemy",
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "melee_attack_count",
+      "relative_to": "talented_attacks_before",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 805644,
+      "min": 1,
+      "max": 3
+    },
+    {
+      "action": "attack",
+      "actor": "enemy",
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 12000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 805644,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_charges",
+      "spell": 805644,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 520566,
+      "op": 14,
+      "base": 1000,
+      "ratio_to": "base_cost",
+      "equals": 0.5
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "spell": 520566,
+      "target": "dummy",
+      "ratio_to": "base_damage",
+      "min": 1.249,
+      "max": 1.251
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 805644,
+      "equals": 5
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520566,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520566,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 805644,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 520566,
+      "op": 14,
+      "base": 1000,
+      "ratio_to": "base_cost",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "spell": 520566,
+      "target": "dummy",
+      "ratio_to": "base_damage",
+      "equals": 1
+    },
+    {
+      "action": "attack",
+      "actor": "enemy",
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 805644,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 805644,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 805643
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "melee_attack_count",
+      "save_as": "removed_attacks_before",
+      "label": "removed_attacks_before"
+    },
+    {
+      "action": "attack",
+      "actor": "enemy",
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "melee_attack_count",
+      "relative_to": "removed_attacks_before",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 805644,
+      "min": 0,
+      "max": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 805643
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 10020,
+      "stacks": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "striker",
+      "enabled": true
+    },
+    {
+      "action": "learn",
+      "actor": "striker",
+      "spell": 23881
+    },
+    {
+      "action": "teleport",
+      "actor": "striker",
+      "map": 0,
+      "x": -9620.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "set_power",
+      "actor": "striker",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "striker",
+      "spell": 23881,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "actor": "striker",
+      "metric": "spell_damage_count",
+      "spell": 23881,
+      "target": "primalist",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 805644,
+      "equals": 0
+    }
+  ],
+  "contract": "Avoided attacks grant one stack up to five; each stack reduces Wildclaw cost by 10% and increases damage by 5%. One Wildclaw consumes the whole stack after applying its modifiers. Unrelated damage, successful incoming attacks, expiry and unlearning are controls. The Wildclaw probe queries a creature: normal class 887019 (-15%) and Mountain King 887085 (+1%) tuning scale its 1000 base to 858, so the 25% increase reads 1073/858. The avoided attacks still come from the enemy player."
+}

@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Spider and Beetle Form leave the stored first action bar untouched (#1408)",
+  "contract": [
+    "Spider Form 800841 applies SPELL_AURA_MOD_SHAPESHIFT form 52 and Beetle Form 803183 form 53.",
+    "SpellShapeshiftForm.dbc gives form 52 bonusActionBar 1 and form 53 bonusActionBar 3.",
+    "The client therefore pages its main bar to slots 73-84 or 97-108 while shifted and back to slots 1-12 after.",
+    "Buttons 0-11 are the stored first bar; shifting in or out of either form must not rewrite or remove them."
+  ],
+  "timeout_ms": 30000,
+  "players": [
+    {"id": "v", "race": 1, "class": 29, "level": 51}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login settle", "ms": 3000},
+    {"action": "learn", "actor": "v", "spell": 800902},
+    {"action": "learn", "actor": "v", "spell": 800841},
+    {"action": "learn", "actor": "v", "spell": 803183},
+    {"action": "set_action_button", "actor": "v", "spell": 800902, "button": 0},
+    {"action": "set_action_button", "actor": "v", "spell": 800841, "button": 1},
+    {"action": "set_action_button", "actor": "v", "spell": 803183, "button": 2},
+    {"action": "cast", "actor": "v", "spell": 800841},
+    {
+      "action": "assert", "label": "Spider Form is active", "actor": "v", "metric": "aura", "spell": 800841,
+      "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "In Spider Form the first bar still stores Green Salve", "actor": "v",
+      "metric": "action_button", "button": 0, "equals": 800902
+    },
+    {"action": "cancel_aura", "actor": "v", "spell": 800841},
+    {
+      "action": "assert", "label": "Spider Form ended", "actor": "v", "metric": "aura", "spell": 800841, "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "After Spider Form button 1 still holds Green Salve", "actor": "v",
+      "metric": "action_button", "button": 0, "equals": 800902
+    },
+    {
+      "action": "assert", "label": "After Spider Form button 2 still holds Spider Form", "actor": "v",
+      "metric": "action_button", "button": 1, "equals": 800841
+    },
+    {
+      "action": "assert", "label": "After Spider Form button 3 still holds Beetle Form", "actor": "v",
+      "metric": "action_button", "button": 2, "equals": 803183
+    },
+    {"action": "wait", "label": "Let the global cooldown pass", "ms": 1600},
+    {"action": "cast", "actor": "v", "spell": 803183},
+    {
+      "action": "assert", "label": "Beetle Form is active", "actor": "v", "metric": "aura", "spell": 803183,
+      "equals": 1, "within_ms": 3000
+    },
+    {"action": "cancel_aura", "actor": "v", "spell": 803183},
+    {
+      "action": "assert", "label": "Beetle Form ended", "actor": "v", "metric": "aura", "spell": 803183, "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "After Beetle Form button 1 still holds Green Salve", "actor": "v",
+      "metric": "action_button", "button": 0, "equals": 800902
+    },
+    {
+      "action": "assert", "label": "After Beetle Form button 2 still holds Spider Form", "actor": "v",
+      "metric": "action_button", "button": 1, "equals": 800841
+    },
+    {
+      "action": "assert", "label": "After Beetle Form button 3 still holds Beetle Form", "actor": "v",
+      "metric": "action_button", "button": 2, "equals": 803183
+    }
+  ]
+}

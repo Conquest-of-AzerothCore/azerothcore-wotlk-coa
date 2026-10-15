@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Destructo-Bot: Manastorm possession and cleanup",
-  "contract": "Building, detonating, expiring and leaving Manastorm with a possessed Destructo-Bot preserve the server and return control to its owner.",
+  "contract": "Building, detonating, expiring and leaving Manastorm with a possessed Destructo-Bot preserve the server and return control to its owner. Requires Ascension.Manastorm.Enable = 1 in coa.conf.",
   "timeout_ms": 240000,
   "players": [
     {

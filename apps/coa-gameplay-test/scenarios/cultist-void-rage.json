@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Cultist: Void Rage adds 5 points to Shadow of the Void's own damage percent through a native spell mod (#2232)",
+  "contract": "681102 is SpellFamilyName 31, effect0 ADD_FLAT_MODIFIER (107), MiscValue=3 (SPELLMOD_EFFECT1), BasePoints=4 -> CalcValue 5, SpellClassMask [256,0,0]. Shadow of the Void (300277) is SpellFamilyName 31 with SpellFamilyFlags[0]=256 (exact classmask match) and its own effect0 is MOD_DAMAGE_PERCENT_DONE (79) on the Shadow school, BasePoints=9 -> CalcValue 10 (percent). Player::ApplySpellMod resolves SPELLMOD_EFFECT1 for a flat-type modifier as basevalue+totalflat (Player.cpp ~10322), so querying spell_modifier(300277, op=3, base=10) reflects the actual percent points Shadow of the Void grants once boosted: 10+5=15. No custom C++ required; regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "c", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: Shadow of the Void's own 10% damage bonus is unmodified before Void Rage",
+      "actor": "c", "metric": "spell_modifier", "spell": 300277, "op": 3, "base": 10, "min": 10, "max": 10
+    },
+    { "action": "learn", "actor": "c", "spell": 681102 },
+    {
+      "action": "assert", "label": "Void Rage raises Shadow of the Void's 10% to 15% (#2232)",
+      "actor": "c", "metric": "spell_modifier", "spell": 300277, "op": 3, "base": 10, "min": 15, "max": 15
+    },
+    {
+      "action": "assert", "label": "Void Rage leaves an unrelated Hammer of Twilight effect alone (control)",
+      "actor": "c", "metric": "spell_modifier", "spell": 806498, "op": 3, "base": 10, "min": 10, "max": 10
+    }
+  ]
+}

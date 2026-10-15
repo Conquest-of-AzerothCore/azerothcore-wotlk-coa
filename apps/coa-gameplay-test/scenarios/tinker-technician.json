@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "name": "Technician cuts spell pushback by 35% and raises critical healing by 10% natively (#845)",
+  "contract": [
+    "Technician 560735 (Tinker Invention talent, CharacterAdvancement 5979 rank 1) reads 'Reduces spell pushback suffered from damaging attacks by $s1% and increases your critical healing by $s2%.' Spell.dbc: effect 0 SPELL_AURA_REDUCE_PUSHBACK (149) BasePoints 34 DieSides 1 (35), effect 1 SPELL_AURA_MOD_CRITICAL_HEALING_AMOUNT (50) BasePoints 9 DieSides 1 (10), both on the caster, passive.",
+    "Both aura types are consumed natively: Spell::Delayed adds GetTotalAuraModifier(SPELL_AURA_REDUCE_PUSHBACK) to the 500 ms pushback reduction, so a hit during a cast pushes it back 325 ms instead of 500 ms; Unit::SpellCriticalHealingBonus multiplies a critical heal by GetTotalAuraMultiplier(SPELL_AURA_MOD_CRITICAL_HEALING_AMOUNT), so a critical heal is 10% larger. No per-spell script is needed.",
+    "Pushback is observed on Emergency Heal 802684 (1500 ms cast, InterruptFlags include PUSH_BACK) hit by an enemy player's instant Fire Blast 2136 with the cast about halfway, so the full 500 ms delay is not clamped by the cast time. Critical healing is observed on the fixed-value Heal 1000 (TEST) spell 49 (BasePoints 999, DieSides 1, DmgClass magic): the Tinker's spell critical rating fixture makes every heal critical, so the second critical heal must be exactly 10% larger than the first. Both heals are cast in the same combat and PvP state."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "tinker", "race": 1, "class": 28, "level": 80, "spell_crit_rating": 10000 },
+    { "id": "enemy", "race": 5, "class": 8, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "pvp", "actor": "tinker", "enabled": true },
+    { "action": "pvp", "actor": "enemy", "enabled": true },
+    { "action": "teleport", "actor": "tinker", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "enemy", "map": 0, "x": -9612.06, "y": -288.949, "z": 57.3053, "o": 3.14159265 },
+    { "action": "learn", "actor": "tinker", "spell": 802684 },
+    { "action": "learn", "actor": "tinker", "spell": 49 },
+    { "action": "learn", "actor": "enemy", "spell": 2136 },
+    { "action": "assert", "label": "Technician is not known yet", "actor": "tinker", "metric": "aura", "spell": 560735, "equals": 0 },
+
+    { "action": "cast", "label": "Baseline cast: no pushback reduction", "actor": "tinker", "spell": 802684, "target": "tinker" },
+    { "action": "wait", "ms": 700 },
+    { "action": "assert", "label": "The cast is about halfway, so a 500 ms delay fits inside its cast time", "actor": "tinker", "metric": "cast_remaining_ms", "spell": 802684, "min": 500, "max": 1000 },
+    { "action": "snapshot", "actor": "tinker", "metric": "cast_pushback_ms", "save_as": "pushback0" },
+    { "action": "cast", "actor": "enemy", "spell": 2136, "target": "tinker" },
+    { "action": "assert", "actor": "enemy", "metric": "spell_damage_count", "spell": 2136, "target": "tinker", "equals": 1, "within_ms": 500 },
+    { "action": "assert", "label": "BASELINE full 500 ms pushback", "actor": "tinker", "metric": "cast_pushback_ms", "relative_to": "pushback0", "equals": 500 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "The delayed cast still lands", "actor": "tinker", "metric": "spell_heal_count", "spell": 802684, "equals": 1 },
+
+    { "action": "cast", "label": "Baseline critical heal", "actor": "tinker", "spell": 49, "target": "tinker" },
+    { "action": "assert", "label": "The fixture crit rating makes the heal critical", "actor": "tinker", "metric": "spell_heal_count", "spell": 49, "critical": true, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "No noncritical heal slipped through", "actor": "tinker", "metric": "spell_heal_count", "spell": 49, "critical": false, "equals": 0 },
+    { "action": "snapshot", "actor": "tinker", "metric": "spell_heal_total", "spell": 49, "critical": true, "save_as": "critical_heal0" },
+
+    { "action": "learn", "actor": "tinker", "spell": 560735 },
+    { "action": "assert", "label": "Technician passive is active", "actor": "tinker", "metric": "aura", "spell": 560735, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Effect 0 carries the authored 35% pushback reduction", "actor": "tinker", "metric": "aura_amount", "spell": 560735, "effect": 0, "equals": 35 },
+    { "action": "assert", "label": "Effect 1 carries the authored 10% critical healing", "actor": "tinker", "metric": "aura_amount", "spell": 560735, "effect": 1, "equals": 10 },
+    { "action": "reset_cooldown", "actor": "enemy", "spell": 2136 },
+
+    { "action": "cast", "label": "Second cast: Technician known", "actor": "tinker", "spell": 802684, "target": "tinker" },
+    { "action": "wait", "ms": 700 },
+    { "action": "assert", "actor": "tinker", "metric": "cast_remaining_ms", "spell": 802684, "min": 500, "max": 1000 },
+    { "action": "snapshot", "actor": "tinker", "metric": "cast_pushback_ms", "save_as": "pushback1" },
+    { "action": "cast", "actor": "enemy", "spell": 2136, "target": "tinker" },
+    { "action": "assert", "actor": "enemy", "metric": "spell_damage_count", "spell": 2136, "target": "tinker", "equals": 2, "within_ms": 500 },
+    { "action": "assert", "label": "CONTRACT pushback cut to 325 ms (35% of the 500 ms base removed)", "actor": "tinker", "metric": "cast_pushback_ms", "relative_to": "pushback1", "equals": 325 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "The delayed cast still lands", "actor": "tinker", "metric": "spell_heal_count", "spell": 802684, "equals": 2 },
+
+    { "action": "cast", "label": "Critical heal with Technician", "actor": "tinker", "spell": 49, "target": "tinker" },
+    { "action": "assert", "label": "The second heal is critical too", "actor": "tinker", "metric": "spell_heal_count", "spell": 49, "critical": true, "equals": 2, "within_ms": 1000 },
+    { "action": "assert", "label": "CONTRACT the critical heal is 10% larger", "actor": "tinker", "metric": "spell_heal_total", "spell": 49, "critical": true, "relative_to": "critical_heal0", "ratio_to": "critical_heal0", "min": 1.098, "max": 1.102 },
+
+    { "action": "unlearn", "actor": "tinker", "spell": 560735 },
+    { "action": "assert", "label": "Unlearning removes the passive", "actor": "tinker", "metric": "aura", "spell": 560735, "equals": 0, "within_ms": 3000 }
+  ]
+}

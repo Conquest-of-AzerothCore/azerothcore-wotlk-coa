@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "A Gift from Hell reduces the Rage cost of Infernal Strike, Meatsaw and Melt by 10 (#1589)",
+  "contract": "A Gift from Hell 300390 reads 'Reduces the Rage cost of Infernal Strike, Meatsaw, and Melt by -10' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z; matches the client's own moa_description, whose raw formula divides the stored value by 10 for display). The installed Spell.dbc's own baked effect 0 is already aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER), MiscValue 14 (SPELLMOD_COST), BasePoints -101/DieSides 1 -> -100 (Rage is stored in tenths, so -10 Rage - the same convention Witch Hunter's Darkrider 705453, #956, uses for an identical reduction), classmask combining Infernal Strike (dword1 bit9), Shieldgore (dword1 bit8, the Infernal Strike replacement, matching Fiend's/680197 fix), Meatsaw (dword1 bit23, matching Chop Shop's/704953 fix) and Melt (dword2 bit2). ApplyContracts now pins this explicitly instead of depending on the loaded row, following the SPELLMOD_COST pattern already used for Combusting Blade (704999, #699) and Black Skull Shield (804354, #941). At level 60 the owned Infernal Strike rank is 501518 and the owned Meatsaw rank is 578119 (AscensionSpellProgressionData.h); Melt (803334) has no rank chain.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_power_cost", "spell": 501518, "save_as": "infernal_before" },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_power_cost", "spell": 578119, "save_as": "meatsaw_before" },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_power_cost", "spell": 803334, "save_as": "melt_before" },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_power_cost", "spell": 680944, "save_as": "gore_before" },
+    {
+      "action": "assert", "label": "SETUP: Infernal Strike has a nonzero unmodified Rage cost",
+      "actor": "knight", "metric": "spell_power_cost", "spell": 501518, "min": 1
+    },
+    { "action": "learn", "actor": "knight", "spell": 300390 },
+    {
+      "action": "assert", "label": "SETUP: A Gift from Hell is learned",
+      "actor": "knight", "metric": "knows_spell", "spell": 300390, "equals": 1
+    },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "CONTRACT: Infernal Strike's Rage cost drops by 10",
+      "actor": "knight", "metric": "spell_power_cost", "spell": 501518, "relative_to": "infernal_before", "equals": -100
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Meatsaw's Rage cost drops by 10",
+      "actor": "knight", "metric": "spell_power_cost", "spell": 578119, "relative_to": "meatsaw_before", "equals": -100
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Melt's Rage cost drops by 10",
+      "actor": "knight", "metric": "spell_power_cost", "spell": 803334, "relative_to": "melt_before", "equals": -100
+    },
+    {
+      "action": "assert", "label": "REGRESSION: an unrelated family spell (Gore) is untouched",
+      "actor": "knight", "metric": "spell_power_cost", "spell": 680944, "relative_to": "gore_before", "equals": 0
+    }
+  ]
+}

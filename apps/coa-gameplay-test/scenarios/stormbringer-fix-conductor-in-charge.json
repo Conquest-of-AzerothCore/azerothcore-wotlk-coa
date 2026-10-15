@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Conductor In Charge raid damage does not stack (#3910)",
+  "contract": "#3910: Conductor In Charge (300961) reads \"Increases all damage dealt by party and raid members by $s1% and your Frost damage dealt by $s2%. Does not stack with similar effects.\" Spell.dbc row 92476 has Effect[0] = 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID with aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 127 (all seven schools), EffectBasePoints 2 + EffectDieSides 1 = 3, and Effect[1] = 6 SPELL_EFFECT_APPLY_AURA on TARGET_UNIT_CASTER with the same aura, MiscValue 16 (Frost), 4 + 1 = 5. Both halves are native: AuraEffect::HandleModDamagePercentDone accumulates them through Unit::GetTotalAuraMultiplierByMiscMask, which the spell_damage_done query reads via Unit::SpellPctDamageModsDone. The non-stacking clause was not enforced, because no spell_group held 300961 or any of the eight other CoA raid damage auras, so two of them multiplied (1.03 x 1.03). The fix puts the nine ids in spell_group 2000184 with stack rule 3 and handles that group next to the other CoA raid groups in SpellMgr::IsEffectInSameEffectStackGroup, so only each spell's area-aura effect joins the group and the caster-only Frost effect keeps multiplying on its own. Carriers: Wrath (5176) is a Nature-school direct damage spell and Ice Lance (30455) a Frost-school one; neither is cast, they only carry the school through the native damage calculation from its fixed base of 1000.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "sb", "race": 1, "class": 16, "level": 80 },
+    { "id": "ally", "race": 1, "class": 16, "level": 80 },
+    { "id": "twin", "race": 1, "class": 16, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "sb", "entry": 28168, "level": 80, "health": 500000, "distance": 3 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn and level scaling settle", "ms": 4000 },
+    { "action": "group", "actor": "sb", "target": "ally" },
+    { "action": "group", "actor": "sb", "target": "twin" },
+    { "action": "snapshot", "label": "Ally Nature damage before any raid damage aura",
+      "actor": "ally", "metric": "spell_damage_done", "spell": 5176, "target": "dummy",
+      "save_as": "ally_nature_base" },
+    { "action": "snapshot", "label": "Stormbringer Nature damage before Conductor In Charge",
+      "actor": "sb", "metric": "spell_damage_done", "spell": 5176, "target": "dummy",
+      "save_as": "sb_nature_base" },
+    { "action": "snapshot", "label": "Stormbringer Frost damage before Conductor In Charge",
+      "actor": "sb", "metric": "spell_damage_done", "spell": 30455, "target": "dummy",
+      "save_as": "sb_frost_base" },
+    { "action": "learn", "actor": "sb", "spell": 300961 },
+    { "action": "assert", "label": "SETUP: the raid aura reaches the grouped ally",
+      "actor": "ally", "metric": "aura", "spell": 300961, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "BASELINE: the ally deals 3% more Nature damage (EffectBasePoints[0] 2 + DieSides 1)",
+      "actor": "ally", "metric": "spell_damage_done", "spell": 5176, "target": "dummy",
+      "ratio_to": "ally_nature_base", "min": 1.028, "max": 1.032 },
+    { "action": "assert", "label": "BASELINE: the caster's own Nature damage gains only the 3% raid effect",
+      "actor": "sb", "metric": "spell_damage_done", "spell": 5176, "target": "dummy",
+      "ratio_to": "sb_nature_base", "min": 1.028, "max": 1.032 },
+    { "action": "assert", "label": "BASELINE: the caster's Frost damage gains 3% and 5% (1.03 x 1.05 = 1.0815)",
+      "actor": "sb", "metric": "spell_damage_done", "spell": 30455, "target": "dummy",
+      "ratio_to": "sb_frost_base", "min": 1.079, "max": 1.084 },
+    { "action": "learn", "actor": "twin", "spell": 300929 },
+    { "action": "assert", "label": "SETUP: a second raid damage aura of the same family reaches the ally",
+      "actor": "ally", "metric": "aura", "spell": 300929, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: two raid damage auras still give the ally 3%, not 1.03 x 1.03 = 1.0609",
+      "actor": "ally", "metric": "spell_damage_done", "spell": 5176, "target": "dummy",
+      "ratio_to": "ally_nature_base", "min": 1.028, "max": 1.032 },
+    { "action": "assert", "label": "DISCRIMINATING: the caster keeps 1.03 x 1.05 = 1.0815 on Frost, neither 1.1139 (stacked) nor 1.05 (personal effect swallowed by the group)",
+      "actor": "sb", "metric": "spell_damage_done", "spell": 30455, "target": "dummy",
+      "ratio_to": "sb_frost_base", "min": 1.079, "max": 1.084 }
+  ]
+}

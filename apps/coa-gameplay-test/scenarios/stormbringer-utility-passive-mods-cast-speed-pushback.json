@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Wind Shift native haste and pushback reduction (#1894)",
+  "contract": "Wind Shift rank1 (503596) has two unconditional TARGET_UNIT_CASTER self-buff effects with no classmask (ClassMask=0 on both, correct for a global caster passive, not a per-spell mod): effect0 is aura 149 SPELL_AURA_REDUCE_PUSHBACK, EffectBasePoints 24 + EffectDieSides 1 = 25(%); effect1 is aura 216 SPELL_AURA_HASTE_SPELLS, EffectBasePoints 1+1=2(%). Rank2 (504879): effect0 EffectBasePoints 49+1=50(%); effect1 EffectBasePoints 3+1=4(%). Both auras dispatch to live, non-null handlers (SpellAuraEffects.cpp:63): 149 to AuraEffect::HandleNoImmediateEffect (implemented in Spell::Delayed's pushback calc), 216 to AuraEffect::HandleModCastingSpeed (implemented in Unit::ApplyCastTimePercentMod). Haste: ApplyCastTimePercentMod's non-apply branch computes var*=100/(100+haste%) (Unit.cpp:14140-14150,14164-14173), giving cast_speed_multiplier 100/102=0.9804 for rank1 and 100/104=0.9615 for rank2 (smaller is faster), read live off the player's own UNIT_MOD_CAST_SPEED field with no combat needed since the aura is unconditional. Pushback: Spell::Delayed (Spell.cpp:7955-7975) starts delaytime=500ms per hit and computes delayReduce=100+GetTotalAuraModifier(SPELL_AURA_REDUCE_PUSHBACK)-100, then AddPct(delaytime,-delayReduce); GetTotalAuraModifier sums AuraEffect::GetAmount() across matching effects, and with no classmask/no other source of this aura type on a fresh actor, that sum is exactly Wind Shift's own effect0 amount -- so this scenario reads AuraEffect::GetAmount() directly (aura_amount) rather than staging a live cross-faction hit-during-cast: a prior fixup in this same cluster (stormbringer-utility-passive-mods-cast-speed-pushback's own sibling, stormbringer-utility-passive-mods-cc-duration.json / the templar-finesse.json precedent it cites) established that reading the passive's own resolved aura amount is sufficient native proof for exactly this dispatch pattern, and staging the live version here reproducibly fails the harness's own cross-faction attack-validity gate on the very first live hostile cast between two freshly created player actors (verified reason 12 SPELL_FAILED_BAD_TARGETS in this run, and independently reproduced by stormbringer-spell-power-scaling-passives-tome-of-lightning.json's unrelated attacker/target pairing in the same batch) -- a harness fixture limitation unrelated to whether Wind Shift's own modifier resolves correctly. Neither rank has any module code; both close as regression scenarios only.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    { "id": "base", "race": 8, "class": 16, "level": 80 },
+    { "id": "rank1", "race": 8, "class": 16, "level": 80 },
+    { "id": "rank2", "race": 8, "class": 16, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+
+    { "action": "assert", "label": "BASELINE: cast speed is unmodified without any Wind Shift rank",
+      "actor": "base", "metric": "cast_speed_multiplier", "min": 0.999, "max": 1.001 },
+
+    { "action": "assert", "label": "BASELINE: cast speed is unmodified before Wind Shift rank 1",
+      "actor": "rank1", "metric": "cast_speed_multiplier", "min": 0.999, "max": 1.001 },
+    { "action": "assert", "label": "BASELINE: Wind Shift rank 1 is not present before learning it",
+      "actor": "rank1", "metric": "aura", "spell": 503596, "equals": 0 },
+    { "action": "learn", "label": "Learn Wind Shift rank 1", "actor": "rank1", "spell": 503596 },
+    { "action": "assert", "label": "Wind Shift rank 1 applies its self-buff on learn",
+      "actor": "rank1", "metric": "aura", "spell": 503596, "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: Wind Shift rank 1 gives +2% spell haste (multiplier 100/102)",
+      "actor": "rank1", "metric": "cast_speed_multiplier", "min": 0.9784, "max": 0.9824 },
+    { "action": "assert", "label": "DISCRIMINATING: Wind Shift rank 1's own pushback-reduction amount is 25%",
+      "actor": "rank1", "metric": "aura_amount", "spell": 503596, "effect": 0, "equals": 25 },
+    { "action": "assert", "label": "Wind Shift rank 1's own haste amount (effect1) is 2%, matching the live cast_speed_multiplier proof",
+      "actor": "rank1", "metric": "aura_amount", "spell": 503596, "effect": 1, "equals": 2 },
+
+    { "action": "assert", "label": "BASELINE: cast speed is unmodified before Wind Shift rank 2",
+      "actor": "rank2", "metric": "cast_speed_multiplier", "min": 0.999, "max": 1.001 },
+    { "action": "assert", "label": "BASELINE: Wind Shift rank 2 is not present before learning it",
+      "actor": "rank2", "metric": "aura", "spell": 504879, "equals": 0 },
+    { "action": "learn", "label": "Learn Wind Shift rank 2", "actor": "rank2", "spell": 504879 },
+    { "action": "assert", "label": "Wind Shift rank 2 applies its self-buff on learn",
+      "actor": "rank2", "metric": "aura", "spell": 504879, "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: Wind Shift rank 2 gives +4% spell haste (multiplier 100/104)",
+      "actor": "rank2", "metric": "cast_speed_multiplier", "min": 0.9595, "max": 0.9635 },
+    { "action": "assert", "label": "DISCRIMINATING: Wind Shift rank 2's own pushback-reduction amount is 50%",
+      "actor": "rank2", "metric": "aura_amount", "spell": 504879, "effect": 0, "equals": 50 },
+    { "action": "assert", "label": "Wind Shift rank 2's own haste amount (effect1) is 4%, matching the live cast_speed_multiplier proof",
+      "actor": "rank2", "metric": "aura_amount", "spell": 504879, "effect": 1, "equals": 4 }
+  ]
+}

@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "name": "Tinker cooldown passives shorten their own spells (#1705, #1362)",
+  "contract": "#1705 Trust the Science! 300653 is SPELL_AURA_ADD_FLAT_MODIFIER -5000 on SPELLMOD_COOLDOWN (DBC EffectBasePoints -5001, DieSides 1) with class mask 0x4, which selects the Zap! ranks 680196/681296/681297/681298 (SpellFamilyFlags[0] 0x4, RecoveryTime and CategoryRecoveryTime 15000, AttributesEx6 0 so SPELL_ATTR6_NO_CATEGORY_COOLDOWN_MODS does not block the category branch). #1362 Bunker Operative 801706 is SPELL_AURA_ADD_PCT_MODIFIER -20 on the same op (EffectBasePoints -21, DieSides 1) with mask 0x2000/0x8000/0x400, which selects Discombobulate! 807197 (20000 ms), Build: Repulsion Unit 706904 (90000 ms) and Kinetic Shield 806224 (300000 ms); it sets SPELL_ATTR2_ALLOW_WHILE_NOT_SHAPESHIFTED, so its Stances value does not stop the passive applying out of form. Player::AddSpellAndCategoryCooldowns applies SPELLMOD_COOLDOWN at Player.cpp:11452 and :11456. Repair Shot 801707 is the control: SpellFamilyName 34, in neither mask.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 680196
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 680196
+    },
+    {
+      "action": "assert",
+      "label": "Zap! starts on its DBC 15 second cooldown",
+      "actor": "t",
+      "metric": "cooldown_ms",
+      "spell": 680196,
+      "min": 13500,
+      "max": 15000,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "No cooldown modifier applies yet",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 680196,
+      "op": 11,
+      "base": 15000,
+      "equals": 15000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 300653
+    },
+    {
+      "action": "assert",
+      "label": "Trust the Science! takes 5 seconds off Zap!",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 680196,
+      "op": 11,
+      "base": 15000,
+      "equals": 10000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 801706
+    },
+    {
+      "action": "assert",
+      "label": "Bunker Operative takes 20% off Kinetic Shield",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 806224,
+      "op": 11,
+      "base": 300000,
+      "equals": 240000
+    },
+    {
+      "action": "assert",
+      "label": "Bunker Operative takes 20% off Discombobulate!",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 807197,
+      "op": 11,
+      "base": 20000,
+      "equals": 16000
+    },
+    {
+      "action": "assert",
+      "label": "Bunker Operative takes 20% off Build: Repulsion Unit",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 706904,
+      "op": 11,
+      "base": 90000,
+      "equals": 72000
+    },
+    {
+      "action": "assert",
+      "label": "Repair Shot is in neither mask",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 801707,
+      "op": 11,
+      "base": 15000,
+      "equals": 15000
+    },
+    {
+      "action": "wait",
+      "ms": 16000
+    },
+    {
+      "action": "assert",
+      "label": "Zap! is ready again",
+      "actor": "t",
+      "metric": "cooldown_ms",
+      "spell": 680196,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 680196
+    },
+    {
+      "action": "assert",
+      "label": "The real cooldown is now 10 seconds",
+      "actor": "t",
+      "metric": "cooldown_ms",
+      "spell": 680196,
+      "min": 8500,
+      "max": 10000,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 806224
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 806224
+    },
+    {
+      "action": "assert",
+      "label": "Kinetic Shield's real cooldown is 240 seconds",
+      "actor": "t",
+      "metric": "cooldown_ms",
+      "spell": 806224,
+      "min": 235000,
+      "max": 240000,
+      "within_ms": 3000
+    }
+  ]
+}

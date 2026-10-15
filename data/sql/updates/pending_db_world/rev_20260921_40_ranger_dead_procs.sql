@@ -1,0 +1,1347 @@
+-- Ranger passives whose proc aura never fires: Spell.dbc ProcFlags 0 with no `spell_proc` row.
+--
+-- SpellMgr::LoadSpellProcs skips a record with no DBC proc flags ("Skip if no proc flags in DBC",
+-- src/server/game/Spells/SpellMgr.cpp), so no fallback entry is generated; Aura::GetProcEffectMask then
+-- returns 0 for any aura with no proc entry ("only auras with spell proc entry can trigger proc",
+-- src/server/game/Spells/Auras/SpellAuras.cpp). Every spell below therefore carries a live
+-- SPELL_AURA_PROC_TRIGGER_SPELL effect that has never fired on this realm. Same defect and same shape as
+-- data/sql/updates/pending_db_world/rev_20260920_51_bloodmage_physical_crit_procs.sql.
+--
+-- Chance stays 0 throughout so each record's own ProcChance is used, per
+-- rev_20260919_20_coa_proc_chance_parity.sql.
+--
+-- Rows marked PARTIAL restore the proc event correctly but do not on their own deliver every clause of the
+-- tooltip; the residual work is named inline and those issues stay open.
+
+-- #773 Freedom (520628)
+-- tooltip: allowing their critical strikes to increase their movement speed by $520629s1% for $520629d
+-- Freedom (520628) carries three SPELL_EFFECT_APPLY_AREA_AURA_RAID (65) effects on radius index 18. Slots 0
+-- and 1 are aura 77 (SPELL_AURA_MECHANIC_IMMUNITY) with MiscValue 7 (MECHANIC_ROOT) and 11 (MECHANIC_SNARE) -
+-- that is the 'immune to roots and snares' half, and it needs no proc row. Slot 2 is aura 42
+-- (SPELL_AURA_PROC_TRIGGER_SPELL) on Freedom 520629, and it is the clause this row revives: Spell.dbc
+-- ProcFlags is 0 and `spell_proc` is empty for 520628, so LoadSpellProcs skips it ('Skip if no proc flags in
+-- DBC') and Aura::GetProcEffectMask returns 0 before any effect is examined. 520629 is a native
+-- SPELL_EFFECT_APPLY_AURA (6) / aura 31 (SPELL_AURA_MOD_INCREASE_SPEED) with BasePoints 29 and DieSides 1, so
+-- SpellEffectInfo::CalcValue yields 30 - the tooltip's 30% - on DurationIndex 28, and TargetA 1
+-- (TARGET_UNIT_CASTER), so it lands on whichever ally procced it rather than on the Ranger.
+-- AuraEffect::HandleProcTriggerSpellAuraProc casts from aurApp->GetTarget(), the raid member carrying the area
+-- aura, which is exactly 'their critical strikes ... their movement speed'. SpellFamilyName stays 0: the
+-- tooltip names no ability and the aura sits on arbitrary allies of any class, so SpellInfo::IsAffected must
+-- short-circuit true. ProcFlags 332116 = PROC_FLAG_DONE_MELEE_AUTO_ATTACK (0x4) |
+-- PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS (0x10) | PROC_FLAG_DONE_RANGED_AUTO_ATTACK (0x40) |
+-- PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS (0x100) | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG (0x1000) |
+-- PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG (0x10000) | PROC_FLAG_DONE_PERIODIC (0x40000): every way an ally
+-- can land a damaging critical strike, and no TAKEN bit, because it is their own strikes that count. The
+-- positive (POS) counterparts are deliberately absent - 'critical strikes', not critical heals - and
+-- SpellTypeMask 1 (PROC_SPELL_TYPE_DAMAGE) enforces the same reading a second time for the flags that are
+-- type-checked. PROC_FLAG_DONE_PERIODIC is included because this tooltip says 'critical strikes' bare while
+-- the same class's Highwayman (707744) says 'Direct critical strikes'; that deliberate contrast is the only
+-- evidence available on whether DoT crits count, and it reads as included here. If a later measurement says
+-- otherwise, clearing 0x40000 (332116 -> 69972) is the single-bit retreat. SpellPhaseMask 2
+-- (PROC_SPELL_PHASE_HIT) because crit is only known once the strike resolves - and because
+-- PROC_FLAG_DONE_MELEE_AUTO_ATTACK is outside REQ_SPELL_PHASE_PROC_FLAG_MASK, white crits skip the phase and
+-- type checks entirely and still pass. HitMask 2 (PROC_HIT_CRITICAL) is the whole point of the clause and
+-- replaces the NORMAL|CRITICAL|ABSORB default a DONE proc would otherwise get. Chance stays 0 so the record's
+-- own ProcChance (100) is used per rev_20260919_20_coa_proc_chance_parity.sql; Charges stays 0 because
+-- Aura::CalcMaxCharges lets a `spell_proc` row's Charges override the DBC and 520628's ProcCharges is 0 - the
+-- aura must keep proccing for its whole 8 sec. DisableEffectsMask stays 0: aura 77 has no proc handler in
+-- AuraEffect::HandleProc and falls through its default case harmlessly.
+-- CORRECTED BY REVIEW: ProcFlags 332116 -> 69972. The paragraph above argues the pre-review value; the shipped
+-- row uses the reviewed one.
+--
+-- #815 Venom-Coated Seeds (807459)
+-- tooltip: Damage dealt by |cffffffffSnapseed|r now reduces the enemy's chance to hit by $807553s1% for
+-- $807553d.
+-- Venom-Coated Seeds (807459) is a single SPELL_EFFECT_APPLY_AURA (6) / aura 42
+-- (SPELL_AURA_PROC_TRIGGER_SPELL) on Venom-Coated Seed 807553, with Spell.dbc ProcFlags 0 and no `spell_proc`
+-- row, so the whole passive is dead at LoadSpellProcs. 807553 is a native SPELL_EFFECT_APPLY_AURA / aura 54
+-- (SPELL_AURA_MOD_HIT_CHANCE) with BasePoints -16 and DieSides 1, i.e. CalcValue -15, on DurationIndex 1 and
+-- TargetA 6 (TARGET_UNIT_TARGET_ENEMY). Note 807553's own cached Description string still says '20%' while its
+-- effect computes -15; 807459's tooltip renders $807553s1, so -15% is what players actually see and the -15 is
+-- correct. Because 807553 targets an enemy, the proc must run at a phase where an action target exists:
+-- AuraEffect::HandleProcTriggerSpellAuraProc casts at eventInfo.GetActionTarget(), which is the struck enemy
+-- only during PROC_SPELL_PHASE_HIT - hence SpellPhaseMask 2. A CAST-phase row would hand it a null victim
+-- (Spell::cast passes nullptr) and the cast would fail SPELL_FAILED_BAD_TARGETS. SpellFamilyName 27 with
+-- SpellFamilyMask1 16: Snapseed's own record is Spell.dbc family 27 SpellFamilyFlags (0, 16, 0), shared by all
+-- thirteen of its ranks (503449-503459, 804027, and the knockback child 807167), and a scan of family 27 shows
+-- that word-1 bit 0x10 belongs to Snapseed alone - no other Ranger spell carries it. ProcFlags 256 =
+-- PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS: Snapseed is DmgClass 3 (SPELL_DAMAGE_CLASS_RANGED) without
+-- SPELL_ATTR2_AUTO_REPEAT, so Spell::prepareDataForTriggerSystem sets exactly this bit and nothing melee,
+-- magic or periodic. SpellTypeMask 1 (PROC_SPELL_TYPE_DAMAGE) is the tooltip's 'Damage dealt by', not merely
+-- 'when you cast': it is what keeps the proc off Snapseed's damage-free knockback child 807167, which shares
+-- the same family mask and DmgClass but resolves with spellTypeMask PROC_SPELL_TYPE_NO_DMG_HEAL (807167 is
+-- also a triggered cast, which Aura::GetProcEffectMask rejects on its own, so this is belt and braces).
+-- HitMask stays 0 - the tooltip does not ask for a critical strike - which gives the DONE default
+-- NORMAL|CRITICAL|ABSORB. Chance stays 0 so 807459's own ProcChance 100 is used; 807553's ProcChance of 12 is
+-- the triggered record's field and never consulted. AttributesMask stays 0: Snapseed is cast by the player, so
+-- no PROC_ATTR_TRIGGERED_CAN_PROC is needed.
+--
+-- #903 Falcon Guide (520586)
+-- tooltip: |cFFFFFFFFFalconstrike|r and |cffffffffBattle Screech|r now increase your movement speed by
+-- $520597s1% for $520597d.
+-- Falcon Guide (520586) is one SPELL_EFFECT_APPLY_AURA (6) / aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) on Falcon
+-- Guide 520597, ProcFlags 0 in Spell.dbc and no `spell_proc` row, so it never fires. 520597 is a native
+-- SPELL_EFFECT_APPLY_AURA / aura 31 (SPELL_AURA_MOD_INCREASE_SPEED), BasePoints 29 with DieSides 1 (CalcValue
+-- 30, the tooltip's 30%), DurationIndex 27, TargetA 1 (TARGET_UNIT_CASTER) - a pure self buff, so it is safe
+-- to proc at a phase that supplies no action target. The tooltip names two abilities with different damage
+-- classes, so both the family mask and the proc flags carry two halves. SpellFamilyName 27 with
+-- SpellFamilyMask1 4194304 and SpellFamilyMask2 8: Falconstrike's eight records (806345, 806437-806443) are
+-- family 27 SpellFamilyFlags (0, 4194304, 0), DmgClass 3; Battle Screech's twelve (567234-567237, 705070,
+-- 706394-706400) are family 27 (0, 0, 8), DmgClass 0. SpellInfo::IsAffected ANDs the whole flag96, so one row
+-- with both words set matches either ability. The only other family-27 record holding word-2 bit 0x8 is
+-- Instinctual Combatant 520572, and it is DmgClass 2 (SPELL_DAMAGE_CLASS_MELEE), whose cast raises
+-- PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS (0x10) - a bit this row does not set - so it can never match. ProcFlags
+-- 1280 = PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS (0x100) for Falconstrike (DmgClass 3, no
+-- SPELL_ATTR2_AUTO_REPEAT) | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS (0x400) for Battle Screech (DmgClass 0,
+-- and positive: its effects are auras 344/345, the CoA flat attack- and spell-power buffs, on TargetA 56
+-- TARGET_UNIT_CASTER_AREA_PARTY with BasePoints > 0, which SpellInfo::_IsPositiveEffect resolves positive).
+-- SpellPhaseMask 1 (PROC_SPELL_PHASE_CAST) is the deliberate choice over HIT. Battle Screech is an area party
+-- buff: at HIT phase Spell::DoAllEffectOnTarget fires one proc per raid member struck, which would recast
+-- 520597 up to forty times for one press of the button. Spell::cast fires the CAST-phase proc exactly once per
+-- non-triggered cast, for both abilities, which is what 'Falconstrike and Battle Screech now increase your
+-- movement speed' describes. SpellTypeMask stays 0 because Unit::ProcSkillsAndAuras hands CAST phase
+-- PROC_SPELL_TYPE_MASK_ALL - any value would be vacuous - and HitMask stays 0, which
+-- CanSpellTriggerProcOnEvent then skips outright for a DONE proc in the CAST phase. One consequence to record:
+-- Spell::cast guards the CAST-phase proc with !IsTriggered(), so this row covers only directly cast Battle
+-- Screech. The passive Battle Screech 705069 ('Abilities that summon War Falcons now empower...') triggers its
+-- own copy 705070 through aura 42, and 705069 itself has ProcFlags 0 and no `spell_proc` row, so that path is
+-- dead today and is a separate defect; if it is ever revived, Falcon Guide would additionally need
+-- SpellPhaseMask 2 and PROC_ATTR_TRIGGERED_CAN_PROC to see it. Chance stays 0 so 520586's own ProcChance 100
+-- is used.
+--
+-- #925 Highwayman (704545)  [PARTIAL]
+-- tooltip: or for your next 2 attacks
+-- This row is the second half of Highwayman's tooltip, the part that ends the buff early: 'increase your haste
+-- by 15% for 5 sec, OR for your next 2 attacks'. Highwayman 704545 is the buff itself - a single
+-- SPELL_EFFECT_APPLY_AURA (6) / aura 192 (SPELL_AURA_MOD_MELEE_RANGED_HASTE), BasePoints 14 / DieSides 1 =
+-- 15%, TargetA 1, DurationIndex 28 - and it has no EffectTriggerSpell of its own to be missing; it is the aura
+-- the charges are counted on. Its Spell.dbc ProcCharges is 0, so Aura::CalcMaxCharges gives it no charges,
+-- IsUsingCharges() is false, and nothing ever ends it before its duration. Aura::CalcMaxCharges reads a
+-- `spell_proc` entry's Charges in preference to the DBC field, so Charges 2 here is what actually gives the
+-- buff its two uses, and Aura::PrepareProcToTrigger decrements m_procCharges on every qualifying event while
+-- Aura::ConsumeProcCharges removes the aura once the last one is spent. The consumption works even though
+-- 704545 has no proc-trigger effect: Unit::GetProcAurasTriggeredOnEvent processes every applied aura,
+-- Aura::GetProcEffectMask keeps effect 0 because AuraEffect::CheckEffectProc has no rule against aura 192, and
+-- AuraEffect::HandleProc falls through its default case doing nothing - the charge drop is the whole
+-- mechanism. ProcFlags 340 = PROC_FLAG_DONE_MELEE_AUTO_ATTACK (0x4) | PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS
+-- (0x10) | PROC_FLAG_DONE_RANGED_AUTO_ATTACK (0x40) | PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS (0x100): 'attacks'
+-- means weapon attacks, white and ability alike, at both ranges, which is also the only kind of strike the
+-- buff's melee-and-ranged haste helps. No magic, none-class or periodic bits - a Focus tick or a proc's own
+-- magic damage is not an attack. SpellPhaseMask 2 (PROC_SPELL_PHASE_HIT), required because 0x10, 0x40 and
+-- 0x100 are all inside REQ_SPELL_PHASE_PROC_FLAG_MASK; 0x4 is outside it and passes regardless. HitMask stays
+-- 0, so the DONE default NORMAL|CRITICAL|ABSORB applies and a missed, dodged or parried swing does not burn a
+-- charge - the attack has to land. SpellTypeMask stays 0: the four flags already name weapon attacks exactly,
+-- and adding PROC_SPELL_TYPE_DAMAGE would only create a way for a landed but fully mitigated swing to escape
+-- the count. SchoolMask, SpellFamilyName and its masks stay 0 because the clause restricts nothing about which
+-- ability the attack came from. Chance stays 0; 704545's own ProcChance is 101, so every qualifying attack
+-- counts. This row is independent of the behind-target blocker on 707744 and is correct on its own, but is
+-- only observable once 707744 can grant the buff at all.
+-- RESIDUAL: 707744 needs a C++ script (or an AuraScript CheckProc) for its 'Direct critical strikes while
+-- behind your target' gate. spell_proc cannot express caster-behind-target:
+-- SpellMgr::CanSpellTriggerProcOnEvent has no facing test and no CONDITION_SOURCE_TYPE_SPELL_PROC condition
+-- type covers relative position. The script must also restrict to DIRECT crits (no PROC_FLAG_DONE_PERIODIC)
+-- and then let 705063 trigger 704545, on which this Charges=2 row is the correct companion fix.
+--
+-- #946 'Tactical' Advantage (706748)
+-- tooltip: |cffffffffKnockout|r and |cffffffffBushwhack|r now increases your damage dealt against the target
+-- by $706749s1% for $706749d.
+-- 'Tactical' Advantage (706748) is one SPELL_EFFECT_APPLY_AURA (6) / aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL)
+-- on 'Tactical' Advantage 706749, with Spell.dbc ProcFlags 0 and no `spell_proc` row, so LoadSpellProcs
+-- generates nothing and the passive never fires. 706749 is a native SPELL_EFFECT_APPLY_AURA / aura 271
+-- (SPELL_AURA_MOD_DAMAGE_FROM_CASTER) with BasePoints 14 and DieSides 1 (CalcValue 15, the tooltip's 15%),
+-- MiscValue 127 (all schools), DurationIndex 31 and TargetA 6 (TARGET_UNIT_TARGET_ENEMY); its AuraDescription,
+-- 'Damage taken from the Ranger increased by 15%', confirms the debuff belongs on the victim, which is what
+-- 'your damage dealt against the target' means. SpellPhaseMask 2 (PROC_SPELL_PHASE_HIT) is therefore
+-- mandatory, not a preference: HandleProcTriggerSpellAuraProc casts 706749 at eventInfo.GetActionTarget(), and
+-- only the HIT phase supplies the struck enemy - Spell::cast's CAST-phase proc passes a null victim and the
+-- enemy-targeted cast would fail. SpellFamilyName 27 with SpellFamilyMask0 32 and SpellFamilyMask1 1073741824:
+-- Knockout's two records (706762, the aura 12 incapacitate, and 801435, the Elude-usable version) are family
+-- 27 SpellFamilyFlags (32, 0, 268435456), and word-0 bit 0x20 already identifies them uniquely across family
+-- 27, so the redundant word-2 bit is left out; Bushwhack 557333 is family 27 (0, 1073741824, 0). ProcFlags 272
+-- = PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS (0x10) for Knockout, which is DmgClass 2, |
+-- PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS (0x100) for Bushwhack, which is DmgClass 3 - the two abilities land on
+-- different sides of Spell::prepareDataForTriggerSystem, so both bits are needed and neither auto-attack,
+-- magic nor periodic bit belongs here. SpellTypeMask stays 0 on purpose: neither ability deals damage or
+-- healing (Knockout applies aura 12 SPELL_AURA_MOD_CONFUSE, Bushwhack a teleport-behind plus aura 12 stun), so
+-- Unit::ProcSkillsAndAuras resolves the event as PROC_SPELL_TYPE_NO_DMG_HEAL through
+-- Spell::DoAllEffectOnTarget's 'Passive spell hits' branch; the family mask has already named the two
+-- abilities exactly, so pinning the type would add nothing but a second way for the row to fail. HitMask stays
+-- 0, giving the DONE default NORMAL|CRITICAL|ABSORB, so a resisted or dodged Knockout does not apply the
+-- debuff. One known imprecision, with no finer bit available to remove it: Serrations 705051 is family 27 (0,
+-- 1073741824, 0) - it shares Bushwhack's exact word-1 bit - and is DmgClass 2, so a direct cast of it would
+-- match this row through the 0x10 bit. Nothing in Spell.dbc triggers 705051, it has no `spell_linked_spell` or
+-- `spell_proc` row and no SkillLineAbility entry, and it appears nowhere in `src/` or `modules/`, so it is
+-- unreachable content today; were it revived as a triggered cast, Aura::GetProcEffectMask would reject it
+-- anyway since AttributesMask deliberately omits PROC_ATTR_TRIGGERED_CAN_PROC. Chance stays 0 so 706748's own
+-- ProcChance 100 is used, per rev_20260919_20_coa_proc_chance_parity.sql.
+--
+-- #1172 Survival Kit (504329)
+-- tooltip: Your |cffffffffSurvival Potion|r now also heals you for $504328s1% of your maximum health with each
+-- tick.
+-- Survival Kit (504329) is one SPELL_EFFECT_APPLY_AURA (6) / aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) on
+-- Survival Kit 504328, Spell.dbc ProcFlags 0 and no `spell_proc` row, so it never fires. The decisive detail
+-- is what 504328 actually is: a native SPELL_EFFECT_APPLY_AURA / aura 20 (SPELL_AURA_OBS_MOD_HEALTH) with
+-- BasePoints 9 and DieSides 1 (CalcValue 10, the tooltip's 10% of maximum health), AuraPeriod 3000 and
+-- DurationIndex 105 - it is itself a periodic heal, not a per-tick payload. Survival Potion 802839 carries
+-- aura 23 (SPELL_AURA_PERIODIC_TRIGGER_SPELL) with the identical AuraPeriod 3000 and the identical
+-- DurationIndex 105. So the mechanic is not 'proc once per tick'; it is 'apply 504328 alongside the potion and
+-- let it tick in lockstep', which is exactly what 'heals you ... with each tick' produces, and what 802839's
+-- own conditional tooltip text ('$?s504329[In addition, restore $504328s1% of your maximum health with each
+-- tick.][]') describes. A per-tick proc would instead refresh a full-duration HoT on every tick and leave it
+-- running long after the potion expired. Hence SpellPhaseMask 1 (PROC_SPELL_PHASE_CAST): Spell::cast fires it
+-- once per non-triggered cast of the potion, and 504328's TargetA 1 (TARGET_UNIT_CASTER) means the null victim
+-- the CAST-phase proc passes is harmless. Per-tick procs are unavailable here in any case - the potion's aura
+-- 23 casts 704341 as a triggered spell, which Aura::GetProcEffectMask rejects, and
+-- SPELL_AURA_PERIODIC_TRIGGER_SPELL raises no PROC_FLAG_DONE_PERIODIC of its own. ProcFlags 16384 =
+-- PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS: 802839 is DmgClass 1 (SPELL_DAMAGE_CLASS_MAGIC), so
+-- prepareDataForTriggerSystem leaves m_procAttacker 0 and Spell::cast derives the flag from
+-- SpellInfo::IsPositive(), which is true - every effect is self-targeted and beneficial (aura 23 plus two
+-- SPELL_EFFECT_DISPEL_MECHANIC of MECHANIC_POISON and MECHANIC_DISEASE), and SpellInfo::_IsPositiveTarget
+-- passes TARGET_UNIT_CASTER. SpellFamilyName 27 with SpellFamilyMask2 536870912: Survival Potion 802839 is
+-- family 27 SpellFamilyFlags (0, 0, 536870912), and it is the only family-27 record carrying word-2 bit
+-- 0x20000000 - notably the periodic child 704341 has mask (0,0,0) and so cannot match. SpellTypeMask stays 0
+-- because Unit::ProcSkillsAndAuras gives the CAST phase PROC_SPELL_TYPE_MASK_ALL, and HitMask stays 0 because
+-- CanSpellTriggerProcOnEvent skips the hit check entirely for a DONE proc in the CAST phase. Chance stays 0 so
+-- 504329's own ProcChance 100 is used. One residual note, outside this row: nothing removes 504328 if the
+-- potion is cancelled early - the two auras share a duration but not a lifetime - and the tooltip does not say
+-- whether it should.
+--
+-- #1209 Silent, But Deadly (524873)  [PARTIAL]
+-- tooltip: Direct Physical damage dealt now has an 8% chance to allow you to use Deadshot regardless of the
+-- targets health for 8 sec.
+-- Silent, But Deadly (524873) carries its whole mechanic on effect 0, a SPELL_AURA_PROC_TRIGGER_SPELL (42) on
+-- 524872, with Spell.dbc ProcFlags 0 and no `spell_proc` row, so LoadSpellProcs skips it ("Skip if no proc
+-- flags in DBC") and Aura::GetProcEffectMask returns 0 - the passive never fires. Triggered spell 524872 is an
+-- 8 s self-buff (ImplicitTargetA 1, DurationIndex 31 = 8000 ms, matching the tooltip's $524872d) whose single
+-- effect is SPELL_AURA_ABILITY_IGNORE_AURASTATE (262) with SpellFamilyName 27 and EffectSpellClassMask
+-- (1048576,0,0) - exactly Deadshot's own SpellFamilyFlags (520227 plus ranks 573243-573246, (0x100000,0,0)).
+-- Deadshot's "Only usable on enemies below 20% health" is TargetAuraState 2
+-- (AURA_STATE_HEALTHLESS_20_PERCENT), tested by SpellInfo::CheckTarget (SpellInfo.cpp:2009) through
+-- Unit::HasAuraState, which returns true whenever the caster holds an ABILITY_IGNORE_AURASTATE aura affecting
+-- that spell (Unit.cpp:8037) - so the triggered spell delivers the "regardless of the targets health" clause
+-- with no script needed. ProcFlags 340 = PROC_FLAG_DONE_MELEE_AUTO_ATTACK (0x4) |
+-- PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS (0x10) | PROC_FLAG_DONE_RANGED_AUTO_ATTACK (0x40) |
+-- PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS (0x100): "damage dealt" spans white swings and abilities on both
+-- weapon lines (the Ranger's Auto Shot is stock spell 75 - ascension_custom_class_spell class 21 entry 33309 -
+-- DmgClass 3 with SPELL_ATTR2_AUTO_REPEAT, which Spell::prepareDataForTriggerSystem maps to
+-- DONE_RANGED_AUTO_ATTACK), while "Direct" excludes PROC_FLAG_DONE_PERIODIC.
+-- PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG is left out: the only family-27 DmgClass-0 physical damage records
+-- are the three visual spells 520352/520600/524614. SchoolMask 1 carries the word "Physical":
+-- ProcEventInfo::GetSchoolMask takes the triggering spell's school, or the DamageInfo's school for white hits,
+-- so a Nature ranged strike such as Toxic Dart (SchoolMask 8) cannot arm it. No SpellFamilyName/Mask - the
+-- clause is about damage school, not named abilities, and white swings carry no SpellInfo to match against.
+-- SpellTypeMask 1 (PROC_SPELL_TYPE_DAMAGE) for "damage dealt"; SpellPhaseMask 2 (HIT) so the CAST-phase event
+-- that DmgClass melee/ranged abilities also raise (Spell.cpp:4018) cannot roll the chance a second time per
+-- cast. HitMask 0 takes the DONE default NORMAL|CRITICAL|ABSORB, i.e. any landed hit, crit or not. Chance
+-- stays 0 so the record's own ProcChance 8 ($h in the tooltip) is used, per
+-- rev_20260919_20_coa_proc_chance_parity.sql; the tooltip names no internal cooldown or charge count, so
+-- Cooldown and Charges stay 0.
+-- RESIDUAL: column values not independently audited in this run
+--
+-- #1299 Headshots Only (680931)  [PARTIAL]
+-- tooltip: Periodic damage dealt with Serrated Shot and Toxic Dart now increases the damage of your next
+-- Precision Shot within 8 sec by 10%, stacking 10 times.
+-- Headshots Only (680931) is a single SPELL_AURA_PROC_TRIGGER_SPELL (42) on effect 0 with DBC ProcFlags 0 and
+-- no `spell_proc` row, so it is dead for the reasons established above. Triggered spell 573202 is a self-cast
+-- (ImplicitTargetA 1) 8 s buff (DurationIndex 31 = 8000 ms = the tooltip's $573202d) with CumulativeAura 10
+-- ($573202u, "stacking 10 times") whose single effect is SPELL_AURA_ADD_PCT_MODIFIER (108), MiscValue 0
+-- (SPELLMOD_DAMAGE), BasePoints 9 (+10% = $573202s1) and EffectSpellClassMask (0,8388608,0) under
+-- SpellFamilyName 27 - Precision Shot's own SpellFamilyFlags (500075 plus ranks 572108-572113,
+-- (0,0x800000,0)), cross-checked against 520727 'Advantage Farstrider Hidden', whose spellmod carries the same
+-- bit. ProcFlags 262144 = PROC_FLAG_DONE_PERIODIC alone, the event AuraEffect::HandlePeriodicDamageAurasTick
+-- raises (SpellAuraEffects.cpp:6592); no direct-hit bit, because the tooltip says "Periodic damage" - the
+-- initial impact of either ability must not arm it. SpellFamilyName 27 with SpellFamilyMask0 32768 and
+-- SpellFamilyMask2 128 names exactly the two abilities: both carry their DoT on their own record, so the
+-- tick's ProcEventInfo::GetSpellInfo is that record and SpellInfo::IsAffected matches - Serrated Shot 500073
+-- and ranks 501704-501707/575836/575837, SpellFamilyFlags (0,0,128), effect 0 aura 3 with a 3 s period; Toxic
+-- Dart 807237 and ranks 807324-807330, SpellFamilyFlags (32768,0,0), effect 0 aura 3 with a 3 s period. Both
+-- bits are independently confirmed by the passives that modify these abilities: 707888 'Improved Serrated
+-- Shot' (spellmod mask (0,0,128)) and 707699 'Toxic Dart' (mask (32768,0,0)). The only other family-27 record
+-- sharing bit 128 is 'Serrated Shot Visual' 524871, which has no periodic aura and therefore cannot raise a
+-- DONE_PERIODIC event. SchoolMask stays 0 because the two abilities differ in school (Serrated Shot Physical
+-- 1, Toxic Dart Nature 8) and the family mask already pins them. SpellTypeMask 1 (PROC_SPELL_TYPE_DAMAGE)
+-- matches "periodic damage dealt" and keeps a fully resisted tick out (Unit::ProcSkillsAndAuras classifies a
+-- 0-damage, 0-absorb tick as NO_DMG_HEAL). SpellPhaseMask 2 (HIT) is mandatory - PROC_FLAG_DONE_PERIODIC is
+-- inside REQ_SPELL_PHASE_PROC_FLAG_MASK - and is the phase ticks use (procPhase defaults to
+-- PROC_SPELL_PHASE_HIT). HitMask 0 takes the DONE default NORMAL|CRITICAL|ABSORB so critical ticks also count.
+-- Chance 0 uses ProcChance 100; no ICD or charges are in the tooltip. Not deliverable by this row, and worth
+-- its own look: 573202 has ProcCharges 0 in Spell.dbc, so the stacks are not consumed by the Precision Shot
+-- they buff - they simply expire after 8 s. That is a property of 573202's own record; a `spell_proc` row on
+-- it would only be loaded to log "doesn't have `ProcFlags` value defined", since it is not a proc aura.
+-- RESIDUAL: column values not independently audited in this run
+--
+-- #1371 Guile of the Ranger (520353)  [PARTIAL]
+-- tooltip: Your Instinct now additionally increases your critical strike rating by 20% of your Agility.
+-- Guile of the Ranger (520353) is one SPELL_AURA_PROC_TRIGGER_SPELL (42) on effect 0 with DBC ProcFlags 0 and
+-- no `spell_proc` row, so it never fires. Triggered spell 520545 is a self-cast (ImplicitTargetA 1) aura with
+-- DurationIndex 8 = 15000 ms whose single effect is SPELL_AURA_MOD_RATING_FROM_STAT (220,
+-- HandleModRatingFromStat), MiscValue 1792 = CR_CRIT_MELEE (8) | CR_CRIT_RANGED (9) | CR_CRIT_SPELL (10) -
+-- "critical strike rating" - MiscValueB 1 (STAT_AGILITY) and BasePoints 19 (+20% = $s1). The event the tooltip
+-- means is using Instinct: 801434, SpellFamilyName 27, SpellFamilyFlags (16,0,0), DmgClass 2, DurationIndex 8
+-- - the same 15000 ms as the triggered aura, which is why "your Instinct now additionally..." is delivered by
+-- granting 520545 on each Instinct cast rather than by a script that watches the buff. Instinct's family bit
+-- is corroborated by 803871 'Assassin' ("Increases the effectiveness of Instinct") and 707319 'Instinctual
+-- Combatant' ("Casting Instinct now also restores..."), whose spellmods both use mask (16,0,0); no other
+-- family-27 record carries that bit, so SpellFamilyName 27 + SpellFamilyMask0 16 is exact. ProcFlags 16 =
+-- PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS, which is what Spell::prepareDataForTriggerSystem (Spell.cpp:2271) sets
+-- from Instinct's DmgClass 2 even though the ability only energizes (effect 0, SPELL_EFFECT_ENERGIZE,
+-- POWER_FOCUS) and applies two self attack-power auras; the self hit still runs
+-- Spell::TargetInfo::DoDamageAndTriggers, which has no self-cast exclusion (only
+-- SPELL_ATTR3_SUPPRESS_CASTER_PROCS, which Instinct does not carry - AttributesEx3 0). SpellPhaseMask 2 (HIT)
+-- selects that single self-hit event and excludes the CAST-phase event the same cast raises (Spell.cpp:4018),
+-- so the aura is granted exactly once per use and always has a real action target to be cast at. SpellTypeMask
+-- is deliberately 0: Instinct deals no damage and no healing, so Unit::ProcSkillsAndAuras classifies the hit
+-- as PROC_SPELL_TYPE_NO_DMG_HEAL (4) - a mask of 1 would make this row dead - and since the tooltip imposes no
+-- damage condition at all, leaving the check off is both faithful and immune to the ability later gaining a
+-- damaging effect. HitMask 0 takes the DONE default (a self-cast reports PROC_HIT_NORMAL). SchoolMask 0,
+-- Chance 0 so ProcChance 100 is used, no ICD and no charges (the buff's own 15 s duration is the limit).
+-- RESIDUAL: column values not independently audited in this run
+--
+-- #1735 Pillager (300702)  [PARTIAL]
+-- tooltip: Ravage now increases movement speed by 50% for 3 sec and grants Pillaging.
+-- Pillager (300702) carries two SPELL_AURA_PROC_TRIGGER_SPELL (42) effects and Spell.dbc ProcFlags 0 with no
+-- `spell_proc` row, so both clauses of the tooltip are dead. One row serves both effects, and
+-- DisableEffectsMask stays 0 so both fire on the same event: effect 0 triggers 560945 'Slick' (self,
+-- DurationIndex 27 = 3000 ms, SPELL_AURA_MOD_INCREASE_SPEED (31) BasePoints 49 = +50%, i.e. "$560945s1% for
+-- $560945d") and effect 1 triggers 520573 'Pillaging' (self, DurationIndex 1 = 10000 ms,
+-- SPELL_AURA_ADD_PCT_MODIFIER BasePoints 14 = +15% with EffectSpellClassMask (2097152,131072,0) under family
+-- 27 - word 1 bit 131072 is Flank's own SpellFamilyFlags (804940, 805082-805088, 582530/582531), so its
+-- "damage dealt by Flank is increased by 15%" resolves correctly). ProcFlags 16 =
+-- PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS: Ravage (803851 plus ranks 803859-803864, the live chain per
+-- AscensionSpellProgressionData.h) is DmgClass 2. SpellFamilyName 27 with SpellFamilyMask1 4096 pins the event
+-- to Ravage - that bit is carried only by the Ravage records (including the '(UNUSED)' variants) and is
+-- corroborated by 560733 'Backstreet Justice' ("Increases the damage of your next Ravage") and 573301, whose
+-- spellmods use mask (0,4096,0). SpellTypeMask is deliberately 0: Ravage's only effect is a 12 s bleed (aura
+-- 3, 3 s period, DurationIndex 29) and nothing in src/ or modules/ adds an impact hit, so the landing event
+-- carries no damage and Unit::ProcSkillsAndAuras classifies it as PROC_SPELL_TYPE_NO_DMG_HEAL (4) - a
+-- SpellTypeMask of 1 would leave this row dead, and the tooltip asks for no damage condition. SpellPhaseMask 2
+-- (HIT) grants the two buffs on the same event that applies the bleed, and excludes the CAST-phase event the
+-- same cast raises, so they are granted once per Ravage; HitMask 0 takes the DONE default
+-- NORMAL|CRITICAL|ABSORB, so a dodged or parried Ravage grants nothing - consistent with the bleed it failed
+-- to apply. The off-hand companion record 805910 'Ravage' shares the family bit but is reachable only as a
+-- triggered cast and has AttributesEx3 0 (no SPELL_ATTR3_NOT_A_PROC), so Aura::GetProcEffectMask discards it;
+-- no double grant, and AttributesMask therefore stays 0. SchoolMask 0, Chance 0 so ProcChance 100 is used,
+-- Cooldown and Charges 0. Separate defect this row cannot fix: 300702 is granted by nothing in this repository
+-- - no ascension_custom_class_spell row, no mod-spellbook tree entry, and no Spell.dbc record triggers,
+-- teaches or references it - and its Attributes 384 (DO_NOT_DISPLAY|DO_NOT_LOG) lack SPELL_ATTR0_PASSIVE, so
+-- the aura is not currently on any Ranger. This row makes it work the moment it is granted.
+-- RESIDUAL: column values not independently audited in this run
+--
+-- #1736 Corrosive Poison (300703)  [PARTIAL]
+-- tooltip: Assault and Wild Strike now reduce the enemy's Armor by 5% for 15 sec, stacking up to 4 times.
+-- Corrosive Poison (300703) is a single SPELL_AURA_PROC_TRIGGER_SPELL (42) on effect 0 with Spell.dbc
+-- ProcFlags 0 and no `spell_proc` row, so the armor shred never lands. Triggered spell 704167 'Pulverized
+-- Armor' is a complete record: SPELL_AURA_MOD_RESISTANCE_PCT (101, HandleModResistancePercent) with MiscValue
+-- 1 (SPELL_SCHOOL_MASK_NORMAL, i.e. armor), BasePoints -6 with DieSides 1 = -5% ($704167s1), DurationIndex 8 =
+-- 15000 ms ($704167d) and CumulativeAura 4 ($704167u) - the tooltip's 5% / 15 sec / 4 stacks exactly. Its
+-- ImplicitTargetA is 6 (enemy) and AuraEffect::HandleProcTriggerSpellAuraProc casts the triggered spell at
+-- eventInfo.GetActionTarget() when the aura owner is the actor, so each stack lands on the struck enemy, which
+-- is where "the enemy's Armor" must be reduced. ProcFlags 16 = PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS: Assault
+-- (803108 plus ranks 503099-503105) and Wild Strike (800083 plus ranks 501724-501734) are both DmgClass 2, and
+-- no other proc bit applies - neither is an auto attack, neither is periodic. SpellFamilyName 27 with
+-- SpellFamilyMask1 33024 (32768 = Assault | 256 = Wild Strike) and SpellFamilyMask2 524288 (Wild Strike's
+-- second flag word) names exactly the two abilities the tooltip names; the bits are corroborated by the
+-- passives that modify them - 681498 'Dirty Fighter' (mask (0,32768,0), an Assault modifier), 560344 'Wild
+-- Man' ("Your Wild Strike now strikes 2 additional nearby enemies", mask (0,256,0)) and 680479 'Piercing Play'
+-- ("Increases the damage of Wild Strike and Quick Shot", mask (0,1,524288)). One other family-27 record shares
+-- Assault's bit: 681235 'Sucker Punch', whose own tooltip states it "Scales with modifiers to Assault" - the
+-- shared bit is deliberate and no finer bit exists to separate them, so Sucker Punch will also apply a stack.
+-- Wild Strike's off-hand blow is excluded on purpose: 560962 'Wild Strike (Off Hand)' and 561352 carry a
+-- different flag, (1073741824,0,0), and although 560962 has SPELL_ATTR3_NOT_A_PROC (AttributesEx3 0x200) and
+-- would therefore be allowed to proc despite being a triggered cast, including its bit would put two stacks on
+-- the target per cast. SpellTypeMask 1 (PROC_SPELL_TYPE_DAMAGE): both abilities deal direct weapon damage on
+-- impact (Assault: SPELL_EFFECT_SCHOOL_DAMAGE + TRIGGER_SPELL_WITH_VALUE + WEAPON_PERCENT_DAMAGE; Wild Strike:
+-- WEAPON_PERCENT_DAMAGE + NORMALIZED_WEAPON_DMG), so the hit event is always classified as damage.
+-- SpellPhaseMask 2 (HIT) applies the stack on the landing blow and excludes the CAST-phase event the same cast
+-- raises; HitMask 0 takes the DONE default NORMAL|CRITICAL|ABSORB, so a missed, dodged or parried strike
+-- shreds nothing. SchoolMask 0 - the family mask already pins the abilities, and restricting by school would
+-- add nothing. Chance 0 so ProcChance 100 is used; no ICD or charges in the tooltip (the 4-stack cap lives on
+-- 704167's CumulativeAura). Separate defect this row cannot fix, same as Pillager: 300703 is granted by
+-- nothing in this repository and its Attributes 384 lack SPELL_ATTR0_PASSIVE, so nothing currently puts the
+-- aura on a Ranger.
+-- RESIDUAL: column values not independently audited in this run
+--
+-- #1803 Superb Shot (301249)  [PARTIAL]
+-- tooltip: Damage dealt by Auto Shot now restores 4 Focus.
+-- Superb Shot (301249) is a single SPELL_AURA_PROC_TRIGGER_SPELL (42) on effect 0 with Spell.dbc ProcFlags 0
+-- and no `spell_proc` row, so no Focus is ever returned. Triggered spell 561183 'Energize + 3 Focus' is sound:
+-- one SPELL_EFFECT_ENERGIZE (30) with MiscValue 2 (POWER_FOCUS), BasePoints 3 and DieSides 1, which is the 4
+-- Focus the tooltip quotes as $561183s1, cast on the Ranger himself (ImplicitTargetA 1;
+-- HandleProcTriggerSpellAuraProc casts it at the action target, but TARGET_UNIT_CASTER resolves back to the
+-- aura owner). ProcFlags 64 = PROC_FLAG_DONE_RANGED_AUTO_ATTACK alone. The Ranger's Auto Shot is stock spell
+-- 75 (ascension_custom_class_spell: class 21, entry_id 33309, required_level 1), DmgClass 3 with
+-- SPELL_ATTR2_AUTO_REPEAT (AttributesEx2 0x20), which Spell::prepareDataForTriggerSystem (Spell.cpp:2281) maps
+-- to exactly this flag; PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS (0x100) is deliberately left out because the
+-- tooltip names Auto Shot only, not the Ranger's ranged abilities. No SpellFamilyName or mask may be set here:
+-- spell 75 is SpellFamilyName 9, so any family-27 restriction would silently kill the row
+-- (SpellMgr::CanSpellTriggerProcOnEvent applies the family check to every event inside SPELL_PROC_FLAG_MASK,
+-- which includes DONE_RANGED_AUTO_ATTACK), and the single flag already isolates the ability. SpellTypeMask 1
+-- (PROC_SPELL_TYPE_DAMAGE) for "Damage dealt by"; SpellPhaseMask 2 (HIT) is required because
+-- DONE_RANGED_AUTO_ATTACK sits inside REQ_SPELL_PHASE_PROC_FLAG_MASK, and there is no competing CAST-phase
+-- event since the auto-repeat shot is itself a triggered cast (Spell.cpp:4017 skips the CAST proc for
+-- triggered spells). HitMask 0 takes the DONE default NORMAL|CRITICAL|ABSORB, so a miss returns no Focus while
+-- a crit does. AttributesMask stays 0 even though Auto Shot is cast as a triggered spell:
+-- Aura::GetProcEffectMask exempts AUTO_ATTACK_PROC_FLAG_MASK events from the triggered-spell block, so
+-- PROC_ATTR_TRIGGERED_CAN_PROC is unnecessary. SchoolMask 0, Chance 0 so the record's ProcChance 100 is used,
+-- and Cooldown stays 0 because the tooltip states no internal cooldown - every landed shot restores Focus.
+-- RESIDUAL: column values not independently audited in this run
+--
+-- #1961 Falcon Diving (520783)
+-- tooltip: Killing an enemy that yields experience or honor now summons a |cffffffffWar Falcon|r to aid you in
+-- combat for $807119d. Can only occur once every 4 sec.
+-- Falcon Diving (520783) is a passive (Attributes 0xC0 = PASSIVE|HIDDEN_CLIENTSIDE) whose only effect, index
+-- 0, is SPELL_EFFECT_APPLY_AURA with SPELL_AURA_PROC_TRIGGER_SPELL (42) on Falcon Diving 807119. Spell.dbc
+-- ProcFlags is 0 and there is no `spell_proc` row, so SpellMgr::LoadSpellProcs generates no fallback entry
+-- ('Skip if no proc flags in DBC', SpellMgr.cpp:2253), Aura::GetProcEffectMask returns 0 at 'only auras with
+-- spell proc entry can trigger proc', and the passive never fires. ProcFlags 2 = PROC_FLAG_KILL, the flag
+-- Unit::Kill hands the killer (src/server/game/Entities/Unit/Unit.cpp:14783); PROC_FLAG_KILLED (0x1) and
+-- PROC_FLAG_DEATH (0x1000000) are the victim's and are deliberately not set - the tooltip says 'Killing an
+-- enemy', not dying. AttributesMask 1 = PROC_ATTR_REQ_EXP_OR_HONOR is the literal translation of 'that yields
+-- experience or honor': SpellMgr::CanSpellTriggerProcOnEvent runs Player::isHonorOrXPTarget on the action
+-- target for exactly that bit. Cooldown 4000 is 'Can only occur once every 4 sec'; Aura::PrepareProcToTrigger
+-- feeds procEntry->Cooldown to AddProcCooldown, so it is an internal cooldown on the aura, which is what the
+-- clause describes. SchoolMask, SpellFamilyName, all three SpellFamilyMask words, SpellTypeMask,
+-- SpellPhaseMask and HitMask all stay 0 on purpose: CanSpellTriggerProcOnEvent returns true immediately after
+-- the exp/honor test for PROC_FLAG_KILL ('always trigger for these types', SpellMgr.cpp:921), so any value in
+-- those fields would be unreachable and misleading about what gates this proc. Chance stays 0 so the record's
+-- own ProcChance (100) is used, per rev_20260919_20_coa_proc_chance_parity.sql. The triggered spell is live
+-- and correct: 807119 Falcon Diving is a single SPELL_EFFECT_SUMMON of creature 50393 with SummonProperties 61
+-- and DurationIndex 29 = 12000 ms, matching the tooltip's '$807119d' = 12 sec, and creature 50393 'War Falcon'
+-- was created by rev_20260916_05_ranger_war_falcon.sql, so Creature::InitEntry no longer rejects the summon.
+-- 807119's own RecoveryTime of 60000 does not gate the proc, because
+-- AuraEffect::HandleProcTriggerSpellAuraProc casts with triggered == true, i.e. TRIGGERED_FULL_MASK (0x7FFFF,
+-- SpellDefines.h:154), which contains TRIGGERED_IGNORE_SPELL_AND_CATEGORY_CD. Its ImplicitTargetA is 43
+-- (TARGET_DEST_CASTER_BACK_LEFT), a caster-relative destination, so the falcons spawn at the Ranger and not at
+-- the corpse that the kill event hands the proc as action target. Two record discrepancies are noted but are
+-- not this row's to fix: 807119 is the full Falcon Diving ability (two falcons plus a dive hit) while the
+-- Description promises one falcon, and 520783's AuraDescription carries a different clause about Battle
+-- Screech - Battle Screech 567234 (SpellFamilyFlags (0,0,8)) has no proc effect pointing back at 520783, so
+-- that second clause is not deliverable from this record at all.
+--
+-- #1974 Thread The Needle (524831)
+-- tooltip: Critical strikes with |cffffffffQuick Shot|r or |cffffffffFalconstrike|r now reduce the cast time
+-- and cost of your next ability that consumes |cff8fff7aAdvantage|r by $503647s1% for $503647d, stacking
+-- $503647u times.
+-- Thread The Needle (524831) is a passive (Attributes 0xC0 = PASSIVE|HIDDEN_CLIENTSIDE) whose only effect,
+-- index 0, is SPELL_EFFECT_APPLY_AURA with SPELL_AURA_PROC_TRIGGER_SPELL (42) on Thread The Needle 503647.
+-- Spell.dbc ProcFlags is 0 and no `spell_proc` row exists, so LoadSpellProcs skips it ('Skip if no proc flags
+-- in DBC', SpellMgr.cpp:2253) and Aura::GetProcEffectMask returns 0. ProcFlags 256 =
+-- PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS, and only that bit: both named abilities are DmgClass 3
+-- (SPELL_DAMAGE_CLASS_RANGED) and neither carries SPELL_ATTR2_AUTO_REPEAT (Quick Shot 500074 AttributesEx2
+-- 0x40020000 = ACTIVE_THREAT|DO_NOT_RESET_COMBAT_TIMERS, Falconstrike 806345 AttributesEx2 0), so
+-- Spell::prepareDataForTriggerSystem (src/server/game/Spells/Spell.cpp:2277-2288) routes them to the ranged-
+-- spell branch and never to PROC_FLAG_DONE_RANGED_AUTO_ATTACK (0x40). SpellFamilyName 27 with SpellFamilyMask1
+-- 4194305 = 1 | 4194304: Quick Shot carries SpellFamilyFlags (0,1,0) on all seven ranks (500074,
+-- 572727-572732, chained in `spell_ranks` under 500074) and Falconstrike carries (0,4194304,0) on all eight
+-- ranks (806345, 806437-806443). An exhaustive Spell.dbc scan of SpellFamilyName 27 finds no other record
+-- holding either bit, so the mask names exactly the two abilities the tooltip names and nothing else - notably
+-- not the other family-27 records also called Falconstrike (520587/520588 summon plumbing, 573060/573339
+-- passives, 806465 dummy), all of which have different or empty flags. HitMask 2 = PROC_HIT_CRITICAL, because
+-- the tooltip says 'Critical strikes with', not 'strikes with'. SpellTypeMask 1 = PROC_SPELL_TYPE_DAMAGE and
+-- SpellPhaseMask 2 = PROC_SPELL_PHASE_HIT are both mandatory here rather than decorative:
+-- PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS sits inside both SPELL_PROC_FLAG_MASK and
+-- REQ_SPELL_PHASE_PROC_FLAG_MASK (SpellMgr.h:156-184), so CanSpellTriggerProcOnEvent runs both tests, and
+-- LoadSpellProcs logs 'doesn't have `SpellPhaseMask` value defined' if the phase is left at 0. AttributesMask
+-- stays 0: Quick Shot and Falconstrike are player-cast, so the triggered-spell block in
+-- Aura::GetProcEffectMask never engages and PROC_ATTR_TRIGGERED_CAN_PROC is not needed. Chance stays 0 so the
+-- record's own ProcChance (100) is used, per rev_20260919_20_coa_proc_chance_parity.sql. The triggered buff
+-- 503647 is live and matches every number in the tooltip: CumulativeAura 3 ('stacking $503647u times' = 3),
+-- DurationIndex 8 = 15000 ms ('for $503647d' = 15 sec), and two SPELL_AURA_ADD_PCT_MODIFIER (108) effects of
+-- BasePoints -35 on MiscValue 10 (SPELLMOD_CASTING_TIME) and MiscValue 14 (SPELLMOD_COST), i.e. 'reduce the
+-- cast time and cost ... by $503647s1%'. Separate pre-existing defect, outside this row: 503647's effect 0
+-- (the casting-time modifier) has EffectSpellClassMask (0,0,0) while effect 1 is scoped to (201326592,
+-- 201326592, 0); since SpellInfo::IsAffected skips the flag test on a falsy mask, the buff's cast-time cut
+-- lands on every SpellFamilyName 27 spell instead of only 'your next ability that consumes Advantage'. Note
+-- also that 503647 is fed by a second record, Threaded 524830, whose own effects are SPELL_EFFECT_DUMMY and
+-- therefore inert - a separate issue from this one.
+--
+-- #2018 Quel'dorei Poison (560802)
+-- tooltip: Damage dealt by |cffffffffWoodland Arrow|r and |cFFFFFFFFEmerald Arrow|r now poison enemies for
+-- $586212d, dealing ${$586212m1*$<scalingbp>+$RAP*.15} Nature damage every $586212T1 sec.
+-- Quel'dorei Poison (560802) is a passive (Attributes 0xC0 = PASSIVE|HIDDEN_CLIENTSIDE) whose only effect,
+-- index 0, is SPELL_EFFECT_APPLY_AURA with SPELL_AURA_PROC_TRIGGER_SPELL (42) on Quel'dorei Poison 586212.
+-- Spell.dbc ProcFlags is 0 with no `spell_proc` row, so LoadSpellProcs generates nothing (SpellMgr.cpp:2253)
+-- and Aura::GetProcEffectMask returns 0 at 'only auras with spell proc entry can trigger proc'. ProcFlags 256
+-- = PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS: Woodland Arrow (572579) and Emerald Arrow (804712) are both
+-- DmgClass 3 and neither has SPELL_ATTR2_AUTO_REPEAT (both AttributesEx2 0x20000 = DO_NOT_RESET_COMBAT_TIMERS
+-- only), so Spell::prepareDataForTriggerSystem gives them the ranged-spell flag, not the ranged-auto-attack
+-- flag. SpellFamilyName 27 with SpellFamilyMask1 67108864 and SpellFamilyMask2 8192: Emerald Arrow carries
+-- SpellFamilyFlags (0,67108864,0) on all six ranks (804712, 806921-806925) and Woodland Arrow carries
+-- (0,0,8192) on all seven ranks (572579, 806368, 806444-806448), so one row covers every rank without a
+-- negative SpellId. HitMask stays 0 so CanSpellTriggerProcOnEvent applies the DONE default
+-- PROC_HIT_NORMAL|PROC_HIT_CRITICAL|PROC_HIT_ABSORB - the tooltip says 'Damage dealt by', every landed hit,
+-- not 'critical strikes'; a HitMask of 2 here would be wrong. SpellTypeMask 1 = PROC_SPELL_TYPE_DAMAGE
+-- ('damage dealt by') and SpellPhaseMask 2 = PROC_SPELL_PHASE_HIT; both are required because
+-- PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS is in SPELL_PROC_FLAG_MASK and REQ_SPELL_PHASE_PROC_FLAG_MASK.
+-- AttributesMask stays 0 (both arrows are player-cast, so the triggered-spell block in Aura::GetProcEffectMask
+-- never engages). Chance stays 0 so the record's own ProcChance (100) is used, per
+-- rev_20260919_20_coa_proc_chance_parity.sql. The triggered spell is live and matches: 586212 is a single
+-- SPELL_EFFECT_APPLY_AURA / SPELL_AURA_PERIODIC_DAMAGE (3), SchoolMask 8 (Nature, exactly what the parent
+-- tooltip promises), BasePoints 149, EffectAuraPeriod 2000 and DurationIndex 31 = 8000 ms - '8 sec, every 2
+-- sec'. It is registered for scaling in modules/mod-ascension-compat/src/AscensionScalingBaseData.h:173
+-- ({586212, 1}), which is what the tooltip's '$586212m1*$<scalingbp>+$RAP*.15' term needs. Its ImplicitTargetA
+-- is 6 (TARGET_UNIT_TARGET_ENEMY) and AuraEffect::HandleProcTriggerSpellAuraProc hands the proc's action
+-- target to the cast, so the DoT lands on the struck enemy. One collision is unavoidable and is recorded here
+-- rather than papered over: Neurotoxin Arrow 500071 also carries SpellFamilyFlags (0,0,8192) in family 27, so
+-- SpellFamilyMask2 8192 lets it apply the poison too, and no finer bit distinguishes it from Woodland Arrow.
+-- SchoolMask cannot separate them either - Neurotoxin Arrow is SchoolMask 8, the same as Emerald Arrow, so any
+-- school filter that excluded Neurotoxin would also exclude a named ability. Cosmetic, not fixed here:
+-- 586212's own Description still reads 'Physical Damage' although its SchoolMask is 8 and its parent says
+-- Nature.
+--
+-- #2019 A Quick Demise (560810)  [PARTIAL]
+-- tooltip: Auto shots now have a $h% chance to extend the duration of your |cFFFFFFFFSerrated Shot|r by
+-- $/1000;561109s1 sec.
+-- A Quick Demise (560810) is a passive (Attributes 0x1C0 = PASSIVE|HIDDEN_CLIENTSIDE|OUTDOORS_ONLY bits) whose
+-- only effect, index 0, is SPELL_EFFECT_APPLY_AURA with SPELL_AURA_PROC_TRIGGER_SPELL (42) on A Quick Demise
+-- 561109. Spell.dbc ProcFlags is 0 and there is no `spell_proc` row, so LoadSpellProcs generates no fallback
+-- entry (SpellMgr.cpp:2253) and Aura::GetProcEffectMask returns 0. ProcFlags 64 =
+-- PROC_FLAG_DONE_RANGED_AUTO_ATTACK, and only that bit: the tooltip says 'Auto shots', which is the auto-
+-- repeat ranged attack, not ranged abilities (0x100) and not melee. SpellFamilyName and all three mask words
+-- are deliberately 0. The Ranger's auto shot is the shared Auto Shot 75, whose SpellFamilyName is 9 (Hunter)
+-- with SpellFamilyFlags (1,0,0); an exhaustive Spell.dbc scan for SPELL_ATTR2_AUTO_REPEAT (0x20) finds no
+-- SpellFamilyName 27 auto-repeat record at all, and `playercreateinfo_spell_custom` grants spell 75 to
+-- classmask 1048576 = 1 << 20 = class 21. Setting SpellFamilyName 27 would make the family test in
+-- CanSpellTriggerProcOnEvent reject every auto shot (PROC_FLAG_DONE_RANGED_AUTO_ATTACK is inside
+-- SPELL_PROC_FLAG_MASK, so the family test does run); SpellFamilyName 0 makes SpellInfo::IsAffected return
+-- true unconditionally, which is what is wanted. SpellTypeMask 1 = PROC_SPELL_TYPE_DAMAGE and SpellPhaseMask 2
+-- = PROC_SPELL_PHASE_HIT are both required for the same reason - the flag is in SPELL_PROC_FLAG_MASK and in
+-- REQ_SPELL_PHASE_PROC_FLAG_MASK; Unit::ProcSkillsAndAuras computes PROC_SPELL_TYPE_DAMAGE for the landed shot
+-- because DamageInfo carries damage or absorb, and Spell::TargetInfo::DoDamageAndTriggers procs at the default
+-- phase 2. HitMask stays 0 so the DONE default PROC_HIT_NORMAL|PROC_HIT_CRITICAL|PROC_HIT_ABSORB applies:
+-- 'auto shots' means shots that land, crit or not - a misses/dodges filter is neither asked for nor wanted.
+-- AttributesMask stays 0: PROC_ATTR_TRIGGERED_CAN_PROC is unnecessary even though the auto-repeat shot is
+-- itself cast as a triggered spell, because Aura::GetProcEffectMask exempts AUTO_ATTACK_PROC_FLAG_MASK from
+-- the triggered-spell block ('exception for hunter auto shot & wands'). Chance stays 0 so the record's own
+-- ProcChance is used - and here that is the whole point: 560810's DBC ProcChance is 20, which is exactly the
+-- tooltip's '$h%' = 20%, so no override is needed and rev_20260919_20_coa_proc_chance_parity.sql applies
+-- unchanged. Cooldown 0 because the tooltip states no internal cooldown. The triggered spell is live: 561109
+-- is a single SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION (177) with BasePoints 1999 and DieSides 1, i.e.
+-- +2000 ms, and MiscValue 500073 (Serrated Shot) - '$/1000;561109s1 sec' = 2 sec, against a Serrated Shot
+-- whose DurationIndex 35 is only 4000 ms, so the extension is meaningful. Separate pre-existing defect that
+-- this row cannot fix and that should be filed on its own: Spell::EffectAscensionModifyAuraDuration
+-- (src/server/game/Spells/SpellEffects.cpp:464) resolves the aura with target->GetAura(effect.MiscValue), an
+-- exact spell-id lookup, while Serrated Shot has seven ranks chained in `spell_ranks` (500073, 501704-501707,
+-- 575836, 575837, SpellLevel 16 through 62). Only rank 1's aura is ever extended; a level-80 Ranger running
+-- rank 7 (575837) sees nothing. The accepted precedent rev_20260920_51_bloodmage_physical_crit_procs.sql has
+-- the identical shape (807359 MiscValue 800772, Taldaram's Torment, itself eight ranks), so making effect 177
+-- rank-aware via GetFirstRankSpell is one change that repairs both.
+-- RESIDUAL: C++ core change required alongside the spell_proc row: Spell::EffectAscensionModifyAuraDuration
+-- (src/server/game/Spells/SpellEffects.cpp:474) calls target->GetAura(effect.MiscValue), an exact spell-id
+-- lookup, but MiscValue 500073 is only rank 1 of Serrated Shot (7 ranks chained in spell_ranks: 500073,
+-- 501704-501707, 575836, 575837, SpellLevel 16-62). Every Ranger above level 24 applies a higher-rank aura id,
+-- so the +2000 ms extension never finds an aura and A Quick Demise remains inert. Fix: resolve the aura rank-
+-- aware - use Unit::GetAuraOfRankedSpell (or walk sSpellMgr->GetFirstSpellInChain / GetNextSpellInChain from
+-- effect.MiscValue) - which also repairs the identical rank-blind lookup in the accepted
+-- rev_20260920_51_bloodmage_physical_crit_procs.sql case (807359 MiscValue 800772, Taldaram's Torment, 8 ranks
+-- 800772/802568-802573/802580).
+--
+-- #2159 Pecking (570737)
+-- tooltip: Your |cFFFFFFFFWar Falcons|r and |cffffffffDragonhawks|r now have a $h% chance to deal additional
+-- Physical damage to $570749x nearby enemies. (rendered: 25% chance, 3 nearby enemies.)
+-- Pecking's single effect is SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (190) carrying
+-- SPELL_AURA_PROC_TRIGGER_SPELL (42) with TriggerSpell 570749, EffectRadiusIndex 25 (SpellRadius.dbc: 70 yd)
+-- and Spell.dbc ProcFlags 0. Effect 190 is routed to Spell::EffectApplyAreaAura and, in Aura::UpdateTargetMap
+-- (SpellAuras.cpp:2882), walks owner->m_Controlled and pushes every summon the owner controls within the
+-- radius - so the aura that must proc sits on the pet, and the proc entry is still looked up by the aura's own
+-- spell id, 570737. With no `spell_proc` row and ProcFlags 0 the aura is unreachable: LoadSpellProcs skips it
+-- ('Skip if no proc flags in DBC') and Aura::GetProcEffectMask returns 0 on the missing procEntry. The proc
+-- actor is therefore the pet, and ProcFlags 20 = PROC_FLAG_DONE_MELEE_AUTO_ATTACK (0x4) |
+-- PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS (0x10) is exactly the damage those pets deal: creature_template 50264
+-- and 50393 ('War Falcon', unit_class 1, type 1 Beast, BaseAttackTime 2000, no AIName, no
+-- creature_template_spell rows) have nothing but their white swings, and the falcon's one damage ability,
+-- Falcon Rush 800295, is DmgClass 2 (Physical, TargetA 24 area enemy).
+-- PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG (0x10000) was deliberately left out: the only magic-class pet
+-- damage in the Ranger tree is Dragonhawk Strike 705895 (DmgClass 1, School 8 Nature), and that record is
+-- itself cast as a triggered spell from another proc aura (803504 'Dragonhawk Strike Applier', aura 42,
+-- ProcFlags 0 - a second dead proc, outside this issue), with AttributesEx3 0x40020000 which does not include
+-- SPELL_ATTR3_NOT_A_PROC, so Aura::GetProcEffectMask would refuse it without PROC_ATTR_TRIGGERED_CAN_PROC
+-- anyway. The Dragonhawk's own white swing is already covered by 0x4, so the magic bit would widen the event
+-- set for no reachable event. SpellTypeMask 1 (PROC_SPELL_TYPE_DAMAGE), SpellPhaseMask 2
+-- (PROC_SPELL_PHASE_HIT) - required because 0x10 is inside REQ_SPELL_PHASE_PROC_FLAG_MASK - and HitMask 0 so
+-- the done-proc default NORMAL | CRITICAL | ABSORB applies; the tooltip puts no hit condition on it.
+-- SpellFamilyName stays 0: the tooltip restricts the ACTOR (the pets), not which ability triggers it, and a
+-- pet white swing carries no SpellInfo at all, so any family value would kill the main case. Chance 0 leaves
+-- the record's own ProcChance 25 in force, which is what $h renders. AttributesMask 0. The triggered spell is
+-- sound: 570749 'Pecking' (Proc) is a native SPELL_EFFECT_SCHOOL_DAMAGE, BasePoints 99 / DieSides 1 = 100,
+-- SchoolMask 1 (Physical), DefenseType 2, TargetA 6 with EffectChainTargets 3 - which is what $570749x renders
+-- as 'nearby enemies' - and HandleProcTriggerSpellAuraProc casts it from the pet onto
+-- eventInfo.GetActionTarget(), the pet's victim. Two adjacent defects worth separate issues, neither fixable
+-- from `spell_proc`: creature_template has NO entry 52393, the Dragonhawk pet that 573058 summons, so the
+-- 'Dragonhawks' half of this tooltip has no actor on this realm today; and effect 190 hands the aura to every
+-- summon the Ranger controls inside 70 yd, not only falcons and dragonhawks, which is the record's own scoping
+-- and cannot be narrowed by a proc row. 570749 also has no `spell_bonus_data` row and no entry in
+-- AscensionScalingBaseData.h / AscensionStockCoefficientData.h, so its 100 damage is flat - the tooltip quotes
+-- no number, so this is flagged rather than claimed.
+--
+-- #2163 Corrosive Shot (572372)
+-- tooltip: Gives a $h% chance to shoot an additional shot when doing damage with your auto shot, dealing
+-- $572419s1% Ranged Weapon damage as Nature damage (rendered: 5% chance, 100% Ranged Weapon damage as Nature
+-- damage).
+-- Effect 1 of 572372 is SPELL_EFFECT_APPLY_AURA / SPELL_AURA_PROC_TRIGGER_SPELL (42) with TriggerSpell 572419,
+-- and Spell.dbc ProcFlags is 0 with no `spell_proc` row, so the shot never fires. ProcFlags 64 =
+-- PROC_FLAG_DONE_RANGED_AUTO_ATTACK, and nothing else: the tooltip says 'when doing damage with your auto
+-- shot', not 'with your ranged attacks'. Spell::prepareDataForTriggerSystem (Spell.cpp:2277-2288) sets exactly
+-- that flag for a DmgClass 3 spell carrying SPELL_ATTR2_AUTO_REPEAT, and that is the Ranger's auto shot:
+-- playercreateinfo_spell_custom grants spell 75 'Auto Shot' to classmask 1048576 = 1 << 20 = class 21. THIS IS
+-- WHY SpellFamilyName MUST STAY 0. Auto Shot 75 is SpellClassSet 9 (Hunter), not 27;
+-- PROC_FLAG_DONE_RANGED_AUTO_ATTACK is inside SPELL_PROC_FLAG_MASK, so SpellMgr::CanSpellTriggerProcOnEvent
+-- does run the family test, and SpellInfo::IsAffected only short-circuits to true when familyName is 0.
+-- Writing 27 here would make this passive never fire. SpellTypeMask 1 (PROC_SPELL_TYPE_DAMAGE) matches 'when
+-- doing damage': at the HIT phase Unit::ProcSkillsAndAuras derives PROC_SPELL_TYPE_DAMAGE from a DamageInfo
+-- with damage or absorb. SpellPhaseMask 2 (PROC_SPELL_PHASE_HIT) - required, 0x40 is inside
+-- REQ_SPELL_PHASE_PROC_FLAG_MASK. HitMask 0 so the done default NORMAL | CRITICAL | ABSORB applies; the
+-- tooltip names no hit condition. Chance 0 leaves the record's own ProcChance 5 in force, matching $h = 5%,
+-- per rev_20260919_20. AttributesMask 0 is correct and not an oversight: Auto Shot is a triggered auto-repeat
+-- cast, but Aura::GetProcEffectMask exempts anything whose event mask intersects AUTO_ATTACK_PROC_FLAG_MASK
+-- from the triggered-spell veto, and PROC_FLAG_DONE_RANGED_AUTO_ATTACK is in that mask - so
+-- PROC_ATTR_TRIGGERED_CAN_PROC is unnecessary. DisableEffectsMask stays 0 even though effect 0 is a second
+-- aura: SPELL_AURA_OVERRIDE_CLASS_SCRIPTS (112) has no case in AuraEffect::HandleProc, so it falls through
+-- 'default: break' and does nothing on proc. The triggered record is healthy: 572419 'Corrosive Shot' is
+-- SPELL_EFFECT_WEAPON_PERCENT_DAMAGE (31), BasePoints 99 / DieSides 1 = 100%, SchoolMask 8 (Nature),
+-- DefenseType 3 (ranged weapon damage, so it scales natively through EffectWeaponDmg), Attributes 0x12 =
+-- SPELL_ATTR0_IS_ABILITY | SPELL_ATTR0_REQ_AMMO, AttributesEx2 0x20000 =
+-- SPELL_ATTR2_DO_NOT_RESET_COMBAT_TIMERS (it will not clip the auto-shot timer), Speed 26. Two things this row
+-- deliberately does not cover. First, the tooltip's second clause, 'doubled against |cff00ff00Poisoned|r
+-- targets', is carried by effect 0, not by the proc: SPELL_AURA_OVERRIDE_CLASS_SCRIPTS with MiscValue 20007
+-- (ASCENSION_CLASSMASK_AURASTATE_DAMAGE, SpellAuraDefines.h:413), MiscValueB 32
+-- (AURA_STATE_ASCENSION_POISONED, SharedDefines.h:1392) and BasePoints 99 / DieSides 1 = +100%. That is the
+-- copied form of the fork's aura-303 contract, and ApplyRangerConditionalDamageContracts
+-- (AscensionClassMechanics.cpp:560-600) only converts Ravager 92116 and Hunting Tactics 300897 - 572372 is not
+-- in its list, so the effect stays an unknown class script and does nothing. Even once converted it would
+-- still be inert, because Unit.cpp:10815 requires IsAffectedOnSpell when MiscValueB is
+-- ASCENSION_CLASSMASK_AURASTATE_DAMAGE and this effect's SpellClassMask is (0, 0, 0); scoping it to the
+-- corrosive shot needs 572419's own flags, family 27 mask (0, 0, 131072). That is a C++/data defect for a
+-- separate issue. Second, 572419's own Description text ('Your ranged abilities against Poisoned targets now
+-- have a $h% chance...') contradicts the passive's; 572372's wording is the authoritative one and is what this
+-- row encodes.
+--
+-- #2176 Gutpiercer (573059)
+-- tooltip: Damage dealt by |cffffffffWar Falcons|r and |cffffffffDragonhawks|r now has a $h% chance to reduce
+-- the enemy's resistances by ${-($803505m1+$803505ppl1)} and increase their Magic damage taken by $803505s2%
+-- for $803505d. (rendered: 15% chance, for 30 sec.)
+-- Gutpiercer's single effect is SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (190) carrying
+-- SPELL_AURA_PROC_TRIGGER_SPELL (42) with TriggerSpell 803505 and EffectRadiusIndex 12 (SpellRadius.dbc: 100
+-- yd), with Spell.dbc ProcFlags 0 and no `spell_proc` row - the same dead shape as the two Bloodmage passives
+-- in rev_20260920_51. Effect 190 hands the aura to the owner's summons (SpellAuras.cpp:2882), so the proc
+-- actor is the pet and the entry is keyed on the aura's own id, 573059. ProcFlags 20 =
+-- PROC_FLAG_DONE_MELEE_AUTO_ATTACK (0x4) | PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS (0x10) is the full set of
+-- damage those pets can actually deal: the War Falcon creatures 50264 and 50393 have no
+-- creature_template_spell rows and no AIName, so their damage is their white swings plus Falcon Rush 800295,
+-- which is DmgClass 2. The tooltip says 'Damage dealt by', so PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG
+-- (0x10000) was weighed for the Dragonhawk's Nature strike and rejected on evidence: Dragonhawk Strike 705895
+-- (DefenseType 1, SchoolMask 8) is only ever cast as the triggered child of 803504's own aura-42 proc, its
+-- AttributesEx3 is 0x40020000 and therefore lacks SPELL_ATTR3_NOT_A_PROC, so Aura::GetProcEffectMask would
+-- veto it as a triggered spell unless this row also set PROC_ATTR_TRIGGERED_CAN_PROC - and the Dragonhawk's
+-- white swing that drove that strike already procs through 0x4, so adding the magic bit would only widen the
+-- event set without reaching a new event. SpellTypeMask 1 (PROC_SPELL_TYPE_DAMAGE) for 'Damage dealt',
+-- SpellPhaseMask 2 (PROC_SPELL_PHASE_HIT) - mandatory, 0x10 sits in REQ_SPELL_PHASE_PROC_FLAG_MASK - and
+-- HitMask 0 so the done default NORMAL | CRITICAL | ABSORB stands; the tooltip sets no hit condition.
+-- SpellFamilyName stays 0 because the restriction is on the actor, not on which ability fires, and a pet white
+-- swing carries no SpellInfo for a family test to read. Chance 0 keeps the record's own ProcChance 15, which
+-- is what $h renders, per rev_20260919_20. The triggered record 803505 'Gutpiercer' is alive and native:
+-- SPELL_EFFECT_APPLY_AURA / SPELL_AURA_MOD_RESISTANCE (22) with BasePoints -21, DieSides 1 and
+-- EffectRealPointsPerLevel -1.14583 against MiscValue 126 (all magic schools), plus
+-- SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN (87) BasePoints -3 / DieSides 1 on the same school mask, DurationIndex 9
+-- = 30000 ms matching '$803505d' = 30 sec, CumulativeAura 1 ('Can only have 1 Jinx active on a target at a
+-- time'), TargetA 6, and HandleProcTriggerSpellAuraProc casts it from the pet onto
+-- eventInfo.GetActionTarget(), the struck enemy. Three observations for separate issues, none of them
+-- reachable from `spell_proc`. (a) creature_template has no entry 52393, the Dragonhawk that 573058 summons,
+-- so the 'Dragonhawks' half of this tooltip has no actor on this realm. (b) Effect 190 applies the aura to
+-- every summon the Ranger controls inside 100 yd, not only War Falcons and Dragonhawks; that scoping lives in
+-- the record. (c) 803505's effect 1 amount computes to -2 (BasePoints -3 + DieSides 1), and
+-- SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN multiplies by (100 + amount)/100, i.e. the target takes 2% LESS magic
+-- damage, while this tooltip asks for an increase and 803505's own AuraDescription flips the sign for display
+-- with ${-$w2}. Flagged, not claimed - 803505 is a shared record (SpellClassSet 19) and the sign may be
+-- intentional elsewhere. Note also that 573059's AuraDescription in Spell.dbc is unrelated boilerplate about
+-- Toxic Dart and Elude; the Description quoted above is the authoritative clause.
+--
+-- #2266 Quick-Witted (704311)
+-- tooltip: Avoiding an attack now causes you to quickly stab an enemy with one of the arrows from your quiver,
+-- dealing ${$704314m2+$704314ppl2+$AP*1} Physical damage and reducing their attack speed by $704314s1% for
+-- $704314d. (rendered: 20% attack speed for 8 sec.)
+-- 704311's only effect is SPELL_EFFECT_APPLY_AURA / SPELL_AURA_PROC_TRIGGER_SPELL (42) with TriggerSpell
+-- 704314, Spell.dbc ProcFlags 0 and no `spell_proc` row, so the passive is dead by the established mechanism.
+-- This is a TAKEN proc: 'Avoiding an attack' is something the Ranger does as the victim, so ProcFlags 40 =
+-- PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK (0x8) | PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS (0x20), covering both an
+-- incoming white swing and an incoming melee-damage-class ability. HitMask 48 = PROC_HIT_DODGE (0x10) |
+-- PROC_HIT_PARRY (0x20). The fork's own data defines what 'avoiding' means: Soul Slip 500286 spells it out as
+-- 'Avoiding attacks ... Successful parries and dodges', and the existing `spell_proc` table already uses 48
+-- for that pair (e.g. 56816) and 112 when a tooltip also says block. PROC_HIT_MISS was left out because a miss
+-- is the attacker's failure, not the defender's avoidance, and PROC_HIT_BLOCK because a blocked attack still
+-- lands and a Ranger carries no shield. The ranged TAKEN bits (0x80 / 0x200) were deliberately omitted and
+-- this is not conservatism: Unit::MeleeSpellHitResult sets canDodge = canParry = false under `if (attType ==
+-- RANGED_ATTACK)` ('Ranged attacks can only miss, resist and deflect'), so a ranged taken bit could never
+-- contribute a DODGE or PARRY event - it would only widen the mask. SpellPhaseMask MUST be 0 here: neither 0x8
+-- nor 0x20 is inside REQ_SPELL_PHASE_PROC_FLAG_MASK (which is SPELL_PROC_FLAG_MASK & DONE_HIT_PROC_FLAG_MASK,
+-- done-side only), so CanSpellTriggerProcOnEvent never consults it and LoadSpellProcs would log 'has
+-- `SpellPhaseMask` value defined, but it won't be used' for any nonzero value. SpellTypeMask is 0 for a
+-- matching reason: on a dodged or parried melee ability there is neither damage nor healing, so
+-- Unit::ProcSkillsAndAuras derives PROC_SPELL_TYPE_NO_DMG_HEAL, and on a dodged white swing there is no
+-- SpellInfo at all and the derived mask is 0 - leaving the column at 0 skips the test in both cases, where any
+-- nonzero value would drop one of them. SpellFamilyName 0: the tooltip restricts nothing about which attack
+-- was avoided. Chance 0 keeps the record's own ProcChance 100 - the tooltip states no chance - per
+-- rev_20260919_20. Cooldown 0 and Charges 0: the neighbouring CoA avoidance passives that do carry an internal
+-- cooldown say so out loud ('Can only occur once per sec', Bloodletter 560093, Protector of the Flame 560492)
+-- and Quick-Witted does not. AttributesMask 0. The targeting is already right without a script:
+-- AuraEffect::HandleProcTriggerSpellAuraProc picks `triggerCaster == eventInfo.GetActor() ? GetActionTarget()
+-- : GetActor()`, and on a taken proc the aura's target (the Ranger) is not the actor, so the trigger lands on
+-- the attacker - 'stab an enemy', the one whose attack was avoided. 704311's EquippedItemClass is -1, so the
+-- passive equipment gate in Aura::GetProcEffectMask is skipped despite the junk EquippedItemSubclass 34961
+-- that the issue misread as an effect id. The triggered record 704314 is alive:
+-- SPELL_AURA_MOD_MELEE_RANGED_HASTE (192) with BasePoints -21 / DieSides 1 = -20 ('reducing their attack speed
+-- by 20%'), EffectMechanic 8 (snare), plus SPELL_EFFECT_SCHOOL_DAMAGE, DurationIndex 31 = 8000 ms ('for 8
+-- sec'), DefenseType 3, TargetA 6. One adjacent defect for a separate issue: the tooltip's damage is
+-- ${$704314m2 + $704314ppl2 + $AP*1} and the record supplies neither half of a server-side AP source -
+-- EffectBasePoints_2 0 / DieSides 1 gives 1, EffectRealPointsPerLevel_2 and EffectBonusMultiplier_2 are both
+-- 0.0, and 704314 has no `spell_bonus_data` row and no entry in AscensionScalingBaseData.h or
+-- AscensionStockCoefficientData.h - so once this proc fires the stab will land for 1 damage until the 100% AP
+-- coefficient is registered.
+--
+-- #2268 Deadly Accuracy (704319)  [PARTIAL]
+-- tooltip: Backstep makes your next Skullpiercer within 6 sec critically strike.
+-- Effect 0 is the record's only aura effect: SPELL_EFFECT_APPLY_AURA (6) carrying
+-- SPELL_AURA_PROC_TRIGGER_SPELL (42) with EffectTriggerSpell 560345 and TargetA 1 (TARGET_UNIT_CASTER).
+-- Spell.dbc ProcFlags is 0 and `spell_proc` has no row, so SpellMgr::LoadSpellProcs skips it ('Skip if no proc
+-- flags in DBC') and Aura::GetProcEffectMask returns 0 on the missing procEntry before any other check - the
+-- aura is dead. The tooltip's event is Backstep, which is Spell.dbc 800685 'Backstep' (SpellFamilyName 27,
+-- SpellFamilyFlags (0, 268435456, 0), DmgClass 3, AttributesEx2 0x44000000 so SPELL_ATTR2_AUTO_REPEAT is
+-- clear, 20s RecoveryTime, effect 0 a leap and effect 1 the periodic Skydiver stacker 800684). A scan of
+-- Spell.dbc shows word 1 bit 0x10000000 is carried by no other family-27 record, so SpellFamilyName 27 with
+-- SpellFamilyMask1 268435456 names Backstep and only Backstep. Because 800685 is DmgClass 3 and not auto-
+-- repeat, Spell::prepareDataForTriggerSystem fixes m_procAttacker at PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS
+-- (0x100) for every phase of that cast, hence ProcFlags 256 - not a melee or magic bit, and not the ranged
+-- auto-attack bit, which is reserved for SPELL_ATTR2_AUTO_REPEAT shots. SpellPhaseMask 1
+-- (PROC_SPELL_PHASE_CAST) is the tooltip's own wording: the buff is granted by *using* Backstep, once. The
+-- CAST-phase call in Spell::cast passes actionTarget nullptr, so HandleProcTriggerSpellAuraProc casts 560345
+-- with a null target and 560345's own TargetA 1 puts it on the Ranger; phase 1 also excludes the HIT and
+-- FINISH events the same cast raises, so exactly one application per Backstep. SpellTypeMask stays 0 because
+-- Unit::ProcSkillsAndAuras reports PROC_SPELL_TYPE_MASK_ALL at CAST phase, so any value would pass and 0
+-- states the absence of a restriction. HitMask stays 0 because CanSpellTriggerProcOnEvent skips the hit check
+-- for a CAST-phase DONE proc unless HitMask is explicitly set. Chance stays 0 so the record's own ProcChance
+-- 100 is used, per rev_20260919_20_coa_proc_chance_parity.sql. Two record defects this row cannot fix and that
+-- are separate from the dead proc: 560345 'Deadly Accurate' puts SPELL_AURA_ADD_FLAT_MODIFIER (107) MiscValue
+-- 7 (SPELLMOD_CRITICAL_CHANCE) BasePoints 99 on EffectSpellClassMask (0,0,0), and
+-- SpellInfo::IsAffectedBySpellMod falls through to IsAffected(27, (0,0,0)) which returns true for every
+-- family-27 spell, so the +100% crit is not confined to Skullpiercer (501715-501723 and 802036,
+-- SpellFamilyFlags (0, 134217728, 0)); and 560345 has ProcCharges 0, so the modifier is never consumed by
+-- 'your next' Skullpiercer and simply runs its whole duration.
+-- RESIDUAL: column values not independently audited in this run
+--
+-- #2493 Beatdown (705047)  [PARTIAL]
+-- tooltip: Auto attacks now have a 5% chance to reveal a fault in the enemy's defenses, causing your next
+-- instance of Physical ability damage to ignore Armor.
+-- Effect 0 is SPELL_EFFECT_APPLY_AURA (6) with SPELL_AURA_PROC_TRIGGER_SPELL (42), EffectTriggerSpell 801437
+-- and TargetA 1; Spell.dbc ProcFlags is 0 and `spell_proc` has no row, so LoadSpellProcs generates no fallback
+-- entry and Aura::GetProcEffectMask bails on the missing procEntry. The payload 801437 'Beatdown' is a single
+-- SPELL_AURA_ADD_PCT_MODIFIER (108) with MiscValue 13 (SPELLMOD_IGNORE_ARMOR) and BasePoints -101, i.e. -100%
+-- armor, whose own aura text is 'Your next instance of ability damage will ignore Armor' - exactly the tooltip
+-- clause this row has to deliver. The event is the tooltip's unqualified 'Auto attacks', so ProcFlags 68 =
+-- PROC_FLAG_DONE_MELEE_AUTO_ATTACK (0x4) | PROC_FLAG_DONE_RANGED_AUTO_ATTACK (0x40): the Ranger's own auto
+-- attack is the bow/crossbow shot (its abilities require EquippedItemSubclass 262148 = bow|crossbow), and the
+-- 'Chance increased by 15% while wielding a polearm' clause shows white melee swings are in scope as well.
+-- PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS and PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS are deliberately left out:
+-- the tooltip says auto attacks, not abilities, and adding them would make every Ranger shot roll the proc.
+-- SpellFamilyName stays 0 because auto attacks are not restricted to a family, and with SpellFamilyName 0
+-- SpellInfo::IsAffected short-circuits to true for the ranged-auto-attack event that does reach the family
+-- check. SpellTypeMask 1 (PROC_SPELL_TYPE_DAMAGE) and SpellPhaseMask 2 (PROC_SPELL_PHASE_HIT) are both
+-- required by the 0x40 half: PROC_FLAG_DONE_RANGED_AUTO_ATTACK sits in SPELL_PROC_FLAG_MASK and in
+-- REQ_SPELL_PHASE_PROC_FLAG_MASK, so an unset SpellPhaseMask would make LoadSpellProcs log 'doesn't have
+-- SpellPhaseMask value defined ... proc will not be triggered' and CanSpellTriggerProcOnEvent reject auto
+-- shot; phase 2 also keeps the auto-shot FINISH event (Spell.cpp:4384, which is not gated on IsTriggered) from
+-- proccing a second time on the same shot. PROC_FLAG_DONE_MELEE_AUTO_ATTACK is in neither SPELL_PROC_FLAG_MASK
+-- nor REQ_SPELL_PHASE_PROC_FLAG_MASK, so neither field can block white melee swings. HitMask 0 takes the DONE
+-- default PROC_HIT_NORMAL|PROC_HIT_CRITICAL|PROC_HIT_ABSORB - any auto attack that lands, as the tooltip says,
+-- with no crit requirement. Chance stays 0 so the record's own ProcChance 5 is used, which is the tooltip's
+-- '$h%'. The other two clauses are already carried by the record and need nothing here: effect 1 is
+-- SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT (333) BasePoints 4 (+5% hit), and effect 2 is
+-- SPELL_AURA_PERIODIC_TRIGGER_SPELL (23) re-casting 706586 every 10000 ms, where 706586 is EquippedItemClass 2
+-- / EquippedItemSubclass 64 (1 << ITEM_SUBCLASS_WEAPON_POLEARM) and carries SPELL_AURA_ADD_FLAT_MODIFIER
+-- MiscValue 18 (SPELLMOD_CHANCE_OF_SUCCESS) BasePoints 14 on EffectSpellClassMask (8192,0,0) - 705047's own
+-- SpellFamilyFlags - which Aura::CalcProcChance applies to the rolled chance, giving 5% -> 20% with a polearm
+-- equipped. One record defect this row does not fix: 801437 has ProcCharges 0 and EffectSpellClassMask
+-- (0,0,0), so the armor-ignore is neither consumed by 'your next' ability nor limited to Physical damage.
+-- RESIDUAL: column values not independently audited in this run
+--
+-- #2497 Elven Enchantments (705054)  [PARTIAL]
+-- tooltip: Dealing damage with Searing or Poison Quiver now grants a stack of Elven Enchantments.
+-- Effect 0 is SPELL_EFFECT_APPLY_AURA (6) with SPELL_AURA_PROC_TRIGGER_SPELL (42), EffectTriggerSpell 560698,
+-- TargetA 1; Spell.dbc ProcFlags is 0 and `spell_proc` has no row, so the aura never procs. 560698 'Elven
+-- Enchantments' is the stacking buff itself (CumulativeAura 10, SPELL_AURA_ADD_PCT_MODIFIER MiscValue 10
+-- SPELLMOD_CASTING_TIME -10% and SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 7 SPELLMOD_CRITICAL_CHANCE +10%, both
+-- TargetA 1), so the proc only has to fire; its own targeting puts it on the Ranger regardless of the event's
+-- action target. The tooltip's event is 'dealing damage with Searing or Poison Quiver', and the records that
+-- actually deal that damage are not the quiver toggles. AscensionClassMechanics.cpp:899 HandleRangerQuiverHit
+-- shows the chain: while Searing Quiver 500103 is up, every DmgClass 3 hit casts 681109 'Fire Arrows'
+-- (SpellFamilyName 27, SpellFamilyFlags (0, 524288, 0), DmgClass 3, SchoolMask 4, effect 0
+-- SPELL_EFFECT_SCHOOL_DAMAGE) for the Fire damage; while Poison Quiver 800260 is up it applies 500104 'Poison
+-- Quiver' (SpellFamilyName 27, SpellFamilyFlags (0, 1024, 48), SchoolMask 8, effect 0
+-- SPELL_AURA_PERIODIC_DAMAGE every 3000 ms, 3 stacks), whose ticks are the Nature damage. Hence
+-- SpellFamilyName 27 with SpellFamilyMask1 525312 = 524288 (Fire Arrows) | 1024 (Poison Quiver DoT). ProcFlags
+-- 262400 = PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS (0x100) for 681109, which is DmgClass 3 and not auto-repeat
+-- so Spell::prepareDataForTriggerSystem sets exactly that bit, plus PROC_FLAG_DONE_PERIODIC (0x40000) for
+-- 500104, which AuraEffect::HandlePeriodicDamageAurasTick raises with the Ranger as actor. SpellPhaseMask 2
+-- (PROC_SPELL_PHASE_HIT) is required by both bits - they are in REQ_SPELL_PHASE_PROC_FLAG_MASK - and the
+-- periodic tick calls ProcSkillsAndAuras with the default procPhase 2. SpellTypeMask 1
+-- (PROC_SPELL_TYPE_DAMAGE) is the tooltip's 'dealing damage'. AttributesMask 2 (PROC_ATTR_TRIGGERED_CAN_PROC)
+-- is mandatory: 681109 is cast through CastCustomSpell with triggered = true (TRIGGERED_FULL_MASK, which
+-- includes TRIGGERED_DISALLOW_PROC_EVENTS) and its AttributesEx3 0x40000000 does not carry
+-- SPELL_ATTR3_NOT_A_PROC, so Aura::GetProcEffectMask would return 0 on 'spell->IsTriggered()' without it; the
+-- periodic half is unaffected because a tick passes procSpell nullptr and never enters that block. SchoolMask
+-- 12 = SPELL_SCHOOL_MASK_FIRE (4) | SPELL_SCHOOL_MASK_NATURE (8), taken from the two records' own schools and
+-- from the tooltip's own words ('Searing' fire, 'Poison' nature); it is what makes the row exact, because
+-- family-27 word 1 bit 524288 is shared with 804725 'Crippling Shot' (DmgClass 3, SchoolMask 1) and word 1 bit
+-- 1024 with 500105 'Envenomed Focus Drain'. Both would be inert anyway - Crippling Shot has no damage effect
+-- so SpellTypeMask 1 rejects it, and Envenomed Focus Drain is two dummies plus SPELL_EFFECT_ENERGIZE and can
+-- never raise a DONE_PERIODIC damage event - but ProcEventInfo::GetSchoolMask reads the static SpellInfo
+-- school for both a spell hit and a periodic tick, so SchoolMask 12 closes them deterministically. HitMask 0
+-- takes the DONE default NORMAL|CRITICAL|ABSORB. DisableEffectsMask 0: effects 1 and 2 are
+-- SPELL_AURA_ADD_PCT_MODIFIER (108), for which AuraEffect::HandleProc has no case, so they cost nothing on
+-- proc; they are the tooltip's other clause ('Increases the damage dealt by your Searing and Poison Quivers by
+-- 25%', MiscValue 3 SPELLMOD_EFFECT1 on EffectSpellClassMask (0,2048,0) = Searing Quiver 500103, and MiscValue
+-- 22 SPELLMOD_DOT on (0,0,32) = Poison Quiver 500104), which already works natively. Chance stays 0 so the
+-- record's own ProcChance 100 is used. Note that 681109 is an AoE (TargetB 16, radius index 8), so a shot that
+-- splashes grants one stack per enemy struck; that is literal to 'dealing damage' and is bounded by 560698's
+-- CumulativeAura 10, so no Cooldown is set.
+-- RESIDUAL: column values not independently audited in this run
+--
+-- #2504 Battle Screech (705069)  [PARTIAL]
+-- tooltip: Abilities that summon War Falcons now empower up to N party members within 40 yds, increasing their
+-- attack or spell power, scaling with your Agility.
+-- Effect 0 is SPELL_EFFECT_APPLY_AURA (6) with SPELL_AURA_PROC_TRIGGER_SPELL (42) and EffectTriggerSpell
+-- 705070; Spell.dbc ProcFlags is 0 and `spell_proc` has no row, so LoadSpellProcs skips it and the aura never
+-- procs. Effect 1 is an APPLY_AURA whose EffectAura column is 0, so SpellEffectInfo::IsAura() is false for it
+-- and effect 0 is the aura's only effect - nothing needs DisableEffectsMask. The payload 705070 'Battle
+-- Screech' is healthy: SPELL_AURA_ASCENSION_MOD_ATTACK_POWER_FLAT (344, HandleAscensionModAttackPowerFlat) and
+-- SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT (345, HandleModHealingDone), both BasePoints 64 on TargetA 56
+-- (TARGET_UNIT_CASTER_AREA_RAID) with radius index 23, so it spreads to the party by itself; that is why the
+-- CAST-phase action target being nullptr is harmless - Unit::CastSpell(nullptr, ...) just leaves the unit
+-- target unset and 705070's caster-relative targeting does the rest. The tooltip's event is 'abilities that
+-- summon War Falcons'. Creature 50393 and 50264 are both named 'War Falcon' in creature_template, and a full
+-- Spell.dbc scan for SPELL_EFFECT_SUMMON (28) with either entry returns exactly six family-27 records: 804715
+-- 'Falcon's Call' (512, 0, 2048), 806341 'Falcon Dive' and 807119 'Falcon Diving' (0, 0, 2048), plus the
+-- triggered helpers 800251 'Falcon's Call' and 520588 'Falconstrike Summon' (0, 0, 2048) and 520558 'Phoenix
+-- Plumes' (0, 0, 4196352, which includes bit 2048). Falconstrike also summons one ('calling 1 War Falcon to
+-- your aid') but does it through effect 1's SPELL_EFFECT_TRIGGER_SPELL on 520587 -> 520588, and its own flags
+-- are (0, 4194304, 0). Hence SpellFamilyName 27 with SpellFamilyMask1 4194304 and SpellFamilyMask2 2048: word
+-- 1 bit 4194304 is carried by exactly the eight Falconstrike ranks 806345 and 806437-806443, and word 2 bit
+-- 2048 by exactly the six summoners above and nothing else in family 27. ProcFlags 87296 is the union of the
+-- proc categories those abilities raise at cast, and only those: 806345 Falconstrike is DmgClass 3 and not
+-- SPELL_ATTR2_AUTO_REPEAT, so Spell::prepareDataForTriggerSystem fixes m_procAttacker at
+-- PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS (0x100); 806341/807119 are DmgClass 1 and 804715 is DmgClass 0, so
+-- m_procAttacker stays 0 and Spell::cast's CAST-phase fallback picks
+-- PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS/NEG (0x4000/0x10000) and
+-- PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS/NEG (0x400/0x1000) respectively from SpellInfo::IsPositive(). Both
+-- polarities are included because positivity is computed per record from its effects and 806341's only effects
+-- are summons while 804715's are enemy-targeted triggers; the SpellFamilyMask is what makes the row exact, so
+-- the extra polarity bits can only ever match the same six records. SpellPhaseMask 1 (PROC_SPELL_PHASE_CAST)
+-- is the tooltip's 'whenever you use an ability that summons War Falcons': it fires once per use. It is also
+-- the only workable phase - Falcon Dive's two summon effects use TargetA 43 and 42
+-- (TARGET_DEST_CASTER_BACK_LEFT/RIGHT), so the cast produces no unit target and raises no HIT-phase proc at
+-- all - and it is what prevents double-firing, because Spell::cast gates the CAST block on !IsTriggered(),
+-- which excludes the triggered helpers 800251, 520588 and 520558 that would otherwise proc a second time
+-- alongside their parent ability. SpellTypeMask stays 0 since ProcSkillsAndAuras reports
+-- PROC_SPELL_TYPE_MASK_ALL at CAST phase, and HitMask stays 0 so CanSpellTriggerProcOnEvent skips the hit
+-- check for a CAST-phase DONE proc. Chance stays 0 so the record's own ProcChance 100 is used. One consequence
+-- to note for review: Falconstrike is a no-cooldown Advantage generator, so including its bit keeps 705070
+-- effectively always up; it is included because the tooltip says 'abilities that summon War Falcons' and
+-- Falconstrike's own text says it calls a War Falcon - drop SpellFamilyMask1 if the intent was only Falcon's
+-- Call and Falcon Dive. Separately, 705069's effect 0 uses TargetA 31 (TARGET_UNIT_DEST_AREA_ALLY) with radius
+-- index 0; Spell.cpp:772 falls the missing dest back to the caster, so the passive still lands on the Ranger,
+-- but the target type is wrong for a self-only passive and is worth correcting in DBC.
+-- RESIDUAL: column values not independently audited in this run
+--
+-- #2507 Falcon's Aid (705075)  [PARTIAL]
+-- tooltip: Periodic damage dealt now has a 10% chance to summon a War Falcon to aid you in battle for 6 sec.
+-- Falcon's Aid (705075) has one effect, index 0 = SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on Falconstrike
+-- Summon 520588, with Spell.dbc ProcTypeMask 0 and no `spell_proc` row, so LoadSpellProcs generates nothing
+-- ('// Skip if no proc flags in DBC', SpellMgr.cpp:2253) and Aura::GetProcEffectMask returns 0 - the passive
+-- is completely inert. ProcFlags 262144 = PROC_FLAG_DONE_PERIODIC, and nothing else, because the Description
+-- is literally 'Periodic damage dealt': AuraEffect::HandlePeriodicDamageAurasTick is the only caller that sets
+-- procAttacker = PROC_FLAG_DONE_PERIODIC (SpellAuraEffects.cpp:6592), so this flag alone catches exactly the
+-- tooltip's event and no direct melee, ranged or magic hit. SpellTypeMask 1 (PROC_SPELL_TYPE_DAMAGE) because
+-- the clause says periodic DAMAGE, not periodic healing, and Unit::ProcSkillsAndAuras (Unit.cpp:7164) sets
+-- PROC_SPELL_TYPE_DAMAGE whenever the tick's DamageInfo carries damage or absorb. SpellPhaseMask 2
+-- (PROC_SPELL_PHASE_HIT) is mandatory, not decorative: PROC_FLAG_DONE_PERIODIC is inside
+-- REQ_SPELL_PHASE_PROC_FLAG_MASK (SpellMgr.h:184), and the periodic tick call at SpellAuraEffects.cpp:6613
+-- omits the procPhase argument so it uses the default PROC_SPELL_PHASE_HIT declared at Unit.h:1571. HitMask
+-- stays 0 so CanSpellTriggerProcOnEvent's default for DONE procs - PROC_HIT_NORMAL | PROC_HIT_CRITICAL |
+-- PROC_HIT_ABSORB (SpellMgr.cpp:962) - applies: the tooltip puts no crit or hit qualifier on the tick.
+-- SpellFamilyName and the three masks stay 0 because the tooltip qualifies the source no further than
+-- 'periodic damage dealt'; this also matches the fork's existing Ranger crit-proc rows 92117, 520925 and
+-- 521451, all of which leave SpellFamilyName 0. AttributesMask stays 0: PROC_ATTR_TRIGGERED_CAN_PROC would be
+-- pointless here because the periodic call passes procSpell = nullptr, so Aura::GetProcEffectMask's 'if
+-- (spell->IsTriggered() ...)' guard at SpellAuras.cpp:2171 is never entered for a tick. Chance stays 0 so the
+-- record's own ProcChance 10 is used, exactly the '$h%' the Description renders as '10% chance', per
+-- rev_20260919_20_coa_proc_chance_parity.sql. Cooldown and Charges stay 0: the tooltip names no internal
+-- cooldown. The triggered spell is sound: Falconstrike Summon 520588 is SPELL_EFFECT_SUMMON of creature 50393
+-- with SummonProperties 61 and DurationIndex 32 = 6000 ms, matching 'for 6 sec'; creature_template 50393 'War
+-- Falcon' now exists thanks to data/sql/updates/pending_db_world/rev_20260916_05_ranger_war_falcon.sql, which
+-- was written for precisely this summon. Its effect 1, SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN with MiscValue
+-- 804715 and BasePoints -1 + DieSides 1 = 0, is a harmless no-op. Note the record's AuraDescription instead
+-- reads 'Damage dealt by Flank and Woodland Arrow now summon a War Falcon' with no chance token; the
+-- Description is the authoritative text here because its '$h%' resolves to the record's ProcChance of 10 while
+-- the AuraDescription implies an unconditional 100%, and the issue quotes the Description. The sibling record
+-- Falcon's Aid 707383 (same aura 42 on 520588, ProcChance 5, Description naming Woodland Arrow and Toxic Dart)
+-- is equally dead and is not covered by issue #2507; it needs its own, differently scoped row.
+-- RESIDUAL: All 16 spell_proc columns are correct and I confirmed each one independently - ProcFlags 262144
+-- (PROC_FLAG_DONE_PERIODIC, SpellMgr.h:137) is exactly the Description's 'Periodic damage dealt' and nothing
+-- else; SpellPhaseMask 2 is mandatory because PROC_FLAG_DONE_PERIODIC sits inside
+-- REQ_SPELL_PHASE_PROC_FLAG_MASK (SpellMgr.h:184) while the tick at SpellAuraEffects.cpp:6613 omits procPhase
+-- and takes the Unit.h:1571 default of 2; HitMask 0 is right because the tooltip carries no crit qualifier;
+-- SpellFamilyName/Mask 0 is right because the Description names no ability (SpellInfo::IsAffected returns true
+-- on familyName 0, SpellInfo.cpp:1434); AttributesMask 0 is right because the triggered-spell guard at
+-- SpellAuras.cpp:2157 lives inside 'if (Spell const* spell = eventInfo.GetProcSpell())' and the tick passes
+-- nullptr for that argument; Chance 0 is right because DBC ProcChance is 10 and $h renders as '10% chance'.
+-- The Description-over-AuraDescription call is correct and provable: 705075 carries SPELL_ATTR1_NO_AURA_ICON
+-- (AttributesEx 0x10000000) so its AuraDescription is never shown, 707383 carries the identical
+-- AuraDescription with ProcChance 5 and a different Description, and Flank (582530, DmgClass 2, effects
+-- 121/31) and Woodland Arrow (572579, DmgClass 3, effects 2/64/64) have no periodic effect at all, so the
+-- AuraDescription is stale copy-paste. I verified the live DB has zero spell_proc, spell_proc_event,
+-- spell_script_names, spell_linked_spell and conditions rows for 705075 and 520588; creature_template 50393
+-- 'War Falcon' exists; SpellDuration index 32 is 6000 ms. WHAT IS WRONG: the proposal's
+-- triggered_spell_ok:true rests on a false claim. The rationale says 520588's effect 2
+-- (SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN, MiscValue 804715, BasePoints -1, DieSides 1) 'is a harmless no-op'.
+-- It is not. SpellEffectInfo::CalcValue (SpellInfo.cpp:490-505, 'case 1: basePoints += 1') makes that effect's
+-- amount exactly 0, and ModifyAscensionCooldown (SpellEffects.cpp:303-314) treats a zero delta as Ascension's
+-- RESET SENTINEL: it calls ResetAscensionCooldown, i.e. player->RemoveSpellCooldown(804715, true)
+-- (SpellEffects.cpp:290-301). Falcon's Call 804715 has Spell.dbc RecoveryTime 90000. So wiring Falcon's Aid to
+-- 520588 also grants a full reset of a 90-second cooldown on roughly 10% of every periodic damage tick - an
+-- effect the tooltip never mentions. This is pre-existing rather than introduced (Falconstrike 806345 ->
+-- 520587 -> 520588 already fires it today, and Forest Fighter 706282 is a second dead aura-42 on the same
+-- summon), but it must be stated truthfully in the SQL comment instead of being dismissed, and it is the
+-- separate defect the task asks to be reported. Two further rationale errors that must not reach the comment
+-- block: (1) 'HandlePeriodicDamageAurasTick is the only caller that sets procAttacker =
+-- PROC_FLAG_DONE_PERIODIC' is false - four handlers set it: HandlePeriodicDamageAurasTick (6592),
+-- HandlePeriodicHealthLeechAuraTick (6682), HandlePeriodicHealAurasTick (6889) and
+-- HandlePeriodicPowerBurnAuraTick (7074); SpellTypeMask 1 is load-bearing precisely because it excludes the
+-- heal tick (Unit.cpp:7163-7167 sets PROC_SPELL_TYPE_HEAL from healInfo), while leech and power-burn ticks
+-- still proc, which is consistent with 'periodic damage dealt'. (2) 'the periodic call passes procSpell =
+-- nullptr' is only half true - the Spell const* argument is nullptr (which is why AttributesMask 0 is safe),
+-- but procSpellInfo is GetSpellInfo(), the DoT's own record, and that is what the SpellFamilyName/Mask check
+-- at SpellMgr.cpp:929-933 would read. needs_script stays false: the tooltip clause itself is fully deliverable
+-- by this row.
+--
+-- #2517 Rally The Archers (705088)
+-- tooltip: Woodland Arrow now grants party members within 15 yds of you 4%+ increased ranged attack power for
+-- 10 sec, scaling with Agility.
+-- Rally The Archers 705088 carries one effect, slot 0, SPELL_AURA_PROC_TRIGGER_SPELL (42) on Rally The Archers
+-- 705089, with Spell.dbc ProcFlags 0 and no spell_proc row, so LoadSpellProcs generates no fallback entry and
+-- Aura::GetProcEffectMask returns 0. The triggered record is live and matches the tooltip term for term:
+-- 705089 is SPELL_EFFECT_APPLY_AREA_AURA_PARTY (35) with SPELL_AURA_MOD_RANGED_ATTACK_POWER_PCT (167,
+-- HandleAuraModRangedAttackPowerPercent), TargetA 1 so the Ranger emanates it, EffectRadiusIndex 18 = 15.0 yd
+-- ('party members within 15 yds'), DurationIndex 1 = 10000 ms ('for 10 sec'), BasePoints 3 / DieSides 1 = 4%.
+-- The proc event is Woodland Arrow, which in the effective Spell.dbc is 572579, 806368 and 806444-806448 -
+-- every rank SpellClassSet 27 with SpellClassMask (0,0,8192) and DefenseType 3 (SPELL_DAMAGE_CLASS_RANGED),
+-- effect 0 SPELL_EFFECT_SCHOOL_DAMAGE - hence SpellFamilyName 27 with SpellFamilyMask2 8192, which covers all
+-- seven ranks with one row. ProcFlags 256 = PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS: Spell.cpp:2287 sets exactly
+-- that flag for a DmgClass 3 spell without SPELL_ATTR2_AUTO_REPEAT (Woodland Arrow's AttributesEx2 is 0x20000,
+-- not 0x20), so no ranged auto-attack bit and no melee bit belong here. SpellTypeMask 1
+-- (PROC_SPELL_TYPE_DAMAGE) because the arrow's own effect 0 is direct damage; SpellPhaseMask 2
+-- (PROC_SPELL_PHASE_HIT) because the buff follows the shot landing and because a DONE ranged flag is inside
+-- REQ_SPELL_PHASE_PROC_FLAG_MASK and must name a phase. SchoolMask 1 is load-bearing rather than decorative:
+-- family-27 SpellFamilyFlags[2] bit 0x2000 is shared with Neurotoxin Arrow 500071 and there is no finer bit,
+-- since Woodland Arrow's entire class mask is that one bit; Woodland Arrow is SchoolMask 1 (Physical -
+-- 'dealing ... Physical damage') while Neurotoxin Arrow is SchoolMask 8 (Nature), and
+-- SpellMgr::CanSpellTriggerProcOnEvent tests procEntry.SchoolMask against ProcEventInfo::GetSchoolMask(),
+-- which returns the proc spell's own SpellInfo school (Unit.cpp:321-324), so SchoolMask 1 separates them
+-- cleanly. HitMask 0 takes the DONE default PROC_HIT_NORMAL|PROC_HIT_CRITICAL|PROC_HIT_ABSORB - the tooltip
+-- qualifies no hit result. AttributesMask 0: nothing in Spell.dbc triggers Woodland Arrow, so it is always the
+-- player's own cast, and its two child casts 807001 and 520640 are Ranger Horn cooldown reductions
+-- (SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN only, no damage), so there is no triggered path to allow and no
+-- double-proc risk. Chance 0 so the record's own ProcChance 100 is used, per
+-- rev_20260919_20_coa_proc_chance_parity.sql. Two things this row does not and cannot cover, recorded rather
+-- than papered over: 705088's AuraDescription is stale, naming Backstep where the Description names Woodland
+-- Arrow (the Description is the passive's spellbook tooltip and is what the issue quotes); and the tooltip's
+-- '${$705089m1+$AGI*0.015}%' Agility term has no registration in modules/mod-ascension-
+-- compat/src/AscensionScalingBaseData.h or AscensionRangerScaling.cpp, so the buff lands at the flat 4% - a
+-- scaling defect independent of this proc. Verified: zero spell_proc rows for 705088 in coa_dbc_world; no
+-- occurrence of 705088 in src/ or modules/.
+--
+-- #3051 Forest Fighter (706282)
+-- tooltip: Critically striking with Falconstrike will now summon an additional War Falcon.
+-- Forest Fighter 706282 carries one effect, slot 0, SPELL_AURA_PROC_TRIGGER_SPELL (42) on Falconstrike Summon
+-- 520588, with Spell.dbc ProcFlags 0 and no spell_proc row, so LoadSpellProcs skips it and
+-- Aura::GetProcEffectMask returns 0. 520588 is fully live: SPELL_EFFECT_SUMMON (28) with MiscValue 50393 -
+-- creature_template 50393 'War Falcon' exists in the world DB - MiscValueB 61 and DurationIndex 32 = 6000 ms,
+-- plus SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165, Spell::EffectAscensionModifyCooldown) on MiscValue 804715
+-- 'Falcon's Call'. It is the same spell Falconstrike's own chain reaches (806345 effect 1 -> 520587 ->
+-- 520588), which is precisely what makes the proc an 'additional' falcon rather than a replacement. The proc
+-- event is 'critically striking with Falconstrike': Falconstrike is 806345 plus ranks 806437-806443, every one
+-- SpellClassSet 27 with SpellClassMask (0,4194304,0) and DefenseType 3, and word-1 bit 0x400000 is carried by
+-- no other family-27 record in Spell.dbc, so SpellFamilyName 27 with SpellFamilyMask1 4194304 selects the
+-- ability and nothing else - SchoolMask therefore stays 0 rather than pinning Falconstrike's Nature school
+-- (SchoolMask 8), since the family bit is already exclusive and pinning a school would only become a trap if a
+-- rank's school changes. ProcFlags 256 = PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS, the flag Spell.cpp:2287 sets
+-- for a DmgClass 3 spell without SPELL_ATTR2_AUTO_REPEAT; no melee bit belongs here despite the word
+-- 'striking', because Falconstrike's damage is ranged - effect 0 is SPELL_EFFECT_NORMALIZED_WEAPON_DMG (121)
+-- with BasePoints 9 Nature and effect 2 is SPELL_EFFECT_WEAPON_PERCENT_DAMAGE (31) at 120% ranged weapon
+-- damage. SpellTypeMask 1 (PROC_SPELL_TYPE_DAMAGE) and SpellPhaseMask 2 (PROC_SPELL_PHASE_HIT): the DONE
+-- ranged flag is inside REQ_SPELL_PHASE_PROC_FLAG_MASK so a phase is mandatory, and the crit result is only
+-- known at hit. HitMask 2 = PROC_HIT_CRITICAL is the whole point of the tooltip - 'critically striking', not
+-- 'striking' - and without it the passive would summon a falcon on every Falconstrike. AttributesMask 0: no
+-- record in Spell.dbc has 806345 as an EffectTriggerSpell, so Falconstrike is always the player's own cast,
+-- including when the 573060 passive turns a Quick Shot into it, and PROC_ATTR_TRIGGERED_CAN_PROC would only
+-- widen the row for no gain. Chance 0 so the record's own ProcChance 100 applies, per
+-- rev_20260919_20_coa_proc_chance_parity.sql; Cooldown and Charges 0 because the tooltip rate-limits nothing.
+-- Verified: zero spell_proc rows for 706282 in coa_dbc_world; no occurrence of 706282 in src/ or modules/.
+--
+-- #3167 Barbed Quills (800077)  [PARTIAL]
+-- tooltip: Damage dealt by Quills now spreads your periodic effects to 5 enemies within 10 yds and extends
+-- their duration by 2 sec.
+-- Barbed Quills 800077 carries three SPELL_AURA_PROC_TRIGGER_SPELL (42) effects - slot 0 on 560965, slot 1 on
+-- 561161, slot 2 on 561168 - with Spell.dbc ProcFlags 0 and no spell_proc row, so none of them fire. The
+-- tooltip's second paragraph names the event precisely: 'Damage dealt by Quills'. Quills is 560966 plus ranks
+-- 561184-561187, SpellClassSet 27 with SpellClassMask (0,4,131072) and DefenseType 3, effect 0
+-- SPELL_EFFECT_SCHOOL_DAMAGE. SpellFamilyMask1 4 is the selector and SpellFamilyMask2 131072 is deliberately
+-- left unset: word-2 bit 0x20000 is shared with Corrosive Shot 572419, while word-1 bit 0x4 is carried by the
+-- five Quills records and nothing else in family 27, and CanSpellTriggerProcOnEvent ORs the three mask words,
+-- so adding the word-2 bit would only widen the match. ProcFlags 256 = PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS,
+-- the flag Spell.cpp:2287 sets for a DmgClass 3 spell without SPELL_ATTR2_AUTO_REPEAT; SpellTypeMask 1
+-- (PROC_SPELL_TYPE_DAMAGE) for the arrow's direct damage; SpellPhaseMask 2 (PROC_SPELL_PHASE_HIT), mandatory
+-- because a DONE ranged flag sits in REQ_SPELL_PHASE_PROC_FLAG_MASK; HitMask 0 for the DONE default
+-- NORMAL|CRITICAL|ABSORB because 'damage dealt' qualifies no hit result; SchoolMask 0 because the family bit
+-- already isolates Quills; Chance 0 so the record's own ProcChance 100 applies, per
+-- rev_20260919_20_coa_proc_chance_parity.sql. This row delivers the '...and extends their duration by 2 sec'
+-- half in full: 561161's three SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION (177) effects add BasePoints 1999 +
+-- DieSides 1 = 2000 ms to MiscValues 801472 (the Barbed Quills bleed), 807237 (Toxic Dart) and 803851
+-- (Ravage), and 561168's two do the same for 500073 (Serrated Shot) and 500104 (Poison Quiver); effect 177
+-- resolves to Spell::EffectAscensionModifyAuraDuration, and AuraEffect::HandleProcTriggerSpellAuraProc casts
+-- each trigger at eventInfo.GetActionTarget(), i.e. the struck enemy where those periodics live, matching both
+-- spells' TargetA 6. The '...spreads your periodic effects to 5 enemies within 10 yds' half will still not
+-- work after this row, and that is a core defect rather than a data one: 560965's three effects are all
+-- SPELL_EFFECT_ASCENSION_SPREAD_AURA (169), which src/server/game/Spells/SpellEffects.cpp maps to
+-- &Spell::EffectNULL - loaded but unimplemented - even though its own data is correct (EffectRadiusIndex 13 =
+-- 10.0 yd, BasePoints 7, triggers 803851 / 807237 / 801472). The tooltip's first paragraph, the Wild
+-- Strike/Flank/Quills bleed, is not on this record at all - no effect of 800077 applies 801472 - it lives on
+-- Barbed Quills 803856, which has its own entry in this set. Forward note: Double Up 520803 casts Quills as a
+-- triggered spell, so when 520803 is revived its extra Quills will not feed this row unless
+-- PROC_ATTR_TRIGGERED_CAN_PROC (AttributesMask 2) is added; that would be safe then because SpellFamilyMask1
+-- bit 4 is exclusive to Quills, but it is left 0 now because 520803 is itself a dead ProcFlags-0 proc.
+-- Verified: zero spell_proc rows for 800077 in coa_dbc_world; no occurrence of 800077 in src/ or modules/.
+-- RESIDUAL: The tooltip's 'spreads your periodic effects to 5 enemies within 10 yds' half cannot be delivered
+-- by a spell_proc row. 800077 effect 0 triggers 560965, whose three effects are
+-- SPELL_EFFECT_ASCENSION_SPREAD_AURA (169), mapped to &Spell::EffectNULL at
+-- src/server/game/Spells/SpellEffects.cpp:241; the effect must be implemented in C++. The proposed row
+-- correctly delivers only the '...and extends their duration by 2 sec' half via 561161 (801472/807237/803851)
+-- and 561168 (500073/500104). The same blocker applies to 800080, whose only effect triggers 561021 (also
+-- effect 169); no row is proposed for it.
+--
+-- #3168 Deepwood Poison (800079)  [PARTIAL]
+-- tooltip: Flank and Exploit apply Deepwood Poison. (Barbed Quills: Deals Nature Damage every 3 sec and
+-- reduces their periodic healing received for 9 sec, stacking 4 times.)
+-- Deepwood Poison (800079): "Flank and Exploit apply Deepwood Poison." The record has a single effect,
+-- EFFECT_0, a SPELL_EFFECT_APPLY_AURA carrying aura 42 SPELL_AURA_PROC_TRIGGER_SPELL with EffectTriggerSpell
+-- 801472. Spell.dbc gives the record ProcFlags 0 and the world DB holds no `spell_proc` row, so
+-- SpellMgr::LoadSpellProcs generates no fallback entry ("// Skip if no proc flags in DBC" / "if
+-- (!spellInfo->ProcFlags) continue;", SpellMgr.cpp:2252-2254), SpellMgr::GetSpellProcEntry returns nullptr and
+-- Aura::GetProcEffectMask returns 0 ("// only auras with spell proc entry can trigger proc",
+-- SpellAuras.cpp:2150-2154). The passive is inert: Barbed Quills is never applied to anything. -- The trigger
+-- 801472 "Barbed Quills" is native and healthy: its EFFECT_0 is aura 3 SPELL_AURA_PERIODIC_DAMAGE with
+-- BasePoints 22 + DieSides 3, Amplitude 3000, DurationIndex 105 = 9000 ms, StackAmount 4, Mechanic 15
+-- (MECHANIC_BLEED), SchoolMask 8 (Nature) and TargetA 6 (enemy) - exactly the tooltip's "Deals Nature Damage
+-- every 3 sec ... for 9 sec, stacking 4 times". Targeting needs no script: the Ranger is the proc actor, so
+-- AuraEffect::HandleProcTriggerSpellAuraProc casts 801472 at eventInfo.GetActionTarget(), the enemy just
+-- struck (SpellAuraEffects.cpp:7098-7108). -- ProcFlags 16 = PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS
+-- (SpellMgr.h:118). Flank is Spell.dbc DmgClass 2 (MELEE) and is a cast ability, so
+-- Spell::PrepareDataForTriggerSystem gives its event that done flag (Spell.cpp:2270-2277).
+-- PROC_FLAG_DONE_MELEE_AUTO_ATTACK is deliberately absent - the tooltip names two abilities, not white swings
+-- - and the periodic flags are absent because the poison is applied by the strike, not by a tick. --
+-- SpellFamilyName 27 with SpellFamilyMask1 131072 (word 1, bit 0x20000) is Flank's own SpellFamilyFlags. Every
+-- Flank record in this Spell.dbc - 582530, 582531, 804940 and 805082-805088 - carries (0, 0x20000, 0), and a
+-- full scan of family 27 shows those ten ids are the only holders of that bit, so the mask names Flank and
+-- nothing else. The same ten ids are what AscensionClassMechanics.cpp:427-431 IsRangerFlank() already
+-- recognises. -- SpellTypeMask 1 (PROC_SPELL_TYPE_DAMAGE): Flank's effects are
+-- SPELL_EFFECT_WEAPON_PERCENT_DAMAGE (121) and SPELL_EFFECT_WEAPON_DAMAGE (31), so the HIT event always
+-- reports damage or absorb and Unit::ProcSkillsAndAuras computes PROC_SPELL_TYPE_DAMAGE (Unit.cpp:7162-7167).
+-- SpellPhaseMask 2 (PROC_SPELL_PHASE_HIT) applies the poison on the landed strike. HitMask 0 leaves the DONE
+-- default NORMAL | CRITICAL | ABSORB (SpellMgr.cpp:956-964); the tooltip asks for no critical strike.
+-- AttributesMask 0: Flank is the player's own cast, not a triggered spell, so PROC_ATTR_TRIGGERED_CAN_PROC is
+-- not wanted. DisableEffectsMask 0: the record has exactly one effect. Cooldown and Charges 0 (ProcCharges 0,
+-- no internal cooldown in the tooltip). Chance stays 0 so LoadSpellProcs takes the record's own ProcChance of
+-- 100, per rev_20260919_20_coa_proc_chance_parity.sql. -- KNOWN RESIDUAL GAP, not reachable from `spell_proc`:
+-- the tooltip's second named ability, Exploit 520570, has SpellFamilyFlags (0, 0, 0) in Spell.dbc.
+-- SpellInfo::IsAffected returns false whenever the proc entry carries a non-zero mask and the event spell's
+-- own flags are empty (SpellInfo.cpp:1440-1441), so no family-masked row can ever include Exploit; and
+-- dropping the mask would make every family-27 melee-damage-class ability apply Barbed Quills, which the
+-- tooltip plainly does not say. Note that 800079's own AuraDescription already reads "Causes Flank to apply
+-- Deepwood Poison" - only the talent Description mentions Exploit. Covering Exploit is separate data work:
+-- either give 520570 a SpellFamilyFlags bit in Spell.dbc and add that bit to SpellFamilyMask here, or route it
+-- through spell_linked_spell/script gated on the player having 800079. A second, independent DBC gap this row
+-- does not touch: 801472's tooltip clause "$801472s2%" (periodic healing received reduction) has no effect
+-- slot at all on the record - it has only the one periodic-damage effect - which is why the client renders it
+-- as "1 to 0%".
+-- RESIDUAL: Partial: the row delivers only the Flank half of the tooltip. Exploit 520570 has SpellFamilyFlags
+-- (0,0,0) in Spell.dbc, and SpellInfo::IsAffected (SpellInfo.cpp:1440-1441) rejects any event spell with empty
+-- flags once the proc entry carries a non-zero SpellFamilyMask, so no family-masked spell_proc row can ever
+-- include Exploit; dropping the mask would make every family-27 melee-damage-class ability apply Barbed
+-- Quills, which the tooltip does not say. Covering Exploit needs separate work: give 520570 a SpellFamilyFlags
+-- bit in Spell.dbc and add it to SpellFamilyMask1, or route it through a script/spell_linked_spell gated on
+-- the player holding 800079. Second, independent DBC defect on the trigger: 801472's tooltip clause $801472s2%
+-- (periodic healing received reduction) has no effect slot on the record at all - 801472 carries only the one
+-- SPELL_AURA_PERIODIC_DAMAGE effect - which is why the client renders it as '1 to 0%'.
+--
+-- #3169 Briar Veil (800084)
+-- tooltip: ... causing dodging attacks to restore 2% maximum health and 5 Focus.
+-- Briar Veil (800084): "Thorns and leaves swirl around you, masking your movements for 10 sec, increasing your
+-- dodge chance by 50% and causing dodging attacks to restore 2% maximum health and 5 Focus." The first two
+-- clauses are already native - DurationIndex 1 = 10000 ms, and EFFECT_0 is aura 49
+-- SPELL_AURA_MOD_DODGE_PERCENT with BasePoints 49 + DieSides 1 = 50, handled by
+-- AuraEffect::HandleAuraModDodgePercent. Only the third clause was dead: it is EFFECT_2, aura 42
+-- SPELL_AURA_PROC_TRIGGER_SPELL on 803288, and Spell.dbc gives the record ProcFlags 0 with no `spell_proc`
+-- row, so LoadSpellProcs skips it (SpellMgr.cpp:2252-2254) and Aura::GetProcEffectMask returns 0 for want of a
+-- proc entry (SpellAuras.cpp:2150-2154). -- The trigger 803288 "Briar Veil" is native and matches the numbers
+-- exactly: EFFECT_0 is SPELL_EFFECT_HEAL_PCT (136) with BasePoints 1 + DieSides 1 = 2% maximum health,
+-- EFFECT_1 is SPELL_EFFECT_ENERGIZE (30) with BasePoints 4 + DieSides 1 = 5 and MiscValue 2 (POWER_FOCUS);
+-- both carry TargetA 1 (TARGET_UNIT_CASTER). That implicit target matters here, because on a taken proc
+-- AuraEffect::HandleProcTriggerSpellAuraProc hands the cast eventInfo.GetActor() - the attacker - as the
+-- explicit target (SpellAuraEffects.cpp:7100-7107); TARGET_UNIT_CASTER overrides it, so the heal and the Focus
+-- land on the Ranger. -- ProcFlags 40 = PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK (0x8) |
+-- PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS (0x20). "Dodging attacks" is a taken event, and only melee attacks can
+-- be dodged: Unit::MeleeSpellHitResult clears canDodge for RANGED_ATTACK ("// Ranged attacks can only miss,
+-- resist and deflect", Unit.cpp:3478-3491) and magic spells never roll the melee table at all, so no ranged,
+-- magic or none-class flag belongs here. Both taken flags are set on the victim before the attack outcome is
+-- rolled - Unit.cpp:1721 and 1725 for white swings, Spell.cpp:2276 for melee-damage-class abilities - and a
+-- fully dodged melee ability still reaches Unit::ProcSkillsAndAuras through the "Passive spell hits/misses or
+-- active spells only misses" branch at Spell.cpp:2938-2949. -- HitMask 16 = PROC_HIT_DODGE, which DamageInfo
+-- sets from MELEE_HIT_DODGE for white swings (Unit.cpp:160) and from SPELL_MISS_DODGE for abilities
+-- (Unit.cpp:214). Without it the default taken mask (NORMAL | CRITICAL, SpellMgr.cpp:958-960) would fire this
+-- on every incoming melee hit, which is the opposite of the tooltip. -- SpellTypeMask 0 is deliberate: a dodge
+-- deals no damage and no heal, so Unit::ProcSkillsAndAuras computes PROC_SPELL_TYPE_NO_DMG_HEAL for the dodged
+-- ability (Unit.cpp:7162-7167); demanding PROC_SPELL_TYPE_DAMAGE, as a damage-gated row would, kills the proc
+-- outright. SpellPhaseMask 0 likewise: REQ_SPELL_PHASE_PROC_FLAG_MASK is the DONE half only (SpellMgr.h:184),
+-- so with a taken-only ProcFlags the phase is never checked (SpellMgr.cpp:942-946) and any non-zero value
+-- would only raise the "has `SpellPhaseMask` value defined, but it won't be used" sql.sql error at
+-- SpellMgr.cpp:2152-2153. SpellFamilyName and the masks stay 0 because the event spell belongs to the
+-- attacker, not the Ranger, and the tooltip names no ability. -- AttributesMask 2 =
+-- PROC_ATTR_TRIGGERED_CAN_PROC. This is exactly what LoadSpellProcs would itself have set had the DBC carried
+-- proc flags: its fallback generator turns the flag on for SPELL_AURA_PROC_TRIGGER_SPELL whenever the record's
+-- ProcFlags intersect TAKEN_HIT_PROC_FLAG_MASK ("Many proc auras with taken procFlag mask don't have attribute
+-- 'can proc with triggered' - they should proc nevertheless", SpellMgr.cpp:2230-2245). Without it, an incoming
+-- melee-damage-class ability that is itself cast as a triggered spell is rejected outright by
+-- Aura::GetProcEffectMask (SpellAuras.cpp:2166-2173); white swings are already exempt there via
+-- AUTO_ATTACK_PROC_FLAG_MASK. -- DisableEffectsMask 0. EFFECT_1 is a bare SPELL_EFFECT_DUMMY (BasePoints -1,
+-- ImplicitTargetA 0) with no aura, so it is not part of the aura's effect mask and must not be named here -
+-- SpellMgr.cpp:2160-2162 logs an sql.sql error for a DisableEffectsMask bit on a non-aura effect. EFFECT_0's
+-- aura 49 does enter the proc effect mask but falls into AuraEffect::HandleProc's default branch
+-- (SpellAuraEffects.cpp:1416-1417) and does nothing on proc; with Charges 0 nothing is consumed. Chance 0
+-- keeps the record's own ProcChance of 100 (the tooltip states no percentage - every dodge restores), per
+-- rev_20260919_20_coa_proc_chance_parity.sql; Cooldown 0 (no internal cooldown in the tooltip) and Charges 0
+-- (ProcCharges 0, the buff runs its full 10 sec).
+--
+-- #3212 Pinpoint Accuracy (801468)
+-- tooltip: Critical strikes with direct damaging abilities now generate 4 Focus.
+-- Pinpoint Accuracy (801468): "Critical strikes with direct damaging abilities now generate 4 Focus" (the
+-- AuraDescription says "direct offensive abilities"). The record's single effect, EFFECT_0, is
+-- SPELL_EFFECT_APPLY_AURA with aura 42 SPELL_AURA_PROC_TRIGGER_SPELL on 801471; Spell.dbc gives it ProcFlags 0
+-- and the world DB has no `spell_proc` row, so LoadSpellProcs generates no fallback (SpellMgr.cpp:2252-2254),
+-- Aura::GetProcEffectMask returns 0 (SpellAuras.cpp:2150-2154) and the passive never fires. -- The trigger
+-- 801471 "Pinpoint Accuracy" is native and exact: a single SPELL_EFFECT_ENERGIZE (30) with BasePoints 3 +
+-- DieSides 1 = 4 and MiscValue 2 (POWER_FOCUS), TargetA 1 (TARGET_UNIT_CASTER), so the Focus goes to the
+-- Ranger. No scaling or script is involved. -- ProcFlags 69904 = PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS (0x10) |
+-- PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS (0x100) | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG (0x1000) |
+-- PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG (0x10000): the four "damage done by a spell or ability" directions,
+-- which is the repository's established set for an "abilities" tooltip
+-- (rev_20260920_50_bloodmage_crit_procs.sql, 504292 and 704654). A Ranger's damaging abilities span DmgClass 2
+-- (Flank, Exploit) and DmgClass 3 (Whipvine Arrow and the other shots), and the two negative none/magic
+-- directions cover the remainder without letting a positive spell in. PROC_FLAG_DONE_MELEE_AUTO_ATTACK (0x4)
+-- and PROC_FLAG_DONE_RANGED_AUTO_ATTACK (0x40) are deliberately absent - the tooltip says "abilities", and a
+-- white swing or an auto shot is not an ability, which is the whole difference between 69904 and the 69972 set
+-- used for tooltips that say only "your critical strikes". PROC_FLAG_DONE_PERIODIC (0x40000) is absent because
+-- the tooltip says "direct": a damage-over-time tick is not a strike, and periodic crits would flood the
+-- Ranger with Focus several times a second. -- SpellTypeMask 1 (PROC_SPELL_TYPE_DAMAGE) is the tooltip's
+-- "damaging"; Unit::ProcSkillsAndAuras sets it when the hit reported damage or absorb (Unit.cpp:7164).
+-- SpellPhaseMask 2 (PROC_SPELL_PHASE_HIT), because a critical strike is only known at hit time. HitMask 2 =
+-- PROC_HIT_CRITICAL is the literal "critical strikes"; without it the DONE default NORMAL | CRITICAL | ABSORB
+-- (SpellMgr.cpp:961-963) would hand out Focus on every ability hit. -- SpellFamilyName and the family masks
+-- stay 0: the tooltip names no ability, so nothing restricts which spell may crit, and EFFECT_0's own
+-- EffectSpellClassMask is (0, 0, 0). AttributesMask 0 - these are the player's own direct casts, so
+-- PROC_ATTR_TRIGGERED_CAN_PROC is not wanted. DisableEffectsMask 0: the record has a single effect. Cooldown 0
+-- and Charges 0 (ProcCharges 0; the tooltip states no internal cooldown and no charge limit). Chance 0 so
+-- LoadSpellProcs takes the record's own ProcChance of 100, per rev_20260919_20_coa_proc_chance_parity.sql.
+-- (EFFECT_0's BasePoints -1 and EffectMiscValue 1 are dead data here:
+-- AuraEffect::HandleProcTriggerSpellAuraProc ignores the amount entirely, and MiscValue is unused by aura 42.
+-- The record's EquippedItemSubclass 4 is likewise inert because EquippedItemClass is -1.)
+--
+-- #3357 Strike Where It Hurts (804178)
+-- tooltip: Your ability critical strikes now increase the damage the target takes from bleeds by 30% for 15
+-- sec.
+-- Strike Where It Hurts (804178): "Your ability critical strikes now increase the damage the target takes from
+-- bleeds by $567588s1% for $567588d." The clause is carried by EFFECT_1, a SPELL_EFFECT_APPLY_AURA with aura
+-- 42 SPELL_AURA_PROC_TRIGGER_SPELL on 567588, and it was inert: Spell.dbc gives the record ProcFlags 0 and the
+-- world DB has no `spell_proc` row, so LoadSpellProcs generates no fallback ("// Skip if no proc flags in
+-- DBC", SpellMgr.cpp:2252-2254), SpellMgr::GetSpellProcEntry returns nullptr and Aura::GetProcEffectMask
+-- returns 0 (SpellAuras.cpp:2150-2154). -- The trigger 567588 "Strike Where It Hurts" is native and exact: a
+-- single aura 255 SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT with MiscValue 15 (MECHANIC_BLEED,
+-- SharedDefines.h:1417), BasePoints 29 + DieSides 1 = 30%, DurationIndex 8 = 15000 ms and TargetA 6 (enemy) -
+-- precisely "increase the damage the target takes from bleeds by 30% for 15 sec". Targeting needs no script:
+-- the Ranger is the proc actor, so AuraEffect::HandleProcTriggerSpellAuraProc casts 567588 at
+-- eventInfo.GetActionTarget(), the enemy just crit (SpellAuraEffects.cpp:7098-7108). This is the same shape as
+-- the already-merged Bloodmage sibling Crimson Curse 706656 -> Lacerations 560288
+-- (rev_20260920_42_bloodmage_critical_strike_procs.sql), which triggers an identical MiscValue 15 / BasePoints
+-- 29 record. -- ProcFlags 69904 = PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS (0x10) |
+-- PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS (0x100) | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG (0x1000) |
+-- PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG (0x10000) - the repository's established "damage done by a spell or
+-- ability" set, the same value rev_20260920_50_bloodmage_crit_procs.sql uses for Mortal Wounds 504292 and
+-- Ultra Instinct 704654. The tooltip says "ability critical strikes", so PROC_FLAG_DONE_MELEE_AUTO_ATTACK
+-- (0x4) and PROC_FLAG_DONE_RANGED_AUTO_ATTACK (0x40) are deliberately out - a white swing and an auto shot are
+-- not abilities, and that is exactly what separates 69904 from the 69972 set used for tooltips that say only
+-- "your critical strikes". PROC_FLAG_DONE_PERIODIC (0x40000) is out too: a bleed tick is not a strike, and
+-- letting periodic crits refresh this would let the debuff maintain itself off its own damage type. --
+-- SpellTypeMask 1 (PROC_SPELL_TYPE_DAMAGE) keeps healing crits out; Unit::ProcSkillsAndAuras sets that type
+-- when the hit reported damage or absorb (Unit.cpp:7164). SpellPhaseMask 2 (PROC_SPELL_PHASE_HIT) - a critical
+-- strike is only known at hit time. HitMask 2 = PROC_HIT_CRITICAL is the literal "critical strikes"; without
+-- it the DONE default NORMAL | CRITICAL | ABSORB (SpellMgr.cpp:961-963) would apply the bleed amplifier on
+-- every ability hit. -- SpellFamilyName and the masks stay 0: the tooltip names no ability, and EFFECT_1's own
+-- EffectSpellClassMask is (0, 0, 0). AttributesMask 0 - the events are the Ranger's own direct casts and
+-- 567588 is not itself cast as a triggered spell by any other record, so PROC_ATTR_TRIGGERED_CAN_PROC is not
+-- wanted. Cooldown 0 and Charges 0 (ProcCharges 0, no internal cooldown or charge limit in the tooltip).
+-- Chance 0 so LoadSpellProcs takes the record's own ProcChance of 100, per
+-- rev_20260919_20_coa_proc_chance_parity.sql. -- DisableEffectsMask 0. EFFECT_0 is aura 303
+-- SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE with MiscValue 18 (AURA_STATE_BLEEDING, SharedDefines.h:1385)
+-- and BasePoints -1 + DieSides 1 = 0, i.e. a zero-valued, bleed-themed native effect that carries no tooltip
+-- clause of its own. It enters the proc effect mask but falls into AuraEffect::HandleProc's default branch
+-- (SpellAuraEffects.cpp:1416-1417) and does nothing on proc, so it needs no disabling; worth flagging
+-- separately as a likely stub (it grants +0% damage versus bleeding targets and is registered only in
+-- AscensionStockCoefficientData.h), but it is not this row's business.
+--
+-- #3659 Knuckleduster (806957)
+-- tooltip: Periodic damage dealt now generates $525081s1 (5) Focus.
+-- Knuckleduster (806957) is a passive whose first tooltip clause is carried by effect 0, a
+-- SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on 525081. Spell.dbc gives 806957 ProcFlags 0 and the world DB has
+-- no `spell_proc` row, so LoadSpellProcs skips it ("Skip if no proc flags in DBC"), Aura::GetProcEffectMask
+-- returns 0 and the Focus is never granted. 525081 "Energize +5 Focus" is native and healthy: a single
+-- SPELL_EFFECT_ENERGIZE (30) with BasePoints 4 + DieSides 1 = 5, MiscValue 2 (POWER_FOCUS) and TargetA 1
+-- (caster), so the 5 Focus lands on the Ranger, matching the tooltip's $525081s1. ProcFlags 262144 =
+-- PROC_FLAG_DONE_PERIODIC is the only flag the periodic path raises: AuraEffect::HandlePeriodicDamageAurasTick
+-- and its siblings call Unit::ProcSkillsAndAuras with procAttacker = PROC_FLAG_DONE_PERIODIC
+-- (SpellAuraEffects.cpp:6592, 6682, 7074). SpellTypeMask 1 (PROC_SPELL_TYPE_DAMAGE) keeps it to "periodic
+-- damage": Unit::ProcSkillsAndAuras computes PROC_SPELL_TYPE_HEAL when healInfo carries a heal, so a HoT tick
+-- cannot pay Focus, while a leech tick passes a DamageInfo and correctly counts. SpellPhaseMask 2
+-- (PROC_SPELL_PHASE_HIT) is mandatory, not decorative: PROC_FLAG_DONE_PERIODIC is inside
+-- REQ_SPELL_PHASE_PROC_FLAG_MASK, so CanSpellTriggerProcOnEvent enforces the phase check and LoadSpellProcs
+-- logs "doesn't have `SpellPhaseMask` value defined ... proc will not be triggered" without it; the periodic
+-- call sites use the default procPhase 2. HitMask stays 0 (a tick has no crit requirement) and no family
+-- restriction is set because the tooltip says "Periodic damage dealt" and names no ability. This is the same
+-- shape as the merged rev_20260920_54_bloodmage_periodic_procs.sql rows. The tooltip's second clause, "the
+-- range of your Bushwhack is increased by $s2 yds", is already native and untouched by this row: effect 1 is
+-- aura 107 SPELL_AURA_ADD_FLAT_MODIFIER with MiscValue 5 (SPELLMOD_RANGE), BasePoints 9 + DieSides 1 = +10 yds
+-- and EffectSpellClassMask (0,1073741824,0), which is exactly Bushwhack 557333's SpellFamilyFlags in Spell.dbc
+-- - a modifier, not a proc, so DisableEffectsMask stays 0. Chance stays 0 so the record's own ProcChance 100
+-- is used, per rev_20260919_20_coa_proc_chance_parity.sql. AttributesMask 0: a tick raises its event from
+-- AuraEffect::PeriodicTick, not from a triggered cast, so PROC_ATTR_TRIGGERED_CAN_PROC is not needed.
+--
+-- #3660 Marked for Death (806973)  [PARTIAL]
+-- tooltip: While you have daggers equipped, direct critical strikes on enemies below 35% health now have a
+-- chance to allow the use of abilities as if you were in Elude for $806974d (5 sec).
+-- COMPANION ROW REQUIRED - this `spell_proc` row alone would fire on every qualifying critical strike
+-- regardless of the target's health; the "below 35% health" half of the tooltip must ship in the same revision
+-- as a `conditions` row: (24, 0, 806973, 0, 0, 38, 1, 35, 2, 0, 0, 0, 0, '', 'Marked for Death only procs on a
+-- target below 35 percent health') - SourceTypeOrReferenceId 24 = CONDITION_SOURCE_TYPE_SPELL_PROC
+-- (ConditionMgr.h:150), ConditionTypeOrReference 38 = CONDITION_HP_PCT, ConditionTarget 1 = the action target,
+-- since Aura::GetProcEffectMask builds ConditionSourceInfo(eventInfo.GetActor(), eventInfo.GetActionTarget())
+-- at SpellAuras.cpp:2210-2213 and CONDITION_SOURCE_TYPE_SPELL_PROC allows 2 targets (ConditionMgr.cpp:848),
+-- ConditionValue1 35 with ConditionValue2 2 = COMP_TYPE_LOW (Util.h:580) for "below".
+-- rev_1789913115262463100.sql already uses this exact pattern for Mineralization. Now the row itself: 806973's
+-- single effect is aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) on 806974, with Spell.dbc ProcFlags 0 and no
+-- `spell_proc` row, so LoadSpellProcs skips it and Aura::GetProcEffectMask returns 0 - the passive is inert.
+-- ProcFlags 340 = PROC_FLAG_DONE_MELEE_AUTO_ATTACK (0x4) | PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS (0x10) |
+-- PROC_FLAG_DONE_RANGED_AUTO_ATTACK (0x40) | PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS (0x100): the tooltip says
+-- "direct critical strikes", not "melee critical strikes", so all four weapon-strike DONE flags are set;
+-- "direct" excludes PROC_FLAG_DONE_PERIODIC and "strikes" excludes the dmg-class NONE and MAGIC flags, which
+-- cover cast spells rather than weapon strikes. SpellTypeMask 1 (PROC_SPELL_TYPE_DAMAGE) and SpellPhaseMask 2
+-- (HIT) for a landed strike; the phase is required for the two DONE_SPELL_* bits, which sit in
+-- REQ_SPELL_PHASE_PROC_FLAG_MASK, and is harmlessly ignored for the auto-attack bits. HitMask 2 =
+-- PROC_HIT_CRITICAL, the tooltip's only hit-result restriction. No family restriction: the tooltip names no
+-- ability. "While you have daggers equipped" needs no row field - it is the triggered spell's own gate: 806974
+-- has EquippedItemClass 2 with EquippedItemSubclass 32768 (1 << ITEM_SUBCLASS_WEAPON_DAGGER) and
+-- Spell::CheckItems enforces Player::HasItemFitToSpellRequirements even for triggered casts (Spell.cpp:7413;
+-- TRIGGERED_FULL_MASK 0x7FFFF omits TRIGGERED_IGNORE_EQUIPPED_ITEM_REQUIREMENT). 806974 delivers the payload
+-- natively: effect 0 is aura 275 SPELL_AURA_MOD_IGNORE_SHAPESHIFT with EffectSpellClassMask (32832,0,0), which
+-- Spell::CheckCast consults through AuraEffect::IsAffectedOnSpell (Spell.cpp:5806) and which resolves in
+-- Spell.dbc to the family-27 Elude abilities Toxic Dart (807237, 807324-807330), Guise 520753, Sticky Fingers
+-- 804669 and Rusty Shiv 561315 - exactly "use abilities as if you were in Elude"; DurationIndex 28, the same
+-- index Crippling Shot uses for its documented 5 sec, matches $806974d. Both of 806974's effects have TargetA
+-- 1 (caster), so although HandleProcTriggerSpellAuraProc aims the cast at the struck enemy the buff lands on
+-- the Ranger. SECONDARY DEFECT, not fixed here: 806974's effect 1 is a bare SPELL_AURA_DUMMY (aura 4) with
+-- EffectSpellClassMask (1073872896,0,0) = Elude SLS3 524969 plus the Wild Strike off-hand halves
+-- 560962/561352, and no script anywhere in src/ or modules/ handles 806974, so that second slot is inert.
+-- Chance stays 0 so the record's own ProcChance 100 is used, per rev_20260919_20_coa_proc_chance_parity.sql:
+-- the tooltip says "have a chance" but states no number, and inventing one would be worse than using the
+-- record's. AttributesMask 0 - the proc source is the player's own strike, never a triggered cast.
+-- CORRECTED BY REVIEW: ProcFlags 340 -> 69972. The paragraph above argues the pre-review value; the shipped
+-- row uses the reviewed one.
+-- RESIDUAL: The 'While you have daggers equipped' clause is not deliverable by a spell_proc row: 806974's
+-- EquippedItemClass gate is bypassed by the non-passive/aura-effect branch of
+-- Player::HasItemFitToSpellRequirements when no fitting weapon is equipped at all. Needs an AuraScript
+-- CheckProc on 806973 (or EquippedItemClass 2 / EquippedItemSubclass 32768 on 806973 so
+-- Aura::GetProcEffectMask's passive equipment check applies). Separately, the 'below 35% health' clause
+-- requires the companion conditions row (24, 0, 806973, 0, 0, 38, 1, 35, 2, ...) shipped in the same revision.
+--
+-- #3661 Tip of the Spear (807023)
+-- tooltip: While you have a polearm equipped, your Wild Strike now has a $h% (15%) chance to strike 3
+-- additional times.
+-- Tip of the Spear (807023) carries three identical SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) effects, all three
+-- on 807024, with Spell.dbc ProcFlags 0 and no `spell_proc` row, so SpellMgr::LoadSpellProcs generates no
+-- fallback entry ("Skip if no proc flags in DBC"), Aura::GetProcEffectMask returns 0 and none of the three
+-- ever fires. The three identical slots are the tooltip's "strike 3 additional times":
+-- Aura::TriggerProcOnEvent (SpellAuras.cpp:2323) walks every effect in the returned mask, so one proc event
+-- casts 807024 three times, and 807024 is a single SPELL_EFFECT_TRIGGER_SPELL (64) on Wild Strike 800083 (Rank
+-- 1, DmgClass 2, weapon damage). ProcFlags 16 = PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS: every Wild Strike record
+-- is DmgClass 2, so Spell::PrepareDataForTriggerSystem (Spell.cpp:2271) raises exactly this flag for the cast;
+-- PROC_FLAG_DONE_MAINHAND_ATTACK rides the same event but adds nothing here. SpellTypeMask 1
+-- (PROC_SPELL_TYPE_DAMAGE) and SpellPhaseMask 2 (PROC_SPELL_PHASE_HIT) because a "strike" is a landed damaging
+-- hit; HitMask stays 0 because the tooltip asks for no critical. The proc is scoped to Wild Strike by
+-- SpellFamilyName 27 with SpellFamilyMask1 256: Spell.dbc gives every Wild Strike rank (501724-501734, 704093,
+-- 800083 and the 804093 Focus variant) SpellFamilyFlags with bit 0x100 in the second word, and a full scan of
+-- family 27 shows no other record carrying that bit. The off-hand halves 561352 and 560962 carry
+-- (1073741824,0,0) instead, so they are deliberately not matched and one Wild Strike produces one proc, not
+-- two. "While you have a polearm equipped" needs no row field: 807024's own record has EquippedItemClass 2
+-- with EquippedItemSubclass 64 (1 << ITEM_SUBCLASS_WEAPON_POLEARM), and Spell::CheckItems enforces
+-- Player::HasItemFitToSpellRequirements even for triggered casts (Spell.cpp:7413 - the skip is commented out,
+-- and TRIGGERED_FULL_MASK 0x7FFFF does not contain TRIGGERED_IGNORE_EQUIPPED_ITEM_REQUIREMENT 0x80000), so the
+-- branch self-gates. Chance stays 0 so the record's own ProcChance 15 is used - the tooltip's $h% - per
+-- rev_20260919_20_coa_proc_chance_parity.sql; Aura::CalcProcChance rolls once per aura per event, so the
+-- single 15% roll grants all three strikes, which is what "a 15% chance to strike 3 additional times" means.
+-- AttributesMask stays 0 deliberately: the extra 800083 casts are triggered and carry no
+-- SPELL_ATTR3_NOT_A_PROC (their AttributesEx3 is 0x400, REQUIRES_MAIN_HAND_WEAPON), so Aura::GetProcEffectMask
+-- rejects them (SpellAuras.cpp:2171) and the proc cannot chain into itself; adding
+-- PROC_ATTR_TRIGGERED_CAN_PROC would create an infinite Wild Strike loop.
+--
+DELETE FROM `spell_proc` WHERE `SpellId` IN (520628, 807459, 520586, 704545, 706748, 504329, 524873, 680931, 520353, 300702, 300703, 301249, 520783, 524831, 560802, 560810, 570737, 572372, 573059, 704311, 704319, 705047, 705054, 705069, 705075, 705088, 706282, 800077, 800079, 800084, 801468, 804178, 806957, 806973, 807023);
+INSERT INTO `spell_proc` (`SpellId`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `ProcFlags`, `SpellTypeMask`, `SpellPhaseMask`, `HitMask`, `AttributesMask`, `DisableEffectsMask`, `ProcsPerMinute`, `Chance`, `Cooldown`, `Charges`) VALUES
+(520628, 0, 0, 0, 0, 0, 69972, 1, 2, 2, 0, 0, 0, 0, 0, 0),
+(807459, 0, 27, 0, 16, 0, 256, 1, 2, 0, 0, 0, 0, 0, 0, 0),
+(520586, 0, 27, 0, 4194304, 8, 1280, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(704545, 0, 0, 0, 0, 0, 340, 0, 2, 0, 0, 0, 0, 0, 0, 2),
+(706748, 0, 27, 32, 1073741824, 0, 272, 0, 2, 0, 0, 0, 0, 0, 0, 0),
+(504329, 0, 27, 0, 0, 536870912, 16384, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(524873, 1, 0, 0, 0, 0, 340, 1, 2, 0, 0, 0, 0, 0, 0, 0),
+(680931, 0, 27, 32768, 0, 128, 262144, 1, 2, 0, 0, 0, 0, 0, 0, 0),
+(520353, 0, 27, 16, 0, 0, 16, 0, 2, 0, 0, 0, 0, 0, 0, 0),
+(300702, 0, 27, 0, 4096, 0, 16, 0, 2, 0, 0, 0, 0, 0, 0, 0),
+(300703, 0, 27, 0, 33024, 524288, 16, 1, 2, 0, 0, 0, 0, 0, 0, 0),
+(301249, 0, 0, 0, 0, 0, 64, 1, 2, 0, 0, 0, 0, 0, 0, 0),
+(520783, 0, 0, 0, 0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 4000, 0),
+(524831, 0, 27, 0, 4194305, 0, 256, 1, 2, 2, 0, 0, 0, 0, 0, 0),
+(560802, 0, 27, 0, 67108864, 8192, 256, 1, 2, 0, 0, 0, 0, 0, 0, 0),
+(560810, 0, 0, 0, 0, 0, 64, 1, 2, 0, 0, 0, 0, 0, 0, 0),
+(570737, 0, 0, 0, 0, 0, 20, 1, 2, 0, 0, 0, 0, 0, 0, 0),
+(572372, 0, 0, 0, 0, 0, 64, 1, 2, 0, 0, 0, 0, 0, 0, 0),
+(573059, 0, 0, 0, 0, 0, 20, 1, 2, 0, 0, 0, 0, 0, 0, 0),
+(704311, 0, 0, 0, 0, 0, 40, 0, 0, 48, 0, 0, 0, 0, 0, 0),
+(704319, 0, 27, 0, 268435456, 0, 256, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(705047, 0, 0, 0, 0, 0, 68, 1, 2, 0, 0, 0, 0, 0, 0, 0),
+(705054, 12, 27, 0, 525312, 0, 262400, 1, 2, 0, 2, 0, 0, 0, 0, 0),
+(705069, 0, 27, 0, 4194304, 2048, 87296, 0, 1, 0, 0, 0, 0, 0, 0, 0),
+(705075, 0, 0, 0, 0, 0, 262144, 1, 2, 0, 0, 0, 0, 0, 0, 0),
+(705088, 1, 27, 0, 0, 8192, 256, 1, 2, 0, 0, 0, 0, 0, 0, 0),
+(706282, 0, 27, 0, 4194304, 0, 256, 1, 2, 2, 0, 0, 0, 0, 0, 0),
+(800077, 0, 27, 0, 4, 0, 256, 1, 2, 0, 0, 0, 0, 0, 0, 0),
+(800079, 0, 27, 0, 131072, 0, 16, 1, 2, 0, 0, 0, 0, 0, 0, 0),
+(800084, 0, 0, 0, 0, 0, 40, 0, 0, 16, 2, 0, 0, 0, 0, 0),
+(801468, 0, 0, 0, 0, 0, 69904, 1, 2, 2, 0, 0, 0, 0, 0, 0),
+(804178, 0, 0, 0, 0, 0, 69904, 1, 2, 2, 0, 0, 0, 0, 0, 0),
+(806957, 0, 0, 0, 0, 0, 262144, 1, 2, 0, 0, 0, 0, 0, 0, 0),
+(806973, 0, 0, 0, 0, 0, 69972, 1, 2, 2, 0, 0, 0, 0, 0, 0),
+(807023, 0, 27, 0, 256, 0, 16, 1, 2, 0, 0, 0, 0, 0, 0, 0);

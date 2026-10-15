@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "Tinker Flak Guns delivers +15% critical damage, not +15 damage (#1960)",
+  "contract": "#1960: Flak Guns (520686) reads 'Your Mechsuit: Combustion now has 10% increased critical strike chance and 15% increased critical damage'. Spell.dbc row 520686 encodes both halves as SPELL_AURA_ADD_FLAT_MODIFIER on class mask (0,0,0x4000), the mask of Combustion (801388): effect 0 MiscValue 7 (SPELLMOD_CRITICAL_CHANCE) BasePoints 9 DieSides 1 = +10, effect 1 MiscValue 15 (SPELLMOD_CRIT_DAMAGE_BONUS) BasePoints 14 DieSides 1 = +15. SPELLMOD_CRITICAL_CHANCE is consumed as percentage points, so the flat form of effect 0 is correct. SPELLMOD_CRIT_DAMAGE_BONUS is applied to the absolute critical bonus, so the flat form of effect 1 adds 15 raw damage; the percentage form multiplies it by 1.15. Applied to a base of 1000, the fixed effect 1 yields 1150 and the unfixed one 1015.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Combustion carries no critical strike chance modifier before Flak Guns",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 801388,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Combustion carries no critical damage modifier before Flak Guns",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 801388,
+      "op": 15,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 520686
+    },
+    {
+      "action": "assert",
+      "label": "Flak Guns is active on the Tinker",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 520686,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Flak Guns still adds 10 percentage points of Combustion critical strike chance",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 801388,
+      "op": 7,
+      "base": 0,
+      "equals": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Flak Guns raises Combustion's critical damage by 15 percent, not by 15 damage",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 801388,
+      "op": 15,
+      "base": 1000,
+      "equals": 1150,
+      "within_ms": 3000
+    }
+  ]
+}

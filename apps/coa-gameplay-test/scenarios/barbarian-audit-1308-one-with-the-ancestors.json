@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Barbarian audit: One With The Ancestors raises crit chance natively (#1308)",
+  "contract": "#1308: One With The Ancestors rank 1 (560452, EffectBasePoints 1 DieSides 1 = 2) and rank 2 (560889, EffectBasePoints 3 DieSides 1 = 4) are both a single plain APPLY_AURA effect with SPELL_AURA_MOD_CRIT_PCT (290). AuraEffect::HandleAuraModCritPct ignores MiscValue and calls Player::UpdateAllWeaponDependentCritAuras() plus UpdateAllSpellCritChances(), which raise both PLAYER_CRIT_PERCENTAGE (melee_crit_chance) and PLAYER_SPELL_CRIT_PERCENTAGE1..7 (spell_crit_chance) by the aura amount; needs no script. PLAYER_CRIT_PERCENTAGE is only ever recomputed from AuraEffect handlers (UpdateAllWeaponDependentCritAuras has no call site outside them), so a freshly spawned character reads 0 until the first crit-affecting aura is applied or removed. The scenario primes that recalculation with a throwaway learn+unlearn of rank 1 before taking its baseline, so mcrit0/scrit0 reflect the character's true resting crit chance rather than an uninitialized field.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+
+    { "action": "learn", "actor": "b", "spell": 560452 },
+    { "action": "assert", "label": "Priming cycle: rank 1 applies before baseline", "actor": "b", "metric": "aura", "spell": 560452, "equals": 1, "within_ms": 3000 },
+    { "action": "unlearn", "actor": "b", "spell": 560452 },
+    { "action": "assert", "label": "Priming cycle: rank 1 is removed again", "actor": "b", "metric": "aura", "spell": 560452, "equals": 0, "within_ms": 3000 },
+
+    { "action": "snapshot", "label": "Baseline melee crit chance", "actor": "b", "metric": "melee_crit_chance", "save_as": "mcrit0" },
+    { "action": "snapshot", "label": "Baseline spell crit chance", "actor": "b", "metric": "spell_crit_chance", "save_as": "scrit0" },
+
+    { "action": "learn", "actor": "b", "spell": 560452 },
+    { "action": "assert", "label": "Rank 1 (560452) is active", "actor": "b", "metric": "aura", "spell": 560452, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Rank 1 resolves to 2", "actor": "b", "metric": "aura_amount", "spell": 560452, "effect": 0, "equals": 2 },
+    { "action": "assert", "label": "Melee crit chance rises by 2", "actor": "b", "metric": "melee_crit_chance", "relative_to": "mcrit0", "min": 1.9, "max": 2.1 },
+    { "action": "assert", "label": "Spell crit chance rises by 2", "actor": "b", "metric": "spell_crit_chance", "relative_to": "scrit0", "min": 1.9, "max": 2.1 },
+    { "action": "unlearn", "actor": "b", "spell": 560452 },
+    { "action": "assert", "label": "Unlearning restores melee crit chance", "actor": "b", "metric": "melee_crit_chance", "relative_to": "mcrit0", "equals": 0, "within_ms": 3000 },
+
+    { "action": "learn", "actor": "b", "spell": 560889 },
+    { "action": "assert", "label": "Rank 2 (560889) is active", "actor": "b", "metric": "aura", "spell": 560889, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Rank 2 resolves to 4", "actor": "b", "metric": "aura_amount", "spell": 560889, "effect": 0, "equals": 4 },
+    { "action": "assert", "label": "Melee crit chance rises by 4", "actor": "b", "metric": "melee_crit_chance", "relative_to": "mcrit0", "min": 3.9, "max": 4.1 },
+    { "action": "assert", "label": "Spell crit chance rises by 4", "actor": "b", "metric": "spell_crit_chance", "relative_to": "scrit0", "min": 3.9, "max": 4.1 },
+    { "action": "unlearn", "actor": "b", "spell": 560889 },
+    { "action": "assert", "label": "Unlearning restores spell crit chance", "actor": "b", "metric": "spell_crit_chance", "relative_to": "scrit0", "equals": 0, "within_ms": 3000 }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Clockwork Assistant stands about as tall as a gnome (#5411)",
+  "contract": "#5411 reports that the Clockwork Assistant built by Build: Clockwork Assistant 803436 dwarfs dwarves and should stand about as tall as a gnome. The pet 60070 uses display 40388 (model worserobot_nobelt_COA.m2), which the client DBC scales by 1.5 while its sibling displays 40387 and 40389-40397 of the same model use 1.0. The model's CreatureModelData bounding box is 1.863 high, so at object scale 1 the pet stands 2.79 against 1.60 for DwarfMale and 1.30 for GnomeMale; Mechano-Bear (display 94943, 1.936 at 0.75) stands 1.45. The client multiplies the display scale by the object scale the server sends from creature_template_model.DisplayScale. At 0.5 the Clockwork Assistant stands 1.40, between a gnome and a dwarf and level with Mechano-Bear. A level 80 Tinker builds the pet and the server-side object scale is read.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks and class synchronisation settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Build: Clockwork Assistant",
+      "actor": "tinker",
+      "spell": 803436
+    },
+    {
+      "action": "cast",
+      "label": "Build: Clockwork Assistant",
+      "actor": "tinker",
+      "spell": 803436
+    },
+    {
+      "action": "assert",
+      "label": "Clockwork Assistant is built",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 60070,
+      "within_ms": 9000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Clockwork Assistant uses display 40388",
+      "actor": "tinker",
+      "metric": "pet_display",
+      "equals": 40388
+    },
+    {
+      "action": "assert",
+      "label": "#5411: Clockwork Assistant is scaled to about gnome height",
+      "actor": "tinker",
+      "metric": "pet_scale",
+      "min": 0.49,
+      "max": 0.51
+    }
+  ]
+}

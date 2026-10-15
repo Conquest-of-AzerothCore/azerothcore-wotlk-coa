@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "name": "Necromancer Dead Man Walking shortens roots and slows by 25% (#1519)",
+  "contract": "Dead Man Walking 300233 is a Necromancer class-tree passive (CharacterAdvancement 33751, ClassType 25 = class 23, Tab 87 Class, AbilityEssenceCost 1) whose description reads 'Reduces the duration of root and slow effects against you by $s1%.' Both effects are native aura 232 SPELL_AURA_MECHANIC_DURATION_MOD on the caster, EffectBasePoints -26 + DieSides 1 = -25, MiscValue 7 (MECHANIC_ROOT) and 11 (MECHANIC_SNARE). The aura is not one of the family-29 aura 42/354 effects the Necromancer contract turns into dummies, and Unit::ModSpellDuration reads GetTotalAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD, mechanic) for every harmful aura a real cast lands on the recipient, so no script is required. Fixtures: Chains of Ice 113 (spell Mechanic 7, one MOD_ROOT effect, DurationIndex 31 = 8000 ms) and Curse of Exhaustion 65815 (spell Mechanic 11, one MOD_DECREASE_SPEED effect, DurationIndex 29 = 12000 ms), both cast by a hostile creature ten levels above the players so the spell hit roll cannot miss; each player receives each spell once, so diminishing returns cannot shorten either application. The untalented control must keep 8000 ms and 12000 ms; the Necromancer with Dead Man Walking must get 6000 ms and 9000 ms.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 70 },
+    { "id": "control", "race": 5, "class": 23, "level": 70 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "necro", "spell": 300233 },
+    {
+      "action": "assert", "label": "The Dead Man Walking passive aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 300233, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The root reduction resolves to -25", "actor": "necro",
+      "metric": "aura_amount", "spell": 300233, "effect": 0, "equals": -25
+    },
+    {
+      "action": "assert", "label": "The slow reduction resolves to -25", "actor": "necro",
+      "metric": "aura_amount", "spell": 300233, "effect": 1, "equals": -25
+    },
+    {
+      "action": "assert", "label": "CONTROL: the other Necromancer lacks the passive", "actor": "control",
+      "metric": "aura", "spell": 300233, "equals": 0
+    },
+    { "action": "cast", "label": "Root the control", "actor": "golem", "spell": 113, "target": "control" },
+    {
+      "action": "assert", "label": "SETUP: the root lands on the control", "actor": "control",
+      "metric": "aura", "spell": 113, "equals": 1, "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "CONTROL: the root keeps its 8 second duration", "actor": "control",
+      "metric": "aura_duration_ms", "spell": 113, "min": 7000, "max": 8000
+    },
+    { "action": "cast", "label": "Root the Necromancer", "actor": "golem", "spell": 113, "target": "necro" },
+    {
+      "action": "assert", "label": "SETUP: the root lands on the Necromancer", "actor": "necro",
+      "metric": "aura", "spell": 113, "equals": 1, "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Dead Man Walking cuts the root to 6 seconds", "actor": "necro",
+      "metric": "aura_duration_ms", "spell": 113, "min": 5000, "max": 6000
+    },
+    { "action": "cast", "label": "Slow the control", "actor": "golem", "spell": 65815, "target": "control" },
+    {
+      "action": "assert", "label": "SETUP: the slow lands on the control", "actor": "control",
+      "metric": "aura", "spell": 65815, "equals": 1, "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "CONTROL: the slow keeps its 12 second duration", "actor": "control",
+      "metric": "aura_duration_ms", "spell": 65815, "min": 11000, "max": 12000
+    },
+    { "action": "cast", "label": "Slow the Necromancer", "actor": "golem", "spell": 65815, "target": "necro" },
+    {
+      "action": "assert", "label": "SETUP: the slow lands on the Necromancer", "actor": "necro",
+      "metric": "aura", "spell": 65815, "equals": 1, "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Dead Man Walking cuts the slow to 9 seconds", "actor": "necro",
+      "metric": "aura_duration_ms", "spell": 65815, "min": 8000, "max": 9000
+    }
+  ]
+}

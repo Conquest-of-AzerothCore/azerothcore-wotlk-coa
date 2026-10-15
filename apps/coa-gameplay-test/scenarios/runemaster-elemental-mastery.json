@@ -1,0 +1,316 @@
+{
+  "schema": 1,
+  "name": "Runemaster Elemental Mastery transforms Primordial Blast from Runic Brand damage (#1025)",
+  "contract": [
+    "Tooltip 806711: damage dealt by Runic Brand has a $h% (ProcChance 33) chance to transform your Primordial",
+    "Blast into a random unique elemental version of itself.",
+    "806711 effect 0 is PROC_TRIGGER_SPELL 725391; Spell.dbc gives it ProcFlags 0, so no proc entry existed.",
+    "Runic Brand's weapon hits are 712322 (the only family 38 spell with mask0 0x20, melee class), triggered",
+    "twice per cast by the brand_weapons script, so the proc must accept triggered spells.",
+    "725391 is Ascension effect 184 (trigger random spell, server group 7015), which the core left as EffectNULL.",
+    "Its tooltip 'Your Primordial Blast has transformed into Stratus!' names the group: the 6 sec dummy auras",
+    "Ignis 713003, Lithos 717070, Hydros 718040 and Stratus 721085 ('...has transformed into X!').",
+    "Each names an elemental Primordial Blast with the same family flags: Ignis 712668, Lithos 712858, Hydros",
+    "713002 and Stratus 712404 (matching names and icons).",
+    "While a transform is active, Primordial Blast 800732 stands in as its elemental version on the server,",
+    "casting it replaces the cast and consumes the transform, and a new transform replaces an older one.",
+    "Expiry restores Primordial Blast. 40 Runic Brand hits at 33% fail to proc with probability 1e-7.",
+    "A Runemaster without the talent keeps Primordial Blast. Weapon skills and Dual Wield are fixture setup."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "rm", "race": 1, "class": 32, "level": 80, "melee_hit_rating": 10000, "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "plain", "race": 1, "class": 32, "level": 80, "melee_hit_rating": 10000, "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 3},
+    {"id": "plain_dummy", "owner": "plain", "entry": 36, "level": 80, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and the characters settle", "ms": 5000},
+    {"action": "learn", "actor": "rm", "spell": 201},
+    {"action": "learn", "actor": "rm", "spell": 1180},
+    {"action": "learn", "actor": "rm", "spell": 674},
+    {"action": "learn", "actor": "rm", "spell": 712299},
+    {"action": "learn", "actor": "rm", "spell": 800732},
+    {"action": "add_item", "actor": "rm", "item": 25},
+    {"action": "add_item", "actor": "rm", "item": 2092},
+    {"action": "equip", "label": "Worn Shortsword in the main hand", "actor": "rm", "item": 25, "slot": 15},
+    {"action": "equip", "label": "Worn Dagger in the off hand", "actor": "rm", "item": 2092, "slot": 16},
+    {"action": "learn", "actor": "plain", "spell": 201},
+    {"action": "learn", "actor": "plain", "spell": 1180},
+    {"action": "learn", "actor": "plain", "spell": 674},
+    {"action": "learn", "actor": "plain", "spell": 712299},
+    {"action": "learn", "actor": "plain", "spell": 800732},
+    {"action": "add_item", "actor": "plain", "item": 25},
+    {"action": "add_item", "actor": "plain", "item": 2092},
+    {"action": "equip", "label": "Worn Shortsword in the main hand", "actor": "plain", "item": 25, "slot": 15},
+    {"action": "equip", "label": "Worn Dagger in the off hand", "actor": "plain", "item": 2092, "slot": 16},
+    {"action": "learn", "actor": "rm", "spell": 806711},
+    {"action": "wait", "ms": 1000},
+    {
+      "action": "assert", "label": "Elemental Mastery passive is active", "actor": "rm", "metric": "aura",
+      "spell": 806711, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Primordial Blast starts untransformed", "actor": "rm",
+      "metric": "temporary_spell_replacement", "spell": 800732, "equals": 800732
+    },
+    {"action": "set_aura", "label": "Fixture: Ignis transform", "actor": "rm", "spell": 713003, "stacks": 1},
+    {
+      "action": "assert", "label": "Ignis transforms Primordial Blast", "actor": "rm",
+      "metric": "temporary_spell_replacement", "spell": 800732, "equals": 712668, "within_ms": 1000
+    },
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Primordial Blast as Ignis", "actor": "rm", "spell": 800732, "target": "dummy"},
+    {
+      "action": "assert", "label": "Ignis strikes in place of Primordial Blast", "actor": "rm",
+      "metric": "spell_damage_count", "spell": 712668, "target": "dummy", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Casting Ignis consumes the transform", "actor": "rm", "metric": "aura",
+      "spell": 713003, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Primordial Blast returns after Ignis", "actor": "rm",
+      "metric": "temporary_spell_replacement", "spell": 800732, "equals": 800732, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The lent Ignis spell is withdrawn", "actor": "rm", "metric": "knows_spell",
+      "spell": 712668, "equals": 0
+    },
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "set_aura", "label": "Fixture: Lithos transform", "actor": "rm", "spell": 717070, "stacks": 1},
+    {
+      "action": "assert", "label": "Lithos transforms Primordial Blast", "actor": "rm",
+      "metric": "temporary_spell_replacement", "spell": 800732, "equals": 712858, "within_ms": 1000
+    },
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Primordial Blast as Lithos", "actor": "rm", "spell": 800732, "target": "dummy"},
+    {
+      "action": "assert", "label": "Lithos strikes in place of Primordial Blast", "actor": "rm",
+      "metric": "spell_damage_count", "spell": 712858, "target": "dummy", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Casting Lithos consumes the transform", "actor": "rm", "metric": "aura",
+      "spell": 717070, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Primordial Blast returns after Lithos", "actor": "rm",
+      "metric": "temporary_spell_replacement", "spell": 800732, "equals": 800732, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The lent Lithos spell is withdrawn", "actor": "rm", "metric": "knows_spell",
+      "spell": 712858, "equals": 0
+    },
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "set_aura", "label": "Fixture: Hydros transform", "actor": "rm", "spell": 718040, "stacks": 1},
+    {
+      "action": "assert", "label": "Hydros transforms Primordial Blast", "actor": "rm",
+      "metric": "temporary_spell_replacement", "spell": 800732, "equals": 713002, "within_ms": 1000
+    },
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Primordial Blast as Hydros", "actor": "rm", "spell": 800732, "target": "dummy"},
+    {
+      "action": "assert", "label": "Hydros strikes in place of Primordial Blast", "actor": "rm",
+      "metric": "spell_damage_count", "spell": 713002, "target": "dummy", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Casting Hydros consumes the transform", "actor": "rm", "metric": "aura",
+      "spell": 718040, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Primordial Blast returns after Hydros", "actor": "rm",
+      "metric": "temporary_spell_replacement", "spell": 800732, "equals": 800732, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The lent Hydros spell is withdrawn", "actor": "rm", "metric": "knows_spell",
+      "spell": 713002, "equals": 0
+    },
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "set_aura", "label": "Fixture: Stratus transform", "actor": "rm", "spell": 721085, "stacks": 1},
+    {
+      "action": "assert", "label": "Stratus transforms Primordial Blast", "actor": "rm",
+      "metric": "temporary_spell_replacement", "spell": 800732, "equals": 712404, "within_ms": 1000
+    },
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Primordial Blast as Stratus", "actor": "rm", "spell": 800732, "target": "dummy"},
+    {
+      "action": "assert", "label": "Stratus strikes in place of Primordial Blast", "actor": "rm",
+      "metric": "spell_damage_count", "spell": 712404, "target": "dummy", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Casting Stratus consumes the transform", "actor": "rm", "metric": "aura",
+      "spell": 721085, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Primordial Blast returns after Stratus", "actor": "rm",
+      "metric": "temporary_spell_replacement", "spell": 800732, "equals": 800732, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The lent Stratus spell is withdrawn", "actor": "rm", "metric": "knows_spell",
+      "spell": 712404, "equals": 0
+    },
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {
+      "action": "assert", "label": "The elemental versions replaced every Primordial Blast cast", "actor": "rm",
+      "metric": "spell_damage_count", "spell": 800732, "target": "dummy", "equals": 0
+    },
+    {"action": "set_aura", "label": "Fixture: Ignis transform", "actor": "rm", "spell": 713003, "stacks": 1},
+    {"action": "set_aura", "label": "Fixture: a later Lithos transform", "actor": "rm", "spell": 717070, "stacks": 1},
+    {
+      "action": "assert", "label": "The later transform replaces the earlier one", "actor": "rm", "metric": "aura",
+      "spell": 713003, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Primordial Blast now stands in as Lithos", "actor": "rm",
+      "metric": "temporary_spell_replacement", "spell": 800732, "equals": 712858
+    },
+    {
+      "action": "assert", "label": "Ignis is no longer lent", "actor": "rm", "metric": "knows_spell", "spell": 712668,
+      "equals": 0
+    },
+    {
+      "action": "assert", "label": "Lithos expires after 6 sec", "actor": "rm", "metric": "aura", "spell": 717070,
+      "equals": 0, "within_ms": 7000
+    },
+    {
+      "action": "assert", "label": "Expiry restores Primordial Blast", "actor": "rm",
+      "metric": "temporary_spell_replacement", "spell": 800732, "equals": 800732, "within_ms": 1000
+    },
+    {"action": "reset_cooldown", "actor": "rm", "spell": 712299},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runic Brand 1", "actor": "rm", "spell": 712299, "target": "dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 712299},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runic Brand 2", "actor": "rm", "spell": 712299, "target": "dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 712299},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runic Brand 3", "actor": "rm", "spell": 712299, "target": "dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 712299},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runic Brand 4", "actor": "rm", "spell": 712299, "target": "dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 712299},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runic Brand 5", "actor": "rm", "spell": 712299, "target": "dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 712299},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runic Brand 6", "actor": "rm", "spell": 712299, "target": "dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 712299},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runic Brand 7", "actor": "rm", "spell": 712299, "target": "dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 712299},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runic Brand 8", "actor": "rm", "spell": 712299, "target": "dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 712299},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runic Brand 9", "actor": "rm", "spell": 712299, "target": "dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 712299},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runic Brand 10", "actor": "rm", "spell": 712299, "target": "dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 712299},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runic Brand 11", "actor": "rm", "spell": 712299, "target": "dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 712299},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runic Brand 12", "actor": "rm", "spell": 712299, "target": "dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 712299},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runic Brand 13", "actor": "rm", "spell": 712299, "target": "dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 712299},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runic Brand 14", "actor": "rm", "spell": 712299, "target": "dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 712299},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runic Brand 15", "actor": "rm", "spell": 712299, "target": "dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 712299},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runic Brand 16", "actor": "rm", "spell": 712299, "target": "dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 712299},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runic Brand 17", "actor": "rm", "spell": 712299, "target": "dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 712299},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runic Brand 18", "actor": "rm", "spell": 712299, "target": "dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 712299},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runic Brand 19", "actor": "rm", "spell": 712299, "target": "dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 712299},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Runic Brand 20", "actor": "rm", "spell": 712299, "target": "dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {
+      "action": "assert", "label": "Runic Brand hit with both weapons 20 times", "actor": "rm",
+      "metric": "spell_damage_count", "spell": 712322, "target": "dummy", "min": 38, "max": 40
+    },
+    {
+      "action": "assert", "label": "Runic Brand damage transformed Primordial Blast at least once", "actor": "rm",
+      "metric": "spell_proc_count", "spell": 806711, "min": 1, "max": 40
+    },
+    {
+      "action": "snapshot", "label": "Elemental Mastery procs", "actor": "rm", "metric": "spell_proc_count",
+      "spell": 806711, "save_as": "procs"
+    },
+    {
+      "action": "assert", "label": "Every proc casts Alteration Trigger once", "actor": "rm",
+      "metric": "spell_cast_count", "spell": 725391, "ratio_to": "procs", "equals": 1
+    },
+    {"action": "reset_cooldown", "actor": "plain", "spell": 712299},
+    {"action": "set_power", "actor": "plain", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Control Runic Brand 1", "actor": "plain", "spell": 712299, "target": "plain_dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "plain", "spell": 712299},
+    {"action": "set_power", "actor": "plain", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Control Runic Brand 2", "actor": "plain", "spell": 712299, "target": "plain_dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "plain", "spell": 712299},
+    {"action": "set_power", "actor": "plain", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Control Runic Brand 3", "actor": "plain", "spell": 712299, "target": "plain_dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "plain", "spell": 712299},
+    {"action": "set_power", "actor": "plain", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Control Runic Brand 4", "actor": "plain", "spell": 712299, "target": "plain_dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "reset_cooldown", "actor": "plain", "spell": 712299},
+    {"action": "set_power", "actor": "plain", "power": 0, "value": 2000},
+    {"action": "cast", "label": "Control Runic Brand 5", "actor": "plain", "spell": 712299, "target": "plain_dummy"},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {
+      "action": "assert", "label": "Control: Runic Brand hits", "actor": "plain", "metric": "spell_damage_count",
+      "spell": 712322, "target": "plain_dummy", "min": 8
+    },
+    {
+      "action": "assert", "label": "Control: no Alteration Trigger without the talent", "actor": "plain",
+      "metric": "spell_cast_count", "spell": 725391, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Control: Primordial Blast stays untransformed", "actor": "plain",
+      "metric": "temporary_spell_replacement", "spell": 800732, "equals": 800732
+    }
+  ]
+}

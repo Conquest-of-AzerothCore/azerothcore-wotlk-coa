@@ -1,0 +1,165 @@
+{
+  "schema": 1,
+  "name": "Silver Bullets adds its extra damage against Undead (#2178)",
+  "contract": "Silver Bullets 574149 / 574163 read 'Increases the damage of Darkslayer by $s1%, increased by an additional $s2% against Undead' with $s1 = $s2 = 10 / 20 (Spell.dbc 2026-09-17). Effect 0 is a SPELLMOD_DAMAGE percent mod on class mask word2 0x20 (Darkslayer). Effect 1 is a raw aura 112 record with the private selector 20014 and MiscValueB 32 (creature-type mask, Undead = 1 << (6 - 1)), which nothing reads: native aura 168 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS honours the effect's class mask once the selector is in MiscValueB (Unit.cpp:8863, 10808). Darkslayer 681203 is DmgClass 3 and goes through MeleeDamageBonusDone, which multiplies the versus factor into the damage and then applies SPELLMOD_DAMAGE, so an Undead target reads 1.10 x 1.10 = 1.21 (rank 1) and 1.20 x 1.20 = 1.44 (rank 2), a non-Undead 1.10 / 1.20. On main the Undead ratios equal the non-Undead ones. Creature types come from data/sql/base/db_world/creature_template.sql: 201 Brittlebones Skeleton is type 6 (Undead), 36 Harvest Golem type 9 (Mechanical, the control). Dawn Blade 802024 is a family 21 spell outside the mask.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wh",
+      "race": 1,
+      "class": 15,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "undead",
+      "owner": "wh",
+      "entry": 201,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "plain",
+      "owner": "wh",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 6
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "wh",
+      "spell": 574149
+    },
+    {
+      "action": "unlearn",
+      "actor": "wh",
+      "spell": 574163
+    },
+    {
+      "action": "snapshot",
+      "label": "Darkslayer against the Undead without Silver Bullets",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 681203,
+      "target": "undead",
+      "save_as": "undead_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Darkslayer against the Mechanical control without Silver Bullets",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 681203,
+      "target": "plain",
+      "save_as": "plain_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Dawn Blade against the Undead without Silver Bullets",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 802024,
+      "target": "undead",
+      "save_as": "dawn_base"
+    },
+    {
+      "action": "learn",
+      "label": "Silver Bullets rank 1",
+      "actor": "wh",
+      "spell": 574149
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: +10% Darkslayer against a non-Undead (effect 0)",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 681203,
+      "target": "plain",
+      "ratio_to": "plain_base",
+      "min": 1.095,
+      "max": 1.105
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: an additional +10% against Undead, 1.10 x 1.10 (effect 1)",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 681203,
+      "target": "undead",
+      "ratio_to": "undead_base",
+      "min": 1.205,
+      "max": 1.215
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 does not touch an unmasked ability",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 802024,
+      "target": "undead",
+      "ratio_to": "dawn_base",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "wh",
+      "spell": 574149
+    },
+    {
+      "action": "learn",
+      "label": "Silver Bullets rank 2",
+      "actor": "wh",
+      "spell": 574163
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: +20% Darkslayer against a non-Undead",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 681203,
+      "target": "plain",
+      "ratio_to": "plain_base",
+      "min": 1.195,
+      "max": 1.205
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: an additional +20% against Undead, 1.20 x 1.20",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 681203,
+      "target": "undead",
+      "ratio_to": "undead_base",
+      "min": 1.435,
+      "max": 1.445
+    },
+    {
+      "action": "unlearn",
+      "actor": "wh",
+      "spell": 574163
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning removes the bonus",
+      "actor": "wh",
+      "metric": "melee_spell_damage_done",
+      "spell": 681203,
+      "target": "undead",
+      "ratio_to": "undead_base",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

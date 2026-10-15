@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Incinerator reduces target resistance by 30 at level 30 (#660)",
+  "contract": "#660: Incinerator 807510 is an aura 123 MOD_TARGET_RESISTANCE, misc 124 (Fire|Nature|Frost|Shadow|Arcane), base -31+1 = -30 with RealPointsPerLevel -0.5 starting at level 30 (BaseLevel 30), computed natively by SpellEffectInfo::CalcValue (SpellInfo.cpp:474-489). At level 30 the level term is zero so the amount is exactly -30. Unit::GetEffectiveResistChance adds the aura to the victim's resistance (Unit.cpp:2378-2382). Asserts the aura effect amount is -30 once the passive is learned; a non-zero amount proves the specialization passive is applied and scaled natively. The audit report does not verify how the passive is granted, so the scenario learns it explicitly.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "No penetration aura before learning",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 807510,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 807510
+    },
+    {
+      "action": "assert",
+      "label": "Incinerator aura is present",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 807510,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Incinerator amount is -30 at level 30",
+      "actor": "p",
+      "metric": "aura_amount",
+      "spell": 807510,
+      "effect": 0,
+      "equals": -30,
+      "within_ms": 3000
+    }
+  ]
+}

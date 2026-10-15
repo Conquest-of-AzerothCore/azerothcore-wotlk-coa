@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "name": "Pyromancer Flames of Focus raises the Flamecasting stack cap (#2221)",
+  "contract": "Flames of Focus 680977 reads \"Adds $s1 additional stack to Flamecasting and increases its duration by $/1000;s2 sec.\" Effect 0 is aura 107 SPELLMOD_MAX_AURA_STACKS BasePoints 0 (+1) and effect 1 SPELLMOD_DURATION BasePoints 4999 (+5000 ms), both on class mask 0x2000 (Flamecasting 804301, StackAmount 5, duration 15000 ms), so Flamecasting stacks to 6 and lasts 20 s. The duration half already worked; the stack half was lost because AscensionPyromancer::Flames capped the count at the literal 5 through Aura::SetStackAmount.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 680378
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 680977
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 680378
+    },
+    {
+      "action": "assert",
+      "label": "Emberheart grants its five Flamecasting stacks",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "spell": 804301,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "p",
+      "spell": 680378
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown expire",
+      "ms": 2500
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 680378
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Flamecasting reaches 6 stacks with Flames of Focus (5 + 1)",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "spell": 804301,
+      "equals": 6,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Flamecasting lasts longer than its native 15000 ms",
+      "actor": "p",
+      "metric": "aura_duration_ms",
+      "spell": 804301,
+      "min": 15200,
+      "within_ms": 1000
+    }
+  ]
+}

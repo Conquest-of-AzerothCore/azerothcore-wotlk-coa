@@ -1,0 +1,406 @@
+{
+  "schema": 1,
+  "name": "Reaper: Ghost Form cannot apply after an indoor corpse reclaim (#6437)",
+  "contract": "Ghost Form561083 permits casting while dead but is usable only outdoors. The native dead-target guard prevents an applied aura until resurrection; a completed dead cast can leave an owned aura pending. Corpse reclaim indoors must discard that non-passive outdoor-only owned aura, so it cannot apply after resurrection or reappear on a later outdoor transition. An outdoor corpse reclaim preserves the permitted form and its authored60% speed. Living indoor casting is rejected with93 and an ordinary living outdoor-to-indoor transition removes the form. The indoor location is native Innkeeper Firebrew5111/guid1745 at (-4840.67,-857.094,501.997), with vmap indoor checks enabled. Each dead cast is observed as a new SpellGo relative to a pre-cast snapshot before returning to the corpse. Six seconds after reclaim cover delayed aura target-map updates. Teleports position the fixture only; casts, spirit release and corpse reclaim use normal native handlers. CMSG_RECLAIM_CORPSE466 ignores its GUID field and validates the actual corpse, delay and distance. Acquisition of561083 is outside this aura-lifecycle regression.",
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -4840.67,
+    "y": -857.094,
+    "z": 501.997,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "r",
+      "race": 1,
+      "class": 30,
+      "level": 33
+    },
+    {
+      "id": "out",
+      "race": 1,
+      "class": 30,
+      "level": 33
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 561083
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "run_speed_rate",
+      "save_as": "living_speed"
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 561083
+    },
+    {
+      "action": "assert",
+      "label": "The native geometry prohibits a living indoor cast",
+      "actor": "r",
+      "metric": "cast_failure",
+      "spell": 561083,
+      "equals": 93
+    },
+    {
+      "action": "teleport",
+      "actor": "r",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 561083
+    },
+    {
+      "action": "assert",
+      "label": "The outdoor cast supplies the real travel aura",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 561083,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "r",
+      "map": 0,
+      "x": -4840.67,
+      "y": -857.094,
+      "z": 501.997
+    },
+    {
+      "action": "assert",
+      "label": "The ordinary living transition removes the aura",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 561083,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "out",
+      "spell": 561083
+    },
+    {
+      "action": "snapshot",
+      "actor": "out",
+      "metric": "run_speed_rate",
+      "save_as": "outdoor_living_speed"
+    },
+    {
+      "action": "teleport",
+      "actor": "out",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "die",
+      "actor": "out"
+    },
+    {
+      "action": "release_spirit",
+      "actor": "out"
+    },
+    {
+      "action": "assert",
+      "actor": "out",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "actor": "out",
+      "metric": "spell_go_count",
+      "spell": 561083,
+      "save_as": "out_dead_go_before"
+    },
+    {
+      "action": "cast",
+      "actor": "out",
+      "spell": 561083
+    },
+    {
+      "action": "assert",
+      "label": "The native dead cast completes",
+      "actor": "out",
+      "metric": "spell_go_count",
+      "spell": 561083,
+      "min": 1,
+      "within_ms": 3000,
+      "relative_to": "out_dead_go_before"
+    },
+    {
+      "action": "assert",
+      "label": "Dead-target guards prevent an applied travel aura",
+      "actor": "out",
+      "metric": "aura",
+      "spell": 561083,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "out",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053
+    },
+    {
+      "action": "wait",
+      "ms": 35000
+    },
+    {
+      "action": "client_packet",
+      "actor": "out",
+      "opcode": 466,
+      "early": true,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "out"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL the outdoor corpse reclaim succeeds",
+      "actor": "out",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL an outdoor resurrection applies any pending permitted form",
+      "actor": "out",
+      "metric": "aura",
+      "spell": 561083,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL its authored60% speed remains outdoors",
+      "actor": "out",
+      "metric": "run_speed_rate",
+      "relative_to": "outdoor_living_speed",
+      "min": 0.59,
+      "max": 0.61
+    },
+    {
+      "action": "die",
+      "actor": "r"
+    },
+    {
+      "action": "release_spirit",
+      "actor": "r"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 8326,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "teleport",
+      "actor": "r",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_go_count",
+      "spell": 561083,
+      "save_as": "r_dead_go_before"
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 561083
+    },
+    {
+      "action": "assert",
+      "label": "The native dead cast completes",
+      "actor": "r",
+      "metric": "spell_go_count",
+      "spell": 561083,
+      "min": 1,
+      "within_ms": 3000,
+      "relative_to": "r_dead_go_before"
+    },
+    {
+      "action": "assert",
+      "label": "Dead-target guards prevent an applied travel aura",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 561083,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "r",
+      "map": 0,
+      "x": -4840.67,
+      "y": -857.094,
+      "z": 501.997
+    },
+    {
+      "action": "assert",
+      "label": "Returning to the indoor corpse still has no applied aura",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 561083,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 35000
+    },
+    {
+      "action": "client_packet",
+      "actor": "r",
+      "opcode": 466,
+      "early": true,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "r"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The native corpse reclaim resurrects the player",
+      "actor": "r",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Observe delayed aura target-map application after resurrection",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Resurrection indoors removes the outdoors-only form",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 561083,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The form and ghost speed no longer survive indoors",
+      "actor": "r",
+      "metric": "run_speed_rate",
+      "relative_to": "living_speed",
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "r",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The discarded pending form does not reappear outdoors",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 561083,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No discarded travel speed reappears outdoors",
+      "actor": "r",
+      "metric": "run_speed_rate",
+      "relative_to": "living_speed",
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "out",
+      "map": 0,
+      "x": -4840.67,
+      "y": -857.094,
+      "z": 501.997
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL the preserved outdoor form still expires on an ordinary living indoor transition",
+      "actor": "out",
+      "metric": "aura",
+      "spell": 561083,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL the preserved form speed is removed indoors",
+      "actor": "out",
+      "metric": "run_speed_rate",
+      "relative_to": "outdoor_living_speed",
+      "equals": 0
+    }
+  ]
+}

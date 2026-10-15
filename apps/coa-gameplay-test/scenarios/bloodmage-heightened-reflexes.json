@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Heightened Reflexes raises dodge chance and expertise (#1218)",
+  "contract": "Heightened Reflexes 704627 (4% dodge / 5 expertise) and 704628 (8% / 10): \"Increases your chance to dodge by $s1% and your expertise by $s2.\" Effect 0 is aura 49 SPELL_AURA_MOD_DODGE_PERCENT, handled by AuraEffect::HandleAuraModDodgePercent (SpellAuraEffects.cpp:114), which writes PLAYER_DODGE_PERCENTAGE - the field the dodge_chance metric reads. Effect 1 is aura 240 SPELL_AURA_MOD_EXPERTISE, handled by AuraEffect::HandleAuraModExpertise (SpellAuraEffects.cpp:305) and consumed in StatSystem.cpp:1029, which writes PLAYER_EXPERTISE. No source or SQL change is involved.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "dodge_chance",
+      "save_as": "dodge_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "expertise",
+      "save_as": "exp_base"
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 704627
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 704627,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds 4 points of dodge",
+      "actor": "b",
+      "metric": "dodge_chance",
+      "relative_to": "dodge_base",
+      "min": 3.9,
+      "max": 4.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds 5 expertise",
+      "actor": "b",
+      "metric": "expertise",
+      "relative_to": "exp_base",
+      "equals": 5
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 704627
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 704628
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 adds 8 points of dodge",
+      "actor": "b",
+      "metric": "dodge_chance",
+      "relative_to": "dodge_base",
+      "min": 7.9,
+      "max": 8.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 adds 10 expertise",
+      "actor": "b",
+      "metric": "expertise",
+      "relative_to": "exp_base",
+      "equals": 10
+    }
+  ]
+}

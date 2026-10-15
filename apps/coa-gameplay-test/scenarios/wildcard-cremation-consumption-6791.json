@@ -1,0 +1,194 @@
+{
+  "schema": 1,
+  "name": "Cremation consumes the original caster Fireball periodic damage and produces its burn",
+  "contract": [
+    "Spell278067 consumes only its caster Fireball/Pyroblast/Living Bomb/Searing Brand periodic damage.",
+    "Its tooltip requires seven times the remaining periodic damage plus35-37 times player level, spread",
+    "over278068 ten seconds. At level10 Fireball133 adds two two-second ticks of one damage. Immediate",
+    "consumption yields364-384 total before per-tick integer rounding, five ticks of72-76. Unlisted Rend",
+    "is preserved."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 10,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 10,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 201
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 772
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 772,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 133
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 278067
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 133,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 133,
+      "caster": "hero",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 133,
+      "effect": 1,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 278067,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 278067,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 133,
+      "caster": "hero",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 772,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 278068,
+      "caster": "hero",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 278068,
+      "effect": 0,
+      "min": 72,
+      "max": 76
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 278068,
+      "target": "enemy",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_total",
+      "spell": 278068,
+      "target": "enemy",
+      "min": 360,
+      "max": 380
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "cooldown_ms",
+      "spell": 278067,
+      "min": 45000
+    }
+  ]
+}

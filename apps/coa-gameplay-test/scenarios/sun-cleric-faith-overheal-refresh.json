@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Faith refreshes on any direct heal, even at full health (#4574)",
+  "contract": "Faith 707077 (proc trigger, spell_proc rev_20260909_13_sun_cleric_completion.sql:39, 100% chance) casts the armor buff 804405 on Check() success. Its own tooltip reads 'Direct healing done now increases the target's Armor by ...' (coa-dbc-viewer record --id 707077 against /home/fab/CoaServer/dbc_clientset) -- 'healing done', with no health-threshold or effective-healing qualifier; 804405's own tooltip is likewise unconditional. AscensionSunClericEvents.cpp's Check() gated case 707077 on the shared `healing` variable, which is event.GetHealInfo()->GetEffectiveHeal() (zero on an already-full-health target, i.e. pure overheal), so a full-health heal never refreshed 804405. Fix reads event.GetHealInfo()->GetHeal() (the raw/attempted heal) for the 707077 branch only, leaving 704563 (Warmth, not reported here) on the shared effective-heal variable. Asserts a direct heal on a full-health ally still applies Faith.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 },
+    { "id": "ally", "race": 1, "class": 1, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "cleric", "spell": 707077 },
+    { "action": "learn", "actor": "cleric", "spell": 500143 },
+    {
+      "action": "assert", "label": "SETUP: ally at full health",
+      "actor": "ally", "metric": "health_pct", "min": 99
+    },
+    {
+      "action": "assert", "label": "SETUP: no Faith buff yet",
+      "actor": "ally", "metric": "aura", "spell": 804405, "caster": "cleric", "equals": 0
+    },
+    { "action": "cast", "label": "Direct heal a full-health ally (Illumination)", "actor": "cleric", "spell": 500143, "target": "ally" },
+    {
+      "action": "assert", "label": "Faith applies despite the heal overhealing",
+      "actor": "ally", "metric": "aura", "spell": 804405, "caster": "cleric", "equals": 1, "within_ms": 3000
+    }
+  ]
+}

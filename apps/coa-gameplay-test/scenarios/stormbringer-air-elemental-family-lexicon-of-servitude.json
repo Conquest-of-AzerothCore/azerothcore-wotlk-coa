@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Lexicon of Servitude frees and speeds Summon: Air Elemental, and reduces the pet's cooldowns (#1940)",
+  "contract": "#1940: Lexicon of Servitude rank 1 (520087) is a stock SPELL_AURA_ADD_PCT_MODIFIER (108) pair: SPELLMOD_COST (misc 14) and SPELLMOD_CASTING_TIME (misc 10), both -100%, class-masked to Summon: Air Elemental (804019, the only family-22 spell with SpellFamilyFlags[0] & 0x20000). Cost is applied at SpellInfo::CalcPowerCost against the total cost (804019 has ManaCostPercentage 75, no flat ManaCost), and cast time at Unit::ModSpellCastTime; both are native paths, no module code needed. 804019 has CastingTimeIndex 6 (SpellCastTimes.CastTime 5000 ms) and RecoveryTime/CategoryRecoveryTime 0, and 520087 has DurationIndex 8 (15000 ms), so the free/instant window is exactly one 15 s buff, matching the tooltip's own 'Lasts 15 sec' clause. Rank 2 (705722) is a stock SPELLMOD_COOLDOWN (misc 11) of -20%, class-masked to exactly the Air Elemental's kit (300836 Breath of Air, 804022 Blessing of Air, 806016 Windpelt, seeded in rev_20260914_09_air_elemental.sql for CreatureID 500941); the owner's SPELLMOD_COOLDOWN reaches pet casts via Creature::AddSpellCooldown calling GetSpellModOwner(), and Pet does not override that method. 705722 has no CharacterAdvancement row (SkillLineAbility 91373 uses AcquireMethod 0, no trainer/module/SQL grant), so it is not currently obtainable, but the mechanism it uses is proven here as well so the issue can be closed on the same evidence. Gale (804036) sits outside 705722's class mask and is asserted unchanged as a negative control.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "s", "spell": 804019 },
+    { "action": "assert", "label": "BASELINE: Summon: Air Elemental has its stock 5 s cast time without Lexicon of Servitude",
+      "actor": "s", "metric": "spell_cast_time_ms", "spell": 804019, "equals": 5000 },
+    { "action": "assert", "label": "BASELINE: Summon: Air Elemental costs mana without Lexicon of Servitude",
+      "actor": "s", "metric": "spell_power_cost", "spell": 804019, "min": 1 },
+    { "action": "learn", "actor": "s", "spell": 520087 },
+    { "action": "cast", "actor": "s", "spell": 520087 },
+    { "action": "assert", "label": "DISCRIMINATING: Lexicon of Servitude rank 1 is applied",
+      "actor": "s", "metric": "aura", "spell": 520087, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: Lexicon of Servitude makes Summon: Air Elemental instant",
+      "actor": "s", "metric": "spell_cast_time_ms", "spell": 804019, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: Lexicon of Servitude makes Summon: Air Elemental free",
+      "actor": "s", "metric": "spell_power_cost", "spell": 804019, "equals": 0 },
+    { "action": "assert", "label": "Lexicon of Servitude rank 1 expires after its 15 s duration",
+      "actor": "s", "metric": "aura", "spell": 520087, "equals": 0, "within_ms": 16000 },
+    { "action": "assert", "label": "Summon: Air Elemental's cast time returns to baseline once the buff expires",
+      "actor": "s", "metric": "spell_cast_time_ms", "spell": 804019, "equals": 5000 },
+    { "action": "assert", "label": "Summon: Air Elemental's cost returns to baseline once the buff expires",
+      "actor": "s", "metric": "spell_power_cost", "spell": 804019, "min": 1 },
+    { "action": "assert", "label": "BASELINE: Blessing of Air has its stock 10 s cooldown without Lexicon of Servitude rank 2",
+      "actor": "s", "metric": "spell_modifier", "spell": 804022, "op": 11, "base": 10000, "equals": 10000 },
+    { "action": "assert", "label": "BASELINE: Breath of Air has its stock 30 s cooldown without Lexicon of Servitude rank 2",
+      "actor": "s", "metric": "spell_modifier", "spell": 300836, "op": 11, "base": 30000, "equals": 30000 },
+    { "action": "learn", "actor": "s", "spell": 705722 },
+    { "action": "assert", "label": "DISCRIMINATING: Lexicon of Servitude rank 2 cuts Blessing of Air's cooldown by 20%",
+      "actor": "s", "metric": "spell_modifier", "spell": 804022, "op": 11, "base": 10000, "equals": 8000 },
+    { "action": "assert", "label": "DISCRIMINATING: Lexicon of Servitude rank 2 cuts Breath of Air's cooldown by 20%",
+      "actor": "s", "metric": "spell_modifier", "spell": 300836, "op": 11, "base": 30000, "equals": 24000 },
+    { "action": "assert", "label": "Negative control: Gale is outside Lexicon of Servitude rank 2's class mask",
+      "actor": "s", "metric": "spell_modifier", "spell": 804036, "op": 11, "base": 10000, "equals": 10000 }
+  ]
+}

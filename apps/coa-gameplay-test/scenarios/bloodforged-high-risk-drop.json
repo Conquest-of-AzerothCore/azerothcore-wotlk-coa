@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "name": "Bloodforged drop on a High-Risk kill",
+  "contract": "Requires Bloodforged.Enable = 1 with Bloodforged.Rates15 = \"99.98 0.01 0.00\" (a rate that guarantees the roll), PvpPower.Enable = 1 and the catalogue SQL. A level 15 High-Risk character kills a natural Riverpaw Mongrel (level 14) and finds one Bloodforged item on the corpse.",
+  "players": [
+    {
+      "id": "h",
+      "race": 2,
+      "class": 1,
+      "level": 15,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -10022.6,
+    "y": 1813.3,
+    "z": 37.9,
+    "o": 0
+  },
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "h",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "h",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "set_phase",
+      "actor": "h",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "nearby_creature_count",
+      "entry": 123,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "h",
+      "entry": 123,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "loot_nearby",
+      "actor": "h",
+      "entry": 123
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "loot_bloodforged",
+      "equals": 1
+    }
+  ]
+}

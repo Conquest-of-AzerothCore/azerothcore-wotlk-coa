@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "name": "Chaotic Time's periodic damage reduces Incarnation of Chaos's cooldown (#807)",
+  "contract": "Chaotic Time 583245's tooltip is \"In addition, periodic damage dealt now reduces the cooldown of Incarnation of Chaos by $/1000;583258S1 sec\". Its effect 2 is aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) on 583258, whose single effect is 165 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN with MiscValue 570067 (Incarnation of Chaos, RecoveryTime and CategoryRecoveryTime 180000) and BasePoints -1001 -> -1000 ms, forwarded to ModifyAscensionCooldown and then Player::ModifySpellCooldown. Spell.dbc gives 583245 ProcFlags 0x0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs generated nothing, Aura::GetProcEffectMask returned 0 and the cooldown never moved. Nothing here is probabilistic: 583245's own ProcChance is 100 and the row carries Chance 100 with no Cooldown, so the false-failure probability from proc rolls is zero. Timerend 801291 is SPELL_AURA_PERIODIC_DAMAGE with EffectAmplitude 1000 and DurationIndex 32 = 6000 ms in SpellDuration.dbc, and it carries neither SPELL_ATTR5_SPELL_HASTE_AFFECTS_PERIODIC nor SPELL_ATTR5_EXTRA_INITIAL_PERIOD, so AuraEffect::CalculatePeriodic starts its timer at one full amplitude and it ticks exactly six times, at 1000 through 6000 ms, for exactly 6000 ms of reduction. Elapsed time is removed from the measurement by a second, otherwise identical Chronomancer who starts the same Incarnation of Chaos cooldown at the same moment but has not learned the talent: both cooldowns decay in real time, so the difference between them is exactly the talent's contribution. The tolerance around -6000 ms covers only the sub-second skew between the two casts. The tooltip's other clauses (effects 0 and 1, aura 107 spellmods) are native and untouched; its Melt Reality replication clause routes through 504727, an aura-354 spell with no core handler, and is out of scope here.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 22, "level": 80, "spell_hit_rating": 10000 },
+    { "id": "talent", "race": 1, "class": 22, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "talent", "entry": 36, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "control", "spell": 570067 },
+    { "action": "learn", "actor": "talent", "spell": 570067 },
+    { "action": "learn", "actor": "talent", "spell": 801291 },
+    { "action": "learn", "actor": "talent", "spell": 583245 },
+    {
+      "action": "assert",
+      "label": "Incarnation of Chaos is off cooldown for the control caster before any cast",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 570067,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Incarnation of Chaos is off cooldown for the talented caster before any cast",
+      "actor": "talent",
+      "metric": "cooldown_ms",
+      "spell": 570067,
+      "equals": 0
+    },
+    { "action": "cast", "actor": "control", "spell": 570067 },
+    { "action": "cast", "actor": "talent", "spell": 570067 },
+    {
+      "action": "assert",
+      "label": "The control caster's Incarnation of Chaos cooldown has started",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 570067,
+      "min": 170000
+    },
+    {
+      "action": "assert",
+      "label": "The talented caster's Incarnation of Chaos cooldown has started",
+      "actor": "talent",
+      "metric": "cooldown_ms",
+      "spell": 570067,
+      "min": 170000
+    },
+    { "action": "wait", "label": "Let the global cooldown from Incarnation of Chaos clear", "ms": 2000 },
+    { "action": "cast", "actor": "talent", "spell": 801291, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "Timerend's periodic damage aura landed on the dummy",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 801291,
+      "caster": "talent",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let all six of Timerend's 1-second ticks land", "ms": 8000 },
+    {
+      "action": "snapshot",
+      "label": "Control caster's remaining Incarnation of Chaos cooldown, with no talent contribution",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 570067,
+      "save_as": "control_cooldown"
+    },
+    {
+      "action": "assert",
+      "label": "Six periodic ticks took 6000 ms more off Incarnation of Chaos than elapsed time alone",
+      "actor": "talent",
+      "metric": "cooldown_ms",
+      "spell": 570067,
+      "relative_to": "control_cooldown",
+      "min": -6700,
+      "max": -5300
+    }
+  ]
+}

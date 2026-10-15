@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Adventure Mode levels are picked freely; loot history gates only one-shot challenges",
+  "contract": "Adventure Mode (211) is a difficulty ladder, not a run: a level is entered at whichever tier the player picks, with no earlier level completed. A character that has already looted can still pick a tier - the loot-interaction requirement both Ascension's client data and this world's definition carry for the mode is a clean-start gate for one-shot challenges (Slow and Steady, 601) and is not enforced against a ladder, whose whole loop is dungeon loot. The remaining refusal is the real one: a character that has gained experience cannot enter the mode, and every refusal is answered in words, never with the raw condition name.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9458.0,
+    "y": 42.0,
+    "z": 55.5
+  },
+  "players": [
+    { "id": "fresh", "race": 1, "class": 1, "level": 1 },
+    { "id": "played", "race": 1, "class": 1, "level": 1 },
+    { "id": "steady", "race": 1, "class": 1, "level": 1 },
+    { "id": "veteran", "race": 1, "class": 1, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+
+    { "action": "start_challenge", "actor": "fresh", "challenge": 211, "level": 30 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "label": "level 30 of Adventure Mode starts with no earlier level completed", "actor": "fresh",
+      "metric": "challenge_start_code", "equals": 0 },
+    { "action": "assert", "label": "and the character is never told to finish a previous level", "actor": "fresh",
+      "metric": "system_message_contains", "text": "Complete the previous level", "equals": 0 },
+
+    { "action": "add_item", "actor": "played", "item": 5335 },
+    { "action": "open_item", "actor": "played", "item": 5335 },
+    { "action": "collect_loot", "actor": "played" },
+    { "action": "assert", "label": "the played character loots a sack, so its loot history is no longer empty", "actor": "played",
+      "metric": "loot_received", "equals": 1 },
+    { "action": "close_loot", "actor": "played" },
+    { "action": "start_challenge", "actor": "played", "challenge": 211, "level": 32 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "label": "a character that has looted still picks tier 32", "actor": "played",
+      "metric": "challenge_start_code", "equals": 0 },
+    { "action": "assert", "label": "and is not told it has looted anything", "actor": "played",
+      "metric": "system_message_contains", "text": "looted anything", "equals": 0 },
+
+    { "action": "add_item", "actor": "steady", "item": 5335 },
+    { "action": "open_item", "actor": "steady", "item": 5335 },
+    { "action": "collect_loot", "actor": "steady" },
+    { "action": "assert", "label": "the same loot history is real for a one-shot challenge", "actor": "steady",
+      "metric": "loot_received", "equals": 1 },
+    { "action": "close_loot", "actor": "steady" },
+    { "action": "start_challenge", "actor": "steady", "challenge": 601, "level": 1 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "label": "Slow and Steady still refuses a character that has looted", "actor": "steady",
+      "metric": "challenge_start_code", "equals": 8 },
+    { "action": "assert", "label": "and says so in words", "actor": "steady",
+      "metric": "system_message_contains", "text": "already looted something", "equals": 1 },
+
+    { "action": "start_challenge", "actor": "veteran", "challenge": 211, "level": 1 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "label": "a character that already leveled reads the requirement that blocks it", "actor": "veteran",
+      "metric": "system_message_contains", "text": "already gained experience", "equals": 1 },
+    { "action": "assert", "label": "and never the condition's own name", "actor": "veteran",
+      "metric": "system_message_contains", "text": "LOOT_INTERACTION", "equals": 0 },
+    { "action": "assert", "label": "the experience gate still answers the window", "actor": "veteran",
+      "metric": "challenge_start_code", "equals": 8 },
+    { "action": "console", "command": "server info" }
+  ]
+}

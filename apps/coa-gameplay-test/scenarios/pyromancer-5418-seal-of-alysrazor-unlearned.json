@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Seal of Alysrazor survives a level-up instead of being unlearned (#5418, #5473, #5201)",
+  "contract": "#5418, #5473, #5201: Seal of Alysrazor 800196 is a Pyromancer class ability, the rank-1 root of the 802819/802820/802821/802822 chain (AscensionSpellProgressionData.h) and the reference bootstrap (rev_1787754600000000000.sql:155) sets its required_level at 5, matching the level-2 entry of the same chain in spell_ranks (rev_20260831_01_local_spell_progression.sql). It was present only in AscensionCompatData::LegacyGeneratedClassSpells, not in ClassSpells, so AscensionClassService::currentGrantAllows (AscensionCompat.cpp) rejected it and SynchronizeProgression::reconcile removed it on every login, level-up, talent-rank apply and spec switch. The fix adds {24, 5, 800196} to ClassSpells. Learn it directly (bypassing the trainer flow, which this read-only investigation could not locate), cross a level boundary through native GiveLevel, and confirm it is still known.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "pyro", "race": 1, "class": 24, "level": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 2000 },
+    { "action": "learn", "label": "Learn Seal of Alysrazor directly", "actor": "pyro", "spell": 800196 },
+    { "action": "assert", "label": "Seal of Alysrazor is known", "actor": "pyro", "metric": "knows_spell", "spell": 800196, "equals": 1 },
+    { "action": "set_level", "label": "Level up", "actor": "pyro", "value": 6 },
+    { "action": "assert", "label": "Seal of Alysrazor is still known after level-up", "actor": "pyro", "metric": "knows_spell", "spell": 800196, "equals": 1, "within_ms": 2000 },
+    { "action": "set_level", "label": "Level up again", "actor": "pyro", "value": 7 },
+    { "action": "assert", "label": "Seal of Alysrazor is still known after a second level-up", "actor": "pyro", "metric": "knows_spell", "spell": 800196, "equals": 1, "within_ms": 2000 }
+  ]
+}

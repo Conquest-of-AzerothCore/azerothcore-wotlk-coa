@@ -1,0 +1,275 @@
+{
+  "schema": 1,
+  "name": "Woodcutting and Woodworking recipes are learned as the skill reaches them",
+  "contract": "Neither trade has a trainer. The client's SkillLineAbility marks every recipe of both trainer-taught and no creature in the realm carries a row for either skill, so the recipes are learned with the skill itself by mod-woodworking's script, gated by the skill the client declares for each recipe: its MinSkillLineRank where that is above 1 (the four Refine spells above Forestwood, at 65, 125, 165 and 230) and its TrivialSkillLineRankLow otherwise (the wood tiers, from 10 to 280). This takes each trade up through its gates and asserts that the recipe of the next tier is not known one point below its gate and known at it. Refine Forestwood Plank and the three Forestwood intermediates are the client's own learned-on-skill-value rows and arrive with the trade, which is the shape the rest of the ladder takes.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9200.0,
+    "y": -1700.0,
+    "z": 258.915,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "woodworker",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_skill",
+      "actor": "woodworker",
+      "skill": 732,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 13977861,
+      "equals": 1,
+      "label": "Refine Forestwood Plank is the client's own learned-on-skill-value row and comes with the trade"
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 13977881,
+      "equals": 0,
+      "label": "Refine Wildwood Plank is not known at skill 1"
+    },
+    {
+      "action": "set_skill",
+      "actor": "woodworker",
+      "skill": 732,
+      "value": 65,
+      "maximum": 75
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 13977881,
+      "equals": 1,
+      "label": "Refine Wildwood Plank arrives at its gate of 65"
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 13977888,
+      "equals": 0,
+      "label": "Refine Everwood Plank is still not known at 65"
+    },
+    {
+      "action": "set_skill",
+      "actor": "woodworker",
+      "skill": 732,
+      "value": 125,
+      "maximum": 150
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 13977888,
+      "equals": 1,
+      "label": "Refine Everwood Plank arrives at its gate of 125"
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 13977890,
+      "equals": 0,
+      "label": "Refine Heartwood Plank is still not known at 125"
+    },
+    {
+      "action": "set_skill",
+      "actor": "woodworker",
+      "skill": 732,
+      "value": 165,
+      "maximum": 175
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 13977889,
+      "equals": 1,
+      "label": "Refine Grovewood Plank arrives at its gate of 165"
+    },
+    {
+      "action": "set_skill",
+      "actor": "woodworker",
+      "skill": 732,
+      "value": 230,
+      "maximum": 300
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 13977890,
+      "equals": 1,
+      "label": "Refine Heartwood Plank arrives at its gate of 230"
+    },
+    {
+      "action": "set_skill",
+      "actor": "woodworker",
+      "skill": 757,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 1005020,
+      "equals": 1,
+      "label": "Forestwood Page is the client's own learned-on-skill-value row and comes with the trade"
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 808975,
+      "equals": 0,
+      "label": "Copper Tipped Spear, the first recipe that needs a gate, is not known at skill 1"
+    },
+    {
+      "action": "set_skill",
+      "actor": "woodworker",
+      "skill": 757,
+      "value": 10,
+      "maximum": 75
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 808975,
+      "equals": 1,
+      "label": "Copper Tipped Spear arrives at its gate of 10"
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 1061533,
+      "equals": 0,
+      "label": "Simple Bow is not known at 10"
+    },
+    {
+      "action": "set_skill",
+      "actor": "woodworker",
+      "skill": 757,
+      "value": 30,
+      "maximum": 75
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 1061533,
+      "equals": 1,
+      "label": "Simple Bow arrives at its gate of 30"
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 1005038,
+      "equals": 0,
+      "label": "Wildwood Page is not known at 30"
+    },
+    {
+      "action": "set_skill",
+      "actor": "woodworker",
+      "skill": 757,
+      "value": 60,
+      "maximum": 75
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 1005038,
+      "equals": 1,
+      "label": "Wildwood Page arrives at its gate of 60"
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 1005041,
+      "equals": 0,
+      "label": "Everwood Page is not known at 60"
+    },
+    {
+      "action": "set_skill",
+      "actor": "woodworker",
+      "skill": 757,
+      "value": 115,
+      "maximum": 150
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 1005041,
+      "equals": 1,
+      "label": "Everwood Page arrives at its gate of 115"
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 1005047,
+      "equals": 0,
+      "label": "Heartwood Page is not known at 115"
+    },
+    {
+      "action": "set_skill",
+      "actor": "woodworker",
+      "skill": 757,
+      "value": 230,
+      "maximum": 300
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 1005047,
+      "equals": 1,
+      "label": "Heartwood Page arrives at its gate of 230"
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 1061566,
+      "equals": 0,
+      "label": "Wooden Effigy, the top of the ladder at 280, is not known at 230"
+    },
+    {
+      "action": "set_skill",
+      "actor": "woodworker",
+      "skill": 757,
+      "value": 280,
+      "maximum": 300
+    },
+    {
+      "action": "assert",
+      "actor": "woodworker",
+      "metric": "knows_spell",
+      "spell": 1061566,
+      "equals": 1,
+      "label": "Wooden Effigy arrives at its gate of 280"
+    }
+  ]
+}

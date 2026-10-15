@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "name": "Prestige Open World daily counts every quest turned in in the open world",
+  "contract": "Issue #5584: the Open World Prestige daily 80956 counts 25 \"World Quests Completed\" (client quest cache, Dawnrise 2026-09-01). Any quest turned in in the open world counts, including a dungeon quest handed in outside its dungeon (reporters on live CoA). Kobold Camp Cleanup 7 is an ordinary Elwynn quest and What Comes Around... 386 a Stockade quest; neither is a daily.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8816.5,
+    "y": 627.0,
+    "z": 94.1,
+    "o": 3.8
+  },
+  "players": [
+    {
+      "id": "prestiger",
+      "race": 1,
+      "class": 20,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 2000
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "prestiger",
+      "quest": 80956,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "The Open World daily starts with no turned-in quests",
+      "actor": "prestiger",
+      "metric": "quest_objective_count",
+      "quest": 80956,
+      "index": 1,
+      "equals": 0
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "prestiger",
+      "quest": 7
+    },
+    {
+      "action": "reward_quest",
+      "actor": "prestiger",
+      "quest": 7
+    },
+    {
+      "action": "assert",
+      "label": "Kobold Camp Cleanup is turned in",
+      "actor": "prestiger",
+      "metric": "quest_rewarded",
+      "quest": 7,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "An ordinary open-world quest counts",
+      "actor": "prestiger",
+      "metric": "quest_objective_count",
+      "quest": 80956,
+      "index": 1,
+      "equals": 1
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "prestiger",
+      "quest": 386
+    },
+    {
+      "action": "reward_quest",
+      "actor": "prestiger",
+      "quest": 386
+    },
+    {
+      "action": "assert",
+      "label": "What Comes Around... is turned in",
+      "actor": "prestiger",
+      "metric": "quest_rewarded",
+      "quest": 386,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "A dungeon quest turned in in the open world counts too",
+      "actor": "prestiger",
+      "metric": "quest_objective_count",
+      "quest": 80956,
+      "index": 1,
+      "equals": 2
+    }
+  ]
+}

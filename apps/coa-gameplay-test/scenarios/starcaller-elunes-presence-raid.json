@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "name": "Elune's Presence reaches every raid member within 40 yards (#1006)",
+  "contract": "Elune's Presence 680774 (Spell.dbc): Effect0 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT (133) BasePoints 19, ImplicitTargetA 56 = TARGET_UNIT_CASTER_AREA_RAID, radius index 227 (40 yd), duration index 1 (10 s), RecoveryTime 180000, and MaxAffectedTargets (field 212) = 5, read from /srv/coa/server-data/dbc/Spell.dbc. The tooltip says all party or raid members within 40 yds. Spell::SelectImplicitAreaTargets RandomResizes the target list to MaxAffectedTargets, so a group of seven (caster plus six, converted to a raid by the group step once the party is full) loses two members at random on today's main. The fix zeroes MaxAffectedTargets at load time in AscensionStarcaller::ApplyContracts. Seven fixtures share the spawn location, so all are within 40 yd. Each is asserted to carry the aura: on unfixed code at most five of the seven can, so the assertion fails whichever members are dropped; the fixed code applies it to all seven. The cast is a self cast with no hit roll.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "m1",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "m2",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "m3",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "m4",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "m5",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "m6",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680774
+    },
+    {
+      "action": "group",
+      "label": "Add m1 to the fixture group (raid past five)",
+      "actor": "caster",
+      "target": "m1"
+    },
+    {
+      "action": "group",
+      "label": "Add m2 to the fixture group (raid past five)",
+      "actor": "caster",
+      "target": "m2"
+    },
+    {
+      "action": "group",
+      "label": "Add m3 to the fixture group (raid past five)",
+      "actor": "caster",
+      "target": "m3"
+    },
+    {
+      "action": "group",
+      "label": "Add m4 to the fixture group (raid past five)",
+      "actor": "caster",
+      "target": "m4"
+    },
+    {
+      "action": "group",
+      "label": "Add m5 to the fixture group (raid past five)",
+      "actor": "caster",
+      "target": "m5"
+    },
+    {
+      "action": "group",
+      "label": "Add m6 to the fixture group (raid past five)",
+      "actor": "caster",
+      "target": "m6"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Elune's Presence",
+      "actor": "caster",
+      "spell": 680774
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "caster carries Elune's Presence",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 680774,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "m1 carries Elune's Presence",
+      "actor": "m1",
+      "metric": "aura",
+      "spell": 680774,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "m2 carries Elune's Presence",
+      "actor": "m2",
+      "metric": "aura",
+      "spell": 680774,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "m3 carries Elune's Presence",
+      "actor": "m3",
+      "metric": "aura",
+      "spell": 680774,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "m4 carries Elune's Presence",
+      "actor": "m4",
+      "metric": "aura",
+      "spell": 680774,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "m5 carries Elune's Presence",
+      "actor": "m5",
+      "metric": "aura",
+      "spell": 680774,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "m6 carries Elune's Presence",
+      "actor": "m6",
+      "metric": "aura",
+      "spell": 680774,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

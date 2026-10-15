@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Seeker and Hastened reduce Ward/Idol/Effigy cost and cooldown (#1234, #737)",
+  "contract": "#1234 and #737 report Seeker (705880) and Hastened (705899) as missing handlers. Both are single-effect passives read straight from Spell.dbc: Seeker is aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 14 (SPELLMOD_COST), BasePoints -21 + DieSides 1 = -20, class mask (8192) matching SpellFamilyName 19's bit 13; Hastened is the same aura type, EffectMiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -26 + DieSides 1 = -25, class mask (8320 = bits 7+13). Both are consumed by the stock spell-modifier pipeline (AuraEffect::CalculateSpellMod -> Player::m_spellMods -> SpellInfo::CalcPowerCost / Player::ApplySpellMod at cooldown-add time) with no module code, gated only by SpellFamilyName+SpellClassMask via SpellInfo::IsAffected. Sentry Ward (674303) and Stasis Ward (801678) are unrelated Witch Doctor summon spells with FamilyName 19 and FamilyFlags[0] bit 13 set (8192), so both masks match them; Sentry Ward has ManaCost 25 (untouched by Hastened) and Stasis Ward has RecoveryTime 60000 (untouched by Seeker). Values are the server's own ApplySpellMod output, measured before and after learning on the same actor, with cross-isolation asserts proving each passive only ever touches its own SpellModOp bucket.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wd",
+      "race": 1,
+      "class": 13,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "No cost modifier on Sentry Ward before learning Seeker",
+      "actor": "wd",
+      "metric": "spell_modifier",
+      "spell": 674303,
+      "op": 14,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "No cooldown modifier on Stasis Ward before learning Hastened",
+      "actor": "wd",
+      "metric": "spell_modifier",
+      "spell": 801678,
+      "op": 11,
+      "base": 60000,
+      "equals": 60000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Seeker",
+      "actor": "wd",
+      "spell": 705880
+    },
+    {
+      "action": "assert",
+      "label": "#1234: Seeker is a -20% cost modifier on Sentry Ward",
+      "actor": "wd",
+      "metric": "spell_modifier",
+      "spell": 674303,
+      "op": 14,
+      "base": 100,
+      "equals": 80
+    },
+    {
+      "action": "assert",
+      "label": "Seeker leaves Stasis Ward's cooldown modifier alone",
+      "actor": "wd",
+      "metric": "spell_modifier",
+      "spell": 801678,
+      "op": 11,
+      "base": 60000,
+      "equals": 60000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Hastened",
+      "actor": "wd",
+      "spell": 705899
+    },
+    {
+      "action": "assert",
+      "label": "#737: Hastened is a -25% cooldown modifier on Stasis Ward",
+      "actor": "wd",
+      "metric": "spell_modifier",
+      "spell": 801678,
+      "op": 11,
+      "base": 60000,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "Hastened leaves Sentry Ward's cost modifier at Seeker's -20%",
+      "actor": "wd",
+      "metric": "spell_modifier",
+      "spell": 674303,
+      "op": 14,
+      "base": 100,
+      "equals": 80
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Impaling Spear throws its spear missile before it shatters (#4368)",
+  "contract": "Shattered Spear (255846) is triggered by Visual: Spear (255845): SPELL_EFFECT_TRIGGER_MISSILE from TARGET_DEST_CASTER to TARGET_DEST_CASTER_FRONT over 30 yd at speed 40, with SpellVisual 277946 (HasMissile, spear model 815). Impaling Spear's own visual 277945 has no missile. One Impaling Spear (503090) must send the caster a SPELL_GO for 255845, so the client draws the flying spear, and the spear's impact must then send one SPELL_GO for Shattered Spear.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "barbarian",
+      "race": 1,
+      "class": 12,
+      "level": 50,
+      "ranged_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "barbarian",
+      "entry": 36,
+      "level": 50,
+      "health": 500000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "barbarian",
+      "item": 585
+    },
+    {
+      "action": "equip",
+      "actor": "barbarian",
+      "item": 585,
+      "slot": 17
+    },
+    {
+      "action": "learn",
+      "actor": "barbarian",
+      "spell": 503090
+    },
+    {
+      "action": "set_power",
+      "actor": "barbarian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "barbarian",
+      "metric": "spell_go_count",
+      "spell": 503090,
+      "save_as": "spear_go"
+    },
+    {
+      "action": "snapshot",
+      "actor": "barbarian",
+      "metric": "spell_go_count",
+      "spell": 255845,
+      "save_as": "missile_go"
+    },
+    {
+      "action": "snapshot",
+      "actor": "barbarian",
+      "metric": "spell_go_count",
+      "spell": 255846,
+      "save_as": "shatter_go"
+    },
+    {
+      "action": "cast",
+      "actor": "barbarian",
+      "spell": 503090,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Impaling Spear is cast",
+      "actor": "barbarian",
+      "metric": "spell_go_count",
+      "spell": 503090,
+      "relative_to": "spear_go",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the spear missile Visual: Spear is sent to the client",
+      "actor": "barbarian",
+      "metric": "spell_go_count",
+      "spell": 255845,
+      "relative_to": "missile_go",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The spear's impact shatters it once",
+      "actor": "barbarian",
+      "metric": "spell_go_count",
+      "spell": 255846,
+      "relative_to": "shatter_go",
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

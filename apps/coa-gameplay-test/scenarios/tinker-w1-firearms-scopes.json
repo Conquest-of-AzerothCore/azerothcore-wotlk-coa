@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "name": "Tinker Firearms scopes modify Rocket Launcher (#3117, #3118)",
+  "contract": "#3117 Mega Scope 707252 is SPELL_AURA_ADD_FLAT_MODIFIER +10 on SPELLMOD_RANGE (DBC EffectBasePoints 9, DieSides 1) with class mask 0x04000000, which selects Rocket Launcher 500235 (SpellFamilyFlags[0] 0x04000000, rangeIndex 114 = 35 yd). Its range must become 45 yd. #3118 Buster Scope 707253 is SPELL_AURA_ADD_PCT_MODIFIER +10 on SPELLMOD_CRIT_DAMAGE_BONUS; its class mask is 0/0/0x01000000, which selects the triggered damage spell Rocket Launcher 500220 (SpellFamilyFlags[2] 0x01000000), not the launcher 500235 the group report named. Both are stock spell modifiers, so no script is needed. Scrap Shot 500549 is the control: it is SpellFamilyName 34 with rangeIndex 114 too, and neither mask touches it.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "t",
+      "entry": 36,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rocket Launcher starts at the DBC range of 35 yd",
+      "actor": "t",
+      "metric": "spell_max_range",
+      "spell": 500235,
+      "equals": 35
+    },
+    {
+      "action": "snapshot",
+      "save_as": "scraprange0",
+      "actor": "t",
+      "metric": "spell_max_range",
+      "spell": 500549
+    },
+    {
+      "action": "assert",
+      "label": "No crit damage modifier applies to Rocket Launcher yet",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 500220,
+      "op": 15,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "snapshot",
+      "save_as": "crit0",
+      "actor": "t",
+      "metric": "spell_critical_damage",
+      "spell": 500220,
+      "target": "d"
+    },
+    {
+      "action": "snapshot",
+      "save_as": "scrapcrit0",
+      "actor": "t",
+      "metric": "spell_critical_damage",
+      "spell": 500549,
+      "target": "d"
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 707252
+    },
+    {
+      "action": "assert",
+      "label": "Mega Scope adds its 10 yd to Rocket Launcher",
+      "actor": "t",
+      "metric": "spell_max_range",
+      "spell": 500235,
+      "equals": 45
+    },
+    {
+      "action": "assert",
+      "label": "Mega Scope leaves Scrap Shot's range alone",
+      "actor": "t",
+      "metric": "spell_max_range",
+      "spell": 500549,
+      "relative_to": "scraprange0",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 707253
+    },
+    {
+      "action": "assert",
+      "label": "Buster Scope raises Rocket Launcher's crit bonus by 10%",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 500220,
+      "op": 15,
+      "base": 1000,
+      "equals": 1100
+    },
+    {
+      "action": "assert",
+      "label": "The native crit calculation carries the bonus",
+      "actor": "t",
+      "metric": "spell_critical_damage",
+      "spell": 500220,
+      "target": "d",
+      "relative_to": "crit0",
+      "min": 50
+    },
+    {
+      "action": "assert",
+      "label": "Buster Scope does not touch Scrap Shot's modifier",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 500549,
+      "op": 15,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Buster Scope does not touch Scrap Shot's crit damage",
+      "actor": "t",
+      "metric": "spell_critical_damage",
+      "spell": 500549,
+      "target": "d",
+      "relative_to": "scrapcrit0",
+      "equals": 0
+    }
+  ]
+}

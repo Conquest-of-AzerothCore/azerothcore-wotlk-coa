@@ -110,7 +110,7 @@ struct instance_blackrock_depths : public InstanceScript
     ObjectGuid MagmusGUID;
     ObjectGuid MoiraGUID;
     ObjectGuid PriestessGUID;
-    ObjectGuid IronhandGUID[6];
+    GuidSet IronhandGUIDs; // CoA: set instead of a fixed array of 6 (counter overflowed when guardians were created again)
     ObjectGuid CorenGUID;
 
     ObjectGuid GoArena1GUID;
@@ -275,8 +275,7 @@ struct instance_blackrock_depths : public InstanceScript
                 ArgelmachGUID = creature->GetGUID();
                 break;
             case NPC_IRONHAND_GUARDIAN:
-                IronhandGUID[IronhandCounter] = creature->GetGUID();
-                IronhandCounter++;
+                IronhandGUIDs.insert(creature->GetGUID());
                 break;
             case NPC_ARENA_SPECTATOR:
                 ArenaSpectators.push_back(creature->GetGUID());
@@ -497,8 +496,8 @@ struct instance_blackrock_depths : public InstanceScript
                 {
                 case NOT_STARTED:
                 case IN_PROGRESS:
-                    for (int i = 0; i < 6; i++)
-                        if (Creature* ironhand = instance->GetCreature(IronhandGUID[i]))
+                    for (ObjectGuid const& guid : IronhandGUIDs)
+                        if (Creature* ironhand = instance->GetCreature(guid))
                             ironhand->AI()->SetData(0, data == IN_PROGRESS);
                     break;
                 case DONE:

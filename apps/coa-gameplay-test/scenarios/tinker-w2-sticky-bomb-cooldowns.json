@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Tinker Sticky Bomb passives: Maniacal and Bombs? BOMBS! (#1215, #780)",
+  "contract": "#1215, #780: both are native ADD_FLAT_MODIFIER (aura 107) passives, so neither needs a script. Maniacal 706375 has one effect, EffectMiscValue 11 SPELLMOD_COOLDOWN, BasePoints -2001 DieSides 1 (-2000 ms), EffectSpellClassMask (0,33554688,0) = bits 57 and 40, i.e. Sticky Bomb 500232 (flags (0,33554432,0)) plus Deploy Blast Mine 801718 (flags (0,256,0)). Bombs? BOMBS! 705789 has three effects, all on mask (0,33554432,0), so they reach Sticky Bomb only: MiscValue 11 SPELLMOD_COOLDOWN -2000 ms, MiscValue 19 SPELLMOD_ACTIVATION_TIME -1000 ms and MiscValue 1 SPELLMOD_DURATION -1000 ms. Sticky Bomb 500232 has Category 742, RecoveryTime 0, CategoryRecoveryTime 12000, DurationIndex 28 (SpellDuration.dbc row 28 = 5000 ms) and effect 1 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE with Amplitude 4800; Deploy Blast Mine 801718 has RecoveryTime 10000 and CategoryRecoveryTime 0. Player::AddSpellAndCategoryCooldowns applies SPELLMOD_COOLDOWN to both the recovery and the category-recovery field, and neither spell carries SPELL_ATTR6_NO_CATEGORY_COOLDOWN_MODS or a SpellCharges.dbc row, so the expected results are 12000 -> 10000 ms, 10000 -> 8000 ms, tick 4800 -> 3800 ms and aura 5000 -> 4000 ms.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "control", "race": 1, "class": 28, "level": 80, "spell_hit_rating": 10000 },
+    { "id": "maniacal", "race": 1, "class": 28, "level": 80, "spell_hit_rating": 10000 },
+    { "id": "bombs", "race": 1, "class": 28, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "d_control", "owner": "control", "entry": 36, "level": 80, "health": 1000000, "distance": 3 },
+    { "id": "d_maniacal", "owner": "maniacal", "entry": 36, "level": 80, "health": 1000000, "distance": 3 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "maniacal", "spell": 706375 },
+    { "action": "learn", "actor": "bombs", "spell": 705789 },
+
+    { "action": "assert", "label": "Sticky Bomb keeps its 12 sec cooldown without a talent",
+      "actor": "control", "metric": "spell_modifier", "spell": 500232, "op": 11, "base": 12000, "equals": 12000 },
+    { "action": "assert", "label": "Maniacal cuts Sticky Bomb's cooldown to 10 sec",
+      "actor": "maniacal", "metric": "spell_modifier", "spell": 500232, "op": 11, "base": 12000, "equals": 10000 },
+    { "action": "assert", "label": "Bombs? BOMBS! cuts Sticky Bomb's cooldown to 10 sec",
+      "actor": "bombs", "metric": "spell_modifier", "spell": 500232, "op": 11, "base": 12000, "equals": 10000 },
+    { "action": "assert", "label": "Deploy Blast Mine keeps its 10 sec cooldown without a talent",
+      "actor": "control", "metric": "spell_modifier", "spell": 801718, "op": 11, "base": 10000, "equals": 10000 },
+    { "action": "assert", "label": "Maniacal cuts Deploy Blast Mine's cooldown to 8 sec",
+      "actor": "maniacal", "metric": "spell_modifier", "spell": 801718, "op": 11, "base": 10000, "equals": 8000 },
+    { "action": "assert", "label": "Bombs? BOMBS! does not reach Deploy Blast Mine",
+      "actor": "bombs", "metric": "spell_modifier", "spell": 801718, "op": 11, "base": 10000, "equals": 10000 },
+
+    { "action": "assert", "label": "Sticky Bomb's detonation tick is unmodified without a talent",
+      "actor": "control", "metric": "spell_modifier", "spell": 500232, "op": 19, "base": 4800, "equals": 4800 },
+    { "action": "assert", "label": "Bombs? BOMBS! speeds Sticky Bomb's detonation tick to 3800 ms",
+      "actor": "bombs", "metric": "spell_modifier", "spell": 500232, "op": 19, "base": 4800, "equals": 3800 },
+    { "action": "assert", "label": "Maniacal changes the cooldown only, not the detonation tick",
+      "actor": "maniacal", "metric": "spell_modifier", "spell": 500232, "op": 19, "base": 4800, "equals": 4800 },
+    { "action": "assert", "label": "Sticky Bomb's aura lasts 5 sec without a talent",
+      "actor": "control", "metric": "spell_modifier", "spell": 500232, "op": 1, "base": 5000, "equals": 5000 },
+    { "action": "assert", "label": "Bombs? BOMBS! shortens Sticky Bomb's aura to 4 sec",
+      "actor": "bombs", "metric": "spell_modifier", "spell": 500232, "op": 1, "base": 5000, "equals": 4000 },
+
+    { "action": "learn", "actor": "control", "spell": 500232 },
+    { "action": "learn", "actor": "maniacal", "spell": 500232 },
+    { "action": "cast", "actor": "control", "spell": 500232, "target": "d_control" },
+    { "action": "cast", "actor": "maniacal", "spell": 500232, "target": "d_maniacal" },
+    { "action": "assert", "label": "The unmodified Sticky Bomb cast leaves a 12 sec category cooldown",
+      "actor": "control", "metric": "cooldown_ms", "spell": 500232, "min": 10500, "max": 12000, "within_ms": 8000 },
+    { "action": "assert", "label": "Maniacal's cast leaves a 10 sec category cooldown",
+      "actor": "maniacal", "metric": "cooldown_ms", "spell": 500232, "min": 8500, "max": 10000, "within_ms": 8000 },
+
+    { "action": "set_aura", "label": "Apply Sticky Bomb with the unmodified Tinker as its caster",
+      "actor": "control", "spell": 500232, "stacks": 1 },
+    { "action": "set_aura", "label": "Apply Sticky Bomb with Bombs? BOMBS! as its caster",
+      "actor": "bombs", "spell": 500232, "stacks": 1 },
+    { "action": "assert", "label": "The unmodified bomb detonates 4.8 sec after application",
+      "actor": "control", "metric": "aura_amplitude_ms", "spell": 500232, "effect": 1, "equals": 4800 },
+    { "action": "assert", "label": "Bombs? BOMBS! detonates the bomb 3.8 sec after application",
+      "actor": "bombs", "metric": "aura_amplitude_ms", "spell": 500232, "effect": 1, "equals": 3800 },
+    { "action": "assert", "label": "The unmodified bomb aura lasts 5 sec",
+      "actor": "control", "metric": "aura_duration_ms", "spell": 500232, "min": 4500, "max": 5000 },
+    { "action": "assert", "label": "Bombs? BOMBS! keeps the aura from outliving its detonation tick",
+      "actor": "bombs", "metric": "aura_duration_ms", "spell": 500232, "min": 3500, "max": 4000 }
+  ]
+}

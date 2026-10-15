@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Fast as Lightning adds 20% Electrocute damage while Electrocutioner is up (#1231)",
+  "contract": "#1231. Fast as Lightning 570057 is a plain family-22 spell modifier with no script. Spell.dbc: SpellFamilyName 22, Attributes 320 (SPELL_ATTR0_PASSIVE | SPELL_ATTR0_DO_NOT_LOG), DurationIndex 21 (SpellDuration.dbc Duration -1), effect 0 = APPLY_AURA / SPELL_AURA_ADD_FLAT_MODIFIER (107), EffectMiscValue 23 = SPELLMOD_EFFECT3 (SpellDefines.h:99), EffectBasePoints 19 with EffectDieSides 1 so CalcValue yields 19 + 1 = 20, EffectImplicitTargetA 1 = TARGET_UNIT_CASTER, EffectSpellClassMask (0, 0, 64). That mask does not target Electrocute: it targets Electrocutioner 804592, whose own SpellFamilyFlags are (0, 0, 64) with SpellFamilyName 22, so SpellInfo::IsAffected (SpellInfo.cpp:1437) matches 64 & 64. Electrocutioner 804592 carries the damage clause itself: effect 2 = APPLY_AURA / SPELL_AURA_ADD_PCT_MODIFIER (108), EffectMiscValue 0 = SPELLMOD_DAMAGE, EffectSpellClassMask for that effect (0, 2097152, 0), which matches Electrocute's SpellFamilyFlags[1] = 2097152 on every rank (verified on 501421, 501432 and 801844), and EffectBasePoints -1 with EffectDieSides 1 so its unmodified value is -1 + 1 = 0, i.e. +0%. SPELLMOD_EFFECT3 is applied to effect index 2 by Unit::ApplyEffectModifiers (Unit.cpp:12163) inside SpellEffectInfo::CalcValue (SpellInfo.cpp:520), so holding 570057 raises Electrocutioner's own damage modifier from 0 to 20 and Electrocute is dealt 20% more damage for exactly as long as that buff is up. Neither AttributesEx3 carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, so SpellInfo::IsAffectedBySpellMods does not block either modifier, and no GlobalScript overrides OnIsAffectedBySpellModCheck. Generic core machinery: a regression guard for behaviour that already works. The tooltip's conditional gate is structural - the percentage lives on the Electrocutioner buff, so it cannot leak outside it.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "s", "race": 1, "class": 16, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "BASELINE: Electrocutioner's own Electrocute damage modifier is +0% (Spell.dbc -1 + 1 die side)",
+      "actor": "s", "metric": "spell_effect_value", "spell": 804592, "effect": 2, "equals": 0
+    },
+    {
+      "action": "assert", "label": "BASELINE: no damage modifier on Electrocute 801844 before the talent",
+      "actor": "s", "metric": "spell_modifier", "spell": 801844, "op": 0, "base": 100, "equals": 100
+    },
+    { "action": "learn", "actor": "s", "spell": 570057 },
+    {
+      "action": "assert", "label": "Fast as Lightning's passive aura is applied on learning",
+      "actor": "s", "metric": "aura", "spell": 570057, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Fast as Lightning raises Electrocutioner's damage modifier to 20 (Spell.dbc 19 + 1 die side, SPELLMOD_EFFECT3 on effect index 2)",
+      "actor": "s", "metric": "spell_effect_value", "spell": 804592, "effect": 2, "equals": 20
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: with Electrocutioner absent Electrocute is still unmodified",
+      "actor": "s", "metric": "spell_modifier", "spell": 801844, "op": 0, "base": 100, "equals": 100
+    },
+    { "action": "set_aura", "actor": "s", "spell": 804592, "stacks": 1 },
+    {
+      "action": "assert", "label": "SETUP: Electrocutioner is active",
+      "actor": "s", "metric": "aura", "spell": 804592, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: while Electrocutioner is active Electrocute 801844 gains 20% damage",
+      "actor": "s", "metric": "spell_modifier", "spell": 801844, "op": 0, "base": 100, "min": 119.9, "max": 120.1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the same 20% reaches the trained rank chain (Electrocute 501421, SpellFamilyFlags[1] 2097152)",
+      "actor": "s", "metric": "spell_modifier", "spell": 501421, "op": 0, "base": 100, "min": 119.9, "max": 120.1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: and the highest Electrocute rank 501432",
+      "actor": "s", "metric": "spell_modifier", "spell": 501432, "op": 0, "base": 100, "min": 119.9, "max": 120.1
+    },
+    { "action": "set_aura", "actor": "s", "spell": 804592, "stacks": 0 },
+    {
+      "action": "assert", "label": "SETUP: Electrocutioner has fallen off",
+      "actor": "s", "metric": "aura", "spell": 804592, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the bonus leaves with the buff",
+      "actor": "s", "metric": "spell_modifier", "spell": 801844, "op": 0, "base": 100, "equals": 100
+    },
+    { "action": "unlearn", "actor": "s", "spell": 570057 },
+    {
+      "action": "assert", "label": "Unlearning removes Fast as Lightning's modifier from Electrocutioner",
+      "actor": "s", "metric": "spell_effect_value", "spell": 804592, "effect": 2, "equals": 0
+    },
+    { "action": "set_aura", "actor": "s", "spell": 804592, "stacks": 1 },
+    {
+      "action": "assert", "label": "CONTROL: Electrocutioner alone gives Electrocute no damage bonus without the talent",
+      "actor": "s", "metric": "spell_modifier", "spell": 801844, "op": 0, "base": 100, "equals": 100
+    }
+  ]
+}

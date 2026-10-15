@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "name": "Pyromancer Chains of Fire shortens and extends Cindergrip (#3101)",
+  "contract": "#3101: Chains of Fire (706862) is already native: it reduces Cindergrip's 1500 ms cast time by 250 ms (op 10, bp -251 die 1) and adds 10 yd to its 30 yd range (op 5, bp 9 die 1). Values from Spell.dbc, recorded in the group 2 report.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 805476
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 535505
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 535508
+    },
+    {
+      "action": "assert",
+      "label": "Cindergrip 805476 cast time is 1500 ms before Chains of Fire",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 805476,
+      "equals": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Cindergrip 805476 range is 30 yd before Chains of Fire",
+      "actor": "caster",
+      "metric": "spell_max_range",
+      "spell": 805476,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Cindergrip 535505 cast time is 1500 ms before Chains of Fire",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 535505,
+      "equals": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Cindergrip 535505 range is 30 yd before Chains of Fire",
+      "actor": "caster",
+      "metric": "spell_max_range",
+      "spell": 535505,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Cindergrip 535508 cast time is 1500 ms before Chains of Fire",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 535508,
+      "equals": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Cindergrip 535508 range is 30 yd before Chains of Fire",
+      "actor": "caster",
+      "metric": "spell_max_range",
+      "spell": 535508,
+      "equals": 30
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 706862
+    },
+    {
+      "action": "assert",
+      "label": "Chains of Fire cuts Cindergrip 805476 cast time by 250 ms",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 805476,
+      "equals": 1250
+    },
+    {
+      "action": "assert",
+      "label": "Chains of Fire adds 10 yd to Cindergrip 805476 range",
+      "actor": "caster",
+      "metric": "spell_max_range",
+      "spell": 805476,
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "label": "Chains of Fire cuts Cindergrip 535505 cast time by 250 ms",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 535505,
+      "equals": 1250
+    },
+    {
+      "action": "assert",
+      "label": "Chains of Fire adds 10 yd to Cindergrip 535505 range",
+      "actor": "caster",
+      "metric": "spell_max_range",
+      "spell": 535505,
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "label": "Chains of Fire cuts Cindergrip 535508 cast time by 250 ms",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 535508,
+      "equals": 1250
+    },
+    {
+      "action": "assert",
+      "label": "Chains of Fire adds 10 yd to Cindergrip 535508 range",
+      "actor": "caster",
+      "metric": "spell_max_range",
+      "spell": 535508,
+      "equals": 40
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "name": "Ranger Wingman: 2% less damage taken per active War Falcon (#481)",
+  "contract": "Wingman 705098 (Ranger Survival talent, CharacterAdvancement tab 2) reads 'Reduces all damage taken by $680278s3% for each War Falcon or Dragonhawk you have active.' Its effect 2 is SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127 (all schools), BasePoints -1 + DieSides 1 = 0, so the passive alone reduces nothing. $680278s3 is effect 2 of 680278 'War Falcon' ('Shows how many War Falcons you have active'), BasePoints -3 + DieSides 1 = -2; the Dragonhawk counterpart 681394 has the same -2. That effect is an ADD_FLAT_MODIFIER SPELLMOD_EFFECT3 whose class mask (0x80000, 0, 0) selects Wingman (SpellFamilyFlags 0x80000), i.e. the client design adds -2 to Wingman's damage-taken effect per active falcon; 680278's own effects 0/1 reach the owner as APPLY_AREA_AURA_OWNER with radius index 12 = 100 yd. No War Falcon template carries 680278, so the count never reaches the Ranger. Falcon Dive 806341 is a self-cast with two SPELL_EFFECT_SUMMON effects of creature 50393 'War Falcon' (SummonProperties 61, a guardian) and DurationIndex 29 = 12000 ms, so it gives exactly two active falcons. Expected: with Wingman learned, Wingman's effect 2 amount is 0 and incoming melee damage is unchanged before the dive; with two falcons active it is -4 and a fixed 1000 melee hit from the golem is scaled to 960 (ratio 0.96); after the falcons expire it returns to 0 and 1000. Before the fix the amount stays 0 and the ratio 1.0.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "ranger", "spell": 806341 },
+    { "action": "learn", "actor": "ranger", "spell": 705098 },
+    {
+      "action": "assert",
+      "label": "SETUP: Wingman is active on the Ranger",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 705098,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Without a War Falcon Wingman reduces nothing",
+      "actor": "ranger",
+      "metric": "aura_amount",
+      "spell": 705098,
+      "effect": 2,
+      "equals": 0
+    },
+    { "action": "snapshot", "actor": "ranger", "metric": "melee_damage_taken", "target": "dummy", "save_as": "taken_alone" },
+    { "action": "cast", "label": "Falcon Dive calls two War Falcons", "actor": "ranger", "spell": 806341 },
+    {
+      "action": "assert",
+      "label": "SETUP: two War Falcons are active",
+      "actor": "ranger",
+      "metric": "owned_creature_count",
+      "entry": 50393,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Wingman's damage-taken effect is -2% per War Falcon",
+      "actor": "ranger",
+      "metric": "aura_amount",
+      "spell": 705098,
+      "effect": 2,
+      "equals": -4,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Two War Falcons reduce incoming damage by 4%",
+      "actor": "ranger",
+      "metric": "melee_damage_taken",
+      "target": "dummy",
+      "ratio_to": "taken_alone",
+      "min": 0.955,
+      "max": 0.965
+    },
+    {
+      "action": "assert",
+      "label": "The War Falcons leave after 12 seconds",
+      "actor": "ranger",
+      "metric": "owned_creature_count",
+      "entry": 50393,
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Wingman's reduction ends with the falcons",
+      "actor": "ranger",
+      "metric": "aura_amount",
+      "spell": 705098,
+      "effect": 2,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Incoming damage returns to normal",
+      "actor": "ranger",
+      "metric": "melee_damage_taken",
+      "target": "dummy",
+      "ratio_to": "taken_alone",
+      "min": 0.995,
+      "max": 1.005
+    }
+  ]
+}

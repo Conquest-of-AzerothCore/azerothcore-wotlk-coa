@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Day Hunter grants both halves of its authored haste (#4407)",
+  "contract": "Evil Never Sleeps 804185 periodically applies Night Hunter 807198 or Day Hunter 807231. In the client's Spell.dbc, Day Hunter 807231 carries the same 3% twice: effect 0 is SPELL_AURA_HASTE_SPELLS (216) and effect 1 is SPELL_AURA_MOD_MELEE_RANGED_HASTE (192), which is how the unified authored Haste stat maps onto a 3.3.5 core, and its own buff text reads 'Haste increased by ${$w1}%.'. Night Hunter 807198 instead carries 4% Agility on effect 0 (SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, misc 1) and a leftover 5% melee/ranged haste on effect 1 that the talent text does not promise, so AscensionWitchHunterCompletion keeps suppressing that one. Extensions.dll resolves $wN from the effect amount at slot N-1 sent by SMSG_ASCENSION_AURA_AMOUNT (AscensionAuraAmounts.cpp), so a missing effect 0 both drops the spell-haste half and prints 0%. The scenario applies each buff as fixture state instead of waiting for the talent's 30-second Moscow-time day/night tick.",
+  "timeout_ms": 60000,
+  "players": [{ "id": "hunter", "race": 1, "class": 15, "level": 60 }],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "No Day Hunter buff yet",
+      "actor": "hunter", "metric": "aura", "spell": 807231, "equals": 0
+    },
+    {
+      "action": "snapshot", "label": "Cast speed before Day Hunter",
+      "actor": "hunter", "metric": "cast_speed_multiplier", "save_as": "cast_speed_before"
+    },
+    {
+      "action": "snapshot", "label": "Main-hand swing timer before Day Hunter",
+      "actor": "hunter", "metric": "attack_time_ms", "hand": 0, "save_as": "swing_before"
+    },
+    { "action": "set_aura", "label": "Apply Day Hunter", "actor": "hunter", "spell": 807231, "stacks": 1 },
+    {
+      "action": "assert", "label": "Day Hunter is present",
+      "actor": "hunter", "metric": "aura", "spell": 807231, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Effect 0 is the 3% spell haste the buff text reads as $w1",
+      "actor": "hunter", "metric": "aura_amount", "spell": 807231, "effect": 0, "equals": 3
+    },
+    {
+      "action": "assert", "label": "Effect 1 is the matching 3% melee/ranged haste",
+      "actor": "hunter", "metric": "aura_amount", "spell": 807231, "effect": 1, "equals": 3
+    },
+    {
+      "action": "assert", "label": "Casts are 3% faster",
+      "actor": "hunter", "metric": "cast_speed_multiplier", "ratio_to": "cast_speed_before",
+      "min": 0.968, "max": 0.974
+    },
+    {
+      "action": "assert", "label": "Swings are 3% faster",
+      "actor": "hunter", "metric": "attack_time_ms", "hand": 0, "ratio_to": "swing_before",
+      "min": 0.965, "max": 0.976
+    },
+    { "action": "set_aura", "label": "Remove Day Hunter", "actor": "hunter", "spell": 807231, "stacks": 0 },
+    {
+      "action": "assert", "label": "Cast speed returns to its baseline",
+      "actor": "hunter", "metric": "cast_speed_multiplier", "ratio_to": "cast_speed_before",
+      "min": 0.999, "max": 1.001
+    },
+    { "action": "set_aura", "label": "Apply Night Hunter", "actor": "hunter", "spell": 807198, "stacks": 1 },
+    {
+      "action": "assert", "label": "Night Hunter still grants its authored 4% Agility on effect 0",
+      "actor": "hunter", "metric": "aura_amount", "spell": 807198, "effect": 0, "equals": 4
+    },
+    {
+      "action": "assert", "label": "Night Hunter grants no haste: its unpromised effect 1 stays suppressed",
+      "actor": "hunter", "metric": "attack_time_ms", "hand": 0, "ratio_to": "swing_before",
+      "min": 0.999, "max": 1.001
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Holy Fervor already boosts Sunrise and Sunset by 20% (#1564)",
+  "contract": "300323 is ADD_PCT_MODIFIER (aura 108), MiscValue 8 = SPELLMOD_ALL_EFFECTS, EffectSpellClassMask word 1 = 0x1000000 plus word 2 = 0x400000 combined into one 96-bit mask. Sunset (500511) carries word 1 = 0x1000000 in its own SpellFamilyFlags, and Sunrise (500477) carries word 2 = 0x400000 in its own -- the same one-mod-two-targets OR-combined mask pattern already used natively elsewhere in this class (e.g. Wrath of God). SpellInfo::IsAffectedBySpellMod's generic flag96 AND matches both. BasePoints 19 resolves to 20 (DieSides 1), matching 'Increases the effectiveness of Sunrise and Sunset by 20%' exactly, applied through the ordinary SPELLMOD_ALL_EFFECTS path in Unit::ApplyEffectModifiers. Native only, no server code needed.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_effect_value", "spell": 500477, "effect": 0, "save_as": "sunrise_base" },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_effect_value", "spell": 500511, "effect": 0, "save_as": "sunset_base" },
+    { "action": "learn", "label": "Increases the effectiveness of Sunrise and Sunset by 20%", "actor": "caster", "spell": 300323 },
+    {
+      "action": "assert", "label": "Sunrise's effect value is boosted to 120% of base",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 500477, "effect": 0, "ratio_to": "sunrise_base", "equals": 1.2
+    },
+    {
+      "action": "assert", "label": "Sunset's effect value is boosted to 120% of base",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 500511, "effect": 0, "ratio_to": "sunset_base", "equals": 1.2
+    }
+  ]
+}

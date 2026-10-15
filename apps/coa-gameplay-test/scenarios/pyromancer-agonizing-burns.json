@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Agonizing Burns lengthens Blaze by 20% (#3322)",
+  "contract": "#3322: Agonizing Burns 803452 effect 0 is ADD_PCT_MODIFIER (108), misc 1 = SPELLMOD_DURATION, base 19 + 1 = +20%, class mask A 0x200 = every Blaze rank (805500 asserted, DBC duration 15000 ms). Aura::CalcMaxDuration applies SPELLMOD_DURATION natively (SpellAuras.cpp:812), no module script touches 803452, so Blaze goes from 15000 ms to 18000 ms. Fireball-family control spell Cinderheart 800806 (outside the mask) must stay unchanged. The periodic-haste half (aura 316 on the same mask) is not measurable with the available metrics and is not asserted. Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Blaze keeps 15000 ms before Agonizing Burns",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 805500,
+      "op": 1,
+      "base": 15000,
+      "equals": 15000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 803452
+    },
+    {
+      "action": "assert",
+      "label": "Agonizing Burns lengthens Blaze by 20% (18000 ms)",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 805500,
+      "op": 1,
+      "base": 15000,
+      "equals": 18000,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Control: Cinderheart duration is untouched",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 800806,
+      "op": 1,
+      "base": 15000,
+      "equals": 15000,
+      "within_ms": 3000
+    }
+  ]
+}

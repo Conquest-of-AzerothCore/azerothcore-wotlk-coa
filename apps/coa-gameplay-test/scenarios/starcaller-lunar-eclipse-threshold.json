@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Lunar Eclipse needs and spends four Lunar Phase stacks even with Bright Moon (#4273)",
+  "contract": "Lunar Phase 802985 says \"At 4 stacks you can activate Lunar Eclipse\"; Lunar Eclipse 800386 carries CasterAuraSpell 704519 (Spell.dbc field 24, \"4 Stacks of Lunar Phase\"), a marker aura only C++ applies. Bright Moon 801226 effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER on SPELLMOD_MAX_AURA_STACKS with base points 3, so it raises only the stack cap (SpellInfo::CalcMaxAuraStacks) from 4 to 8, not the activation threshold. On origin/main AscensionStarcaller::GainPhase applied 704519 only when the count equals MaxPhase (8), Refresh stripped it below MaxPhase, starcaller_spells::OnSpellCheckCast compared the count with MaxPhase, and OnSpellBeforeEffects removed 802985 entirely, so with Bright Moon the Eclipse needs 8 stacks and spends all of them. Fixed: threshold constant 4, activation spends exactly four stacks. Fixture 'four' knows Bright Moon and holds exactly 4 stacks plus the marker: the cast must succeed (fails before the fix with SPELL_FAILED_CASTER_AURASTATE) and leave no Lunar Phase. Fixture 'eight' holds 8 stacks: after the cast 4 must remain (the passive gain of one stack per several seconds may add one before the assert, hence the 4..5 window) and the marker must survive since 4 remain. Set_aura writes the stacks directly, the cast is the native spell 800386 with its native cast check plus the module hook.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "four", "race": 1, "class": 26, "level": 80 },
+    { "id": "eight", "race": 1, "class": 26, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "four", "spell": 800386 },
+    { "action": "learn", "actor": "four", "spell": 801226 },
+    { "action": "learn", "actor": "eight", "spell": 800386 },
+    { "action": "learn", "actor": "eight", "spell": 801226 },
+    { "action": "set_aura", "actor": "four", "spell": 802985, "stacks": 4 },
+    { "action": "set_aura", "actor": "four", "spell": 704519, "stacks": 1 },
+    { "action": "cast", "label": "Activate Lunar Eclipse at exactly four stacks with Bright Moon", "actor": "four", "spell": 800386 },
+    { "action": "assert", "label": "Eclipse is active", "actor": "four", "metric": "aura", "spell": 800386, "equals": 1, "within_ms": 500 },
+    { "action": "assert", "label": "The four stacks were spent", "actor": "four", "metric": "aura", "spell": 802985, "equals": 0 },
+    { "action": "set_aura", "actor": "eight", "spell": 802985, "stacks": 8 },
+    { "action": "set_aura", "actor": "eight", "spell": 704519, "stacks": 1 },
+    { "action": "cast", "label": "Activate Lunar Eclipse at eight stacks", "actor": "eight", "spell": 800386 },
+    { "action": "assert", "label": "Eclipse is active", "actor": "eight", "metric": "aura", "spell": 800386, "equals": 1, "within_ms": 500 },
+    { "action": "assert", "label": "Only four stacks were spent, at least four remain", "actor": "eight", "metric": "aura_stacks", "spell": 802985, "min": 4 },
+    { "action": "assert", "label": "No more than four plus one passive gain remain", "actor": "eight", "metric": "aura_stacks", "spell": 802985, "max": 5 },
+    { "action": "assert", "label": "The four-stack marker survives", "actor": "eight", "metric": "aura", "spell": 704519, "equals": 1 }
+  ]
+}

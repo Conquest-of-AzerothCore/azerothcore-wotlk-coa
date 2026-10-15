@@ -1,0 +1,165 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Invoking Storms scales Shock, Call Lightning and Arm of Thorim (#2786)",
+  "contract": "#2786. Invoking Storms (705667 rank 1, 707793 rank 2) reads 'Increases the spell power scaling of Shock, Call Lightning, and Arm of Thorim by $s1%'. Both ranks are aura 108 (ADD_PCT_MODIFIER) with EffectBasePoints 14 + DieSides 1 = 15% and 29 + 1 = 30%, EffectMiscValue 41 and EffectSpellClassMask [2048, 16, 0]. Misc value 41 is the Ascension client's spell-power-scaling operation; this core's SpellModOp stops at 31 and AuraEffect::CalculateSpellMod drops any effect outside that range, so no modifier was ever installed. Stone Tosser (680862), whose tooltip is the same 'spell bonus damage scaling' clause, is already remapped from 41 to SPELLMOD_BONUS_MULTIPLIER (24) in AscensionPrimalistStoneTosser.cpp, and Master Elementalist (705662) delivers the same clause natively on op 24. The mask matches Shock (SpellFamilyFlags [2048, 0, 0]) and Call Lightning ([0, 16, 32]) but cannot match Arm of Thorim ([0, 2, 32]), so the fix also ORs dword1 bit1 into the mask. Only that bit is added: dword2 bit5 is shared by Volt, Electrocute, Conjure Storm and Torrential Wrath, which the tooltip does not name, and Torrential Wrath (804017, [0, 1, 32]) is asserted to stay unmodified.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "s",
+      "race": 1,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: no spell power scaling modifier on Shock",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 804020,
+      "op": 24,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: no spell power scaling modifier on Call Lightning",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 501388,
+      "op": 24,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: no spell power scaling modifier on Arm of Thorim",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 567518,
+      "op": 24,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 705667
+    },
+    {
+      "action": "assert",
+      "label": "Invoking Storms rank 1 is applied",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 705667,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: rank 1 adds 15% to Shock's spell power scaling (Spell.dbc 14 + 1)",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 804020,
+      "op": 24,
+      "base": 100,
+      "equals": 115
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: rank 1 adds 15% to Call Lightning (class mask dword1 bit4)",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 501388,
+      "op": 24,
+      "base": 100,
+      "equals": 115
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: rank 1 adds 15% to Arm of Thorim (class mask dword1 bit1, added at load)",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 567518,
+      "op": 24,
+      "base": 100,
+      "equals": 115
+    },
+    {
+      "action": "assert",
+      "label": "The widened mask does not reach Torrential Wrath, which the tooltip does not name",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 804017,
+      "op": 24,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "unlearn",
+      "actor": "s",
+      "spell": 705667
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning rank 1 removes the modifier",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 804020,
+      "op": 24,
+      "base": 100,
+      "equals": 100,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 707793
+    },
+    {
+      "action": "assert",
+      "label": "Invoking Storms rank 2 is applied",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 707793,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: rank 2 adds 30% to Shock's spell power scaling (Spell.dbc 29 + 1)",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 804020,
+      "op": 24,
+      "base": 100,
+      "equals": 130
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: rank 2 adds 30% to Call Lightning",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 501388,
+      "op": 24,
+      "base": 100,
+      "equals": 130
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: rank 2 adds 30% to Arm of Thorim",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 567518,
+      "op": 24,
+      "base": 100,
+      "equals": 130
+    }
+  ]
+}

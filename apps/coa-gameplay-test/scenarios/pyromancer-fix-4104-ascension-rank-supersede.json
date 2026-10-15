@@ -1,0 +1,26 @@
+{
+ "schema": 1,
+ "name": "Pyromancer: a higher Ascension rank supersedes the lower one (#4104)",
+ "contract": "Once Ascension of Executus rank 2 is learned, rank 1 is no longer an active spell, so the shapeshift bar shows one Ascension. The superseded rank cannot be cast; the current rank can.",
+ "timeout_ms": 90000,
+ "players": [
+  {
+   "id": "p",
+   "race": 1,
+   "class": 24,
+   "level": 27
+  }
+ ],
+ "steps": [
+  {"action": "wait", "ms": 3000},
+  {"action": "learn", "actor": "p", "spell": 1119754},
+  {"action": "learn", "actor": "p", "spell": 1119755},
+  {"action": "cast", "actor": "p", "spell": 1119754},
+  {"action": "wait", "ms": 1500},
+  {"action": "assert", "metric": "aura", "spell": 1119754, "equals": 0, "actor": "p"},
+  {"action": "cast", "actor": "p", "spell": 1119755},
+  {"action": "assert", "metric": "aura", "spell": 1119755, "equals": 1, "within_ms": 3000, "actor": "p"},
+  {"action": "assert", "label": "The active higher rank must not also apply the lower-rank aura",
+   "metric": "aura", "spell": 1119754, "equals": 0, "actor": "p"}
+ ]
+}

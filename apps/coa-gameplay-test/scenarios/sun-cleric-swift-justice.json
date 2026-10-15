@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Swift Justice already grants flat spell and melee/ranged haste (#1563)",
+  "contract": "Both ranks carry effect 0 = APPLY_AURA SPELL_AURA_HASTE_SPELLS (aura 216) with MiscValue 0, and effect 1 = APPLY_AURA SPELL_AURA_MOD_MELEE_RANGED_HASTE (aura 192); both are generic, unconditional self-buffs with no EffectSpellClassMask (family filter 0, which SpellInfo::IsAffected treats as unrestricted -- 'if (!familyName) return true;'), so no per-ability routing is needed at all. Rank 1's BasePoints 2 resolves to 3 (DieSides 1), matching 'Increases your haste by 3%'; rank 2's BasePoints 5 resolves to 6, matching 'Increases your haste by 6%'. Both aura types are stock WotLK auras already handled generically by the engine. Native only, no server code needed.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "assert", "label": "No haste aura before the talent", "actor": "caster", "metric": "aura", "spell": 300322, "equals": 0 },
+    { "action": "learn", "label": "Rank 1: Increases your haste by 3%", "actor": "caster", "spell": 300322 },
+    { "action": "assert", "label": "Rank 1 spell haste is 3%", "actor": "caster", "metric": "aura_amount", "spell": 300322, "effect": 0, "equals": 3 },
+    { "action": "assert", "label": "Rank 1 melee/ranged haste is 3%", "actor": "caster", "metric": "aura_amount", "spell": 300322, "effect": 1, "equals": 3 },
+    { "action": "learn", "label": "Rank 2 replaces rank 1: Increases your haste by 6%", "actor": "caster", "spell": 300327 },
+    { "action": "assert", "label": "Rank 2 spell haste is 6%", "actor": "caster", "metric": "aura_amount", "spell": 300327, "effect": 0, "equals": 6 },
+    { "action": "assert", "label": "Rank 2 melee/ranged haste is 6%", "actor": "caster", "metric": "aura_amount", "spell": 300327, "effect": 1, "equals": 6 }
+  ]
+}

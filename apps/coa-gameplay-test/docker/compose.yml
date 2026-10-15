@@ -1,9 +1,3 @@
-# CoA gameplay tests on Linux, used together with the root docker-compose.yml:
-#
-#   docker compose -f docker-compose.yml -f apps/coa-gameplay-test/docker/compose.yml \
-#     --profile tests run --rm --no-deps ac-gameplay-test run apps/coa-gameplay-test/scenarios/frostbolt.json
-#
-# Relative paths resolve against the repository root (the first compose file's directory).
 services:
   ac-gameplay-test:
     image: acore/ac-wotlk-gameplay-test:${DOCKER_IMAGE_TAG:-master}
@@ -13,10 +7,8 @@ services:
         BASE_IMAGE: acore/ac-wotlk-worldserver:${DOCKER_IMAGE_TAG:-master}
         DOCKER_USER: ${DOCKER_USER:-acore}
     profiles: [tests]
-    # MySQL is reachable on 127.0.0.1, as the harness isolation checks require.
     network_mode: "service:ac-database"
     init: true
-    # Cleanup includes a world-cache audit (individual checksum calls can take five minutes).
     stop_grace_period: 15m
     working_dir: /azerothcore-src
     entrypoint: ["bash", "/azerothcore-src/apps/coa-gameplay-test/docker/entrypoint.sh"]
@@ -24,7 +16,6 @@ services:
       ${DOCKER_AC_ENV_FILE:-conf/dist/env.ac}
     environment:
       AC_DATA_DIR: "/azerothcore/env/dist/data"
-      # Match the source schemas selected by ac-worldserver, through the shared loopback endpoint.
       AC_LOGIN_DATABASE_INFO: "127.0.0.1;3306;root;${DOCKER_DB_ROOT_PASSWORD:-password};acore_auth"
       AC_WORLD_DATABASE_INFO: "127.0.0.1;3306;root;${DOCKER_DB_ROOT_PASSWORD:-password};acore_world"
       AC_CHARACTER_DATABASE_INFO: "127.0.0.1;3306;root;${DOCKER_DB_ROOT_PASSWORD:-password};acore_characters"

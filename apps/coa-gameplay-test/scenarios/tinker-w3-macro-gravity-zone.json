@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "name": "Tinker: Macro-Gravity Zone snares, stacks and stuns",
+  "contract": "#452: Macro-Gravity Zone (707104) is two ordinary persistent area auras - a -50% snare with mechanic 11 and a 500 ms periodic trigger of Macro-Gravity (712289) - so the zone itself needs no script. The only scripted part, the six-stack payoff, already lives on the triggered spell: aura_ascension_tinker_lifecycle casts Macro-Gravity stun (712319) at six stacks, which triggers the Gravity-Adjusted marker (712401). An enemy standing in the zone must be snared by 50%, must gather Macro-Gravity stacks, and must end up stunned and marked.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "t",
+      "entry": 299,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 707104
+    },
+    {
+      "action": "snapshot",
+      "label": "The enemy's unsnared run speed",
+      "actor": "d",
+      "metric": "run_speed_rate",
+      "save_as": "speed0"
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 707104,
+      "destination": {
+        "x": -8917.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "label": "The zone's ground effect is out",
+      "actor": "t",
+      "metric": "dynamic_object",
+      "spell": 707104,
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The zone's snare effect on the enemy is -50",
+      "actor": "d",
+      "metric": "aura_amount",
+      "spell": 707104,
+      "effect": 0,
+      "equals": -50,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The enemy is actually slowed to half speed",
+      "actor": "d",
+      "metric": "run_speed_rate",
+      "ratio_to": "speed0",
+      "min": 0.45,
+      "max": 0.55,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Macro-Gravity stacks on the enemy inside the zone",
+      "actor": "d",
+      "metric": "aura_stacks",
+      "spell": 712289,
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The six-stack payoff stuns the enemy",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 712319,
+      "equals": 1,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "The stun marks the enemy as Gravity-Adjusted",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 712401,
+      "equals": 1,
+      "within_ms": 12000
+    }
+  ]
+}

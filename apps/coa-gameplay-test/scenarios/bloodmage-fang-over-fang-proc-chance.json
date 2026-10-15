@@ -1,0 +1,567 @@
+{
+  "schema": 1,
+  "name": "Fang Over Fang has a 20% chance per Bloodfang Bite to reset Reave (#578)",
+  "contract": "Fang Over Fang 504116 is a passive SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on 504117, the SPELL_EFFECT_ASCENSION_RESET_COOLDOWN payload bloodmage-fang-over-fang-reave-reset.json already proves deterministic. That scenario documents the half it cannot cover: Spell.dbc gives 504116 ProcFlags 0 and no spell_proc row existed before rev_20260920_57_bloodmage_fang_over_fang_proc.sql, so SpellMgr::LoadSpellProcs generated nothing and the aura was inert; the row's own Chance is 0, deferring to Spell.dbc's ProcChance 20 (rev_20260919_20_coa_proc_chance_parity.sql), scoped to Bloodfang Bite by SpellFamilyName 26 and SpellFamilyMask1 8388608 (all ten ranks 501695-501697, 503613-503615, 572549-572551, 800156), ProcFlags 16 (PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS) and SpellPhaseMask 1 (PROC_SPELL_PHASE_CAST), so the roll happens on cast, independent of hit or miss. 572551 is the rank a level-80 character owns per AscensionSpellProgressionData.h's Bloodfang Bite progression (top rank at level 60, unchanged through 80); it needs a Cursed Form for its CasterAuraSpell 525031, supplied here the same way bloodmage-petrified-legions-darkwing.json supplies it, by fixturing Eternal Curse 800157 (the module syncs the marker onto 525031). Each bite costs 300 rage units (30 Rage), refilled before every cast. spell_proc_count(spell=504116) records every cast with Fang Over Fang named as its triggering aura (CoAGameplayTestProcCounter::OnSpellCast reads Spell::GetTriggeredByAuraSpellInfo(), which is 504116, the aura, not 504117, the payload it casts) - the same convention bloodmage-petrified-legions-darkwing.json uses for its own aura/payload pair. At the record's own 20 percent chance, 31 connecting bites leave 0.8^31, about 0.0990 percent, chance that a correctly fixed build records zero procs; a build without the spell_proc row (the state before rev_20260920_57) records zero every time, so the assertion also fails against that prior state. spell_cast_count(spell=572551) proves all 31 trials were genuine completed casts, not GCD- or rage-starved rejections, independent of the proc outcome.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy1",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 572551
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504116
+    },
+    {
+      "action": "set_aura",
+      "actor": "bloodmage",
+      "spell": 800157,
+      "stacks": 1,
+      "label": "Eternal Curse 800157: the Cursed Form Bloodfang Bite's CasterAuraSpell 525031 needs"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no proc before any Bloodfang Bite cast",
+      "actor": "bloodmage",
+      "metric": "spell_proc_count",
+      "spell": 504116,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572551,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: all 31 Bloodfang Bites were genuine completed casts",
+      "actor": "bloodmage",
+      "metric": "spell_cast_count",
+      "spell": 572551,
+      "min": 31
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Fang Over Fang has proc'd at least once over 31 casts (p < 0.1% false negative)",
+      "actor": "bloodmage",
+      "metric": "spell_proc_count",
+      "spell": 504116,
+      "min": 1
+    }
+  ]
+}

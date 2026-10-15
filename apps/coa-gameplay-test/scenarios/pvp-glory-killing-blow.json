@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "PvP Glory: an honorable killing blow on a player adds 1 Glory to the killer, kept and sent to the client",
+  "contract": "The client's PvP panel (Ascension_PVP.lua PVPHonorLevelMixin) shows GetGloryPoints(\"player\") as Glory and turns it into the Glory Rank through C_PVP:GetHonorRank (rank 2 at 250). Extensions.dll reads Glory from field 35 of the player's SMSG_UPDATE_OBJECT_ADDON (0x0578) table. Ascension's Glory System: Glory is gained by landing killing blows in world PvP or battlegrounds and when the team completes battleground objectives, more for objectives. This fork awards 1 Glory per killing blow that counts as an honorable kill and 5 per objective; Glory is never spent and is stored per character in the player setting core.coa_glory. A level 60 killer's grey level is 60 - 9 = 51, so killing a level 50 player is not an honorable kill and adds no Glory, while killing a level 60 player of the other faction adds 1 Glory to the killer only. Each change sends the field to the client, and replaying the login keeps the stored Glory.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "killer", "race": 2, "class": 1, "level": 60 },
+    { "id": "rival", "race": 1, "class": 1, "level": 60 },
+    { "id": "lowbie", "race": 1, "class": 1, "level": 50 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixture settle", "ms": 2000 },
+    { "action": "teleport", "actor": "killer", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "lowbie", "map": 0, "x": -9615.56, "y": -288.449, "z": 57.3053, "o": 3.141593 },
+    { "action": "teleport", "actor": "rival", "map": 0, "x": -9615.56, "y": -289.449, "z": 57.3053, "o": 3.141593 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "pvp", "actor": "killer", "enabled": true },
+    { "action": "pvp", "actor": "rival", "enabled": true },
+    { "action": "pvp", "actor": "lowbie", "enabled": true },
+    { "action": "assert", "label": "A new character starts without Glory", "actor": "killer", "metric": "player_setting", "source": "core.coa_glory", "index": 0, "equals": 0 },
+
+    { "action": "set_health", "actor": "lowbie", "value": 1 },
+    { "action": "attack", "actor": "killer", "target": "lowbie" },
+    { "action": "assert", "label": "The killer lands the killing blow on the grey-level player", "actor": "lowbie", "metric": "alive", "equals": 0, "within_ms": 15000 },
+    { "action": "stop_attack", "actor": "killer" },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "A killing blow that is not an honorable kill adds no Glory", "actor": "killer", "metric": "player_setting", "source": "core.coa_glory", "index": 0, "equals": 0 },
+    { "action": "snapshot", "actor": "killer", "metric": "server_packets", "opcode": 1400, "save_as": "addon_updates" },
+
+    { "action": "set_health", "actor": "rival", "value": 1 },
+    { "action": "attack", "actor": "killer", "target": "rival" },
+    { "action": "assert", "label": "The killer lands the killing blow on the level 60 rival", "actor": "rival", "metric": "alive", "equals": 0, "within_ms": 15000 },
+    { "action": "assert", "label": "An honorable killing blow adds 1 Glory", "actor": "killer", "metric": "player_setting", "source": "core.coa_glory", "index": 0, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "The new Glory is sent to the client", "actor": "killer", "metric": "server_packets", "opcode": 1400, "relative_to": "addon_updates", "min": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "The slain player gains no Glory", "actor": "rival", "metric": "player_setting", "source": "core.coa_glory", "index": 0, "equals": 0 },
+
+    { "action": "login_hooks", "actor": "killer" },
+    { "action": "assert", "label": "Login does not change Glory", "actor": "killer", "metric": "player_setting", "source": "core.coa_glory", "index": 0, "equals": 1 }
+  ]
+}

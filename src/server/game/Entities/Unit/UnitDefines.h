@@ -100,6 +100,7 @@ enum ShapeshiftForm
     FORM_STEALTH                        = 0x1E,
     FORM_MOONKIN                        = 0x1F,
     FORM_SPIRITOFREDEMPTION             = 0x20,
+    FORM_TINKER_MECHSUIT                = 0x31,
     FORM_VENOMANCER_SPIDER              = 0x34,
     FORM_VENOMANCER_BEETLE              = 0x35
 };

@@ -1,0 +1,486 @@
+{
+  "schema": 1,
+  "name": "cultist-dark-infusion-native-rank-upgrade-4526",
+  "contract": [
+    "Dark Infusion rank one 500721 promises a flat 66 heal at level 34. The original level-44 rank 570248",
+    "has base points 142 plus die sides 1, zero spell-power coefficient, and therefore a base heal of 143.",
+    "Buy the paid shared node through advancement and acquire the upgrade from the normal Book of Ascension.",
+    "Original heal 570263 can critically heal; its native Magic critical bonus is integer half the base,",
+    "so a critical heal is 143 + 71 = 214. Wilting Touch 34640 supplies its original -75 spell critical",
+    "chance; original fixture 525603 supplies +100. Assert the live Arcane critical chance in both phases,",
+    "the infusion amount of 143, and separate actual noncritical and critical healing packets. Six original",
+    "enemy Fireballs retain native hit rolls while bounding an all-miss setup; each infusion heals exactly",
+    "once and is consumed. Rank progression, authored healing, and both critical states remain exercised."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 25,
+      "level": 44
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "c",
+      "entry": 36,
+      "level": 44,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "c",
+      "id": 40
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "c",
+      "entry": 6274,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "knows_spell",
+      "spell": 500721,
+      "equals": 1
+    },
+    {
+      "action": "money",
+      "actor": "c",
+      "copper": 1000000
+    },
+    {
+      "action": "learn",
+      "actor": "c",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "c"
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spellbook_offers_spell",
+      "spell": 570248,
+      "equals": 1
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "c",
+      "spell": 570248
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 570248,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "knows_spell",
+      "spell": 570248,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 34640,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_crit_chance",
+      "school": 6,
+      "max": 0
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_taken_crit_chance",
+      "spell": 570263,
+      "target": "c",
+      "max": 0
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 570248
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "cast_failure",
+      "spell": 570248,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_cast_count",
+      "spell": 570248,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 570248,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura_amount",
+      "spell": 570248,
+      "effect": 0,
+      "equals": 143
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 133,
+      "target": "c"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 133,
+      "target": "c"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 133,
+      "target": "c"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 133,
+      "target": "c"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 133,
+      "target": "c"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 133,
+      "target": "c"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_heal_count",
+      "spell": 570263,
+      "target": "c",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_heal_count",
+      "spell": 570263,
+      "target": "c",
+      "critical": false,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_heal_total",
+      "spell": 570263,
+      "target": "c",
+      "critical": false,
+      "equals": 143
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_heal_count",
+      "spell": 570263,
+      "target": "c",
+      "critical": true,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_heal_total",
+      "spell": 570263,
+      "target": "c",
+      "critical": true,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 570248,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 133,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 34640,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 525603,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_crit_chance",
+      "school": 6,
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_taken_crit_chance",
+      "spell": 570263,
+      "target": "c",
+      "min": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 570248
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "cast_failure",
+      "spell": 570248,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_cast_count",
+      "spell": 570248,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 570248,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura_amount",
+      "spell": 570248,
+      "effect": 0,
+      "equals": 143
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 133,
+      "target": "c"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 133,
+      "target": "c"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 133,
+      "target": "c"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 133,
+      "target": "c"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 133,
+      "target": "c"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 133,
+      "target": "c"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_heal_count",
+      "spell": 570263,
+      "target": "c",
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_heal_count",
+      "spell": 570263,
+      "target": "c",
+      "critical": false,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_heal_total",
+      "spell": 570263,
+      "target": "c",
+      "critical": false,
+      "equals": 143
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_heal_count",
+      "spell": 570263,
+      "target": "c",
+      "critical": true,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_heal_total",
+      "spell": 570263,
+      "target": "c",
+      "critical": true,
+      "equals": 214
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 570248,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

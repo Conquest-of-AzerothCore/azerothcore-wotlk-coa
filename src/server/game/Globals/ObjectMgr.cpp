@@ -34,6 +34,7 @@
 #include "GroupMgr.h"
 #include "GuildMgr.h"
 #include "LFGMgr.h"
+#include "LocalLevelScaling.h"
 #include "Log.h"
 #include "MapMgr.h"
 #include "Pet.h"
@@ -211,7 +212,9 @@ bool normalizePlayerName(std::string& name)
     if (name.empty())
         return false;
 
-    if (name.find(" ") != std::string::npos)
+    std::size_t separator = name.find(' ');
+    if (separator != std::string::npos &&
+        (separator == 0 || separator + 1 == name.size() || name.find(' ', separator + 1) != std::string::npos))
         return false;
 
     std::wstring tmp;
@@ -222,9 +225,69 @@ bool normalizePlayerName(std::string& name)
     if (!tmp.empty())
         tmp[0] = wcharToUpper(tmp[0]);
 
+    std::size_t wideSeparator = tmp.find(L' ');
+    if (wideSeparator != std::wstring::npos)
+        tmp[wideSeparator + 1] = wcharToUpper(tmp[wideSeparator + 1]);
+
     if (!WStrToUtf8(tmp, name))
         return false;
 
+    return true;
+}
+
+bool joinQuotedPlayerName(std::string& name, std::string_view& rest)
+{
+    if (name.size() < 2 || (name.front() != '"' && name.front() != '\''))
+        return false;
+
+    char const quote = name.front();
+    if (name.back() == quote)
+    {
+        if (name.size() == 2)
+            return false;
+
+        name = name.substr(1, name.size() - 2);
+        return true;
+    }
+
+    std::size_t const secondEnd = rest.find(' ');
+    std::string_view second = rest.substr(0, secondEnd);
+    if (second.size() < 2 || second.back() != quote)
+        return false;
+    second.remove_suffix(1);
+
+    name = name.substr(1) + ' ' + std::string(second);
+    std::size_t const tail = secondEnd == std::string_view::npos ? secondEnd : rest.find_first_not_of(' ', secondEnd);
+    rest = tail == std::string_view::npos ? std::string_view() : rest.substr(tail);
+    return true;
+}
+
+bool resolveWhisperTarget(std::string& to, std::string& msg, PlayerNameByFirstName const& uniqueNameByFirstName)
+{
+    std::string joined = to;
+    std::string_view rest(msg);
+    if (joinQuotedPlayerName(joined, rest))
+    {
+        if (rest.empty())
+            return false;
+
+        to = std::move(joined);
+        msg = std::string(rest);
+        return true;
+    }
+
+    if (to.size() < 2 || (to.front() != '"' && to.front() != '\''))
+        return false;
+
+    std::string first = to.substr(1);
+    if (first.find_first_of(" \"'") != std::string::npos || !normalizePlayerName(first))
+        return false;
+
+    std::string fullName = uniqueNameByFirstName(first);
+    if (fullName.empty())
+        return false;
+
+    to = std::move(fullName);
     return true;
 }
 
@@ -634,7 +697,7 @@ void ObjectMgr::LoadCreatureTemplate(Field* fields, bool triggerHook)
     creatureTemplate.unit_flags       = fields[28].Get<uint32>();
     creatureTemplate.unit_flags2      = fields[29].Get<uint32>();
     creatureTemplate.dynamicflags     = fields[30].Get<uint32>();
-    creatureTemplate.family           = uint32(fields[31].Get<uint8>());
+    creatureTemplate.family           = uint32(fields[31].Get<uint16>());
     creatureTemplate.type             = uint32(fields[32].Get<uint8>());
     creatureTemplate.type_flags       = fields[33].Get<uint32>();
     creatureTemplate.lootid           = fields[34].Get<uint32>();
@@ -739,12 +802,10 @@ void ObjectMgr::LoadCreatureTemplateModels()
             continue;
         }
 
-        CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(creatureDisplayId);
-        if (!displayEntry)
-        {
-            LOG_ERROR("sql.sql", "Creature (Entry: {}) lists non-existing CreatureDisplayID id ({}), this can crash the client.", creatureId, creatureDisplayId);
-            continue;
-        }
+        if (!sCreatureDisplayInfoStore.LookupEntry(creatureDisplayId))
+            LOG_WARN("sql.sql",
+                     "Creature (Entry: {}) uses display id ({}) unknown to the server; keeping it.",
+                     creatureId, creatureDisplayId);
 
         CreatureModelInfo const* modelInfo = GetCreatureModelInfo(creatureDisplayId);
         if (!modelInfo)
@@ -1734,10 +1795,7 @@ void ObjectMgr::LoadCreatureModelInfo()
         uint32 modelId = fields[0].Get<uint32>();
         CreatureDisplayInfoEntry const* creatureDisplay = sCreatureDisplayInfoStore.LookupEntry(modelId);
         if (!creatureDisplay)
-        {
-            LOG_ERROR("sql.sql", "Table `creature_model_info` references missing display id ({}), skipping.", modelId);
-            continue;
-        }
+            LOG_WARN("sql.sql", "Table `creature_model_info` uses unknown display id ({}); keeping it.", modelId);
 
         CreatureModelInfo& modelInfo = _creatureModelStore[modelId];
 
@@ -1764,7 +1822,8 @@ void ObjectMgr::LoadCreatureModelInfo()
         if (modelInfo.combat_reach < 0.1f)
             modelInfo.combat_reach = DEFAULT_COMBAT_REACH;
 
-        if (CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(creatureDisplay->ModelId))
+        CreatureModelDataEntry const* modelData = creatureDisplay ? sCreatureModelDataStore.LookupEntry(creatureDisplay->ModelId) : nullptr;
+        if (modelData)
         {
             for (uint32 i = 0; i < 14; i++)
             {
@@ -3777,7 +3836,9 @@ void ObjectMgr::LoadItemTemplates()
             if (itemTemplate.RandomProperty == -1)
                 itemTemplate.RandomProperty = 0;
 
-            else if (!sItemRandomPropertiesStore.LookupEntry(GetItemEnchantMod(itemTemplate.RandomProperty)))
+            // CoA items may name an ItemRandomProperties row directly instead of an enchantment group
+            else if (!(!HasItemEnchantTemplate(itemTemplate.RandomProperty) && sItemRandomPropertiesStore.LookupEntry(itemTemplate.RandomProperty)) &&
+                !sItemRandomPropertiesStore.LookupEntry(GetItemEnchantMod(itemTemplate.RandomProperty)))
             {
                 LOG_ERROR("sql.sql", "Item (Entry: {}) has unknown (wrong or not listed in `item_enchantment_template`) RandomProperty ({})", entry, itemTemplate.RandomProperty);
                 itemTemplate.RandomProperty = 0;
@@ -3934,7 +3995,11 @@ void ObjectMgr::LoadItemTemplates()
 
 ItemTemplate const* ObjectMgr::GetItemTemplate(uint32 entry)
 {
-    return entry < _itemTemplateStoreFast.size() ? _itemTemplateStoreFast[entry] : nullptr;
+    if (entry < _itemTemplateStoreFast.size())
+        if (ItemTemplate const* proto = _itemTemplateStoreFast[entry])
+            return proto;
+
+    return LocalLevelScaling::ScaledItemTemplateFor(entry);
 }
 
 void ObjectMgr::LoadItemSetNameLocales()
@@ -6393,6 +6458,18 @@ void ObjectMgr::LoadSpellScriptNames()
             _spellScriptsStore.insert(SpellScriptsContainer::value_type(spellInfo->Id, GetScriptId(scriptName)));
         ++count;
     } while (result->NextRow());
+
+    for (auto const& [source, twin] : sSpellMgr->GetSpellTwins())
+    {
+        if (_spellScriptsStore.contains(twin))
+            continue;
+        std::vector<uint32> scriptIds;
+        auto const [begin, end] = _spellScriptsStore.equal_range(source);
+        for (auto itr = begin; itr != end; ++itr)
+            scriptIds.push_back(itr->second);
+        for (uint32 scriptId : scriptIds)
+            _spellScriptsStore.emplace(twin, scriptId);
+    }
 
     LOG_INFO("server.loading", ">> Loaded {} spell script names in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
     LOG_INFO("server.loading", " ");
@@ -9287,7 +9364,7 @@ uint8 ObjectMgr::CheckPlayerName(std::string_view name, bool create)
         return CHAR_NAME_INVALID_CHARACTER;
 
     // Check for too long name
-    if (wname.size() > MAX_PLAYER_NAME)
+    if (wname.size() > MAX_PLAYER_NAME || name.size() > MAX_PLAYER_NAME_BYTES)
         return CHAR_NAME_TOO_LONG;
 
     // Check for too short name
@@ -9295,9 +9372,25 @@ uint8 ObjectMgr::CheckPlayerName(std::string_view name, bool create)
     if (wname.size() < minName)
         return CHAR_NAME_TOO_SHORT;
 
+    std::size_t separator = wname.find(L' ');
+    if (separator != std::wstring::npos &&
+        (separator == 0 || separator + 1 == wname.size() ||
+            wname.find(L' ', separator + 1) != std::wstring::npos))
+        return CHAR_NAME_INVALID_SPACE;
+
+    std::size_t firstLength = separator == std::wstring::npos ? wname.size() : separator;
+    std::size_t secondLength = separator == std::wstring::npos ? 0 : wname.size() - separator - 1;
+    if (firstLength > MAX_PLAYER_NAME_PART || secondLength > MAX_PLAYER_NAME_PART)
+        return CHAR_NAME_TOO_LONG;
+    if (firstLength < minName || (secondLength && secondLength < minName))
+        return CHAR_NAME_TOO_SHORT;
+
     // Check for mixed languages
     uint32 strictMask = sWorld->getIntConfig(CONFIG_STRICT_PLAYER_NAMES);
-    if (!isValidString(wname, strictMask, false, create))
+    std::wstring letters = wname;
+    if (separator != std::wstring::npos)
+        letters.erase(separator, 1);
+    if (!isValidString(letters, strictMask, false, create))
         return CHAR_NAME_MIXED_LANGUAGES;
 
     // Check for three consecutive letters
@@ -9313,6 +9406,22 @@ uint8 ObjectMgr::CheckPlayerName(std::string_view name, bool create)
     // Check Profanity Name
     if (sObjectMgr->IsProfanityName(name))
         return CHAR_NAME_PROFANE;
+
+    // Neither component nor inserting a space may bypass the name filters.
+    std::size_t byteSeparator = name.find(' ');
+    if (byteSeparator != std::string_view::npos)
+    {
+        std::string joined(name);
+        joined.erase(byteSeparator, 1);
+        for (std::string_view candidate : {name.substr(0, byteSeparator), name.substr(byteSeparator + 1),
+            std::string_view(joined)})
+        {
+            if (sObjectMgr->IsReservedName(candidate))
+                return CHAR_NAME_RESERVED;
+            if (sObjectMgr->IsProfanityName(candidate))
+                return CHAR_NAME_PROFANE;
+        }
+    }
 
     return CHAR_NAME_SUCCESS;
 }
@@ -9654,6 +9763,24 @@ void ObjectMgr::ChangeFishingBaseSkillLevel(uint32 entry, int32 skill)
 
 bool ObjectMgr::CheckDeclinedNames(std::wstring w_ownname, DeclinedName const& names)
 {
+    // Validate both words independently, including unchanged surnames.
+    std::size_t separator = w_ownname.find(L' ');
+    if (separator != std::wstring::npos)
+    {
+        DeclinedName firstNames;
+        DeclinedName secondNames;
+        for (uint8 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+        {
+            std::size_t split = names.name[i].find(' ');
+            if (split == std::string::npos || names.name[i].find(' ', split + 1) != std::string::npos)
+                return false;
+            firstNames.name[i] = names.name[i].substr(0, split);
+            secondNames.name[i] = names.name[i].substr(split + 1);
+        }
+        return CheckDeclinedNames(w_ownname.substr(0, separator), firstNames) &&
+            CheckDeclinedNames(w_ownname.substr(separator + 1), secondNames);
+    }
+
     // get main part of the name
     std::wstring mainpart = GetMainPartOfName(w_ownname, 0);
     // prepare flags
@@ -9665,6 +9792,9 @@ bool ObjectMgr::CheckDeclinedNames(std::wstring w_ownname, DeclinedName const& n
     {
         std::wstring wname;
         if (!Utf8toWStr(names.name[i], wname))
+            return false;
+
+        if (wname.empty() || wname.size() > 15 || wname.find(L' ') != std::wstring::npos)
             return false;
 
         if (mainpart != GetMainPartOfName(wname, i + 1))

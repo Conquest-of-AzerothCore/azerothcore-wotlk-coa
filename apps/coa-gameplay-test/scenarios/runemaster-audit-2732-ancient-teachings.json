@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Runemaster audit #2732: Ancient Teachings gives melee haste and boosts Etching of the Dextrous",
+  "contract": [
+    "Ancient Teachings rank1 705558: 'Increases haste by 3%.' Rank2 806797: 'Increases the effectiveness of",
+    "Etching of the Dextrous by 20%.' Re-verified in Spell.dbc: rank1 Effect1 is SPELL_AURA_MOD_MELEE_RANGED_HASTE",
+    "(192), EffectBasePoints1 2 with DieSides 1 = +3% (its Effect0 dummy and Effect2 HASTE_SPELLS fields are not",
+    "referenced by this rank's tooltip text). Rank2 Effect2 is SPELL_AURA_ADD_PCT_MODIFIER (108), MiscValue 8 =",
+    "SPELLMOD_ALL_EFFECTS, EffectBasePoints2 19 with DieSides 1 = +20%, EffectSpellClassMask mask2(effect2) 2048",
+    "(0x800) on family 38. Etching of the Dextrous 561237 carries SpellFamilyName 38, SpellFamilyFlags[2] 2048 -",
+    "an exact match. MOD_MELEE_RANGED_HASTE is a native stat aura (HandleModMeleeRangedSpeedPct); the rank2",
+    "modifier is the generic spellmod system; no occurrence of 705558/806797 exists in src/server/coa/.",
+    "Expected: rank1 shortens the base melee/ranged attack time by 3%; rank2 raises Etching of the Dextrous's",
+    "effect value by 20% over a 1000 base."
+  ],
+  "timeout_ms": 60000,
+  "players": [{"id": "rm", "race": 1, "class": 32, "level": 80}],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 3000},
+    {"action": "snapshot", "label": "Base attack time", "actor": "rm", "metric": "attack_time_ms",
+      "save_as": "base_attack"},
+    {"action": "learn", "actor": "rm", "spell": 705558},
+    {"action": "assert", "label": "CONTRACT: rank 1 is active", "actor": "rm", "metric": "aura",
+      "spell": 705558, "equals": 1, "within_ms": 1500},
+    {"action": "assert", "label": "CONTRACT: rank 1 shortens melee/ranged attack time by 3%", "actor": "rm",
+      "metric": "attack_time_ms", "ratio_to": "base_attack", "min": 0.965, "max": 0.975},
+    {"action": "unlearn", "actor": "rm", "spell": 705558},
+    {"action": "assert", "label": "SETUP: attack time returns to base after unlearning rank 1", "actor": "rm",
+      "metric": "attack_time_ms", "ratio_to": "base_attack", "min": 0.995, "max": 1.005, "within_ms": 2000},
+    {"action": "assert", "label": "SETUP: base Etching of the Dextrous value before rank 2", "actor": "rm",
+      "metric": "spell_modifier", "spell": 561237, "op": 8, "base": 1000, "equals": 1000},
+    {"action": "learn", "actor": "rm", "spell": 806797},
+    {"action": "assert", "label": "CONTRACT: rank 2 is active", "actor": "rm", "metric": "aura",
+      "spell": 806797, "equals": 1, "within_ms": 1500},
+    {"action": "assert", "label": "CONTRACT: rank 2 raises Etching of the Dextrous by 20%", "actor": "rm",
+      "metric": "spell_modifier", "spell": 561237, "op": 8, "base": 1000, "equals": 1200}
+  ]
+}

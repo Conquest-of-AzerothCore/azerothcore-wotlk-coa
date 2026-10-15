@@ -1,0 +1,202 @@
+{
+  "schema": 1,
+  "name": "Well Fed replacement through custom and stock food consumption",
+  "contract": "Only the latest Well Fed grants bonuses; eating custom or stock food preserves unrelated buffs.",
+  "timeout_ms": 180000,
+  "players": [
+    { "id": "eater", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "set_aura", "actor": "eater", "spell": 8112, "stacks": 1 },
+    { "action": "assert", "actor": "eater", "metric": "aura", "spell": 8112, "equals": 1 },
+    { "action": "snapshot", "actor": "eater", "metric": "stat", "stat": 0, "save_as": "strength" },
+    { "action": "snapshot", "actor": "eater", "metric": "stat", "stat": 1, "save_as": "agility" },
+    { "action": "snapshot", "actor": "eater", "metric": "stat", "stat": 2, "save_as": "stamina" },
+    { "action": "snapshot", "actor": "eater", "metric": "stat", "stat": 4, "save_as": "spirit" },
+    { "action": "snapshot", "actor": "eater", "metric": "combat_rating", "rating": 23, "save_as": "expertise" },
+    { "action": "add_item", "actor": "eater", "item": 772065, "count": 3 },
+    { "action": "add_item", "actor": "eater", "item": 772066 },
+    { "action": "add_item", "actor": "eater", "item": 6888 },
+    { "action": "set_health", "actor": "eater", "value": 1 },
+    { "action": "use_item", "actor": "eater", "item": 772065, "spell": 1136 },
+    {
+      "action": "assert", "label": "Loaf consumption uses the item handler", "actor": "eater",
+      "metric": "item_count", "item": 772065, "equals": 2, "within_ms": 2000
+    },
+    { "action": "assert", "actor": "eater", "metric": "aura", "spell": 1136, "equals": 1 },
+    { "action": "assert", "actor": "eater", "metric": "aura", "spell": 19733, "equals": 0 },
+    {
+      "action": "assert", "label": "Eating loaf acquires its delayed Well Fed buff", "actor": "eater",
+      "metric": "aura", "spell": 19733, "equals": 1, "within_ms": 15000
+    },
+    { "action": "set_aura", "actor": "eater", "spell": 1136, "stacks": 0 },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 0,
+      "relative_to": "strength", "equals": 3
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 2,
+      "relative_to": "stamina", "equals": 3
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "combat_rating", "rating": 23,
+      "relative_to": "expertise", "equals": 2
+    },
+    { "action": "set_health", "actor": "eater", "value": 1 },
+    { "action": "use_item", "actor": "eater", "item": 772066, "spell": 1140 },
+    {
+      "action": "assert", "actor": "eater", "metric": "item_count", "item": 772066,
+      "equals": 0, "within_ms": 2000
+    },
+    { "action": "assert", "actor": "eater", "metric": "aura", "spell": 1140, "equals": 1 },
+    { "action": "assert", "actor": "eater", "metric": "aura", "spell": 19741, "equals": 0 },
+    {
+      "action": "assert", "label": "Eating perch acquires its delayed Well Fed buff", "actor": "eater",
+      "metric": "aura", "spell": 19741, "equals": 1, "within_ms": 15000
+    },
+    { "action": "set_aura", "actor": "eater", "spell": 1140, "stacks": 0 },
+    {
+      "action": "assert", "label": "Perch replaces loaf Well Fed", "actor": "eater",
+      "metric": "aura", "spell": 19733, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Loaf Strength is removed", "actor": "eater",
+      "metric": "stat", "stat": 0, "relative_to": "strength", "equals": 0
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 1,
+      "relative_to": "agility", "equals": 3
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 2,
+      "relative_to": "stamina", "equals": 3
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "combat_rating", "rating": 23,
+      "relative_to": "expertise", "equals": 2
+    },
+    { "action": "assert", "actor": "eater", "metric": "aura", "spell": 8112, "equals": 1 },
+    { "action": "set_health", "actor": "eater", "value": 1 },
+    { "action": "use_item", "actor": "eater", "item": 772065, "spell": 1136 },
+    {
+      "action": "assert", "actor": "eater", "metric": "item_count", "item": 772065,
+      "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "aura", "spell": 19733,
+      "equals": 1, "within_ms": 15000
+    },
+    { "action": "set_aura", "actor": "eater", "spell": 1136, "stacks": 0 },
+    {
+      "action": "assert", "label": "Loaf replaces perch in reciprocal order", "actor": "eater",
+      "metric": "aura", "spell": 19741, "equals": 0
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 0,
+      "relative_to": "strength", "equals": 3
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 1,
+      "relative_to": "agility", "equals": 0
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 2,
+      "relative_to": "stamina", "equals": 3
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "combat_rating", "rating": 23,
+      "relative_to": "expertise", "equals": 2
+    },
+    { "action": "set_health", "actor": "eater", "value": 1 },
+    { "action": "use_item", "actor": "eater", "item": 6888, "spell": 5004 },
+    {
+      "action": "assert", "actor": "eater", "metric": "item_count", "item": 6888,
+      "equals": 0, "within_ms": 2000
+    },
+    { "action": "assert", "actor": "eater", "metric": "aura", "spell": 5004, "equals": 1 },
+    { "action": "assert", "actor": "eater", "metric": "aura", "spell": 19705, "equals": 0 },
+    {
+      "action": "assert", "label": "Eating stock food acquires its delayed Well Fed buff", "actor": "eater",
+      "metric": "aura", "spell": 19705, "equals": 1, "within_ms": 15000
+    },
+    { "action": "set_aura", "actor": "eater", "spell": 5004, "stacks": 0 },
+    {
+      "action": "assert", "label": "Stock food replaces custom Well Fed", "actor": "eater",
+      "metric": "aura", "spell": 19733, "equals": 0
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 0,
+      "relative_to": "strength", "equals": 0
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 2,
+      "relative_to": "stamina", "equals": 2
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 4,
+      "relative_to": "spirit", "equals": 2
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "combat_rating", "rating": 23,
+      "relative_to": "expertise", "equals": 0
+    },
+    { "action": "assert", "actor": "eater", "metric": "aura", "spell": 8112, "equals": 1 },
+    { "action": "set_health", "actor": "eater", "value": 1 },
+    { "action": "use_item", "actor": "eater", "item": 772065, "spell": 1136 },
+    {
+      "action": "assert", "actor": "eater", "metric": "item_count", "item": 772065,
+      "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "aura", "spell": 19733,
+      "equals": 1, "within_ms": 15000
+    },
+    { "action": "set_aura", "actor": "eater", "spell": 1136, "stacks": 0 },
+    {
+      "action": "assert", "label": "Custom food replaces stock Well Fed in reciprocal order", "actor": "eater",
+      "metric": "aura", "spell": 19705, "equals": 0
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 0,
+      "relative_to": "strength", "equals": 3
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 2,
+      "relative_to": "stamina", "equals": 3
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 4,
+      "relative_to": "spirit", "equals": 0
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "combat_rating", "rating": 23,
+      "relative_to": "expertise", "equals": 2
+    },
+    { "action": "set_aura", "actor": "eater", "spell": 19733, "stacks": 0 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "actor": "eater", "metric": "aura", "spell": 19733, "equals": 0 },
+    { "action": "assert", "actor": "eater", "metric": "aura", "spell": 19741, "equals": 0 },
+    { "action": "assert", "actor": "eater", "metric": "aura", "spell": 19705, "equals": 0 },
+    { "action": "assert", "actor": "eater", "metric": "aura", "spell": 8112, "equals": 1 },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 0,
+      "relative_to": "strength", "equals": 0
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 1,
+      "relative_to": "agility", "equals": 0
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 2,
+      "relative_to": "stamina", "equals": 0
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "stat", "stat": 4,
+      "relative_to": "spirit", "equals": 0
+    },
+    {
+      "action": "assert", "actor": "eater", "metric": "combat_rating", "rating": 23,
+      "relative_to": "expertise", "equals": 0
+    }
+  ]
+}

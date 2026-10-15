@@ -1,0 +1,310 @@
+{
+  "schema": 1,
+  "name": "Jailer's Will Soul Strike bonus scales with Strength (#926)",
+  "contract": [
+    "Jailer's Will 524939 says Soul Strike gains damage equal to 0.3 times Strength.",
+    "Its periodic helper 578264 is a flat SPELLMOD_EFFECT2 modifier selected by Soul Strike ranks 500517 and 500646.",
+    "Two identical Reapers provide no-talent and talented controls at recorded base Strength and base+100 Strength.",
+    "TEST 100 STR DND 24653 supplies the verified +100 Strength. The talent-specific modifier and effect-2 value",
+    "must each gain 30, while no-talent values stay unchanged. Native spell-value queries avoid combat damage variance."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 10,
+      "class": 30,
+      "level": 80
+    },
+    {
+      "id": "talented",
+      "race": 10,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "control",
+      "spell": 524939
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 524939
+    },
+    {
+      "action": "assert",
+      "label": "Jailer's Will passive is active",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 524939,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Periodic talent helper becomes active",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 578264,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "label": "Control base Strength",
+      "actor": "control",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "control_base_strength"
+    },
+    {
+      "action": "snapshot",
+      "label": "Talented base Strength",
+      "actor": "talented",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "talented_base_strength"
+    },
+    {
+      "action": "assert",
+      "label": "Both Reapers start with the same Strength",
+      "actor": "talented",
+      "metric": "stat",
+      "stat": 0,
+      "relative_to": "control_base_strength",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No-talent Soul Strike rank 1 has no effect-2 spell modifier",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 500517,
+      "op": 12,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No-talent Soul Strike rank 6 has no effect-2 spell modifier",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 500646,
+      "op": 12,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Talent bonus on rank 1 at base Strength",
+      "actor": "talented",
+      "metric": "spell_modifier",
+      "spell": 500517,
+      "op": 12,
+      "base": 0,
+      "save_as": "rank1_bonus_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Talent bonus on rank 6 at base Strength",
+      "actor": "talented",
+      "metric": "spell_modifier",
+      "spell": 500646,
+      "op": 12,
+      "base": 0,
+      "save_as": "rank6_bonus_base"
+    },
+    {
+      "action": "assert",
+      "label": "Jailer's Will modifies rank 1",
+      "actor": "talented",
+      "metric": "spell_modifier",
+      "spell": 500517,
+      "op": 12,
+      "base": 0,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Jailer's Will modifies rank 6",
+      "actor": "talented",
+      "metric": "spell_modifier",
+      "spell": 500646,
+      "op": 12,
+      "base": 0,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Untalented rank 1 effect-2 value at base Strength",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 500517,
+      "effect": 1,
+      "save_as": "control_rank1_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Untalented rank 6 effect-2 value at base Strength",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 500646,
+      "effect": 1,
+      "save_as": "control_rank6_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Talented rank 1 effect-2 value at base Strength",
+      "actor": "talented",
+      "metric": "spell_effect_value",
+      "spell": 500517,
+      "effect": 1,
+      "save_as": "talented_rank1_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Talented rank 6 effect-2 value at base Strength",
+      "actor": "talented",
+      "metric": "spell_effect_value",
+      "spell": 500646,
+      "effect": 1,
+      "save_as": "talented_rank6_base"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 effect value includes a talent bonus",
+      "actor": "talented",
+      "metric": "spell_effect_value",
+      "spell": 500517,
+      "effect": 1,
+      "relative_to": "control_rank1_base",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 6 effect value includes a talent bonus",
+      "actor": "talented",
+      "metric": "spell_effect_value",
+      "spell": 500646,
+      "effect": 1,
+      "relative_to": "control_rank6_base",
+      "min": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Add exactly 100 Strength to the control",
+      "actor": "control",
+      "spell": 24653,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Add exactly 100 Strength to the talented Reaper",
+      "actor": "talented",
+      "spell": 24653,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control Strength rose by exactly 100",
+      "actor": "control",
+      "metric": "stat",
+      "stat": 0,
+      "relative_to": "control_base_strength",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Talented Strength rose by exactly 100",
+      "actor": "talented",
+      "metric": "stat",
+      "stat": 0,
+      "relative_to": "talented_base_strength",
+      "equals": 100
+    },
+    {
+      "action": "wait",
+      "label": "Allow Jailer's Will another periodic trigger at higher Strength",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Jailer's Will helper remains active after another trigger",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 578264,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Control rank 1 effect-2 value is unchanged by Strength alone",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 500517,
+      "effect": 1,
+      "relative_to": "control_rank1_base",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Control rank 6 effect-2 value is unchanged by Strength alone",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 500646,
+      "effect": 1,
+      "relative_to": "control_rank6_base",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 talent bonus gains 30 from 100 Strength",
+      "actor": "talented",
+      "metric": "spell_modifier",
+      "spell": 500517,
+      "op": 12,
+      "base": 0,
+      "relative_to": "rank1_bonus_base",
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Rank 6 talent bonus gains 30 from 100 Strength",
+      "actor": "talented",
+      "metric": "spell_modifier",
+      "spell": 500646,
+      "op": 12,
+      "base": 0,
+      "relative_to": "rank6_bonus_base",
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 effect-2 damage value gains 30",
+      "actor": "talented",
+      "metric": "spell_effect_value",
+      "spell": 500517,
+      "effect": 1,
+      "relative_to": "talented_rank1_base",
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Rank 6 effect-2 damage value gains 30",
+      "actor": "talented",
+      "metric": "spell_effect_value",
+      "spell": 500646,
+      "effect": 1,
+      "relative_to": "talented_rank6_base",
+      "equals": 30
+    }
+  ]
+}

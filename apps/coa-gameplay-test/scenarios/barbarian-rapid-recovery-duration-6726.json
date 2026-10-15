@@ -1,0 +1,260 @@
+{
+  "schema": 1,
+  "name": "Rapid Recovery speeds Onslaught ticks without extending its duration (#6726)",
+  "contract": "Onslaught (801758) grants 25 Energy immediately and 20 every two seconds for ten seconds. Rapid Recovery (705171), acquired through advancement entry 34302, promises only faster effects: its -50% activation-time modifier halves the tick interval to one second, while the ten-second duration stays unchanged. Compare two level-34 Barbarians without regeneration, observe actual first-tick Energy and expiry, then remove the advancement and verify the ordinary interval returns. The removal fixture has enough copper to pay the native unlearning price.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "plain",
+      "race": 1,
+      "class": 12,
+      "level": 34,
+      "allow_regeneration": false
+    },
+    {
+      "id": "rapid",
+      "race": 1,
+      "class": 12,
+      "level": 34,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 801758
+    },
+    {
+      "action": "learn",
+      "actor": "rapid",
+      "spell": 801758
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "rapid",
+      "entry": 34302,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rapid",
+      "metric": "aura",
+      "spell": 705171,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "plain",
+      "power": 3,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "plain",
+      "spell": 801758
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "aura",
+      "spell": 801758,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "plain: Onslaught lasts ten seconds",
+      "actor": "plain",
+      "metric": "aura_duration_ms",
+      "spell": 801758,
+      "min": 9300,
+      "max": 10000
+    },
+    {
+      "action": "assert",
+      "label": "plain: native Energy tick interval",
+      "actor": "plain",
+      "metric": "aura_amplitude_ms",
+      "spell": 801758,
+      "effect": 0,
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "label": "plain: only the instant 25 Energy has arrived",
+      "actor": "plain",
+      "metric": "power",
+      "power": 3,
+      "equals": 25
+    },
+    {
+      "action": "set_power",
+      "actor": "rapid",
+      "power": 3,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "rapid",
+      "spell": 801758
+    },
+    {
+      "action": "assert",
+      "actor": "rapid",
+      "metric": "aura",
+      "spell": 801758,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "rapid: Onslaught lasts ten seconds",
+      "actor": "rapid",
+      "metric": "aura_duration_ms",
+      "spell": 801758,
+      "min": 9300,
+      "max": 10000
+    },
+    {
+      "action": "assert",
+      "label": "rapid: native Energy tick interval",
+      "actor": "rapid",
+      "metric": "aura_amplitude_ms",
+      "spell": 801758,
+      "effect": 0,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "rapid: only the instant 25 Energy has arrived",
+      "actor": "rapid",
+      "metric": "power",
+      "power": 3,
+      "equals": 25
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "assert",
+      "label": "Rapid Recovery grants the first 20 Energy tick after one second",
+      "actor": "rapid",
+      "metric": "power",
+      "power": 3,
+      "equals": 45
+    },
+    {
+      "action": "assert",
+      "label": "The ordinary two-second tick has not fired",
+      "actor": "plain",
+      "metric": "power",
+      "power": 3,
+      "equals": 25
+    },
+    {
+      "action": "wait",
+      "ms": 9500
+    },
+    {
+      "action": "assert",
+      "label": "plain: Onslaught expires after ten seconds",
+      "actor": "plain",
+      "metric": "aura",
+      "spell": 801758,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "plain",
+      "power": 3,
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "label": "rapid: Onslaught expires after ten seconds",
+      "actor": "rapid",
+      "metric": "aura",
+      "spell": 801758,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "rapid",
+      "power": 3,
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "label": "plain: no Energy ticks after expiry",
+      "actor": "plain",
+      "metric": "power",
+      "power": 3,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "rapid: no Energy ticks after expiry",
+      "actor": "rapid",
+      "metric": "power",
+      "power": 3,
+      "equals": 0
+    },
+    {
+      "action": "money",
+      "actor": "rapid",
+      "copper": 100000
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "rapid",
+      "entry": 34302,
+      "rank": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rapid",
+      "metric": "aura",
+      "spell": 705171,
+      "equals": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rapid",
+      "spell": 801758
+    },
+    {
+      "action": "cast",
+      "actor": "rapid",
+      "spell": 801758
+    },
+    {
+      "action": "assert",
+      "label": "Removing Rapid Recovery restores the ordinary tick interval",
+      "actor": "rapid",
+      "metric": "aura_amplitude_ms",
+      "spell": 801758,
+      "effect": 0,
+      "equals": 2000,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Removing Rapid Recovery preserves the ten-second duration",
+      "actor": "rapid",
+      "metric": "aura_duration_ms",
+      "spell": 801758,
+      "min": 9300,
+      "max": 10000
+    }
+  ]
+}

@@ -1,0 +1,340 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Binder of Storms procs a Thunder Orb from Conduction (#3133)",
+  "contract": "Binder of Storms (707542) promises \"Damage dealt by Conduction now has a 60% chance to summon a Thunder Orb\". Spell.dbc gives it Effect[0] SPELL_AURA_PROC_TRIGGER_SPELL with EffectTriggerSpell[0] 801802 and ProcChance 60, but ProcFlags 0 and an empty EffectSpellClassMask, so SpellMgr::LoadSpellProcs skips it and Aura::GetProcEffectMask never finds a proc entry: the aura is applied and never consulted again. Conduction (567560) is the only SpellFamilyName 22 spell with SpellFamilyFlags[0] 32768, so a proc entry with that family and mask selects it exactly. Twelve damaging Conduction hits at ProcChance 60 leave a false-failure probability of 0.4^12 = 1.7e-5 for the proc count. The untalented control casts the same Conduction at its own dummy, so a proc there would mean the orb comes from Conduction and not the talent.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "s",
+      "race": 1,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "c",
+      "race": 1,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "s",
+      "entry": 36,
+      "level": 80,
+      "distance": 10
+    },
+    {
+      "id": "f",
+      "owner": "c",
+      "entry": 36,
+      "level": 80,
+      "distance": 10
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 567560
+    },
+    {
+      "action": "learn",
+      "actor": "c",
+      "spell": 567560
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 707542
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: only the talented Stormbringer carries the permanent Binder of Storms aura",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 707542,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the control carries no Binder of Storms aura",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 707542,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Binder of Storms has procced nothing before any Conduction hit",
+      "actor": "s",
+      "metric": "spell_proc_count",
+      "spell": 707542,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: no Thunder Orb 50074 is owned before any Conduction hit",
+      "actor": "s",
+      "metric": "owned_creature_count",
+      "entry": 50074,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 567560,
+      "target": "e"
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 567560,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 567560,
+      "target": "e"
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 567560,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 567560,
+      "target": "e"
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 567560,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 567560,
+      "target": "e"
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 567560,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 567560,
+      "target": "e"
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 567560,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 567560,
+      "target": "e"
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 567560,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 567560,
+      "target": "e"
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 567560,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 567560,
+      "target": "e"
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 567560,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 567560,
+      "target": "e"
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 567560,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 567560,
+      "target": "e"
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 567560,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 567560,
+      "target": "e"
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 567560,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 567560,
+      "target": "e"
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 567560,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Binder of Storms procced at least once over 12 Conduction hits (0.4^12 = 1.7e-5 false failure)",
+      "actor": "s",
+      "metric": "spell_proc_count",
+      "spell": 707542,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the proc cast Summon: Thunder Orb 801802, EffectTriggerSpell[0] of 707542",
+      "actor": "s",
+      "metric": "spell_cast_count",
+      "spell": 801802,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a Thunder Orb 50074 stands within its 16000 ms life after the last hit",
+      "actor": "s",
+      "metric": "owned_creature_count",
+      "entry": 50074,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Conduction alone procs nothing without the talent",
+      "actor": "c",
+      "metric": "spell_proc_count",
+      "spell": 707542,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the untalented Stormbringer never casts Summon: Thunder Orb",
+      "actor": "c",
+      "metric": "spell_cast_count",
+      "spell": 801802,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the untalented Stormbringer owns no Thunder Orb",
+      "actor": "c",
+      "metric": "owned_creature_count",
+      "entry": 50074,
+      "equals": 0
+    }
+  ]
+}

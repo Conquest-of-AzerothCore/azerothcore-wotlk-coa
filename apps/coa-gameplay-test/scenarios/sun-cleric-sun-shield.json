@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Sun Shield already reduces the chance to be hit by spells (#1573)",
+  "contract": "300348 is a plain APPLY_AURA SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE (aura 186) with no EffectSpellClassMask and no family filter, a stock WotLK generic self-buff needing no per-ability routing at all. BasePoints -4 resolves to -3 (DieSides 1), matching 'Reduces your chance to be hit by spells by 3%'. Learning a passive spell auto-applies its own aura (as with every other 'Rank: Passive' family-33 talent in this class), so the aura and its authored amount are present natively with no server code needed.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "assert", "label": "No Sun Shield aura before the talent", "actor": "caster", "metric": "aura", "spell": 300348, "equals": 0 },
+    { "action": "learn", "label": "Reduces your chance to be hit by spells by 3%", "actor": "caster", "spell": 300348 },
+    { "action": "assert", "label": "Sun Shield is applied on learn", "actor": "caster", "metric": "aura", "spell": 300348, "equals": 1 },
+    { "action": "assert", "label": "Sun Shield's own amount is -3", "actor": "caster", "metric": "aura_amount", "spell": 300348, "effect": 0, "equals": -3 }
+  ]
+}

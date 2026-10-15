@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "name": "Gore Tome opens a 5 s guaranteed Bloodfang Bite crit after a Cursed Form (#3692)",
+  "contract": "Gore Tome 807788's tooltip is \"For the first 5 sec after activating a Cursed Form, your Bloodfang Bite is now guaranteed to critically strike.\" Its own single effect cannot express that: it is aura 108 SPELL_AURA_ADD_PCT_MODIFIER with MiscValue 27 (SPELLMOD_VALUE_MULTIPLIER) and +150% over EffectSpellClassMask (0, 131072, 0), which is Bloodbolt, not Bloodfang Bite, and not a crit operation. A second Spell.dbc record named \"Gore Tome\", 808014, carries exactly the promised contract: aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 99 + DieSides 1 = +100, EffectSpellClassMask (0, 8388608, 0) = word 1 bit 23 = the ten Bloodfang Bite records (501695-501697, 503613-503615, 572549-572551, 800156), and DurationIndex 28 = 5000 ms. No Spell.dbc row names 808014 in any field and no acquisition route reaches it, so nothing ever applied it. Accursed Form 562572 is one of the Cursed Forms the module already recognises. The discriminating assertion is the presence of aura 808014 right after entering the form, with the +100 crit modifier on Bloodfang Bite; both are absent on today's tree and both are gone again after the five seconds.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 562572
+    },
+    {
+      "action": "assert",
+      "label": "No Gore Tome window before anything is learned",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 808014,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Bloodfang Bite has no crit bonus before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 501697,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807788
+    },
+    {
+      "action": "assert",
+      "label": "Learning Gore Tome alone opens no window",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 808014,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 562572
+    },
+    {
+      "action": "assert",
+      "label": "Accursed Form is active",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 562572,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Entering a Cursed Form opens the Gore Tome window",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 808014,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Bloodfang Bite is guaranteed to crit inside the window",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 501697,
+      "op": 7,
+      "base": 0,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "The window does not touch Bloodbolt's crit chance",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let 808014's own five-second duration run out",
+      "ms": 6500
+    },
+    {
+      "action": "assert",
+      "label": "The window closes on its own",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 808014,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Bloodfang Bite's crit bonus is gone with it",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 501697,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    }
+  ]
+}

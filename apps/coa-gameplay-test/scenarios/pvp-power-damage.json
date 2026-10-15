@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "PvP Power raises damage against players",
+  "contract": "A chestpiece with PvP Power (+42) adds 42 x 0.05% = 2.1% to a level 60 attacker's damage against another player. Requires PvpPower.Enable = 1 in coa.conf.",
+  "players": [
+    {
+      "id": "k",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "v",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "script_melee_damage_taken",
+      "target": "k",
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 750
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 8737
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 9078
+    },
+    {
+      "action": "add_item",
+      "actor": "k",
+      "item": 14948,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "k",
+      "item": 14948,
+      "slot": 4
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "script_melee_damage_taken",
+      "target": "k",
+      "min": 1020,
+      "max": 1022
+    }
+  ]
+}

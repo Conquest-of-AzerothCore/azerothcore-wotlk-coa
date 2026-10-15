@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "name": "Dark Intent heals 5% of maximum health when Lunge lands (#2831)",
+  "contract": "Dark Intent 707622 is the rank a Bloodmage owns (CharacterAdvancement class 20, and present in the live-client capture). Its tooltip is \"When you Lunge at an enemy you now heal for $504831s1% of your maximum health\", and its single effect is aura 42 SPELL_AURA_PROC_TRIGGER_SPELL with EffectTriggerSpell 504831 (\"Heal 5%\": SPELL_EFFECT_HEAL_PCT, BasePoints 4 + DieSides 1 = 5, on the caster), ProcChance 100 and Spell.dbc ProcFlags 0x0. With no `spell_proc` row SpellMgr::LoadSpellProcs generated nothing and the heal never fired. Lunge 500126 is the only family-26 record with SpellFamilyFlags (16777216, 0, 0); it has DmgClass NONE and is harmful, so the proc belongs on ProcFlags 4096 (PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG). Lunge is PowerType -2 (POWER_HEALTH) with ManaCostPercentage 8 and CasterAuraSpell 525031, one of the two Cursed Form markers, so the caster must be in a Cursed Form to cast it and the cast itself costs 8 percentage points of maximum health. The discriminating assertion is therefore the signed health_pct change across the Lunge: today's tree loses about 8 points, while the 5% heal leaves a loss of about 3. The bound -5 sits between the two and the bound 0 keeps the assertion from passing on an unrelated gain.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "victim",
+      "owner": "caster",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 12
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 562572
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 500126
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707622
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 562572
+    },
+    {
+      "action": "assert",
+      "label": "A Cursed Form is active so Lunge is castable",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 562572,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Cursed Form marker settle",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "health_pct",
+      "save_as": "before_lunge"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 500126,
+      "target": "victim"
+    },
+    {
+      "action": "wait",
+      "label": "Let the leap and its proc resolve",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Lunge's 8% health cost is offset by the 5% Dark Intent heal",
+      "actor": "caster",
+      "metric": "health_pct",
+      "relative_to": "before_lunge",
+      "min": -5,
+      "max": 0
+    }
+  ]
+}

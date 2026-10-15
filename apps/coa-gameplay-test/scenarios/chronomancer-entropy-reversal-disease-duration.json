@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "name": "Entropy Reversal cuts incoming disease duration by 40% natively (#1276)",
+  "contract": "Spell.dbc gives Entropy Reversal 520780 a single self-targeted APPLY_AURA effect: aura 245 SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL, EffectMiscValue 3 (DISPEL_DISEASE), EffectBasePoints -41 with DieSides 1 -> -40. The tooltip reads 'Reduces the duration of disease effects by -40%'. The aura type has a real consumer: Unit::ModSpellDuration reads durationMod_always = target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL, spellProto->Dispel) and applies AddPct(duration, durationMod), inside the 'if (!positive)' branch, i.e. for negative auras only. No script or SQL is needed; this is a regression scenario for behaviour that already works. FIXTURE: the disease is Ghoul Rot 83985 - Dispel 3 (Disease), DurationIndex 6 = 600000 ms, Mechanic 0 and EffectMechanic 0 (so the separate SPELL_AURA_MECHANIC_DURATION_MOD block above it is inert), SpellFamilyName 0 and Mechanic 0 (so no diminishing-returns group), and SPELL_ATTR0_AURA_IS_DEBUFF (0x04000000), which makes SpellInfo::_IsPositiveEffect return false so a self-cast is flagged AFLAG_NEGATIVE by AuraApplication::_InitFlags. It must be applied by a real cast: the set_aura action goes through Unit::AddAura -> Aura::TryRefreshStackOrCreate, which never calls Unit::ModSpellDuration, so a set_aura fixture would show no reduction whether or not the aura type works. Expected: 600000 ms on the control, 360000 ms on the talented Chronomancer, a ratio of 0.60.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 22, "level": 80 },
+    { "id": "talented", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "control", "spell": 83985 },
+    { "action": "learn", "actor": "talented", "spell": 83985 },
+    { "action": "learn", "actor": "talented", "spell": 520780 },
+    {
+      "action": "assert",
+      "label": "Learning the passive applies its aura",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 520780,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Disease duration modifier resolves to -40",
+      "actor": "talented",
+      "metric": "aura_amount",
+      "spell": 520780,
+      "effect": 0,
+      "equals": -40
+    },
+    { "action": "cast", "actor": "control", "spell": 83985 },
+    { "action": "cast", "actor": "talented", "spell": 83985 },
+    {
+      "action": "assert",
+      "label": "The control caught the fixture disease",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 83985,
+      "caster": "control",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The talented Chronomancer caught the fixture disease",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 83985,
+      "caster": "talented",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Disease duration on the untalented control (600000 ms)",
+      "actor": "control",
+      "metric": "aura_duration_ms",
+      "spell": 83985,
+      "caster": "control",
+      "save_as": "disease_duration_base"
+    },
+    {
+      "action": "assert",
+      "label": "The talented Chronomancer's disease lasts 40% less (360000 ms)",
+      "actor": "talented",
+      "metric": "aura_duration_ms",
+      "spell": 83985,
+      "caster": "talented",
+      "ratio_to": "disease_duration_base",
+      "min": 0.57,
+      "max": 0.63
+    }
+  ]
+}

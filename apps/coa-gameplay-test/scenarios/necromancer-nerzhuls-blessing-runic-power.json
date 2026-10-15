@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Necromancer Ner'zhul's Blessing raises maximum Runic Power by 20% (#1224)",
+  "contract": "Ner'zhul's Blessing 704729 is a Class-tab node (CharacterAdvancement 31143, ClassType 25 = class 23, Tab 87, AbilityEssenceCost 1, SpellFamilyName 29) whose description reads 'Increases your maximum Runic Power by $s1%.' Its only effect is SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT (132) MiscValue 6 (POWER_RUNIC_POWER), BasePoints 19 + DieSides 1 = 20; its ProcFlags 4 has no proc effect to trigger. The aura is not 42/354, so the Necromancer load contract leaves it intact, and AuraEffect::HandleAuraModIncreaseEnergyPercent applies it to UNIT_MOD_RUNIC_POWER TOTAL_PCT, which Player::UpdateMaxPower multiplies into the maximum. Expected: learning the talent multiplies maximum Runic Power by exactly 1.2 and leaves maximum mana unchanged; unlearning restores the original maximum.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and stat updates settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: the fixture does not have Ner'zhul's Blessing yet", "actor": "necro",
+      "metric": "aura", "spell": 704729, "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: the Necromancer has a Runic Power pool", "actor": "necro",
+      "metric": "max_power", "power": 6, "min": 1
+    },
+    { "action": "snapshot", "actor": "necro", "metric": "max_power", "power": 6, "save_as": "rp0" },
+    { "action": "snapshot", "actor": "necro", "metric": "max_power", "power": 0, "save_as": "mana0" },
+    { "action": "learn", "actor": "necro", "spell": 704729 },
+    {
+      "action": "assert", "label": "The talent aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 704729, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: maximum Runic Power rises by 20%", "actor": "necro",
+      "metric": "max_power", "power": 6, "ratio_to": "rp0", "min": 1.199, "max": 1.201
+    },
+    {
+      "action": "assert", "label": "CONTROL: maximum mana is unchanged", "actor": "necro",
+      "metric": "max_power", "power": 0, "ratio_to": "mana0", "min": 0.9999, "max": 1.0001
+    },
+    { "action": "unlearn", "actor": "necro", "spell": 704729 },
+    {
+      "action": "assert", "label": "Unlearning removes the talent aura", "actor": "necro",
+      "metric": "aura", "spell": 704729, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Unlearning restores maximum Runic Power", "actor": "necro",
+      "metric": "max_power", "power": 6, "relative_to": "rp0", "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,200 @@
+{
+  "schema": 1,
+  "name": "Transgression keeps Mortal Form abilities usable (#5571)",
+  "contract": [
+    "Transgression 801076 (Rank 'Cursed Form') reads: 'Enter a unique Cursed Form for $d that does not disable",
+    "the use of Mortal Form abilities'. It replaces Blood Curse for the Sanguine spec, so it is that spec's",
+    "only Cursed Form and keeps both Cursed Form markers: 525031 and 524861, which 53 Cursed ability records",
+    "(Rotclaw 12 ranks among them) require as CasterAuraSpell. Mortal Form damage abilities carry",
+    "ExcludeCasterAuraSpell 524861 (Taldaram's Torment 8 ranks, Bloodmoon Blast 10, Keleseth's Calamity 6,",
+    "Sanguine Rupture 8, Valanar's Vengeance 7, Vampyr's Kiss 8). An ordinary Cursed Form (Blood Curse 562720)",
+    "refuses Taldaram's Torment 802580 with SPELL_FAILED_CASTER_AURASTATE (22, Spell.cpp:5865). Under",
+    "Transgression that instant cast must land its debuff and report no failure, and Rotclaw 503486 must still",
+    "ravage a nearby enemy."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "unique",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ordinary",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "unique_target",
+      "owner": "unique",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "ordinary_target",
+      "owner": "ordinary",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "unique",
+      "spell": 802580
+    },
+    {
+      "action": "learn",
+      "actor": "unique",
+      "spell": 503486
+    },
+    {
+      "action": "learn",
+      "actor": "ordinary",
+      "spell": 802580
+    },
+    {
+      "action": "set_aura",
+      "actor": "unique",
+      "spell": 801076,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Transgression is active",
+      "actor": "unique",
+      "metric": "aura",
+      "spell": 801076,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Transgression keeps the shared Cursed Form marker",
+      "actor": "unique",
+      "metric": "aura",
+      "spell": 525031,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Transgression keeps the Cursed ability marker",
+      "actor": "unique",
+      "metric": "aura",
+      "spell": 524861,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "unique",
+      "spell": 802580,
+      "target": "unique_target"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Taldaram's Torment lands in Transgression",
+      "actor": "unique_target",
+      "metric": "aura",
+      "spell": 802580,
+      "caster": "unique",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The cast is not refused",
+      "actor": "unique",
+      "metric": "cast_failure",
+      "spell": 802580,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "unique",
+      "spell": 503486
+    },
+    {
+      "action": "assert",
+      "label": "Guard: Rotclaw still bleeds a nearby enemy in Transgression",
+      "actor": "unique_target",
+      "metric": "aura",
+      "spell": 503486,
+      "caster": "unique",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Guard: Rotclaw is not refused",
+      "actor": "unique",
+      "metric": "cast_failure",
+      "spell": 503486,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ordinary",
+      "spell": 562720,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control: an ordinary Cursed Form applies the Mortal Form lockout marker",
+      "actor": "ordinary",
+      "metric": "aura",
+      "spell": 524861,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ordinary",
+      "spell": 802580,
+      "target": "ordinary_target"
+    },
+    {
+      "action": "assert",
+      "label": "Control: Blood Curse refuses Taldaram's Torment with SPELL_FAILED_CASTER_AURASTATE",
+      "actor": "ordinary",
+      "metric": "cast_failure",
+      "spell": 802580,
+      "equals": 22,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Control: no debuff lands from the refused cast",
+      "actor": "ordinary_target",
+      "metric": "aura",
+      "spell": 802580,
+      "caster": "ordinary",
+      "equals": 0
+    }
+  ]
+}

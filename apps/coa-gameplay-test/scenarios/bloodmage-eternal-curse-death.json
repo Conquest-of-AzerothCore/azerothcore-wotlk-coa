@@ -1,0 +1,61 @@
+{
+ "schema": 1,
+ "name": "Bloodmage: dying in Eternal Curse drops the form (#4189)",
+ "contract": "A Bloodmage that dies while shapeshifted by Eternal Curse (800157) loses the form at death, so the ghost is not left shapeshifted and the form cannot kill it a second time.",
+ "timeout_ms": 90000,
+ "players": [
+  {
+   "id": "b",
+   "race": 1,
+   "class": 20,
+   "level": 27
+  }
+ ],
+ "steps": [
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "set_aura",
+   "spell": 800157,
+   "stacks": 1,
+   "actor": "b"
+  },
+  {
+   "action": "assert",
+   "metric": "aura",
+   "spell": 800157,
+   "equals": 1,
+   "actor": "b"
+  },
+  {
+   "action": "learn",
+   "actor": "b",
+   "spell": 7
+  },
+  {
+   "action": "cast",
+   "actor": "b",
+   "spell": 7
+  },
+  {
+   "action": "assert",
+   "metric": "alive",
+   "equals": 0,
+   "within_ms": 3000,
+   "actor": "b"
+  },
+  {
+   "action": "wait",
+   "ms": 1500
+  },
+  {
+   "action": "assert",
+   "metric": "aura",
+   "spell": 800157,
+   "equals": 0,
+   "actor": "b"
+  }
+ ]
+}

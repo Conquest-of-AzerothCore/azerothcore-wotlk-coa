@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Uncanny Movement raises Agility, all three hit ratings and Claw Sweep threat (#1792)",
+  "contract": "Uncanny Movement 301064: \"Level 20 Passive. Increases your Agility by $s1% and your hit rating by $s2% of your Agility. In addition, Claw Sweep now generates additional threat.\" Effect 0 is aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE with MiscValue 1 = STAT_AGILITY, amount 25. Effect 1 is aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, amount 5, MiscValue 224 = bits 5, 6 and 7 = CR_HIT_MELEE, CR_HIT_RANGED and CR_HIT_SPELL (Unit.h:223-225), MiscValueB 1 = STAT_AGILITY, consumed in Player::UpdateRating (PlayerUpdates.cpp:659-661) as CalculatePct(GetStat(MiscValueB), GetAmount()) for every rating whose bit is set - so all three hit ratings must move, which is the point of MiscValue 224. Effect 2 is aura 108 with MiscValue 2 = SPELLMOD_THREAT, amount 50, EffectSpellClassMask [0, 0, 16384], which over SpellFamilyName 26 selects exactly the eight Claw Sweep ranks (500169 and 500436-500444) and nothing else; SPELLMOD_THREAT is applied at ThreatManager.cpp:709, so the assertion reads the modifier rather than damage, which SPELLMOD_THREAT never changes. The rating gains are 5% of the post-buff Agility, which is well above 3 at level 80. No source or SQL change is involved.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "stat",
+      "stat": 1,
+      "save_as": "agility"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "combat_rating",
+      "rating": 5,
+      "save_as": "hit_melee"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "combat_rating",
+      "rating": 6,
+      "save_as": "hit_ranged"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "combat_rating",
+      "rating": 7,
+      "save_as": "hit_spell"
+    },
+    {
+      "action": "assert",
+      "label": "Claw Sweep carries no threat modifier yet",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 500169,
+      "op": 2,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 301064
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 301064,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Agility rises by 25%",
+      "actor": "b",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "agility",
+      "min": 1.24,
+      "max": 1.26
+    },
+    {
+      "action": "assert",
+      "label": "Melee hit rating rises with Agility",
+      "actor": "b",
+      "metric": "combat_rating",
+      "rating": 5,
+      "relative_to": "hit_melee",
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "Ranged hit rating rises with Agility",
+      "actor": "b",
+      "metric": "combat_rating",
+      "rating": 6,
+      "relative_to": "hit_ranged",
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "Spell hit rating rises with Agility",
+      "actor": "b",
+      "metric": "combat_rating",
+      "rating": 7,
+      "relative_to": "hit_spell",
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "Claw Sweep generates 50% more threat",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 500169,
+      "op": 2,
+      "base": 1000,
+      "equals": 1500
+    }
+  ]
+}

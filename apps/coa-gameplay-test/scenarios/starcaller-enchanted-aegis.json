@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Enchanted Aegis gives blocks a 50% chance to critically block (#2400)",
+  "contract": "Enchanted Aegis 704795 (SpellFamilyName 32) reads \"Your successful blocks now have a $s1% chance to critically block for twice the normal amount\". Its effect 0 is SPELL_AURA_MOD_BLOCK_CRIT_CHANCE (253), EffectBasePoints 49 with DieSides 1 resolving to 50, implicit target 1 (the caster). The aura handler is HandleNoImmediateEffect (\"implemented in Unit::isBlockCritical\"); Unit::isBlockCritical rolls roll_chance_i(GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_CRIT_CHANCE)), and both block paths call it: Unit::CalculateMeleeDamage doubles blocked_amount and Unit::CalculateSpellDamageTaken doubles damageInfo->blocked when isBlockCritical() is true. The metric critical_block_chance returns exactly that total modifier, so the assertion reads the roll's own input, and the doubling is the stock consumer. The same actor is measured before and after learning the passive, so nothing but the talent can move the value: it must rise by exactly 50 (a rolled 50% chance is not sampled, which would need many blocks; the input to the roll is what the tooltip promises). Nothing in the module handles 704795 (it appears in AscensionStockCoefficientData.h only as an EffectBonusMultiplier suppression id).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Critical block chance before the talent",
+      "actor": "tank",
+      "metric": "critical_block_chance",
+      "save_as": "critblock_base"
+    },
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 704795
+    },
+    {
+      "action": "assert",
+      "label": "The passive self-applies once learned",
+      "actor": "tank",
+      "metric": "aura",
+      "spell": 704795,
+      "caster": "tank",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Critical block chance rises by exactly 50 points",
+      "actor": "tank",
+      "metric": "critical_block_chance",
+      "relative_to": "critblock_base",
+      "equals": 50
+    }
+  ]
+}

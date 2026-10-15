@@ -8,14 +8,14 @@ import sys
 
 module = Path(__file__).resolve().parents[1]
 repo = module.parents[1]
-compat = repo / "modules/mod-ascension-compat/src"
+compat = repo / "src/server/coa"
 bridge = (module / "src/ManastormClientBridge.cpp").read_text(encoding="utf-8")
 config = (module / "src/ManastormModuleConfig.cpp").read_text(encoding="utf-8")
 donor = (compat / "AscensionManastorm.cpp").read_text(encoding="utf-8")
 registration = donor[donor.index("void AddAscensionManastormItemScripts()") :]
 assert re.findall(r"new\s+(\w+)\s*\(", registration) == ["item_ascension_manastorm_cache"]
 assert "QueueAscensionManastormPacket" not in (compat / "AscensionCompat.cpp").read_text(encoding="utf-8")
-assert "AddAscensionManastormScripts" not in (compat / "MP_loader.cpp").read_text(encoding="utf-8")
+assert "AddAscensionManastormScripts" not in (compat / "CoAScriptLoader.cpp").read_text(encoding="utf-8")
 
 validation = bridge[bridge.index("    Ascension::Manastorm::Gadget const* FindGadget") :
                     bridge.index("    char const* ValidateEnter")]

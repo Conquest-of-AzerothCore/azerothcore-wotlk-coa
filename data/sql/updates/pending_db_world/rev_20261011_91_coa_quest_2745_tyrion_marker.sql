@@ -1,0 +1,17 @@
+-- Conquest of Azeroth: quest 2745 "Infiltrating the Castle" points its map marker at Tyrion.
+--
+-- WHERE EACH VALUE COMES FROM
+--   Tyrion's spot  SOURCED-CORE: rev_20260923_03_coa_stormwind.sql moves Tyrion 7766 (guid 43667) out of
+--     the stock garden, which is now the Northern Elwynn lake 35 yd below, into the CoA keep roof garden
+--     beside the library: position (-8330, 279.5, 156.833). The in-game bug report #7005 confirms he stands
+--     in the grassy courtyard there while the marker points outside the walls.
+--   stale point  SOURCED-CORE: quest_poi_points (2745, 0, 0) still holds the stock spot (-8408, 451),
+--     ~188 yd from Tyrion. rev_20260924_60_coa_quest_markers.sql explicitly left Tyrion 7766 (2745, 2746)
+--     alone as an unconfident INFERRED move; #7005 now supplies the confidence for 2745.
+--   new point  DERIVED: Tyrion's spawn rounded to the integer grid quest_poi_points uses (-8330, 280),
+--     0.5 yd from his spawn. The quest_poi row (ObjectiveIndex -1, MapID 0, WorldMapAreaId 30, Floor 0,
+--     Flags 1) already matches the garden and is untouched.
+-- Quest 2746 keeps its Stockade objective markers; the report covers 2745 only.
+--
+-- Exact-key update only; re-applying the file is a no-op.
+UPDATE `quest_poi_points` SET `X` = -8330, `Y` = 280 WHERE (`QuestID`, `Idx1`, `Idx2`) = (2745, 0, 0);

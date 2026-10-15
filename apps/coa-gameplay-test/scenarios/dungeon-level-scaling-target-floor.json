@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "name": "Scaled dungeon creatures follow the viewer down to the finder entry's TargetLevelMin",
+  "contract": [
+    "Requires DestinyWeaver.Enable=1 and DestinyWeaver.LevelScaling=1 with the default DestinyWeaver.Scaling.DungeonIds.",
+    "Inside a scaled five-player dungeon a creature stands at the viewer's own level, held inside the dungeon's band.",
+    "The band's floor is LFGDungeons.dbc TargetLevelMin, not the finder's MinLevel: Maraudon (map 349, entries 26,",
+    "272 and 273) has MinLevel 35 and TargetLevelMin 20, so a level-26 character sees a level-45 creature at 26",
+    "instead of 35, and a level-15 character sees it at the floor of 20. Black Riding Wolf 5194 is the fixture."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 349,
+    "x": 1019.69,
+    "y": -458.31,
+    "z": -43.43,
+    "o": 0.31,
+    "ignore_access": true
+  },
+  "players": [
+    { "id": "mid", "race": 1, "class": 1, "level": 26 },
+    { "id": "low", "race": 1, "class": 1, "level": 15 }
+  ],
+  "creatures": [
+    { "id": "mid_target", "owner": "mid", "entry": 5194, "level": 45, "distance": 8 },
+    { "id": "low_target", "owner": "low", "entry": 5194, "level": 45, "distance": 8 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
+    { "action": "level_scaling_packet", "actor": "mid", "value": 1 },
+    { "action": "level_scaling_packet", "actor": "low", "value": 1 },
+    {
+      "action": "assert",
+      "label": "A level-26 character sees the Maraudon creature at its own level",
+      "actor": "mid",
+      "metric": "view_level",
+      "target": "mid_target",
+      "equals": 26,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The level-26 character is sent level 26",
+      "actor": "mid",
+      "metric": "sent_level",
+      "target": "mid_target",
+      "equals": 26,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "A level-15 character sees the creature at Maraudon's TargetLevelMin of 20",
+      "actor": "low",
+      "metric": "view_level",
+      "target": "low_target",
+      "equals": 20,
+      "within_ms": 2000
+    },
+    { "action": "level_scaling_packet", "actor": "mid", "value": 0 },
+    {
+      "action": "assert",
+      "label": "Scaling off shows the authored level",
+      "actor": "mid",
+      "metric": "view_level",
+      "target": "mid_target",
+      "equals": 45,
+      "within_ms": 2000
+    }
+  ]
+}

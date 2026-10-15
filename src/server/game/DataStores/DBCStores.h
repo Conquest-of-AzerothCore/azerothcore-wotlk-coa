@@ -25,10 +25,16 @@
 #include <string_view>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
+#include <vector>
 
 typedef std::list<uint32> SimpleFactionsList;
 
 SimpleFactionsList const* GetFactionTeamList(uint32 faction);
+
+// A reputation index belongs to the first faction that uses it; later factions sharing it lose their reputation.
+// Returns the released faction IDs with the ID of the faction that keeps the index.
+std::vector<std::pair<uint32, uint32>> ReleaseSharedReputationListIds(std::vector<FactionEntry*> const& factions);
 
 char const* GetPetName(uint32 petfamily, uint32 dbclang);
 uint32 GetTalentSpellCost(uint32 spellId);

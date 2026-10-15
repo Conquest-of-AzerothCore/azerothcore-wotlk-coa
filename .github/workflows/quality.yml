@@ -3,6 +3,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
   workflow_dispatch:
 permissions:
   contents: read
@@ -16,8 +17,26 @@ jobs:
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: '3.12'
-      - run: python -B apps/codestyle/tests/test_scoped_lint.py
-      - run: python -B modules/mod-ascension-compat/tests/client_compat/run.py
-      - run: python -B apps/coa-dbc/test_client_dbc.py
+      - name: Run source checks relevant to this change
+        id: source-checks
+        env:
+          CHECK_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          CHECK_SQL_EXCEPTION: ${{ contains(github.event.pull_request.labels.*.name, 'sql-change-authorized') }}
+        run: |
+          extra=()
+          base="$CHECK_BASE_SHA"
+          if [ -z "$base" ] || [[ "$base" =~ ^0+$ ]]; then
+            base=HEAD
+            extra+=(--all)
+          elif ! git cat-file -e "$base^{commit}"; then
+            git fetch --no-tags --depth=1 origin "$base"
+          fi
+          if [ "$CHECK_SQL_EXCEPTION" = true ]; then extra+=(--allow-historical-sql); fi
+          python -B tools/check_source.py --base "$base" --github-output "$GITHUB_OUTPUT" "${extra[@]}"
+      - name: Native client compatibility checks
+        if: steps.source-checks.outputs.client_compat == 'true'
+        run: |
+          python -B apps/coa-tests/client_compat/run.py
+          python -B apps/coa-tests/core_integration/run.py
       - run: python -B tools/check_repository.py
       - run: git diff --check HEAD^ HEAD

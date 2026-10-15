@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Sunbeams is a native cast-time modifier on Radiant Cascade only (#3694)",
+  "contract": "Spell.dbc 807874 (\"Sunbeams\", SpellFamilyName 33, Passive) has one SPELL_AURA_ADD_PCT_MODIFIER (108) effect with EffectMiscValue 10 (SPELLMOD_CASTING_TIME), EffectBasePoints -16 (amount -15), and EffectSpellClassMask word 1 = 32768, which a repository-wide Spell.dbc scan for family-33 spells shows matches only the Radiant Cascade chain. Player::ApplySpellMod's CASTING_TIME/DURATION branch (Player.cpp:10219) computes basevalue = (basevalue+totalflat)*totalmul; with no flat modifier and a single -15% pct modifier, totalmul = 0.85, so base 1000 reads back 850 — the tooltip's 'reduces the cast time of Radiant Cascade by 15%'. This is a fully generic native pipeline; no server script exists or is needed.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "Sanity: no cast-time modifier on Radiant Cascade before learning",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 500141, "op": 10, "base": 1000, "equals": 1000
+    },
+    { "action": "learn", "actor": "cleric", "spell": 807874 },
+    {
+      "action": "assert", "label": "Radiant Cascade's cast time is reduced by 15%",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 500141, "op": 10, "base": 1000, "equals": 850
+    },
+    {
+      "action": "assert", "label": "An unrelated family-33 spell (Gavel of Light) keeps its normal cast time",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 800611, "op": 10, "base": 1000, "equals": 1000
+    }
+  ]
+}

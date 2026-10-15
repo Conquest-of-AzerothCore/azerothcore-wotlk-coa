@@ -256,22 +256,21 @@ namespace CoAChallenges
     {
         if (!player)
             return;
+        RefreshHungerTracking(player, LoadActiveChallengeRows(player->GetGUID().GetCounter()));
+    }
+
+    void RefreshHungerTracking(Player* player, std::vector<ActiveChallengeRow> const& rows)
+    {
+        if (!player)
+            return;
         uint32 guid = player->GetGUID().GetCounter();
 
         // Build the fresh state (DB reads) BEFORE taking HungerMutex: holding the
         // lock across synchronous queries stalls every other player's hunger tick.
         HungerClock fresh;
-        if (QueryResult r = CharacterDatabase.Query(
-                "SELECT challengeId, hunger, thirst FROM coa_character_challenge WHERE guid = {}", guid))
-        {
-            do
-            {
-                Field* f = r->Fetch();
-                uint32 challengeID = f[0].Get<uint32>();
-                if (IsHungerChallenge(challengeID))
-                    fresh.state[challengeID] = HungerState{ f[1].Get<int32>(), f[2].Get<int32>() };
-            } while (r->NextRow());
-        }
+        for (ActiveChallengeRow const& row : rows)
+            if (IsHungerChallenge(row.challengeId))
+                fresh.state[row.challengeId] = HungerState{ row.hunger, row.thirst };
         // Survivalist gamemode: run hunger globally for this character. Read the
         // cached mask (the login recompute just wrote it) instead of re-querying
         // the async-updated row.

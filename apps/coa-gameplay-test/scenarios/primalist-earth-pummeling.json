@@ -1,0 +1,277 @@
+{
+  "schema": 1,
+  "name": "Primalist Earth Pummeling critical vulnerability",
+  "contract": "Retain the native passive +3% critical chance. Positive Geode and Barrage hits apply the native twelve-second +3% spell critical vulnerability; unrelated damage, baseline and unlearning do not.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 500000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 804002
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 803138
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 582532
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_crit_chance",
+      "save_as": "base_crit",
+      "school": 3
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 804002,
+      "target": "target",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 504201,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 560182
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_crit_chance",
+      "relative_to": "base_crit",
+      "school": 3,
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 804002,
+      "target": "target",
+      "save_as": "before_804002"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 804002,
+      "target": "target",
+      "relative_to": "before_804002",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 504201,
+      "caster": "primalist",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_amount",
+      "spell": 504201,
+      "effect": 0,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_duration_ms",
+      "spell": 504201,
+      "min": 10500,
+      "max": 12000
+    },
+    {
+      "action": "wait",
+      "ms": 12500
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 504201,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "before_803138"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "relative_to": "before_803138",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 504201,
+      "caster": "primalist",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_amount",
+      "spell": 504201,
+      "effect": 0,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_duration_ms",
+      "spell": 504201,
+      "min": 10500,
+      "max": 12000
+    },
+    {
+      "action": "wait",
+      "ms": 12500
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 504201,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 582532,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "target": "target",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 504201,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 560182,
+      "all_specs": true
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 804002,
+      "target": "target",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 504201,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_crit_chance",
+      "relative_to": "base_crit",
+      "equals": 0,
+      "school": 3
+    }
+  ]
+}

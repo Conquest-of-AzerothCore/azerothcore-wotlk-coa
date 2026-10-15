@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "Tinker Tank Buster ignores armor on burning targets (#3119)",
+  "contract": [
+    "Tank Buster 707254 is SPELL_AURA_OVERRIDE_CLASS_SCRIPTS with amount 25 (DBC EffectBasePoints 24,",
+    "DieSides 1) and class mask 0x10, and it is implemented in core C++ in Unit::CalcArmorReducedDamage",
+    "(src/server/game/Entities/Unit/Unit.cpp:2287-2297): a CLASS_TINKER attacker casting a SpellFamilyName 34",
+    "spell carrying flag96(16,0,256) against a victim holding a Fire periodic-damage aura adds 25 to",
+    "ignoreArmorPct. Scrap Shot 500549 carries that mask; Rocket Launcher 500235 does not. Incendiary Rounds",
+    "800024 is the Fire periodic aura fixture: SpellFamilyName 34, SchoolMask 4, SPELL_AURA_PERIODIC_DAMAGE",
+    "with amount 0 and an 8 s duration, so it marks the target burning without changing its health."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "burning",
+      "owner": "t",
+      "entry": 36,
+      "level": 80,
+      "distance": 3
+    },
+    {
+      "id": "clean",
+      "owner": "t",
+      "entry": 36,
+      "level": 80,
+      "distance": 8
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 800024
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 800024,
+      "target": "burning"
+    },
+    {
+      "action": "assert",
+      "label": "The first target is burning",
+      "actor": "burning",
+      "metric": "aura",
+      "spell": 800024,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The second target is not burning",
+      "actor": "clean",
+      "metric": "aura",
+      "spell": 800024,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "save_as": "burn0",
+      "actor": "t",
+      "metric": "armor_reduced_damage",
+      "spell": 500549,
+      "target": "burning"
+    },
+    {
+      "action": "snapshot",
+      "save_as": "clean0",
+      "actor": "t",
+      "metric": "armor_reduced_damage",
+      "spell": 500549,
+      "target": "clean"
+    },
+    {
+      "action": "snapshot",
+      "save_as": "rocket0",
+      "actor": "t",
+      "metric": "armor_reduced_damage",
+      "spell": 500235,
+      "target": "burning"
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 707254
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 800024,
+      "target": "burning"
+    },
+    {
+      "action": "assert",
+      "label": "The burn is still up for the measurement",
+      "actor": "burning",
+      "metric": "aura",
+      "spell": 800024,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Scrap Shot punches through the burning target's armor",
+      "actor": "t",
+      "metric": "armor_reduced_damage",
+      "spell": 500549,
+      "target": "burning",
+      "relative_to": "burn0",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "A target that is not burning keeps its full armor",
+      "actor": "t",
+      "metric": "armor_reduced_damage",
+      "spell": 500549,
+      "target": "clean",
+      "relative_to": "clean0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Rocket Launcher is outside the talent's class mask",
+      "actor": "t",
+      "metric": "armor_reduced_damage",
+      "spell": 500235,
+      "target": "burning",
+      "relative_to": "rocket0",
+      "equals": 0
+    }
+  ]
+}

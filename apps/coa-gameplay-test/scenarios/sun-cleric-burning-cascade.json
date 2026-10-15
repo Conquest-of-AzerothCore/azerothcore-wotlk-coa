@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "name": "Burning Cascade cuts Dawnsear and Sunflare's cast time and mana cost by 10%/20% per rank (#1343)",
+  "contract": "Burning Cascade rank 1 (560859) and rank 2 (561329) are family 33, Attributes 448 (SPELL_ATTR0_PASSIVE), EquippedItemClass -1, no Stances, so each self-applies on learn. Both ranks carry two SPELL_AURA_ADD_PCT_MODIFIER (108) effects on the same EffectSpellClassMask word1 1282 (bits 0x2, 0x100 and 0x400): effect 0 has EffectMiscValue 10 (SPELLMOD_CASTING_TIME), effect 1 has EffectMiscValue 14 (SPELLMOD_COST); rank 1's EffectBasePoints are -11 + DieSides 1 = -10 on both, rank 2's are -21 + DieSides 1 = -20 on both. Dawnsear (500146 and its ranks 502366-502371) carries word1 bit 0x2; Sunflare (800231 and ranks 502386-502397) carries word1 bit 0x100. SpellInfo::CalcCastTime and SpellInfo::CalcPowerCost both apply ApplySpellMod unconditionally; this is not \"no server-side implementation\", both named spells already get the cast-time and mana-cost reduction at both ranks. (Word1 bit 0x400 also matches an unrelated spell, 'Glorious Execution Mana Passive' 807451; that stray match is not part of this issue and is recorded separately, not fixed here.)",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    },
+    {
+      "id": "rank1",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    },
+    {
+      "id": "rank2",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 560859
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 561329
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 self-applies",
+      "actor": "rank1",
+      "metric": "aura",
+      "spell": 560859,
+      "caster": "rank1",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 self-applies",
+      "actor": "rank2",
+      "metric": "aura",
+      "spell": 561329,
+      "caster": "rank2",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_cast_time_ms",
+      "spell": 500146,
+      "save_as": "control_dawnsear_cast"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 cuts Dawnsear's cast time by 10%",
+      "actor": "rank1",
+      "metric": "spell_cast_time_ms",
+      "spell": 500146,
+      "ratio_to": "control_dawnsear_cast",
+      "min": 0.88,
+      "max": 0.92
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 cuts Dawnsear's cast time by 20%",
+      "actor": "rank2",
+      "metric": "spell_cast_time_ms",
+      "spell": 500146,
+      "ratio_to": "control_dawnsear_cast",
+      "min": 0.78,
+      "max": 0.82
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 500146,
+      "save_as": "control_dawnsear_cost"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 cuts Dawnsear's mana cost by 10%",
+      "actor": "rank1",
+      "metric": "spell_power_cost",
+      "spell": 500146,
+      "ratio_to": "control_dawnsear_cost",
+      "min": 0.85,
+      "max": 0.95
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 cuts Dawnsear's mana cost by 20%",
+      "actor": "rank2",
+      "metric": "spell_power_cost",
+      "spell": 500146,
+      "ratio_to": "control_dawnsear_cost",
+      "min": 0.75,
+      "max": 0.85
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_cast_time_ms",
+      "spell": 800231,
+      "save_as": "control_sunflare_cast"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 cuts Sunflare's cast time by 10%",
+      "actor": "rank1",
+      "metric": "spell_cast_time_ms",
+      "spell": 800231,
+      "ratio_to": "control_sunflare_cast",
+      "min": 0.88,
+      "max": 0.92
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 cuts Sunflare's cast time by 20%",
+      "actor": "rank2",
+      "metric": "spell_cast_time_ms",
+      "spell": 800231,
+      "ratio_to": "control_sunflare_cast",
+      "min": 0.78,
+      "max": 0.82
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 800231,
+      "save_as": "control_sunflare_cost"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 cuts Sunflare's mana cost by 10%",
+      "actor": "rank1",
+      "metric": "spell_power_cost",
+      "spell": 800231,
+      "ratio_to": "control_sunflare_cost",
+      "min": 0.85,
+      "max": 0.95
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 cuts Sunflare's mana cost by 20%",
+      "actor": "rank2",
+      "metric": "spell_power_cost",
+      "spell": 800231,
+      "ratio_to": "control_sunflare_cost",
+      "min": 0.75,
+      "max": 0.85
+    }
+  ]
+}

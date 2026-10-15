@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "name": "Shadow Strength shortens Howl cooldowns when the Darkwing is called (#3249)",
+  "contract": "Shadow Strength 801960's second clause reads 'triggering Call of the Darkwing now reduces the cooldown of all Howl spells by $/1000;556239S1 sec. Can only occur once per sec'. Its two effects are aura 42 (proc trigger spell) on 556239 and 556238, which between them carry six SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN effects at BasePoints -1001 (-1000 ms) on 806177, 500124, 804207, 804195, 800782 and 804811. Spell.dbc gives 801960 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped the record. Call of the Darkwing is never cast directly, so the scenario reaches it through Monstrous Howl 804811, whose own proc row (this batch) triggers 801958 on a Bloodfang Bite; 556238 in turn shortens 804811's 40 sec cooldown, which is the observable. A control pair of adjacent steps first proves that an idle step pair decays the cooldown by less than 600 ms, so only the proc can produce the 900 ms drop asserted afterwards. NOTE: the tooltip's FIRST clause, the nearby Shadow damage from 536277, has no effect slot on 801960 at all and is not covered by this scenario or by the migration.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 801960
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 804811
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 800156
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture the Cursed Form marker Monstrous Howl requires",
+      "actor": "bloodmage",
+      "spell": 524861,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture the Cursed Form marker Bloodfang Bite requires",
+      "actor": "bloodmage",
+      "spell": 525031,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Shadow Strength passive is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 801960,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 804811
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Monstrous Howl is on its 40 sec cooldown",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 804811,
+      "min": 30000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "CONTROL: cooldown before an idle step pair",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 804811,
+      "save_as": "cd_control"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: adjacent steps decay the cooldown by less than 600 ms",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 804811,
+      "relative_to": "cd_control",
+      "min": -600
+    },
+    {
+      "action": "snapshot",
+      "label": "Monstrous Howl cooldown before the bite",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 804811,
+      "save_as": "cd_before"
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800156,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: calling the Darkwing cuts the Howl cooldown by at least 900 ms",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 804811,
+      "relative_to": "cd_before",
+      "max": -900
+    }
+  ]
+}

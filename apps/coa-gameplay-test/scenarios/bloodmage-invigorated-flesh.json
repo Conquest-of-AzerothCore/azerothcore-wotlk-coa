@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Invigorated Flesh gives the raid 1% hit with all spells and attacks (#3699)",
+  "contract": "Invigorated Flesh 704632 has a single effect in Spell.dbc: SPELL_EFFECT_APPLY_AREA_AURA_RAID with aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 0 + DieSides 1 = 1, radius index 12 (100 yards) and TargetA 1. Its native handler AuraEffect::HandleAscensionModHitChanceAll calls both HandleModHitChance (m_modMeleeHitChance) and HandleModSpellHitChance (m_modSpellHitChance), which is exactly the tooltip's \"all spells and attacks\". relative_to is used rather than an absolute value because base hit chance depends on level and gear.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 20, "level": 80 },
+    { "id": "ally", "race": 1, "class": 20, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "group", "actor": "caster", "target": "ally" },
+    { "action": "snapshot", "actor": "caster", "metric": "melee_hit_chance", "save_as": "caster_melee" },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_hit_chance", "save_as": "caster_spell" },
+    { "action": "snapshot", "actor": "ally", "metric": "melee_hit_chance", "save_as": "ally_melee" },
+    { "action": "snapshot", "actor": "ally", "metric": "spell_hit_chance", "save_as": "ally_spell" },
+    { "action": "learn", "actor": "caster", "spell": 704632 },
+    {
+      "action": "assert", "label": "The caster gains 1% melee hit",
+      "actor": "caster", "metric": "melee_hit_chance", "relative_to": "caster_melee",
+      "min": 0.99, "max": 1.01, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The caster gains 1% spell hit",
+      "actor": "caster", "metric": "spell_hit_chance", "relative_to": "caster_spell",
+      "min": 0.99, "max": 1.01
+    },
+    {
+      "action": "assert", "label": "The grouped ally gains 1% melee hit",
+      "actor": "ally", "metric": "melee_hit_chance", "relative_to": "ally_melee",
+      "min": 0.99, "max": 1.01, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The grouped ally gains 1% spell hit",
+      "actor": "ally", "metric": "spell_hit_chance", "relative_to": "ally_spell",
+      "min": 0.99, "max": 1.01
+    }
+  ]
+}

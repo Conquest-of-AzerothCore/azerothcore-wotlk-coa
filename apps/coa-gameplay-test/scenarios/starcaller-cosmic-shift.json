@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "name": "Cosmic Shift stealths an ally and does not break on damage taken (#797)",
+  "contract": "Cosmic Shift 801134 (SpellFamilyName 32) reads \"Shift the target ally out of the physical plane, granting improved stealth for $d. Does not break on damage taken.\" Effect 0 is SPELL_AURA_MOD_STEALTH (16) with EffectBasePoints 999 (stealth level 1000) on implicit target 21 (TARGET_UNIT_TARGET_ALLY), DurationIndex 1 = 10 s. AuraInterruptFlags is 0x0c020004: it carries neither AURA_INTERRUPT_FLAG_TAKE_DAMAGE (0x2) nor DIRECT_DAMAGE (0x01000000), and Unit::DealDamage only strips auras through RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TAKE_DAMAGE) (Unit.cpp, the damagetype != NODAMAGE branch), so damage leaves it up: that is the tooltip's last sentence, and it needs no module code (no module reference to 801134). AuraEffect::HandleModStealth adds the value to m_stealth on any target, ally included. The fixture applies the damage the way chronomancer-borrowed-time-heal does: Gnomish Death Ray 13493 (SchoolMask 1, SPELL_AURA_PERIODIC_DAMAGE, amplitude 1000, EffectBasePoints 149) via set_aura on the ally, which is a real DealDamage on a player. The scenario asserts the ally lost health (so damage really went through DealDamage) and that Cosmic Shift is still applied afterwards, well inside its 10 s duration (about 4 s elapse). Stock rules that do remove it, and are not tested: casting a spell (interrupt flag 0x4) and being hit by a hostile non-triggered spell. Both fixtures are class 26, race 1, so they are friendly and the ally cast is valid at the harness's default spawn spacing.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801134
+    },
+    {
+      "action": "cast",
+      "label": "Cast Cosmic Shift on the ally",
+      "actor": "caster",
+      "spell": 801134,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "The ally is stealthed by Cosmic Shift",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 801134,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "label": "Ally health before damage",
+      "actor": "ally",
+      "metric": "health",
+      "save_as": "ally_health_before"
+    },
+    {
+      "action": "set_aura",
+      "label": "Damage the ally with Gnomish Death Ray",
+      "actor": "ally",
+      "spell": 13493,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let at least two Death Ray ticks land",
+      "ms": 2600
+    },
+    {
+      "action": "assert",
+      "label": "The ally really took damage",
+      "actor": "ally",
+      "metric": "health",
+      "relative_to": "ally_health_before",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "label": "Cosmic Shift survived the damage",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 801134,
+      "caster": "caster",
+      "equals": 1
+    }
+  ]
+}

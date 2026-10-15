@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Infernus applies its Burn DoT after a Lava Shard hit (#4605)",
+  "contract": "#4605: 92124 Infernus is a real Pyromancer talent (CharacterAdvancement 4037) whose native effect is SPELL_AURA_PROC_TRIGGER_SPELL(706874), but AscensionPyromancer::ApplyContracts (AscensionPyromancerContracts.cpp) neuters that effect to SPELL_AURA_DUMMY and zeroes ProcFlags/ProcCharges for every id in PyromancerDrivers (AscensionPyromancerData.h), which lists 92124 -- so the native proc path is intentionally dead, and rev_20260909_11_pyromancer_completion.sql's DELETE-without-reINSERT of the spell_proc row for 92124 matches that design rather than a missing row. The real trigger is hardcoded: pyromancer_spells::OnSpellHitResult (AscensionPyromancerAbilities.cpp) casts 706874 at the struck target whenever Named(info, 803950) -- Lava Shard's granted rank-chain root (ClassSpells {24,4,803950}; spell_ranks roots the chain at 803950), not 803948, an unrelated Spell.dbc record with the same display name that nothing in this fork grants or references -- lands damage and player->HasAura(92124) is true. This scenario proves that hardcoded path already delivers the DoT; no code or SQL change is made.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "pyro",
+      "race": 1,
+      "class": 24,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "pyro",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "pyro", "spell": 803950 },
+    { "action": "cast", "label": "Lava Shard without Infernus known", "actor": "pyro", "spell": 803950, "target": "target" },
+    { "action": "assert", "label": "control: Lava Shard cast succeeded", "actor": "pyro", "metric": "cast_failure", "spell": 803950, "equals": 0, "within_ms": 2000 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "Without Infernus, Lava Shard alone does not apply the Burn DoT", "actor": "target", "metric": "aura", "spell": 706874, "caster": "pyro", "equals": 0 },
+    { "action": "learn", "actor": "pyro", "spell": 92124 },
+    { "action": "assert", "label": "Infernus passive is applied to the caster once learned", "actor": "pyro", "metric": "aura", "spell": 92124, "equals": 1 },
+    { "action": "reset_cooldown", "actor": "pyro", "spell": 803950 },
+    { "action": "cast", "label": "Lava Shard with Infernus known", "actor": "pyro", "spell": 803950, "target": "target" },
+    { "action": "assert", "label": "Infernus applies its Burn DoT after the Lava Shard hit", "actor": "target", "metric": "aura", "spell": 706874, "caster": "pyro", "equals": 1, "within_ms": 3000 }
+  ]
+}

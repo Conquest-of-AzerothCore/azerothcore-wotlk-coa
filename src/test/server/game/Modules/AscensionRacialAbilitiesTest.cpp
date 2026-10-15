@@ -1,7 +1,8 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
-#include "../../../../../modules/mod-ascension-compat/src/AscensionRacialAbilities.h"
+#include "AscensionRacialAbilities.h"
 #include "gtest/gtest.h"
+#include <vector>
 
 namespace
 {
@@ -94,6 +95,54 @@ TEST(AscensionRacialAbilitiesTest, BloodElfWitchHunterReceivesOnlyTheMultiResour
     torrent.MinSkillLineRank = 1;
     torrent.SupercededBySpell = 123;
     EXPECT_FALSE(AscensionRacialAbilities::CanLearn(torrent, RACE_BLOODELF, CLASS_WITCH_HUNTER));
+}
+
+TEST(AscensionRacialAbilitiesTest, EveryCustomClassReceivesExactlyOneActiveRacialVariant)
+{
+    struct Variant
+    {
+        uint32 SkillId;
+        uint32 SpellId;
+        uint32 RaceMask;
+        uint32 ClassMask;
+    };
+    constexpr Variant bloodFury[] = {
+        {SKILL_ORC_RACIAL, 814283, 2, 1181696u}, {SKILL_ORC_RACIAL, 814284, 2, 12619776u},
+        {SKILL_ORC_RACIAL, 814285, 2, 3372294144u}};
+    constexpr Variant arcaneTorrent[] = {
+        {SKILL_RACIAL_BLOODELF, 28730, 0, 512u}, {SKILL_RACIAL_BLOODELF, 814286, 512, 401408u},
+        {SKILL_RACIAL_BLOODELF, 814287, 512, 2376105984u}, {SKILL_RACIAL_BLOODELF, 814288, 512, 536870912u},
+        {SKILL_RACIAL_BLOODELF, 814289, 512, 4194304u}, {SKILL_RACIAL_BLOODELF, 814290, 512, 589824u},
+        {SKILL_RACIAL_BLOODELF, 814291, 512, 33554432u}, {SKILL_RACIAL_BLOODELF, 814292, 512, 1048576u}};
+    constexpr Variant giftOfTheNaaru[] = {
+        {11760, 814280, 1024, 48267264u}, {11760, 814281, 1024, 131072u}, {11760, 814282, 1024, 3909427200u}};
+
+    auto learnedVariants = [](auto const& variants, uint8 raceId, uint8 classId)
+    {
+        std::vector<uint32> learned;
+        for (Variant const& variant : variants)
+        {
+            auto ability = RacialAbility(variant.SkillId, variant.RaceMask, variant.ClassMask);
+            ability.Spell = variant.SpellId;
+            if (AscensionRacialAbilities::CanLearn(ability, raceId, classId))
+                learned.push_back(variant.SpellId);
+        }
+        return learned;
+    };
+
+    for (uint8 classId = CLASS_BARBARIAN; classId < MAX_CLASSES; ++classId)
+    {
+        EXPECT_EQ(learnedVariants(bloodFury, RACE_ORC, classId).size(), 1u);
+        EXPECT_EQ(learnedVariants(arcaneTorrent, RACE_BLOODELF, classId).size(), 1u);
+        EXPECT_EQ(learnedVariants(giftOfTheNaaru, RACE_DRAENEI, classId).size(), 1u);
+    }
+
+    EXPECT_EQ(learnedVariants(bloodFury, RACE_ORC, CLASS_REAPER), std::vector<uint32>{814285});
+    EXPECT_EQ(learnedVariants(arcaneTorrent, RACE_BLOODELF, CLASS_WITCH_DOCTOR), std::vector<uint32>{814287});
+    EXPECT_EQ(learnedVariants(arcaneTorrent, RACE_BLOODELF, CLASS_PROPHET), std::vector<uint32>{814287});
+    EXPECT_EQ(learnedVariants(giftOfTheNaaru, RACE_DRAENEI, CLASS_RANGER), std::vector<uint32>{814281});
+    EXPECT_EQ(learnedVariants(giftOfTheNaaru, RACE_DRAENEI, CLASS_WITCH_DOCTOR), std::vector<uint32>{814280});
+    EXPECT_TRUE(learnedVariants(bloodFury, RACE_BLOODELF, CLASS_REAPER).empty());
 }
 
 TEST(AscensionRacialAbilitiesTest, RejectsUnrelatedSkillsClassesAndNonDefaultAbilities)

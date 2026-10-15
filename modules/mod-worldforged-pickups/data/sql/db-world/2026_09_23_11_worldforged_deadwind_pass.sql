@@ -1,0 +1,34 @@
+-- ----------------------------------------------------------------------------
+-- Worldforged pickups: Deadwind Pass, judged against the realm map marker by marker
+-- ----------------------------------------------------------------------------
+-- Each marker on the zone's realm map page is given the object it means: the object of that
+-- name in this world; the object whose loot row carries that name as its item (the map names
+-- most of this zone's markers after the item, e.g. 'Forsaken Tome' for the object 'Scorched
+-- Tome'); or the object the archive's loot pin at that spot names.
+--
+-- This file holds no statements.  The zone needed no change, and it is written down here so the
+-- check has a record beside every other zone's.
+--
+-- Of the page's 41 markers:
+--   37 are real placements.  36 stand 0.0 yd on them; the 37th, Betrayal's Edge, is a placement
+--      the map records twice - on its Duskwood page as 'Dark Scythe' (-10452.2 -1720.3) and here
+--      as 'Betrayal's Edge' (-10449.5 -1733.0), 13 yd apart - and the realm's own sightings of
+--      that chest (254494, -10452.6 -1719.7 at height 85.8, twice, tagged Duskwood) agree with
+--      the Duskwood spot, where the pickup stands.  Nothing moved.
+--   2 have objects in the realm's records and this world but no loot table in any source held:
+--      Lost Tome (100049, display 430) and Old Book (254512/254513/254514, displays 8128/8133/
+--      60737), both chests the realm saw in DeadwindPass.  Nothing is invented for them.
+--   1 is a scroll chest: Mysterious Goblet (2180754, display 565), whose archive loot pin 1.9 yd
+--      away names Mystic Scroll: Divine Symmetry (200584) - left out with the rest of that family.
+--   1 is the 'Worldforge Drops (3 items)' cluster label.
+--
+-- Three of the page's markers are served by pickups the world's own area data files in a
+-- neighbouring zone, so their rows live on that zone's sheet: Bloodied Gauntlets (6940145,
+-- Blasted Lands), Lifesap Blade (6940705, Duskwood), and Furbolg War Drum (6940519, which the
+-- world does call Deadwind Pass).  All three stand 0.0 yd on the marker.
+--
+-- Six rows read 9 to 157 yd from the terrain reader's surface (Ancient Formula, Shelf of
+-- Recipes, Wine Bottle, Bag of Folding, Fallen Hero's Shield, Venerable Necklace) because they
+-- sit inside Karazhan's cellars and crypts; each matches the realm's own recorded height for
+-- that object to the decimal, so they stay.
+-- ----------------------------------------------------------------------------

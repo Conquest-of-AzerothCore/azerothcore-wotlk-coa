@@ -1,0 +1,742 @@
+{
+  "schema": 1,
+  "name": "Brimstone's Blood raises Demon's Blood's proc chance by 25 points (#1587)",
+  "contract": "Brimstone's Blood 300387 reads 'Increases the chance of gaining a stack of Demon's Blood by 25%' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z; matches the client's own moa_description). The chance belongs to the innate class passive Demon's Blood (804345, ProcChance 25 in the installed Spell.dbc, granted at class tiers 6/7 in AscensionCustomClassData.h): 'Damage taken has a 25% chance to generate Rage and grant Demon's Blood.' aura_ascension_xoroth_event::Check (AscensionXorothEvents.cpp) rolls this manually via AscensionXoroth::Chance(player, 804345), bypassing the native spellmod pipeline entirely, so Brimstone's Blood's own baked SPELLMOD_CHANCE_OF_SUCCESS effect (even though its classmask does match 804345) is never read; it is nulled in ApplyContracts. The fix adds Amount(300387) = 25 as Chance()'s bonus parameter, so the roll becomes 50% while the talent is known. On each successful roll, Proc() (AscensionXorothEvents.cpp case 804345) casts 521226 (Rage) directly via the AscensionXoroth::Cast() helper - a script-issued cast with no aura named as its trigger, so spell_cast_count (not spell_proc_count, which requires native trigger-spell recording) is the metric that observes it, per the README's guidance for script-driven casts. Harness constraint (found while debugging #1587/#856): fixture creatures listed in the scenario's own 'creatures' array are forced REACT_PASSIVE twice during setup and CreatureAI::UpdateVictim never selects a victim for a passive creature (CoAGameplayTest.cpp), so such a fixture can never strike the player and no TAKEN-proc contract can be observed against one - confirmed empirically (a diagnostic scenario attacking a fixture dummy for 8s produced zero health loss on the player). The established workaround (apps/coa-gameplay-test/scenarios/bloodmage-blood-bond-ally-damage.json, #1930) is a creature the fixture itself summons: Scholomance Dark Summoner 11582's SmartAI casts Summon Risen Lackey 17618 on itself repeatedly after engaging, and those Lackeys are ordinary spawns that attack normally, not subject to the fixture's forced passivity. The Dark Summoner is also a caster that periodically casts Curse of Blood and Drain Life at range, and in a socketless test session the player never repositions to chase a kiting target, so combat is driven as repeated short attack/wait cycles (re-issuing the melee attack request every 10 s) so the knight keeps re-engaging regardless of any transient range loss. Reusing a single character across a sequential baseline-then-talented design was unreliable: after ~150 s of live combat, learning 300387 and even force-applying its aura via the harness's set_aura fixture (which bypasses normal cast checks) both left the aura absent, reproducibly, despite the exact same learn/set_aura sequence working correctly in an isolated pre-combat diagnostic and despite the aura's own duration reading -1 (permanent) when checked in isolation - the failure is specific to applying it after sustained live combat, not to the aura's own record. The design instead uses two independent knights, each fighting its own separate Dark Summoner (three instances per knight, to raise the trial rate) for the same equal-length window: 'baseline' only ever knows Demon's Blood, 'talented' learns and verifies Brimstone's Blood before combat starts, in the same clean pre-combat state the isolated diagnostic used. This sidesteps the mid-session application issue entirely and runs both windows concurrently. Because Lackey spawn/engage cadence is not a fixed-interval timer like a direct melee swing, this cannot reproduce the original design's exact trial-count statistics; the test instead requires only that the talented knight's grant count exceeds the baseline knight's over the same combat window, matching the rigor of the Blood Bond precedent's own 'at least 1' incoming-damage assertions.",
+  "timeout_ms": 400000,
+  "players": [
+    {
+      "id": "baseline",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    },
+    {
+      "id": "talented",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "baseline_s1",
+      "owner": "baseline",
+      "entry": 11582,
+      "faction": 14,
+      "level": 60,
+      "health": 100000000,
+      "distance": 3
+    },
+    {
+      "id": "baseline_s2",
+      "owner": "baseline",
+      "entry": 11582,
+      "faction": 14,
+      "level": 60,
+      "health": 100000000,
+      "distance": 4
+    },
+    {
+      "id": "baseline_s3",
+      "owner": "baseline",
+      "entry": 11582,
+      "faction": 14,
+      "level": 60,
+      "health": 100000000,
+      "distance": 5
+    },
+    {
+      "id": "talented_s1",
+      "owner": "talented",
+      "entry": 11582,
+      "faction": 14,
+      "level": 60,
+      "health": 100000000,
+      "distance": 3
+    },
+    {
+      "id": "talented_s2",
+      "owner": "talented",
+      "entry": 11582,
+      "faction": 14,
+      "level": 60,
+      "health": 100000000,
+      "distance": 4
+    },
+    {
+      "id": "talented_s3",
+      "owner": "talented",
+      "entry": 11582,
+      "faction": 14,
+      "level": 60,
+      "health": 100000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "baseline",
+      "value": 1000000,
+      "maximum": 1000000,
+      "label": "Give baseline a large health buffer to survive the whole combat window"
+    },
+    {
+      "action": "learn",
+      "actor": "baseline",
+      "spell": 804345,
+      "label": "Ensure the innate Demon's Blood passive is known"
+    },
+    {
+      "action": "set_health",
+      "actor": "talented",
+      "value": 1000000,
+      "maximum": 1000000,
+      "label": "Give talented a large health buffer to survive the whole combat window"
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 804345,
+      "label": "Ensure the innate Demon's Blood passive is known"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: baseline does not know Brimstone's Blood",
+      "actor": "baseline",
+      "metric": "knows_spell",
+      "spell": 300387,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 300387,
+      "label": "The talented knight learns Brimstone's Blood before any combat, in a clean state"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: talented knows Brimstone's Blood",
+      "actor": "talented",
+      "metric": "knows_spell",
+      "spell": 300387,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: talented's Brimstone's Blood aura is active",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 300387,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "spell_cast_count",
+      "spell": 521226,
+      "save_as": "grants_baseline_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "spell_cast_count",
+      "spell": 521226,
+      "save_as": "grants_talented_before"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s1",
+      "label": "baseline engages baseline_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s2",
+      "label": "baseline engages baseline_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s3",
+      "label": "baseline engages baseline_s3"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s1",
+      "label": "talented engages talented_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s2",
+      "label": "talented engages talented_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s3",
+      "label": "talented engages talented_s3"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: baseline's summoners are engaged",
+      "actor": "baseline_s1",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: talented's summoners are engaged",
+      "actor": "talented_s1",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s3"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s3"
+    },
+    {
+      "action": "wait",
+      "ms": 10000,
+      "label": "Let the summoned Lackeys land damage-taken trials (25% baseline vs 50% talented), re-attacking every 10s"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s3"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s3"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s3"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s3"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s3"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s3"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s3"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s3"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s3"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s3"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s3"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s3"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s3"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s3"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s3"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s3"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s3"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s3"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s3"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s3"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s3"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s3"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s3"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s3"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s3"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s3"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_s3"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s1"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s2"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_s3"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "baseline"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "talented"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: combat generated Rage grants for baseline at the 25% chance",
+      "actor": "baseline",
+      "metric": "spell_cast_count",
+      "spell": 521226,
+      "relative_to": "grants_baseline_before",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the talented knight generates more Rage grants than the baseline knight over the same window",
+      "actor": "talented",
+      "metric": "spell_cast_count",
+      "spell": 521226,
+      "relative_to": "grants_talented_before",
+      "min": 1
+    }
+  ]
+}

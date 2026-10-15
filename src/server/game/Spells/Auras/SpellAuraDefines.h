@@ -382,6 +382,7 @@ enum AuraType
     // until their individual mechanics are ported.
     SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT              = 317,
     SPELL_AURA_ASCENSION_MOD_HEALING_RECEIVED_PCT           = 319,
+    SPELL_AURA_ASCENSION_MOD_PVP_DAMAGE_DONE_PCT            = 322,
     SPELL_AURA_ASCENSION_MOD_STAT_FROM_STAT                 = 327,
     SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT             = 328,
     SPELL_AURA_ASCENSION_MOD_CRIT_CHANCE_AGAINST_TARGET     = 330,
@@ -413,10 +414,19 @@ enum AscensionAuraStateDamageScope
     ASCENSION_CLASSMASK_AURASTATE_DAMAGE = 20007
 };
 
+// Same arrangement for native aura 168: the selector kept in MiscValueB asks
+// SPELL_AURA_MOD_DAMAGE_DONE_VERSUS to honour the effect's class mask, which
+// the stock creature-type bonus ignores.
+enum AscensionCreatureTypeDamageScope
+{
+    ASCENSION_CLASSMASK_CREATURE_DAMAGE = 20014
+};
+
 // Local conversions of reviewed coefficient modifiers. Keep private client
 // spellmod indices out of the native player's fixed-size modifier arrays.
 enum AscensionAttackPowerCoefficientScript
 {
+    ASCENSION_DIRECT_AP_COEFFICIENT_FLAT = 20032,
     ASCENSION_DIRECT_AP_COEFFICIENT_PCT = 20042,
     ASCENSION_PERIODIC_AP_COEFFICIENT_PCT = 20045
 };
@@ -440,7 +450,8 @@ enum AscensionConditionalCombatScript
     ASCENSION_STATE_MASKED_CRIT_DAMAGE = 21007,
     ASCENSION_STATE_GLOBAL_IGNORE_ARMOR = 21008,
     ASCENSION_STATE_MASKED_IGNORE_ARMOR = 21009,
-    ASCENSION_STATE_MASKED_AND_AUTO_CRIT = 21010
+    ASCENSION_STATE_MASKED_AND_AUTO_CRIT = 21010,
+    ASCENSION_STATE_MASKED_SHADOW_CRIT = 21011
 };
 
 enum AscensionConditionalCombatModifier
@@ -453,6 +464,7 @@ enum AscensionConditionalCombatModifier
 
 enum AscensionConditionalTargetState
 {
+    ASCENSION_TARGET_SLOWED = 26,
     ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT = 28
 };
 

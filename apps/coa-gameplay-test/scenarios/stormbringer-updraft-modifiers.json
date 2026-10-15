@@ -1,0 +1,176 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Quickdraft and Clearsky Pendant modify Updraft natively (#1064, #2810)",
+  "contract": "#1064 and #2810 report 'Spell Script / Aura Handler Not Implemented' for two passives that are plain Spell.dbc modifiers on Updraft (570161-570166/802354, SpellFamilyName 22) and its ally-speed sub-spell 704202. #1064: Quickdraft rank 1 (705704) is aura 107 SPELLMOD_DURATION (misc 1) BasePoints 2999 + DieSides 1 = +3000 ms, and aura 108 SPELLMOD_ACTIVATION_TIME (misc 19) BasePoints -16 + 1 = -15%, both on class mask (0,256,*) intersecting Updraft's own SpellFamilyFlags dword1 (256|2147483648); rank 2 (707801) carries +6000 ms and -30% the same way. Updraft's effective learned rank at level 80 is 570166 (AscensionTalentReplacementData.h threshold 58). #2810: Clearsky Pendant (705709) is aura 107 SPELLMOD_EFFECT1 (misc 3) BasePoints 24 + 1 = +25, class mask (0,0,512) intersecting 704202's own SpellFamilyFlags dword2 (512), so it adds to 704202's effect0 (SPELL_AURA_MOD_INCREASE_SPEED, base 25%). Aura::CalcMaxDuration, AuraEffect::CalculatePeriodic and Unit::ApplyEffectModifiers apply SPELLMOD_DURATION/SPELLMOD_ACTIVATION_TIME/SPELLMOD_EFFECT1 generically for every spell family, and SpellInfo::IsAffectedBySpellMod has no special case for family 22, so no module code is needed. Values are the server's own Player::ApplySpellMod, measured before and after learning on the same actor; percentage ops use a tolerance band since the harness's own rounding for SPELLMOD_ACTIVATION_TIME was not independently traced.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Updraft rank 6 duration modifier is 0 without Quickdraft",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 570166,
+      "op": 1,
+      "base": 30000,
+      "equals": 30000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Updraft rank 6 tick-rate modifier is 0 without Quickdraft",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 570166,
+      "op": 19,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Quickdraft rank 1",
+      "actor": "s",
+      "spell": 705704
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Quickdraft rank 1 lengthens Updraft's duration by 3000 ms",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 570166,
+      "op": 1,
+      "base": 30000,
+      "equals": 33000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Quickdraft rank 1 speeds up Updraft's tick rate by ~15%",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 570166,
+      "op": 19,
+      "base": 1000,
+      "min": 849,
+      "max": 851
+    },
+    {
+      "action": "unlearn",
+      "label": "Unlearn Quickdraft rank 1 before isolating rank 2",
+      "actor": "s",
+      "spell": 705704
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning rank 1 restores Updraft's duration",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 570166,
+      "op": 1,
+      "base": 30000,
+      "equals": 30000,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning rank 1 restores Updraft's tick rate",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 570166,
+      "op": 19,
+      "base": 1000,
+      "equals": 1000,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Quickdraft rank 2",
+      "actor": "s",
+      "spell": 707801
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Quickdraft rank 2 lengthens Updraft's duration by 6000 ms",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 570166,
+      "op": 1,
+      "base": 30000,
+      "equals": 36000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Quickdraft rank 2 speeds up Updraft's tick rate by ~30%",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 570166,
+      "op": 19,
+      "base": 1000,
+      "min": 699,
+      "max": 701
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Updraft's ally-speed sub-spell effect1 modifier is 0 without Clearsky Pendant",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 704202,
+      "op": 3,
+      "base": 20,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE control: Clearsky Pendant's own class mask does not yet touch Updraft's own effect0",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 570166,
+      "op": 3,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "learn",
+      "label": "Learn Clearsky Pendant",
+      "actor": "s",
+      "spell": 705709
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Clearsky Pendant adds 25 to 704202's ally-speed effect",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 704202,
+      "op": 3,
+      "base": 20,
+      "equals": 45
+    },
+    {
+      "action": "assert",
+      "label": "Clearsky Pendant leaves Updraft's own effect0 untouched (class mask targets 704202, not Updraft)",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 570166,
+      "op": 3,
+      "base": 100,
+      "equals": 100
+    }
+  ]
+}

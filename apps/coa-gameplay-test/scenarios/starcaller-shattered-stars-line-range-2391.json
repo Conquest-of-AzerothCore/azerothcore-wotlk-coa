@@ -1,0 +1,224 @@
+{
+  "schema": 1,
+  "name": "Shattered Stars extends Starshatter's actual line by ten yards (#2391)",
+  "contract": [
+    "Starshatter encodes a twenty-five-yard line in its parent radius; the native four-yard placer",
+    "advances using its stacked radius modifier, but it receives no Shattered Stars ten-yard range bonus.",
+    "A normal cast must stun near and twenty-yard enemies, leave a thirty-yard enemy unaffected, then",
+    "reach that enemy with the talent while preserving the near section and leaving a forty-yard enemy",
+    "unaffected. Unlearning restores baseline range. Width and rendered effects are outside this",
+    "scenario's measurements."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "s",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "near",
+      "owner": "s",
+      "entry": 36,
+      "level": 80,
+      "distance": 6,
+      "health": 1000000
+    },
+    {
+      "id": "far",
+      "owner": "s",
+      "entry": 36,
+      "level": 80,
+      "distance": 20,
+      "health": 1000000
+    },
+    {
+      "id": "extended",
+      "owner": "s",
+      "entry": 36,
+      "level": 80,
+      "distance": 30,
+      "health": 1000000
+    },
+    {
+      "id": "beyond",
+      "owner": "s",
+      "entry": 36,
+      "level": 80,
+      "distance": 40,
+      "health": 1000000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 801135
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 801135
+    },
+    {
+      "action": "assert",
+      "label": "The near portion remains stunned",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 712461,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The authored twenty-five-yard line reaches twenty yards",
+      "actor": "far",
+      "metric": "aura",
+      "spell": 712461,
+      "equals": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "The untalented line does not reach thirty yards",
+      "actor": "extended",
+      "metric": "aura",
+      "spell": 712461,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 686
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 686,
+      "target": "extended"
+    },
+    {
+      "action": "assert",
+      "label": "A direct cast can reach the thirty-yard target",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 686,
+      "target": "extended",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 704771
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "s",
+      "spell": 801135
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 801135
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "The talent preserves the near portion",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 712461,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The ten-yard talent extension reaches thirty yards",
+      "actor": "extended",
+      "metric": "aura",
+      "spell": 712461,
+      "equals": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "The thirty-five-yard line does not reach forty yards",
+      "actor": "beyond",
+      "metric": "aura",
+      "spell": 712461,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The extension applies a caster-owned Scattered Star",
+      "actor": "extended",
+      "metric": "aura_stacks",
+      "spell": 804378,
+      "caster": "s",
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "unlearn",
+      "actor": "s",
+      "spell": 704771
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "s",
+      "spell": 801135
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 801135
+    },
+    {
+      "action": "assert",
+      "label": "Removing the talent preserves baseline range",
+      "actor": "far",
+      "metric": "aura",
+      "spell": 712461,
+      "equals": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "Removing the talent removes extended range",
+      "actor": "extended",
+      "metric": "aura",
+      "spell": 712461,
+      "equals": 0
+    }
+  ]
+}

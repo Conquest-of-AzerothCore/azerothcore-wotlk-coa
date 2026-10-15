@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "name": "One Shot adds 20% critical strike chance to Heartseeking Bolt (#1123)",
+  "contract": "One Shot 680331 has E0 aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER) MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 19 / DieSides 1 = +20, class mask (0, 0x800, 0); the description reads 'Increases the critical strike chance of Heartseeking Bolt by $s1%'. Every Heartseeking Bolt rank (805754, 807279 ... 807284) has SpellFamilyFlags B 0x800, and Unit::SpellDoneCritChance applies SPELLMOD_CRITICAL_CHANCE to the crit chance. The difference is asserted rather than the absolute chance, so the character's own crit is irrelevant. Darkslayer 804179 (flags C 0x20) is the control. The unrelated guaranteed-crit rule of Kingdom Hearts is not learned.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 680331,
+      "all_specs": true
+    },
+    {
+      "action": "snapshot",
+      "label": "Heartseeking Bolt rank 7 crit before",
+      "actor": "hunter",
+      "metric": "spell_done_crit_chance",
+      "save_as": "bolt7_before",
+      "spell": 807284,
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "label": "Heartseeking Bolt rank 1 crit before",
+      "actor": "hunter",
+      "metric": "spell_done_crit_chance",
+      "save_as": "bolt1_before",
+      "spell": 805754,
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "label": "Darkslayer crit before",
+      "actor": "hunter",
+      "metric": "spell_done_crit_chance",
+      "save_as": "slayer_before",
+      "spell": 804179,
+      "target": "dummy"
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 680331
+    },
+    {
+      "action": "assert",
+      "label": "The passive aura is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 680331,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 7 gains 20 percentage points",
+      "actor": "hunter",
+      "metric": "spell_done_crit_chance",
+      "spell": 807284,
+      "target": "dummy",
+      "relative_to": "bolt7_before",
+      "min": 19.99,
+      "max": 20.01
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 gains 20 percentage points",
+      "actor": "hunter",
+      "metric": "spell_done_crit_chance",
+      "spell": 805754,
+      "target": "dummy",
+      "relative_to": "bolt1_before",
+      "min": 19.99,
+      "max": 20.01
+    },
+    {
+      "action": "assert",
+      "label": "Darkslayer is unchanged",
+      "actor": "hunter",
+      "metric": "spell_done_crit_chance",
+      "spell": 804179,
+      "target": "dummy",
+      "relative_to": "slayer_before",
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 680331,
+      "all_specs": true,
+      "label": "Remove the passive"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 7 returns to its base chance",
+      "actor": "hunter",
+      "metric": "spell_done_crit_chance",
+      "spell": 807284,
+      "target": "dummy",
+      "relative_to": "bolt7_before",
+      "min": -0.01,
+      "max": 0.01
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "name": "Tear Drops stacks the Aspect of the Goddess healing-taken aura (#2024)",
+  "contract": "Tear Drops 560896 (Spell.dbc, family 32) has three SPELL_AURA_ADD_FLAT_MODIFIER (107) effects on EffectSpellClassMask word2 0x8000000, the SpellFamilyFlags word2 of the Aspect of the Goddess heal helper 801401: EffectMiscValue 12 (SPELLMOD_EFFECT2) base 0 (+1), 31 (SPELLMOD_MAX_AURA_STACKS) base 8 (+9 on StackAmount 1, so 10) and 1 (SPELLMOD_DURATION) base 9999 (+10000 ms). 801401 effect index 1 is SPELL_AURA_MOD_HEALING_RECEIVED (283) with EffectBasePoints -1 (a base of 0) and DurationIndex 0; Unit::SpellHealingBonusDone filters that aura by the caster's GUID, matching 'increases the target's healing taken from you by 1% for 10 sec, stacking up to 10 times'. Aura::CalcMaxDuration applies SPELLMOD_DURATION to the 0 ms base (only -1 is skipped), and aura amounts are multiplied by the stack count. AscensionStarcallerContracts.cpp used to set 801401's effect 1 to 0, so no aura was ever created and the three modifiers had nothing to change; the fix keeps the effect and spell_ascension_starcaller_ability prevents it unless the caster has 560896. The scenario learns 801401 as a fixture and casts it on the caster, the helper Aspect of the Goddess casts on its allies, three times two seconds apart (past any global cooldown), then asserts three stacks, a healing-taken amount of 3 (1% per stack) and a remaining duration within the 10000 ms refresh. The control casts it the same way and must end with no aura, which also pins the talent gate (polled, because the prevented effect leaves a zero-duration shell that expires on the next aura update). Self-heals cannot miss, so no retry is needed.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Tear Drops",
+      "actor": "talent",
+      "spell": 560896
+    },
+    {
+      "action": "learn",
+      "label": "Fixture: the heal helper as a castable spell",
+      "actor": "talent",
+      "spell": 801401
+    },
+    {
+      "action": "learn",
+      "label": "Fixture: the heal helper as a castable spell",
+      "actor": "control",
+      "spell": 801401
+    },
+    {
+      "action": "cast",
+      "label": "Helper heal 1 on the talent fixture",
+      "actor": "talent",
+      "spell": 801401
+    },
+    {
+      "action": "cast",
+      "label": "Helper heal 1 on the control",
+      "actor": "control",
+      "spell": 801401
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Helper heal 2 on the talent fixture",
+      "actor": "talent",
+      "spell": 801401
+    },
+    {
+      "action": "cast",
+      "label": "Helper heal 2 on the control",
+      "actor": "control",
+      "spell": 801401
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Helper heal 3 on the talent fixture",
+      "actor": "talent",
+      "spell": 801401
+    },
+    {
+      "action": "cast",
+      "label": "Helper heal 3 on the control",
+      "actor": "control",
+      "spell": 801401
+    },
+    {
+      "action": "assert",
+      "label": "Three heals stack the healing-taken aura three times",
+      "actor": "talent",
+      "metric": "aura_stacks",
+      "spell": 801401,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Each stack raises healing taken from the caster by 1%",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 801401,
+      "effect": 1,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "The aura lasts up to 10 seconds",
+      "actor": "talent",
+      "metric": "aura_duration_ms",
+      "spell": 801401,
+      "min": 7000,
+      "max": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Without Tear Drops the helper applies no aura",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 801401,
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

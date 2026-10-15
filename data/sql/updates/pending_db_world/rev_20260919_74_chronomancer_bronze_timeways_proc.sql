@@ -1,0 +1,31 @@
+-- Bronze Timeways (807309): "Casting Correct the Mistake now grants 2 stacks of Endless Sands."
+-- Both of its effects are aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) triggering the same buff 806728
+-- (Endless Sands: -20% cast time on Reverse Wound through SPELL_AURA_ADD_PCT_MODIFIER op 10 class mask
+-- word1 131072, plus SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT, StackAmount 5, 15 sec). Two identical proc
+-- effects are how the tooltip's "2 stacks" is produced - each effect casts 806728 once. Spell.dbc gives
+-- 807309's record ProcFlags 0x0 and no `spell_proc` row existed, so SpellMgr::LoadSpellProcs skipped it
+-- and Aura::GetProcEffectMask returned 0: neither effect ever fired.
+-- Proc on Correct the Mistake, the ability the tooltip names: its ranks (572352-572360) are
+-- SpellFamilyName 28 with SpellFamilyFlags word1 2048, DmgClass 1 (magic) and effect 0
+-- SPELL_EFFECT_HEAL.
+-- Data divergence, recorded rather than silently resolved: both of 807309's effects carry
+-- EffectSpellClassMask [4, 0, 0], and family-28 word0 bit 4 is Epoch (501779-501784, 504575, 801270),
+-- not Correct the Mistake. The DBC mask is inert today because ProcFlags is 0, so nothing in the shipped
+-- behaviour depends on it, and the row must choose one reading. It follows the tooltip and the merged
+-- precedent rev_20260918_36_chronomancer_caverns_of_time_proc.sql, which keys on "the ability its
+-- tooltip names". If the Epoch reading is ever confirmed, only SpellFamilyMask1 changes.
+-- ProcFlags 16384 = PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS. The positive variant is what a heal
+-- produces: Spell.cpp's TargetInfo::DoDamageAndTriggers computes
+-- `positive = true; if (m_damage > 0) positive = false; else if (!m_healing) { <per-effect scan> }`, so
+-- a healing cast never reaches the per-effect scan and keeps positive == true, and DmgClass 1 then sets
+-- the MAGIC_DMG_CLASS_POS bit. SpellTypeMask 2 = PROC_SPELL_TYPE_HEAL, which
+-- Unit::ProcSkillsAndAuras assigns from `healInfo && healInfo->GetHeal()`.
+-- SpellPhaseMask 2 = PROC_SPELL_PHASE_HIT; Correct the Mistake has no
+-- SPELL_ATTR3_SUPPRESS_CASTER_PROCS (AttributesEx3 0x100 is SPELL_ATTR3_ONLY_ON_PLAYER), so its
+-- hit-phase event is delivered. HitMask 0 keeps the default normal-or-critical behaviour, since the
+-- tooltip does not require a crit. DisableEffectsMask 0 is deliberate and load-bearing: both effects
+-- must be allowed to proc, or only one stack of Endless Sands is granted.
+-- Chance is the record's own ProcChance (100 - the tooltip states no percentage).
+DELETE FROM `spell_proc` WHERE `SpellId` = 807309;
+INSERT INTO `spell_proc` (`SpellId`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `ProcFlags`, `SpellTypeMask`, `SpellPhaseMask`, `HitMask`, `AttributesMask`, `DisableEffectsMask`, `ProcsPerMinute`, `Chance`, `Cooldown`, `Charges`) VALUES
+(807309, 0, 28, 0, 2048, 0, 16384, 2, 2, 0, 0, 0, 0, 100, 0, 0);

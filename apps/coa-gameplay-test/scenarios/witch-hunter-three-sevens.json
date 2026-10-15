@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "name": "Three Sevens shortens Burrow Bolt, lengthens Traps and cheapens Dawn Blade (#1654)",
+  "contract": "Three Sevens 300572 is SpellFamily 21, Attributes 0x1c0 (passive), DurationIndex 21, with three SPELL_AURA_ADD_FLAT_MODIFIER (107) effects, each BasePoints+DieSides 1: effect 0 op 1 (SPELLMOD_DURATION) 6999+1 = +7000 ms over EffectSpellClassMask word 2 bit 0x40000 (Shadow Trap 680238, Inquisitor's Trap 681445, Death Trap 681450 and Scourge Trap 681455 carry that bit in SpellFamilyFlags word 2); effect 1 op 11 (SPELLMOD_COOLDOWN) -7001+1 = -7000 ms over word 2 bit 0x40000000 (only Burrow Bolt 802269, RecoveryTime 40000); effect 2 op 14 (SPELLMOD_COST) -71+1 = -70 (7 Rage, Rage costs are stored x10) over word 0 bit 0x400 (Dawn Blade 802024, Rage cost 300). None of those records carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, so Player::ApplySpellMod (Player.cpp:10219) applies the flat mods. Nothing needed a script: the passive is a native spell modifier and the reporter's grep of C++/SQL cannot see it. The trap duration is applied by the summon script through ApplySpellMod(SPELLMOD_DURATION) (AscensionWitchHunterSummons.cpp:408), so the probe reads the same modifier that script reads. The scenario reads each modified value through the native spell_modifier and spell_power_cost probes and pins the untouched controls (Burrow Bolt duration, Trap cooldown, Dusk Blade cost).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "hunter",
+      "entry": 36,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "No Three Sevens aura yet",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 300572,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Before the talent: Shadow Trap duration is untouched",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 680238,
+      "op": 1,
+      "base": 30000,
+      "min": 29999.4,
+      "max": 30000.6
+    },
+    {
+      "action": "assert",
+      "label": "Before the talent: Burrow Bolt cooldown is untouched",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 802269,
+      "op": 11,
+      "base": 40000,
+      "min": 39999.4,
+      "max": 40000.6
+    },
+    {
+      "action": "snapshot",
+      "label": "Dawn Blade Rage cost before the talent",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "save_as": "dawn_cost_before",
+      "spell": 802024
+    },
+    {
+      "action": "snapshot",
+      "label": "Dusk Blade Rage cost before the talent",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "save_as": "dusk_cost_before",
+      "spell": 802020
+    },
+    {
+      "action": "learn",
+      "label": "Learn 300572",
+      "actor": "hunter",
+      "spell": 300572
+    },
+    {
+      "action": "assert",
+      "label": "Three Sevens is applied as a passive",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 300572,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Trap lasts 7 seconds longer (effect 0, op 1 duration, +7000)",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 680238,
+      "op": 1,
+      "base": 30000,
+      "min": 36999.4,
+      "max": 37000.6
+    },
+    {
+      "action": "assert",
+      "label": "Inquisitor's Trap lasts 7 seconds longer",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 681445,
+      "op": 1,
+      "base": 60000,
+      "min": 66999.4,
+      "max": 67000.6
+    },
+    {
+      "action": "assert",
+      "label": "Death Trap lasts 7 seconds longer",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 681450,
+      "op": 1,
+      "base": 60000,
+      "min": 66999.4,
+      "max": 67000.6
+    },
+    {
+      "action": "assert",
+      "label": "Scourge Trap lasts 7 seconds longer",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 681455,
+      "op": 1,
+      "base": 60000,
+      "min": 66999.4,
+      "max": 67000.6
+    },
+    {
+      "action": "assert",
+      "label": "Burrow Bolt duration is not a Trap and stays",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 802269,
+      "op": 1,
+      "base": 30000,
+      "min": 29999.4,
+      "max": 30000.6
+    },
+    {
+      "action": "assert",
+      "label": "Burrow Bolt cooldown is 7 seconds shorter (effect 1, op 11 cooldown, -7000)",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 802269,
+      "op": 11,
+      "base": 40000,
+      "min": 32999.4,
+      "max": 33000.6
+    },
+    {
+      "action": "assert",
+      "label": "Trap cooldowns are not touched by the Burrow Bolt mask",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 680238,
+      "op": 11,
+      "base": 60000,
+      "min": 59999.4,
+      "max": 60000.6
+    },
+    {
+      "action": "assert",
+      "label": "Dawn Blade costs 7 Rage less (effect 2, op 14 cost, -70 in tenths)",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "spell": 802024,
+      "relative_to": "dawn_cost_before",
+      "min": -70.6,
+      "max": -69.4
+    },
+    {
+      "action": "assert",
+      "label": "Dusk Blade is not in the mask and keeps its cost",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "spell": 802020,
+      "relative_to": "dusk_cost_before",
+      "equals": 0
+    }
+  ]
+}

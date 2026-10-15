@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "Eye of Elune grants 5% critical strike chance (#1211)",
+  "contract": "Eye of Elune 704783 (Spell.dbc, family 32) tooltip: \"Increases your critical strike chance by $s1%.\" Effect 0 is SPELL_AURA_MOD_CRIT_PCT (290), EffectBasePoints 4 with DieSides 1 (=5), TargetA 1, no class mask. Native path: AuraEffect::HandleAuraModCritPct calls Player::UpdateAllWeaponDependentCritAuras and UpdateAllSpellCritChances; Player::UpdateWeaponDependentCritAuras (Player.cpp) adds GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT) to the melee and ranged crit base-mod groups, Player::UpdateSpellCritChance (StatSystem.cpp) to every spell school, and Unit::SpellDoneCritChance reads those fields. Same race, class and level with no ratings, so the twin's crit values equal the talented fixture's baseline and the difference must be 5 points. The harness exposes melee and per-school spell crit, not the ranged field, which shares the same aura sum. Values read 2026-09-21 from the shipped /srv/coa/server-data/dbc/Spell.dbc. Result 20260921T080841274573008Z showed the melee before/after delta is not measurable: the control's PLAYER_CRIT_PERCENTAGE read 0 (field never recomputed on a fresh character) while the talented twin read 8.7048 = 5 flat + agility and weapon-skill terms that Player::UpdateCritPercentage (StatSystem.cpp) rewrites in the same pass. The melee clause therefore asserts effect 0's resolved aura amount (AuraEffect::GetAmount, 5) directly, as felsworn-fel-infusion does; the spell-school delta stays because Player::UpdateSpellCritChance is a pure sum whose baseline (3.4708 arcane) was populated.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "label": "Arcane spell crit chance without the talent",
+      "actor": "control",
+      "metric": "spell_crit_chance",
+      "save_as": "spell_base",
+      "school": 6
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 704783
+    },
+    {
+      "action": "assert",
+      "label": "Eye of Elune's crit-chance effect resolves to 5 (EffectBasePoints 4 + 1, DieSides 1)",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 704783,
+      "caster": "talent",
+      "effect": 0,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Arcane spell crit chance rises by 5 points",
+      "actor": "talent",
+      "metric": "spell_crit_chance",
+      "school": 6,
+      "relative_to": "spell_base",
+      "min": 4.99,
+      "max": 5.01,
+      "within_ms": 3000
+    }
+  ]
+}

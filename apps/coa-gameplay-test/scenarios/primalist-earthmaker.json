@@ -1,0 +1,1275 @@
+{
+  "schema": 1,
+  "name": "Primalist Earthmaker: one second per Seismic or Quake damage event and three-second base cooldown reduction",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "baseline",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "talented",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "removed",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target_baseline",
+      "owner": "baseline",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    },
+    {
+      "id": "target_talented",
+      "owner": "talented",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    },
+    {
+      "id": "target_removed",
+      "owner": "removed",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "baseline",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "baseline",
+      "spell": 196
+    },
+    {
+      "action": "learn",
+      "actor": "baseline",
+      "spell": 680421
+    },
+    {
+      "action": "learn",
+      "actor": "baseline",
+      "spell": 800094
+    },
+    {
+      "action": "learn",
+      "actor": "baseline",
+      "spell": 503264
+    },
+    {
+      "action": "learn",
+      "actor": "baseline",
+      "spell": 582532
+    },
+    {
+      "action": "learn",
+      "actor": "baseline",
+      "spell": 505157
+    },
+    {
+      "action": "learn",
+      "actor": "baseline",
+      "spell": 803138
+    },
+    {
+      "action": "add_item",
+      "actor": "baseline",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "baseline",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "cast",
+      "actor": "baseline",
+      "spell": 680421
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "baseline",
+      "spell": 680421,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "baseline",
+      "spell": 800094
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "min": 295000,
+      "max": 300000
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "save_as": "baseline_503264_avatar"
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "save_as": "baseline_503264_control"
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "save_as": "baseline_503264_hits"
+    },
+    {
+      "action": "set_power",
+      "actor": "baseline",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "baseline",
+      "spell": 503264,
+      "target": "target_baseline"
+    },
+    {
+      "action": "wait",
+      "ms": 1800
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "relative_to": "baseline_503264_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "relative_to": "baseline_503264_hits",
+      "save_as": "baseline_503264_trials",
+      "label": "baseline_503264_trials"
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "relative_to": "baseline_503264_avatar",
+      "save_as": "baseline_503264_avatar_delta",
+      "label": "baseline_503264_avatar_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "relative_to": "baseline_503264_control",
+      "save_as": "baseline_503264_control_delta",
+      "label": "baseline_503264_control_delta"
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 503264,
+      "min": 5500,
+      "max": 6300
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "save_as": "baseline_505157_avatar"
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "save_as": "baseline_505157_control"
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "spell_damage_count",
+      "spell": 505157,
+      "save_as": "baseline_505157_hits"
+    },
+    {
+      "action": "set_power",
+      "actor": "baseline",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "baseline",
+      "spell": 505157,
+      "target": "target_baseline"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "spell_damage_count",
+      "spell": 505157,
+      "relative_to": "baseline_505157_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "spell_damage_count",
+      "spell": 505157,
+      "relative_to": "baseline_505157_hits",
+      "save_as": "baseline_505157_trials",
+      "label": "baseline_505157_trials"
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "relative_to": "baseline_505157_avatar",
+      "save_as": "baseline_505157_avatar_delta",
+      "label": "baseline_505157_avatar_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "relative_to": "baseline_505157_control",
+      "save_as": "baseline_505157_control_delta",
+      "label": "baseline_505157_control_delta"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "save_as": "baseline_582532_avatar"
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "save_as": "baseline_582532_control"
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "save_as": "baseline_582532_hits"
+    },
+    {
+      "action": "set_power",
+      "actor": "baseline",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "baseline",
+      "spell": 582532,
+      "target": "target_baseline"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "relative_to": "baseline_582532_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "relative_to": "baseline_582532_hits",
+      "save_as": "baseline_582532_trials",
+      "label": "baseline_582532_trials"
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "relative_to": "baseline_582532_avatar",
+      "save_as": "baseline_582532_avatar_delta",
+      "label": "baseline_582532_avatar_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "relative_to": "baseline_582532_control",
+      "save_as": "baseline_582532_control_delta",
+      "label": "baseline_582532_control_delta"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "save_as": "baseline_803138_avatar"
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "save_as": "baseline_803138_control"
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "save_as": "baseline_803138_hits"
+    },
+    {
+      "action": "set_power",
+      "actor": "baseline",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "baseline",
+      "spell": 803138,
+      "target": "target_baseline"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "relative_to": "baseline_803138_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "relative_to": "baseline_803138_hits",
+      "save_as": "baseline_803138_trials",
+      "label": "baseline_803138_trials"
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "relative_to": "baseline_803138_avatar",
+      "save_as": "baseline_803138_avatar_delta",
+      "label": "baseline_803138_avatar_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "relative_to": "baseline_803138_control",
+      "save_as": "baseline_803138_control_delta",
+      "label": "baseline_803138_control_delta"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "specialization",
+      "actor": "talented",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 196
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 680421
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 800094
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 503264
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 582532
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 505157
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 803138
+    },
+    {
+      "action": "add_item",
+      "actor": "talented",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "talented",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 560150
+    },
+    {
+      "action": "cast",
+      "actor": "talented",
+      "spell": 680421
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "talented",
+      "spell": 680421,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "talented",
+      "spell": 800094
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "min": 295000,
+      "max": 300000
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "save_as": "talented_503264_avatar"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "save_as": "talented_503264_control"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "save_as": "talented_503264_hits"
+    },
+    {
+      "action": "set_power",
+      "actor": "talented",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "talented",
+      "spell": 503264,
+      "target": "target_talented"
+    },
+    {
+      "action": "wait",
+      "ms": 1800
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "relative_to": "talented_503264_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "relative_to": "talented_503264_hits",
+      "save_as": "talented_503264_trials",
+      "label": "talented_503264_trials"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "relative_to": "talented_503264_avatar",
+      "save_as": "talented_503264_avatar_delta",
+      "label": "talented_503264_avatar_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "relative_to": "talented_503264_control",
+      "save_as": "talented_503264_control_delta",
+      "label": "talented_503264_control_delta"
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 503264,
+      "min": 2500,
+      "max": 3300
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "save_as": "talented_505157_avatar"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "save_as": "talented_505157_control"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "spell_damage_count",
+      "spell": 505157,
+      "save_as": "talented_505157_hits"
+    },
+    {
+      "action": "set_power",
+      "actor": "talented",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "talented",
+      "spell": 505157,
+      "target": "target_talented"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "spell_damage_count",
+      "spell": 505157,
+      "relative_to": "talented_505157_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "spell_damage_count",
+      "spell": 505157,
+      "relative_to": "talented_505157_hits",
+      "save_as": "talented_505157_trials",
+      "label": "talented_505157_trials"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "relative_to": "talented_505157_avatar",
+      "save_as": "talented_505157_avatar_delta",
+      "label": "talented_505157_avatar_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "relative_to": "talented_505157_control",
+      "save_as": "talented_505157_control_delta",
+      "label": "talented_505157_control_delta"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "save_as": "talented_582532_avatar"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "save_as": "talented_582532_control"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "save_as": "talented_582532_hits"
+    },
+    {
+      "action": "set_power",
+      "actor": "talented",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "talented",
+      "spell": 582532,
+      "target": "target_talented"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "relative_to": "talented_582532_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "relative_to": "talented_582532_hits",
+      "save_as": "talented_582532_trials",
+      "label": "talented_582532_trials"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "relative_to": "talented_582532_avatar",
+      "save_as": "talented_582532_avatar_delta",
+      "label": "talented_582532_avatar_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "relative_to": "talented_582532_control",
+      "save_as": "talented_582532_control_delta",
+      "label": "talented_582532_control_delta"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "save_as": "talented_803138_avatar"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "save_as": "talented_803138_control"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "save_as": "talented_803138_hits"
+    },
+    {
+      "action": "set_power",
+      "actor": "talented",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "talented",
+      "spell": 803138,
+      "target": "target_talented"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "relative_to": "talented_803138_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "relative_to": "talented_803138_hits",
+      "save_as": "talented_803138_trials",
+      "label": "talented_803138_trials"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "relative_to": "talented_803138_avatar",
+      "save_as": "talented_803138_avatar_delta",
+      "label": "talented_803138_avatar_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "relative_to": "talented_803138_control",
+      "save_as": "talented_803138_control_delta",
+      "label": "talented_803138_control_delta"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "specialization",
+      "actor": "removed",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "removed",
+      "spell": 196
+    },
+    {
+      "action": "learn",
+      "actor": "removed",
+      "spell": 680421
+    },
+    {
+      "action": "learn",
+      "actor": "removed",
+      "spell": 800094
+    },
+    {
+      "action": "learn",
+      "actor": "removed",
+      "spell": 503264
+    },
+    {
+      "action": "learn",
+      "actor": "removed",
+      "spell": 582532
+    },
+    {
+      "action": "learn",
+      "actor": "removed",
+      "spell": 505157
+    },
+    {
+      "action": "learn",
+      "actor": "removed",
+      "spell": 803138
+    },
+    {
+      "action": "add_item",
+      "actor": "removed",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "removed",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "removed",
+      "spell": 560150
+    },
+    {
+      "action": "unlearn",
+      "actor": "removed",
+      "spell": 560150
+    },
+    {
+      "action": "cast",
+      "actor": "removed",
+      "spell": 680421
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "removed",
+      "spell": 680421,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "removed",
+      "spell": 800094
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "min": 295000,
+      "max": 300000
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "save_as": "removed_503264_avatar"
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "save_as": "removed_503264_control"
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "save_as": "removed_503264_hits"
+    },
+    {
+      "action": "set_power",
+      "actor": "removed",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "removed",
+      "spell": 503264,
+      "target": "target_removed"
+    },
+    {
+      "action": "wait",
+      "ms": 1800
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "relative_to": "removed_503264_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "relative_to": "removed_503264_hits",
+      "save_as": "removed_503264_trials",
+      "label": "removed_503264_trials"
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "relative_to": "removed_503264_avatar",
+      "save_as": "removed_503264_avatar_delta",
+      "label": "removed_503264_avatar_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "relative_to": "removed_503264_control",
+      "save_as": "removed_503264_control_delta",
+      "label": "removed_503264_control_delta"
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 503264,
+      "min": 5500,
+      "max": 6300
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "save_as": "removed_505157_avatar"
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "save_as": "removed_505157_control"
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "spell_damage_count",
+      "spell": 505157,
+      "save_as": "removed_505157_hits"
+    },
+    {
+      "action": "set_power",
+      "actor": "removed",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "removed",
+      "spell": 505157,
+      "target": "target_removed"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "spell_damage_count",
+      "spell": 505157,
+      "relative_to": "removed_505157_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "spell_damage_count",
+      "spell": 505157,
+      "relative_to": "removed_505157_hits",
+      "save_as": "removed_505157_trials",
+      "label": "removed_505157_trials"
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "relative_to": "removed_505157_avatar",
+      "save_as": "removed_505157_avatar_delta",
+      "label": "removed_505157_avatar_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "relative_to": "removed_505157_control",
+      "save_as": "removed_505157_control_delta",
+      "label": "removed_505157_control_delta"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "save_as": "removed_582532_avatar"
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "save_as": "removed_582532_control"
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "save_as": "removed_582532_hits"
+    },
+    {
+      "action": "set_power",
+      "actor": "removed",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "removed",
+      "spell": 582532,
+      "target": "target_removed"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "relative_to": "removed_582532_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "relative_to": "removed_582532_hits",
+      "save_as": "removed_582532_trials",
+      "label": "removed_582532_trials"
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "relative_to": "removed_582532_avatar",
+      "save_as": "removed_582532_avatar_delta",
+      "label": "removed_582532_avatar_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "relative_to": "removed_582532_control",
+      "save_as": "removed_582532_control_delta",
+      "label": "removed_582532_control_delta"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "save_as": "removed_803138_avatar"
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "save_as": "removed_803138_control"
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "save_as": "removed_803138_hits"
+    },
+    {
+      "action": "set_power",
+      "actor": "removed",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "removed",
+      "spell": 803138,
+      "target": "target_removed"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "relative_to": "removed_803138_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "relative_to": "removed_803138_hits",
+      "save_as": "removed_803138_trials",
+      "label": "removed_803138_trials"
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "relative_to": "removed_803138_avatar",
+      "save_as": "removed_803138_avatar_delta",
+      "label": "removed_803138_avatar_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "relative_to": "removed_803138_control",
+      "save_as": "removed_803138_control_delta",
+      "label": "removed_803138_control_delta"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    }
+  ]
+}

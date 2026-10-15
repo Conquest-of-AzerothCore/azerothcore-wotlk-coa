@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Life Scent applies its stealth-detection amount (#3076)",
+  "contract": "Life Scent 706617 has a single effect in Spell.dbc: SPELL_EFFECT_APPLY_AURA with aura 17 SPELL_AURA_MOD_DETECT, MiscValue 0, BasePoints 399 + DieSides 1 = 400, duration index 0 (permanent) and TargetA 1. The native handler is AuraEffect::HandleModStealthDetect. The record's Description is \"Increases your stealth detection significantly.\" and the bindmysoul snapshot for 706617 carries the same sentence. The README lists no \"can see unit\" metric, so the applied amount is the honest discriminator at this layer. Caveat recorded with the audit: the record's AuraDescription field instead talks about Bloodbolt creating Blood Rain, which contradicts both its Description and its only effect; that string is treated as stale data, not as a missing feature.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 20, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "The talent is absent to begin with",
+      "actor": "caster", "metric": "aura", "spell": 706617, "equals": 0
+    },
+    { "action": "learn", "actor": "caster", "spell": 706617 },
+    {
+      "action": "assert", "label": "Learning it applies the passive",
+      "actor": "caster", "metric": "aura", "spell": 706617, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The stealth-detection amount is the shipped 400",
+      "actor": "caster", "metric": "aura_amount", "spell": 706617, "effect": 0, "equals": 400
+    }
+  ]
+}

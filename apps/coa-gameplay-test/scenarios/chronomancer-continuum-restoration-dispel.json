@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Continuum Restoration removes a harmful magic effect from an ally (#450)",
+  "contract": "Continuum Restoration 801271's tooltip is \"Restore the continuum at target location for all allies and enemies, removing all beneficial magic effects from enemies and harmful magic effects from allies\". Effect 0 is SPELL_EFFECT_DISPEL with MiscValue 1 (DISPEL_MAGIC) and BasePoints 99 -> 100 dispels at TARGET_UNIT_DEST_AREA_ALLY; effect 1 is the same at TARGET_UNIT_DEST_AREA_ENEMY; effect 2 triggers 821275, which mirrors stock Mass Dispel 39897 with SPELL_EFFECT_DISPEL_MECHANIC. No script, spell_proc, spell_linked_spell or spell_dbc row exists for 801271: the behaviour is entirely native. The ally-versus-enemy split is produced by Unit::GetDispellableAuraList, which computes `bool positive = rank >= REP_FRIENDLY` and then skips every aura whose IsPositive() equals that, so a friendly target loses only its harmful magic auras. This is a regression scenario for that native handler and for Spell::EffectDispel; it makes no code change. Polymorph 118 is the fixture debuff because it is unambiguously negative and DISPEL_MAGIC. The enemy-side clauses are not asserted: a hostile unit cannot be given a beneficial aura through this harness (set_aura fixtures a player), and the \"normally undispellable\" clause runs through effect 2 against enemies only.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 530,
+    "x": 7633.86,
+    "y": -6810.22,
+    "z": 79.5987
+  },
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 801271
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 118,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "The ally carries the fixtured harmful magic aura before the dispel",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 118,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801271,
+      "destination": {
+        "x": 7633.86,
+        "y": -6810.22,
+        "z": 79.5987
+      }
+    },
+    {
+      "action": "assert",
+      "label": "Continuum Restoration strips the ally's harmful magic aura",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 118,
+      "equals": 0,
+      "within_ms": 5000
+    }
+  ]
+}

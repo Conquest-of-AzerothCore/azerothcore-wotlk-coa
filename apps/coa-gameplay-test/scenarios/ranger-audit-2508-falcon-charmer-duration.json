@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Falcon Charmer raises Falcon Dive's duration modifier by 3 sec (#2508)",
+  "contract": "705076 'Falcon Charmer' reads 'Increases the duration of War Falcons by 3 sec.' It is a single SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 1 = SPELLMOD_DURATION, BasePoints 2999+1=3000, class mask (0, 0, 2048) = word2 bit 11. Falcon Dive 806341 (the self-cast that summons two War Falcons, DurationIndex 29 = 12000 ms; see ranger-war-falcon-focus.json) has SpellFamilyFlags (0, 0, 2048) = word2 bit 11, a direct match. Spell duration modifiers are applied generically wherever a spell/aura duration is computed for a matching family-27 spell, so no script is needed: the query for Falcon Dive's own duration modifier must rise by exactly 3000 ms once Falcon Charmer is learned.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the character settle", "ms": 3000 },
+    {
+      "action": "snapshot", "actor": "ranger", "metric": "spell_modifier", "spell": 806341, "op": 1, "base": 12000,
+      "save_as": "falcon_dive_duration_before"
+    },
+    { "action": "learn", "actor": "ranger", "spell": 705076 },
+    {
+      "action": "assert", "label": "SETUP: Falcon Charmer is active", "actor": "ranger",
+      "metric": "aura", "spell": 705076, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Falcon Dive's duration modifier rises by 3000 ms", "actor": "ranger",
+      "metric": "spell_modifier", "spell": 806341, "op": 1, "base": 12000, "relative_to": "falcon_dive_duration_before",
+      "min": 2999.99, "max": 3000.01
+    }
+  ]
+}

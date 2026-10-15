@@ -1,0 +1,202 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Venom Fanatic makes Serpent's Fang strike two additional enemies (#1141)",
+  "contract": "#1141: Venom Fanatic 681059 effect 0 is aura 107 (ADD_FLAT_MODIFIER) misc 17 SPELLMOD_JUMP_TARGETS, BasePoints 2 DieSides 1 (+3), EffectSpellClassMask (0,0x1000000,0) = the Serpent's Fang family (ranks 800946, 503931..503935, 552781, 552783). Serpent's Fang effect 0 is SCHOOL_DAMAGE on TARGET_UNIT_TARGET_ENEMY with EffectChainTarget 0 and EffectDamageMultiplier 1.0. Spell::SelectImplicitTargetObjectTargets calls Spell::SelectImplicitChainTargets for that target type, which applies SPELLMOD_JUMP_TARGETS to the chain count (0 -> 3) and searches maxTargets - 1 = 2 extra enemies within the 10 yard magic-class jump radius, so the tooltip 'strikes 2 additional nearby enemies' is the primary target plus two. The chain damage multiplier is 1.0, and the AoE damage reduction in Spell::DoAllEffectOnLaunchTarget excludes SPELL_DAMAGE_CLASS_MAGIC, so each of the three enemies takes a positive hit. The module's healing hook (venomancer_serpent_fang) is guarded by a script value and fires once per cast. The control casts the same spell at the same cluster in the same run: one damage event without the talent, three with it. All fixtures spawn at the same point, so the fanatic's chain finds enemies within the jump radius. Both players carry spell_hit_rating 10000 so no cast can miss. No script or SQL is needed; this is a regression scenario for behaviour that already works.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 29,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "fanatic",
+      "race": 1,
+      "class": 29,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "c1",
+      "owner": "control",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "f1",
+      "owner": "fanatic",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "f2",
+      "owner": "fanatic",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "f3",
+      "owner": "fanatic",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 800946,
+      "label": "Control learns Serpent's Fang"
+    },
+    {
+      "action": "learn",
+      "actor": "fanatic",
+      "spell": 800946,
+      "label": "Fanatic learns Serpent's Fang"
+    },
+    {
+      "action": "assert",
+      "label": "Serpent's Fang gets no extra jump targets without Venom Fanatic",
+      "actor": "fanatic",
+      "metric": "spell_modifier",
+      "spell": 800946,
+      "op": 17,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "fanatic",
+      "spell": 681059,
+      "label": "Learn Venom Fanatic"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Fanatic adds 3 to Serpent's Fang's chain target count (rank 800946)",
+      "actor": "fanatic",
+      "metric": "spell_modifier",
+      "spell": 800946,
+      "op": 17,
+      "base": 0,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Venom Fanatic adds 3 chain targets to Serpent's Fang rank 503931",
+      "actor": "fanatic",
+      "metric": "spell_modifier",
+      "spell": 503931,
+      "op": 17,
+      "base": 0,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Venom Fanatic adds 3 chain targets to Serpent's Fang rank 552783",
+      "actor": "fanatic",
+      "metric": "spell_modifier",
+      "spell": 552783,
+      "op": 17,
+      "base": 0,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Venom Fanatic does not reach Venom Bolt",
+      "actor": "fanatic",
+      "metric": "spell_modifier",
+      "spell": 800869,
+      "op": 17,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The control still has no extra jump targets",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 800946,
+      "op": 17,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Control casts Serpent's Fang at one of the clustered enemies",
+      "actor": "control",
+      "spell": 800946,
+      "target": "c1"
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent one enemy is damaged",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 800946,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Let any extra chain hit land",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent still exactly one enemy was damaged",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 800946,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Fanatic casts Serpent's Fang at one of the same cluster",
+      "actor": "fanatic",
+      "spell": 800946,
+      "target": "f1"
+    },
+    {
+      "action": "assert",
+      "label": "With Venom Fanatic the primary target and two more enemies are damaged",
+      "actor": "fanatic",
+      "metric": "spell_damage_count",
+      "spell": 800946,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Let any further chain hit land",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "With Venom Fanatic exactly three enemies were damaged, never a fourth",
+      "actor": "fanatic",
+      "metric": "spell_damage_count",
+      "spell": 800946,
+      "equals": 3
+    }
+  ]
+}

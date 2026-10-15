@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "name": "Blood-Cursed Weapons hastes the party when Crimson Tide is cast (#2246)",
+  "contract": "Blood-Cursed Weapons 684331 reads 'Casting Crimson Tide now additionally increases the haste of all party and raid members by $685029s1% for $685029d'. Its single effect is aura 42 (proc trigger spell) on Blood-Cursed Weapons 685029, two SPELL_EFFECT_APPLY_AREA_AURA_RAID effects (SPELL_AURA_HASTE_SPELLS and SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints 4 -> +5%, radius index 12, TargetA 1). Spell.dbc gives 684331 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and no party member ever received 685029. Crimson Tide is cast as 504282, the highest-numbered of the nine family-26 Crimson Tide records (504129-504136, 504282) that all carry SpellFamilyFlags (16384, 0, 0); it costs 400 Rage and has ExcludeCasterAuraSpell 802877, so no Cursed Form marker is fixtured.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "bloodmage",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 684331
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504282
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Blood-Cursed Weapons passive is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 684331,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "No Blood-Cursed Weapons buff on the ally before the cast",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 685029,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 504282,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ally gains Blood-Cursed Weapons 685029",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 685029,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Blood-Cursed Weapons grants the DBC value of +5% haste",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 685029,
+      "equals": 5
+    }
+  ]
+}

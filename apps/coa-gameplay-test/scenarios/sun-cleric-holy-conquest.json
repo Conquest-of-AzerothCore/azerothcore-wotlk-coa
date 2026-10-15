@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "name": "Holy Conquest halves the mana cost of Paragon, Chosen of the Light and Judgement Day (#865)",
+  "contract": "Holy Conquest 504248 is family 33, Attributes 448 (SPELL_ATTR0_PASSIVE), EquippedItemClass -1, no Stances, so it self-applies on learn. Its single effect is SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue 14 (SPELLMOD_COST) and EffectSpellClassMask word0 4104 (bits 0x8 and 0x1000), word2 8388608 (bit 0x800000), EffectBasePoints -51 + DieSides 1 = -50. Judgement Day 806121 carries SpellFamilyFlags word0 8; Chosen of the Light 800622 carries word0 4096; Paragon 680639 carries word2 8388608 (also relied on by AscensionSunClericBattleCleric.cpp's own 'Paragon only' cooldown mask). SpellInfo::CalcPowerCost calls ApplySpellMod(id, SPELLMOD_COST, ...) unconditionally for every spell, native and generic; this is not \"no server-side implementation\", the mana-cost reduction already applies to exactly the three named spells. spell_power_cost queries CalcPowerCost directly with no cast submitted.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 504248
+    },
+    {
+      "action": "assert",
+      "label": "Talent self-applies its passive",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 504248,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 806121,
+      "save_as": "control_judgement_day"
+    },
+    {
+      "action": "assert",
+      "label": "Judgement Day costs half as much",
+      "actor": "talent",
+      "metric": "spell_power_cost",
+      "spell": 806121,
+      "ratio_to": "control_judgement_day",
+      "min": 0.45,
+      "max": 0.55
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 800622,
+      "save_as": "control_chosen_of_the_light"
+    },
+    {
+      "action": "assert",
+      "label": "Chosen of the Light costs half as much",
+      "actor": "talent",
+      "metric": "spell_power_cost",
+      "spell": 800622,
+      "ratio_to": "control_chosen_of_the_light",
+      "min": 0.45,
+      "max": 0.55
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 680639,
+      "save_as": "control_paragon"
+    },
+    {
+      "action": "assert",
+      "label": "Paragon costs half as much",
+      "actor": "talent",
+      "metric": "spell_power_cost",
+      "spell": 680639,
+      "ratio_to": "control_paragon",
+      "min": 0.45,
+      "max": 0.55
+    }
+  ]
+}

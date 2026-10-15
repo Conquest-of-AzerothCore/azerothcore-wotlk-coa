@@ -89,6 +89,13 @@ bool ScriptMgr::OnIsAffectedBySpellModCheck(SpellInfo const* affectSpell, SpellI
     CALL_ENABLED_BOOLEAN_HOOKS(GlobalScript, GLOBALHOOK_ON_IS_AFFECTED_BY_SPELL_MOD_CHECK, !script->OnIsAffectedBySpellModCheck(affectSpell, checkSpell, mod));
 }
 
+void ScriptMgr::OnSpellModFamilyMask(SpellInfo const* affectSpell, SpellInfo const* checkSpell,
+    SpellModifier const* mod, bool& affected)
+{
+    CALL_ENABLED_HOOKS(GlobalScript, GLOBALHOOK_ON_SPELL_MOD_FAMILY_MASK,
+        script->OnSpellModFamilyMask(affectSpell, checkSpell, mod, affected));
+}
+
 bool ScriptMgr::OnSpellHealingBonusTakenNegativeModifiers(Unit const* target, Unit const* caster, SpellInfo const* spellInfo, float& val)
 {
     CALL_ENABLED_BOOLEAN_HOOKS_WITH_DEFAULT_FALSE(GlobalScript, GLOBALHOOK_ON_SPELL_HEALING_BONUS_TAKEN_NEGATIVE_MODIFIERS, script->OnSpellHealingBonusTakenNegativeModifiers(target, caster, spellInfo, val));

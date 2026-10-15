@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Decomposition applies the Magic Erosion debuff (#2945)",
+  "contract": "Magic Erosion 706046 applies aura 42 (proc trigger spell) on 570060, a 30 s target debuff whose aura 186 (SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, +3%) is native in Unit::MagicSpellHitResult, but Spell.dbc gives 706046 ProcFlags 0 and no spell_proc row existed, so the debuff was never applied. Effect 0 of the talent (aura 108, SPELLMOD_DOT +10% on Decomposition) is native and untouched. The tooltip is \"Your Decomposition ... applies Magic Erosion to the target\" and the record's own ProcChance is 100, so one Decomposition cast must apply it every time - one cast is already deterministic. Decomposition 800856 has no SPELL_EFFECT_SCHOOL_DAMAGE effect, so its HIT-phase event is PROC_SPELL_TYPE_NO_DMG_HEAL, which is what the new row's SpellTypeMask 4 matches.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 706046
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 800856
+    },
+    {
+      "action": "assert",
+      "label": "No Magic Erosion debuff before any cast",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 570060,
+      "caster": "chronomancer",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Decomposition's hit applies Magic Erosion to the target",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 570060,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

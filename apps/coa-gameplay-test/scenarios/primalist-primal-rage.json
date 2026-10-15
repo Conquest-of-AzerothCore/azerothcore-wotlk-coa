@@ -1,0 +1,1082 @@
+{
+  "schema": 1,
+  "name": "Primalist Primal Rage restores one Rylak charge",
+  "contract": [
+    "Consume both Rylak charges with normal attacks, then Totemic Smash restores one charge only with Primal",
+    "Rage. Cover first/highest ranks and removal, proving successful hit packets."
+  ],
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 300000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 196
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 23775
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "target": "target",
+      "spell": 23775,
+      "label": "Hold the passive target still and prevent defensive blocks"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "stunned",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "The passive target cannot block required physical damage"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the fixture stun global cooldown"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 300690
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 803914,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802557,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802556,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802555,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802554,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802553,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 800178,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800178
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 707910,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706494,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706493,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706492,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706491,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706490,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706342,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 706342
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 706342
+    },
+    {
+      "action": "restore_charges",
+      "actor": "primalist",
+      "spell": 706342
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_charges",
+      "spell": 706342,
+      "equals": 2
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 800178
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 706342,
+      "target": "target",
+      "save_as": "baseline_bite_0"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 706342,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 706342,
+      "target": "target",
+      "relative_to": "baseline_bite_0",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 706342,
+      "target": "target",
+      "save_as": "baseline_bite_1"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 706342,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 706342,
+      "target": "target",
+      "relative_to": "baseline_bite_1",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 706342,
+      "min": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_charges",
+      "spell": 706342,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 800178,
+      "target": "target",
+      "save_as": "baseline_smash"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800178,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 800178,
+      "target": "target",
+      "relative_to": "baseline_smash",
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 706342,
+      "min": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_charges",
+      "spell": 706342,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 300690
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 803914,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802557,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802556,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802555,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802554,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802553,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 800178,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800178
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 707910,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706494,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706493,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706492,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706491,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706490,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706342,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 706342
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 706342
+    },
+    {
+      "action": "restore_charges",
+      "actor": "primalist",
+      "spell": 706342
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_charges",
+      "spell": 706342,
+      "equals": 2
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 800178
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 706342,
+      "target": "target",
+      "save_as": "first_bite_0"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 706342,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 706342,
+      "target": "target",
+      "relative_to": "first_bite_0",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 706342,
+      "target": "target",
+      "save_as": "first_bite_1"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 706342,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 706342,
+      "target": "target",
+      "relative_to": "first_bite_1",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 706342,
+      "min": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_charges",
+      "spell": 706342,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 800178,
+      "target": "target",
+      "save_as": "first_smash"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800178,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 800178,
+      "target": "target",
+      "relative_to": "first_smash",
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 706342,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_charges",
+      "spell": 706342,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 300690
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 803914,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802557,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802556,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802555,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802554,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802553,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 800178,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 802557
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 707910,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706494,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706493,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706492,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706491,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706490,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706342,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 707910
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 707910
+    },
+    {
+      "action": "restore_charges",
+      "actor": "primalist",
+      "spell": 707910
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_charges",
+      "spell": 707910,
+      "equals": 2
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 802557
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 707910,
+      "target": "target",
+      "save_as": "highest_bite_0"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 707910,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 707910,
+      "target": "target",
+      "relative_to": "highest_bite_0",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 707910,
+      "target": "target",
+      "save_as": "highest_bite_1"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 707910,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 707910,
+      "target": "target",
+      "relative_to": "highest_bite_1",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 707910,
+      "min": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_charges",
+      "spell": 707910,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 802557,
+      "target": "target",
+      "save_as": "highest_smash"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 802557,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 802557,
+      "target": "target",
+      "relative_to": "highest_smash",
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 707910,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_charges",
+      "spell": 707910,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 300690
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 803914,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802557,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802556,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802555,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802554,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 802553,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 800178,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 802557
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 707910,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706494,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706493,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706492,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706491,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706490,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706342,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 707910
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 707910
+    },
+    {
+      "action": "restore_charges",
+      "actor": "primalist",
+      "spell": 707910
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_charges",
+      "spell": 707910,
+      "equals": 2
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 802557
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 707910,
+      "target": "target",
+      "save_as": "removed_bite_0"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 707910,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 707910,
+      "target": "target",
+      "relative_to": "removed_bite_0",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 707910,
+      "target": "target",
+      "save_as": "removed_bite_1"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 707910,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 707910,
+      "target": "target",
+      "relative_to": "removed_bite_1",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 707910,
+      "min": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_charges",
+      "spell": 707910,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 802557,
+      "target": "target",
+      "save_as": "removed_smash"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 802557,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 802557,
+      "target": "target",
+      "relative_to": "removed_smash",
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 707910,
+      "min": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_charges",
+      "spell": 707910,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    }
+  ]
+}

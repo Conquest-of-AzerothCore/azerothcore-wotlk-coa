@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Puppeteer's Grasp transform display (#3114)",
+  "contract": "#3114 Puppeteer's Grasp (707209, Spell.dbc row 123975, SpellFamilyName 19) is three APPLY_AURA effects on the caster: Effect[0]=SPELL_AURA_TRANSFORM (EffectMiscValue[0]=454292), Effect[1]=SPELL_AURA_313 (class-masked to Malefic Wrath 807037/Bad Juju 802087, letting them be cast while moving), Effect[2]=SPELL_AURA_PERIODIC_TRIGGER_SPELL (amplitude 2000ms, triggers Spirit 561136, AttributesEx5=SPELL_ATTR5_EXTRA_INITIAL_PERIOD ticks at apply). Effects 1 and 2 are engine-native (AuraEffect::HandleFeignDeath-equivalent generic dispatch via Unit::CanCastSpellWhileMoving/HasAuraTypeWithAffectMask for effect 1, plain periodic-trigger dispatch for effect 2) and need no module code. Effect 0 is broken: AuraEffect::HandleAuraTransform (SpellAuraEffects.cpp) resolves a nonzero EffectMiscValue through sObjectMgr->GetCreatureTemplate(454292); creature_template 454292 does not exist anywhere in this tree (base dump, updates, pending_db_world) and CreatureDisplayInfo/Creature/CreatureDisplayInfoExtra/CreatureModelData.dbc in the shipped client set all lack id 454292 (independently re-verified by reading the raw WDBC headers), so on any build from this tree the caster's display silently falls back to SetDisplayId(16358) (the pink test pig) plus a LOG_ERROR every cast. The intended 'malignant spirit' appearance is not recoverable from any DBC/DB/code in this tree (digit-truncation candidates 45429 'Quilin' and 4542 'TaurenMale' are unrelated models, ruled out by direct DBC read), so inventing a replacement creature/display id is out of scope; the fix neutralizes AscensionWitchDoctor::ApplyContracts's broken Effect[0] (id==PuppeteersGrasp -> dummy(EFFECT_0), same pattern as the existing Shadowhunter/EFFECT_1 neutralization) so casting the spell no longer corrupts the caster's display or spams the error log. Effects 1 and 2 are untouched. This scenario fails before the fix (display_id jumps to 16358) and passes after (display_id is unchanged by the cast).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 4000 },
+
+    { "action": "learn", "actor": "caster", "spell": 707209, "label": "#3114 learn Puppeteer's Grasp" },
+
+    { "action": "assert", "actor": "caster", "metric": "aura", "spell": 707209, "equals": 0, "label": "#3114 baseline: Puppeteer's Grasp not yet cast" },
+    { "action": "assert", "actor": "caster", "metric": "aura_stacks", "spell": 561136, "equals": 0, "label": "#3114 baseline: no Spirit stacks before casting" },
+
+    { "action": "snapshot", "actor": "caster", "metric": "display_id", "save_as": "display_before" },
+
+    { "action": "cast", "actor": "caster", "spell": 707209, "label": "#3114 cast Puppeteer's Grasp on self" },
+
+    { "action": "assert", "actor": "caster", "metric": "aura", "spell": 707209, "equals": 1, "within_ms": 2000, "label": "#3114 Puppeteer's Grasp aura applies" },
+
+    { "action": "assert", "actor": "caster", "metric": "display_id", "relative_to": "display_before", "equals": 0, "within_ms": 500, "label": "#3114 caster's display is unchanged - fails before the fix (falls back to pig display 16358 via HandleAuraTransform's missing-creature-template branch), passes after (Effect[0] neutralized)" },
+
+    { "action": "assert", "actor": "caster", "metric": "aura_stacks", "spell": 561136, "min": 1, "within_ms": 2500, "label": "#3114 regression: Effect[2]'s Spirit periodic trigger still fires immediately (native, untouched by the fix)" },
+    { "action": "assert", "actor": "caster", "metric": "aura_stacks", "spell": 561136, "equals": 5, "within_ms": 11000, "label": "#3114 regression: Spirit stacks to its 5-stack cap on the 2000ms amplitude (native, untouched by the fix)" }
+  ]
+}

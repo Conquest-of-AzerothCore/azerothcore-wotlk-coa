@@ -1,0 +1,1541 @@
+{
+  "schema": 1,
+  "name": "Runemaster Primordial Echoes relaunches Primordial Blast on a critical strike (#2742)",
+  "contract": [
+    "Original Primordial Echoes 705572 triggers 547525 with the authored 40 percent chance only on Primordial",
+    "Blast critical hits. Run 32 funded ordinary Primordial Blast casts, waiting 8500 milliseconds between",
+    "them for the original eight-second cooldown and one-second global cooldown. Require an accepted cast and",
+    "a new actual critical damage event for every trial, plus at least 32 native critical hits, an actual",
+    "triggered echo and resolved rank-six 502827 damage on the same enemy. Zero procs after 32 eligible",
+    "critical hits has probability at most 0.6^32, about 8e-8. Preserve the original proc chance, hit phase,",
+    "critical-only filter, damage and cooldown; submitted casts rejected by the global cooldown are not",
+    "trials."
+  ],
+  "timeout_ms": 360000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 100000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "rm",
+      "entry": 36,
+      "level": 80,
+      "health": 5000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 705572
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 800732
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Primordial Echoes is active",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 705572,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: forced crit rating pushes spell crit chance near 100%",
+      "actor": "rm",
+      "metric": "spell_crit_chance",
+      "school": 2,
+      "min": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 547525,
+      "save_as": "echoes_before"
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture: mana pool for the repeated Primordial Blast casts",
+      "actor": "rm",
+      "spell": 10040,
+      "stacks": 3
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the mana fixture landed",
+      "actor": "rm",
+      "metric": "max_power",
+      "power": 0,
+      "min": 20000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_0"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_0",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_1"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_1",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_2"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_2",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_3"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_3",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_4"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_4",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_5"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_5",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_6"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_6",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_7"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_7",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_8"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_8",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_9"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_9",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_10"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_10",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_11"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_11",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_12"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_12",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_13"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_13",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_14"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_14",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_15"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_15",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_16"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_16",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_17"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_17",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_18"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_18",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_19"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_19",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_20"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_20",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_21"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_21",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_22"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_22",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_23"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_23",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_24"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_24",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_25"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_25",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_26"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_26",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_27"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_27",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_28"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_28",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_29"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_29",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_30"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_30",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "critical_before_31"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every counted trial lands a new actual critical hit",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "critical_before_31",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "assert",
+      "label": "At least 32 eligible native Primordial Blast critical hits",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "critical": true,
+      "min": 32
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: actual Primordial Blast crits relaunch it via 547525",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 547525,
+      "relative_to": "echoes_before",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The triggered echo deals actual rank-six Primordial Blast damage",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 502827,
+      "target": "dummy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Spirit of Fire raises absorb amounts (#988)",
+  "contract": "#988: Spirit of Fire rank 1 (500167) and rank 2 (500644) are family 30 passives whose e1 is aura 317 (SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT) misc 126, BasePoints 19 / 39 = +20% / +40% (e2 does the same for summons and is not asserted). AuraEffect::CalculateAmount (SpellAuraEffects.cpp:630-650) multiplies a SCHOOL_ABSORB amount above zero by that modifier when the caster is a Pyromancer and the spell is family 30, so it is core code, not module code. Volcanic Shell 805477 is family 30 with e1 SPELL_AURA_SCHOOL_ABSORB (69) BasePoints 624, Fire (misc 127, inside mask 126). Asserts the shield's aura amount, measured by casting it before and after learning each rank, is 1.20x at rank 1 and 1.40x at rank 2 (ratio bounds absorb rounding).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 805477
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "p",
+      "spell": 805477
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 805477
+    },
+    {
+      "action": "assert",
+      "label": "Volcanic Shell is up",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 805477,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Shield amount without Spirit of Fire",
+      "actor": "p",
+      "metric": "aura_amount",
+      "spell": 805477,
+      "effect": 0,
+      "save_as": "shell0"
+    },
+    {
+      "action": "set_aura",
+      "label": "Drop the shield",
+      "actor": "p",
+      "spell": 805477,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 500167
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "p",
+      "spell": 805477
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 805477
+    },
+    {
+      "action": "assert",
+      "label": "Volcanic Shell is up",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 805477,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises the shield by about 20%",
+      "actor": "p",
+      "metric": "aura_amount",
+      "spell": 805477,
+      "effect": 0,
+      "ratio_to": "shell0",
+      "min": 1.19,
+      "max": 1.21
+    },
+    {
+      "action": "set_aura",
+      "label": "Drop the shield",
+      "actor": "p",
+      "spell": 805477,
+      "stacks": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 500167
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 500644
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "p",
+      "spell": 805477
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 805477
+    },
+    {
+      "action": "assert",
+      "label": "Volcanic Shell is up",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 805477,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises the shield by about 40%",
+      "actor": "p",
+      "metric": "aura_amount",
+      "spell": 805477,
+      "effect": 0,
+      "ratio_to": "shell0",
+      "min": 1.39,
+      "max": 1.41
+    },
+    {
+      "action": "set_aura",
+      "label": "Drop the shield",
+      "actor": "p",
+      "spell": 805477,
+      "stacks": 0
+    }
+  ]
+}

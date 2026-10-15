@@ -1,0 +1,218 @@
+{
+  "schema": 1,
+  "name": "Keleseth's Calamity uses its 69 percent spell-power coefficient across all six ranks (#4175)",
+  "contract": [
+    "Active Keleseth's Calamity ranks 560249 and 561175-561179 all promise $sps*0.69 Shadow damage and share",
+    "first rank 560249. With 175 additional spell power at level 60, native level penalties yield increases",
+    "70.4375, 80.5, 92.575, 104.65, 116.725 and 120.75 respectively. Bloodmoon Blast 501614 is the independent",
+    "existing-coefficient control (0.466229, increase 81.59). Entry 7672 is a paid Sanguine talent: acquire the",
+    "first rank natively. This covers the named reachable ability; it does not resolve the report's entire",
+    "1231-entry audit or unreachable legacy Atherann's Anguish. A separate character acquires the talent so",
+    "Sanguine specialization damage passives do not alter the coefficient fixture."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 60
+    },
+    {
+      "id": "buyer",
+      "race": 1,
+      "class": 20,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "buyer",
+      "id": 26
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "buyer",
+      "entry": 7672,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "buyer",
+      "metric": "knows_spell",
+      "spell": 560249,
+      "equals": 1,
+      "label": "Keleseth is acquired through its paid Sanguine node"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_damage_done",
+      "spell": 560249,
+      "target": "target",
+      "save_as": "spell_560249"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_damage_done",
+      "spell": 561175,
+      "target": "target",
+      "save_as": "spell_561175"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_damage_done",
+      "spell": 561176,
+      "target": "target",
+      "save_as": "spell_561176"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_damage_done",
+      "spell": 561177,
+      "target": "target",
+      "save_as": "spell_561177"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_damage_done",
+      "spell": 561178,
+      "target": "target",
+      "save_as": "spell_561178"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_damage_done",
+      "spell": 561179,
+      "target": "target",
+      "save_as": "spell_561179"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_damage_done",
+      "spell": 501614,
+      "target": "target",
+      "save_as": "spell_501614"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_power",
+      "school": 6,
+      "save_as": "sp"
+    },
+    {
+      "action": "set_aura",
+      "actor": "b",
+      "spell": 23271,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spell_power",
+      "school": 6,
+      "relative_to": "sp",
+      "equals": 175,
+      "label": "Fixture supplies exactly 175 Shadow spell power"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spell_damage_done",
+      "spell": 501614,
+      "target": "target",
+      "relative_to": "spell_501614",
+      "min": 80.49000000000001,
+      "max": 82.69,
+      "label": "Rank 501614 receives the independently authored coefficient after native level penalties"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spell_damage_done",
+      "spell": 561179,
+      "target": "target",
+      "relative_to": "spell_561179",
+      "min": 119.65,
+      "max": 121.85,
+      "label": "Rank 561179 receives the independently authored coefficient after native level penalties"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spell_damage_done",
+      "spell": 561178,
+      "target": "target",
+      "relative_to": "spell_561178",
+      "min": 115.625,
+      "max": 117.82499999999999,
+      "label": "Rank 561178 receives the independently authored coefficient after native level penalties"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spell_damage_done",
+      "spell": 561177,
+      "target": "target",
+      "relative_to": "spell_561177",
+      "min": 103.55000000000001,
+      "max": 105.75,
+      "label": "Rank 561177 receives the independently authored coefficient after native level penalties"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spell_damage_done",
+      "spell": 561176,
+      "target": "target",
+      "relative_to": "spell_561176",
+      "min": 91.47500000000001,
+      "max": 93.675,
+      "label": "Rank 561176 receives the independently authored coefficient after native level penalties"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spell_damage_done",
+      "spell": 561175,
+      "target": "target",
+      "relative_to": "spell_561175",
+      "min": 79.4,
+      "max": 81.6,
+      "label": "Rank 561175 receives the independently authored coefficient after native level penalties"
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spell_damage_done",
+      "spell": 560249,
+      "target": "target",
+      "relative_to": "spell_560249",
+      "min": 69.3375,
+      "max": 71.5375,
+      "label": "Rank 560249 receives the independently authored coefficient after native level penalties"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "b",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 15
+    }
+  ]
+}

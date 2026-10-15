@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "name": "celestial-surge-damage|Celestial Surge adds 10% to the damage of consuming Scattered Stars (#928)",
+  "contract": "Celestial Surge 680773 (Spell.dbc, SpellFamilyName 32, passive 0x1c0) has effect 0 = SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue SPELLMOD_DAMAGE (0), EffectSpellClassMask word1 0x800 and EffectBasePoints 9, resolving to 10 with DieSides 1, matching 'Increases the damage dealt by consuming Scattered Stars by $s1%'. The consuming hit is Scattered Star 804995 (SpellFamilyFlags word1 0x800, effect 0 SCHOOL_DAMAGE, Arcane), which carries SPELL_ATTR3_DO_NOT_DISPLAY_RANGE (0x40000000) but not SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (0x20000000). Native path only: Unit::SpellDamageBonusDone ends with ApplySpellMod(SPELLMOD_DAMAGE) on the total, so the result scales by exactly 1.10 whatever spell power the fixture has; the spell_damage_done metric calls it with a fixed base of 1000. Lunar Lance rank 9 502340 (word1 0x2000000, also Arcane) has a different class mask and must not move, which shows the modifier is scoped to the Scattered Star hit. Both fixtures are the same race, class and level.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "control",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 680773
+    },
+    {
+      "action": "snapshot",
+      "label": "Scattered Star damage without the talent",
+      "actor": "control",
+      "metric": "spell_damage_done",
+      "spell": 804995,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "star_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Lunar Lance damage without the talent",
+      "actor": "control",
+      "metric": "spell_damage_done",
+      "spell": 502340,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "lance_base"
+    },
+    {
+      "action": "assert",
+      "label": "Scattered Star deals 10% more damage with the talent",
+      "actor": "talent",
+      "metric": "spell_damage_done",
+      "spell": 804995,
+      "effect": 0,
+      "target": "dummy",
+      "ratio_to": "star_base",
+      "min": 1.099,
+      "max": 1.101
+    },
+    {
+      "action": "assert",
+      "label": "Lunar Lance is not scaled by the talent",
+      "actor": "talent",
+      "metric": "spell_damage_done",
+      "spell": 502340,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "lance_base",
+      "equals": 0
+    }
+  ]
+}

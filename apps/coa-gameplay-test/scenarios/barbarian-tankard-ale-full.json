@@ -1,0 +1,317 @@
+{
+  "schema": 1,
+  "name": "Ale of the God-King follows the naturally filled Tankard (#5804)",
+  "contract": [
+    "At level 43, Ancestry uses Ale rank 573224. Its Spell.dbc CasterAuraSpell is Full Tankard 805814;",
+    "the spell is an active pet-targeted aura, not a passive. Fill Level 92083 grants periodic helper 500061,",
+    "which adds one stack of 805813 every 2000 ms. Fill Level has a ten-stack limit and Full Tankard has",
+    "an authored amount of ten. Ale must be refused before the Tankard fills, then empower the Honored",
+    "Ancestor and consume Fill Level. Breath's five-second Empty Tankard 806055 window follows spending",
+    "the resource. The Finest Ale 705218 explicitly prevents Ale from emptying the Tankard, so it must",
+    "preserve both the stacks and Full Tankard without granting a new Empty Tankard window. Stack reduction",
+    "must withdraw Full Tankard, and removing the level passive must stop filling and remove resource state."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 43
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "b",
+      "id": 3
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 804729
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 804834
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "pet_entry",
+      "equals": 51265,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 805780
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 573224
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "spell": 573224,
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 92083,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 92083
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 500061,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 805814,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 573224,
+      "target_pet": true
+    },
+    {
+      "action": "assert",
+      "label": "Ale requires a full Tankard",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 573224,
+      "equals": 22
+    },
+    {
+      "action": "assert",
+      "label": "The native periodic helper fills the Tankard",
+      "actor": "b",
+      "metric": "aura_stacks",
+      "spell": 805813,
+      "equals": 10,
+      "within_ms": 21000
+    },
+    {
+      "action": "assert",
+      "label": "Ten stacks enable Ale through its authored aura requirement",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 805814,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 573224,
+      "target_pet": true
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 573224,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Ale empowers the normally summoned Honored Ancestor",
+      "actor": "b",
+      "metric": "pet_aura_stacks",
+      "spell": 573224,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura_stacks",
+      "spell": 805813,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 805814,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 806055,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Ten stacks reduce Ale's 15-second cooldown by 100 percent",
+      "actor": "b",
+      "metric": "cooldown_ms",
+      "spell": 573224,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 705218
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 705218,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura_stacks",
+      "spell": 805813,
+      "equals": 10,
+      "within_ms": 21000
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 805814,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 806055,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 573224,
+      "target_pet": true
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "cast_failure",
+      "spell": 573224,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "pet_aura_stacks",
+      "spell": 573224,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Finest Ale preserves Fill Level",
+      "actor": "b",
+      "metric": "aura_stacks",
+      "spell": 805813,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 805814,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 806055,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "b",
+      "spell": 805813,
+      "stacks": 9
+    },
+    {
+      "action": "assert",
+      "label": "A stack reduction withdraws the full marker",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 805814,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 806055,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 92083,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 500061,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura_stacks",
+      "spell": 805813,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 805814,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 806055,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura_stacks",
+      "spell": 805813,
+      "equals": 0
+    }
+  ]
+}

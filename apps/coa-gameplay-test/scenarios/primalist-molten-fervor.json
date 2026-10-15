@@ -1,0 +1,221 @@
+{
+  "schema": 1,
+  "name": "Primalist Molten Fervor group and personal spell haste",
+  "contract": "Group spell haste is three percent and personal haste is five percent. Two casters share only one group benefit; the outsider receives neither. Removal restores native cast speed.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "outsider",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "timeout_ms": 120000,
+  "steps": [
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "ally"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 680476,
+      "all_specs": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cast_speed_multiplier",
+      "save_as": "primalist_cast_speed_multiplier"
+    },
+    {
+      "action": "unlearn",
+      "actor": "ally",
+      "spell": 680476,
+      "all_specs": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "cast_speed_multiplier",
+      "save_as": "ally_cast_speed_multiplier"
+    },
+    {
+      "action": "unlearn",
+      "actor": "outsider",
+      "spell": 680476,
+      "all_specs": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "outsider",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "cast_speed_multiplier",
+      "save_as": "outsider_cast_speed_multiplier"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 680476
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "primalist_cast_speed_multiplier",
+      "min": 0.9236417013407303,
+      "max": 0.9256417013407303
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "ally_cast_speed_multiplier",
+      "min": 0.969873786407767,
+      "max": 0.971873786407767
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "outsider_cast_speed_multiplier",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "learn",
+      "actor": "ally",
+      "spell": 680476
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "primalist_cast_speed_multiplier",
+      "min": 0.9236417013407303,
+      "max": 0.9256417013407303
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "ally_cast_speed_multiplier",
+      "min": 0.9236417013407303,
+      "max": 0.9256417013407303
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "outsider_cast_speed_multiplier",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 680476,
+      "all_specs": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "primalist_cast_speed_multiplier",
+      "min": 0.969873786407767,
+      "max": 0.971873786407767
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "ally_cast_speed_multiplier",
+      "min": 0.9236417013407303,
+      "max": 0.9256417013407303
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "outsider_cast_speed_multiplier",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "ally",
+      "spell": 680476,
+      "all_specs": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "primalist_cast_speed_multiplier",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "ally_cast_speed_multiplier",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "outsider_cast_speed_multiplier",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

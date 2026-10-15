@@ -64,6 +64,13 @@ void ScriptMgr::OnCreate(Group* group, Player* leader)
     CALL_ENABLED_HOOKS(GroupScript, GROUPHOOK_ON_CREATE, script->OnCreate(group, leader));
 }
 
+void ScriptMgr::OnGroupLootRollStart(Group* group, Roll const& roll, Loot const& loot, LootItem const& item)
+{
+    ASSERT(group);
+
+    CALL_ENABLED_HOOKS(GroupScript, GROUPHOOK_ON_LOOT_ROLL_START, script->OnLootRollStart(group, roll, loot, item));
+}
+
 GroupScript::GroupScript(char const* name, std::vector<uint16> enabledHooks)
     : ScriptObject(name, GROUPHOOK_END)
 {

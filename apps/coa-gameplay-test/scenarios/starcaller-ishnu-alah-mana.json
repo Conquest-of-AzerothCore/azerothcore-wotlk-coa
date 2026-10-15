@@ -1,0 +1,197 @@
+{
+  "schema": 1,
+  "name": "Ishnu-alah adds 4% of maximum mana to Moon Arrow's energize (#1174)",
+  "contract": "Ishnu-alah 524638 (Spell.dbc, SpellFamilyName 32) reads \"Moon Arrow restores an additional $s1% of your maximum mana\" with $s1 = 4 (effect 0: SPELL_AURA_ADD_FLAT_MODIFIER, EffectBasePoints 3 with DieSides 1, EffectMiscValue 23 = SPELLMOD_EFFECT3, class mask word1 bit 4 shared with Moon Arrow's SpellFamilyFlags (0,4,0)). Moon Arrow 801972 (ranks 803918-803925) carries effect 1 = SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (142) bp 9 firing 804096 (effect 0 SPELL_EFFECT_ENERGIZE_PCT 137, the \"% of your maximum mana\" of tooltip $s2) and effect 2 = 142 bp 9 firing 804155 (effect 0 SPELL_EFFECT_ENERGIZE 30, the flat mana of tooltip \"plus $s3\"). Spell::EffectTriggerSpell forwards the CalcValue result of the trigger effect as SPELLVALUE_BASE_POINT0..2, and Unit::ApplyEffectModifiers applies SPELLMOD_EFFECT2 to effect index 1 and SPELLMOD_EFFECT3 to effect index 2. The shipped EFFECT3 modifier therefore adds 4 flat mana points to 804155 (10 becomes 14 mana), not 4% of maximum mana. The fix moves the modifier to SPELLMOD_EFFECT2 in the Starcaller load-time contracts, so 804096 restores 14% instead of 10% of maximum mana. Both fixtures are the same race, class, level, gear and start at 1000 mana, cast one Moon Arrow at their own dummy with hit ratings 10000 and no ammo requirement (custom classes are exempt in Spell::CheckItems), so cost, base energize and regeneration are identical and only the modifier can separate their mana. Expected difference: 4% of max mana, at least 60 with the asserted 1500 minimum maximum mana; today's difference is +4 flat, so the min 40 bound fails before the fix and passes after, with 20 mana of margin for regeneration timing between the two casts. The Worn Shortbow 2504 (item_template: class 2, subclass 2 bow, InventoryType 15, RequiredLevel 1) supplies the equipped-bow requirement (EquippedItemClass weapon, subclass mask bow/gun/crossbow); Moon Arrow 801972 has RecoveryTime 0 and CategoryRecoveryTime 0 (only a 1250 ms GCD), so a cooldown proves nothing; the spell_cast_count metric counts the completed casts instead. The equips completed in run 204b8dfedac6. Moon Arrow has a 2000 ms cast (SpellCastTimes 5) and SpellRange 113 carries the ranged flag (2), so Spell::CheckRange refuses a target inside the caster's melee range with SPELL_FAILED_TOO_CLOSE: the dummies stand 15 yards away, inside the 30 yard maximum, and the wait covers the cast.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_control",
+      "owner": "control",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 15
+    },
+    {
+      "id": "dummy_talent",
+      "owner": "talent",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "control",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "label": "Moon Arrow needs a bow in the ranged slot",
+      "actor": "control",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "add_item",
+      "actor": "talent",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "label": "Moon Arrow needs a bow in the ranged slot",
+      "actor": "talent",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "label": "Let the weapon swap cooldown expire",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 801972
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 801972
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 524638
+    },
+    {
+      "action": "assert",
+      "label": "Ishnu-alah's passive aura is applied",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 524638,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Both mana pools are large enough for the fixture",
+      "actor": "control",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1500
+    },
+    {
+      "action": "snapshot",
+      "label": "Control max mana",
+      "actor": "control",
+      "metric": "max_power",
+      "power": 0,
+      "save_as": "max_mana"
+    },
+    {
+      "action": "assert",
+      "label": "Both fixtures share one max mana",
+      "actor": "talent",
+      "metric": "max_power",
+      "power": 0,
+      "relative_to": "max_mana",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "label": "Same starting mana, well below the maximum",
+      "actor": "control",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "label": "Same starting mana, well below the maximum",
+      "actor": "talent",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 801972,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 801972,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "label": "Let both Moon Arrows land and the energize helpers resolve",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "Both arrows landed",
+      "actor": "control",
+      "metric": "spell_cast_count",
+      "spell": 801972,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Both arrows landed (talent)",
+      "actor": "talent",
+      "metric": "spell_cast_count",
+      "spell": 801972,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Control mana after Moon Arrow",
+      "actor": "control",
+      "metric": "power",
+      "power": 0,
+      "save_as": "mana_control"
+    },
+    {
+      "action": "assert",
+      "label": "Control mana rose above the start (base energize landed)",
+      "actor": "control",
+      "metric": "power",
+      "power": 0,
+      "min": 1001
+    },
+    {
+      "action": "assert",
+      "label": "Talented Moon Arrow restores at least 3.5 percent of 1500 maximum mana more than control (flat +4 fails)",
+      "actor": "talent",
+      "metric": "power",
+      "power": 0,
+      "relative_to": "mana_control",
+      "min": 40
+    }
+  ]
+}

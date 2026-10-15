@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Book of Ascension: a first-rank purchase is announced exactly once",
+  "contract": "A purchase is announced by exactly one packet the client draws a chat line from: SMSG_LEARNED_SPELL for an ability the character did not hold, SMSG_SUPERCEDED_SPELL for a rank up, which the client announces itself. The window sends none of its own. This buys the first ranks a live realm session bought (523485, 680535, 680584, 680585, 802826, all logged as announced by the core) and asserts, per purchase, that exactly one cue arrived and that it named the ability that was bought.",
+  "timeout_ms": 180000,
+  "players": [
+    { "id": "wh", "race": 1, "class": 15, "level": 60 }
+  ],
+  "steps": [
+    { "action": "money", "actor": "wh", "copper": 400000, "label": "fixture: a purse deep enough for five abilities" },
+    { "action": "learn", "actor": "wh", "spell": 97930, "label": "learn the book companion spell" },
+    { "action": "cast", "actor": "wh", "spell": 97930, "label": "summon the Book of Ascension" },
+    { "action": "assert", "actor": "wh", "metric": "owned_creature_count", "entry": 75115, "equals": 1, "within_ms": 5000, "label": "the book is out" },
+    { "action": "gossip_hello", "actor": "wh", "label": "open the book" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_list_packets", "equals": 1, "label": "one window was sent" },
+
+    { "action": "trainer_buy", "actor": "wh", "spell": 523485, "label": "buy 523485" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_buy_succeeded", "spell": 523485, "equals": 1, "label": "523485 was granted" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_cues_in_last_buy", "equals": 1, "label": "523485 produced one cue" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_last_buy_cued", "spell": 523485, "equals": 1, "label": "and the cue named 523485" },
+
+    { "action": "trainer_buy", "actor": "wh", "spell": 680535, "label": "buy 680535" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_buy_succeeded", "spell": 680535, "equals": 1, "label": "680535 was granted" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_cues_in_last_buy", "equals": 1, "label": "680535 produced one cue" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_last_buy_cued", "spell": 680535, "equals": 1, "label": "and the cue named 680535" },
+
+    { "action": "trainer_buy", "actor": "wh", "spell": 680584, "label": "buy 680584" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_buy_succeeded", "spell": 680584, "equals": 1, "label": "680584 was granted" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_cues_in_last_buy", "equals": 1, "label": "680584 produced one cue" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_last_buy_cued", "spell": 680584, "equals": 1, "label": "and the cue named 680584" },
+
+    { "action": "trainer_buy", "actor": "wh", "spell": 680585, "label": "buy 680585" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_buy_succeeded", "spell": 680585, "equals": 1, "label": "680585 was granted" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_cues_in_last_buy", "equals": 1, "label": "680585 produced one cue" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_last_buy_cued", "spell": 680585, "equals": 1, "label": "and the cue named 680585" },
+
+    { "action": "trainer_buy", "actor": "wh", "spell": 802826, "label": "buy 802826" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_buy_succeeded", "spell": 802826, "equals": 1, "label": "802826 was granted" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_cues_in_last_buy", "equals": 1, "label": "802826 produced one cue" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_last_buy_cued", "spell": 802826, "equals": 1, "label": "and the cue named 802826" },
+
+    { "action": "assert", "actor": "wh", "metric": "spellbook_buys_granted", "equals": 5, "label": "all five purchases were granted" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_silent_buys", "equals": 0, "label": "no purchase was silent" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_multi_announced_buys", "equals": 0, "label": "no purchase was announced twice" }
+  ]
+}

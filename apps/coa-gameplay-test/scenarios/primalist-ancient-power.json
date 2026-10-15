@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "name": "Primalist Ancient Power native Strength and hit bonuses",
+  "contract": "First and second ranks grant 5/10% Strength and 3/6 percentage points of melee and spell hit; removing them restores baseline stats.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 58
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 300740,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 301354,
+      "all_specs": true
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "stat",
+      "save_as": "stat",
+      "stat": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_hit_chance",
+      "save_as": "melee_hit_chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_hit_chance",
+      "save_as": "spell_hit_chance"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 300740
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 300740,
+      "effect": 0,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "stat",
+      "min": 1.04,
+      "max": 1.06
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_hit_chance",
+      "relative_to": "melee_hit_chance",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_hit_chance",
+      "relative_to": "spell_hit_chance",
+      "equals": 3
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 300740,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 301354
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 301354,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "stat",
+      "min": 1.09,
+      "max": 1.11
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_hit_chance",
+      "relative_to": "melee_hit_chance",
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_hit_chance",
+      "relative_to": "spell_hit_chance",
+      "equals": 6
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 301354,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "stat",
+      "relative_to": "stat",
+      "equals": 0,
+      "stat": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_hit_chance",
+      "relative_to": "melee_hit_chance",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_hit_chance",
+      "relative_to": "spell_hit_chance",
+      "equals": 0
+    }
+  ]
+}

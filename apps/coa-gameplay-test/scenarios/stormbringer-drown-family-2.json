@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Bursting raises Drowning's stack value, Washed Away shortens Drown's cooldown (#842, #3688)",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "s", "race": 8, "class": 16, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn and level scaling settle", "ms": 3000 },
+    { "action": "assert", "label": "BASELINE: Drowning (806406) deals 80% bonus damage per stack without Bursting",
+      "actor": "s", "metric": "spell_effect_value", "spell": 806406, "effect": 0, "equals": 80 },
+    { "action": "learn", "actor": "s", "spell": 806397 },
+    { "action": "assert", "label": "DISCRIMINATING: Bursting (#842) raises Drowning's stack value from 80% to 100%",
+      "actor": "s", "metric": "spell_effect_value", "spell": 806406, "effect": 0, "equals": 100 },
+    { "action": "learn", "actor": "s", "spell": 806407 },
+    { "action": "assert", "label": "BASELINE: Drown's (806407) category cooldown is unmodified at 60000 ms without Washed Away",
+      "actor": "s", "metric": "spell_modifier", "spell": 806407, "op": 11, "base": 60000, "equals": 60000 },
+    { "action": "learn", "actor": "s", "spell": 807657 },
+    { "action": "assert", "label": "DISCRIMINATING: Washed Away (#3688) reduces Drown's category cooldown from 60000 ms to 45000 ms",
+      "actor": "s", "metric": "spell_modifier", "spell": 806407, "op": 11, "base": 60000, "equals": 45000 }
+  ],
+  "contract": "#842: Bursting (806397) tooltip promises 'Increases the stack value of Drowning by $s1%.' Drowning (806406) is the debuff Drown's periodic damage spell (806408) triggers to stack; its own tooltip renders Effect[0] (SPELL_AURA_MOD_DAMAGE_FROM_CASTER, 79+1 = 80) as 'Damage taken from Drown increased by $s1% per stack.' Bursting's Effect[0] is a stock SPELLMOD_EFFECT1 flat modifier (19+1 = +20) whose class mask matches only Drowning's family flags, applied through the engine's own Unit::ApplyEffectModifiers with no module code: 80 + 20 = 100. #3688: Washed Away (807657) tooltip promises 'Reduces the cooldown of Drown by $/1000;s1 sec.' Drown (806407) carries its cooldown as a category cooldown (Category 135, CategoryRecoveryTime 60000, no SPELL_ATTR6_NO_CATEGORY_COOLDOWN_MODS). Washed Away's Effect[0] is a stock SPELLMOD_COOLDOWN flat modifier (-15001+1 = -15000 ms) whose class mask matches only Drown and its rank chain (572760-572764), applied through Player::AddSpellAndCategoryCooldowns's own category-cooldown ApplySpellMod call: 60000 - 15000 = 45000."
+}

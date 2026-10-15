@@ -1,0 +1,233 @@
+{
+  "schema": 1,
+  "name": "Air Engraving weapon enchant activates its direct damage copies and removes them with the enchant (#6003)",
+  "contract": [
+    "Air653223 promises a 15% chance to replicate30% of direct damage via653225 and653226. Native Master Engraver705605 adds 5 chance points.",
+    "Apply Air by normal653222 on an owned weapon, then require real positive melee damage and actual Air proc damage. At20% chance and90 landed hits, no proc probability is below 2e-9. Replacing Air with normal Ice must stop Air copies while attacks continue."
+  ],
+  "timeout_ms": 240000,
+  "players": [
+    {
+      "id": "r",
+      "race": 1,
+      "class": 32,
+      "level": 24,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "r",
+      "entry": 36,
+      "level": 24,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "r",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "r",
+      "item": 2092,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 653222
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 653264
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 705605
+    },
+    {
+      "action": "set_health",
+      "actor": "r",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 653222,
+      "target_item": 2092
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 653223,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 653225,
+      "equals": 1,
+      "label": "The normal weapon enchant activates the authored Air proc aura"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_modifier",
+      "spell": 653225,
+      "op": 18,
+      "base": 15,
+      "equals": 20
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "melee_damage_count",
+      "save_as": "swings",
+      "hand": 0
+    },
+    {
+      "action": "attack",
+      "actor": "r",
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 135000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "r"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "relative_to": "swings",
+      "min": 90
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_proc_count",
+      "spell": 653225,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 653226,
+      "target": "e",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_proc_count",
+      "save_as": "copies",
+      "spell": 653225
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 653226,
+      "target": "e",
+      "ratio_to": "copies",
+      "min": 1,
+      "max": 1,
+      "label": "Each Air proc deals one damage copy"
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 653264,
+      "target_item": 2092
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 653266,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 653225,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_cast_count",
+      "save_as": "copies_before_removal_control",
+      "spell": 653226
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "melee_damage_count",
+      "save_as": "plain_swings",
+      "hand": 0
+    },
+    {
+      "action": "attack",
+      "actor": "r",
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "r"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "relative_to": "plain_swings",
+      "min": 4
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_cast_count",
+      "spell": 653226,
+      "relative_to": "copies_before_removal_control",
+      "equals": 0
+    }
+  ]
+}

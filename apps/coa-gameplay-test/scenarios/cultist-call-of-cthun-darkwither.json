@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Call of C'Thun extends Withered's stack cap and speeds up Darkwither's tick through native spell mods (#1820)",
+  "contract": "301317 Effect[0] is ADD_FLAT_MODIFIER (107), Misc=31=SPELLMOD_MAX_AURA_STACKS (SpellDefines.h:107, 'Ascension: maximum stacks of an already stackable aura'), BasePoints 2+1=+3, classmask word C bit1 (2) == Withered's (706913, Darkwither's own healing-reduction stacking debuff, own StackAmount=4) SpellFamilyFlags[2]=2 exactly. SpellInfo::CalcMaxAuraStacks (SpellInfo.cpp:1451) applies this exact modifier via ApplySpellMod(Id, SPELLMOD_MAX_AURA_STACKS, maximum); the harness's spell_max_stacks metric calls this same function directly, so 4+3=7 is read without any cast. Effect[1] is ADD_PCT_MODIFIER (108), Misc=19=SPELLMOD_ACTIVATION_TIME (SpellDefines.h:95, tick period), BasePoints -26+1=-25%, classmask word B bit21 (2097152) == Darkwither's (502213) own SpellFamilyFlags[1]=2097152 exactly (the same mask Dread's DoT effect targets, cultist-dread-darkwither-eldritch-shock.json); AuraEffect::CalculatePeriodicData (SpellAuraEffects.cpp:713-720) applies modOwner->ApplySpellMod(GetId(), SPELLMOD_ACTIVATION_TIME, m_amplitude) per periodic effect at aura creation, so Darkwither's 3000 ms tick becomes 2250 ms, observed here through the spell_modifier metric (op 19) as a base-1000 proxy for the same -25% multiplier. Negative control: an unrelated family-31 classmask (Eldritch Shock, 808043) is unaffected by op 19. The client's own Darkwither description hard-codes the with-talent stack cap as '8' ($?s301317[8][$706913u]), one higher than the computed 4+3=7; the issue's tooltip only promises '3 additional times', which is delivered exactly, so that separate one-stack text/DBC mismatch is not asserted here (see report Observations). Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: Withered's stack cap is its own base 4 before Call of C'Thun",
+      "actor": "cultist", "metric": "spell_max_stacks", "spell": 706913, "equals": 4
+    },
+    {
+      "action": "assert", "label": "SETUP: Darkwither's tick period is unmodified before Call of C'Thun",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 502213, "op": 19, "base": 1000,
+      "min": 1000, "max": 1000
+    },
+    { "action": "learn", "actor": "cultist", "spell": 301317 },
+    {
+      "action": "assert", "label": "Call of C'Thun raises Withered's stack cap from 4 to 7 (#1820)",
+      "actor": "cultist", "metric": "spell_max_stacks", "spell": 706913, "equals": 7
+    },
+    {
+      "action": "assert", "label": "Call of C'Thun cuts Darkwither's tick period by 25% (#1820)",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 502213, "op": 19, "base": 1000,
+      "min": 749, "max": 751
+    },
+    {
+      "action": "assert", "label": "Call of C'Thun leaves an unrelated family-31 tick period alone",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 808043, "op": 19, "base": 1000,
+      "min": 1000, "max": 1000
+    }
+  ]
+}

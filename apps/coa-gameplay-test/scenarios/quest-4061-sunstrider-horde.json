@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Sunstrider Isle: a troll can take the isle's zone quests (#4061)",
+  "contract": [
+    "The Travel Permit 977028 (AscensionTravelPermit.cpp) sends any Horde character up to level 8 to Sunstrider Isle",
+    "(530, 10349.6 -6357.29 33.4026), beside Magistrix Erona 15278. Her zone quests carried the stock blood elf mask",
+    "512, while the isle's own 8547, 9704, 9705 and 8350 take every Horde race (690). Expected: a level 3 troll",
+    "standing there sees Erona's available marker, can take Reclaiming Sunstrider Isle 8325 and, once it is",
+    "rewarded, can take its follow-up Unfortunate Measures 8326. The troll talks to its own Erona, since the lane",
+    "phase hides the world spawn."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 530, "x": 10349.6, "y": -6357.29, "z": 33.4026, "o": 5.31605},
+  "players": [{"id": "troll", "race": 8, "class": 1, "level": 3}],
+  "creatures": [{"id": "erona", "owner": "troll", "entry": 15278, "distance": 2, "faction": 1604, "level": 5}],
+  "steps": [
+    {"action": "wait", "label": "Let login settle", "ms": 3000},
+    {"action": "assert", "label": "Magistrix Erona offers the troll a quest", "actor": "troll",
+     "metric": "dialog_status", "entry": 15278, "equals": 8, "within_ms": 5000},
+    {"action": "assert", "label": "The troll can take Reclaiming Sunstrider Isle", "actor": "troll",
+     "metric": "quest_takeable", "quest": 8325, "equals": 1},
+    {"action": "prepare_quest", "label": "Fixture: the mana wyrms are slain", "actor": "troll", "quest": 8325},
+    {"action": "reward_quest", "label": "Hand in Reclaiming Sunstrider Isle", "actor": "troll", "quest": 8325},
+    {"action": "assert", "label": "Reclaiming Sunstrider Isle is rewarded", "actor": "troll",
+     "metric": "quest_rewarded", "quest": 8325, "equals": 1},
+    {"action": "assert", "label": "The troll can take Unfortunate Measures", "actor": "troll",
+     "metric": "quest_takeable", "quest": 8326, "equals": 1}
+  ]
+}

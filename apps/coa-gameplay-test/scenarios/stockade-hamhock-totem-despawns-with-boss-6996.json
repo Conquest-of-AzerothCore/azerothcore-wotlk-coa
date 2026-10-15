@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "name": "Stormwind Stockade: Hamhock's Greater Fire Nova Totem despawns when Hamhock dies",
+  "contract": [
+    "A dungeon boss's summons leave with it (#6996). Hamhock (1717) summons a Greater Fire Nova Totem (192328) from",
+    "his Ascension kit; once Hamhock dies the totem is gone instead of novaing the group after the kill."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 34,
+    "x": 54.2,
+    "y": 0.3,
+    "z": -18.3,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 30,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 1717,
+      "level": 28,
+      "health": 400000,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in the Stockade",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 34
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no totem stands before the fight",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 192328,
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "label": "Engage Hamhock",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hamhock fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hamhock summons a Greater Fire Nova Totem",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 192328,
+      "equals": 1,
+      "within_ms": 25000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "set_health",
+      "label": "Bring Hamhock to the killing blow",
+      "actor": "boss",
+      "value": 1
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hamhock dies",
+      "actor": "boss",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The totem despawns with Hamhock",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 192328,
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "name": "Crystal Shield adds 10% Stamina and 25% of attack power as spell damage (#520)",
+  "contract": "Crystal Shield 680748 (Spell.dbc, SpellFamilyName 32 (Starcaller). Effect 1 SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER (237), EffectBasePoints 24 with DieSides 1 resolves to 25, EffectMiscValue 126 (all magic schools); Effect 2 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (137), EffectMiscValue 2 (Stamina), EffectBasePoints 9 resolves to 10. This matches the tooltip 'Stamina +$s3%, spell damage +$s2% of attack power'. Effect 0 is SPELL_AURA_DUMMY with no handler and no tooltip claim. Native path: HandleModTotalPercentStat scales the Stamina total, and Unit::SpellBaseDamageBonusDone adds CalculatePct(GetTotalAttackPowerValue(BASE_ATTACK), GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER, schoolMask)), read by the spell_power metric for the arcane school. Stamina is asserted as a ratio to the control (float total, band 1.09-1.11); spell power as a strictly positive delta, because the exact 25% of attack power depends on a total the scenario cannot compute in advance. Both fixtures are the same race, class and level with no ratings or gear, so only the learned passive can move the difference. Nothing in AscensionStarcallerContracts.cpp touches this spell id, and the scenario is a regression guard: it is expected to pass on the shipped data.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 680748
+    },
+    {
+      "action": "assert",
+      "label": "Crystal Shield is applied",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 680748,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Effect 1 resolves to 25% of attack power as spell damage (EffectBasePoints 24 + 1)",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 680748,
+      "effect": 1,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "Effect 2 resolves to +10% Stamina (EffectBasePoints 9 + 1)",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 680748,
+      "effect": 2,
+      "equals": 10
+    },
+    {
+      "action": "snapshot",
+      "label": "Stamina without the passive",
+      "actor": "control",
+      "metric": "stat",
+      "save_as": "stamina_base",
+      "stat": 2
+    },
+    {
+      "action": "assert",
+      "label": "Stamina is 10% higher with Crystal Shield",
+      "actor": "talent",
+      "metric": "stat",
+      "stat": 2,
+      "ratio_to": "stamina_base",
+      "min": 1.09,
+      "max": 1.11
+    },
+    {
+      "action": "snapshot",
+      "label": "Arcane spell power without the passive",
+      "actor": "control",
+      "metric": "spell_power",
+      "save_as": "sp_base",
+      "school": 6
+    },
+    {
+      "action": "assert",
+      "label": "Arcane spell power rises by a share of attack power",
+      "actor": "talent",
+      "metric": "spell_power",
+      "school": 6,
+      "relative_to": "sp_base",
+      "min": 1
+    }
+  ]
+}

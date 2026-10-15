@@ -19,6 +19,7 @@
 #include "CommandScript.h"
 #include "ConditionMgr.h"
 #include "DisableMgr.h"
+#include "Formulas.h"
 #include "GameTime.h"
 #include "ObjectMgr.h"
 #include "Player.h"
@@ -690,7 +691,8 @@ public:
             else
             {
                 // Some experience might get lost on level up.
-                uint32 xp = uint32(quest->XPValue(charLevel) * sWorld->getRate(RATE_XP_QUEST));
+                float const rate = Acore::XP::QuestRate(quest->IsDFQuest(), quest->GetQuestLevel(), charLevel);
+                uint32 xp = uint32(quest->XPValue(charLevel) * rate);
                 stmt = CharacterDatabase.GetPreparedStatement(CHAR_UPD_XP_ACCUMULATIVE);
                 stmt->SetData(0, xp);
                 stmt->SetData(1, guid);

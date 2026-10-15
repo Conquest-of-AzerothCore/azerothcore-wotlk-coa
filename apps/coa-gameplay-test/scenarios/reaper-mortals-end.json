@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "name": "Mortal's End raises Extinction's maximum stacks (#2678)",
+  "contract": "Mortal's End 705437 (Spell.dbc: effect 0 Apply Aura ADD_FLAT_MODIFIER, EffectMiscValue 31, EffectSpellClassMask[2] 33554432, TargetA TARGET_UNIT_CASTER; effect 1 Apply Aura PROC_TRIGGER_SPELL, EffectTriggerSpell 560414) reads 'Level 30 Passive. Allows Extinction to stack an additional time and allows Wraithblade to grant you Extinction.' SpellDefines.h documents SpellModOp 31 as SPELLMOD_MAX_AURA_STACKS ('Ascension: maximum stacks of an already stackable aura'), and Extinction 560414 has native StackAmount 1, so the native generic SpellMod system alone raises its effective maximum to 2 while 705437 is known, using the same EffectSpellClassMask[2] bit (33554432 = 1<<25) present in 560414's own SpellFamilyFlags. data/sql/updates/pending_db_world/rev_20260921_20_reaper_talent_procs_two.sql wires spell_proc SpellId 705437 (comment 'Casting Wraithblade', ProcFlags 87060, Chance 100) to 'spell_ascension_reaper_talent_proc', and AscensionReaperTalentProcs.h Rules maps talent 705437 to the Wraithblade rank list (805258, 806818-806824, 807166), gating the native PROC_TRIGGER_SPELL to 560414. The spell_max_stacks metric reads the modified native maximum directly, so casting Wraithblade is not required to prove the stack increase.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "control", "race": 10, "class": 30, "level": 80 },
+    { "id": "reaper", "race": 10, "class": 30, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "assert", "label": "CONTROL Extinction's native maximum is 1 stack", "actor": "control", "metric": "spell_max_stacks", "spell": 560414, "equals": 1 },
+    { "action": "learn", "actor": "reaper", "spell": 705437 },
+    { "action": "assert", "label": "Mortal's End is active", "actor": "reaper", "metric": "aura", "spell": 705437, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "REGRESSION Mortal's End raises Extinction's maximum to 2 stacks", "actor": "reaper", "metric": "spell_max_stacks", "spell": 560414, "equals": 2 }
+  ]
+}

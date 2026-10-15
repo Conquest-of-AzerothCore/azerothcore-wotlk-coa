@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Master Animator raises the Life Force capacity from 2 to 3 (#1925)",
+  "contract": [
+    "Master Animator 504431 (CharacterAdvancement 7117, Necromancer Animation tab, 1 talent point) reads 'Increases",
+    "your maximum Life Force by 1.' Its only effect is SPELL_AURA_ADD_FLAT_MODIFIER (107), MiscValue 31",
+    "(SPELLMOD_MAX_AURA_STACKS, the Ascension operation), EffectBasePoints 0 + DieSides 1 = +1, class mask word 1 =",
+    "0x20000 in SpellFamilyName 29, which selects only the two Life Force auras 805011 (capacity, StackAmount 2)",
+    "and 525004 (free capacity). Scourge Apprentice Training 680283 carries the same effect. The #1925 audit read",
+    "the absence of 504431 from the source as a missing handler, but the modifier is native: the Necromancer",
+    "capacity starts at 2 and applies SPELLMOD_MAX_AURA_STACKS for 805011, whose stack count the server keeps equal",
+    "to the capacity. A level-8 Necromancer (below Scourge Apprentice Training's level 10) without Life Force",
+    "passives has capacity 2; learning Master Animator makes it 3 (805011 stacks 3, 525004 free stacks 3). Raise:",
+    "Lesser Skeletal Warrior 500970 occupies 1 Life Force and costs 32% of base mana, so three warriors fit, which",
+    "a capacity of 2 refuses, and a fourth is refused with SPELL_FAILED_ALREADY_HAVE_SUMMON (7) while the three",
+    "stay up."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 8 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the Life Force aura synchronize", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 500970 },
+    {
+      "action": "assert", "label": "PRECONDITION: Life Force capacity is 2 without Life Force talents", "actor": "n",
+      "metric": "aura_stacks", "spell": 805011, "equals": 2, "within_ms": 3000
+    },
+    { "action": "learn", "label": "Learn Master Animator", "actor": "n", "spell": 504431 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Master Animator raises the Life Force capacity to 3", "actor": "n",
+      "metric": "aura_stacks", "spell": 805011, "equals": 3, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "All 3 Life Force are free before any raise", "actor": "n",
+      "metric": "aura_stacks", "spell": 525004, "equals": 3, "within_ms": 3000
+    },
+    { "action": "cast", "label": "Raise the first Lesser Skeletal Warrior", "actor": "n", "spell": 500970 },
+    {
+      "action": "assert", "label": "One Lesser Skeletal Warrior is raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 500 },
+    { "action": "cast", "label": "Raise the second Lesser Skeletal Warrior", "actor": "n", "spell": 500970 },
+    {
+      "action": "assert", "label": "Two Lesser Skeletal Warriors are raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 2, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 500 },
+    { "action": "cast", "label": "Raise a third warrior into the talented Life Force", "actor": "n", "spell": 500970 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the third Lesser Skeletal Warrior fits into capacity 3",
+      "actor": "n", "metric": "owned_creature_count", "entry": 50065, "equals": 3, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "No Life Force is left free", "actor": "n",
+      "metric": "aura_stacks", "spell": 525004, "equals": 0, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 500 },
+    { "action": "cast", "label": "Raise a fourth with no free Life Force", "actor": "n", "spell": 500970 },
+    {
+      "action": "assert", "label": "The capacity is exactly 3: the fourth raise is refused (7)", "actor": "n",
+      "metric": "cast_failure", "spell": 500970, "equals": 7, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Outlast the 2 s cast time", "ms": 2500 },
+    {
+      "action": "assert", "label": "The three raised warriors stay and no fourth appears", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 3
+    }
+  ]
+}

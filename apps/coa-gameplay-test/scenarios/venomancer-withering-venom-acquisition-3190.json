@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Withering Venom is acquired and applied as 706962, not the deprecated 800886 (#3190)",
+  "contract": "Withering Venom reaches a Venomancer through CharacterAdvancement 7152, whose only rank is 706962, cast in Spider Form. 800886 is the debuff of the deprecated 572831 that no advancement teaches, so casting the live Withering Venom puts 706962 on the target and never 800886.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "creatures": [
+    { "id": "d", "owner": "v", "entry": 36, "level": 60, "health": 1000000, "distance": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and spawn AI settle", "ms": 5000 },
+    {
+      "action": "advancement_rank", "label": "Choose Withering Venom", "actor": "v",
+      "entry": 7152, "rank": 1
+    },
+    {
+      "action": "assert", "label": "The advancement teaches the live Withering Venom 706962", "actor": "v",
+      "metric": "knows_spell", "spell": 706962, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "It does not teach the deprecated debuff 800886", "actor": "v",
+      "metric": "knows_spell", "spell": 800886, "equals": 0
+    },
+    { "action": "learn", "label": "Spider Form fixture: the form is its own advancement", "actor": "v", "spell": 800841 },
+    { "action": "cast", "label": "Enter Spider Form", "actor": "v", "spell": 800841 },
+    {
+      "action": "assert", "label": "SETUP: Spider Form is active", "actor": "v",
+      "metric": "aura", "spell": 800841, "equals": 1, "within_ms": 3000
+    },
+    { "action": "wait", "label": "GCD", "ms": 1600 },
+    { "action": "cast", "label": "Cast Withering Venom on the target", "actor": "v", "spell": 706962, "target": "d" },
+    {
+      "action": "assert", "label": "The target carries Withering Venom 706962", "actor": "d",
+      "metric": "aura", "spell": 706962, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The target never gets the deprecated debuff 800886", "actor": "d",
+      "metric": "aura", "spell": 800886, "equals": 0
+    }
+  ]
+}

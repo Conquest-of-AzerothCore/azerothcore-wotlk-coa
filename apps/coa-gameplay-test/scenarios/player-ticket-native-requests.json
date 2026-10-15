@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "name": "Native player ticket requests open, answer, close, reopen and resolve a ticket",
+  "contract": "C_PlayerTicket.CreateTicket sends CMSG 0x0703 {u8 priority, u8 category, title, description, affected character}; SendTicketMessage 0x0707 {[ticket id], text, u8 GM only}; MarkResponseSeen 0x071D {[ticket id], u32 message}; ReopenTicket 0x0719 and CloseTicket 0x0705 {[ticket id]}. The DLL stores the player's ticket from SMSG 0x0701 (info) and 0x0702 (update) and signals the 0x0704, 0x0708, 0x071A, 0x0706 and 0x071E results. Expected: one ticket per account; a player message and a GM reply both reach the ticket, a GM note never reaches the player; a ticket a GM closed refuses messages until the player reopens it; closing it as the player resolves it, after which there is nothing left to close.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "player", "race": 1, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    {
+      "action": "client_packet", "label": "Open a ticket", "actor": "player", "opcode": 1795,
+      "fields": [ { "u8": 1 }, { "u8": 8 }, { "string": "Quest giver missing" },
+        { "string": "The quest giver is missing." }, { "string": "AFFECTED_CHARACTERS_ALL" } ]
+    },
+    {
+      "action": "assert", "label": "The ticket is accepted", "actor": "player", "metric": "server_packet_contains",
+      "opcode": 1796, "text": "CREATE_PLAYER_TICKET_OK", "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "and delivered as the player's ticket", "actor": "player",
+      "metric": "server_packet_contains", "opcode": 1793, "text": "Quest giver missing", "equals": 1
+    },
+    {
+      "action": "client_packet", "label": "Open a second ticket", "actor": "player", "opcode": 1795,
+      "fields": [ { "u8": 0 }, { "u8": 0 }, { "string": "Second" }, { "string": "Another issue." },
+        { "string": "AFFECTED_CHARACTERS_NONE" } ]
+    },
+    {
+      "action": "assert", "label": "An account keeps one ticket", "actor": "player",
+      "metric": "server_packet_contains", "opcode": 1796, "text": "CREATE_PLAYER_TICKET_ALREADY_HAS_TICKET",
+      "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "client_packet", "label": "Ask for news", "actor": "player", "opcode": 1799,
+      "fields": [ { "string": "Any news?" }, { "u8": 0 } ]
+    },
+    {
+      "action": "assert", "label": "The message is accepted", "actor": "player", "metric": "server_packet_contains",
+      "opcode": 1800, "text": "SEND_PLAYER_TICKET_MESSAGE_OK", "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "and the ticket update carries it", "actor": "player",
+      "metric": "server_packet_contains", "opcode": 1794, "text": "Any news?", "equals": 1
+    },
+    { "action": "console", "label": "A GM leaves a note", "command": "support note Harnessa Internal spawn check" },
+    { "action": "console", "label": "A GM replies", "command": "support reply Harnessa Fixed, please retry." },
+    {
+      "action": "assert", "label": "The reply reaches the player", "actor": "player",
+      "metric": "server_packet_contains", "opcode": 1794, "text": "Fixed, please retry.", "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The note never does", "actor": "player", "metric": "server_packet_contains",
+      "opcode": 1794, "text": "Internal spawn check", "equals": 0
+    },
+    {
+      "action": "client_packet", "label": "Read the reply", "actor": "player", "opcode": 1821,
+      "fields": [ { "u32": 3 } ]
+    },
+    {
+      "action": "assert", "label": "The reply is marked read", "actor": "player", "metric": "server_packet_contains",
+      "opcode": 1822, "text": "MARK_PLAYER_TICKET_MESSAGE_AS_READ_OK", "equals": 1, "within_ms": 1000
+    },
+    { "action": "console", "label": "A GM closes the ticket", "command": "support close Harnessa" },
+    {
+      "action": "client_packet", "label": "Write on the closed ticket", "actor": "player", "opcode": 1799,
+      "fields": [ { "string": "Still broken" }, { "u8": 0 } ]
+    },
+    {
+      "action": "assert", "label": "A closed ticket refuses messages", "actor": "player",
+      "metric": "server_packet_contains", "opcode": 1800, "text": "SEND_PLAYER_TICKET_MESSAGE_TICKET_CLOSED",
+      "equals": 1, "within_ms": 1000
+    },
+    { "action": "client_packet", "label": "Reopen the ticket", "actor": "player", "opcode": 1817 },
+    {
+      "action": "assert", "label": "The ticket reopens", "actor": "player", "metric": "server_packet_contains",
+      "opcode": 1818, "text": "REOPEN_PLAYER_TICKET_OK", "equals": 1, "within_ms": 1000
+    },
+    { "action": "client_packet", "label": "Resolve the ticket", "actor": "player", "opcode": 1797 },
+    {
+      "action": "assert", "label": "The player closes it", "actor": "player", "metric": "server_packet_contains",
+      "opcode": 1798, "text": "CLOSE_PLAYER_TICKET_OK", "equals": 1, "within_ms": 1000
+    },
+    { "action": "client_packet", "label": "Close again", "actor": "player", "opcode": 1797 },
+    {
+      "action": "assert", "label": "Nothing is left to close", "actor": "player", "metric": "server_packet_contains",
+      "opcode": 1798, "text": "CLOSE_PLAYER_TICKET_NO_TICKET", "equals": 1, "within_ms": 1000
+    }
+  ]
+}

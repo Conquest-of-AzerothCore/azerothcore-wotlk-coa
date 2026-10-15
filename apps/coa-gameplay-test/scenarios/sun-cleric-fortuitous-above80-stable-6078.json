@@ -1,0 +1,231 @@
+{
+  "schema": 1,
+  "name": "Fortuitous stays active above 80% without repeated expiry and recreation (#6078)",
+  "contract": [
+    "Fortuitous (561328) promises instant Glare above 80% health. Its helper (561396) lasts 1500 ms in the DBC.",
+    "The custom health gate disables the native 1000 ms periodic refresh and owns helper application/removal.",
+    "At stable 95% health for 20 seconds, the helper must remain active without being cast again.",
+    "The previous helper expired and Refresh recreated it every 1500 ms, causing aura removal/reapplication.",
+    "A fall to 70% removes it; a rise to 85% grants it once. Unlearning the talent removes it again.",
+    "Glare cast time and normal damaging casts verify that the continuously active helper still grants its effect.",
+    "The reported level 45 is used; regeneration is disabled to keep the health condition independent of time."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 45,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "cleric",
+      "entry": 36,
+      "level": 45,
+      "distance": 4,
+      "health": 1000000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "cleric",
+      "maximum": 1000,
+      "value": 950
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 805583
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_cast_time_ms",
+      "spell": 805583,
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 561328
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 561396,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_cast_time_ms",
+      "spell": 805583,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "spell_cast_count",
+      "spell": 561396,
+      "save_as": "initial_helper_casts"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_cast_count",
+      "spell": 561396,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 20000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "health",
+      "equals": 950
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 561396,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Stable healthy helper is never recreated",
+      "actor": "cleric",
+      "metric": "spell_cast_count",
+      "spell": 561396,
+      "relative_to": "initial_helper_casts",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_cast_time_ms",
+      "spell": 805583,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "cleric",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 805583,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_damage_count",
+      "spell": 805583,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_cast_count",
+      "spell": 561396,
+      "relative_to": "initial_helper_casts",
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "cleric",
+      "value": 700
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 561396,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_cast_time_ms",
+      "spell": 805583,
+      "min": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "cleric",
+      "value": 850
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 561396,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_cast_count",
+      "spell": 561396,
+      "relative_to": "initial_helper_casts",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "spell_cast_count",
+      "spell": 561396,
+      "save_as": "reenabled_helper_casts"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "spell_cast_count",
+      "spell": 561396,
+      "relative_to": "reenabled_helper_casts",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "cleric",
+      "spell": 561328
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 561396,
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}

@@ -1,0 +1,336 @@
+{
+  "schema": 1,
+  "name": "Primalist Earthmothers Protection: Hand discount follows Rock Barrier",
+  "contract": "Hand costs half Rage only while the talent and Rock Barrier are both present; the helper survives eight seconds, shares expiry, and combines with Earthenforged Barrier.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 503630
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502808
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 502808,
+      "equals": 350
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 503630,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 503630,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 504853,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 502808,
+      "equals": 350
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 503630,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 560298
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 504853,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 502808,
+      "equals": 350
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 503630,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 503630,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 504853,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 502808,
+      "equals": 175
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 504853,
+      "effect": 2,
+      "equals": -50
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "spell": 503630,
+      "save_as": "barrier_lifetime"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "spell": 504853,
+      "relative_to": "barrier_lifetime",
+      "min": -50,
+      "max": 50
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502808,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 502808,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "power",
+      "power": 1,
+      "equals": 825
+    },
+    {
+      "action": "wait",
+      "ms": 6800
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 503630,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 504853,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 502808,
+      "equals": 175
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 560298
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 503630,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 504853,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 502808,
+      "equals": 350
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 560298
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 504853,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 502808,
+      "equals": 175
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 503630,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 504853,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 502808,
+      "equals": 350
+    },
+    {
+      "action": "wait",
+      "ms": 21000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 680408
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 503630,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 503630,
+      "effect": 1,
+      "equals": -25
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 504853,
+      "effect": 2,
+      "equals": -50
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 502808,
+      "equals": 131
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 503630,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 504853,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 502808,
+      "equals": 350
+    }
+  ]
+}

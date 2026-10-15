@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Blood Curse turns the Bloodmage into a worgen for as long as the Cursed Form lasts (#1406)",
+  "contract": "#1406: casting Blood Curse keeps the player model instead of transforming it into the cursed form model, although the cursed abilities work. Blood Curse 562720 (family 26, rank 'Cursed Form') applies SPELL_AURA_MOD_SHAPESHIFT MiscValue 57, periodic energize and periodic heal, and has no SPELL_AURA_TRANSFORM. The client's SpellShapeshiftForm 57 'Cursed Form' carries CreatureDisplayID 0, so Unit::GetModelForForm returns 0 and only a transform aura can change the display. The client ships that transform as the hidden companion 563124 'Worgen Form Visual' (rank 'SLS', family 26, SPELL_ATTR0_DO_NOT_DISPLAY, SPELL_ATTR1_NO_AURA_ICON, infinite duration): a clone of Blood Curse (same Category 572, SpellVisual 2325 and SpellFamilyFlags[1] 0x80000000) whose single effect is SPELL_AURA_TRANSFORM to creature 56332 'Tank Worgen Form', display 574 (Creature\\Worgen\\Worgen.mdx), the same creature Eternal Curse 800157 transforms into. Nothing applied it; Accursed Form's companion 562722 is applied the same way through SPELL_LINK_AURA. Expected: while Blood Curse is active the Bloodmage carries 563124 and display 574; when the form ends, both go and the mortal display returns. display_id reads the server's selected display only; client rendering is not tested.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "bloodmage", "race": 1, "class": 20, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "bloodmage", "spell": 562720 },
+    { "action": "snapshot", "actor": "bloodmage", "metric": "display_id", "save_as": "mortal_display" },
+    {
+      "action": "assert", "label": "SETUP: no Cursed Form yet", "actor": "bloodmage",
+      "metric": "aura", "spell": 562720, "equals": 0
+    },
+    { "action": "cast", "actor": "bloodmage", "spell": 562720 },
+    {
+      "action": "assert", "label": "SETUP: Blood Curse enters the Cursed Form", "actor": "bloodmage",
+      "metric": "aura", "spell": 562720, "caster": "bloodmage", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Worgen Form Visual rides on Blood Curse", "actor": "bloodmage",
+      "metric": "aura", "spell": 563124, "caster": "bloodmage", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Bloodmage wears the worgen display", "actor": "bloodmage",
+      "metric": "display_id", "equals": 574
+    },
+    { "action": "cancel_aura", "label": "Return to Mortal Form", "actor": "bloodmage", "spell": 562720 },
+    {
+      "action": "assert", "label": "Blood Curse ends", "actor": "bloodmage",
+      "metric": "aura", "spell": 562720, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The worgen visual ends with the form", "actor": "bloodmage",
+      "metric": "aura", "spell": 563124, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The mortal display returns", "actor": "bloodmage",
+      "metric": "display_id", "relative_to": "mortal_display", "equals": 0
+    }
+  ]
+}

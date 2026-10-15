@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "name": "Dark Power grants Stamina equal to Agility (#713)",
+  "contract": "Dark Power 681340 (installed Spell.dbc, client set of 2026-09-17) is a passive family-21 spell with one effect: SPELL_AURA_ASCENSION_MOD_STAT_FROM_STAT (327), misc 2 (Stamina) MiscValueB 1 (Agility), base 99 die 1 -> 100%. Its Description reads 'You now gain 2 Stamina for every 2 Agility', i.e. one for one, which is what 100% means (older client sets carried 50% and a 1-for-2 text). GetAscensionStatFromStatBonus adds CalculatePct(source stat, amount) to the destination stat and UpdateStats refreshes it when Agility moves. Base stats are not assumed: the Stamina gained by learning is snapshotted and Agility, read with the same stat metric, must equal it within 2 points (the talent does not change Agility); then Increased Agility 40 (14404, +40 Agility) must add 40 Stamina (39-41).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "dp",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dp",
+      "metric": "stat",
+      "save_as": "sta_0",
+      "label": "Stamina before the talent",
+      "stat": 2
+    },
+    {
+      "action": "learn",
+      "actor": "dp",
+      "spell": 681340,
+      "label": "Learn Dark Power"
+    },
+    {
+      "action": "assert",
+      "label": "The conversion is 100% (2 Stamina for every 2 Agility)",
+      "actor": "dp",
+      "metric": "aura_amount",
+      "spell": 681340,
+      "effect": 0,
+      "equals": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "dp",
+      "metric": "stat",
+      "save_as": "sta_gain",
+      "label": "Stamina gained from learning the talent",
+      "stat": 2,
+      "relative_to": "sta_0"
+    },
+    {
+      "action": "assert",
+      "label": "The Stamina gained equals Agility (the talent does not change Agility)",
+      "actor": "dp",
+      "metric": "stat",
+      "stat": 1,
+      "relative_to": "sta_gain",
+      "min": -2,
+      "max": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "dp",
+      "metric": "stat",
+      "save_as": "sta_1",
+      "label": "Stamina with the talent",
+      "stat": 2
+    },
+    {
+      "action": "set_aura",
+      "actor": "dp",
+      "spell": 14404,
+      "stacks": 1,
+      "label": "Add a known +40 Agility"
+    },
+    {
+      "action": "assert",
+      "label": "Fixture: the Agility aura is +40",
+      "actor": "dp",
+      "metric": "aura_amount",
+      "spell": 14404,
+      "effect": 0,
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "label": "+40 Agility adds 40 Stamina",
+      "actor": "dp",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "sta_1",
+      "min": 39,
+      "max": 41
+    }
+  ]
+}

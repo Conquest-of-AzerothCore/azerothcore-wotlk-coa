@@ -1,0 +1,3756 @@
+{
+  "schema": 1,
+  "name": "Wildcard mounts preserve the chosen mount's cast time and cancellation (#4600)",
+  "contract": "Wildcard Mount 91944 and Wildcard Flying Mount 93539 must use a normal mount cast. Green Riding Nether Ray 39798 has a 1500 ms cast (SpellCastTimes 16) and native local-mount variants 498697 on the ground or 498695 with 300 riding in Outland. A normal 39798 cast is the control. Wildcard selection must start that same cast, remain unmounted during it, honor a native cancel request, and mount only after completion. The flying fixture also knows ground-only Brewfest Kodo 49322, which must not be selected for the flying action. The Outland coordinates come from the world game_tele HellfirePeninsula row. This observes native casts and mounted auras, not a rendered cast bar. Setting riding to 300 teaches the whole mount skill-line repertoire in this fixture. After riding and spell setup, native unlearn actions remove the other wrappers: the ground actor retains only 39798, and the flying actor retains 39798 plus ground-only 49322. This makes both random selections deterministic without seeding a cast or mounted aura.",
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "ground",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "flying",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_skill",
+      "actor": "ground",
+      "skill": 762,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "ground",
+      "spell": 39798
+    },
+    {
+      "action": "learn",
+      "actor": "ground",
+      "spell": 91944
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 39800
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 39801
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 39802
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 39803
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 40192
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 41513
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 41514
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 41515
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 41516
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 41517
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 41518
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 42777
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 43927
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 44151
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 44153
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 44744
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 49193
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 49322
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 51412
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 58615
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 60024
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 60025
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 61451
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 61996
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 61997
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 66122
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 69395
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 83102
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 84194
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 84279
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 84794
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 91727
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 91728
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 91730
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 102107
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 170013
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 170016
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 170019
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 170025
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 170028
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 170031
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 170034
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 170037
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 170040
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364104
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364119
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364124
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364129
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364134
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364139
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364144
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364149
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364154
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364159
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364168
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364173
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364178
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364183
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364188
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364193
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364198
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364203
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364208
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364213
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364218
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364226
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364231
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364236
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364252
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364257
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364262
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364267
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364272
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364277
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364282
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364343
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364348
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364353
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364358
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364394
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364399
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364448
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364449
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364450
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364470
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364475
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364480
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364485
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364500
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364505
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364510
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364525
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364530
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364535
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364540
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364545
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364550
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364555
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364560
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364565
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364570
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364575
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364580
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364585
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364590
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364595
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364600
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364605
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364614
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364619
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364624
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364629
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364649
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364688
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364693
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364836
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364843
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364848
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364853
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364858
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364863
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364868
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364873
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 364884
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 365419
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 498616
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 498791
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 498796
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 498801
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 498806
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499164
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499171
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499176
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499181
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499186
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499207
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499212
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499218
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499570
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499575
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499580
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499600
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499609
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499612
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499615
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499618
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499621
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499624
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499627
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499630
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499633
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499636
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499639
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499642
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499645
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499648
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499651
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499654
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499670
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499673
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499676
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499679
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499682
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499685
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499688
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499762
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499766
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499769
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499772
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499775
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499778
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499781
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499784
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499789
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499823
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499826
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499829
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499832
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499835
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499838
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499841
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499844
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499847
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499850
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499853
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499856
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499859
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499862
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499865
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499868
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499871
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499874
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499877
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499880
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499883
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499886
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499889
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499892
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499895
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499917
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499921
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499930
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499933
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499937
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499940
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499947
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499984
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499987
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499990
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499995
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 499998
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 500221
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 500315
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 530443
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 530448
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 530453
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 530458
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 619435
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 619445
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 699762
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 699765
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 699768
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 802361
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 802366
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 802371
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 802376
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 802381
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 802382
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 802383
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 802384
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 900955
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 900960
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 911369
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 911374
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 911379
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 911384
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 911399
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 911405
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 911410
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 911415
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 911420
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 911425
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 911430
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 911435
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 911440
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 914893
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 916267
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 933608
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 933613
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 933618
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 933623
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 933628
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 933633
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 933644
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 947201
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 947206
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 947211
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 953674
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 955203
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 955208
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 955213
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 955218
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 966002
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 966203
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 976012
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 976017
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 979860
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 979861
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 979862
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 979863
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 979870
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 979873
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 979901
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 983803
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 985005
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 985350
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 988101
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 988104
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 988107
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 988110
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 988113
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 988116
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 988119
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 988122
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 988125
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 999116
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 1000017
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 1057945
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 1110330
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 1114571
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 1114576
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 1114581
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 1114586
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 1114591
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 1114596
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 1114601
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 1216310
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 1216315
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 1245289
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 1245294
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 1591687
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 1591692
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 1701549
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 1701554
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9930979
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9931112
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9931367
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9931591
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9931592
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9931597
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9931602
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934028
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934043
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934044
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934046
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934047
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934048
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934050
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934051
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934052
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934053
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934054
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934055
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934057
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934080
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934081
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934087
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934088
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934089
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934103
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934104
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934105
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934106
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934107
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934196
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934197
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934198
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934200
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934212
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934213
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934242
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934252
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934285
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934305
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 9934310
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 13977836
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 13977844
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 13977845
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 13977846
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 13977848
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 13977854
+    },
+    {
+      "action": "unlearn",
+      "actor": "ground",
+      "spell": 13977855
+    },
+    {
+      "action": "assert",
+      "actor": "ground",
+      "metric": "spell_cast_time_ms",
+      "spell": 39798,
+      "equals": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "ground",
+      "spell": 39798,
+      "target": "ground"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "ground",
+      "metric": "cast_remaining_ms",
+      "spell": 39798,
+      "min": 1300,
+      "max": 1500,
+      "label": "An ordinary mount retains its native cast time"
+    },
+    {
+      "action": "assert",
+      "actor": "ground",
+      "metric": "mount_display_id",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ground",
+      "metric": "aura",
+      "spell": 498697,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "ground"
+    },
+    {
+      "action": "cast",
+      "actor": "ground",
+      "spell": 91944,
+      "target": "ground"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "ground",
+      "metric": "cast_remaining_ms",
+      "spell": 39798,
+      "min": 1300,
+      "max": 1500,
+      "label": "Wildcard Mount starts an ordinary mount cast"
+    },
+    {
+      "action": "assert",
+      "actor": "ground",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "label": "The mount is not applied before the cast finishes"
+    },
+    {
+      "action": "client_packet",
+      "actor": "ground",
+      "opcode": 303,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u32": 39798
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "ground",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "label": "Canceling the cast prevents mounting"
+    },
+    {
+      "action": "cast",
+      "actor": "ground",
+      "spell": 91944,
+      "target": "ground"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "ground",
+      "metric": "cast_remaining_ms",
+      "spell": 39798,
+      "min": 1300,
+      "max": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "ground",
+      "metric": "aura",
+      "spell": 498697,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "A completed Wildcard cast applies the ground mount"
+    },
+    {
+      "action": "teleport",
+      "actor": "flying",
+      "map": 530,
+      "x": -211.237,
+      "y": 4278.54,
+      "z": 86.5678,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "actor": "flying",
+      "skill": 762,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "flying",
+      "spell": 39798
+    },
+    {
+      "action": "learn",
+      "actor": "flying",
+      "spell": 49322
+    },
+    {
+      "action": "learn",
+      "actor": "flying",
+      "spell": 93539
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 39800
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 39801
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 39802
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 39803
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 40192
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 41513
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 41514
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 41515
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 41516
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 41517
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 41518
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 42777
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 43927
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 44151
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 44153
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 44744
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 49193
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 51412
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 58615
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 60024
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 60025
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 61451
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 61996
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 61997
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 66122
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 69395
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 83102
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 84194
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 84279
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 84794
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 91727
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 91728
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 91730
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 102107
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 170013
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 170016
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 170019
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 170025
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 170028
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 170031
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 170034
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 170037
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 170040
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364104
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364119
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364124
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364129
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364134
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364139
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364144
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364149
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364154
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364159
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364168
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364173
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364178
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364183
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364188
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364193
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364198
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364203
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364208
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364213
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364218
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364226
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364231
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364236
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364252
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364257
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364262
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364267
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364272
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364277
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364282
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364343
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364348
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364353
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364358
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364394
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364399
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364448
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364449
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364450
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364470
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364475
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364480
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364485
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364500
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364505
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364510
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364525
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364530
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364535
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364540
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364545
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364550
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364555
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364560
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364565
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364570
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364575
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364580
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364585
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364590
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364595
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364600
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364605
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364614
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364619
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364624
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364629
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364649
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364688
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364693
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364836
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364843
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364848
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364853
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364858
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364863
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364868
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364873
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 364884
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 365419
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 498616
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 498791
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 498796
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 498801
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 498806
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499164
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499171
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499176
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499181
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499186
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499207
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499212
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499218
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499570
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499575
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499580
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499600
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499609
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499612
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499615
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499618
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499621
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499624
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499627
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499630
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499633
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499636
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499639
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499642
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499645
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499648
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499651
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499654
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499670
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499673
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499676
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499679
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499682
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499685
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499688
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499762
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499766
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499769
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499772
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499775
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499778
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499781
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499784
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499789
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499823
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499826
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499829
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499832
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499835
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499838
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499841
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499844
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499847
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499850
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499853
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499856
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499859
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499862
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499865
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499868
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499871
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499874
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499877
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499880
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499883
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499886
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499889
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499892
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499895
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499917
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499921
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499930
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499933
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499937
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499940
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499947
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499984
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499987
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499990
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499995
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 499998
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 500221
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 500315
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 530443
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 530448
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 530453
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 530458
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 619435
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 619445
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 699762
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 699765
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 699768
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 802361
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 802366
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 802371
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 802376
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 802381
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 802382
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 802383
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 802384
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 900955
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 900960
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 911369
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 911374
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 911379
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 911384
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 911399
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 911405
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 911410
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 911415
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 911420
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 911425
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 911430
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 911435
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 911440
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 914893
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 916267
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 933608
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 933613
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 933618
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 933623
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 933628
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 933633
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 933644
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 947201
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 947206
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 947211
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 953674
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 955203
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 955208
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 955213
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 955218
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 966002
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 966203
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 976012
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 976017
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 979860
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 979861
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 979862
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 979863
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 979870
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 979873
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 979901
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 983803
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 985005
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 985350
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 988101
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 988104
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 988107
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 988110
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 988113
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 988116
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 988119
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 988122
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 988125
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 999116
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 1000017
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 1057945
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 1110330
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 1114571
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 1114576
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 1114581
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 1114586
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 1114591
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 1114596
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 1114601
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 1216310
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 1216315
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 1245289
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 1245294
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 1591687
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 1591692
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 1701549
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 1701554
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9930979
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9931112
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9931367
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9931591
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9931592
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9931597
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9931602
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934028
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934043
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934044
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934046
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934047
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934048
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934050
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934051
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934052
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934053
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934054
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934055
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934057
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934080
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934081
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934087
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934088
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934089
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934103
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934104
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934105
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934106
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934107
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934196
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934197
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934198
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934200
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934212
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934213
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934242
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934252
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934285
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934305
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 9934310
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 13977836
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 13977844
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 13977845
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 13977846
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 13977848
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 13977854
+    },
+    {
+      "action": "unlearn",
+      "actor": "flying",
+      "spell": 13977855
+    },
+    {
+      "action": "cast",
+      "actor": "flying",
+      "spell": 93539,
+      "target": "flying"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "flying",
+      "metric": "cast_remaining_ms",
+      "spell": 39798,
+      "min": 1300,
+      "max": 1500,
+      "label": "Flying selection excludes the known ground-only mount"
+    },
+    {
+      "action": "assert",
+      "actor": "flying",
+      "metric": "mount_display_id",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "flying",
+      "metric": "aura",
+      "spell": 498695,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "The chosen flying mount applies after casting"
+    }
+  ]
+}

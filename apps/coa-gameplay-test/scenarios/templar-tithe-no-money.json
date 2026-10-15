@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Templar Tithe without a silver teaches nothing",
+  "contract": "At a holy site, a Templar who cannot pay 1 silver learns nothing and Reset Tithe 800981 cuts the cooldown to about 98 sec. Run with the default StartPlayerMoney = 0.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "poor",
+      "race": 1,
+      "class": 19,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": 659.762,
+    "y": -959.316,
+    "z": 164.404
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the login settle",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "poor",
+      "spell": 804781
+    },
+    {
+      "action": "console",
+      "label": "Record the area",
+      "command": "pinfo Harnessa"
+    },
+    {
+      "action": "cast",
+      "actor": "poor",
+      "spell": 804781
+    },
+    {
+      "action": "wait",
+      "label": "Reset Tithe ticks after one second",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "No silver, no Tithe of Might",
+      "actor": "poor",
+      "metric": "knows_spell",
+      "spell": 804784,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Reset Tithe hands most of the cooldown back",
+      "actor": "poor",
+      "metric": "cooldown_ms",
+      "spell": 804781,
+      "min": 1,
+      "max": 100000
+    }
+  ]
+}

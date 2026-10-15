@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Electrified Waters spawns its elemental and refunds Drown (#929)",
+  "contract": "Electrified Waters 573436 is a passive SPELL_AURA_PROC_TRIGGER_SPELL (42) of 573437 whose Spell.dbc ProcFlags is 0. SpellMgr::LoadSpellProcs only auto-generates a proc entry for a record that has proc flags, and no `spell_proc` row named 573436, so Aura::GetProcEffectMask returned 0 and the aura could never fire. The chain is 573436 -> 573437 (SPELL_EFFECT_TRIGGER_SPELL, target 6) -> 573438 (SPELL_EFFECT_SUMMON, MiscValue 310603, MiscValueB 61, DurationIndex 18 = 20000 ms), and creature 310603 had no template, so even a firing proc summoned nothing. The tooltip's second clause is delivered by 573442, SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN with MiscValue 806407 and EffectBasePoints[0] -2001 + EffectDieSides[0] 1 = -2000 ms; nothing cast it, because no script observed the elemental's despawn. Expected numbers: 60000 ms is Drown's CategoryRecoveryTime (Category 135, RecoveryTime 0), 20000 ms is SpellDuration row 18, and 2000 ms is 573442's own value. The probe for \"your direct critical strikes\" is Shock 804020 (SPELL_EFFECT_SCHOOL_DAMAGE, DmgClass 1, 1500 ms cast, 35 yd, no cooldown) with spell_crit_rating 10000, which the scenario checks with spell_done_crit_chance before relying on it; the proc entry sets no PROC_ATTR_TRIGGERED_CAN_PROC, so Drown's own triggered damage 806408 does not proc it and exactly one elemental can appear. The cooldown leg is differential: over a 25000 ms wait that fully contains the elemental's remaining lifetime, an unrefunded cooldown falls by the elapsed time alone while the refund takes it 2000 ms further.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "s",
+      "race": 1,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "e", "owner": "s", "entry": 36, "level": 80, "health": 1000000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "s", "spell": 806407 },
+    { "action": "learn", "actor": "s", "spell": 804020 },
+    { "action": "learn", "actor": "s", "spell": 573436 },
+    {
+      "action": "assert", "label": "SETUP: the fixture rating makes every Shock a critical strike",
+      "actor": "s", "metric": "spell_done_crit_chance", "spell": 804020, "target": "e", "min": 100
+    },
+    {
+      "action": "assert", "label": "BASELINE: no Electrified Water Elemental is out before any critical strike",
+      "actor": "s", "metric": "owned_creature_count", "entry": 310603, "equals": 0
+    },
+    { "action": "cast", "actor": "s", "spell": 806407, "target": "e" },
+    {
+      "action": "assert", "label": "SETUP: Drown is on the target, so the proc's gating clause is satisfied",
+      "actor": "e", "metric": "aura", "spell": 806407, "caster": "s", "equals": 1, "within_ms": 4000
+    },
+    { "action": "wait", "label": "Let the global cooldown from Drown expire", "ms": 2000 },
+    {
+      "action": "assert", "label": "BASELINE: Drown started its 60000 ms category cooldown (Category 135)",
+      "actor": "s", "metric": "cooldown_ms", "spell": 806407, "min": 55000
+    },
+    { "action": "cast", "actor": "s", "spell": 804020, "target": "e" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the critical Shock into a drowning target spawns creature 310603",
+      "actor": "s", "metric": "owned_creature_count", "entry": 310603, "min": 1, "within_ms": 10000
+    },
+    {
+      "action": "assert", "label": "SETUP: only one elemental is out, so the refund below can only be counted once",
+      "actor": "s", "metric": "owned_creature_count", "entry": 310603, "equals": 1
+    },
+    {
+      "action": "snapshot", "label": "Drown's cooldown while the elemental is alive",
+      "actor": "s", "metric": "cooldown_ms", "spell": 806407, "save_as": "cooldown_with_elemental"
+    },
+    { "action": "wait", "label": "Outlast the elemental's 20000 ms lifetime (SpellDuration row 18)", "ms": 25000 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the cooldown lost the 25000 ms waited plus 573442's 2000 ms refund",
+      "actor": "s", "metric": "cooldown_ms", "spell": 806407, "relative_to": "cooldown_with_elemental",
+      "min": -28000, "max": -26200
+    },
+    {
+      "action": "assert", "label": "The elemental dissipated at the end of its lifetime",
+      "actor": "s", "metric": "owned_creature_count", "entry": 310603, "equals": 0
+    }
+  ]
+}

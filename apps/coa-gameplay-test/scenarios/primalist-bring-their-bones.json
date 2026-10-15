@@ -1,0 +1,489 @@
+{
+  "schema": 1,
+  "name": "Primalist Bring Me Their Bones: fifth pet hit, ownership and expiry",
+  "contract": [
+    "Only pet ability damage against its owner's marked target counts; the fifth hit consumes owned stacks",
+    "for an armor-bypassing burst."
+  ],
+  "timeout_ms": 100000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "other",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "spirit",
+      "owner": "primalist",
+      "entry": 1188,
+      "level": 19,
+      "health": 100000,
+      "distance": 5
+    },
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    },
+    {
+      "id": "other_target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 574301
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 574301,
+      "target": "spirit"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 24000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 61017,
+      "effect": 0,
+      "min": 100,
+      "within_ms": 4000,
+      "label": "Native pet hit scaling has settled"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 61017,
+      "effect": 2,
+      "min": 100,
+      "within_ms": 4000,
+      "label": "Native pet expertise scaling has settled"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 806552
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500940
+    },
+    {
+      "action": "attack",
+      "actor": "primalist",
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "max_health",
+      "save_as": "stable_target_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "armor",
+      "save_as": "stable_target_armor"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor_reduced_damage",
+      "spell": 806553,
+      "target": "target",
+      "max": 900
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_uses_armor",
+      "spell": 806553,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_uses_armor",
+      "spell": 803138,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 806553,
+      "target": "target",
+      "save_as": "base_burst"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "save_as": "base_ap"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 887019,
+      "effect": 0,
+      "equals": -15
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 887084,
+      "effect": 0,
+      "equals": 32
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "relative_to": "base_ap",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 806553,
+      "target": "target",
+      "relative_to": "base_burst",
+      "min": 55,
+      "max": 57
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 806553,
+      "target": "target",
+      "relative_to": "base_burst",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 806552,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 806552,
+      "caster": "primalist",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 806554,
+      "caster": "primalist",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 806378,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 806554,
+      "caster": "primalist",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 806553,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500940,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 806554,
+      "caster": "primalist",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 806554,
+      "caster": "primalist",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 806553,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 806554,
+      "caster": "primalist",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 806553,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 806554,
+      "caster": "primalist",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 806553,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "other",
+      "spell": 806554
+    },
+    {
+      "action": "cast",
+      "actor": "other",
+      "spell": 806554,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 806554,
+      "caster": "other",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 806554,
+      "caster": "primalist",
+      "equals": 4
+    },
+    {
+      "action": "wait",
+      "ms": 2900
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 806553,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 806554,
+      "caster": "primalist",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 806554,
+      "caster": "other",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "max_health",
+      "relative_to": "stable_target_health",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "armor",
+      "relative_to": "stable_target_armor",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 806552,
+      "caster": "primalist",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 806554,
+      "caster": "primalist",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 806378,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 806553,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 504669,
+      "pet": true,
+      "target": "target",
+      "min": 6
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 504669,
+      "pet": true,
+      "target": "other_target",
+      "min": 6
+    }
+  ]
+}

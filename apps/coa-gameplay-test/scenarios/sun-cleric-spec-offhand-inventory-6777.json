@@ -1,0 +1,307 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric spec change removes invalid offhands into available bags",
+  "contract": [
+    "Leaving Valkyr47 for Piety46 revokes Valkyr Grip707072, which supplied two-handed and dual wield permission.",
+    "Illegal offhands must move into available bags without creating mail, for both polearms and two-handed swords.",
+    "Valkyr Grip supplies dual wield for ordinary one-handed maces too; removing that sole grant moves the offhand",
+    "into bags."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "polearms",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    },
+    {
+      "id": "swords",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    },
+    {
+      "id": "dualwield",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "polearms",
+      "id": 47
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "polearms",
+      "metric": "knows_spell",
+      "spell": 707072,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "polearms",
+      "item": 4901
+    },
+    {
+      "action": "equip",
+      "actor": "polearms",
+      "item": 4901,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "polearms",
+      "item": 5545
+    },
+    {
+      "action": "equip",
+      "actor": "polearms",
+      "item": 5545,
+      "slot": 16
+    },
+    {
+      "action": "assert",
+      "actor": "polearms",
+      "metric": "equipped_item",
+      "slot": 16,
+      "equals": 5545
+    },
+    {
+      "action": "assert",
+      "actor": "polearms",
+      "metric": "free_inventory_slots",
+      "min": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "polearms",
+      "metric": "mail_count",
+      "save_as": "polearms_mail"
+    },
+    {
+      "action": "specialization",
+      "actor": "polearms",
+      "id": 46
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "polearms",
+      "metric": "knows_spell",
+      "spell": 707072,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "polearms",
+      "metric": "equipped_item",
+      "equals": 0,
+      "slot": 16
+    },
+    {
+      "action": "assert",
+      "actor": "polearms",
+      "metric": "item_count",
+      "item": 5545,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "polearms",
+      "metric": "mail_count",
+      "relative_to": "polearms_mail",
+      "equals": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "swords",
+      "id": 47
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "swords",
+      "metric": "knows_spell",
+      "spell": 707072,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "swords",
+      "spell": 202
+    },
+    {
+      "action": "add_item",
+      "actor": "swords",
+      "item": 1194
+    },
+    {
+      "action": "equip",
+      "actor": "swords",
+      "item": 1194,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "swords",
+      "item": 1198
+    },
+    {
+      "action": "equip",
+      "actor": "swords",
+      "item": 1198,
+      "slot": 16
+    },
+    {
+      "action": "assert",
+      "actor": "swords",
+      "metric": "equipped_item",
+      "slot": 16,
+      "equals": 1198
+    },
+    {
+      "action": "assert",
+      "actor": "swords",
+      "metric": "free_inventory_slots",
+      "min": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "swords",
+      "metric": "mail_count",
+      "save_as": "swords_mail"
+    },
+    {
+      "action": "specialization",
+      "actor": "swords",
+      "id": 46
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "swords",
+      "metric": "knows_spell",
+      "spell": 707072,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "swords",
+      "metric": "equipped_item",
+      "equals": 0,
+      "slot": 16
+    },
+    {
+      "action": "assert",
+      "actor": "swords",
+      "metric": "item_count",
+      "item": 1198,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "swords",
+      "metric": "mail_count",
+      "relative_to": "swords_mail",
+      "equals": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "dualwield",
+      "id": 47
+    },
+    {
+      "action": "learn",
+      "actor": "dualwield",
+      "spell": 198
+    },
+    {
+      "action": "add_item",
+      "actor": "dualwield",
+      "item": 36
+    },
+    {
+      "action": "equip",
+      "actor": "dualwield",
+      "item": 36,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "dualwield",
+      "item": 2130
+    },
+    {
+      "action": "equip",
+      "actor": "dualwield",
+      "item": 2130,
+      "slot": 16
+    },
+    {
+      "action": "assert",
+      "actor": "dualwield",
+      "metric": "equipped_item",
+      "slot": 16,
+      "equals": 2130
+    },
+    {
+      "action": "unlearn",
+      "actor": "dualwield",
+      "spell": 707072,
+      "all_specs": true
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "dualwield",
+      "metric": "knows_spell",
+      "spell": 707072,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "dualwield",
+      "metric": "knows_spell",
+      "spell": 674,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "dualwield",
+      "metric": "equipped_item",
+      "slot": 16,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "dualwield",
+      "metric": "item_count",
+      "item": 2130,
+      "equals": 1
+    }
+  ]
+}

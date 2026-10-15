@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "Transfusion swaps health percentages and floors the lower one at 40% (#2825)",
+  "contract": "Spell.dbc gives Transfusion 705734 RecoveryTime 180000, RangeIndex 4 (30 yds), PowerType 1 (Rage), ManaCost 200 and a single effect 77 (SPELL_EFFECT_SCRIPT_EFFECT) with TargetA 57 (TARGET_UNIT_TARGET_RAID) and base 39 -> 40. Its tooltip is 'Swap health percentages with an ally. Increases the lower health percentage of the two to 40%, if below that amount.' Spell::EffectScriptEffect is a hard-coded switch with no entry for family 26 or id 705734 and there was no spell_script_names row, so the cast moved no health at all. The two actors are given different maximum health (the ally is levelled down) so that a percentage swap is distinguishable from a flat health swap: with the caster at 100% and the ally at about 1.5%, the contract leaves the caster at 40% of ITS own maximum and the ally at 100% of ITS own maximum. The empowered -60 sec cooldown is a separate, already working path (AscensionPooledVitality.h maps 705734 to Empowerment::Transfusion) and is only guarded here through the unempowered 180 sec cooldown.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling and login settle", "ms": 5000 },
+    { "action": "set_level", "actor": "ally", "value": 60 },
+    { "action": "group", "actor": "bloodmage", "target": "ally" },
+    { "action": "learn", "actor": "bloodmage", "spell": 705734 },
+    { "action": "set_power", "actor": "bloodmage", "power": 1, "value": 1000 },
+    { "action": "set_health", "actor": "ally", "value": 100 },
+    {
+      "action": "assert",
+      "label": "Fixture precondition: the caster is at full health",
+      "actor": "bloodmage",
+      "metric": "health_pct",
+      "min": 99
+    },
+    {
+      "action": "assert",
+      "label": "Fixture precondition: the ally is far below the 40% floor",
+      "actor": "ally",
+      "metric": "health_pct",
+      "max": 10
+    },
+    { "action": "cast", "actor": "bloodmage", "spell": 705734, "target": "ally" },
+    {
+      "action": "assert",
+      "label": "The caster takes the ally's percentage, raised to the 40% floor",
+      "actor": "bloodmage",
+      "metric": "health_pct",
+      "min": 38,
+      "max": 42,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ally takes the caster's percentage of its own maximum",
+      "actor": "ally",
+      "metric": "health_pct",
+      "min": 95
+    },
+    {
+      "action": "assert",
+      "label": "Regression guard: the unempowered cooldown is 180 sec",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 705734,
+      "min": 170000
+    }
+  ]
+}

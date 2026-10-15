@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Glaive Tossing increases Warden's Blade's range by 20 yds (#1080)",
+  "contract": "Glaive Tossing 680737 (Spell.dbc, SpellFamilyName 32, passive) effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 5 (SPELLMOD_RANGE), EffectBasePoints 19 with DieSides 1 -> +20 yards, EffectSpellClassMask (word0 0, word1 0x4000000, word2 0x100). Warden's Blade ranks 1-6 (805508, 806812-806816) carry SpellFamilyFlags word1 0x4000000, so the mask selects them; their RangeIndex is 7, and SpellRange.dbc row 7 has RangeMax 10 for both hostile and friendly. The tooltip is 'Increases the range of Warden's Blade by 20 yds.'. Native consumers: SpellInfo::GetMaxRange calls Player::ApplySpellMod(SPELLMOD_RANGE) and Spell::CheckRange (Spell.cpp:7201) does the same at cast time. The spell_max_range metric returns SpellInfo::GetMaxRange(positive, player); the Starcaller-specific 50-yard override in that function needs aura 801975 and a DmgClass of ranged, neither present on these fixtures. Expected: 10 on the control, 30 (+20) with the talent. The mask's word2 0x100 also matches Cosmic Trap 807195; that side effect is out of the issue's scope (see the class-tree-1 report) and not asserted.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 680737
+    },
+    {
+      "action": "assert",
+      "label": "Learning the talent applies its passive aura",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 680737,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Warden's Blade rank 6 range without the talent",
+      "actor": "control",
+      "metric": "spell_max_range",
+      "save_as": "range_base",
+      "spell": 806816
+    },
+    {
+      "action": "assert",
+      "label": "Control keeps the authored 10 yards",
+      "actor": "control",
+      "metric": "spell_max_range",
+      "spell": 806816,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Glaive Tossing adds 20 yards",
+      "actor": "talent",
+      "metric": "spell_max_range",
+      "spell": 806816,
+      "relative_to": "range_base",
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 is covered by the same mask",
+      "actor": "talent",
+      "metric": "spell_max_range",
+      "spell": 805508,
+      "equals": 30
+    }
+  ]
+}

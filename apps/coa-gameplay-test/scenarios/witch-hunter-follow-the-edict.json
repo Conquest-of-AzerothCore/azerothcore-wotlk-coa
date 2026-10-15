@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "name": "Follow The Edict raises the amount of every Edict by 20% (#1899)",
+  "contract": "Follow The Edict 503698 has E0 aura 108 (SPELL_AURA_ADD_PCT_MODIFIER), MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 19 / DieSides 1 = +20%, class mask (0, 0, 0x20000000); its tooltip reads 'Increases the effectiveness of your Edicts by $s1%'. Every Edict record carries SpellFamilyName 21 and SpellFamilyFlags C 0x20000000 (Witching Edict 707687 and 681442 with aura 345 BasePoints 61 -> 62, Greater Inquisitor's Edict 680303 with aura 29 BasePoints 76 -> 77), none has SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, and SpellEffectInfo::CalcValue runs Unit::ApplyEffectModifiers on the base amount, so the percent is delivered by the core with no per-spell code. Expected amounts are DBC arithmetic truncated to int: 62 * 1.2 = 74.4 -> 74, 77 * 1.2 = 92.4 -> 92. Burrow Bolt 802269 (flags C 0x40000000) is the control and must not move.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 503698,
+      "all_specs": true,
+      "label": "Start without the passive"
+    },
+    {
+      "action": "assert",
+      "label": "Witching Edict R4 amount from the DBC: 61 + 1",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "spell": 707687,
+      "effect": 0,
+      "equals": 62
+    },
+    {
+      "action": "assert",
+      "label": "Greater Witching Edict amount from the DBC: 61 + 1",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "spell": 681442,
+      "effect": 0,
+      "equals": 62
+    },
+    {
+      "action": "assert",
+      "label": "Greater Inquisitor's Edict amount from the DBC: 76 + 1",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "spell": 680303,
+      "effect": 0,
+      "equals": 77
+    },
+    {
+      "action": "snapshot",
+      "label": "Control amount before",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "save_as": "control_before",
+      "spell": 802269,
+      "effect": 0
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 503698
+    },
+    {
+      "action": "assert",
+      "label": "The passive aura is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 503698,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Witching Edict R4 gains 20%",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "spell": 707687,
+      "effect": 0,
+      "equals": 74
+    },
+    {
+      "action": "assert",
+      "label": "Greater Witching Edict gains 20%",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "spell": 681442,
+      "effect": 0,
+      "equals": 74
+    },
+    {
+      "action": "assert",
+      "label": "Greater Inquisitor's Edict gains 20%",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "spell": 680303,
+      "effect": 0,
+      "equals": 92
+    },
+    {
+      "action": "assert",
+      "label": "Burrow Bolt is not an Edict and is unchanged",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "spell": 802269,
+      "effect": 0,
+      "ratio_to": "control_before",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 503698,
+      "all_specs": true,
+      "label": "Remove the passive"
+    },
+    {
+      "action": "assert",
+      "label": "The amounts return to the DBC value",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "spell": 707687,
+      "effect": 0,
+      "equals": 62
+    }
+  ]
+}

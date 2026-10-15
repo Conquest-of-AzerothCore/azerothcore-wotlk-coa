@@ -1,0 +1,359 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Venomcult Scrolls, Cunning and Caustic spell modifiers (#3137, #3472, #3687)",
+  "contract": "#3137, #3472, #3687. Three Spell.dbc passives that are plain family-35 spell modifiers with no script: Venomcult Scrolls 707574 (effect 0 aura 108 op 0 +49+1 = +50% on mask [0x200] = seek heal 803529; effect 1 aura 107 op 11 -2001+1 = -2000 ms on mask [0x1] = Green Salve 800902, whose CategoryRecoveryTime is 10000); Cunning 805093 (effect 0 aura 107 op 7 = +19+1 = 20 crit chance points and effect 1 aura 108 op 15 = +9+1 = +10% crit damage, both on mask [0,0,0x2000000] = Chitin Rush 803570, 803641-803644, 803728); Caustic 807610 (aura 107 op 11 -60001+1 = -60000 ms on mask [0x40000000] = Noxious Empowerment 804964, RecoveryTime 180000). The native consumers are Player::ApplySpellMod through Player::AddSpellCooldown (Player.cpp:11452/11456), Unit::SpellHealingBonusDone (Unit.cpp:10217) and Unit::SpellDoneCritChance. Each modifier is read with spell_modifier from a same-run baseline; the cooldowns are additionally measured on a real cast before and after learning the passive. Noxious Empowerment needs Spider Form 800841 (Spell.dbc CasterAuraSpell). Generic core machinery: a regression guard for behaviour that already works.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 29,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "a",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "v",
+      "target": "a"
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 800902
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 800841
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 804964
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: no damage/healing modifier on the Green Salve seek heal",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803529,
+      "op": 0,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: no cooldown modifier on Green Salve",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 800902,
+      "op": 11,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "snapshot",
+      "label": "BASELINE: seek heal from a fixed base of 1000",
+      "actor": "v",
+      "metric": "spell_healing_done",
+      "spell": 803529,
+      "target": "a",
+      "save_as": "seek_base"
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: no Chitin Rush crit chance modifier",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803570,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: no Chitin Rush crit damage modifier",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803570,
+      "op": 15,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: no Noxious Empowerment cooldown modifier",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 804964,
+      "op": 11,
+      "base": 180000,
+      "equals": 180000
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800902,
+      "target": "a"
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Green Salve goes on its 10 s category cooldown",
+      "actor": "v",
+      "metric": "cooldown_ms",
+      "spell": 800902,
+      "min": 9000,
+      "max": 10000,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 707574
+    },
+    {
+      "action": "assert",
+      "label": "Venomcult Scrolls passive is applied",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 707574,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Venomcult Scrolls takes 2 s off Green Salve (Spell.dbc -2001 + 1)",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 800902,
+      "op": 11,
+      "base": 10000,
+      "equals": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Venomcult Scrolls adds 50% to the seek heal (aura 108 op 0, mask 0x200)",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803529,
+      "op": 0,
+      "base": 100,
+      "equals": 150
+    },
+    {
+      "action": "assert",
+      "label": "The seek heal's server-calculated healing is 1.5x the pre-Scrolls value",
+      "actor": "v",
+      "metric": "spell_healing_done",
+      "spell": 803529,
+      "target": "a",
+      "ratio_to": "seek_base",
+      "min": 1.49,
+      "max": 1.51
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "v",
+      "spell": 800902
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800902,
+      "target": "a"
+    },
+    {
+      "action": "assert",
+      "label": "With Scrolls Green Salve's cooldown is 8 s",
+      "actor": "v",
+      "metric": "cooldown_ms",
+      "spell": 800902,
+      "min": 7000,
+      "max": 8000,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 805093
+    },
+    {
+      "action": "assert",
+      "label": "Cunning passive is applied",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 805093,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Cunning adds 20 points of crit chance to Chitin Rush 803570",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803570,
+      "op": 7,
+      "base": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "Cunning adds 20 points of crit chance to Chitin Rush 803641",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803641,
+      "op": 7,
+      "base": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "Cunning adds 20 points of crit chance to Chitin Rush 803644",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803644,
+      "op": 7,
+      "base": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "Cunning adds 20 points of crit chance to Chitin Rush 803728",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803728,
+      "op": 7,
+      "base": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "Cunning adds 10% crit damage to Chitin Rush (Spell.dbc 9 + 1)",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803570,
+      "op": 15,
+      "base": 100,
+      "equals": 110
+    },
+    {
+      "action": "assert",
+      "label": "Cunning does not touch Expulsion's crit chance (different class mask)",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 805094,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "v",
+      "spell": 800841,
+      "stacks": 1,
+      "label": "Enter Spider Form (set_aura; the cast did not apply it in the previous run)"
+    },
+    {
+      "action": "assert",
+      "label": "Spider Form is up (caster aura of Noxious Empowerment)",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 800841,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 804964
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Noxious Empowerment goes on its 180 s cooldown",
+      "actor": "v",
+      "metric": "cooldown_ms",
+      "spell": 804964,
+      "min": 178000,
+      "max": 180000,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 807610
+    },
+    {
+      "action": "assert",
+      "label": "Caustic passive is applied",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 807610,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Caustic takes 60 s off Noxious Empowerment (Spell.dbc -60001 + 1)",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 804964,
+      "op": 11,
+      "base": 180000,
+      "equals": 120000
+    },
+    {
+      "action": "set_aura",
+      "actor": "v",
+      "spell": 804964,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "v",
+      "spell": 804964
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 804964
+    },
+    {
+      "action": "assert",
+      "label": "With Caustic Noxious Empowerment's cooldown is 120 s",
+      "actor": "v",
+      "metric": "cooldown_ms",
+      "spell": 804964,
+      "min": 118000,
+      "max": 120000,
+      "within_ms": 3000
+    }
+  ]
+}

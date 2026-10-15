@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Umbral Glaive",
+  "contract": [
+    "Umbral Glaive consumes its proc buff, keeps Hex of Malice known and charges the mana cost once for all",
+    "its victims."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy0",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "distance": 4,
+      "health": 100000
+    },
+    {
+      "id": "enemy1",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "distance": 5,
+      "health": 100000
+    },
+    {
+      "id": "enemy2",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "distance": 6,
+      "health": 100000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 501153
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 681242
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 501134
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 504588,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 504588,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "power",
+      "save_as": "mana0"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 501134,
+      "target": "enemy0"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy0",
+      "metric": "aura",
+      "spell": 501134,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "Debuff applied"
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy0",
+      "metric": "health",
+      "save_as": "hp_hit"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "actor": "enemy0",
+      "metric": "health",
+      "relative_to": "hp_hit",
+      "min": -1,
+      "max": 100000,
+      "label": "First leech tick waits a period"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy0",
+      "metric": "health",
+      "relative_to": "hp_hit",
+      "max": -1,
+      "within_ms": 3000,
+      "label": "Leech ticks later"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 504588,
+      "equals": 0,
+      "within_ms": 3000,
+      "label": "Proc consumed"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501153,
+      "equals": 1,
+      "label": "Hex stays known"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "power",
+      "relative_to": "mana0",
+      "min": -1200,
+      "label": "Mana charged once"
+    }
+  ]
+}

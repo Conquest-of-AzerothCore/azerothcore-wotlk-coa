@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Ravager already removes the minimum range of Ranger shots (#5479, #4038)",
+  "contract": "Ravager 92116 (Ranger Level 10 Passive) grants SPELL_AURA_ASCENSION_IGNORE_MIN_RANGE (312) misc 10 (IGNORE_MIN_RANGE_RANGED_ABILITIES). Quick Shot 500074 uses SpellRange 54 (5-30 yd, Flags 0, not SPELL_RANGE_RANGED) and DmgClass SPELL_DAMAGE_CLASS_RANGED with SPELL_ATTR0_USES_RANGED_SLOT set. Unit::GetSpellMinRangeForTarget (src/server/game/Entities/Unit/Unit.cpp) already calls IgnoresSpellMinRange and returns 0 whenever it applies, before Spell::CheckRange branches on range_type, so min_range is already zero for every ignored spell regardless of its SpellRange Flags: the else-if branch's own `min_range > 0` guard already skips TOO_CLOSE. Without Ravager, Quick Shot at 2 yds (below its 5 yd minimum) must still fail SPELL_FAILED_TOO_CLOSE (128); with Ravager known, the same cast at the same distance must succeed (cast_failure 0), proving the contract already holds on current code.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 20 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "ranger", "entry": 36, "level": 20, "health": 500000, "distance": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "settle", "ms": 3000 },
+    { "action": "learn", "actor": "ranger", "spell": 500074 },
+    { "action": "unlearn", "actor": "ranger", "spell": 92116 },
+    { "action": "add_item", "actor": "ranger", "item": 2504 },
+    { "action": "equip", "actor": "ranger", "item": 2504, "slot": 17 },
+    { "action": "add_item", "actor": "ranger", "item": 25 },
+    { "action": "equip", "actor": "ranger", "item": 25, "slot": 15 },
+    { "action": "wait", "label": "Let the equipment settle", "ms": 1500 },
+    { "action": "assert", "label": "SETUP: Ravager is not known", "actor": "ranger",
+      "metric": "knows_spell", "spell": 92116, "equals": 0 },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "cast", "actor": "ranger", "spell": 500074, "target": "dummy" },
+    { "action": "assert", "label": "BASELINE: too close without Ravager", "actor": "ranger",
+      "metric": "cast_failure", "spell": 500074, "equals": 128, "within_ms": 3000 },
+    { "action": "learn", "actor": "ranger", "spell": 92116 },
+    { "action": "assert", "label": "SETUP: Ravager known", "actor": "ranger",
+      "metric": "knows_spell", "spell": 92116, "equals": 1 },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "cast", "actor": "ranger", "spell": 500074, "target": "dummy" },
+    { "action": "assert", "label": "CONTRACT: Ravager removes the minimum range", "actor": "ranger",
+      "metric": "cast_failure", "spell": 500074, "equals": 0, "within_ms": 3000 }
+  ]
+}

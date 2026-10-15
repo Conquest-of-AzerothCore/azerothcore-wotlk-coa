@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "name": "Bloodcraft weakens enemies hit by Darkfallen Lament (#2213)",
+  "contract": "Bloodcraft 680733 reads 'Your damage dealt by Darkfallen Lament now applies Bloodcraft to affected enemies, reducing damage dealt by $524182s1% for $524182d, stacking $524182u times'. Its single effect is aura 42 (proc trigger spell) on Bloodcraft 524182 (MOD_DAMAGE_PERCENT_DONE, MiscValue 127 = all schools, BasePoints -3 -> -2%, StackAmount 4, TargetA 6). Spell.dbc gives 680733 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and no enemy was ever debuffed. Darkfallen Lament is cast as 524181, a direct SPELL_EFFECT_HEALTH_LEECH record carrying SpellFamilyFlags (0, 0, 4096) - the mask the new row uses - with no cooldown and no Cursed Form gate. A diagnostic assertion confirms the cast actually damaged the target before the debuff is checked.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 680733
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 524181
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Bloodcraft passive is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 680733,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "No Bloodcraft debuff before the cast",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 524182,
+      "caster": "bloodmage",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "DIAGNOSTIC: target health before Darkfallen Lament",
+      "actor": "dummy",
+      "metric": "health",
+      "save_as": "hp_before"
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 524181,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DIAGNOSTIC: Darkfallen Lament actually deals damage",
+      "actor": "dummy",
+      "metric": "health",
+      "relative_to": "hp_before",
+      "max": -1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the target gains Bloodcraft 524182",
+      "actor": "dummy",
+      "metric": "aura_stacks",
+      "spell": 524182,
+      "caster": "bloodmage",
+      "min": 1,
+      "within_ms": 5000
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Mechanized Crossbows adds 10% ranged attack power and 5 yards of ability range (#762)",
+  "contract": "Mechanized Crossbows 705514 reads 'Increases your ranged attack power by $s1% and the range of your ranged abilities by $s2 yds.' In the installed Spell.dbc it is passive, family 21, effect 0 = SPELL_AURA_MOD_RANGED_ATTACK_POWER_PCT (167) BasePoints 9 (10%), effect 1 = SPELL_AURA_ADD_FLAT_MODIFIER (107) misc 5 = SPELLMOD_RANGE, BasePoints 4 (+5 yd), class mask (0x40011000, 0x400800, 0x90000030). Heartseeking Bolt 805754 (flags word 1 0x800) and Tormentor 800162 (flags word 2 0x10000000) match that mask, Smite Evil 802004 (flags word 1 0x40000000) does not. Their SpellRange index 114 is 35 yd and Smite Evil's index 2 is 5 yd (SpellRange.dbc). SpellInfo::GetMaxRange applies SPELLMOD_RANGE through Player::ApplySpellMod (SpellInfo.cpp:2924), so the probe reads 40 for the two bolts and stays 35 before the talent, and 5 for the control both times. The ranged attack power is multiplied by the stock total percentage modifier, so the ratio is 1.10 within integer rounding. The item is a crossbow so ranged attack power is a real weapon-backed value.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Crossbows skill, as in shadowblast-shadow-rage.json", "actor": "hunter", "spell": 5011},
+    {"action": "add_item", "actor": "hunter", "item": 15807},
+    {"action": "equip", "actor": "hunter", "item": 15807, "slot": 17},
+    {"action": "wait", "label": "Let the weapon swap cooldown expire", "ms": 2000},
+    {"action": "assert", "label": "Ranged attack power is measurable", "actor": "hunter", "metric": "ranged_attack_power", "min": 1},
+    {"action": "snapshot", "actor": "hunter", "metric": "ranged_attack_power", "save_as": "rap_base"},
+    {"action": "assert", "label": "Heartseeking Bolt range is 35 yd (SpellRange 114)", "actor": "hunter", "metric": "spell_max_range", "spell": 805754, "equals": 35},
+    {"action": "assert", "label": "Tormentor range is 35 yd", "actor": "hunter", "metric": "spell_max_range", "spell": 800162, "equals": 35},
+    {"action": "assert", "label": "Smite Evil range is 5 yd (SpellRange 2)", "actor": "hunter", "metric": "spell_max_range", "spell": 802004, "equals": 5},
+    {"action": "learn", "label": "Mechanized Crossbows", "actor": "hunter", "spell": 705514},
+    {"action": "assert", "label": "The passive is active with a 10% first effect", "actor": "hunter", "metric": "aura_amount", "spell": 705514, "effect": 0, "equals": 10},
+    {"action": "assert", "label": "Ranged attack power rises by 10%", "actor": "hunter", "metric": "ranged_attack_power", "ratio_to": "rap_base", "min": 1.09, "max": 1.11, "within_ms": 3000},
+    {"action": "assert", "label": "Heartseeking Bolt range is 40 yd", "actor": "hunter", "metric": "spell_max_range", "spell": 805754, "equals": 40},
+    {"action": "assert", "label": "Tormentor range is 40 yd", "actor": "hunter", "metric": "spell_max_range", "spell": 800162, "equals": 40},
+    {"action": "assert", "label": "Smite Evil is outside the mask and stays at 5 yd", "actor": "hunter", "metric": "spell_max_range", "spell": 802004, "equals": 5},
+    {"action": "unlearn", "label": "Drop Mechanized Crossbows", "actor": "hunter", "spell": 705514},
+    {"action": "assert", "label": "Heartseeking Bolt range returns to 35 yd", "actor": "hunter", "metric": "spell_max_range", "spell": 805754, "equals": 35},
+    {"action": "assert", "label": "Ranged attack power returns to its baseline", "actor": "hunter", "metric": "ranged_attack_power", "ratio_to": "rap_base", "min": 0.999, "max": 1.001, "within_ms": 3000}
+  ]
+}

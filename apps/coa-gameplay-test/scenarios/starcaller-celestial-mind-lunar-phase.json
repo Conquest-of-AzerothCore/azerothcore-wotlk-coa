@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "name": "Celestial Mind makes Lunar Phase gain stacks 1 second faster, whenever learned (#1230)",
+  "contract": "Celestial Mind 707638 reads \"You now passively gain 1 stack of Lunar Phase 1 sec faster\". Effect[0] is SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue SPELLMOD_ACTIVATION_TIME (19), EffectBasePoints -26 (-25) and EffectSpellClassMask word0 0x2000, which selects the Lunar Phase driver 524781 (SpellFamilyFlags word0 0x2000, Effect[0] aura 23 with EffectAmplitude 4000 ms, kept as a periodic dummy by AscensionStarcallerContracts.cpp; the gain is made on its tick by GainPhase). 4000 ms * 0.75 = 3000 ms, exactly one second faster. The native consumer, AuraEffect::CalculatePeriodic, applies SPELLMOD_ACTIVATION_TIME to the amplitude only when the effect is constructed or its timers are refreshed, whereas the spellmod-add path recalculates amounts and not amplitudes; the driver is created once by Refresh() when 800386 is known. So the result can depend on the order of the two learns. Three fixtures of the same race, class and level: the control never learns 707638 and must stay at 4000 ms; the early fixture learns 707638 before the Lunar Phase driver exists; the late fixture learns it after 524781 is already on the player. The metric aura_amplitude_ms reads the driver's Effect[0] period. Both talented fixtures must read 3000; a late reading of 4000 is the timing defect described in the report and turns this into a real bug (fix shape: refresh the driver's timers when the talent is learned). The assertion polls for 3000 ms so a driver re-created by the module's 250 ms refresh cycle is still accepted. Side effect not asserted: the same mask also selects Starfire Barrage's periodic damage 803264.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "early",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "late",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "early",
+      "spell": 707638,
+      "label": "Early fixture learns Celestial Mind first"
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 800386
+    },
+    {
+      "action": "learn",
+      "actor": "early",
+      "spell": 800386
+    },
+    {
+      "action": "learn",
+      "actor": "late",
+      "spell": 800386
+    },
+    {
+      "action": "assert",
+      "label": "Control's Lunar Phase driver exists",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 524781,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Early fixture's driver exists",
+      "actor": "early",
+      "metric": "aura",
+      "spell": 524781,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Late fixture's driver exists before it learns Celestial Mind",
+      "actor": "late",
+      "metric": "aura",
+      "spell": 524781,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "late",
+      "spell": 707638,
+      "label": "Late fixture learns Celestial Mind with the driver already running"
+    },
+    {
+      "action": "assert",
+      "label": "Control keeps the 4 second period",
+      "actor": "control",
+      "metric": "aura_amplitude_ms",
+      "spell": 524781,
+      "equals": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Early learner gains a stack every 3 seconds",
+      "actor": "early",
+      "metric": "aura_amplitude_ms",
+      "spell": 524781,
+      "equals": 3000,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Late learner gains a stack every 3 seconds",
+      "actor": "late",
+      "metric": "aura_amplitude_ms",
+      "spell": 524781,
+      "equals": 3000,
+      "within_ms": 3000
+    }
+  ]
+}

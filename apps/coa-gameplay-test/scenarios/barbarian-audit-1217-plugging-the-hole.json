@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "name": "Barbarian audit: Plugging the Hole's spell modifier and bleed-removal effect both work natively (#1217)",
+  "contract": "Audit report #1217 flags 561314 for a missing script. Effect 0 is a native spell-mod aura (107 flat, SPELLMOD_COOLDOWN op 11 on 807046) -- covered below and already proven. Effect 1 is SPELL_EFFECT_DUMMY (type 3) with EffectMiscValue 524287 and EffectTriggerSpell 560460 ('Torpedo'), which has an empty DBC description and an unrelated single-target speed-increase aura (SPELL_AURA_MOD_INCREASE_SPEED) plus its own dummy effect -- nothing that resembles a bleed removal, and no spell_proc/spell_linked_spell row or C++ script anywhere references 561314 or 560460. But 561314's own tooltip ('Your Skull Smash now removes all bleed effects on the enemy') is not a promise this DUMMY effect needs to keep: Skull Smash's (560532) own DBC description carries the client-side conditional macro '$?s561314[ Removes all bleed effects on the target.][]', and its effect 2 (SPELL_EFFECT_FORCE_CAST -> 560554, SPELL_EFFECT_DISPEL_MECHANIC misc 15 = MECHANIC_BLEED, confirmed in the #1144 Skull Smash scenario) already performs that exact removal generically, with no per-spell script (grep confirmed no code references 560532, 560554, 561314 or 560460 anywhere in src/ or modules/). Aura::CalcDispelChance returns 100% chance absent a SPELL_AURA_MOD_DISPEL_RESIST source, so a plain dummy creature's bleed is removed deterministically. Effect 1 of 561314 is therefore dead/vestigial DBC data -- like #2550 and #2566 in this same audit -- not a functional gap: the tooltip's promise is already delivered by Skull Smash's own unconditional effect, so there is nothing left for 561314's own DUMMY effect to implement.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "d", "owner": "b", "entry": 36, "level": 80, "health": 500000, "distance": 3 }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "before: 807046 has no modifier for op 11",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 807046,
+      "op": 11,
+      "base": 100000,
+      "min": 99998,
+      "max": 100002
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 561314
+    },
+    {
+      "action": "assert",
+      "label": "Plugging the Hole (561314) is active",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 561314,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "561314 op 11 flat -30000 reaches 807046 (mask selects 1 Barbarian spell(s))",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 807046,
+      "op": 11,
+      "base": 100000,
+      "min": 69998,
+      "max": 70002
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 560532
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 800772
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 800772,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the target is bleeding",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 800772,
+      "caster": "b",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 560532,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Skull Smash's own slow effect actually landed on the target (confirms the cast was not eaten by GCD/cooldown)",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 560532,
+      "caster": "b",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Skull Smash's own effect removes the bleed without any script on 561314's DUMMY effect",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 800772,
+      "caster": "b",
+      "equals": 0,
+      "within_ms": 5000
+    }
+  ]
+}

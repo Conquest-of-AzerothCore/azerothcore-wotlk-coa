@@ -1,0 +1,171 @@
+{
+ "schema": 1,
+ "name": "Issue 455: Permafrost Rune breaks on damage and is cheaper in Runeshroud",
+ "contract": "Tooltip: damage taken ends the effect; 80% reduced cooldown (60 s base) while in Runeshroud (500288). The 8 s player cap needs a hostile player and is not covered.",
+ "timeout_ms": 120000,
+ "players": [
+  {
+   "id": "rm",
+   "race": 1,
+   "class": 32,
+   "level": 60
+  },
+  {
+   "id": "rm_shroud",
+   "race": 1,
+   "class": 32,
+   "level": 60
+  },
+  {
+   "id": "attacker",
+   "race": 1,
+   "class": 8,
+   "level": 80,
+   "spell_hit_rating": 10000
+  }
+ ],
+ "creatures": [
+  {
+   "id": "dummy",
+   "owner": "rm",
+   "entry": 36,
+   "level": 60,
+   "health": 500000,
+   "distance": 3
+  },
+  {
+   "id": "dummy2",
+   "owner": "rm_shroud",
+   "entry": 36,
+   "level": 60,
+   "health": 500000,
+   "distance": 3
+  }
+ ],
+ "steps": [
+  {
+   "action": "wait",
+   "ms": 5000
+  },
+  {
+   "action": "learn",
+   "actor": "rm",
+   "spell": 804060
+  },
+  {
+   "action": "learn",
+   "actor": "rm_shroud",
+   "spell": 804060
+  },
+  {
+   "action": "learn",
+   "actor": "attacker",
+   "spell": 116
+  },
+  {
+   "action": "learn",
+   "actor": "attacker",
+   "spell": 122
+  },
+  {
+   "action": "set_aura",
+   "actor": "rm_shroud",
+   "spell": 500288,
+   "stacks": 1
+  },
+  {
+   "action": "cast",
+   "actor": "attacker",
+   "spell": 122
+  },
+  {
+   "action": "assert",
+   "label": "Frost Nova freezes dummy",
+   "actor": "dummy",
+   "metric": "aura",
+   "spell": 122,
+   "equals": 1,
+   "within_ms": 3000
+  },
+  {
+   "action": "cast",
+   "actor": "rm",
+   "spell": 804060,
+   "target": "dummy"
+  },
+  {
+   "action": "cast",
+   "actor": "rm_shroud",
+   "spell": 804060,
+   "target": "dummy2"
+  },
+  {
+   "action": "assert",
+   "label": "Permafrost lands on creature",
+   "actor": "dummy",
+   "metric": "aura",
+   "spell": 804060,
+   "equals": 1,
+   "within_ms": 3000
+  },
+  {
+   "action": "assert",
+   "label": "Base cooldown ~60s without Runeshroud",
+   "actor": "rm",
+   "metric": "cooldown_ms",
+   "spell": 804060,
+   "min": 50000
+  },
+  {
+   "action": "assert",
+   "label": "Runeshroud cast lands",
+   "actor": "dummy2",
+   "metric": "aura",
+   "spell": 804060,
+   "equals": 1,
+   "within_ms": 3000
+  },
+  {
+   "action": "assert",
+   "label": "Cooldown reduced ~80% in Runeshroud",
+   "actor": "rm_shroud",
+   "metric": "cooldown_ms",
+   "spell": 804060,
+   "max": 13000
+  },
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "assert",
+   "label": "Effect persists without damage",
+   "actor": "dummy",
+   "metric": "aura",
+   "spell": 804060,
+   "equals": 1
+  },
+  {
+   "action": "cast",
+   "actor": "attacker",
+   "spell": 116,
+   "target": "dummy"
+  },
+  {
+   "action": "assert",
+   "label": "Damage ends the effect",
+   "actor": "dummy",
+   "metric": "aura",
+   "spell": 804060,
+   "equals": 0,
+   "within_ms": 6000
+  }
+ ],
+ "location": {
+  "map": 0,
+  "x": -8917.41,
+  "y": -115.853,
+  "z": 82.3711,
+  "o": 0
+ }
+}

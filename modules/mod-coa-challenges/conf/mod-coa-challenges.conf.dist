@@ -78,6 +78,11 @@ CoAChallenges.GameModes.PlayerToggle = 0
 # Default: Draft,Resolute,WildCard,Felforged,BuildDraft,Crusader
 CoAChallenges.GameModes.Hidden = Draft,Resolute,WildCard,Felforged,BuildDraft,Crusader
 
+# Modes every character on this realm plays, e.g. WildCard on a Wildcard realm.
+# Comma-separated wire names as above. They are part of every login's mask,
+# whatever the character's trials or toggles. Empty = none.
+CoAChallenges.GameModes.Realm =
+
 
 ############################################################################
 # Completion, failure & lifecycle
@@ -249,17 +254,43 @@ CoAChallenges.HungerMax = 100
 ############################################################################
 # Fatigue (Narcolepsy / FATIGUED_UNLESS_RESTED: 106/170/171/172/384/385/386)
 ############################################################################
-# A native "fatigue" bar (mirror-timer type FATIGUE) that FILLS while the
-# player is OUTSIDE a rested area (inn); inside a rested area it resets to 0.
-# At FatigueMax the player falls asleep (dies). Persisted in
-# coa_character_fatigue.
+# A native "fatigue" bar (mirror-timer type FATIGUE) that starts FULL and
+# DRAINS while the player is OUTSIDE a safe area. Safe areas are rested areas
+# (inns, cities) plus sanctuaries (starter zones): there the bar is hidden and
+# the counter resets to full. When it reaches 0 the player falls asleep (dies).
+# Persisted in coa_character_fatigue.
 
 # Range: 1-1000. Default: 100
 CoAChallenges.FatigueMax = 100
 
-# Seconds for the full 0..FatigueMax range. Range: 1-86400.
+# Seconds for the full FatigueMax..0 range (max to empty). Range: 1-86400.
 # Default: 420
 CoAChallenges.FatigueSecondsToFill = 420
+
+# Grace (seconds) before the bar returns after LEAVING a safe area, so standing
+# at the inn/rest boundary does not flicker it. Entering a safe area resets
+# immediately (no grace). Range: 0-60. Default: 1
+CoAChallenges.Fatigue.SafeGraceSeconds = 1
+
+
+############################################################################
+# Mailbox (TAKE_MAIL_MONEY_OR_ITEM, #4205)
+############################################################################
+# Taking a non-store item/currency from the mailbox taints the character for
+# the next non-prestige trial activation (a facet of OUTSIDE_INTERACTION).
+# Item entries listed here are exempt (store items / reward caches).
+CoAChallenges.MailExemptItems = "1397884;1397885;1397886"
+
+
+############################################################################
+# Outside interactions (OUTSIDE_INTERACTION implicit condition)
+############################################################################
+# Non-prestige trials cannot be started after a player-facing outside service
+# interaction: trade with another player, auction house, vendor, or guild bank
+# withdrawal. Disable to turn the whole implicit gate off (the mailbox keeps
+# its own gate above).
+# Default: 1
+CoAChallenges.OutsideInteractionGate = 1
 
 
 ############################################################################
@@ -279,7 +310,7 @@ CoAChallenges.ProfessionXP.PointsPerLevel = 50
 ############################################################################
 
 # Aura that marks a character as participating in the High Risk ruleset
-# (mod-ascension-compat SPELL_ASCENSION_HIGH_RISK). HIGH_RISK_ONLY challenges
+# (CoA SPELL_ASCENSION_HIGH_RISK). HIGH_RISK_ONLY challenges
 # require it to activate and fail if it is lost while active.
 # Default: 1004019
 CoAChallenges.HighRisk.Aura = 1004019

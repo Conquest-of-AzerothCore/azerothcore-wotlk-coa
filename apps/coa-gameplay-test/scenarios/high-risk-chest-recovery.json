@@ -1,0 +1,204 @@
+{
+  "schema": 1,
+  "name": "High-Risk chest recovery",
+  "contract": "A High-Risk character who dies leaves a chest; another living High-Risk character next to it can open it and recover the gold and every stored item, which empties the chest. A character outside High-Risk cannot open it. Requires HighRisk.Losses = 1 and HighRisk.GearChance, HighRisk.ResourceChance and HighRisk.GoldChance = 100 in coa.conf.",
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "k",
+      "race": 2,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "o",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "timeout_ms": 120000,
+  "steps": [
+    {
+      "action": "teleport",
+      "actor": "k",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159
+    },
+    {
+      "action": "teleport",
+      "actor": "o",
+      "map": 0,
+      "x": -9615.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "v",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "k",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "v",
+      "item": 723,
+      "count": 20
+    },
+    {
+      "action": "add_item",
+      "actor": "v",
+      "item": 355242,
+      "count": 1
+    },
+    {
+      "action": "set_money",
+      "actor": "v",
+      "value": 200000
+    },
+    {
+      "action": "pvp",
+      "actor": "v",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "k",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "attack",
+      "actor": "k",
+      "target": "v"
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "nearby_gameobject_count",
+      "entry": 994300,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "o",
+      "entry": 994300
+    },
+    {
+      "action": "assert",
+      "actor": "o",
+      "metric": "loot_count",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "k",
+      "metric": "carried_money",
+      "save_as": "money_before"
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "k",
+      "entry": 994300
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "loot_count",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "loot_gold",
+      "min": 1
+    },
+    {
+      "action": "loot_money",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "carried_money",
+      "relative_to": "money_before",
+      "min": 1
+    },
+    {
+      "action": "loot_slot",
+      "actor": "k",
+      "slot": 0
+    },
+    {
+      "action": "loot_slot",
+      "actor": "k",
+      "slot": 1
+    },
+    {
+      "action": "loot_slot",
+      "actor": "k",
+      "slot": 2
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "loot_count",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "nearby_gameobject_count",
+      "entry": 994300,
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Holy Giant doubles Vow of the Valkyr and Vow of Light effects (#666)",
+  "contract": "Holy Giant 681337 (Spell.dbc, SpellFamilyName 33) carries SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue SPELLMOD_ALL_EFFECTS (8), EffectSpellClassMask word A = 2 and word C = 537919488 (bits 29 and 20), EffectBasePoints 99 resolving to +100 with DieSides 1 (doubling). Vow of the Valkyr 807749 carries SpellFamilyFlags word A = 3 (bit 1 set), intersecting Holy Giant's word-A mask; Vow of Light (SLS Inherit Aura) 807750 carries SpellFamilyFlags word C = 536870912 (bit 29 set), intersecting Holy Giant's word-C mask. Native path: Unit::ApplyEffectModifiers (Unit.cpp) calls Player::ApplySpellMod(spellId, SPELLMOD_ALL_EFFECTS, value) for every effect of every spell cast, and SpellInfo::IsAffectedBySpellMod falls through to the generic SpellInfo::IsAffected(familyName, mask) family+classmask intersection for SpellFamilyName 33 outside its small explicit override switch (neither 807749 nor 807750 nor 681337 appear in that switch), so the doubling applies without any script. This scenario drives the same Player::ApplySpellMod call the CoA gameplay-test harness exposes as the spell_modifier metric.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "Vow of the Valkyr effect value is unmodified before the talent",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 807749, "op": 8, "base": 1000, "equals": 1000
+    },
+    {
+      "action": "assert", "label": "Vow of Light effect value is unmodified before the talent",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 807750, "op": 8, "base": 1000, "equals": 1000
+    },
+    { "action": "learn", "actor": "cleric", "spell": 681337 },
+    {
+      "action": "assert", "label": "Holy Giant doubles Vow of the Valkyr's effect value",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 807749, "op": 8, "base": 1000, "equals": 2000
+    },
+    {
+      "action": "assert", "label": "Holy Giant doubles Vow of Light's effect value",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 807750, "op": 8, "base": 1000, "equals": 2000
+    }
+  ]
+}

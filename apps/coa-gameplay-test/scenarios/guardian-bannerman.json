@@ -1,0 +1,648 @@
+{
+  "schema": 1,
+  "name": "Guardian Bannerman: initial Valiance damage with an owned banner (#1148)",
+  "contract": "Own banners boost only initial Valiance damage by 150%; later pulses and foreign banners stay normal.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 18,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "guardian",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "guardian",
+      "target": "ally"
+    },
+    {
+      "action": "set_aura",
+      "actor": "guardian",
+      "spell": 64481,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "melee_crit_chance",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 803938
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 801504
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 504144
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "max_health",
+      "save_as": "stable_max"
+    },
+    {
+      "action": "set_power",
+      "actor": "guardian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "baseline_health"
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 803938,
+      "destination": {
+        "x": -8946.95,
+        "y": -132.493,
+        "z": 83.5312
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "owned_creature_count",
+      "entry": 60064,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "max_health",
+      "relative_to": "stable_max",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "baseline_health",
+      "save_as": "baseline_damage"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "baseline_health",
+      "max": -1
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 801504
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "owned_creature_count",
+      "entry": 60064,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 500259
+    },
+    {
+      "action": "set_power",
+      "actor": "guardian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 500259
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 800704,
+      "caster": "guardian",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "guardian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "swiftness_health"
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 803938,
+      "destination": {
+        "x": -8946.95,
+        "y": -132.493,
+        "z": 83.5312
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "owned_creature_count",
+      "entry": 60064,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "max_health",
+      "relative_to": "stable_max",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "swiftness_health",
+      "save_as": "swiftness_damage"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "swiftness_health",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "label": "Owned banner increases initial damage by 150%",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "swiftness_health",
+      "ratio_to": "baseline_damage",
+      "min": 2.3,
+      "max": 2.7
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "swiftness_after_initial"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The subsequent tick retains normal damage",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "swiftness_after_initial",
+      "ratio_to": "baseline_damage",
+      "min": 0.85,
+      "max": 1.15
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 801504
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "owned_creature_count",
+      "entry": 60064,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 504144
+    },
+    {
+      "action": "set_power",
+      "actor": "guardian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "untalented_health"
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 803938,
+      "destination": {
+        "x": -8946.95,
+        "y": -132.493,
+        "z": 83.5312
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "owned_creature_count",
+      "entry": 60064,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "max_health",
+      "relative_to": "stable_max",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "untalented_health",
+      "save_as": "untalented_damage"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "untalented_health",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "label": "Control retains normal initial damage",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "untalented_health",
+      "ratio_to": "baseline_damage",
+      "min": 0.95,
+      "max": 1.05
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 801504
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "owned_creature_count",
+      "entry": 60064,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 504144
+    },
+    {
+      "action": "set_aura",
+      "actor": "guardian",
+      "spell": 500259,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "guardian",
+      "spell": 800704,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 500261
+    },
+    {
+      "action": "set_power",
+      "actor": "guardian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 500261
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 500264,
+      "caster": "guardian",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "melee_crit_chance",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "guardian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "conquest_health"
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 803938,
+      "destination": {
+        "x": -8946.95,
+        "y": -132.493,
+        "z": 83.5312
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "owned_creature_count",
+      "entry": 60064,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "max_health",
+      "relative_to": "stable_max",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "conquest_health",
+      "save_as": "conquest_damage"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "conquest_health",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "label": "Owned banner increases initial damage by 150%",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "conquest_health",
+      "ratio_to": "baseline_damage",
+      "min": 2.3,
+      "max": 2.7
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "conquest_after_initial"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The subsequent tick retains normal damage",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "conquest_after_initial",
+      "ratio_to": "baseline_damage",
+      "min": 0.85,
+      "max": 1.15
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 801504
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "owned_creature_count",
+      "entry": 60064,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "set_aura",
+      "actor": "guardian",
+      "spell": 500261,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "guardian",
+      "spell": 500264,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "ally",
+      "spell": 500259
+    },
+    {
+      "action": "cast",
+      "actor": "ally",
+      "spell": 500259
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 800704,
+      "caster": "ally",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 800704,
+      "caster": "guardian",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "guardian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "foreign_banner_health"
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 803938,
+      "destination": {
+        "x": -8946.95,
+        "y": -132.493,
+        "z": 83.5312
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "owned_creature_count",
+      "entry": 60064,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "max_health",
+      "relative_to": "stable_max",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "foreign_banner_health",
+      "save_as": "foreign_banner_damage"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "foreign_banner_health",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "label": "Control retains normal initial damage",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "foreign_banner_health",
+      "ratio_to": "baseline_damage",
+      "min": 0.95,
+      "max": 1.05
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 801504
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "owned_creature_count",
+      "entry": 60064,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    }
+  ]
+}

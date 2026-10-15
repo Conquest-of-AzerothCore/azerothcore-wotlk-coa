@@ -1,0 +1,138 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Master Airbender shortens Static-spending cooldowns on Gale (#2815)",
+  "contract": "Master Airbender 705719 (Spell.dbc: passive Attributes 448, Effect[0..2] APPLY_AURA / aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 680878 / 6801879 / 681010, all TARGET_UNIT_CASTER) promises \"Casting Gale now reduces the cooldown of abilities that deplete Static by $/1000;680878s1 sec\", excluding Updraft and Invigorating Surge. Each trigger carries three SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN effects with EffectBasePoints -1001 + EffectDieSides 1 = -1000 ms: 680878 names 806124 Aerodynamics, 500039 Kiss of the Clouds and 804035 Tailwind; 6801879 names 806242 Insulate, 804830 Skyfall and 500040 Call Lightning; 681010 names 705672 Exhale, 500041 Body of Lightning and 707543 Flurry. 705719's DBC ProcFlags are 0, so SpellMgr::LoadSpellProcs skips proc-entry generation and, with no spell_proc row, none of the three triggers can ever fire. The measured targets are the ones with a real self cooldown that a solo fixture can start: Exhale (RecoveryTime 90000, target self), Insulate (RecoveryTime 60000, target self), Body of Lightning (Category 525, RecoveryTime/CategoryRecoveryTime 90000, target self) and Kiss of the Clouds rank 1 (Category 56, CategoryRecoveryTime 30000), which is learned at rank 1 so that the id named by EffectMiscValue is also the rank cast. Skyfall and Flurry are SPELL_EFFECT_FORCE_CAST on TARGET_UNIT_PET and Aerodynamics, Tailwind and Call Lightning have no cooldown at all, so neither can be measured here. Gale rank 5 (570141) carries SpellFamilyFlags0 0x4000, which matches exactly the five Gale ranks; Arm of Thorim (SpellFamilyFlags1 0x2, no mana cost) is the negative control. An identical unarmed control player casts the same spells in lockstep so ordinary cooldown decay cancels out. Both targets are Harvest Golems (36), which hold their position under fire: a Rabbit (721) flees in random directions for CreatureFamilyFleeDelay (7000 ms) once Gale damages it (CritterAI), so the facing-restricted Arm of Thorim (FacingCasterFlags 1) that follows could fail with SPELL_FAILED_UNIT_NOT_INFRONT (134).",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "control", "race": 2, "class": 16, "level": 80, "spell_hit_rating": 10000 },
+    { "id": "armed", "race": 2, "class": 16, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "control_dummy", "owner": "control", "entry": 36, "health": 1000000, "distance": 3 },
+    { "id": "armed_dummy", "owner": "armed", "entry": 36, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "control", "spell": 570141 },
+    { "action": "learn", "actor": "control", "spell": 705672 },
+    { "action": "learn", "actor": "control", "spell": 806242 },
+    { "action": "learn", "actor": "control", "spell": 500041 },
+    { "action": "learn", "actor": "control", "spell": 500039 },
+    { "action": "learn", "actor": "control", "spell": 567520 },
+    { "action": "learn", "actor": "armed", "spell": 570141 },
+    { "action": "learn", "actor": "armed", "spell": 705672 },
+    { "action": "learn", "actor": "armed", "spell": 806242 },
+    { "action": "learn", "actor": "armed", "spell": 500041 },
+    { "action": "learn", "actor": "armed", "spell": 500039 },
+    { "action": "learn", "actor": "armed", "spell": 567520 },
+    { "action": "learn", "actor": "armed", "spell": 705719 },
+    {
+      "action": "assert", "label": "SETUP: Master Airbender is passive and self-applies on learn",
+      "actor": "armed", "metric": "aura", "spell": 705719, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "SETUP: the control never learns Master Airbender",
+      "actor": "control", "metric": "aura", "spell": 705719, "equals": 0
+    },
+    { "action": "set_aura", "actor": "control", "spell": 803102, "stacks": 100 },
+    { "action": "set_aura", "actor": "armed", "spell": 803102, "stacks": 100 },
+    { "action": "cast", "actor": "control", "spell": 705672 },
+    { "action": "cast", "actor": "armed", "spell": 705672 },
+    { "action": "wait", "ms": 1700 },
+    { "action": "cast", "actor": "control", "spell": 806242 },
+    { "action": "cast", "actor": "armed", "spell": 806242 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "cast", "actor": "control", "spell": 500041 },
+    { "action": "cast", "actor": "armed", "spell": 500041 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "cast", "actor": "control", "spell": 500039 },
+    { "action": "cast", "actor": "armed", "spell": 500039 },
+    { "action": "wait", "ms": 1700 },
+    {
+      "action": "assert", "label": "SETUP: Exhale runs its 90000 ms RecoveryTime",
+      "actor": "control", "metric": "cooldown_ms", "spell": 705672, "min": 84000, "max": 90000
+    },
+    {
+      "action": "assert", "label": "SETUP: Insulate runs its 60000 ms RecoveryTime",
+      "actor": "control", "metric": "cooldown_ms", "spell": 806242, "min": 54000, "max": 60000
+    },
+    {
+      "action": "assert", "label": "SETUP: Body of Lightning runs its 90000 ms cooldown",
+      "actor": "control", "metric": "cooldown_ms", "spell": 500041, "min": 84000, "max": 90000
+    },
+    {
+      "action": "assert", "label": "SETUP: Kiss of the Clouds rank 1 runs its 30000 ms CategoryRecoveryTime",
+      "actor": "control", "metric": "cooldown_ms", "spell": 500039, "min": 26000, "max": 30000
+    },
+    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 705672, "save_as": "exhale_start" },
+    {
+      "action": "assert", "label": "SETUP: both players start from the same Exhale cooldown",
+      "actor": "armed", "metric": "cooldown_ms", "spell": 705672,
+      "relative_to": "exhale_start", "min": -600, "max": 600
+    },
+    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 806242, "save_as": "insulate_start" },
+    {
+      "action": "assert", "label": "SETUP: both players start from the same Insulate cooldown",
+      "actor": "armed", "metric": "cooldown_ms", "spell": 806242,
+      "relative_to": "insulate_start", "min": -600, "max": 600
+    },
+    { "action": "cast", "actor": "control", "spell": 570141, "target": "control_dummy" },
+    { "action": "cast", "actor": "armed", "spell": 570141, "target": "armed_dummy" },
+    { "action": "wait", "ms": 1700 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Gale cast procs Master Airbender",
+      "actor": "armed", "metric": "spell_proc_count", "spell": 705719, "min": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: nothing procs on the control",
+      "actor": "control", "metric": "spell_proc_count", "spell": 705719, "equals": 0
+    },
+    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 705672, "save_as": "exhale_gale" },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Exhale loses 1000 ms through trigger 681010 (EffectBasePoints -1001 + 1 die side)",
+      "actor": "armed", "metric": "cooldown_ms", "spell": 705672,
+      "relative_to": "exhale_gale", "min": -1500, "max": -500
+    },
+    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 500041, "save_as": "body_gale" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Body of Lightning loses 1000 ms through the same trigger 681010",
+      "actor": "armed", "metric": "cooldown_ms", "spell": 500041,
+      "relative_to": "body_gale", "min": -1500, "max": -500
+    },
+    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 806242, "save_as": "insulate_gale" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Insulate loses 1000 ms through trigger 6801879",
+      "actor": "armed", "metric": "cooldown_ms", "spell": 806242,
+      "relative_to": "insulate_gale", "min": -1500, "max": -500
+    },
+    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 500039, "save_as": "kiss_gale" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Kiss of the Clouds loses 1000 ms through trigger 680878",
+      "actor": "armed", "metric": "cooldown_ms", "spell": 500039,
+      "relative_to": "kiss_gale", "min": -1500, "max": -500
+    },
+    { "action": "snapshot", "actor": "armed_dummy", "metric": "health", "save_as": "dummy_before_thorim" },
+    { "action": "cast", "actor": "control", "spell": 567520, "target": "control_dummy" },
+    { "action": "cast", "actor": "armed", "spell": 567520, "target": "armed_dummy" },
+    { "action": "wait", "ms": 1700 },
+    {
+      "action": "assert", "label": "SETUP: the Arm of Thorim cast really landed, so the next assertions are not a silent no-cast",
+      "actor": "armed_dummy", "metric": "health", "relative_to": "dummy_before_thorim", "max": -1, "within_ms": 3000
+    },
+    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 705672, "save_as": "exhale_thorim" },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Arm of Thorim is outside Gale's 0x4000 mask, so Exhale keeps its single 1000 ms reduction",
+      "actor": "armed", "metric": "cooldown_ms", "spell": 705672,
+      "relative_to": "exhale_thorim", "min": -1500, "max": -500
+    },
+    { "action": "snapshot", "actor": "control", "metric": "cooldown_ms", "spell": 806242, "save_as": "insulate_thorim" },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Insulate also keeps its single 1000 ms reduction",
+      "actor": "armed", "metric": "cooldown_ms", "spell": 806242,
+      "relative_to": "insulate_thorim", "min": -1500, "max": -500
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Dark Chants shortens Forbidden Ritual's cast time and raises Black Blood's stack cap (#3163)",
+  "contract": "Dark Chants 712471 (Spell.dbc, passive, family 31) has two effects, both APPLY_AURA, both spellmods: effect0 is SPELLMOD_FLAT (aura 107) on SPELLMOD_CASTING_TIME (misc 10), EffectBasePoints -1001 + DieSides(1)-derived +1 = -1000 ms, class mask dword C bit18 (262144), which is exactly the SpellFamilyFlags of both 'Forbidden Ritual' records (800105, 802766). effect1 is SPELLMOD_FLAT on SPELLMOD_MAX_AURA_STACKS (misc 31, an Ascension-native spellmod op), BasePoints 0+1=+1, class mask dword B bit15 (32768), exactly the SpellFamilyFlags of both 'Black Blood' records (804113, 804153), whose own StackAmount is natively 1. Both spellmods are read generically: SPELLMOD_CASTING_TIME by SpellInfo::CalcCastTime -> Unit::ModSpellCastTime, and SPELLMOD_MAX_AURA_STACKS by SpellInfo::CalcMaxAuraStacks (SpellInfo.cpp ~1442-1465), both called through the ordinary Player::ApplySpellMod path with no CoA script or dummy handler for 712471 anywhere in src/server/coa or src/server/game. The spell_modifier metric (op 10, arbitrary base) proves the flat -1000 ms cast-time mod in isolation; spell_max_stacks proves the native StackAmount(1)+1=2 cap directly, which is the exact mechanism SpellInfo::CalcMaxAuraStacks implements. A control spell outside both class masks (Netherstrike 806222, family 31, SpellFamilyFlags dword A bit18 only) must be unaffected by both mods. Regression guard for behaviour that already works natively; no code change.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "p", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: Forbidden Ritual keeps an arbitrary 2000 ms cast time before Dark Chants",
+      "actor": "p", "metric": "spell_modifier", "spell": 800105, "op": 10, "base": 2000, "equals": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the other Forbidden Ritual record is unaffected too",
+      "actor": "p", "metric": "spell_modifier", "spell": 802766, "op": 10, "base": 2000, "equals": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: Black Blood's native stack cap is 1 (its own StackAmount) before Dark Chants",
+      "actor": "p", "metric": "spell_max_stacks", "spell": 804113, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: Netherstrike's cast-time mod is unaffected before Dark Chants too",
+      "actor": "p", "metric": "spell_modifier", "spell": 806222, "op": 10, "base": 2000, "equals": 2000
+    },
+    { "action": "learn", "actor": "p", "spell": 712471 },
+    {
+      "action": "assert", "label": "Dark Chants removes exactly 1000 ms from Forbidden Ritual 800105 (#3163)",
+      "actor": "p", "metric": "spell_modifier", "spell": 800105, "op": 10, "base": 2000, "equals": 1000
+    },
+    {
+      "action": "assert", "label": "Dark Chants removes exactly 1000 ms from Forbidden Ritual 802766 too (#3163)",
+      "actor": "p", "metric": "spell_modifier", "spell": 802766, "op": 10, "base": 2000, "equals": 1000
+    },
+    {
+      "action": "assert", "label": "Dark Chants raises Black Blood's stack cap from 1 to 2 (#3163)",
+      "actor": "p", "metric": "spell_max_stacks", "spell": 804113, "equals": 2
+    },
+    {
+      "action": "assert", "label": "Dark Chants raises the other Black Blood record's cap too (#3163)",
+      "actor": "p", "metric": "spell_max_stacks", "spell": 804153, "equals": 2
+    },
+    {
+      "action": "assert", "label": "Netherstrike's cast time stays unaffected by Dark Chants (control)",
+      "actor": "p", "metric": "spell_modifier", "spell": 806222, "op": 10, "base": 2000, "equals": 2000
+    }
+  ]
+}

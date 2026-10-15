@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Fanaticism is a native spell modifier on Gavels and Horusath Blast only (#3541)",
+  "contract": "Spell.dbc 805628 (\"Fanaticism\", SpellFamilyName 33, Passive) has two SPELL_AURA_ADD_PCT_MODIFIER (108) effects sharing EffectSpellClassMask word 2 = 96, which a repository-wide Spell.dbc scan for family-33 spells shows matches exactly the Gavel of Light/Grace/Wrath chains and the Horusath Blast chain, and nothing else. Effect 0 is EffectMiscValue 8 (SPELLMOD_ALL_EFFECTS) with EffectBasePoints 19 (amount 20); effect 1 is EffectMiscValue 14 (SPELLMOD_COST) with EffectBasePoints -21 (amount -20). Player::ApplySpellMod's SPELLMOD_PCT branch (Player.cpp:10219) gives basevalue = basevalue*totalmul + totalflat: a single +20% modifier makes base 1000 read back 1200, a single -20% modifier makes it read back 800 — exactly the tooltip's 'increases the effectiveness ... and reduces their mana cost ... by 20%'. This is a fully generic native pipeline; no server script exists or is needed.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "cleric", "spell": 805628 },
+    {
+      "action": "assert", "label": "Gavel of Wrath's effectiveness is increased by 20%",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 800617, "op": 8, "base": 1000, "equals": 1200
+    },
+    {
+      "action": "assert", "label": "Horusath Blast's effectiveness is increased by 20%",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 500154, "op": 8, "base": 1000, "equals": 1200
+    },
+    {
+      "action": "assert", "label": "Gavel of Wrath's mana cost is reduced by 20%",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 800617, "op": 14, "base": 1000, "equals": 800
+    },
+    {
+      "action": "assert", "label": "Horusath Blast's mana cost is reduced by 20%",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 500154, "op": 14, "base": 1000, "equals": 800
+    },
+    {
+      "action": "assert", "label": "An unrelated family-33 spell (Radiant Cascade) is untouched",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 500141, "op": 8, "base": 1000, "equals": 1000
+    }
+  ]
+}

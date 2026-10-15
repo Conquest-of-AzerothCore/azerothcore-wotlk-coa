@@ -1,0 +1,1234 @@
+{
+  "schema": 1,
+  "name": "Electrocutioner procs from spell damage (#4222)",
+  "contract": "A Stormbringer with the Electrocutioner passive gains Electrocutioner (804592) from damaging spells; one without the passive never does. Chance is 5% plus a fifth of a percent per Static, so 24 casts at full Static (25% each) make a missed proc very unlikely (0.75^24, about 0.1%). The procs are counted as casts of 804592 over the whole scenario rather than read as the 15 second aura at the end, which only samples the last nine or so casts (a 7.5% false failure).",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "s",
+      "race": 1,
+      "class": 16,
+      "level": 20,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "c",
+      "race": 1,
+      "class": 16,
+      "level": 20,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "s",
+      "entry": 36,
+      "level": 20,
+      "distance": 10
+    },
+    {
+      "id": "f",
+      "owner": "c",
+      "entry": 36,
+      "level": 20,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 500068
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 804020
+    },
+    {
+      "action": "learn",
+      "actor": "c",
+      "spell": 804020
+    },
+    {
+      "action": "assert",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 804592,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "e",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "e"
+    },
+    {
+      "action": "set_health",
+      "actor": "f",
+      "value": 386
+    },
+    {
+      "action": "set_power",
+      "actor": "c",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "c",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 804020,
+      "target": "f"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Electrocutioner procced at least once over the 24 casts",
+      "actor": "s",
+      "metric": "spell_cast_count",
+      "spell": 804592,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Without the passive it never procs",
+      "actor": "c",
+      "metric": "spell_cast_count",
+      "spell": 804592,
+      "equals": 0
+    }
+  ]
+}

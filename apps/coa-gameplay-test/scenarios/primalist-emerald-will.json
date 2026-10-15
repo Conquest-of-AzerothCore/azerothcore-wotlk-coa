@@ -1,0 +1,417 @@
+{
+  "schema": 1,
+  "name": "Primalist Emerald Will successful poison and disease dispels",
+  "contract": "Soothing Touch heals 4% of target maximum health for each successfully dispelled poison/disease effect. Test either type, both together, a clean target, baseline and removal. Mere casts cannot heal. Emerald Will 525015 is a DmgClass 1 heal of the Normal school, which AscensionPrimalistPhysicalCrit.cpp lets crit at the Primalist's Nature spell crit chance, so the heal crits at random. The Primalist therefore gets spell crit rating 10000, which puts that chance above 100%, and every heal is the native 150% magic critical heal (Unit::SpellCriticalHealingBonus): 4% of the ally's 100000 maximum is 4000, healed as 6000 per dispelled effect and 12000 for both. The positive cases count critical heals only, so a heal that did not crit cannot stand in for a larger percentage; the baseline, clean-target and removal controls count every heal and must stay at zero.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 58
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 520841
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500302,
+      "all_specs": true
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 2818,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 2818,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 525015,
+      "target": "ally",
+      "save_as": "baseline"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520841,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 2818,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 525015,
+      "target": "ally",
+      "relative_to": "baseline",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500302
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 2818,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 2818,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 525015,
+      "target": "ally",
+      "critical": true,
+      "save_as": "poison"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520841,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 2818,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 525015,
+      "target": "ally",
+      "critical": true,
+      "relative_to": "poison",
+      "equals": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55078,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 55078,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 525015,
+      "target": "ally",
+      "critical": true,
+      "save_as": "disease"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520841,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 55078,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 525015,
+      "target": "ally",
+      "critical": true,
+      "relative_to": "disease",
+      "equals": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 2818,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 2818,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55078,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 55078,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 525015,
+      "target": "ally",
+      "critical": true,
+      "save_as": "both"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520841,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 2818,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 55078,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 525015,
+      "target": "ally",
+      "critical": true,
+      "relative_to": "both",
+      "equals": 12000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 525015,
+      "target": "ally",
+      "save_as": "clean"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520841,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 525015,
+      "target": "ally",
+      "relative_to": "clean",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500302,
+      "all_specs": true
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 2818,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 2818,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 525015,
+      "target": "ally",
+      "save_as": "removed"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520841,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 2818,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 525015,
+      "target": "ally",
+      "relative_to": "removed",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    }
+  ]
+}

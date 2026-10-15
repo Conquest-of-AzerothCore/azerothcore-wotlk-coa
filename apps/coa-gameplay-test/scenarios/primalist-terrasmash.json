@@ -1,0 +1,369 @@
+{
+  "schema": 1,
+  "name": "primalist-terrasmash",
+  "contract": "Positive offhand melee hits have a 30% chance to launch one Geode. Native offhand hits are the sample denominator. Baseline, unlearning and main-hand-only attacks cannot proc.",
+  "timeout_ms": 600000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "mainhand",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 196
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 674
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 2134
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 2134,
+      "slot": 16
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_geodes_before",
+      "label": "baseline_geodes_before",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_damage_count",
+      "save_as": "baseline_offhand_before",
+      "label": "baseline_offhand_before",
+      "hand": 1
+    },
+    {
+      "action": "attack",
+      "actor": "primalist",
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 15000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_damage_count",
+      "save_as": "baseline_offhand",
+      "label": "baseline_offhand",
+      "hand": 1,
+      "relative_to": "baseline_offhand_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_geodes",
+      "label": "baseline_geodes",
+      "spell": 804002,
+      "target": "target",
+      "relative_to": "baseline_geodes_before"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_damage_count",
+      "hand": 1,
+      "relative_to": "baseline_offhand_before",
+      "min": 5
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 804002,
+      "target": "target",
+      "relative_to": "baseline_geodes_before",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 706220
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_geodes_before",
+      "label": "talented_geodes_before",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_damage_count",
+      "save_as": "talented_offhand_before",
+      "label": "talented_offhand_before",
+      "hand": 1
+    },
+    {
+      "action": "attack",
+      "actor": "primalist",
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 400000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_damage_count",
+      "save_as": "talented_offhand",
+      "label": "talented_offhand",
+      "hand": 1,
+      "relative_to": "talented_offhand_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_geodes",
+      "label": "talented_geodes",
+      "spell": 804002,
+      "target": "target",
+      "relative_to": "talented_geodes_before"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_damage_count",
+      "hand": 1,
+      "relative_to": "talented_offhand_before",
+      "min": 180
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706220
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_geodes_before",
+      "label": "removed_geodes_before",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_damage_count",
+      "save_as": "removed_offhand_before",
+      "label": "removed_offhand_before",
+      "hand": 1
+    },
+    {
+      "action": "attack",
+      "actor": "primalist",
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 15000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_damage_count",
+      "save_as": "removed_offhand",
+      "label": "removed_offhand",
+      "hand": 1,
+      "relative_to": "removed_offhand_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_geodes",
+      "label": "removed_geodes",
+      "spell": 804002,
+      "target": "target",
+      "relative_to": "removed_geodes_before"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_damage_count",
+      "hand": 1,
+      "relative_to": "removed_offhand_before",
+      "min": 5
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 804002,
+      "target": "target",
+      "relative_to": "removed_geodes_before",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "specialization",
+      "actor": "mainhand",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "mainhand",
+      "spell": 197
+    },
+    {
+      "action": "learn",
+      "actor": "mainhand",
+      "spell": 706220
+    },
+    {
+      "action": "add_item",
+      "actor": "mainhand",
+      "item": 12282
+    },
+    {
+      "action": "equip",
+      "actor": "mainhand",
+      "item": 12282,
+      "slot": 15
+    },
+    {
+      "action": "attack",
+      "actor": "mainhand",
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 20000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mainhand"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "mainhand",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "min": 5
+    },
+    {
+      "action": "assert",
+      "actor": "mainhand",
+      "metric": "melee_attack_count",
+      "hand": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "mainhand",
+      "metric": "spell_damage_count",
+      "spell": 804002,
+      "target": "target",
+      "equals": 0
+    }
+  ]
+}

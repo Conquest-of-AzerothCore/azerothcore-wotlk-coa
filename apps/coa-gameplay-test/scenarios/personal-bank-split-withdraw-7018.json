@@ -1,0 +1,184 @@
+{
+  "schema": 1,
+  "name": "Personal Bank split withdrawals preserve item counts (#7018)",
+  "contract": "Linen Cloth stacks to 20. Withdrawing five from a bank stack of twenty into an explicit backpack slot grants five and leaves fifteen. Automatic split placement grants one and leaves nineteen. A full inventory with a stack of fifteen can accept a split of five, and the remaining bank stack stays fifteen. These are native bank swap packets, with no item-count adjustments after the transfer.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "banker",
+      "race": 1,
+      "class": 22,
+      "level": 26
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "banker",
+      "item": 134985
+    },
+    {
+      "action": "use_item",
+      "actor": "banker",
+      "item": 134985,
+      "spell": 100702
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "personal_bank_open",
+      "actor": "banker",
+      "entry": 475001
+    },
+    {
+      "action": "add_item",
+      "actor": "banker",
+      "item": 2589,
+      "count": 20
+    },
+    {
+      "action": "personal_bank_swap",
+      "actor": "banker",
+      "entry": 475001,
+      "direction": "deposit",
+      "item": 2589
+    },
+    {
+      "action": "assert",
+      "actor": "banker",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 0,
+      "label": "The bank holds the original stack of twenty"
+    },
+    {
+      "action": "personal_bank_swap",
+      "actor": "banker",
+      "entry": 475001,
+      "direction": "withdraw",
+      "count": 5,
+      "inventory_slot": 38
+    },
+    {
+      "action": "assert",
+      "actor": "banker",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 5,
+      "label": "An explicit split destination receives exactly five"
+    },
+    {
+      "action": "personal_bank_swap",
+      "actor": "banker",
+      "entry": 475001,
+      "direction": "withdraw"
+    },
+    {
+      "action": "assert",
+      "actor": "banker",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 20,
+      "label": "The remaining fifteen preserve the total of twenty"
+    },
+    {
+      "action": "personal_bank_swap",
+      "actor": "banker",
+      "entry": 475001,
+      "direction": "deposit",
+      "item": 2589
+    },
+    {
+      "action": "personal_bank_swap",
+      "actor": "banker",
+      "entry": 475001,
+      "direction": "withdraw",
+      "count": 1
+    },
+    {
+      "action": "assert",
+      "actor": "banker",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 1,
+      "label": "Automatic inventory placement receives exactly one"
+    },
+    {
+      "action": "personal_bank_swap",
+      "actor": "banker",
+      "entry": 475001,
+      "direction": "withdraw"
+    },
+    {
+      "action": "assert",
+      "actor": "banker",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 20,
+      "label": "Automatic placement leaves nineteen in the bank"
+    },
+    {
+      "action": "personal_bank_swap",
+      "actor": "banker",
+      "entry": 475001,
+      "direction": "deposit",
+      "item": 2589
+    },
+    {
+      "action": "add_item",
+      "actor": "banker",
+      "item": 2589,
+      "count": 15
+    },
+    {
+      "action": "fill_bags",
+      "actor": "banker"
+    },
+    {
+      "action": "assert",
+      "actor": "banker",
+      "metric": "free_inventory_slots",
+      "equals": 0
+    },
+    {
+      "action": "personal_bank_swap",
+      "actor": "banker",
+      "entry": 475001,
+      "direction": "withdraw",
+      "count": 5
+    },
+    {
+      "action": "assert",
+      "actor": "banker",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 20,
+      "label": "A split can fit into the only remaining stack capacity"
+    },
+    {
+      "action": "destroy_item",
+      "actor": "banker",
+      "item": 2589
+    },
+    {
+      "action": "personal_bank_swap",
+      "actor": "banker",
+      "entry": 475001,
+      "direction": "withdraw"
+    },
+    {
+      "action": "assert",
+      "actor": "banker",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 15,
+      "label": "The capacity-limited split left exactly fifteen in the bank"
+    }
+  ]
+}

@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "PvP Power raises absorb shields",
+  "contract": "Requires PvpPower.Enable = 1. A High-Risk level 60 priest wearing a robe with PvP Power (+42) gets 42 x 0.02% = 0.84% more Power Word: Shield on top of the robe's own spell power (+1.90% on this rank, measured with PvpPower.Enable = 0).",
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 5,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 25218
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 25218,
+      "target": "p"
+    },
+    {
+      "action": "assert",
+      "label": "Base shield exists",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 25218,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "aura_amount",
+      "spell": 25218,
+      "save_as": "shield_base"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 25218,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 6788,
+      "stacks": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 16443,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 16443,
+      "slot": 4
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 25218,
+      "target": "p"
+    },
+    {
+      "action": "assert",
+      "label": "Shield exists again",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 25218,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Robe stats (+1.90%) and PvP Power +42 (+0.84%) compound on the shield",
+      "actor": "p",
+      "metric": "aura_amount",
+      "spell": 25218,
+      "ratio_to": "shield_base",
+      "min": 1.0255,
+      "max": 1.0295
+    }
+  ]
+}

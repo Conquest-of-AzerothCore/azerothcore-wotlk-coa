@@ -1,0 +1,268 @@
+{
+  "schema": 1,
+  "name": "Oblivion copies the full Epoch heal, including overhealing, as noncritical Frost/Arcane damage",
+  "contract": "Each fully overhealing Epoch deals its full logged heal as one 583921 hit within 15 yards. Spell.dbc gives 583921 AttributesEx2 0x20000000 (SPELL_ATTR2_CANT_CRIT), so its native per-spell crit chance is 0 even though the fixture's spell critical rating raises the character-sheet chance far above 100%. The targets are Harvest Golems (entry 36, a mechanical creature): a critter such as Dig Rat 3444 runs CritterAI, which flees from the first Oblivion hit and then evades home, leaving no valid enemy within 15 yards for the next Epoch.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chrono",
+      "race": 1,
+      "class": 22,
+      "level": 60,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "near",
+      "owner": "chrono",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 14
+    },
+    {
+      "id": "far",
+      "owner": "chrono",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 26
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chrono",
+      "spell": 504575
+    },
+    {
+      "action": "set_aura",
+      "actor": "chrono",
+      "spell": 806293,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Oblivion cannot crit despite the fixture's spell critical rating",
+      "actor": "chrono",
+      "metric": "spell_done_crit_chance",
+      "spell": 583921,
+      "target": "near",
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "chrono",
+      "value": 500000,
+      "maximum": 500000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono",
+      "metric": "spell_heal_total",
+      "spell": 504575,
+      "save_as": "full_heal_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono",
+      "metric": "spell_damage_total",
+      "spell": 583921,
+      "target": "near",
+      "save_as": "full_damage_before"
+    },
+    {
+      "action": "cast",
+      "actor": "chrono",
+      "spell": 504575
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "cast_failure",
+      "spell": 504575,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "spell_effective_heal_total",
+      "spell": 504575,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "full_healing",
+      "actor": "chrono",
+      "metric": "spell_heal_total",
+      "spell": 504575,
+      "relative_to": "full_heal_before",
+      "save_as": "full_healing"
+    },
+    {
+      "action": "snapshot",
+      "label": "full_damage",
+      "actor": "chrono",
+      "metric": "spell_damage_total",
+      "spell": 583921,
+      "target": "near",
+      "relative_to": "full_damage_before",
+      "save_as": "full_damage"
+    },
+    {
+      "action": "set_aura",
+      "actor": "chrono",
+      "spell": 44505,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "spell_power",
+      "school": 5,
+      "min": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "spell_damage_done",
+      "spell": 583921,
+      "target": "near",
+      "equals": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "chrono",
+      "value": 500000,
+      "maximum": 500000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono",
+      "metric": "spell_heal_total",
+      "spell": 504575,
+      "save_as": "boosted_heal_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono",
+      "metric": "spell_damage_total",
+      "spell": 583921,
+      "target": "near",
+      "save_as": "boosted_damage_before"
+    },
+    {
+      "action": "cast",
+      "actor": "chrono",
+      "spell": 504575
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "cast_failure",
+      "spell": 504575,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "spell_effective_heal_total",
+      "spell": 504575,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "boosted_healing",
+      "actor": "chrono",
+      "metric": "spell_heal_total",
+      "spell": 504575,
+      "relative_to": "boosted_heal_before",
+      "save_as": "boosted_healing"
+    },
+    {
+      "action": "snapshot",
+      "label": "boosted_damage",
+      "actor": "chrono",
+      "metric": "spell_damage_total",
+      "spell": 583921,
+      "target": "near",
+      "relative_to": "boosted_damage_before",
+      "save_as": "boosted_damage"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "spell_damage_count",
+      "spell": 583921,
+      "target": "near",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "spell_damage_count",
+      "spell": 583921,
+      "critical": true,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "spell_damage_count",
+      "spell": 583921,
+      "target": "far",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "spell_damage_count",
+      "spell": 801301,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chrono",
+      "spell": 806293,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "chrono",
+      "spell": 504575
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "spell_heal_count",
+      "spell": 504575,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "spell_damage_count",
+      "spell": 583921,
+      "equals": 2
+    }
+  ]
+}

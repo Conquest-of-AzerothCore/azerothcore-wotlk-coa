@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Cruel Intent strikes three extra auto attacks when a Lunge lands (#2336)",
+  "contract": "Cruel Intent 704653 reads 'When you Lunge at an enemy you now strike them 3 times with auto attacks.' Its effect is aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) with EffectTriggerSpell 707599 (SPELL_EFFECT_ADD_EXTRA_ATTACKS, BasePoints 2 + DieSides 1 = 3, on the caster), ProcChance 100 and Spell.dbc ProcFlags 0x0, so without a spell_proc row SpellMgr::LoadSpellProcs generated nothing and the aura never procced. Lunge 500126 is the only family-26 record with SpellFamilyFlags (16777216, 0, 0); it has DmgClass NONE and is harmful, so the row belongs on ProcFlags 4096 (PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG) with SpellPhaseMask 2 (HIT) and Chance 0, the same shape as the live Dark Intent heal row 707622. Lunge requires Cursed Form (CasterAuraSpell 525031) and costs 8% maximum health, so the fixture enters Accursed Form 562572 first. The harness all-spell cast hook records the triggered 707599 cast as a proc against 704653 and as a cast of 707599, and the queued extra attacks are asserted as three extra main-hand melee packets landing on the Lunge target.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 20, "level": 80, "spell_hit_rating": 10000, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "victim", "owner": "caster", "entry": 36, "level": 1, "health": 1000000, "distance": 12 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 4000 },
+    { "action": "learn", "actor": "caster", "spell": 562572 },
+    { "action": "learn", "actor": "caster", "spell": 500126 },
+    { "action": "learn", "actor": "caster", "spell": 704653 },
+    { "action": "cast", "actor": "caster", "spell": 562572 },
+    { "action": "assert", "label": "A Cursed Form is active so Lunge is castable", "actor": "caster", "metric": "aura", "spell": 562572, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Let the Cursed Form marker settle", "ms": 2000 },
+    { "action": "snapshot", "save_as": "melee_before_lunge", "actor": "caster", "metric": "melee_attack_count" },
+    { "action": "cast", "label": "Lunge the dummy", "actor": "caster", "spell": 500126, "target": "victim" },
+    { "action": "assert", "label": "The landed Lunge procced Cruel Intent", "actor": "caster", "metric": "spell_proc_count", "spell": 704653, "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "The proc cast the extra-attacks spell", "actor": "caster", "metric": "spell_cast_count", "spell": 707599, "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Cruel Intent struck three extra auto attacks", "actor": "caster", "metric": "melee_attack_count", "relative_to": "melee_before_lunge", "min": 3, "within_ms": 3000 }
+  ]
+}

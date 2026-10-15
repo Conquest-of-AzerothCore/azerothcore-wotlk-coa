@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Champion's Arrival extends both Chains of Light and Champion of the Sun by 5 sec (#2442)",
+  "contract": "Champion's Arrival 704905 (SpellFamilyName 33) is SPELL_AURA_ADD_FLAT_MODIFIER (107), SPELLMOD_DURATION (1), EffectBasePoints 4999 -> real 5000 ms, EffectSpellClassMask (0x4000, 0x800, 0x100000). Word 1 (0x4000) matches Chains of Light's own effect spell (806697, SpellFamilyFlags_1 0x4000, DurationIndex 8 = 15000 ms), so SpellInfo::IsAffectedBySpellMod already admits it and the native Player::ApplySpellMod(806697, SPELLMOD_DURATION, base) path (queried directly here with 'spell_modifier', the same call Spell::CheckCast's duration calculation makes) already returns 15000 -> 20000 with no code change. Words 2 and 3 (0x800, 0x100000) do not match Champion of the Sun (800612, SpellFamilyFlags_1 0x20 only): scanning every family-33 record for those two bits instead finds 'Twilight' (707612, 712445) and 'Holy Form' (805301) / 'Vow of the Valkyr' (807751) -- none of them Champion of the Sun -- so that half of the SpellMod can never reach 800612's own 25000 ms self-buff (DurationIndex 63). aura_ascension_champion_of_the_sun_arrival (registered on 800612 itself) extends the aura by 5000 ms directly on AfterEffectApply when the caster knows 704905, using the same Aura::SetDuration/SetMaxDuration pair AscensionSunCleric::Extend already uses elsewhere for this exact purpose. 'set_aura' applies 800612 through the normal Unit::AddAura path, so the hook fires the same way a real cast would.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 27, "level": 80 },
+    { "id": "talent", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talent", "spell": 704905 },
+    {
+      "action": "assert",
+      "label": "Without the talent Chains of Light keeps its own 15 second duration",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 806697,
+      "op": 1,
+      "base": 15000,
+      "equals": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Champion's Arrival extends Chains of Light to 20 seconds",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 806697,
+      "op": 1,
+      "base": 15000,
+      "equals": 20000
+    },
+    { "action": "set_aura", "label": "Control gains Champion of the Sun as a fixture", "actor": "control", "spell": 800612, "stacks": 1 },
+    { "action": "set_aura", "label": "The talented Sun Cleric gains the same buff", "actor": "talent", "spell": 800612, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "Without the talent Champion of the Sun keeps its own 25 second duration",
+      "actor": "control",
+      "metric": "aura_duration_ms",
+      "spell": 800612,
+      "caster": "control",
+      "min": 24000,
+      "max": 25000
+    },
+    {
+      "action": "assert",
+      "label": "Champion's Arrival extends Champion of the Sun to 30 seconds",
+      "actor": "talent",
+      "metric": "aura_duration_ms",
+      "spell": 800612,
+      "caster": "talent",
+      "min": 29000,
+      "max": 30000
+    }
+  ]
+}

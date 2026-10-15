@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "name": "Iron Claws gives Rotclaw stacks, armor ignore and duration (#2166)",
+  "contract": "Iron Claws 572783 has all three effects over EffectSpellClassMask (0, 512, 0) = word 1 bit 9 = the twelve Rotclaw records (503476-503486, 804197). Effect 0 is aura 107 with MiscValue 31 (SPELLMOD_MAX_AURA_STACKS, consumed by SpellInfo::CalcMaxAuraStacks) and BasePoints 1 + DieSides 1 = +2; Rotclaw ships StackAmount 1, so it becomes 3. Effect 1 is aura 107 with MiscValue 23 (SPELLMOD_EFFECT3, which Unit::ApplyEffectModifiers maps to effect index 2) and BasePoints 2 + DieSides 1 = +3; Rotclaw's effect 2 is aura 338 SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT with amount 0, so it becomes 3, and AuraEffect::CalculateAmount multiplies by the stack amount. Effect 2 is aura 108 with MiscValue 1 (SPELLMOD_DURATION) and +50%; Rotclaw has DurationIndex 35 = 4000 ms, so it becomes 6000 ms. Tooltip: \"Allows Rotclaw's periodic effect to stack up $s1 additional times for $s3% longer duration and cause you to ignore $s2% of the target's armor.\" Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Rotclaw stacks once before the talent",
+      "actor": "caster",
+      "metric": "spell_max_stacks",
+      "spell": 503486,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rotclaw's armor-ignore effect is zero before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 503486,
+      "op": 23,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Rotclaw keeps its authored 4000 ms before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 503486,
+      "op": 1,
+      "base": 4000,
+      "equals": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572783
+    },
+    {
+      "action": "assert",
+      "label": "Iron Claws lets Rotclaw stack three times",
+      "actor": "caster",
+      "metric": "spell_max_stacks",
+      "spell": 503486,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Iron Claws gives Rotclaw 3% armor ignore per stack",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 503486,
+      "op": 23,
+      "base": 0,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Iron Claws lengthens Rotclaw to 6000 ms",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 503486,
+      "op": 1,
+      "base": 4000,
+      "equals": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Iron Claws does not touch Bloodbolt's duration",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 1,
+      "base": 4000,
+      "equals": 4000
+    }
+  ]
+}

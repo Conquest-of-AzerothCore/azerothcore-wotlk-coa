@@ -19,6 +19,17 @@
 #include "ScriptMgr.h"
 #include "ScriptMgrMacros.h"
 
+void ScriptMgr::OnBeforeHealAbsorb(HealInfo& healInfo)
+{
+    CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_ON_BEFORE_HEAL_ABSORB, script->OnBeforeHealAbsorb(healInfo));
+}
+
+void ScriptMgr::OnAfterAuraEffectCalculateAmount(AuraEffect const* effect, Unit* caster, int32& amount)
+{
+    CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_ON_AFTER_AURA_EFFECT_CALCULATE_AMOUNT,
+        script->OnAfterAuraEffectCalculateAmount(effect, caster, amount));
+}
+
 void ScriptMgr::OnHeal(Unit* healer, Unit* reciever, uint32& gain)
 {
     CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_ON_HEAL, script->OnHeal(healer, reciever, gain));
@@ -71,7 +82,8 @@ void ScriptMgr::ModifyHealReceived(Unit* target, Unit* healer, uint32& heal, Spe
     CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_MODIFY_HEAL_RECEIVED, script->ModifyHealReceived(target, healer, heal, spellInfo));
 }
 
-uint32 ScriptMgr::DealDamage(Unit* AttackerUnit, Unit* pVictim, uint32 damage, DamageEffectType damagetype)
+uint32 ScriptMgr::DealDamage(Unit* AttackerUnit, Unit* pVictim, uint32 damage, DamageEffectType damagetype,
+    std::optional<uint32>* scriptHealthLeechDamage)
 {
     if (ScriptRegistry<UnitScript>::ScriptPointerList.empty())
     {
@@ -80,7 +92,8 @@ uint32 ScriptMgr::DealDamage(Unit* AttackerUnit, Unit* pVictim, uint32 damage, D
 
     for (auto const& [scriptID, script] : ScriptRegistry<UnitScript>::ScriptPointerList)
     {
-        damage = script->DealDamage(AttackerUnit, pVictim, damage, damagetype);
+        damage = script->DealDamage(AttackerUnit, pVictim, damage, damagetype,
+                                    scriptHealthLeechDamage);
     }
 
     return damage;
@@ -178,6 +191,11 @@ void ScriptMgr::OnUnitDeath(Unit* unit, Unit* killer)
 void ScriptMgr::OnUnitSetShapeshiftForm(Unit* unit, uint8 form)
 {
     CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_ON_UNIT_SET_SHAPESHIFT_FORM, script->OnUnitSetShapeshiftForm(unit, form));
+}
+
+void ScriptMgr::OnHealthChanged(Unit* unit)
+{
+    CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_ON_HEALTH_CHANGED, script->OnHealthChanged(unit));
 }
 
 UnitScript::UnitScript(char const* name, bool addToScripts, std::vector<uint16> enabledHooks)

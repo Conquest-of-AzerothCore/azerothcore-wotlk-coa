@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "name": "Shadowflame Forge ranks 1 and 2 lengthen Hellmaw by 3 and 6 seconds (#1334)",
+  "contract": "#1334 claims Shadowflame Forge 704989/707838 has no server handler. Live client Spell.dbc: both ranks (family 23, CharacterAdvancement 34099, class 17 Hellfire tab) read 'Increases the duration of Hellmaw by $/1000;s1 sec'. Effect 0 is the native aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER), MiscValue 1 (SPELLMOD_DURATION), BasePoints 2999/5999 + DieSides 1 = +3000/+6000 ms, class mask (0x40, 0, 0), which is exactly the family flags of every Hellmaw rank (806965-806970, 573336). Hellmaw's DurationIndex 29 is 12000 ms. Nothing in AscensionXorothContracts.cpp touches either rank and xoroth_casts::OnCalcMaxDuration leaves Hellmaw alone, so Aura::CalcMaxDuration applies SPELLMOD_DURATION natively. Expected: an untalented Hellmaw lasts 12 s, with rank 1 15 s, with rank 2 (rank 1 removed) 18 s. Each cast hits its own Harvest Golem so no refresh is involved; melee hit and expertise ratings remove the miss, dodge and parry rolls of this melee-class spell. Effect 2 (aura 108, SPELLMOD_DOT +25% on the same mask) is data the tooltip does not describe and is not asserted here. No gameplay change: this is evidence against the report's premise.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "plain", "owner": "knight", "entry": 36, "level": 60, "health": 1000000, "distance": 3 },
+    { "id": "forged", "owner": "knight", "entry": 36, "level": 60, "health": 1000000, "distance": 3 },
+    { "id": "forged_rank2", "owner": "knight", "entry": 36, "level": 60, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 806965 },
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000, "label": "Hellmaw costs 20 Rage" },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 1, "label": "Hellmaw requires and spends Demonfire" },
+    { "action": "cast", "actor": "knight", "spell": 806965, "target": "plain", "label": "Hellmaw without Shadowflame Forge" },
+    {
+      "action": "assert", "label": "SETUP: the untalented Hellmaw lands on its golem",
+      "actor": "plain", "metric": "aura", "spell": 806965, "caster": "knight", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "BASELINE: untalented Hellmaw lasts its 12 s DBC duration",
+      "actor": "plain", "metric": "aura_duration_ms", "spell": 806965, "caster": "knight", "min": 11000, "max": 12000
+    },
+    { "action": "learn", "actor": "knight", "spell": 704989 },
+    { "action": "set_aura", "actor": "knight", "spell": 704989, "stacks": 1, "label": "Force the rank 1 passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle and clear the global cooldown", "ms": 1700 },
+    {
+      "action": "assert", "label": "SETUP: Shadowflame Forge rank 1 is active",
+      "actor": "knight", "metric": "aura", "spell": 704989, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: rank 1 adds 3000 ms to Hellmaw's duration modifier",
+      "actor": "knight", "metric": "spell_modifier", "spell": 806965, "op": 1, "base": 12000, "min": 14999.99, "max": 15000.01
+    },
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000, "label": "Rage for the rank 1 cast" },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 1, "label": "Demonfire for the rank 1 cast" },
+    { "action": "cast", "actor": "knight", "spell": 806965, "target": "forged", "label": "Hellmaw with Shadowflame Forge rank 1" },
+    {
+      "action": "assert", "label": "SETUP: the rank 1 Hellmaw lands on its own golem",
+      "actor": "forged", "metric": "aura", "spell": 806965, "caster": "knight", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Hellmaw lasts 15 s with rank 1",
+      "actor": "forged", "metric": "aura_duration_ms", "spell": 806965, "caster": "knight", "min": 14000, "max": 15000
+    },
+    { "action": "set_aura", "actor": "knight", "spell": 704989, "stacks": 0, "label": "Remove rank 1's passive aura" },
+    { "action": "unlearn", "actor": "knight", "spell": 704989 },
+    { "action": "learn", "actor": "knight", "spell": 707838 },
+    { "action": "set_aura", "actor": "knight", "spell": 707838, "stacks": 1, "label": "Force the rank 2 passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle and clear the global cooldown", "ms": 1700 },
+    {
+      "action": "assert", "label": "SETUP: rank 1 is gone",
+      "actor": "knight", "metric": "aura", "spell": 704989, "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: Shadowflame Forge rank 2 is active",
+      "actor": "knight", "metric": "aura", "spell": 707838, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: rank 2 adds 6000 ms to Hellmaw's duration modifier",
+      "actor": "knight", "metric": "spell_modifier", "spell": 806965, "op": 1, "base": 12000, "min": 17999.99, "max": 18000.01
+    },
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000, "label": "Rage for the rank 2 cast" },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 1, "label": "Demonfire for the rank 2 cast" },
+    { "action": "cast", "actor": "knight", "spell": 806965, "target": "forged_rank2", "label": "Hellmaw with Shadowflame Forge rank 2" },
+    {
+      "action": "assert", "label": "SETUP: the rank 2 Hellmaw lands on its own golem",
+      "actor": "forged_rank2", "metric": "aura", "spell": 806965, "caster": "knight", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Hellmaw lasts 18 s with rank 2",
+      "actor": "forged_rank2", "metric": "aura_duration_ms", "spell": 806965, "caster": "knight", "min": 17000, "max": 18000
+    }
+  ]
+}

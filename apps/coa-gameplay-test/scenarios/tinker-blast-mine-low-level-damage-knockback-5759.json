@@ -1,0 +1,282 @@
+{
+  "schema": 1,
+  "name": "Level-7 Blast Mine remote detonation damages and knocks back nearby enemies (#5759)",
+  "contract": [
+    "Deploy Blast Mine 801718 is a normal level-6 Tinker class ability. Its current description promises Fire damage and knockback on destruction or Remote Detonation 801798, within the Remote Bomb Explosion 802336 radius of 8 yards. Explosion effect 0 is SCHOOL_DAMAGE and effect 1 is KNOCK_BACK. A level-7 Tinker buys Deploy Blast Mine through the native Book at level 7, then deploys it three yards away without fixture-learning the mine, remote ability or ready aura; a level-3 hostile creature one yard beyond that mine must take positive damage and move away after the normal Remote Detonation cast. A second hostile creature 22 yards from the mine must receive neither damage nor displacement. Before detonation the nearby creature remains unharmed and stationary. Mine cleanup removes its readiness aura and leaves Remote Detonation known; the owner remains unharmed. This observes native creature motion; client movement acknowledgement is outside this case."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 7
+    }
+  ],
+  "creatures": [
+    {
+      "id": "near",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 3,
+      "distance": 4,
+      "health": 1000000
+    },
+    {
+      "id": "far",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 3,
+      "distance": 25,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "money",
+      "actor": "tinker",
+      "copper": 200000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 97930,
+      "label": "Book of Ascension utility setup"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "tinker"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spellbook_offers_spell",
+      "spell": 801718,
+      "equals": 1
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "tinker",
+      "spell": 801718
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 801718,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "knows_spell",
+      "spell": 801718,
+      "equals": 1,
+      "label": "Normal level7 Book purchase teaches Deploy Blast Mine"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "knows_spell",
+      "spell": 801798,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Remote Detonation is known from Deploy Blast Mine"
+    },
+    {
+      "action": "snapshot",
+      "actor": "near",
+      "metric": "health",
+      "save_as": "near_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "near",
+      "metric": "distance",
+      "save_as": "near_distance",
+      "target": "tinker"
+    },
+    {
+      "action": "snapshot",
+      "actor": "far",
+      "metric": "health",
+      "save_as": "far_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "far",
+      "metric": "distance",
+      "save_as": "far_distance",
+      "target": "tinker"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "health",
+      "save_as": "owner_health"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801718,
+      "destination": {
+        "x": -8914.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50045,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 500354,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "The mine supplies its native readiness aura"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "knows_spell",
+      "spell": 801798,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Remote Detonation stays known with a mine out"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Let the deployment global cooldown expire before Remote Detonation"
+    },
+    {
+      "action": "assert",
+      "actor": "near",
+      "metric": "health",
+      "relative_to": "near_health",
+      "equals": 0,
+      "label": "Proximity alone does not explode the mine"
+    },
+    {
+      "action": "assert",
+      "actor": "near",
+      "metric": "distance",
+      "target": "tinker",
+      "relative_to": "near_distance",
+      "min": -0.05,
+      "max": 0.05
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801798
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "cast_failure",
+      "spell": 801798,
+      "equals": 0,
+      "label": "The ordinary remote cast is accepted after the deployment cooldown"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50045,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "near",
+      "metric": "health",
+      "relative_to": "near_health",
+      "max": -1,
+      "within_ms": 3000,
+      "label": "Remote Detonation causes native Fire damage"
+    },
+    {
+      "action": "assert",
+      "actor": "near",
+      "metric": "distance",
+      "target": "tinker",
+      "relative_to": "near_distance",
+      "min": 1,
+      "within_ms": 3000,
+      "label": "The same explosion knocks the near enemy away"
+    },
+    {
+      "action": "assert",
+      "actor": "far",
+      "metric": "health",
+      "relative_to": "far_health",
+      "equals": 0,
+      "label": "The distant enemy receives no damage"
+    },
+    {
+      "action": "assert",
+      "actor": "far",
+      "metric": "distance",
+      "target": "tinker",
+      "relative_to": "far_distance",
+      "min": -0.05,
+      "max": 0.05,
+      "label": "The distant enemy receives no knockback"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "health",
+      "relative_to": "owner_health",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 500354,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "knows_spell",
+      "spell": 801798,
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

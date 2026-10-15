@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Unmake consumes the Paradox buff (#5027)",
+  "contract": "Paradox 680946 reads \"Casting Melt Reality now causes your next Unmake or Reverse Wound within 6 sec to become instant and cost 100% less mana\", via the merged spell_proc fix that triggers buff 680947 off Melt Reality (806335, family 28 word1 512). 680947 carries two SPELL_AURA_ADD_PCT_MODIFIER effects (SPELLMOD_COST and SPELLMOD_CASTING_TIME, both -100%, class mask word1 33554432 = Unmake 804418's own flags | word2 1 = Reverse Wound's own flags), but its own Spell.dbc record carries ProcCharges 0, so Player::RemoveSpellMods never dropped it after a cast: the free-instant window applied to every Unmake/Reverse Wound cast for the full 6 s duration instead of only the next one. ApplyAscensionClassMechanics19To25 now patches 680947's ProcCharges to 1 for the validated record, giving Aura::CalcMaxCharges one usable charge so the next Unmake cast removes the whole buff. Fails before the fix (the buff survives the Unmake cast), passes after.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "chronomancer", "entry": 36, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "chronomancer", "spell": 680946 },
+    { "action": "learn", "actor": "chronomancer", "spell": 806335 },
+    { "action": "learn", "actor": "chronomancer", "spell": 804418 },
+    { "action": "cast", "actor": "chronomancer", "spell": 806335, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "Melt Reality's cast procs the Paradox buff",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 680947,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let the global cooldown clear", "ms": 2000 },
+    { "action": "cast", "actor": "chronomancer", "spell": 804418, "target": "dummy" },
+    { "action": "wait", "label": "Let Unmake's cast resolve", "ms": 2500 },
+    {
+      "action": "assert",
+      "label": "Casting Unmake removes the Paradox buff",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 680947,
+      "caster": "chronomancer",
+      "equals": 0
+    }
+  ]
+}

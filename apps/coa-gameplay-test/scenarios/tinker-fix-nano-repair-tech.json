@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "name": "Tinker Nano-Repair Tech regenerates a Tinker with no pet (#2237)",
+  "contract": "#2237: Nano-Repair Tech (681358) is a passive whose Spell.dbc effect 0 is SPELL_AURA_PERIODIC_TRIGGER_SPELL with Amplitude 8000 and TriggerSpell 681516. 681516 heals a percentage of maximum health twice: effect 0 at TARGET_UNIT_CASTER and effect 1 at TARGET_UNIT_PET. Spell::CheckCast rejects a cast whose TargetA is TARGET_UNIT_PET while the caster has no guardian pet or charm, and Spell::prepare runs that check for triggered casts too, so the whole tick was discarded and the caster's own share never ran. A Tinker with no permanent pet is an ordinary state, so the tick must still reach Spell::cast. Fail-before proof: with no guardian pet, the count of spells this aura triggered is zero on the current code and at least one after the fix.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Tinker has no guardian pet, which is what aborted the cast",
+      "actor": "t",
+      "metric": "pet_entry",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Nothing has been triggered before the passive is known",
+      "actor": "t",
+      "metric": "spell_proc_count",
+      "spell": 681358,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 681358
+    },
+    {
+      "action": "assert",
+      "label": "Nano-Repair Tech is active on the Tinker",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 681358,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Its period is the authored 8 seconds",
+      "actor": "t",
+      "metric": "aura_amplitude_ms",
+      "spell": 681358,
+      "effect": 0,
+      "equals": 8000
+    },
+    {
+      "action": "assert",
+      "label": "The periodic heal runs although the Tinker has no pet",
+      "actor": "t",
+      "metric": "spell_proc_count",
+      "spell": 681358,
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "No pet appeared during the test",
+      "actor": "t",
+      "metric": "pet_entry",
+      "equals": 0
+    }
+  ]
+}

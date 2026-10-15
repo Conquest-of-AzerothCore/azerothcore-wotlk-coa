@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Hex of Malice damage over time can critically strike",
+  "contract": "Hex of Malice: periodic damage dealt by this effect can critically strike (spell 501153 tooltip).",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 13, "level": 60, "spell_hit_rating": 10000, "spell_crit_rating": 500 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "caster", "entry": 36, "level": 60, "distance": 5, "health": 100000 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 4000 },
+    { "action": "learn", "actor": "caster", "spell": 501153 },
+    { "action": "cast", "actor": "caster", "spell": 501153, "target": "enemy" },
+    { "action": "assert", "actor": "enemy", "metric": "aura", "spell": 501153, "caster": "caster", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "The damage over time carries the caster's crit chance", "actor": "enemy",
+      "metric": "aura_crit_chance", "spell": 501153, "caster": "caster", "effect": 0, "min": 1 }
+  ]
+}

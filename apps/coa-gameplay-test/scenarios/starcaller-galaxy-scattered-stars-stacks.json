@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Galaxy lets Scattered Stars stack 2 additional times (#706)",
+  "contract": "Galaxy 800508 (Spell.dbc, SpellFamilyName 32, passive) effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 31 (SPELLMOD_MAX_AURA_STACKS, SpellDefines.h), EffectBasePoints 1 with DieSides 1 -> +2, EffectSpellClassMask word1 0x800. Scattered Stars 804378 has SpellFamilyFlags word1 0x800 and StackAmount 4, so the mask selects it (the only other record in family 32 with that bit, 804995, is its helper and has no StackAmount). The tooltip is 'Your Scattered Stars can now stack 2 additional times.'. Effect 1 (op 12, +3) targets effect 2 of the same mask and lands on 804378's effect 1, which AscensionStarcallerContracts.cpp:104 turns into a dummy: it has no bearing on the stack cap and is not asserted. The module adds Scattered Stars through Cast(player, target, 804378) (AscensionStarcaller.cpp:215), whose comment says the native stack cap keeps the caster's stack-capacity modifiers: Aura::ModStackAmount reads SpellInfo::CalcMaxAuraStacks(caster), which applies SPELLMOD_MAX_AURA_STACKS. spell_max_stacks returns exactly SpellInfo::CalcMaxAuraStacks(player). The Bright Moon scenario (starcaller-bright-moon-lunar-phase.json) proves the same consumer at 4 -> 8. Expected: 4 without the talent, 6 with it.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 800508
+    },
+    {
+      "action": "assert",
+      "label": "Learning the talent applies its passive aura",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 800508,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Scattered Stars stack cap without the talent",
+      "actor": "control",
+      "metric": "spell_max_stacks",
+      "save_as": "stars_cap_base",
+      "spell": 804378
+    },
+    {
+      "action": "assert",
+      "label": "Control cap is the authored StackAmount 4",
+      "actor": "control",
+      "metric": "spell_max_stacks",
+      "spell": 804378,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "Galaxy adds 2 stacks",
+      "actor": "talent",
+      "metric": "spell_max_stacks",
+      "spell": 804378,
+      "relative_to": "stars_cap_base",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Galaxy cap is 6",
+      "actor": "talent",
+      "metric": "spell_max_stacks",
+      "spell": 804378,
+      "equals": 6
+    }
+  ]
+}

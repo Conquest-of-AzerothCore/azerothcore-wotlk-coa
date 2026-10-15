@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "name": "Critical Pressure raises Intellect and spell crit chance (#902)",
+  "contract": "#902: Critical Pressure rank 1 704804 = aura 290 (MOD_CRIT_PCT) base 2 -> +3% and aura 137 (MOD_TOTAL_STAT_PERCENTAGE, MiscValue 3 Intellect) base 2 -> +3%; rank 2 707789 = +6% for both. Spell crit is read for Fire (school 2). The crit window is a little wider than the passive because the extra Intellect also adds a fraction of a percent of crit; the Intellect window is wide enough for integer rounding. Rank 2 replaces rank 1. The passive's Aura1/Aura2 helper spells (707791, 712472) are not part of the tooltip and are not asserted.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Fire spell crit chance before the passive",
+      "actor": "caster",
+      "metric": "spell_crit_chance",
+      "save_as": "crit0",
+      "school": 2
+    },
+    {
+      "action": "snapshot",
+      "label": "Intellect before the passive",
+      "actor": "caster",
+      "metric": "stat",
+      "save_as": "int0",
+      "stat": 3
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 704804
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds about 3% spell crit",
+      "actor": "caster",
+      "metric": "spell_crit_chance",
+      "school": 2,
+      "relative_to": "crit0",
+      "min": 2.9,
+      "max": 3.3,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds 3% Intellect",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "int0",
+      "min": 1.02,
+      "max": 1.04,
+      "within_ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 704804
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707789
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 adds about 6% spell crit",
+      "actor": "caster",
+      "metric": "spell_crit_chance",
+      "school": 2,
+      "relative_to": "crit0",
+      "min": 5.8,
+      "max": 6.5,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 adds 6% Intellect",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "int0",
+      "min": 1.05,
+      "max": 1.07,
+      "within_ms": 5000
+    }
+  ]
+}

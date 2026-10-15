@@ -1,0 +1,164 @@
+{
+  "schema": 1,
+  "name": "Prestige sends Blood Elves to Deathknell and Draenei to Shadowglen",
+  "contract": "Issues #6072 and #6264: a Blood Elf (race 10) or Draenei (race 11) that prestiges with Chromie 178081 in Orgrimmar returns to level 1 and is sent to its racial starting location, where its hearthstone is now bound. Conquest of Azeroth starts Blood Elves in Deathknell (playercreateinfo map 0, 1676.71 1678.31) and Draenei in Shadowglen (map 1, 10311.3 832.463) since #6397, so the teleport no longer targets an expansion map the character cannot enter.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": 1583.18,
+    "y": -4417.3,
+    "z": 8.35,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "prestiger",
+      "race": 10,
+      "class": 20,
+      "level": 60
+    },
+    {
+      "id": "draenei",
+      "race": 11,
+      "class": 20,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "chromie",
+      "owner": "prestiger",
+      "entry": 178081,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "prestiger",
+      "id": 25
+    },
+    {
+      "action": "assert",
+      "label": "The character starts in Orgrimmar",
+      "actor": "prestiger",
+      "metric": "map_id",
+      "equals": 1
+    },
+    {
+      "action": "specialization",
+      "actor": "draenei",
+      "id": 25
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "draenei",
+      "target": "chromie",
+      "label": "The Draenei speaks to Chromie"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "draenei",
+      "option": 0,
+      "label": "I would like to prestige!"
+    },
+    {
+      "action": "assert",
+      "label": "The Draenei is back to level 1",
+      "actor": "draenei",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Sent to Kalimdor",
+      "actor": "draenei",
+      "metric": "map_id",
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Landing in Shadowglen (x)",
+      "actor": "draenei",
+      "metric": "position_x",
+      "min": 10301,
+      "max": 10322,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Landing in Shadowglen (y)",
+      "actor": "draenei",
+      "metric": "position_y",
+      "min": 822,
+      "max": 843
+    },
+    {
+      "action": "assert",
+      "label": "The Draenei's hearthstone is bound where it landed",
+      "actor": "draenei",
+      "metric": "at_homebind",
+      "equals": 1
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie",
+      "label": "Speak to Chromie"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0,
+      "label": "I would like to prestige!"
+    },
+    {
+      "action": "assert",
+      "label": "Back to level 1",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Sent to Eastern Kingdoms",
+      "actor": "prestiger",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Landing in Deathknell (x)",
+      "actor": "prestiger",
+      "metric": "position_x",
+      "min": 1666,
+      "max": 1687,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Landing in Deathknell (y)",
+      "actor": "prestiger",
+      "metric": "position_y",
+      "min": 1668,
+      "max": 1689
+    },
+    {
+      "action": "assert",
+      "label": "The hearthstone is bound where the character landed",
+      "actor": "prestiger",
+      "metric": "at_homebind",
+      "equals": 1
+    }
+  ]
+}

@@ -1,0 +1,425 @@
+{
+  "schema": 1,
+  "name": "Periodic damage launches Anomaly Spikes (#852)",
+  "contract": "Anomaly Spikes 503825 applies aura 42 (proc trigger spell) on Anomaly Spike 503826, but Spell.dbc gives it ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs generated nothing and Aura::GetProcEffectMask returned 0 for every tick. Its tooltip is \"Periodic damage dealt now has a $h% chance to launch an Anomaly Spike at your target\", with $h = the record's own ProcChance of 8. Anomaly Spike 503826 is direct damage whose effect 1 triggers 504725 Fatebreaker, an area hit (implicit targets 53/16, EffectRadiusIndex 8 = 5 yards) centred on the spike's target, so a spike launched at the primary dummy also damages a bystander 2 yards away. Nothing else in this scenario can touch the bystander: Unmake 804418 is single-target and creature health regeneration is off, so any health loss on it is permanent evidence that at least one spike was launched. Unmake's DoT is duration index 36 (1000 ms) with Amplitude 250, i.e. 4 ticks per cast; 21 casts give 84 independent trials and 0.92^84 = 0.00091, so a false failure is under 0.1% at the record's real 8% chance.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "primary",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "bystander",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 503825
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 804418
+    },
+    {
+      "action": "snapshot",
+      "label": "Bystander health before any periodic damage",
+      "actor": "bystander",
+      "metric": "health",
+      "save_as": "bystander_start"
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 1 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 2 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 3 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 4 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 5 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 6 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 7 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 8 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 9 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 10 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 11 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 12 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 13 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 14 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 15 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 16 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 17 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 18 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 19 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 20 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake 21 of 21 on the primary dummy",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "wait",
+      "label": "Let the last Unmake finish ticking",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Anomaly Spike's splash reached the bystander, so the periodic proc fired",
+      "actor": "bystander",
+      "metric": "health",
+      "relative_to": "bystander_start",
+      "max": -1
+    }
+  ]
+}

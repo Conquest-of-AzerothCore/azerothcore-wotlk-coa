@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Razorquills raises Toxic Dart's tick-rate modifier by 20% without touching an unrelated Ranger spell (#2506)",
+  "contract": "705072 'Razorquills' reads 'Increases the tick rate of Toxic Dart and Emerald Arrows by 20%.' It is a single SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 19 = SPELLMOD_ACTIVATION_TIME, BasePoints -21+1=-20, class mask (32768, 0, 64) = word0 bit 15, word2 bit 6, narrowly scoped to two spells. Toxic Dart 807237 (SPELL_AURA_PERIODIC_DAMAGE) has SpellFamilyFlags (32768, 0, 0) = word0 bit 15, a direct match; the older, unrelated 707699 'Toxic Dart' record carries all-zero family flags and is untouched by this passive. AuraEffect::CalculatePeriodic (src/server/game/Spells/Auras/SpellAuraEffects.cpp) unconditionally applies modOwner->ApplySpellMod(id, SPELLMOD_ACTIVATION_TIME, amplitude) for every periodic aura matching the mask, so no script is needed.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the character settle", "ms": 3000 },
+    {
+      "action": "snapshot", "actor": "ranger", "metric": "spell_modifier", "spell": 807237, "op": 19, "base": 1000,
+      "save_as": "toxic_dart_tick_before"
+    },
+    {
+      "action": "snapshot", "actor": "ranger", "metric": "spell_modifier", "spell": 707699, "op": 19, "base": 1000,
+      "save_as": "unrelated_toxic_dart_tick_before"
+    },
+    { "action": "learn", "actor": "ranger", "spell": 705072 },
+    {
+      "action": "assert", "label": "SETUP: Razorquills is active", "actor": "ranger",
+      "metric": "aura", "spell": 705072, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Toxic Dart's tick-interval modifier drops to 80%", "actor": "ranger",
+      "metric": "spell_modifier", "spell": 807237, "op": 19, "base": 1000, "ratio_to": "toxic_dart_tick_before",
+      "min": 0.7999, "max": 0.8001
+    },
+    {
+      "action": "assert", "label": "REGRESSION: the unrelated all-zero-mask Toxic Dart record is untouched", "actor": "ranger",
+      "metric": "spell_modifier", "spell": 707699, "op": 19, "base": 1000, "ratio_to": "unrelated_toxic_dart_tick_before",
+      "min": 0.9999, "max": 1.0001
+    }
+  ]
+}

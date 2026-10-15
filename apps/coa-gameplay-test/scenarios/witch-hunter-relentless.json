@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "name": "Relentless lets Witchbane hit one more enemy and deal 30% more damage (#1956)",
+  "contract": "Relentless 520593 has E0 aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER) MiscValue 17 (SPELLMOD_JUMP_TARGETS), BasePoints 1 / DieSides 0 = +1, and E1 aura 108 (SPELL_AURA_ADD_PCT_MODIFIER) MiscValue 0 (SPELLMOD_DAMAGE), BasePoints 29 / DieSides 1 = +30%, both with class mask (0, 0, 0x80000000); its description reads 'Increases the damage of Witchbane by $s2% and allows it to hit an additional nearby enemy'. Witchbane's triggered shot 704342 is SpellFamilyName 21, flags C 0x80000000, ChainTarget 1 for effect 0; the channel ranks (800165 ... 574320) carry B 0x400000 only and are the controls. SpellInfo/Spell chain targeting adds SPELLMOD_JUMP_TARGETS to the chain count (1 -> 2) and SPELLMOD_DAMAGE scales the damage (1000 -> 1300). The chain count is asserted as the native modifier value; the actual extra hit needs a positioned second enemy and is not exercised here.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 520593,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "label": "Baseline chain count is 1 (ChainTarget in the DBC)",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 704342,
+      "op": 17,
+      "base": 1,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Baseline damage is unmodified",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 704342,
+      "op": 0,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 520593
+    },
+    {
+      "action": "assert",
+      "label": "The passive aura is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 520593,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Witchbane's shot may hit one additional enemy",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 704342,
+      "op": 17,
+      "base": 1,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Witchbane's shot deals 30% more damage",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 704342,
+      "op": 0,
+      "base": 1000,
+      "min": 1299.9,
+      "max": 1300.1
+    },
+    {
+      "action": "assert",
+      "label": "The channel is not a chain spell and is unchanged",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 800165,
+      "op": 17,
+      "base": 1,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The channel's own damage modifier is unchanged",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 800165,
+      "op": 0,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "assert",
+      "label": "Darkslayer damage is unchanged",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 804179,
+      "op": 0,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    }
+  ]
+}

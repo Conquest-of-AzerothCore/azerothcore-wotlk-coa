@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "name": "Necromancer Frigid Power raises Lichfrost and Ice Barrage spell power scaling by 20% (#1315)",
+  "contract": "Frigid Power 560620 is a Rime talent (CharacterAdvancement 33731, ClassType 25 = class 23, Tab 60, TalentEssenceCost 1, SpellFamilyName 29) whose description reads 'Increases the spell power scaling of Lichfrost and Ice Barrage by $s1%.' Its only effect is SPELL_AURA_ADD_PCT_MODIFIER (108) MiscValue 24 (SPELLMOD_BONUS_MULTIPLIER), BasePoints 19 + DieSides 1 = 20, EffectSpellClassMask (0, 0, 0x8000040) in family 29: 0x8000000 is every Lichfrost rank (801722, 501969-501980) and 0x40 is Ice Barrage's damage 803779 (and Lichfrost's Runic Power helper 804112, which deals no damage). The tooltips state Lichfrost as $m1+$spfr*.86989416 and Ice Barrage as $m1+$SP*.5971; the Necromancer adds those spell power terms itself (DBC EffectBonusMultiplier and spell_bonus_data are zeroed), so a 20% SPELLMOD_BONUS_MULTIPLIER must turn 0.86989416 into 1.04387 and 0.5971 into 0.71652. The effect value of each damage effect therefore rises by that coefficient times the Frost spell power gained from the fixture Drink Fel Infusion 44505 (aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 127, +2000); the only other variable is each effect's die roll (DieSides 6, at most 5 points, 0.0025 of 2000). Glacial Impact 707592 (family flags 0, 0, 0x10000000, coefficient 1.405, DieSides 1) is outside the mask and must keep its coefficient. Unlearning the talent restores the original coefficients.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and stat updates settle", "ms": 3000 },
+    { "action": "learn", "actor": "necro", "spell": 801722 },
+    { "action": "learn", "actor": "necro", "spell": 801760 },
+    {
+      "action": "assert", "label": "SETUP: Frigid Power is not active yet", "actor": "necro",
+      "metric": "aura", "spell": 560620, "equals": 0
+    },
+    { "action": "snapshot", "actor": "necro", "metric": "spell_power", "school": 4, "save_as": "frost_base" },
+    {
+      "action": "snapshot", "actor": "necro", "metric": "spell_effect_value", "spell": 801722, "effect": 0,
+      "save_as": "lichfrost_base"
+    },
+    {
+      "action": "snapshot", "actor": "necro", "metric": "spell_effect_value", "spell": 803779, "effect": 0,
+      "save_as": "barrage_base"
+    },
+    {
+      "action": "snapshot", "actor": "necro", "metric": "spell_effect_value", "spell": 707592, "effect": 0,
+      "save_as": "impact_base"
+    },
+    { "action": "set_aura", "label": "Fixture +2000 spell power", "actor": "necro", "spell": 44505, "stacks": 1 },
+    {
+      "action": "snapshot", "actor": "necro", "metric": "spell_power", "school": 4, "relative_to": "frost_base",
+      "save_as": "frost_gain"
+    },
+    {
+      "action": "assert", "label": "SETUP: the fixture adds 2000 Frost spell power", "actor": "necro",
+      "metric": "spell_power", "school": 4, "relative_to": "frost_base", "min": 2000
+    },
+    {
+      "action": "assert", "label": "CONTROL: Lichfrost scales with 86.99% of spell power", "actor": "necro",
+      "metric": "spell_effect_value", "spell": 801722, "effect": 0, "relative_to": "lichfrost_base",
+      "ratio_to": "frost_gain", "min": 0.865, "max": 0.875
+    },
+    {
+      "action": "assert", "label": "CONTROL: Ice Barrage scales with 59.71% of spell power", "actor": "necro",
+      "metric": "spell_effect_value", "spell": 803779, "effect": 0, "relative_to": "barrage_base",
+      "ratio_to": "frost_gain", "min": 0.592, "max": 0.602
+    },
+    { "action": "learn", "actor": "necro", "spell": 560620 },
+    {
+      "action": "assert", "label": "The talent aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 560620, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Lichfrost now scales with 104.39% of spell power",
+      "actor": "necro", "metric": "spell_effect_value", "spell": 801722, "effect": 0,
+      "relative_to": "lichfrost_base", "ratio_to": "frost_gain", "min": 1.038, "max": 1.05
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Ice Barrage now scales with 71.65% of spell power",
+      "actor": "necro", "metric": "spell_effect_value", "spell": 803779, "effect": 0,
+      "relative_to": "barrage_base", "ratio_to": "frost_gain", "min": 0.711, "max": 0.722
+    },
+    {
+      "action": "assert", "label": "CONTROL: Glacial Impact keeps its 140.5% coefficient", "actor": "necro",
+      "metric": "spell_effect_value", "spell": 707592, "effect": 0, "relative_to": "impact_base",
+      "ratio_to": "frost_gain", "min": 1.403, "max": 1.407
+    },
+    { "action": "unlearn", "actor": "necro", "spell": 560620 },
+    {
+      "action": "assert", "label": "Unlearning removes the talent aura", "actor": "necro",
+      "metric": "aura", "spell": 560620, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Unlearning restores Lichfrost's original scaling", "actor": "necro",
+      "metric": "spell_effect_value", "spell": 801722, "effect": 0, "relative_to": "lichfrost_base",
+      "ratio_to": "frost_gain", "min": 0.865, "max": 0.875
+    },
+    {
+      "action": "assert", "label": "SETUP: the spell power fixture lasted through every measurement", "actor": "necro",
+      "metric": "spell_power", "school": 4, "relative_to": "frost_base", "min": 2000
+    }
+  ]
+}

@@ -1,0 +1,380 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Unbreakable stack cap and Empowering Pheromones potency (#2924, #2927)",
+  "contract": "Issues #2924 (Unbreakable 705991) and #2927 (Empowering Pheromones 705996), both classified works-natively; regression scenario. Spell.dbc: 705991 is family 35 with two ADD_FLAT_MODIFIER (aura 107) effects, both with EffectSpellClassMask (0,0,0x4000000) which is the SpellFamilyFlags of Exposed Flesh 805095 (StackAmount 10, effect 0 aura 87 MOD_DAMAGE_PERCENT_TAKEN misc 1 physical, BasePoints 2 DieSides 1 = 3). Effect 0 is misc 31 SPELLMOD_MAX_AURA_STACKS BasePoints 4 (+5), read by SpellInfo::CalcMaxAuraStacks, which Aura stack changes and the module's Expose() both call. Effect 1 is misc 3 SPELLMOD_EFFECT1 BasePoints -2 DieSides 1 (-1), read by SpellEffectInfo::CalcValue through Unit::ApplyEffectModifiers, so the per-stack amount goes 3 -> 2; AuraEffect::CalculateAmount multiplies by stack count (10 stacks: 30 control, 20 talent; 15 stacks: 30), and the Physical damage taken bonus follows. 705996 has two ADD_PCT_MODIFIER (aura 108) effects with mask (0,4096,0): misc 8 SPELLMOD_ALL_EFFECTS BasePoints 19 (+20%) and misc 1 SPELLMOD_DURATION BasePoints 49 (+50%). Every Spider/Beetle/Toxic Pheromones row carries SpellFamilyFlags (0,4096,0). Spider Pheromones rank 2 (803306): effect 0 aura 29 MOD_STAT misc 1 (Agility) BasePoints 19 DieSides 1 = 20, DurationIndex 30 = 1,800,000 ms (SpellDuration.dbc); 20 * 1.2 = 24 exactly and 1,800,000 * 1.5 = 2,700,000. Aura::CalcMaxDuration applies SPELLMOD_DURATION for the caster's spell mod owner. Numbers were read from /srv/coa/server-data/dbc Spell.dbc and SpellDuration.dbc. Each talent is compared against an identical control character; Wilt (804982, flags (64,0,0)) is the negative control for both masks. The 'hitter' creature only supplies an attacker unit for the incoming-damage calculation; it is passive.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "unbreakable",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "pheromones",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "hitter",
+      "owner": "control",
+      "entry": 12142,
+      "level": 80,
+      "health": 100000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Exposed Flesh caps at 10 stacks without Unbreakable",
+      "actor": "control",
+      "metric": "spell_max_stacks",
+      "spell": 805095,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Exposed Flesh's per-stack Physical damage taken is 3% without Unbreakable",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 805095,
+      "effect": 0,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "No stack-cap modifier on Exposed Flesh before Unbreakable",
+      "actor": "unbreakable",
+      "metric": "spell_modifier",
+      "spell": 805095,
+      "op": 31,
+      "base": 10,
+      "equals": 10
+    },
+    {
+      "action": "snapshot",
+      "label": "Unbreakable actor: physical damage taken base",
+      "actor": "unbreakable",
+      "metric": "melee_damage_taken",
+      "save_as": "dmg_base_unb",
+      "target": "hitter"
+    },
+    {
+      "action": "snapshot",
+      "label": "Control: physical damage taken base",
+      "actor": "control",
+      "metric": "melee_damage_taken",
+      "save_as": "dmg_base_ctl",
+      "target": "hitter"
+    },
+    {
+      "action": "learn",
+      "actor": "unbreakable",
+      "spell": 705991
+    },
+    {
+      "action": "assert",
+      "label": "Unbreakable adds a flat 5 to Exposed Flesh's stack cap",
+      "actor": "unbreakable",
+      "metric": "spell_modifier",
+      "spell": 805095,
+      "op": 31,
+      "base": 10,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "Exposed Flesh now caps at 15 stacks",
+      "actor": "unbreakable",
+      "metric": "spell_max_stacks",
+      "spell": 805095,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "Unbreakable adds a flat -1 to Exposed Flesh's first effect",
+      "actor": "unbreakable",
+      "metric": "spell_modifier",
+      "spell": 805095,
+      "op": 3,
+      "base": 3,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Exposed Flesh's per-stack Physical damage taken is 2% with Unbreakable",
+      "actor": "unbreakable",
+      "metric": "spell_effect_value",
+      "spell": 805095,
+      "effect": 0,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Unbreakable does not touch an unrelated Venomancer spell (Wilt) stack cap or first effect",
+      "actor": "unbreakable",
+      "metric": "spell_modifier",
+      "spell": 804982,
+      "op": 3,
+      "base": 3,
+      "equals": 3
+    },
+    {
+      "action": "set_aura",
+      "label": "Control: 10 Exposed Flesh stacks",
+      "actor": "control",
+      "spell": 805095,
+      "stacks": 10
+    },
+    {
+      "action": "set_aura",
+      "label": "Unbreakable actor: 10 Exposed Flesh stacks",
+      "actor": "unbreakable",
+      "spell": 805095,
+      "stacks": 10
+    },
+    {
+      "action": "assert",
+      "label": "Control applies 10 stacks",
+      "actor": "control",
+      "metric": "aura_stacks",
+      "spell": 805095,
+      "equals": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Control: 10 stacks at 3% carry 30",
+      "actor": "control",
+      "metric": "aura_amount",
+      "spell": 805095,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Unbreakable actor: 10 stacks at 2% carry 20",
+      "actor": "unbreakable",
+      "metric": "aura_amount",
+      "spell": 805095,
+      "effect": 0,
+      "equals": 20,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Control takes 30% more Physical damage at 10 stacks",
+      "actor": "control",
+      "metric": "melee_damage_taken",
+      "target": "hitter",
+      "relative_to": "dmg_base_ctl",
+      "min": 298,
+      "max": 301
+    },
+    {
+      "action": "assert",
+      "label": "Unbreakable actor takes 20% more Physical damage at 10 stacks",
+      "actor": "unbreakable",
+      "metric": "melee_damage_taken",
+      "target": "hitter",
+      "relative_to": "dmg_base_unb",
+      "min": 198,
+      "max": 201
+    },
+    {
+      "action": "set_aura",
+      "label": "Unbreakable actor: 15 Exposed Flesh stacks (above the base cap)",
+      "actor": "unbreakable",
+      "spell": 805095,
+      "stacks": 15
+    },
+    {
+      "action": "assert",
+      "label": "Fifteen stacks are accepted",
+      "actor": "unbreakable",
+      "metric": "aura_stacks",
+      "spell": 805095,
+      "equals": 15,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "15 stacks at 2% carry 30",
+      "actor": "unbreakable",
+      "metric": "aura_amount",
+      "spell": 805095,
+      "effect": 0,
+      "equals": 30,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Unbreakable actor takes 30% more Physical damage at 15 stacks",
+      "actor": "unbreakable",
+      "metric": "melee_damage_taken",
+      "target": "hitter",
+      "relative_to": "dmg_base_unb",
+      "min": 298,
+      "max": 301
+    },
+    {
+      "action": "assert",
+      "label": "Spider Pheromones rank 2 grants 20 Agility without Empowering Pheromones",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 803306,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "No all-effects modifier on Pheromones before the talent",
+      "actor": "pheromones",
+      "metric": "spell_modifier",
+      "spell": 803306,
+      "op": 8,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "No duration modifier on Pheromones before the talent",
+      "actor": "pheromones",
+      "metric": "spell_modifier",
+      "spell": 803306,
+      "op": 1,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "pheromones",
+      "spell": 705996
+    },
+    {
+      "action": "assert",
+      "label": "Empowering Pheromones adds +20% to all effects of a Pheromone",
+      "actor": "pheromones",
+      "metric": "spell_modifier",
+      "spell": 803306,
+      "op": 8,
+      "base": 100,
+      "min": 119.99,
+      "max": 120.01
+    },
+    {
+      "action": "assert",
+      "label": "Empowering Pheromones adds +50% to a Pheromone's duration",
+      "actor": "pheromones",
+      "metric": "spell_modifier",
+      "spell": 803306,
+      "op": 1,
+      "base": 1000,
+      "equals": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The Pheromone mask also reaches Beetle Pheromones (803651)",
+      "actor": "pheromones",
+      "metric": "spell_modifier",
+      "spell": 803651,
+      "op": 8,
+      "base": 100,
+      "min": 119.99,
+      "max": 120.01
+    },
+    {
+      "action": "assert",
+      "label": "Empowering Pheromones does not raise an unrelated spell (Wilt) effect",
+      "actor": "pheromones",
+      "metric": "spell_modifier",
+      "spell": 804982,
+      "op": 8,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Spider Pheromones rank 2 would now grant 24 Agility",
+      "actor": "pheromones",
+      "metric": "spell_effect_value",
+      "spell": 803306,
+      "effect": 0,
+      "equals": 24
+    },
+    {
+      "action": "set_aura",
+      "label": "Control receives Spider Pheromones rank 2",
+      "actor": "control",
+      "spell": 803306,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Empowered actor receives Spider Pheromones rank 2 cast by itself",
+      "actor": "pheromones",
+      "spell": 803306,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control's applied aura carries 20",
+      "actor": "control",
+      "metric": "aura_amount",
+      "spell": 803306,
+      "effect": 0,
+      "equals": 20,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Empowered aura carries 24",
+      "actor": "pheromones",
+      "metric": "aura_amount",
+      "spell": 803306,
+      "effect": 0,
+      "equals": 24,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Control's aura lasts the DBC 30 minutes",
+      "actor": "control",
+      "metric": "aura_duration_ms",
+      "spell": 803306,
+      "min": 1799000,
+      "max": 1800000
+    },
+    {
+      "action": "assert",
+      "label": "Empowered aura lasts 45 minutes",
+      "actor": "pheromones",
+      "metric": "aura_duration_ms",
+      "spell": 803306,
+      "min": 2698000,
+      "max": 2700000
+    }
+  ]
+}

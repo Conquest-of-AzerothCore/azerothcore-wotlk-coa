@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Coldridge Valley Mail Delivery: the stack of letters survives a relog and a bag swap and can still be handed in (#5742)",
+  "contract": [
+    "Report #5742: after relogging and equipping bags, 'A Stack of Letters' was gone and Talin Keeneye could not take the quest in.",
+    "quest_template 233 'Coldridge Valley Mail Delivery' gives StartItem 2187 and requires one of it; item 2187 is a plain quest item with no duration or script.",
+    "Quest 233 follows 'Dwarven Outfitters' (179), whose reward makes it available to the gnome and dwarf starters.",
+    "Accepting the quest therefore leaves the quest complete with the letters in the bags.",
+    "A native save, logout and character load must restore the letters, equipping a bag must not move or delete them, and the quest must still be completable at its ender, creature 714.",
+    "Handing the quest in must leave it rewarded."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "tinker", "race": 7, "class": 28, "level": 4 }
+  ],
+  "location": { "map": 0, "x": -6220.69, "y": 689.365, "z": 384.92, "o": 0 },
+  "creatures": [
+    { "id": "giver", "owner": "tinker", "entry": 658, "level": 5, "distance": 3, "faction": 55 },
+    { "id": "ender", "owner": "tinker", "entry": 714, "level": 5, "distance": 5, "faction": 55 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "assert", "label": "No letters before the quest", "actor": "tinker", "metric": "item_count", "item": 2187, "equals": 0 },
+    { "action": "prepare_quest", "label": "Fixture: the prerequisite quest is done", "actor": "tinker", "quest": 179 },
+    { "action": "reward_quest", "label": "Fixture: and rewarded", "actor": "tinker", "quest": 179 },
+    { "action": "assert", "label": "The mail delivery quest is now available", "actor": "tinker", "metric": "quest_takeable", "quest": 233, "equals": 1 },
+    { "action": "quest_accept", "label": "Accept the quest from its giver", "actor": "tinker", "quest": 233, "entry": 658 },
+    { "action": "assert", "label": "Accepting hands over the stack of letters", "actor": "tinker", "metric": "item_count", "item": 2187, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "With the letters in hand the quest is complete", "actor": "tinker", "metric": "quest_status", "quest": 233, "equals": 1 },
+    { "action": "relog", "label": "Log out and back in through the native save and load path", "actor": "tinker" },
+    { "action": "wait", "label": "Let the reloaded character settle", "ms": 2000 },
+    { "action": "assert", "label": "The letters are restored after the relog", "actor": "tinker", "metric": "item_count", "item": 2187, "equals": 1, "within_ms": 3000 },
+    { "action": "add_item", "label": "Receive a bag", "actor": "tinker", "item": 4496, "count": 1 },
+    { "action": "equip", "label": "Equip the bag in the first bag slot", "actor": "tinker", "item": 4496, "slot": 19 },
+    { "action": "wait", "label": "Let the equip settle", "ms": 1000 },
+    { "action": "assert", "label": "Equipping a bag leaves the letters in the character's possession", "actor": "tinker", "metric": "item_count", "item": 2187, "equals": 1 },
+    { "action": "assert", "label": "The quest is still complete", "actor": "tinker", "metric": "quest_status", "quest": 233, "equals": 1 },
+    { "action": "quest_turn_in", "label": "Hand the quest in at its ender", "actor": "tinker", "quest": 233, "entry": 714, "reward": 0 },
+    { "action": "assert", "label": "The turn-in is accepted", "actor": "tinker", "metric": "quest_status", "quest": 233, "equals": 6, "within_ms": 3000 }
+  ]
+}

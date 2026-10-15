@@ -1,0 +1,31 @@
+-- Bloodsores (805591), the rank a Bloodmage actually owns (CharacterAdvancement class 20 level 30, and
+-- present in the live-client capture): "Periodic damage dealt now has a $h% chance to apply a Bloodsore to
+-- your target for $805592d, stacking $805592u times." Its single effect is SPELL_EFFECT_APPLY_AURA with
+-- aura 42 SPELL_AURA_PROC_TRIGGER_SPELL and EffectTriggerSpell 805592, ProcChance 20, and Spell.dbc
+-- ProcFlags 0x0. SpellMgr::LoadSpellProcs skips DBC fallback generation for a record without proc flags
+-- ("Skip if no proc flags in DBC", SpellMgr.cpp), and there was no `spell_proc` row, so
+-- SpellMgr::GetSpellProcEntry returned nullptr, Aura::GetProcEffectMask returned 0 and the passive was
+-- inert: Bloodsore was never applied to anything.
+--
+-- The trigger 805592 "Bloodsore" is native and untouched: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER,
+-- BasePoints 9 + DieSides 1 = 10%, DurationIndex 31 = 8000 ms, StackAmount 5, EffectSpellClassMask
+-- (0, 2105344, 0) = word 1 bit 21 (the Sanguine Rupture damage rows 800775/802496) and bit 13 (the ten
+-- Bloodmoon Blast ranks), which is exactly "your next Sanguine Rupture and Bloodmoon Blast".
+--
+-- ProcFlags 262144 = PROC_FLAG_DONE_PERIODIC, the only flag "periodic damage dealt" can mean, and the same
+-- flag the merged periodic Bloodmage rows use (rev_20260920_54_bloodmage_periodic_procs.sql).
+-- SpellTypeMask 1 = PROC_SPELL_TYPE_DAMAGE: the tooltip says damage, not healing.
+-- SpellPhaseMask 2 = HIT keeps it on the tick itself.
+-- SpellFamilyName and the family masks stay 0: "periodic damage dealt" names no ability.
+-- Chance stays 0 so SpellMgr::LoadSpellProcs takes the record's own ProcChance of 20 - the $h the
+-- description renders - per rev_20260919_20_coa_proc_chance_parity.sql.
+-- HitMask 0 leaves the DONE default (NORMAL | CRITICAL | ABSORB); a periodic tick raises its proc event
+-- from AuraEffect::PeriodicTick, not from a triggered cast, so AttributesMask stays 0 as well.
+-- DisableEffectsMask 0: the record has a single effect. Charges 0 (ProcCharges 0, the passive is permanent).
+--
+-- The other id filed under the same issue, 802314 ("Increases the range of your Sanguine spells by 10 yds",
+-- aura 107 MiscValue 5 SPELLMOD_RANGE), needs no row: SPELLMOD_RANGE is consumed natively. It is also not
+-- obtainable by any route for class 20, so nothing here touches it.
+DELETE FROM `spell_proc` WHERE `SpellId` = 805591;
+INSERT INTO `spell_proc` (`SpellId`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `ProcFlags`, `SpellTypeMask`, `SpellPhaseMask`, `HitMask`, `AttributesMask`, `DisableEffectsMask`, `ProcsPerMinute`, `Chance`, `Cooldown`, `Charges`) VALUES
+(805591, 0, 0, 0, 0, 0, 262144, 1, 2, 0, 0, 0, 0, 0, 0, 0);

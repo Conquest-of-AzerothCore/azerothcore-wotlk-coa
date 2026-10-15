@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Cultist: Eldritch Strength boosts Entropic Slam and Hammer of Twilight through native spell mods (#2202)",
+  "contract": "680600 is SpellFamilyName 31 with two ADD_PCT_MODIFIER (108) effects: effect0 MiscValue=0 (SPELLMOD_DAMAGE) BasePoints=24 -> CalcValue 25%, SpellClassMask [128,0,16384]; effect1 MiscValue=2 (SPELLMOD_THREAT) BasePoints=14 -> CalcValue 15%, same classmask. Entropic Slam (804152, 572846) carries SpellFamilyFlags[0]=128 (matches dword0 bit7); Hammer of Twilight (806498/806499/806829/806830) carries SpellFamilyFlags[2]=16384 (matches dword2 bit14). Player::ApplySpellMod resolves both ops with zero custom C++: op 0 (SPELLMOD_DAMAGE) is multiplicative (totalmul *= 1.25), op 2 (SPELLMOD_THREAT) is additive-percent (totalmul += 0.15). The spell_modifier metric applies these mods to a fixed base directly, per apps/coa-gameplay-test/README.md. Regression guard for behaviour that already works natively; no bug to fix.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "c", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: Entropic Slam damage unmodified before Eldritch Strength",
+      "actor": "c", "metric": "spell_modifier", "spell": 804152, "op": 0, "base": 1000, "min": 1000, "max": 1000
+    },
+    {
+      "action": "assert", "label": "SETUP: Hammer of Twilight threat unmodified before Eldritch Strength",
+      "actor": "c", "metric": "spell_modifier", "spell": 806498, "op": 2, "base": 1000, "min": 1000, "max": 1000
+    },
+    { "action": "learn", "actor": "c", "spell": 680600 },
+    {
+      "action": "assert", "label": "Eldritch Strength adds 25% to Entropic Slam's damage (#2202)",
+      "actor": "c", "metric": "spell_modifier", "spell": 804152, "op": 0, "base": 1000, "min": 1249, "max": 1251
+    },
+    {
+      "action": "assert", "label": "Eldritch Strength adds 25% to Entropic Slam rank 2's damage too (#2202)",
+      "actor": "c", "metric": "spell_modifier", "spell": 572846, "op": 0, "base": 1000, "min": 1249, "max": 1251
+    },
+    {
+      "action": "assert", "label": "Eldritch Strength adds 15% threat to Hammer of Twilight (#2202)",
+      "actor": "c", "metric": "spell_modifier", "spell": 806498, "op": 2, "base": 1000, "min": 1149, "max": 1151
+    },
+    {
+      "action": "assert", "label": "Eldritch Strength adds 15% threat to Hammer of Twilight's other ranks too (#2202)",
+      "actor": "c", "metric": "spell_modifier", "spell": 806830, "op": 2, "base": 1000, "min": 1149, "max": 1151
+    },
+    {
+      "action": "assert", "label": "Eldritch Strength adds 25% damage to Hammer of Twilight too (#2202)",
+      "actor": "c", "metric": "spell_modifier", "spell": 806498, "op": 0, "base": 1000, "min": 1249, "max": 1251
+    },
+    {
+      "action": "assert", "label": "Eldritch Strength adds 15% threat to Entropic Slam too (#2202)",
+      "actor": "c", "metric": "spell_modifier", "spell": 804152, "op": 2, "base": 1000, "min": 1149, "max": 1151
+    },
+    {
+      "action": "assert", "label": "Eldritch Strength leaves an unrelated Wrath of the Black Empire's damage alone (control)",
+      "actor": "c", "metric": "spell_modifier", "spell": 500724, "op": 0, "base": 1000, "min": 1000, "max": 1000
+    },
+    {
+      "action": "assert", "label": "Eldritch Strength leaves an unrelated Wrath of the Black Empire's threat alone (control)",
+      "actor": "c", "metric": "spell_modifier", "spell": 500724, "op": 2, "base": 1000, "min": 1000, "max": 1000
+    }
+  ]
+}

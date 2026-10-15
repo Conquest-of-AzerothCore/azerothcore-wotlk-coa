@@ -1,0 +1,791 @@
+{
+  "schema": 1,
+  "name": "Primalist Stone Skin parry damage and bleed immunity",
+  "contract": "Issue #3649: the displayed parry percentage is the Geode/Seismic damage bonus, one for one (15% parry means 15% more damage). Check real native direct/periodic calculations, live rating changes, unaffected ability controls, bleed-only immunity and removal. Damage ratios are independently checked by check_primalist_final.py stone-skin.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "target",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "timeout_ms": 30000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 60
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 806583,
+      "all_specs": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 573308,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18063,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 34081,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 3,
+      "save_as": "base_rating"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 772,
+      "target": "target",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "parry_chance",
+      "save_as": "base_parry"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "base_803138_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 804002,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "base_804002_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 806545,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "base_806545_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 582532,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "base_582532_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 300693,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "base_300693_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 503264,
+      "target": "target",
+      "periodic": true,
+      "effect": 0,
+      "save_as": "base_503264_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 680442,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "base_680442_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 680442,
+      "target": "target",
+      "periodic": true,
+      "effect": 1,
+      "save_as": "base_680442_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 805462,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "base_805462_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 807432,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "base_807432_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 681251,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "base_681251_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 680448,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "base_680448_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 800178,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "base_800178_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "base_803140_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 403,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "base_403_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 302590,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "base_302590_0"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 806583
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 772,
+      "target": "target",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 403,
+      "target": "target",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 573308,
+      "effect": 0,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "parry_chance",
+      "save_as": "active_parry"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "active_803138_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 804002,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "active_804002_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 806545,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "active_806545_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 582532,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "active_582532_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 300693,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "active_300693_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 503264,
+      "target": "target",
+      "periodic": true,
+      "effect": 0,
+      "save_as": "active_503264_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 680442,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "active_680442_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 680442,
+      "target": "target",
+      "periodic": true,
+      "effect": 1,
+      "save_as": "active_680442_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 805462,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "active_805462_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 807432,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "active_807432_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 681251,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "active_681251_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 680448,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "active_680448_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 800178,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "active_800178_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "active_803140_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 403,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "active_403_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 302590,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "active_302590_0"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18063,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 3,
+      "relative_to": "base_rating",
+      "equals": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "parry_chance",
+      "save_as": "rating_parry"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "rating_803138_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 804002,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "rating_804002_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 806545,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "rating_806545_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 582532,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "rating_582532_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 300693,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "rating_300693_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 503264,
+      "target": "target",
+      "periodic": true,
+      "effect": 0,
+      "save_as": "rating_503264_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 680442,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "rating_680442_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 680442,
+      "target": "target",
+      "periodic": true,
+      "effect": 1,
+      "save_as": "rating_680442_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 805462,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "rating_805462_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 807432,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "rating_807432_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 681251,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "rating_681251_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 680448,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "rating_680448_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 800178,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "rating_800178_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "rating_803140_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 403,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "rating_403_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 302590,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "rating_302590_0"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 806583,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 772,
+      "target": "target",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "parry_chance",
+      "save_as": "removed_parry"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "removed_803138_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 804002,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "removed_804002_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 806545,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "removed_806545_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 582532,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "removed_582532_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 300693,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "removed_300693_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 503264,
+      "target": "target",
+      "periodic": true,
+      "effect": 0,
+      "save_as": "removed_503264_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 680442,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "removed_680442_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 680442,
+      "target": "target",
+      "periodic": true,
+      "effect": 1,
+      "save_as": "removed_680442_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 805462,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "removed_805462_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 807432,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "removed_807432_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 681251,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "removed_681251_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 680448,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "removed_680448_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 800178,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "removed_800178_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "removed_803140_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 403,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "removed_403_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 302590,
+      "target": "target",
+      "periodic": false,
+      "effect": 0,
+      "save_as": "removed_302590_0"
+    }
+  ]
+}

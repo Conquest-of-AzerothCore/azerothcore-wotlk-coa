@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "name": "Reaper: The Time Has Come raises ability damage by 10% against slowed enemies",
+  "contract": "The Time Has Come 572879 is a Reaper talent (CharacterAdvancement 34477: ClassType 32 = class 30 Reaper, tab 79 'Reaping', 1 talent essence; mod-spellbook lists it in the Reaper tree). It reads 'Your abilities now deal $s1% more damage against slowed targets.' Its only effect is aura 112 with EffectMiscValue 20007 (the class-mask aura-state damage selector), EffectMiscValueB 26, EffectBasePoints 9 + DieSides 1 = 10 and EffectSpellClassMask [677413671, 2449487953, 4472960] in family 36, which covers Murder 500376 (family word 1 bit 64) and Soul Strike 500517 (word 1 bit 2048) but not Soulspear 803984 (no family flags). State 26 is ASCENSION_TARGET_SLOWED, which Unit::HasAuraState reads as SPELL_AURA_MOD_DECREASE_SPEED, the same selector and state as Black Hole 707557 and Felsworn's Reckless Assault 804610, whose tooltips also say 'against slowed'. Nothing converted 572879's aura 112, so the talent changed nothing. The query is the native spell_damage_done (Unit::SpellPctDamageModsDone folds aura 303 into the done multiplier) against two identical dummies, only one of which carries a mage's Slow 31589 (aura 33 SPELL_AURA_MOD_DECREASE_SPEED). Expected: before the talent the slow changes nothing; with it Murder and Soul Strike deal exactly 10% more against the slowed dummy only, and Soulspear, outside the mask, gains nothing.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80
+    },
+    {
+      "id": "mage",
+      "race": 10,
+      "class": 8,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "slowed",
+      "owner": "reaper",
+      "entry": 36,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    },
+    {
+      "id": "unslowed",
+      "owner": "reaper",
+      "entry": 36,
+      "level": 80,
+      "health": 100000,
+      "distance": 6
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "spell": 31589
+    },
+    {
+      "action": "cast",
+      "label": "A mage slows one dummy",
+      "actor": "mage",
+      "spell": 31589,
+      "target": "slowed"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Slow lands on one dummy",
+      "actor": "slowed",
+      "metric": "aura",
+      "spell": 31589,
+      "caster": "mage",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the other dummy is not slowed",
+      "actor": "unslowed",
+      "metric": "aura",
+      "spell": 31589,
+      "caster": "mage",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Murder against the unslowed dummy",
+      "actor": "reaper",
+      "metric": "spell_damage_done",
+      "spell": 500376,
+      "target": "unslowed",
+      "save_as": "murder_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Soul Strike against the unslowed dummy",
+      "actor": "reaper",
+      "metric": "spell_damage_done",
+      "spell": 500517,
+      "target": "unslowed",
+      "save_as": "strike_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Soulspear against the unslowed dummy",
+      "actor": "reaper",
+      "metric": "spell_damage_done",
+      "spell": 803984,
+      "target": "unslowed",
+      "save_as": "spear_base"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without the talent the slow leaves Murder unchanged",
+      "actor": "reaper",
+      "metric": "spell_damage_done",
+      "spell": 500376,
+      "target": "slowed",
+      "ratio_to": "murder_base",
+      "min": 0.995,
+      "max": 1.005
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 572879
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: The Time Has Come's passive is applied",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 572879,
+      "caster": "reaper",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Murder deals 10% more against the slowed dummy",
+      "actor": "reaper",
+      "metric": "spell_damage_done",
+      "spell": 500376,
+      "target": "slowed",
+      "ratio_to": "murder_base",
+      "min": 1.095,
+      "max": 1.105
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Soul Strike deals 10% more against the slowed dummy",
+      "actor": "reaper",
+      "metric": "spell_damage_done",
+      "spell": 500517,
+      "target": "slowed",
+      "ratio_to": "strike_base",
+      "min": 1.095,
+      "max": 1.105
+    },
+    {
+      "action": "assert",
+      "label": "Murder gains nothing against the unslowed dummy",
+      "actor": "reaper",
+      "metric": "spell_damage_done",
+      "spell": 500376,
+      "target": "unslowed",
+      "ratio_to": "murder_base",
+      "min": 0.995,
+      "max": 1.005
+    },
+    {
+      "action": "assert",
+      "label": "Soulspear, outside the talent's mask, gains nothing against the slowed dummy",
+      "actor": "reaper",
+      "metric": "spell_damage_done",
+      "spell": 803984,
+      "target": "slowed",
+      "ratio_to": "spear_base",
+      "min": 0.995,
+      "max": 1.005
+    }
+  ]
+}

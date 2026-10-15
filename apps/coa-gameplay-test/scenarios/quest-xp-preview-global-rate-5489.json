@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "name": "Quest XP preview includes the global XP rate (#5489)",
+  "contract": "For an ordinary level-20 player at XP rate 1, the Ascension quest-log reward XP for the scaled Kobold Camp Cleanup quest must equal the XP actually awarded at turn-in. Reading the real preview packet and comparing it to the native XP delta distinguishes the omitted 0.9295 global rate from a correct preview; quest progress is fixture setup.",
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "command",
+      "actor": "hero",
+      "command": ".xp 1"
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "hero",
+      "quest": 7
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "quest_log_sent_xp",
+      "quest": 7,
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "quest_log_sent_xp",
+      "quest": 7,
+      "save_as": "shown_xp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "xp",
+      "save_as": "xp_before"
+    },
+    {
+      "action": "reward_quest",
+      "actor": "hero",
+      "quest": 7
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "quest_rewarded",
+      "quest": 7,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "level",
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "xp",
+      "relative_to": "xp_before",
+      "ratio_to": "shown_xp",
+      "equals": 1,
+      "label": "Actual quest XP equals the preview packet"
+    }
+  ]
+}

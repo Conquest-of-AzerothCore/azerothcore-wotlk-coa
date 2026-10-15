@@ -1,0 +1,549 @@
+{
+  "schema": 1,
+  "name": "A Brewing Potent Mixes purchase reports exactly its own native entry (#6371)",
+  "contract": "Brewing entry 7131 purchases Potent Mixes 503748/504888 with TE; class entry 12264 reuses 503748 with AE. One actual purchase must add one native known-entry record without inventing the other purchase. A following talent purchase, rank upgrade, unlearning, real relog, two specialization slots and a paid native purge must retain explicit entry ownership and keep physical shared spells only while an owner remains.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 13,
+      "level": 19,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "actor": "p",
+      "opcode": 618,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "p"
+        }
+      ]
+    },
+    {
+      "action": "set_money",
+      "actor": "p",
+      "value": 1000000
+    },
+    {
+      "action": "specialization",
+      "actor": "p",
+      "id": 6
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "server_packet_u32",
+      "opcode": 1830,
+      "index": 0,
+      "min": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "server_packet_u32",
+      "opcode": 1830,
+      "index": 0,
+      "save_as": "known_before"
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "p",
+      "entry": 7131,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 7131,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 12264,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 503748,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "server_packet_u32",
+      "opcode": 1830,
+      "index": 0,
+      "relative_to": "known_before",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 7131,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 12264,
+      "equals": 0
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "p",
+      "entry": 7131,
+      "rank": 2
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 7131,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 12264,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 504888,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "server_packet_u32",
+      "opcode": 1830,
+      "index": 0,
+      "relative_to": "known_before",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 7131,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 12264,
+      "equals": 0
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "p",
+      "entry": 7132,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 7132,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 12264,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "server_packet_u32",
+      "opcode": 1830,
+      "index": 0,
+      "relative_to": "known_before",
+      "equals": 2
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "p",
+      "entry": 7132,
+      "rank": 0
+    },
+    {
+      "action": "relog",
+      "actor": "p"
+    },
+    {
+      "action": "client_packet",
+      "actor": "p",
+      "opcode": 618,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "p"
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 504888,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "server_packet_u32",
+      "opcode": 1830,
+      "index": 0,
+      "relative_to": "known_before",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 7131,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 12264,
+      "equals": 0
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "p",
+      "entry": 7131,
+      "rank": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 7131,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 12264,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 503748,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 504888,
+      "equals": 0
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "p",
+      "entry": 12264,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 12264,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 7131,
+      "equals": 0
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "p",
+      "entry": 7131,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 12264,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 7131,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "p",
+      "entry": 7131,
+      "rank": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 12264,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 7131,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 503748,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 979994
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 979994
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 12264,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 503748,
+      "equals": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "p",
+      "id": 6
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "p",
+      "entry": 7131,
+      "rank": 2
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 7131,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 12264,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 979993
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 12264,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 7131,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 503748,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 504888,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 979994
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 7131,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 12264,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 504888,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 919291
+    },
+    {
+      "action": "client_packet",
+      "actor": "p",
+      "opcode": 531
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "server_packet_contains",
+      "opcode": 1835,
+      "text": "CA_PURGE_TALENTS_OK",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 7131,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 12264,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 503748,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 504888,
+      "equals": 0
+    }
+  ]
+}

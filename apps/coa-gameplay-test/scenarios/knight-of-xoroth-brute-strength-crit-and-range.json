@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "name": "Brute Strength raises Physical crit damage and Flesh Hook/Chains of Malice/Chainwhip range (#1092)",
+  "contract": "Brute Strength 680723 reads 'Increases your critical damage dealt with Physical attacks by 10% and increases the range of Flesh Hook, Chains of Malice, and Chainwhip by 5 yds' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z). Effect 0 is the native aura 163 (SPELL_AURA_MOD_CRIT_DAMAGE_BONUS), MiscValue 1 (SPELL_SCHOOL_MASK_NORMAL), BasePoints 10. Unit::SpellCriticalDamageBonus (Unit.cpp) doubles a melee-class spell's base damage into crit_bonus, applies the 10% via AddPct(crit_bonus, crit_mod) on that doubled total, then unconditionally subtracts and re-adds the base damage around the unrelated SPELLMOD_CRIT_DAMAGE_BONUS ApplySpellMod call before returning crit_bonus itself (not crit_bonus-damage) - so a probe of 1000 base damage returns 2000 at baseline (2x1000, no crit_mod) and 2200 with the 10% bonus (2000*1.10), a 1.10 ratio on the raw metric (CoAGameplayTest.cpp's spell_critical_damage metric returns this value directly). Effect 1 is aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER), MiscValue 5 (SPELLMOD_RANGE), BasePoints 5, classmask (4718592,0,1) combining Flesh Hook's (500020) dword2 bit0, Chains of Malice's (803185) dword0 bit22, and Chainwhip's (800081) dword0 bit19. At level 60 the owned Flesh Hook rank is 501490, the owned Chainwhip rank is 503365, and Chains of Malice (803185) and Infernal Strike's owned rank 501518 have no level-scaled chain (AscensionSpellProgressionData.h).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "knight",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "snapshot", "label": "Sever's crit-damage bonus before",
+      "actor": "knight", "metric": "spell_critical_damage", "spell": 501505, "target": "dummy", "save_as": "critdmg_before"
+    },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_max_range", "spell": 501490, "save_as": "hook_range_before" },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_max_range", "spell": 803185, "save_as": "malice_range_before" },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_max_range", "spell": 503365, "save_as": "whip_range_before" },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_max_range", "spell": 501518, "save_as": "infernal_range_before" },
+    { "action": "learn", "actor": "knight", "spell": 680723 },
+    { "action": "set_aura", "actor": "knight", "spell": 680723, "stacks": 1, "label": "Force the Brute Strength passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Brute Strength passive is active",
+      "actor": "knight", "metric": "aura", "spell": 680723, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Sever's crit-damage bonus scales as +10% of the doubled crit total",
+      "actor": "knight", "metric": "spell_critical_damage", "spell": 501505, "target": "dummy",
+      "ratio_to": "critdmg_before", "min": 1.08, "max": 1.12
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Flesh Hook's range rises by 5 yds",
+      "actor": "knight", "metric": "spell_max_range", "spell": 501490, "relative_to": "hook_range_before", "equals": 5
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Chains of Malice's range rises by 5 yds",
+      "actor": "knight", "metric": "spell_max_range", "spell": 803185, "relative_to": "malice_range_before", "equals": 5
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Chainwhip's range rises by 5 yds",
+      "actor": "knight", "metric": "spell_max_range", "spell": 503365, "relative_to": "whip_range_before", "equals": 5
+    },
+    {
+      "action": "assert", "label": "REGRESSION: Infernal Strike's range is untouched",
+      "actor": "knight", "metric": "spell_max_range", "spell": 501518, "relative_to": "infernal_range_before", "equals": 0
+    }
+  ]
+}

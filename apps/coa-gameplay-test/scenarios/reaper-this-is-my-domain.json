@@ -1,0 +1,219 @@
+{
+  "schema": 1,
+  "name": "Reaper This Is My Domain improves Harvester inside Harvesting Grounds",
+  "contract": "Domain adds 10 points to Harvester and 30 more inside the caster's Harvesting Grounds.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "r",
+      "race": 5,
+      "class": 30,
+      "level": 50,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "r",
+      "entry": 299,
+      "level": 50,
+      "distance": 2,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "r",
+      "id": 56
+    },
+    {
+      "action": "command",
+      "actor": "r",
+      "command": ".localclassrepair"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Harvester is known",
+      "actor": "r",
+      "metric": "knows_spell",
+      "spell": 92145,
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "r",
+      "spell": 500584,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "label": "talent is absent for the control",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 500584,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "base Harvest heals for 15 percent",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 500283,
+      "equals": 15
+    },
+    {
+      "action": "set_health",
+      "actor": "r",
+      "value": 1
+    },
+    {
+      "action": "attack",
+      "actor": "r",
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Harvest healing executes",
+      "actor": "r",
+      "metric": "spell_heal_count",
+      "spell": 504565,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "r"
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 500584
+    },
+    {
+      "action": "assert",
+      "label": "talent is active",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 500584,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "talent raises Harvest to 25 percent",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 500283,
+      "equals": 25
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 705413
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 705413,
+      "destination": {
+        "x": -8917.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "label": "Harvesting Grounds deployed",
+      "actor": "r",
+      "metric": "dynamic_object",
+      "spell": 705413,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "zone helper casts",
+      "actor": "r",
+      "metric": "spell_cast_count",
+      "spell": 707591,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "zone helper ground effect exists",
+      "actor": "r",
+      "metric": "dynamic_object",
+      "spell": 707591,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "zone applies allied aura to Reaper",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 707591,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Reaper receives positive allied effect",
+      "actor": "r",
+      "metric": "aura_positive",
+      "spell": 707591,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Reaper receives 30 point Harvest modifier",
+      "actor": "r",
+      "metric": "aura_amount",
+      "spell": 707591,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "enemy receives negative zone effect",
+      "actor": "d",
+      "metric": "aura_positive",
+      "spell": 707591,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "enemy retains zone debuff",
+      "actor": "d",
+      "metric": "aura_amount",
+      "spell": 707591,
+      "effect": 1,
+      "equals": -20
+    },
+    {
+      "action": "assert",
+      "label": "zone raises Harvest to 55 percent",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 500283,
+      "equals": 55,
+      "within_ms": 3000
+    }
+  ]
+}

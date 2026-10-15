@@ -1,0 +1,34 @@
+-- Nozdormu's Gaze (807691): "Your Time Out! now regenerates $s1% less mana per tick, but casting it now
+-- instantly restores an additional $504838s1% of your maximum mana."
+-- Effect 1 is aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) triggering 504838, whose single effect is the
+-- native SPELL_EFFECT_ENERGIZE_PCT with BasePoints 14 -> 15% of maximum mana. Spell.dbc gives 807691's
+-- record ProcFlags 0x0 and no `spell_proc` row existed, so SpellMgr::LoadSpellProcs skipped it and
+-- Aura::GetProcEffectMask returned 0: the additional restore never happened.
+-- 807691's aura-42 effect carries no EffectSpellClassMask, so the row supplies the selector. Proc on
+-- Time Out!, the ability the tooltip names: its ranks (802229 / 803896 / 803897) are SpellFamilyName 28
+-- with SpellFamilyFlags word0 32768 and DmgClass 1 (magic).
+-- ProcFlags 81920 = PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS (0x4000) | ..._NEG (0x10000). Time Out!
+-- neither damages nor heals, so Spell.cpp's TargetInfo::DoDamageAndTriggers does reach the per-effect
+-- scan that decides `positive` - unlike a heal, which short-circuits on m_healing. Following that scan
+-- through SpellInfo::_IsPositiveEffect gives positive: effect 2 is SPELL_EFFECT_ENERGIZE_PCT (always
+-- positive), effect 1 is a periodic energize, and effect 0 is a trigger whose target 802228 contains
+-- SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN (not in that function's sign-dependent list) and
+-- SPELL_AURA_MOD_STUN at effect index 1 (only auto-negative for a single-effect spell). That verdict
+-- rests on a cached AttributesCu chain rather than a live observation, and the merged
+-- rev_20260919_30_chronomancer_gift_of_the_timeways_proc.sql shows this core can classify a
+-- Chronomancer self-buff as negative, so both done-magic bits are set. The family mask already pins the
+-- row to Time Out!, so covering both cannot widen what triggers it, and exactly one bit is present in
+-- any single event, so it cannot double-proc.
+-- SpellTypeMask 4 = PROC_SPELL_TYPE_NO_DMG_HEAL: Unit::ProcSkillsAndAuras falls through to that value
+-- when the event carries neither a heal nor damage, which is Time Out!'s case (energize is neither).
+-- SpellPhaseMask 2 = PROC_SPELL_PHASE_HIT; Time Out! has AttributesEx3 0x0, so it carries no
+-- SPELL_ATTR3_SUPPRESS_CASTER_PROCS and its hit-phase event is delivered. HitMask 0 keeps the default.
+-- DisableEffectsMask 1 disables effect 0 (SPELL_AURA_ADD_FLAT_MODIFIER), which is a spell modifier, not
+-- a proc effect. Chance is the record's own ProcChance (100).
+-- Scope note: this row fixes only the "additional restore" half of the issue. 807691's effect 0 uses
+-- SpellModOp 3 (SPELLMOD_EFFECT1), which Unit::ApplyEffectModifiers applies to effect index 0 - Time
+-- Out!'s damage reduction - while the mana per tick the tooltip describes is effect index 1 and would
+-- need op 12. That repair belongs in the module's SpellInfo contract pass, not in `spell_proc`.
+DELETE FROM `spell_proc` WHERE `SpellId` = 807691;
+INSERT INTO `spell_proc` (`SpellId`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `ProcFlags`, `SpellTypeMask`, `SpellPhaseMask`, `HitMask`, `AttributesMask`, `DisableEffectsMask`, `ProcsPerMinute`, `Chance`, `Cooldown`, `Charges`) VALUES
+(807691, 0, 28, 32768, 0, 0, 81920, 4, 2, 0, 0, 1, 0, 100, 0, 0);

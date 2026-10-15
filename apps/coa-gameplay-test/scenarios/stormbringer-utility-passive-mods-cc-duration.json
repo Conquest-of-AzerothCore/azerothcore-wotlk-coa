@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Airing Out shortens incapacitate/disorient CC natively (#2789)",
+  "contract": "Airing Out (705675) has three effects, all aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, all TARGET_UNIT_CASTER, all EffectBasePoints -21 + EffectDieSides 1 = -20(%): effect0 MiscValue 30 (MECHANIC_SAPPED), effect1 MiscValue 2 (MECHANIC_DISORIENTED), effect2 MiscValue 14 (MECHANIC_KNOCKOUT) -- covering both 'incapacitate' and 'disorient' mechanic families named in the tooltip (SharedDefines.h:1400-1439). aura 232 dispatches to AuraEffect::HandleNoImmediateEffect (SpellAuraEffects.cpp:63), a live, non-null handler implemented in Unit::ModSpellDuration (Unit.cpp:12193-12223): that function reads target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD, mechanic) for each mechanic bit of an incoming negative spell and shrinks its duration by that percentage before the aura lands -- the same generic mechanic-duration-reduction path used by many other classes' native CC-resistance talents, needing no module code. Since Airing Out's own aura amount is what that lookup reads, and the templar Finesse regression (templar-finesse.json) already establishes 'assert the passive's own aura_amount' as sufficient native proof for this exact aura type/parity-contract pattern, this scenario reads AuraEffect::GetAmount on the learned talent directly rather than staging a live incapacitate cast, which would need a stealth- or positional-gated caster (e.g. Sap) with no bearing on whether Airing Out's own modifier resolves correctly.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "sb",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "assert", "label": "BASELINE: Airing Out is not present before learning it",
+      "actor": "sb", "metric": "aura", "spell": 705675, "equals": 0 },
+    { "action": "learn", "label": "Learn Airing Out", "actor": "sb", "spell": 705675 },
+    { "action": "assert", "label": "Airing Out applies its self-buff on learn",
+      "actor": "sb", "metric": "aura", "spell": 705675, "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: Sapped-mechanic duration mod is -20%",
+      "actor": "sb", "metric": "aura_amount", "spell": 705675, "effect": 0, "equals": -20 },
+    { "action": "assert", "label": "DISCRIMINATING: Disoriented-mechanic duration mod is -20%",
+      "actor": "sb", "metric": "aura_amount", "spell": 705675, "effect": 1, "equals": -20 },
+    { "action": "assert", "label": "DISCRIMINATING: Knockout-mechanic duration mod is -20%",
+      "actor": "sb", "metric": "aura_amount", "spell": 705675, "effect": 2, "equals": -20 }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Necromancer Summoning Prodigy keeps Skeletal Archers 3 sec longer (#1353)",
+  "contract": "Summoning Prodigy 704682 is an Animation talent (CharacterAdvancement 33774, ClassType 25 = class 23, Tab Animation, TalentEssenceCost 1, SpellFamilyName 29) whose description reads 'Increases the duration of Skeletal Archers by $/1000;s1 sec.' Its only effect is SPELL_AURA_ADD_FLAT_MODIFIER (107) MiscValue 1 (SPELLMOD_DURATION), BasePoints 2999 + DieSides 1 = +3000 ms, EffectSpellClassMask (0, 0, 0x400000) in family 29, which matches the archer summon 500330 (family flags 8, 0, 0x400000; SPELL_EFFECT_SUMMON of three creature 50076, DurationIndex 8 = 15000 ms). The learned ability Animate: Skeletal Archer 805040 (CharacterAdvancement 7345, description 'Animate ${$500330m1} Skeletal Archers to aid you in combat for $500330d.') triggers 500330. A native summon applies the caster's SPELLMOD_DURATION to the summon spell's duration (Spell::EffectSummonType), so the archers must live 15 sec without the talent and 18 sec with it: 16 sec after they appear none remain without the talent and all three remain with it, and they are gone within the following 3 sec.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "learn", "actor": "necro", "spell": 805040 },
+    {
+      "action": "assert", "label": "SETUP: no archers yet", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 0
+    },
+    { "action": "cast", "label": "Animate archers without the talent", "actor": "necro", "spell": 805040 },
+    {
+      "action": "assert", "label": "SETUP: three Skeletal Archers appear", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 3, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Outlast the 15 sec base duration", "ms": 16000 },
+    {
+      "action": "assert", "label": "CONTROL: without the talent the archers are gone after 16 sec", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 0
+    },
+    { "action": "learn", "actor": "necro", "spell": 704682 },
+    {
+      "action": "assert", "label": "The talent aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 704682, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the native duration modifier adds 3000 ms to the archer summon",
+      "actor": "necro", "metric": "spell_modifier", "spell": 500330, "op": 1, "base": 15000,
+      "min": 17999.99, "max": 18000.01
+    },
+    { "action": "reset_cooldown", "actor": "necro", "spell": 805040 },
+    { "action": "cast", "label": "Animate archers with the talent", "actor": "necro", "spell": 805040 },
+    {
+      "action": "assert", "label": "SETUP: three Skeletal Archers appear again", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 3, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Outlast the 15 sec base duration again", "ms": 16000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: with the talent all archers remain after 16 sec", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 3
+    },
+    {
+      "action": "assert", "label": "The archers expire at 18 sec", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 0, "within_ms": 4000
+    }
+  ]
+}

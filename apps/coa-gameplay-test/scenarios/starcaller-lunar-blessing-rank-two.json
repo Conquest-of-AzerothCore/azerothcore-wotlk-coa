@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Lunar Blessing rank 2 raises healing on a poisoned or diseased target by 6% (#1301)",
+  "contract": "Lunar Blessing 704756 (rank 1, effect 1 base points 2) and 704757 (rank 2, base points 5) carry effect 0 aura 136 and effects 1 and 2 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS (112), read from Spell.dbc in /srv/coa/server-data/dbc. The poisoned or diseased half has no core handler and lives only in starcaller_scaling::ModifyHealReceived (AscensionStarcallerContracts.cpp), which finds the talent with Player::GetAuraOfRankedSpell(704756). SetTalentRank keeps only the chosen rank spell, so a rank 2 player owns 704757 and not 704756, and no spell_ranks row chains them: the lookup found nothing and rank 2 never got the bonus. The scenario calls the registered ModifyHealReceived hooks through the new script_heal_received metric (fixed base 1000, actor as recipient, target as healer, the same argument order the periodic heal path uses) with the actor healing itself while carrying Deadly Poison 3583 (Spell.dbc Dispel type 4, poison). Before the fix rank 2 returns exactly 1000; after it returns 1 + 6/100 = 1.06 applied to 1000 in float, so 1059 or 1060 (bounds 1059..1061). The control knows rank 1 (704756) and carries the same poison: 1 + 3/100 gives 1029 or 1030, proving the existing rank 1 path is untouched. The unpoisoned reading stays 1000 for both, which pins the condition. The metric is deterministic (no cast, hit or crit roll), so there is no false-failure probability. A real Hand of Elune cast cannot prove it because heal crits and the random spread swamp a 6% difference. Only the self-heal path is asserted; the swapped (target, healer) argument order at Unit::HealBySpell for heals on an ally is a separate defect noted, not fixed.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "rank2", "race": 1, "class": 26, "level": 80 },
+    { "id": "rank1", "race": 1, "class": 26, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "rank2", "spell": 704757 },
+    { "action": "learn", "actor": "rank1", "spell": 704756 },
+    {
+      "action": "assert",
+      "label": "Rank 2 without poison heals at the plain amount",
+      "actor": "rank2",
+      "metric": "script_heal_received",
+      "spell": 801990,
+      "target": "rank2",
+      "equals": 1000
+    },
+    { "action": "set_aura", "label": "Poison both fixtures", "actor": "rank2", "spell": 3583, "stacks": 1 },
+    { "action": "set_aura", "actor": "rank1", "spell": 3583, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "Rank 1 on a poisoned target heals 3% more",
+      "actor": "rank1",
+      "metric": "script_heal_received",
+      "spell": 801990,
+      "target": "rank1",
+      "min": 1029,
+      "max": 1031
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 on a poisoned target heals 6% more",
+      "actor": "rank2",
+      "metric": "script_heal_received",
+      "spell": 801990,
+      "target": "rank2",
+      "min": 1059,
+      "max": 1061
+    }
+  ]
+}

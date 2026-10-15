@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "name": "Enraging Howls buffs the party when a Howl is cast (#3186)",
+  "contract": "Enraging Howls 800766 reads 'Casting Howl spells now increases the damage dealt and reduces damage taken by nearby party members by $504157s1% for $504157d'. Its single effect is aura 42 (proc trigger spell) on Enraging Howl 504157, two SPELL_EFFECT_APPLY_AREA_AURA_PARTY effects (MOD_DAMAGE_PERCENT_DONE BasePoints 4 -> +5% and MOD_DAMAGE_PERCENT_TAKEN BasePoints -6 -> -5%, TargetA 20, radius index 14). Spell.dbc gives 800766 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it. The Howl cast is Night Hunter's Howl 501682, the top of its spell_ranks chain 500124-501682, SpellFamilyFlags (0, 0, 2048) which is inside the new row's Howl mask. 501682 has CasterAuraSpell 524861, one of the two Cursed Form markers that AscensionBloodmageTalents mirrors onto the real form state, so the marker is fixtured directly with set_aura instead of shapeshifting.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "bloodmage",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 800766
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 501682
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture the Cursed Form marker Night Hunter's Howl requires",
+      "actor": "bloodmage",
+      "spell": 524861,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Enraging Howls passive is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 800766,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "No Enraging Howl buff on the party member before the cast",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 504157,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 501682,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the party member gains Enraging Howl 504157",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 504157,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Enraging Howl grants the DBC value of +5% damage done",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 504157,
+      "equals": 5
+    }
+  ]
+}

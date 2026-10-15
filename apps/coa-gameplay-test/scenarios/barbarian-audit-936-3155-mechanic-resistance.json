@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Barbarian audit: War Tales and Iron Gut's mechanic-resistance auras apply natively (#936, #3155)",
+  "contract": "#936: War Tales (706352) needs no script. Both its effects are plain APPLY_AURA with SPELL_AURA_MOD_MECHANIC_RESISTANCE (117, BasePoints 25), effect 0 MiscValue 5 (MECHANIC_FEAR) and effect 1 MiscValue 24 (MECHANIC_HORROR). Aura 117's handler is HandleNoImmediateEffect; the resistance is read generically by Unit::GetMechanicResistChance via GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_MECHANIC_RESISTANCE, mechanic) (Unit.cpp). There is no harness metric for mechanic-resist chance, so this proves the aura is applied with the correct per-effect amount (25 on both Fear and Horror) rather than the downstream roll. #3155: Iron Gut (707721) also needs no script. Effect 0 is SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL (245, BasePoints -30, MiscValue 4 = Poison) and effect 1 is SPELL_AURA_MOD_DEBUFF_RESISTANCE (178, BasePoints 30, MiscValue 4 = Poison); both are HandleNoImmediateEffect, with 178 consumed generically in Unit::MagicSpellHitResult and 245 consumed in Unit::CalculateSpellDuration. Same reasoning: no direct harness metric for duration-reduction or debuff-resist chance exists, so the per-effect amounts are asserted directly via aura_amount as native, data-driven proof.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+
+    { "action": "learn", "actor": "b", "spell": 706352 },
+    { "action": "assert", "label": "War Tales (706352) is active",
+      "actor": "b", "metric": "aura", "spell": 706352, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Effect 0 (Fear resist) resolves to 25",
+      "actor": "b", "metric": "aura_amount", "spell": 706352, "effect": 0, "equals": 25 },
+    { "action": "assert", "label": "Effect 1 (Horror resist) resolves to 25",
+      "actor": "b", "metric": "aura_amount", "spell": 706352, "effect": 1, "equals": 25 },
+    { "action": "unlearn", "actor": "b", "spell": 706352 },
+    { "action": "assert", "label": "Unlearning removes War Tales",
+      "actor": "b", "metric": "aura", "spell": 706352, "equals": 0, "within_ms": 3000 },
+
+    { "action": "learn", "actor": "b", "spell": 707721 },
+    { "action": "assert", "label": "Iron Gut (707721) is active",
+      "actor": "b", "metric": "aura", "spell": 707721, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Effect 0 (Poison duration cut) resolves to -30",
+      "actor": "b", "metric": "aura_amount", "spell": 707721, "effect": 0, "equals": -30 },
+    { "action": "assert", "label": "Effect 1 (Poison debuff resist) resolves to 30",
+      "actor": "b", "metric": "aura_amount", "spell": 707721, "effect": 1, "equals": 30 },
+    { "action": "unlearn", "actor": "b", "spell": 707721 },
+    { "action": "assert", "label": "Unlearning removes Iron Gut",
+      "actor": "b", "metric": "aura", "spell": 707721, "equals": 0, "within_ms": 3000 }
+  ]
+}

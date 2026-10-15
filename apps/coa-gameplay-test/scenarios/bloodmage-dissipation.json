@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "Dissipation cuts Fleshcraft's cooldown and Sated's duration by 60 s (#608)",
+  "contract": "Dissipation 680730 effect 0 is aura 107 with MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -60001 + DieSides 1 = -60000 ms, over EffectSpellClassMask (8388608, 0, 0) = word 0 bit 23 = Fleshcraft 801952, whose RecoveryTime is 300000, so it becomes 240000. Effect 1 is aura 107 with MiscValue 1 (SPELLMOD_DURATION), -60000 ms, over (0, 64, 0) = word 1 bit 6 = Sated 532125 (DurationIndex 25 = 180000 ms, so it becomes 120000) and the helper 300796, which nothing applies. Player::ApplySpellMod consumes SPELLMOD_COOLDOWN and Aura::CalcMaxDuration consumes SPELLMOD_DURATION. Tooltip: \"Reduces the cooldown of Fleshcraft and the duration of the Sated debuff by $/1000;s1 sec.\" Both spells the tooltip names are correctly selected. Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Fleshcraft keeps its authored 300 s cooldown before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 801952,
+      "op": 11,
+      "base": 300000,
+      "equals": 300000
+    },
+    {
+      "action": "assert",
+      "label": "Sated keeps its authored 180 s duration before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 532125,
+      "op": 1,
+      "base": 180000,
+      "equals": 180000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680730
+    },
+    {
+      "action": "assert",
+      "label": "Dissipation cuts Fleshcraft's cooldown to 240 s",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 801952,
+      "op": 11,
+      "base": 300000,
+      "equals": 240000
+    },
+    {
+      "action": "assert",
+      "label": "Dissipation cuts Sated's duration to 120 s",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 532125,
+      "op": 1,
+      "base": 180000,
+      "equals": 120000
+    },
+    {
+      "action": "assert",
+      "label": "Dissipation does not touch Bloodbolt's cooldown",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 11,
+      "base": 300000,
+      "equals": 300000
+    }
+  ]
+}

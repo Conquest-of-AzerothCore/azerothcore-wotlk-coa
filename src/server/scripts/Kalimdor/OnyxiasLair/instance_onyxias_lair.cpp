@@ -43,6 +43,17 @@ public:
         uint16 ManyWhelpsCounter;
         bool bDeepBreath;
 
+        // CONFIRMED 2026-10-02 (external review): Basalthane's shattered pillars need
+        // to stay down for the boss's FULL instance lockout, not just a long in-memory
+        // timer (which doesn't survive a worldserver restart). Persisted through the
+        // instance's own save data - survives restarts (loaded from the `instance`
+        // table like every other piece of instance state) and clears itself on a real
+        // instance reset (the whole save-data row gets wiped then, same as everything
+        // else in it). Wipe/evade restoration is unaffected - that's still handled
+        // immediately and independently in spell_basalthane.cpp via Map::ProcessCreatureRespawn,
+        // this flag only ever gets set true on an actual kill (see OnUnitDeath below).
+        bool basalthanePillarsShattered = false;
+
         void Initialize() override
         {
             SetHeaders(DataHeader);
@@ -50,6 +61,48 @@ public:
             ManyWhelpsCounter = 0;
             bDeepBreath = true;
             LoadObjectData(creatureData, nullptr);
+        }
+
+        void ReadSaveDataMore(std::istringstream& data) override
+        {
+            data >> basalthanePillarsShattered;
+        }
+
+        void WriteSaveDataMore(std::ostringstream& data) override
+        {
+            data << uint32(basalthanePillarsShattered);
+        }
+
+        void OnUnitDeath(Unit* unit) override
+        {
+            if (unit->GetEntry() == NPC_BASALTHANE && !basalthanePillarsShattered)
+            {
+                basalthanePillarsShattered = true;
+                SaveToDB();
+            }
+        }
+
+        void OnCreatureCreate(Creature* creature) override
+        {
+            switch (creature->GetEntry())
+            {
+                case NPC_BASALTHANE_PILLAR_1:
+                case NPC_BASALTHANE_PILLAR_2:
+                case NPC_BASALTHANE_PILLAR_3:
+                    // A fresh load (worldserver restart, grid reload, etc.) spawns the
+                    // pillar alive by default - if Basalthane is still dead for this
+                    // lockout, immediately re-assert the shattered state instead of
+                    // letting it stand. Same technique as ShatterPillar() in
+                    // spell_basalthane.cpp (force the corpse to decay immediately, no
+                    // lingering model).
+                    if (basalthanePillarsShattered && creature->IsAlive())
+                    {
+                        creature->KillSelf();
+                        creature->SetCorpseRemoveTime(0);
+                    }
+                    break;
+            }
+            InstanceScript::OnCreatureCreate(creature);
         }
 
         void OnGameObjectCreate(GameObject* go) override

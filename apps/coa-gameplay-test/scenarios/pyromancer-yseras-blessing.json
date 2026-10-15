@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "Ysera's Blessing shortens Gaze of Ysera and lowers its break chance (#702)",
+  "contract": "#702: Ysera's Blessing 704820 carries two ADD_FLAT_MODIFIER (aura 107) effects with class mask {0, 0x40000000, 0}, the family flag of Gaze of Ysera 806148: MiscValue 10 (SPELLMOD_CASTING_TIME) base -501 -> -500 ms, and MiscValue 18 (SPELLMOD_CHANCE_OF_SUCCESS) base -11 -> -10. Gaze of Ysera has cast-time index 16 = 1500 ms, so it becomes 1000 ms. Gaze's proc chance goes through Aura::CalcProcChance, which applies SPELLMOD_CHANCE_OF_SUCCESS, so the 100% break chance of its MOD_STUN proc (ProcFlags 0x222a8) becomes 90%. Only the modifier values are asserted: the report could not read spell_proc rows, so the observed break fraction on a dummy is not asserted. Destroyer's Maw 802107 is the control for the mask.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Gaze of Ysera casts in 1500 ms before the talent",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 806148,
+      "equals": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Gaze of Ysera has a 100 chance modifier base before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 806148,
+      "op": 18,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 704820
+    },
+    {
+      "action": "assert",
+      "label": "Ysera's Blessing removes 500 ms from the Gaze of Ysera cast time",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 806148,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Ysera's Blessing lowers the Gaze of Ysera break chance from 100 to 90",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 806148,
+      "op": 18,
+      "base": 100,
+      "equals": 90
+    },
+    {
+      "action": "assert",
+      "label": "The cast-time cut does not leak onto Destroyer's Maw",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 802107,
+      "op": 10,
+      "base": 1500,
+      "equals": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The chance cut does not leak onto Destroyer's Maw",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 802107,
+      "op": 18,
+      "base": 100,
+      "equals": 100
+    }
+  ]
+}

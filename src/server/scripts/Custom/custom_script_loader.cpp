@@ -17,10 +17,14 @@
 
 // This is where scripts' loading functions should be declared:
 // void MyExampleScript()
+void AddSC_spell_basalthane();
+void AddSC_spell_infernos_items();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
 void AddCustomScripts()
 {
     // MyExampleScript()
+    AddSC_spell_basalthane();
+    AddSC_spell_infernos_items();
 }

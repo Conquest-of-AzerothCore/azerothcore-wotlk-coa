@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "name": "Ranger Silent, But Deadly: direct Physical damage can unlock Deadshot above 20% health (#1209)",
+  "contract": "Silent, But Deadly 524873 reads 'Direct Physical damage dealt now has an $h% chance to allow you to use Deadshot regardless of the targets health for $524872d.' ($h = ProcChance 8, $524872d = DurationIndex 31 = 8 sec). Its only effect is SPELL_AURA_PROC_TRIGGER_SPELL on 524872, a self aura SPELL_AURA_ABILITY_IGNORE_AURASTATE (262) with SpellFamilyName 27 and EffectSpellClassMask (1048576,0,0), which is Deadshot's own SpellFamilyFlags (520227 and ranks). Deadshot's 'Only usable on enemies below 20% health' is TargetAuraState 2; Unit::HasAuraState returns true when the caster holds an ABILITY_IGNORE_AURASTATE aura affecting the spell. Spell.dbc gives 524873 ProcFlags 0; the spell_proc row from rev_20260921_40_ranger_dead_procs.sql (ProcFlags 340 = melee/ranged white hits and melee/ranged abilities, SchoolMask 1, phase HIT) is what lets it fire. Expected: at full target health Deadshot is refused with SPELL_FAILED_TARGET_AURASTATE (111); after the talent is learned, white melee hits eventually grant 524872 (8% per hit: about 126 swings fit in 240 sec, so a false failure has probability near 3e-5), and while it is up Deadshot lands on the same full-health enemy.",
+  "timeout_ms": 400000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "melee_dummy",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "deadshot_dummy",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 20
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 6000 },
+    { "action": "learn", "actor": "ranger", "spell": 264 },
+    { "action": "learn", "actor": "ranger", "spell": 520227 },
+    { "action": "add_item", "actor": "ranger", "item": 2504 },
+    { "action": "equip", "actor": "ranger", "item": 2504, "slot": 17 },
+    { "action": "add_item", "actor": "ranger", "item": 25 },
+    { "action": "equip", "actor": "ranger", "item": 25, "slot": 15 },
+    { "action": "wait", "label": "Let the equipment settle", "ms": 1500 },
+    {
+      "action": "assert",
+      "label": "SETUP: the Deadshot target is at full health",
+      "actor": "deadshot_dummy",
+      "metric": "health_pct",
+      "min": 99
+    },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_damage_count", "spell": 520227, "target": "deadshot_dummy", "save_as": "deadshots_before" },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "cast", "label": "Control Deadshot on a full-health enemy", "actor": "ranger", "spell": 520227, "target": "deadshot_dummy" },
+    { "action": "wait", "label": "Let a landing Deadshot register", "ms": 2000 },
+    {
+      "action": "assert",
+      "label": "Control: Deadshot does not land on an enemy above 20% health",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 520227,
+      "target": "deadshot_dummy",
+      "relative_to": "deadshots_before",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Control: Deadshot is refused for the target's health state",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 520227,
+      "equals": 111
+    },
+    { "action": "learn", "actor": "ranger", "spell": 524873 },
+    {
+      "action": "assert",
+      "label": "SETUP: Silent, But Deadly is active on the Ranger",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 524873,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_proc_count", "spell": 524873, "save_as": "procs_before" },
+    { "action": "attack", "label": "White melee hits deal direct Physical damage", "actor": "ranger", "target": "melee_dummy" },
+    {
+      "action": "assert",
+      "label": "Direct Physical damage eventually grants Silent, But Deadly",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 524872,
+      "caster": "ranger",
+      "equals": 1,
+      "within_ms": 240000
+    },
+    { "action": "stop_attack", "actor": "ranger" },
+    {
+      "action": "assert",
+      "label": "The buff came from the talent's proc",
+      "actor": "ranger",
+      "metric": "spell_proc_count",
+      "spell": 524873,
+      "relative_to": "procs_before",
+      "min": 1
+    },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "cast", "label": "Deadshot on the same full-health enemy while the buff is up", "actor": "ranger", "spell": 520227, "target": "deadshot_dummy" },
+    {
+      "action": "assert",
+      "label": "Deadshot lands regardless of the target's health",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 520227,
+      "target": "deadshot_dummy",
+      "relative_to": "deadshots_before",
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Chaotic procs at its own 8% chance, not 8%*8% (#4719)",
+  "contract": "Chaotic 681376 reads a $h% chance (Spell.dbc ProcChance 8) on dealing damage to stack a damage buff. aura_ascension_felsworn_event::Check (case 681376, AscensionFelswornEvents.cpp) independently rolls roll_chance_f(info->ProcChance) via Chance(player, id) before the native proc system separately rolls CalcProcChance - the same double-gating mechanism as rev_20260928_95_felsworn_legionfall_proc_chance.sql's 801899, and the same parity migration zeroed 681376's spell_proc.Chance too, so the effective rate became 8%*8% = 0.64% instead of 8%. rev_20260928_96_felsworn_chaotic_proc_chance.sql restores Chance = 100. Each successful proc casts 572782 directly (no aura is named as its trigger), so spell_cast_count on 572782 counts exact proc events. 280 autoattack swings against a hostile dummy (entry 36) with near-guaranteed melee hit/no-dodge/no-parry give a binomial floor: at the true 8% rate P(successes >= 9) > 0.999; at the doubled-roll 0.64% rate P(successes >= 9) < 0.01% - min: 9 discriminates the two hypotheses with a false-failure probability under 0.03% and a false-pass probability under 0.01%.",
+  "timeout_ms": 590000,
+  "players": [
+    {
+      "id": "felsworn",
+      "race": 1,
+      "class": 14,
+      "level": 80,
+      "melee_hit_rating": 100000,
+      "expertise_rating": 100000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "felsworn",
+      "entry": 36,
+      "health": 5000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 681376
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Chaotic passive is active",
+      "actor": "felsworn",
+      "metric": "aura",
+      "spell": 681376,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no proc yet",
+      "actor": "felsworn",
+      "metric": "spell_cast_count",
+      "spell": 572782,
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "actor": "felsworn",
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "~280 autoattack swings at a 2000ms weapon speed",
+      "ms": 560000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a single roll at the DBC's 8% clears the binomial floor for 280 trials; a squared 0.64% roll does not",
+      "actor": "felsworn",
+      "metric": "spell_cast_count",
+      "spell": 572782,
+      "min": 9
+    }
+  ]
+}

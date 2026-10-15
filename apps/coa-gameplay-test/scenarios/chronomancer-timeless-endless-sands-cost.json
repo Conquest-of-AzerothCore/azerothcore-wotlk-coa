@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "name": "Timeless makes each Endless Sands stack cut spell costs by 3% (#1259)",
+  "contract": "Timeless 706131 is a passive whose only effect is SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 12 = SPELLMOD_EFFECT2 and EffectBasePoints -4, resolving to -3 with DieSides 1. Its EffectSpellClassMask [0,0,8388608] selects exactly one SpellFamilyName 28 spell: Endless Sands 806728 (SpellFamilyFlags [0,0,8388608], StackAmount 5). Endless Sands effect 1 is SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT (72) with EffectMiscValue 127 (all schools) and EffectBasePoints -1, resolving to 0, so untalented the effect is worth nothing. SPELLMOD_EFFECT2 is folded into that effect's value by Unit::ApplyEffectModifiers through SpellEffectInfo::CalcValue, and AuraEffect::CalculateAmount then multiplies by the stack amount (SpellAuraEffects.cpp), which is the tooltip's 'per stack'. AuraEffect::HandleModPowerCostPCT writes UNIT_FIELD_POWER_COST_MULTIPLIER per school, and SpellInfo::CalcPowerCost multiplies the cost by (1 + multiplier). Endless Sands carries AttributesEx3 0x40010000 (SUPPRESS_CASTER_PROCS | DO_NOT_DISPLAY_RANGE), not SPELL_ATTR3_IGNORE_CASTER_MODIFIERS 0x20000000, so the modifier is not blocked. Epoch 501779 is used as the priced spell: PowerType 0 with ManaCostPercentage 18 and SchoolMask 80, whose first school is 4, one of the schools Endless Sands covers. Native handlers only. Regression scenario for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 22, "level": 80 },
+    { "id": "talent", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talent", "spell": 706131 },
+    {
+      "action": "assert",
+      "label": "Timeless self-applies its passive aura once learned",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 706131,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Endless Sands carries no SPELLMOD_EFFECT2 bonus without the talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 806728,
+      "op": 12,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Timeless adds -3 to Endless Sands' second effect",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 806728,
+      "op": 12,
+      "base": 0,
+      "equals": -3
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline Epoch mana cost before Endless Sands is applied",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 501779,
+      "save_as": "epoch_cost_base"
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture five Endless Sands stacks on the control",
+      "actor": "control",
+      "spell": 806728,
+      "stacks": 5
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture five Endless Sands stacks on the talented Chronomancer",
+      "actor": "talent",
+      "spell": 806728,
+      "stacks": 5
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, Endless Sands' power cost effect stays at zero",
+      "actor": "control",
+      "metric": "aura_amount",
+      "spell": 806728,
+      "caster": "control",
+      "effect": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "With the talent, five stacks resolve to a 15% cost reduction",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 806728,
+      "caster": "talent",
+      "effect": 1,
+      "equals": -15
+    },
+    {
+      "action": "assert",
+      "label": "Endless Sands alone does not change Epoch's cost",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 501779,
+      "ratio_to": "epoch_cost_base",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "assert",
+      "label": "Five talented Endless Sands stacks price Epoch 15% cheaper",
+      "actor": "talent",
+      "metric": "spell_power_cost",
+      "spell": 501779,
+      "ratio_to": "epoch_cost_base",
+      "min": 0.84,
+      "max": 0.86
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Cultist: Everpresent boosts Presence proc chance through the native spellmod path (#1541)",
+  "contract": "300272 is an ADD_FLAT_MODIFIER (107) aura, MiscValue=18 (SPELLMOD_CHANCE_OF_SUCCESS), EffectBasePoints=9/DieSides=1 (+1 per SpellInfo.cpp:489) giving a flat +10; EffectSpellClassMask (512,0,64) hits every real 'Presence of <Old God>' spell in family 31, confirmed in Spell.dbc, including 803341 'Presence of N'zoth' (SpellFamilyFlags (16384,0,64), base ProcChance=5). 300272 is not in SpellInfo::IsAffectedBySpellMod's family-31 routing table (SpellInfo.cpp:1497-1508), so the generic fallback IsAffected(familyName, mask) applies the mod with no script. The spell_modifier metric exercises Player::ApplySpellMod on this exact spell, the same call the real proc-chance roll uses.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "c", "race": 1, "class": 25, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: Presence of N'zoth keeps its base 5 proc chance before Everpresent",
+      "actor": "c", "metric": "spell_modifier", "spell": 803341, "op": 18, "base": 5, "min": 5, "max": 5
+    },
+    {
+      "action": "assert", "label": "SETUP: an unrelated family-31 spell outside the mask is unaffected",
+      "actor": "c", "metric": "spell_modifier", "spell": 800413, "op": 18, "base": 5, "min": 5, "max": 5
+    },
+    { "action": "learn", "actor": "c", "spell": 300272 },
+    {
+      "action": "assert", "label": "Everpresent adds 10 points to Presence of N'zoth's proc chance",
+      "actor": "c", "metric": "spell_modifier", "spell": 803341, "op": 18, "base": 5, "min": 15, "max": 15
+    },
+    {
+      "action": "assert", "label": "Everpresent leaves an unrelated spell's chance-of-success unmodified",
+      "actor": "c", "metric": "spell_modifier", "spell": 800413, "op": 18, "base": 5, "min": 5, "max": 5
+    }
+  ]
+}

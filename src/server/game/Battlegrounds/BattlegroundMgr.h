@@ -22,7 +22,12 @@
 #include "BattlegroundQueue.h"
 #include "CreatureAIImpl.h"
 #include "DBCEnums.h"
+#include <array>
+#include <chrono>
+#include <mutex>
+#include <optional>
 #include <unordered_map>
+#include <vector>
 
 typedef std::map<uint32, Battleground*> BattlegroundContainer;
 typedef std::set<uint32> BattlegroundClientIdsContainer;
@@ -58,9 +63,18 @@ struct BattlegroundTemplate
     bool IsArena() const;
 };
 
+struct WargameAdmission
+{
+    BattlegroundTypeId Type;
+    std::array<ObjectGuid, PVP_TEAMS_COUNT> Leaders;
+    std::array<std::vector<ObjectGuid>, PVP_TEAMS_COUNT> Rosters;
+};
+
 class BattlegroundMgr
 {
 private:
+    Battleground* CreateBattlegroundInstance(BattlegroundTypeId bgTypeId,
+        PvPDifficultyEntry const* bracketEntry, uint8 arenaType, bool isRated, bool isWargame);
     BattlegroundMgr();
     ~BattlegroundMgr();
 
@@ -82,6 +96,14 @@ public:
     Battleground* GetBattleground(uint32 instanceID, BattlegroundTypeId bgTypeId);
     Battleground* GetBattlegroundTemplate(BattlegroundTypeId bgTypeId);
     Battleground* CreateNewBattleground(BattlegroundTypeId bgTypeId, PvPDifficultyEntry const* bracketEntry, uint8 arenaType, bool isRated);
+    // Creates an unstarted private instance. Admission/consent belongs to the Wargame service.
+    Battleground* CreateNewWargame(BattlegroundTypeId bgTypeId, PvPDifficultyEntry const* bracketEntry);
+    // World-thread service API. The client adapter supplies its invitation deadline;
+    // this layer does not invent a client protocol or a historical timeout.
+    uint64 RequestWargame(Player* challenger, Player* opponent, BattlegroundTypeId bgTypeId,
+        std::chrono::steady_clock::time_point deadline);
+    std::optional<WargameAdmission> AcceptWargame(Player* opponent, uint64 invitation);
+    bool CancelWargame(Player* leader, uint64 invitation);
     std::vector<Battleground const*> GetActiveBattlegrounds();
 
     void AddBattleground(Battleground* bg);
@@ -152,6 +174,17 @@ private:
     BattlegroundDataContainer bgDataStore;
 
     BattlegroundQueue m_BattlegroundQueues[MAX_BATTLEGROUND_QUEUE_TYPES];
+
+    struct WargameInvitation
+    {
+        WargameAdmission Admission;
+        std::chrono::steady_clock::time_point Deadline;
+    };
+    void ExpireWargameInvitations();
+    void ExpireWargameInvitationsLocked();
+    std::mutex m_WargameLock;
+    std::unordered_map<uint64, WargameInvitation> m_WargameInvitations;
+    uint64 m_NextWargameInvitation{ 0 };
 
     std::vector<uint64> m_QueueUpdateScheduler;
     bool   m_ArenaTesting;

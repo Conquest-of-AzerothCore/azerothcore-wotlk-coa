@@ -1,0 +1,528 @@
+{
+  "schema": 1,
+  "name": "Primalist Gaze of Therazane native spell ranges",
+  "contract": "Both ranks extend representative first/highest Geomancy spell ranges by 10/20%, and all four Seismic families by 8/16 yards. Wildclaw and removal remain at baseline.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 95
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 680458,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 680453,
+      "all_specs": true
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 500402,
+      "save_as": "range_500402"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 502777,
+      "save_as": "range_502777"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 680448,
+      "save_as": "range_680448"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 681536,
+      "save_as": "range_681536"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 520412,
+      "save_as": "range_520412"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 520745,
+      "save_as": "range_520745"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 803981,
+      "save_as": "range_803981"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 503264,
+      "save_as": "range_503264"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 804433,
+      "save_as": "range_804433"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 582532,
+      "save_as": "range_582532"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 680442,
+      "save_as": "range_680442"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 681114,
+      "save_as": "range_681114"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 807432,
+      "save_as": "range_807432"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 800140,
+      "save_as": "range_800140"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 680453
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 500402,
+      "ratio_to": "range_500402",
+      "min": 1.0990000000000002,
+      "max": 1.101
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 502777,
+      "ratio_to": "range_502777",
+      "min": 1.0990000000000002,
+      "max": 1.101
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 680448,
+      "ratio_to": "range_680448",
+      "min": 1.0990000000000002,
+      "max": 1.101
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 681536,
+      "ratio_to": "range_681536",
+      "min": 1.0990000000000002,
+      "max": 1.101
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 520412,
+      "ratio_to": "range_520412",
+      "min": 1.0990000000000002,
+      "max": 1.101
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 520745,
+      "ratio_to": "range_520745",
+      "min": 1.0990000000000002,
+      "max": 1.101
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 803981,
+      "relative_to": "range_803981",
+      "min": 7.999,
+      "max": 8.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 503264,
+      "relative_to": "range_503264",
+      "min": 7.999,
+      "max": 8.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 804433,
+      "relative_to": "range_804433",
+      "min": 7.999,
+      "max": 8.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 582532,
+      "relative_to": "range_582532",
+      "min": 7.999,
+      "max": 8.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 680442,
+      "relative_to": "range_680442",
+      "min": 7.999,
+      "max": 8.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 681114,
+      "relative_to": "range_681114",
+      "min": 7.999,
+      "max": 8.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 807432,
+      "relative_to": "range_807432",
+      "min": 7.999,
+      "max": 8.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 800140,
+      "relative_to": "range_800140",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 680453,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 680458
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 500402,
+      "ratio_to": "range_500402",
+      "min": 1.199,
+      "max": 1.2009999999999998
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 502777,
+      "ratio_to": "range_502777",
+      "min": 1.199,
+      "max": 1.2009999999999998
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 680448,
+      "ratio_to": "range_680448",
+      "min": 1.199,
+      "max": 1.2009999999999998
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 681536,
+      "ratio_to": "range_681536",
+      "min": 1.199,
+      "max": 1.2009999999999998
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 520412,
+      "ratio_to": "range_520412",
+      "min": 1.199,
+      "max": 1.2009999999999998
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 520745,
+      "ratio_to": "range_520745",
+      "min": 1.199,
+      "max": 1.2009999999999998
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 803981,
+      "relative_to": "range_803981",
+      "min": 15.999,
+      "max": 16.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 503264,
+      "relative_to": "range_503264",
+      "min": 15.999,
+      "max": 16.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 804433,
+      "relative_to": "range_804433",
+      "min": 15.999,
+      "max": 16.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 582532,
+      "relative_to": "range_582532",
+      "min": 15.999,
+      "max": 16.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 680442,
+      "relative_to": "range_680442",
+      "min": 15.999,
+      "max": 16.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 681114,
+      "relative_to": "range_681114",
+      "min": 15.999,
+      "max": 16.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 807432,
+      "relative_to": "range_807432",
+      "min": 15.999,
+      "max": 16.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 800140,
+      "relative_to": "range_800140",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 680458,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 500402,
+      "relative_to": "range_500402",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 502777,
+      "relative_to": "range_502777",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 680448,
+      "relative_to": "range_680448",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 681536,
+      "relative_to": "range_681536",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 520412,
+      "relative_to": "range_520412",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 520745,
+      "relative_to": "range_520745",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 803981,
+      "relative_to": "range_803981",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 503264,
+      "relative_to": "range_503264",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 804433,
+      "relative_to": "range_804433",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 582532,
+      "relative_to": "range_582532",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 680442,
+      "relative_to": "range_680442",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 681114,
+      "relative_to": "range_681114",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 807432,
+      "relative_to": "range_807432",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_range",
+      "spell": 800140,
+      "relative_to": "range_800140",
+      "equals": 0
+    }
+  ]
+}

@@ -1,7 +1,13 @@
 {
   "schema": 1,
   "name": "One-Punch Man: +20% to Oath Breakers, Condemn and Titanstrike (#1119)",
-  "contract": "One-Punch Man 705284 increases the damage of Oath Breakers (including Righteous Tempest and Blade of Faith's periodic damage), Condemn and Titanstrike by 20%.",
+  "contract": [
+    "One-Punch Man 705284 increases the damage of Oath Breakers (including Righteous Tempest and Blade of Faith's",
+    "periodic damage), Condemn and Titanstrike by 20%.",
+    "Original Blade of Faith 803880 forbids misses, dodges and parries. Weapon swaps in combat use 6119 and its",
+    "1500 ms global cooldown; Blade uses the same category 133. Wait for that native timer and require SpellGo",
+    "before observing the periodic aura. Preserve the 20 percent modifier and 1.18-1.22 ratio."
+  ],
   "timeout_ms": 90000,
   "players": [
     {
@@ -217,16 +223,76 @@
       "value": 100
     },
     {
+      "action": "assert",
+      "actor": "control",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "global_cooldown_ms",
+      "spell": 803880,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "Wait for the native in-combat weapon-switch cooldown"
+    },
+    {
       "action": "cast",
       "actor": "control",
       "spell": 803880,
       "target": "dummy_control"
     },
     {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_go_count",
+      "spell": 803880,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "cast_failure",
+      "spell": 803880,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "punch",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "punch",
+      "metric": "global_cooldown_ms",
+      "spell": 803880,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "Wait for the native in-combat weapon-switch cooldown"
+    },
+    {
       "action": "cast",
       "actor": "punch",
       "spell": 803880,
       "target": "dummy_punch"
+    },
+    {
+      "action": "assert",
+      "actor": "punch",
+      "metric": "spell_go_count",
+      "spell": 803880,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "punch",
+      "metric": "cast_failure",
+      "spell": 803880,
+      "equals": 0
     },
     {
       "action": "assert",

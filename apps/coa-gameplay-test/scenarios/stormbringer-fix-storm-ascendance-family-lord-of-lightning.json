@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Lord of Lightning is granted by Storm Ascendance (#1137)",
+  "contract": "#1137: Lord of Lightning 707618 is a passive whose single effect is an aura 42 proc casting the buff 801841 on the caster, with Description 'Storm Ascendance now additionally grants you Lord of Lightning for $801841d'. Its Spell.dbc ProcFlags are 0 and no spell_proc row existed, so no proc entry was generated and the aura could never proc; because the proc is the talent's only effect, nothing of it reached the player. The buff is pure native spellmods: effect 0 aura 108 ADD_PCT_MODIFIER, SPELLMOD_DAMAGE, EffectBasePoints 29 + DieSides 1 = +30 percent on class mask (0x100, 0x200010, 0), and effect 1 aura 107 ADD_FLAT_MODIFIER, EffectMiscValue 17 SPELLMOD_JUMP_TARGETS, EffectBasePoints 2 + DieSides 1 = +3 on class mask (0x2000000, 0, 0). Electrocute 501421 carries SpellFamilyFlags (0x2000000, 0x200000, 0x20) and is matched by both masks; Shock 804020 carries (0x800, 0, 0) and is matched by neither, so it serves as the negative control. The fix is one spell_proc row admitting the proc on family 22 SpellFamilyFlags word 2 bit 0, a bit carried by exactly two Spell.dbc rows, Storm Ascendance 681110 and its companion 681187. Duration 20000 ms from SpellDuration.dbc row 18.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "p1", "race": 1, "class": 16, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "p1", "spell": 681110 },
+    { "action": "learn", "actor": "p1", "spell": 501421 },
+    { "action": "learn", "actor": "p1", "spell": 804020 },
+    { "action": "learn", "actor": "p1", "spell": 707618 },
+    {
+      "action": "assert", "label": "BASELINE: the Lord of Lightning passive is applied on learning",
+      "actor": "p1", "metric": "aura", "spell": 707618, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "BASELINE: the buff is absent before Storm Ascendance is cast",
+      "actor": "p1", "metric": "aura", "spell": 801841, "equals": 0
+    },
+    {
+      "action": "snapshot", "label": "Electrocute damage modifier before the buff",
+      "actor": "p1", "metric": "spell_modifier", "spell": 501421, "op": 0, "base": 100, "save_as": "electrocute_damage"
+    },
+    {
+      "action": "snapshot", "label": "Electrocute jump targets before the buff",
+      "actor": "p1", "metric": "spell_modifier", "spell": 501421, "op": 17, "base": 0, "save_as": "electrocute_jumps"
+    },
+    {
+      "action": "snapshot", "label": "Shock damage modifier before the buff",
+      "actor": "p1", "metric": "spell_modifier", "spell": 804020, "op": 0, "base": 100, "save_as": "shock_damage"
+    },
+    { "action": "cast", "actor": "p1", "spell": 681110 },
+    {
+      "action": "assert", "label": "BASELINE: Storm Ascendance is applied to the caster",
+      "actor": "p1", "metric": "aura", "spell": 681110, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Storm Ascendance granted the Lord of Lightning buff",
+      "actor": "p1", "metric": "aura", "spell": 801841, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the buff lasts 20000 ms (SpellDuration.dbc row 18)",
+      "actor": "p1", "metric": "aura_duration_ms", "spell": 801841, "min": 18000, "max": 20000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the buff adds 30 percent to Electrocute damage (801841 EffectBasePoints[0] 29 + DieSides 1)",
+      "actor": "p1", "metric": "spell_modifier", "spell": 501421, "op": 0, "base": 100, "ratio_to": "electrocute_damage", "min": 1.299, "max": 1.301
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the buff adds 3 Electrocute jump targets (801841 EffectBasePoints[1] 2 + DieSides 1)",
+      "actor": "p1", "metric": "spell_modifier", "spell": 501421, "op": 17, "base": 0, "relative_to": "electrocute_jumps", "equals": 3
+    },
+    {
+      "action": "assert", "label": "Shock is outside both class masks and is left untouched",
+      "actor": "p1", "metric": "spell_modifier", "spell": 804020, "op": 0, "base": 100, "relative_to": "shock_damage", "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,184 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Waves of Blood heals a nearby ally from Crimson Tide ticks (#2240)",
+  "contract": "Waves of Blood 681427: \"Each tick of Crimson Tide now has a $681427h% chance to heal a nearby ally for $681427s1% of the damage dealt.\" Spell.dbc gives 681427 one effect - the private aura 354, which is nullptr in AuraEffectHandler (SpellAuraEffects.cpp:419) and has no core consumer - plus ProcFlags 0x0, ProcChance 10 and TriggerSpell 807652. 807652 is a real SPELL_EFFECT_HEAL with TargetA 18 / TargetB 31 (TARGET_UNIT_DEST_AREA_ALLY), radius index 23 = 40 yd and MaxAffectedTargets 1, and its BasePoints are 0, so the amount can only be forwarded by a script. The Bloodmage is the only friendly unit in range, so the single ally 807652 picks is the caster itself. Crimson Tide rank 504136 (SpellLevel 72, the rank a level 80 character owns) ticks every 3000 ms for DurationIndex 8 = 15000 ms, i.e. 5 ticks per target, and its MaxAffectedTargets is 10 over radius index 13 = 10 yd, so eight fixture enemies all receive it. Two casts therefore roll the 10% chance about 72 times after the baseline is taken, which leaves a false failure below 0.1% (0.9^72 = 5e-4). The caster is in combat for the whole run, so Player::RegenerateHealth adds nothing and the only possible source of health for it is 807652.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d1",
+      "owner": "b",
+      "entry": 36,
+      "health": 200000,
+      "distance": 2
+    },
+    {
+      "id": "d2",
+      "owner": "b",
+      "entry": 36,
+      "health": 200000,
+      "distance": 3
+    },
+    {
+      "id": "d3",
+      "owner": "b",
+      "entry": 36,
+      "health": 200000,
+      "distance": 4
+    },
+    {
+      "id": "d4",
+      "owner": "b",
+      "entry": 36,
+      "health": 200000,
+      "distance": 5
+    },
+    {
+      "id": "d5",
+      "owner": "b",
+      "entry": 36,
+      "health": 200000,
+      "distance": 6
+    },
+    {
+      "id": "d6",
+      "owner": "b",
+      "entry": 36,
+      "health": 200000,
+      "distance": 7
+    },
+    {
+      "id": "d7",
+      "owner": "b",
+      "entry": 36,
+      "health": 200000,
+      "distance": 8
+    },
+    {
+      "id": "d8",
+      "owner": "b",
+      "entry": 36,
+      "health": 200000,
+      "distance": 9
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 504136
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 681427
+    },
+    {
+      "action": "assert",
+      "label": "Waves of Blood is a passive and is applied on learn",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 681427,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 504136
+    },
+    {
+      "action": "assert",
+      "label": "Crimson Tide is ticking on the first fixture enemy",
+      "actor": "d1",
+      "metric": "aura",
+      "spell": 504136,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Crimson Tide is ticking on the eighth fixture enemy",
+      "actor": "d8",
+      "metric": "aura",
+      "spell": 504136,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "b",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "label": "Caster health before the rolls",
+      "actor": "b",
+      "metric": "health",
+      "save_as": "hp_before"
+    },
+    {
+      "action": "wait",
+      "label": "First Crimson Tide runs out",
+      "ms": 16000
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 504136
+    },
+    {
+      "action": "wait",
+      "label": "Second Crimson Tide runs out",
+      "ms": 16000
+    },
+    {
+      "action": "assert",
+      "label": "The caster never left combat, so no health regeneration ran",
+      "actor": "b",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Waves of Blood healed the caster at least once",
+      "actor": "b",
+      "metric": "health",
+      "relative_to": "hp_before",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The heal carries a real share of a tick, not a zero base point",
+      "actor": "b",
+      "metric": "health",
+      "relative_to": "hp_before",
+      "min": 50
+    }
+  ]
+}

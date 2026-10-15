@@ -1,0 +1,470 @@
+{
+  "schema": 1,
+  "name": "Wildcard Feral Charge and Mangle grant native Bear and Cat abilities (#6675, #6676)",
+  "contract": "Original Feral Charge49377 and Mangle33917 wrappers promise usable Bear16979/33878 and Cat49376/33876 abilities. Acquisition must grant them, both forms must charge and damage enemies through native normal casts, and unlearning must remove dependencies. Storm Mangle talent850073 also teaches939300 and its Bear939340/Cat939320 actions; trained939305 grants corresponding rank6 actions, and forgetting the talent removes the dependencies.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "bear",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "cat",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "bear_target",
+      "owner": "bear",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 18
+    },
+    {
+      "id": "cat_target",
+      "owner": "cat",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 18
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessb"
+    },
+    {
+      "action": "learn",
+      "actor": "bear",
+      "spell": 49377
+    },
+    {
+      "action": "learn",
+      "actor": "bear",
+      "spell": 33917
+    },
+    {
+      "action": "assert",
+      "actor": "bear",
+      "metric": "knows_spell",
+      "spell": 16979,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bear",
+      "metric": "knows_spell",
+      "spell": 33878,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "bear",
+      "spell": 5487
+    },
+    {
+      "action": "cast",
+      "actor": "bear",
+      "spell": 5487
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "bear",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bear",
+      "spell": 16979,
+      "target": "bear_target"
+    },
+    {
+      "action": "assert",
+      "actor": "bear",
+      "metric": "cast_failure",
+      "spell": 16979,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "bear",
+      "metric": "distance",
+      "target": "bear_target",
+      "max": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "bear",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bear",
+      "spell": 33878,
+      "target": "bear_target"
+    },
+    {
+      "action": "assert",
+      "actor": "bear",
+      "metric": "spell_damage_count",
+      "spell": 33878,
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "unlearn",
+      "actor": "bear",
+      "spell": 49377
+    },
+    {
+      "action": "unlearn",
+      "actor": "bear",
+      "spell": 33917
+    },
+    {
+      "action": "assert",
+      "actor": "bear",
+      "metric": "knows_spell",
+      "spell": 16979,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "bear",
+      "metric": "knows_spell",
+      "spell": 33878,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "cat",
+      "spell": 49377
+    },
+    {
+      "action": "learn",
+      "actor": "cat",
+      "spell": 33917
+    },
+    {
+      "action": "assert",
+      "actor": "cat",
+      "metric": "knows_spell",
+      "spell": 49376,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "cat",
+      "metric": "knows_spell",
+      "spell": 33876,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "cat",
+      "spell": 768
+    },
+    {
+      "action": "cast",
+      "actor": "cat",
+      "spell": 768
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "cat",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "cat",
+      "spell": 49376,
+      "target": "cat_target"
+    },
+    {
+      "action": "assert",
+      "actor": "cat",
+      "metric": "cast_failure",
+      "spell": 49376,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cat",
+      "metric": "distance",
+      "target": "cat_target",
+      "max": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "cat",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "cat",
+      "spell": 33876,
+      "target": "cat_target"
+    },
+    {
+      "action": "assert",
+      "actor": "cat",
+      "metric": "spell_damage_count",
+      "spell": 33876,
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "unlearn",
+      "actor": "cat",
+      "spell": 49377
+    },
+    {
+      "action": "unlearn",
+      "actor": "cat",
+      "spell": 33917
+    },
+    {
+      "action": "assert",
+      "actor": "cat",
+      "metric": "knows_spell",
+      "spell": 49376,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cat",
+      "metric": "knows_spell",
+      "spell": 33876,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "bear",
+      "spell": 33917
+    },
+    {
+      "action": "learn",
+      "actor": "bear",
+      "spell": 850073
+    },
+    {
+      "action": "assert",
+      "actor": "bear",
+      "metric": "knows_spell",
+      "spell": 939300,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bear",
+      "metric": "knows_spell",
+      "spell": 939340,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "bear",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bear",
+      "spell": 939340,
+      "target": "bear_target"
+    },
+    {
+      "action": "assert",
+      "actor": "bear",
+      "metric": "cast_failure",
+      "spell": 939340,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "bear",
+      "metric": "spell_damage_count",
+      "spell": 939340,
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "learn",
+      "actor": "bear",
+      "spell": 939305
+    },
+    {
+      "action": "assert",
+      "actor": "bear",
+      "metric": "knows_spell",
+      "spell": 939345,
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "bear",
+      "spell": 850073
+    },
+    {
+      "action": "assert",
+      "actor": "bear",
+      "metric": "knows_spell",
+      "spell": 939340,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "bear",
+      "metric": "knows_spell",
+      "spell": 939345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "bear",
+      "metric": "knows_spell",
+      "spell": 33878,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "cat",
+      "spell": 33917
+    },
+    {
+      "action": "learn",
+      "actor": "cat",
+      "spell": 850073
+    },
+    {
+      "action": "assert",
+      "actor": "cat",
+      "metric": "knows_spell",
+      "spell": 939300,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "cat",
+      "metric": "knows_spell",
+      "spell": 939320,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "cat",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "cat",
+      "spell": 939320,
+      "target": "cat_target"
+    },
+    {
+      "action": "assert",
+      "actor": "cat",
+      "metric": "cast_failure",
+      "spell": 939320,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cat",
+      "metric": "spell_damage_count",
+      "spell": 939320,
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "learn",
+      "actor": "cat",
+      "spell": 939305
+    },
+    {
+      "action": "assert",
+      "actor": "cat",
+      "metric": "knows_spell",
+      "spell": 939325,
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "cat",
+      "spell": 850073
+    },
+    {
+      "action": "assert",
+      "actor": "cat",
+      "metric": "knows_spell",
+      "spell": 939320,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cat",
+      "metric": "knows_spell",
+      "spell": 939325,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cat",
+      "metric": "knows_spell",
+      "spell": 33876,
+      "equals": 1
+    }
+  ]
+}

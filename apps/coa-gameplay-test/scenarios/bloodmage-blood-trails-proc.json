@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Blood Trails fires its Blood Trail proc from a periodic damage tick (#510)",
+  "contract": "Blood Trails 804858 reads 'Periodic damage and healing now causes targets to spill a pool of blood beneath them.' Its single real effect is aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) on Blood Trail 804857, DBC ProcChance 100, but Spell.dbc gives 804858 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped the record entirely (Aura::GetProcEffectMask returns 0 without an entry) and 804857 could never fire. The new spell_proc row (ProcFlags 262144 = PROC_FLAG_DONE_PERIODIC, SpellTypeMask 3 = DAMAGE|HEAL, SpellPhaseMask 2 = PROC_SPELL_PHASE_HIT, Chance 0 deferring to the record's own ProcChance 100) makes the aura reachable. AuraEffect::HandlePeriodicDamageAurasTick and AuraEffect::HandlePeriodicHealAurasTick both assign procAttacker = PROC_FLAG_DONE_PERIODIC identically (SpellAuraEffects.cpp), so a single periodic-damage tick from Taldaram's Torment 800772 (SPELL_AURA_PERIODIC_DAMAGE, 3000 ms amplitude) is a sufficient, deterministic (100% chance) proof that the row reaches the engine's shared periodic-tick proc path; the periodic-heal half is not separately scenario-proven here since it shares the identical native flag.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "victim",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3,
+      "faction": 7
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "bloodmage", "spell": 804858 },
+    {
+      "action": "assert", "label": "SETUP: Blood Trails is learned and self-applies",
+      "actor": "bloodmage", "metric": "aura", "spell": 804858, "equals": 1
+    },
+    { "action": "learn", "actor": "bloodmage", "spell": 800772 },
+    { "action": "cast", "actor": "bloodmage", "spell": 800772, "target": "victim" },
+    {
+      "action": "assert", "label": "SETUP: the periodic damage effect is ticking on the target",
+      "actor": "victim", "metric": "aura", "spell": 800772, "caster": "bloodmage",
+      "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let the first 3000 ms damage tick land", "ms": 3500 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the periodic damage tick procs Blood Trail",
+      "actor": "bloodmage", "metric": "spell_proc_count", "spell": 804858, "min": 1
+    }
+  ]
+}

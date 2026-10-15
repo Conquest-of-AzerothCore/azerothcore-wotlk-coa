@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "name": "Rabid cuts every Howl cooldown by 25% (#2823)",
+  "contract": "Rabid 705732 is one effect: aura 108 with MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -26 + DieSides 1 = -25%, over EffectSpellClassMask (0, 0, 133248) = word 2 bits 17, 11 and 7. Those bits select every family-26 record named \"Howl\": Blood Howl 800782 and Monstrous Howl 804811 (bit 17), Night Hunter's Howl 500124/501680-501686 (bit 11), Shadow Howl 806177 and Wicked Howl 804207 (bit 7). Player::ApplySpellMod consumes SPELLMOD_COOLDOWN in the cooldown path. Tooltip: \"Reduces the cooldown of Howl spells by $s1%.\" Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Blood Howl keeps its authored cooldown before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 800782,
+      "op": 11,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Night Hunter's Howl keeps its authored cooldown before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 501686,
+      "op": 11,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 705732
+    },
+    {
+      "action": "assert",
+      "label": "Rabid cuts Blood Howl's cooldown by 25%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 800782,
+      "op": 11,
+      "base": 10000,
+      "equals": 7500
+    },
+    {
+      "action": "assert",
+      "label": "Rabid cuts Night Hunter's Howl's cooldown by 25%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 501686,
+      "op": 11,
+      "base": 10000,
+      "equals": 7500
+    },
+    {
+      "action": "assert",
+      "label": "Rabid cuts Shadow Howl's cooldown by 25%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 806177,
+      "op": 11,
+      "base": 10000,
+      "equals": 7500
+    },
+    {
+      "action": "assert",
+      "label": "Rabid cuts Monstrous Howl's cooldown by 25%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 804811,
+      "op": 11,
+      "base": 10000,
+      "equals": 7500
+    },
+    {
+      "action": "assert",
+      "label": "Rabid does not touch Bloodbolt's cooldown",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 11,
+      "base": 10000,
+      "equals": 10000
+    }
+  ]
+}

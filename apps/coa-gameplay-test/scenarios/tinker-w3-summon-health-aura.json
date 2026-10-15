@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "Tinker: Clockwork Ingenuity reaches the Tinker's summons",
+  "contract": "#521: Clockwork Ingenuity (505336) needs no script. Its effect 1 is the fork's SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS, which UnitAura::FillTargetMap delivers to every summon the caster controls on the same map, carrying SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT with amount 10. A Mechano-Bear that is already out must gain the aura when the passive is learned and lose it when it is unlearned, and the amount the summons receive must stay 10.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 803405
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 803405
+    },
+    {
+      "action": "assert",
+      "label": "The Mechano-Bear is out",
+      "actor": "t",
+      "metric": "pet_entry",
+      "equals": 60671,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Without the passive the summon carries no Clockwork Ingenuity aura",
+      "actor": "t",
+      "metric": "pet_aura_stacks",
+      "spell": 505336,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 505336
+    },
+    {
+      "action": "assert",
+      "label": "The summon aura reaches the existing Mechano-Bear",
+      "actor": "t",
+      "metric": "pet_aura_stacks",
+      "spell": 505336,
+      "caster": "t",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Exactly one owned Mechano-Bear carries it",
+      "actor": "t",
+      "metric": "owned_creature_count",
+      "entry": 60671,
+      "spell": 505336,
+      "caster": "t",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The maximum-health bonus the summons receive is 10%",
+      "actor": "t",
+      "metric": "aura_amount",
+      "spell": 505336,
+      "effect": 1,
+      "equals": 10
+    },
+    {
+      "action": "unlearn",
+      "actor": "t",
+      "spell": 505336
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning takes the aura off the summon",
+      "actor": "t",
+      "metric": "pet_aura_stacks",
+      "spell": 505336,
+      "equals": 0,
+      "within_ms": 10000
+    }
+  ]
+}

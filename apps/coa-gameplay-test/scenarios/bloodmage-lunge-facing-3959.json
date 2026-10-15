@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Lunge lands behind the enemy facing it (#3959)",
+  "contract": "#3959 part 2: 'It also makes you face the wrong way behind your target.' Lunge 500126 effect 0 is SPELL_EFFECT_JUMP_DEST (42) at TARGET_DEST_TARGET_BACK (65), so the Bloodmage lands on the far side of the enemy. Spell::EffectJumpDest (SpellEffects.cpp) calls MotionMaster::MoveJump without a facing, and MoveSpline::ComputePosition then leaves the unit at the spline tangent, i.e. the travel direction, so after the leap the enemy is directly behind. Expected: after Lunge the Bloodmage faces the enemy it leapt behind, the way a charge-behind leap is used. Metric: Hemoburst 572855 has FacingCasterFlags 1 and Spell::CheckCast refuses it with SPELL_FAILED_UNIT_NOT_INFRONT (134) when the target is outside the front arc. The control cast before Lunge, facing the dummy, must not fail; the cast after Lunge fails with 134 on main and must not fail once the jump ends facing the target. A fix that only keeps the pre-jump orientation (MoveSplineFlag::Final_Target) still fails here, because the pre-jump facing points away from the dummy after landing. The dummy inherits the summoner's orientation, so the Bloodmage starts at o = pi and then turns to o = 0: the dummy faces the Bloodmage and its back, the Lunge destination, is on the far side. With both facing the same way the destination would lie between them and the check could not fail.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "b", "race": 1, "class": 20, "level": 80, "melee_hit_rating": 10000, "spell_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "d", "owner": "b", "entry": 299, "level": 80, "distance": 8, "health": 1000000 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 3.14159 },
+  "steps": [
+    { "action": "wait", "ms": 4000 },
+    { "action": "teleport", "label": "Turn toward the dummy, which was summoned facing the Bloodmage", "actor": "b", "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_aura", "label": "Cursed Form, which Lunge requires", "actor": "b", "spell": 525031, "stacks": 1 },
+    { "action": "learn", "actor": "b", "spell": 500126 },
+    { "action": "learn", "actor": "b", "spell": 572855 },
+    { "action": "set_power", "actor": "b", "power": 1, "value": 1000 },
+    { "action": "cast", "label": "Control: Hemoburst while facing the dummy", "actor": "b", "spell": 572855, "target": "d" },
+    { "action": "assert", "label": "Control: the facing check passes before Lunge", "actor": "b", "metric": "cast_failure", "spell": 572855, "equals": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_power", "actor": "b", "power": 1, "value": 1000 },
+    { "action": "cast", "label": "Lunge behind the dummy", "actor": "b", "spell": 500126, "target": "d" },
+    { "action": "assert", "label": "Lunge hit the dummy", "actor": "b", "metric": "spell_damage_count", "spell": 500126, "target": "d", "min": 1, "within_ms": 5000 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "reset_cooldown", "label": "Clear the control cast's Hemoburst cooldown", "actor": "b", "spell": 572855 },
+    { "action": "cast", "label": "Hemoburst right after landing", "actor": "b", "spell": 572855, "target": "d" },
+    { "action": "assert", "label": "DISCRIMINATING: the Bloodmage faces the dummy after Lunge (main: 134 SPELL_FAILED_UNIT_NOT_INFRONT)", "actor": "b", "metric": "cast_failure", "spell": 572855, "equals": 0, "within_ms": 1000 }
+  ]
+}

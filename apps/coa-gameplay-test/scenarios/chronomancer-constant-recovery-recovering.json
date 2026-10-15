@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "Constant Recovery puts Recovering on the ally Reverse Wound heals (#1986)",
+  "contract": "Constant Recovery 555729 effect 1 is aura 42 (proc trigger spell) on Recovering 680843 - aura 118 SPELL_AURA_MOD_HEALING_PCT with EffectBasePoints 5 (die 1 => +6%), DurationIndex 1 = 10000 ms, implicit target 21 TARGET_UNIT_TARGET_ALLY - but Spell.dbc gives 555729 ProcFlags 0 and no spell_proc row existed, so Recovering never landed. With a row keyed on the heal done by Reverse Wound 801303 (family 28, word1 0x20000 and word2 0x1), one Reverse Wound on a wounded ally must place Recovering on that ally, cast by the Chronomancer, with an amount of 6. AuraEffect::HandleProcTriggerSpellAuraProc sends the trigger to the event's action target, which is the healed ally. Effect 0 (aura 10 SPELL_AURA_MOD_THREAT, EffectMiscValue 2, EffectBasePoints -21) already works through AuraEffect::HandleModThreat and is excluded from the proc by DisableEffectsMask 1; it is not the reported defect and is not asserted here.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 555729
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 801303
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "label": "No Recovering before the heal",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 680843,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801303,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "Reverse Wound's heal places Recovering on the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 680843,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Recovering carries the record's 6% healing taken",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 680843,
+      "caster": "chronomancer",
+      "equals": 6
+    }
+  ]
+}

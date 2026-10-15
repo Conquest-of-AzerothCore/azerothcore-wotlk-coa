@@ -1,0 +1,1146 @@
+{
+  "schema": 1,
+  "name": "Primalist One with the Earth: first and highest Stoneshard return four percent Mana",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "first",
+      "race": 1,
+      "class": 31,
+      "level": 4,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "first_enemy",
+      "race": 5,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "highest",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "highest_enemy",
+      "race": 5,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "pvp",
+      "actor": "first",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "first_enemy",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "first",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "first_enemy",
+      "map": 0,
+      "x": -9612.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "learn",
+      "actor": "first",
+      "spell": 680448
+    },
+    {
+      "action": "learn",
+      "actor": "first",
+      "spell": 803138
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "max_power",
+      "power": 0,
+      "save_as": "first_max_mana",
+      "label": "first_max_mana"
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_damage_done",
+      "spell": 680448,
+      "target": "first_enemy",
+      "save_as": "first_damage_680448"
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "first_enemy",
+      "save_as": "first_damage_803138"
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_damage_done",
+      "spell": 680448,
+      "target": "first_enemy",
+      "ratio_to": "first_damage_680448",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "first_enemy",
+      "ratio_to": "first_damage_803138",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "save_as": "first_baseline_680448_count"
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "save_as": "first_baseline_680448_mana"
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_damage_count",
+      "spell": 680448,
+      "target": "first_enemy",
+      "save_as": "first_baseline_680448_hits"
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 680448,
+      "target": "first_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_damage_count",
+      "spell": 680448,
+      "target": "first_enemy",
+      "relative_to": "first_baseline_680448_hits",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "relative_to": "first_baseline_680448_count",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "relative_to": "first_baseline_680448_mana",
+      "save_as": "first_baseline_680448_gain",
+      "label": "first_baseline_680448_gain"
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "save_as": "first_baseline_803138_count"
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "save_as": "first_baseline_803138_mana"
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "first_enemy",
+      "save_as": "first_baseline_803138_hits"
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 803138,
+      "target": "first_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "first_enemy",
+      "relative_to": "first_baseline_803138_hits",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "relative_to": "first_baseline_803138_count",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "relative_to": "first_baseline_803138_mana",
+      "save_as": "first_baseline_803138_gain",
+      "label": "first_baseline_803138_gain"
+    },
+    {
+      "action": "learn",
+      "actor": "first",
+      "spell": 704402
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_damage_done",
+      "spell": 680448,
+      "target": "first_enemy",
+      "ratio_to": "first_damage_680448",
+      "min": 1.249,
+      "max": 1.251
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "first_enemy",
+      "ratio_to": "first_damage_803138",
+      "min": 1.249,
+      "max": 1.251
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "save_as": "first_talented_680448_count"
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "save_as": "first_talented_680448_mana"
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_damage_count",
+      "spell": 680448,
+      "target": "first_enemy",
+      "save_as": "first_talented_680448_hits"
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 680448,
+      "target": "first_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_damage_count",
+      "spell": 680448,
+      "target": "first_enemy",
+      "relative_to": "first_talented_680448_hits",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "relative_to": "first_talented_680448_count",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "relative_to": "first_talented_680448_mana",
+      "save_as": "first_talented_680448_gain",
+      "label": "first_talented_680448_gain"
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "save_as": "first_talented_803138_count"
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "save_as": "first_talented_803138_mana"
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "first_enemy",
+      "save_as": "first_talented_803138_hits"
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 803138,
+      "target": "first_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "first_enemy",
+      "relative_to": "first_talented_803138_hits",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "relative_to": "first_talented_803138_count",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "relative_to": "first_talented_803138_mana",
+      "save_as": "first_talented_803138_gain",
+      "label": "first_talented_803138_gain"
+    },
+    {
+      "action": "unlearn",
+      "actor": "first",
+      "spell": 704402
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_damage_done",
+      "spell": 680448,
+      "target": "first_enemy",
+      "ratio_to": "first_damage_680448",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "first_enemy",
+      "ratio_to": "first_damage_803138",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "save_as": "first_removed_680448_count"
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "save_as": "first_removed_680448_mana"
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_damage_count",
+      "spell": 680448,
+      "target": "first_enemy",
+      "save_as": "first_removed_680448_hits"
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 680448,
+      "target": "first_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_damage_count",
+      "spell": 680448,
+      "target": "first_enemy",
+      "relative_to": "first_removed_680448_hits",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "relative_to": "first_removed_680448_count",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "relative_to": "first_removed_680448_mana",
+      "save_as": "first_removed_680448_gain",
+      "label": "first_removed_680448_gain"
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "save_as": "first_removed_803138_count"
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "save_as": "first_removed_803138_mana"
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "first_enemy",
+      "save_as": "first_removed_803138_hits"
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 803138,
+      "target": "first_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "first_enemy",
+      "relative_to": "first_removed_803138_hits",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "relative_to": "first_removed_803138_count",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "first",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "relative_to": "first_removed_803138_mana",
+      "save_as": "first_removed_803138_gain",
+      "label": "first_removed_803138_gain"
+    },
+    {
+      "action": "pvp",
+      "actor": "highest",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "highest_enemy",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "highest",
+      "map": 0,
+      "x": -9597.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "highest_enemy",
+      "map": 0,
+      "x": -9592.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "learn",
+      "actor": "highest",
+      "spell": 681536
+    },
+    {
+      "action": "learn",
+      "actor": "highest",
+      "spell": 803138
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "max_power",
+      "power": 0,
+      "save_as": "highest_max_mana",
+      "label": "highest_max_mana"
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_damage_done",
+      "spell": 681536,
+      "target": "highest_enemy",
+      "save_as": "highest_damage_681536"
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "highest_enemy",
+      "save_as": "highest_damage_803138"
+    },
+    {
+      "action": "assert",
+      "actor": "highest",
+      "metric": "spell_damage_done",
+      "spell": 681536,
+      "target": "highest_enemy",
+      "ratio_to": "highest_damage_681536",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "actor": "highest",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "highest_enemy",
+      "ratio_to": "highest_damage_803138",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "highest",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "highest",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "save_as": "highest_baseline_681536_count"
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "save_as": "highest_baseline_681536_mana"
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_damage_count",
+      "spell": 681536,
+      "target": "highest_enemy",
+      "save_as": "highest_baseline_681536_hits"
+    },
+    {
+      "action": "cast",
+      "actor": "highest",
+      "spell": 681536,
+      "target": "highest_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "assert",
+      "actor": "highest",
+      "metric": "spell_damage_count",
+      "spell": 681536,
+      "target": "highest_enemy",
+      "relative_to": "highest_baseline_681536_hits",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "highest",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "relative_to": "highest_baseline_681536_count",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "relative_to": "highest_baseline_681536_mana",
+      "save_as": "highest_baseline_681536_gain",
+      "label": "highest_baseline_681536_gain"
+    },
+    {
+      "action": "set_power",
+      "actor": "highest",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "highest",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "save_as": "highest_baseline_803138_count"
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "save_as": "highest_baseline_803138_mana"
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "highest_enemy",
+      "save_as": "highest_baseline_803138_hits"
+    },
+    {
+      "action": "cast",
+      "actor": "highest",
+      "spell": 803138,
+      "target": "highest_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "assert",
+      "actor": "highest",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "highest_enemy",
+      "relative_to": "highest_baseline_803138_hits",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "highest",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "relative_to": "highest_baseline_803138_count",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "relative_to": "highest_baseline_803138_mana",
+      "save_as": "highest_baseline_803138_gain",
+      "label": "highest_baseline_803138_gain"
+    },
+    {
+      "action": "learn",
+      "actor": "highest",
+      "spell": 704402
+    },
+    {
+      "action": "assert",
+      "actor": "highest",
+      "metric": "spell_damage_done",
+      "spell": 681536,
+      "target": "highest_enemy",
+      "ratio_to": "highest_damage_681536",
+      "min": 1.249,
+      "max": 1.251
+    },
+    {
+      "action": "assert",
+      "actor": "highest",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "highest_enemy",
+      "ratio_to": "highest_damage_803138",
+      "min": 1.249,
+      "max": 1.251
+    },
+    {
+      "action": "set_power",
+      "actor": "highest",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "highest",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "save_as": "highest_talented_681536_count"
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "save_as": "highest_talented_681536_mana"
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_damage_count",
+      "spell": 681536,
+      "target": "highest_enemy",
+      "save_as": "highest_talented_681536_hits"
+    },
+    {
+      "action": "cast",
+      "actor": "highest",
+      "spell": 681536,
+      "target": "highest_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "assert",
+      "actor": "highest",
+      "metric": "spell_damage_count",
+      "spell": 681536,
+      "target": "highest_enemy",
+      "relative_to": "highest_talented_681536_hits",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "highest",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "relative_to": "highest_talented_681536_count",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "relative_to": "highest_talented_681536_mana",
+      "save_as": "highest_talented_681536_gain",
+      "label": "highest_talented_681536_gain"
+    },
+    {
+      "action": "set_power",
+      "actor": "highest",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "highest",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "save_as": "highest_talented_803138_count"
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "save_as": "highest_talented_803138_mana"
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "highest_enemy",
+      "save_as": "highest_talented_803138_hits"
+    },
+    {
+      "action": "cast",
+      "actor": "highest",
+      "spell": 803138,
+      "target": "highest_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "assert",
+      "actor": "highest",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "highest_enemy",
+      "relative_to": "highest_talented_803138_hits",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "highest",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "relative_to": "highest_talented_803138_count",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "relative_to": "highest_talented_803138_mana",
+      "save_as": "highest_talented_803138_gain",
+      "label": "highest_talented_803138_gain"
+    },
+    {
+      "action": "unlearn",
+      "actor": "highest",
+      "spell": 704402
+    },
+    {
+      "action": "assert",
+      "actor": "highest",
+      "metric": "spell_damage_done",
+      "spell": 681536,
+      "target": "highest_enemy",
+      "ratio_to": "highest_damage_681536",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "actor": "highest",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "highest_enemy",
+      "ratio_to": "highest_damage_803138",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "highest",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "highest",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "save_as": "highest_removed_681536_count"
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "save_as": "highest_removed_681536_mana"
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_damage_count",
+      "spell": 681536,
+      "target": "highest_enemy",
+      "save_as": "highest_removed_681536_hits"
+    },
+    {
+      "action": "cast",
+      "actor": "highest",
+      "spell": 681536,
+      "target": "highest_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "assert",
+      "actor": "highest",
+      "metric": "spell_damage_count",
+      "spell": 681536,
+      "target": "highest_enemy",
+      "relative_to": "highest_removed_681536_hits",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "highest",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "relative_to": "highest_removed_681536_count",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "relative_to": "highest_removed_681536_mana",
+      "save_as": "highest_removed_681536_gain",
+      "label": "highest_removed_681536_gain"
+    },
+    {
+      "action": "set_power",
+      "actor": "highest",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "highest",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "save_as": "highest_removed_803138_count"
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "save_as": "highest_removed_803138_mana"
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "highest_enemy",
+      "save_as": "highest_removed_803138_hits"
+    },
+    {
+      "action": "cast",
+      "actor": "highest",
+      "spell": 803138,
+      "target": "highest_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "assert",
+      "actor": "highest",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "highest_enemy",
+      "relative_to": "highest_removed_803138_hits",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "highest",
+      "metric": "spell_energize_count",
+      "spell": 524366,
+      "relative_to": "highest_removed_803138_count",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "highest",
+      "metric": "spell_energize_total",
+      "spell": 524366,
+      "relative_to": "highest_removed_803138_mana",
+      "save_as": "highest_removed_803138_gain",
+      "label": "highest_removed_803138_gain"
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "name": "Gameplay fixture regeneration isolation",
+  "contract": "A configured actor does not naturally regenerate health, Mana or Rage, while an ordinary control does. A normal Primalist heal still heals and spends Rage.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "timeout_ms": 30000,
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 20000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 400
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 20000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 1,
+      "value": 400
+    },
+    {
+      "action": "wait",
+      "ms": 3100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "health",
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "power",
+      "power": 0,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "power",
+      "power": 1,
+      "equals": 400
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "health",
+      "min": 1001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "power",
+      "power": 0,
+      "min": 1001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "power",
+      "power": 1,
+      "max": 399
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800135
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800135
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800135,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "health",
+      "min": 1001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "power",
+      "power": 1,
+      "max": 399
+    }
+  ]
+}

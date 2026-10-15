@@ -77,23 +77,27 @@ endfunction()
 #
 
 function(CopyModuleConfig configDir)
+  set(configTarget modules)
+  if(ARGC GREATER 1)
+    set(configTarget "${ARGV1}")
+  endif()
   set(postPath "configs/modules")
 
   if(WIN32)
     if("${CMAKE_MAKE_PROGRAM}" MATCHES "MSBuild")
-      add_custom_command(TARGET modules
+      add_custom_command(TARGET ${configTarget}
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/${postPath}")
-      add_custom_command(TARGET modules
+      add_custom_command(TARGET ${configTarget}
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy "${configDir}" "${CMAKE_BINARY_DIR}/bin/$(ConfigurationName)/${postPath}")
     elseif(MINGW)
-      add_custom_command(TARGET modules
+      add_custom_command(TARGET ${configTarget}
         POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/bin/${postPath}")
-      add_custom_command(TARGET modules
+      add_custom_command(TARGET ${configTarget}
         POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy "${configDir} ${CMAKE_BINARY_DIR}/bin/${postPath}")
+        COMMAND ${CMAKE_COMMAND} -E copy "${configDir}" "${CMAKE_BINARY_DIR}/bin/${postPath}")
     endif()
   endif()
 

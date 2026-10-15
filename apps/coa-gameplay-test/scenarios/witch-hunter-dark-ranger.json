@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Dark Ranger buffs the Shadowhound through its summon-aura effect (#2690)",
+  "contract": "Dark Ranger 705465 (rank 1) and 707861 (rank 2) read 'Increases the Shadow damage dealt by your Shadow Hounds by $s2%.' In the installed Spell.dbc both are passive, family 21, with effect 0 a self MOD_DAMAGE_PERCENT_DONE placeholder worth 0 and effect 1 = 190 (SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS, SharedDefines.h) carrying SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79), misc 32 (Shadow), BasePoints 4 and 9 (DieSides 1, so 5% and 10%, matching $s2), radius index 12 = 100 yd. No script or SQL names either id; the delivery is native: effect 190 is an area-aura effect and UnitAura::FillTargetMap (SpellAuras.cpp) adds every summon in the owner's controlled set, which is the same mechanism scenarios/tinker-w3-summon-health-aura.json already pins for Clockwork Ingenuity 505336. The Shadowhound is the entry 50124 summoned by Houndmaster's Whistle 801343 (effect 56, misc 50124). The scenario summons it, checks that it has no Dark Ranger aura, learns rank 1 and expects the aura on the hound with amount 5, swaps to rank 2 and expects amount 10, and unlearning must take the aura off the hound. The amounts come from the DBC, not from the code.",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Houndmaster's Whistle", "actor": "hunter", "spell": 801343},
+    {"action": "cast", "actor": "hunter", "spell": 801343},
+    {"action": "assert", "label": "The Shadowhound is out", "actor": "hunter", "metric": "pet_entry", "equals": 50124, "within_ms": 15000},
+    {"action": "assert", "label": "Without the passive the hound carries no Dark Ranger aura", "actor": "hunter", "metric": "pet_aura_stacks", "spell": 705465, "equals": 0},
+    {"action": "learn", "label": "Dark Ranger rank 1", "actor": "hunter", "spell": 705465},
+    {"action": "assert", "label": "The aura reaches the existing hound", "actor": "hunter", "metric": "pet_aura_stacks", "spell": 705465, "caster": "hunter", "equals": 1, "within_ms": 10000},
+    {"action": "assert", "label": "Exactly one owned Shadowhound carries it", "actor": "hunter", "metric": "owned_creature_count", "entry": 50124, "spell": 705465, "caster": "hunter", "equals": 1, "within_ms": 10000},
+    {"action": "assert", "label": "Rank 1 grants 5% (BasePoints 4 + 1)", "actor": "hunter", "metric": "pet_aura_amount", "spell": 705465, "effect": 1, "equals": 5},
+    {"action": "unlearn", "label": "Drop rank 1", "actor": "hunter", "spell": 705465},
+    {"action": "assert", "label": "Unlearning takes the aura off the hound", "actor": "hunter", "metric": "pet_aura_stacks", "spell": 705465, "equals": 0, "within_ms": 10000},
+    {"action": "learn", "label": "Dark Ranger rank 2", "actor": "hunter", "spell": 707861},
+    {"action": "assert", "label": "Rank 2 aura reaches the hound", "actor": "hunter", "metric": "pet_aura_stacks", "spell": 707861, "caster": "hunter", "equals": 1, "within_ms": 10000},
+    {"action": "assert", "label": "Rank 2 grants 10% (BasePoints 9 + 1)", "actor": "hunter", "metric": "pet_aura_amount", "spell": 707861, "effect": 1, "equals": 10},
+    {"action": "assert", "label": "Rank 1 is gone from the hound", "actor": "hunter", "metric": "pet_aura_stacks", "spell": 705465, "equals": 0},
+    {"action": "unlearn", "label": "Drop rank 2", "actor": "hunter", "spell": 707861},
+    {"action": "assert", "label": "Unlearning rank 2 takes the aura off the hound", "actor": "hunter", "metric": "pet_aura_stacks", "spell": 707861, "equals": 0, "within_ms": 10000}
+  ]
+}

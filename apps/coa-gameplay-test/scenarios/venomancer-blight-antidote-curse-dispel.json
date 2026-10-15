@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Venomancer Blight Antidote dispels curse effects from an ally (#3702)",
+  "contract": "#3702: Blight Antidote 520153 (Spell.dbc, read for this scenario) has one effect, SPELL_EFFECT_DISPEL (38) with MiscValue 2 (DISPEL_CURSE), EffectBasePoints 1 and DieSides 1, so the effect value is 2 dispels, at ImplicitTargetA 21 (TARGET_UNIT_TARGET_ALLY), cast time 0 and range index 4 (30 yd). The tooltip reads 'dispelling $s1 curse effects from them'. No script, spell_proc or spell_linked_spell touches 520153 (grep of src, modules and pending_db_world found no code reference; the id only appears in the spellbook data tables): the behaviour is entirely native, in Spell::EffectDispel and Unit::GetDispellableAuraList. This is a regression scenario, it makes no code change. Fixtures: two non-Warlock curses (family 0, Dispel 2, 10 s duration) so that SPELL_SPECIFIC_CURSE per-caster exclusivity, which only applies to Warlock-family curses, cannot remove one of them on application: Curse of Weakness 17227 and Curse of Impotence 22371; the control is Polymorph 118 (Dispel 1, Magic), which a curse dispel must not touch. The effect value is asserted as 2 from the server's own CalcValue; the number of curses removed is asserted as both fixtured curses gone (a single-dispel effect would leave one), and the Polymorph staying proves the dispel type is honoured. The ally applies its own fixture auras, so caster and target are the same friendly unit, which is the path Unit::GetDispellableAuraList takes for a friendly target (the positive/negative filter only applies to DISPEL_MAGIC).",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "venomancer", "race": 1, "class": 29, "level": 80 },
+    { "id": "ally", "race": 1, "class": 29, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "venomancer", "spell": 520153 },
+    { "action": "assert", "label": "Blight Antidote's dispel effect count is 2 (BasePoints 1 + DieSides 1)",
+      "actor": "venomancer", "metric": "spell_effect_value", "spell": 520153, "effect": 0, "equals": 2 },
+
+    { "action": "set_aura", "label": "Fixture curse 1 on the ally", "actor": "ally", "spell": 17227, "stacks": 1 },
+    { "action": "set_aura", "label": "Fixture curse 2 on the ally", "actor": "ally", "spell": 22371, "stacks": 1 },
+    { "action": "set_aura", "label": "Fixture magic control (Polymorph) on the ally", "actor": "ally", "spell": 118, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: the ally carries curse 1", "actor": "ally", "metric": "aura", "spell": 17227, "equals": 1 },
+    { "action": "assert", "label": "SETUP: the ally carries curse 2", "actor": "ally", "metric": "aura", "spell": 22371, "equals": 1 },
+    { "action": "assert", "label": "SETUP: the ally carries the magic control", "actor": "ally", "metric": "aura", "spell": 118, "equals": 1 },
+
+    { "action": "cast", "label": "Cast Blight Antidote on the ally", "actor": "venomancer", "spell": 520153, "target": "ally" },
+
+    { "action": "assert", "label": "DISCRIMINATING: curse 1 is dispelled", "actor": "ally", "metric": "aura", "spell": 17227, "equals": 0, "within_ms": 5000 },
+    { "action": "assert", "label": "DISCRIMINATING: curse 2 is dispelled (both, not just one)", "actor": "ally", "metric": "aura", "spell": 22371, "equals": 0, "within_ms": 5000 },
+    { "action": "assert", "label": "CONTROL: the Magic-type Polymorph is not removed by a curse dispel", "actor": "ally", "metric": "aura", "spell": 118, "equals": 1 }
+  ]
+}

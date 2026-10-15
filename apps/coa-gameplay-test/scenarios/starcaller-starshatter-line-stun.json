@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "name": "Starshatter stuns enemies in its line and applies a Scattered Star (#3196)",
+  "contract": "Starshatter 801135 reads \"sending forth Elune's astral light in a line outward from you, stunning enemies struck for 5 sec and applying a Scattered Star\". The report says no server handler exists because grep finds no module reference to 801135, which is true and is not the same as the spell doing nothing: the record chain is native. 801135 Effect[0] is SPELL_AURA_APPLY_AURA 23 (periodic trigger spell), amplitude 250 ms, DurationIndex 36 (1000 ms), trigger 707724; 707724 Effect[0] is SPELL_EFFECT_TRIGGER_SPELL on TARGET_DEST_CASTER_FRONT casting 707725; 707725 (family 20) is a persistent area aura with a 500 ms dynamic object of radius 4 yd (SpellRadius 26) whose periodic trigger (amplitude 499) casts 712461; 712461 Effect[0] is aura 12 (SPELL_AURA_MOD_STUN) with DurationIndex 28 (5000 ms) and Effect[1] triggers 804378 Scattered Stars. Only a run can show whether the chain fires, so the scenario asserts the tooltip's two clauses on a hostile creature 6 yd in front of the caster (location o 0 faces +X): the stun aura 712461 is present with a remaining duration between 3000 and 5000 ms when first observed, and the caster owns at least one stack of 804378 on the creature. A creature at the same distance beside the line is not tested. The fixture is level 80 with raised spell and ranged hit rating so a resist does not read as a missing effect; training dummies are faction 7 and would not be enemies, so the creature uses the harness default hostile faction 14.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 6
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801135
+    },
+    {
+      "action": "assert",
+      "label": "The creature stands 6 yards ahead",
+      "actor": "caster",
+      "metric": "distance",
+      "target": "target",
+      "min": 5,
+      "max": 7
+    },
+    {
+      "action": "cast",
+      "label": "Cast Starshatter",
+      "actor": "caster",
+      "spell": 801135
+    },
+    {
+      "action": "assert",
+      "label": "The line stuns the creature",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 712461,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The stun lasts up to 5 seconds",
+      "actor": "target",
+      "metric": "aura_duration_ms",
+      "spell": 712461,
+      "min": 3000,
+      "max": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The creature carries a Scattered Star owned by the caster",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 804378,
+      "caster": "caster",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

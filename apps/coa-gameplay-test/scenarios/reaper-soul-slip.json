@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "name": "Soul Slip harvests a fragment on avoided melee attacks (#752)",
+  "contract": "Soul Slip 500286 triggers Soul Fragment 805077 on dodged melee attacks and stops after unlearning.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80
+    },
+    {
+      "id": "attacker",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let player setup settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 500286
+    },
+    {
+      "action": "assert",
+      "label": "Soul Slip passive is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 500286,
+      "equals": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "reaper",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "pvp",
+      "actor": "reaper",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "attacker",
+      "enabled": true
+    },
+    {
+      "action": "set_aura",
+      "label": "Give the defender permanent 100 percent dodge",
+      "actor": "reaper",
+      "spell": 10020,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Defender dodge chance is at least 100 percent",
+      "actor": "reaper",
+      "metric": "dodge_chance",
+      "min": 100
+    },
+    {
+      "action": "attack",
+      "actor": "attacker",
+      "target": "reaper"
+    },
+    {
+      "action": "assert",
+      "label": "Attacker makes melee swings",
+      "actor": "attacker",
+      "metric": "melee_attack_count",
+      "min": 20,
+      "within_ms": 60000
+    },
+    {
+      "action": "assert",
+      "label": "Dodge fixture prevents melee damage",
+      "actor": "attacker",
+      "metric": "melee_damage_count",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Avoided attacks trigger Soul Slip",
+      "actor": "reaper",
+      "metric": "spell_proc_count",
+      "spell": 500286,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "A Soul Fragment spell was cast",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 805077,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Record Soul Slip proc count",
+      "actor": "reaper",
+      "metric": "spell_proc_count",
+      "spell": 500286,
+      "save_as": "procs_before_unlearn"
+    },
+    {
+      "action": "snapshot",
+      "label": "Record melee swing count",
+      "actor": "attacker",
+      "metric": "melee_attack_count",
+      "save_as": "swings_before_unlearn"
+    },
+    {
+      "action": "unlearn",
+      "actor": "reaper",
+      "spell": 500286
+    },
+    {
+      "action": "assert",
+      "label": "Soul Slip passive is removed",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 500286,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Keep full dodge chance for control swings",
+      "actor": "reaper",
+      "spell": 10020,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Attacker keeps swinging after unlearning",
+      "actor": "attacker",
+      "metric": "melee_attack_count",
+      "relative_to": "swings_before_unlearn",
+      "min": 5,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "No more Soul Slip procs after unlearning",
+      "actor": "reaper",
+      "metric": "spell_proc_count",
+      "spell": 500286,
+      "relative_to": "procs_before_unlearn",
+      "equals": 0
+    },
+    {
+      "action": "stop_attack",
+      "actor": "attacker"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Unfinished Business: the Hearthglen overlook trigger credits the player the client reports in it (#5920)",
+  "contract": "Quest 6025 Unfinished Business is completed by areatrigger_involvedrelation (3367, 6025). The client fires trigger 3367 from AreaTrigger.dbc: a 10 yard sphere at (2833.63, -1551.14, 187.14), identical in the client and server DBC. The world `areatrigger` row for 3367 sat 10.6 yards away at (2843.4, -1553.26, 190.721) with radius 7, so HandleAreaTriggerOpcode rejected a player standing at the client's trigger as too far and the objective never registered. The row now carries the DBC sphere. Expected: with 6025 in progress, a player at the DBC trigger centre who sends CMSG_AREATRIGGER 3367 completes the quest.",
+  "timeout_ms": 30000,
+  "location": { "map": 0, "x": 2833.63, "y": -1551.14, "z": 187.14, "o": 0 },
+  "players": [
+    { "id": "scout", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Take Unfinished Business", "actor": "scout", "quest": 6025, "complete": false },
+    {
+      "action": "assert", "label": "SETUP: the quest is in progress", "actor": "scout",
+      "metric": "quest_status", "quest": 6025, "equals": 3
+    },
+    {
+      "action": "teleport", "label": "Stand at the client's overlook trigger", "actor": "scout",
+      "map": 0, "x": 2833.63, "y": -1551.14, "z": 187.14
+    },
+    { "action": "area_trigger", "label": "The client reports the overlook trigger", "actor": "scout", "id": 3367 },
+    {
+      "action": "assert", "label": "Overlooking Hearthglen completes the quest", "actor": "scout",
+      "metric": "quest_status", "quest": 6025, "equals": 1, "within_ms": 3000
+    }
+  ]
+}

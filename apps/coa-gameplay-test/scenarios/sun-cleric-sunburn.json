@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Sunburn already shortens Rapture's cast time by 0.5 sec (#1579)",
+  "contract": "300365 is ADD_FLAT_MODIFIER (aura 107), MiscValue 10 = SPELLMOD_CASTING_TIME, EffectSpellClassMask word 1 = 0x80000. Rapture (806477, the RecoveryTime-20000 rank-1 cast spell; the 'Rank: Dawn' 301177 sharing the display name is an unrelated legacy id with no bit in common) carries that exact bit in its own SpellFamilyFlags word 1 (0x80000). SpellInfo::IsAffectedBySpellMod's generic flag96 AND matches. BasePoints -501 resolves to -500 (DieSides 1), matching 'Reduces the cast time of Rapture by 0.5 sec' as a flat millisecond SPELLMOD_CASTING_TIME, applied inside SpellInfo::CalcCastTime. Native only, no server code needed.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_cast_time_ms", "spell": 806477, "save_as": "cast_time_base" },
+    { "action": "learn", "label": "Reduces the cast time of Rapture by 0.5 sec", "actor": "caster", "spell": 300365 },
+    {
+      "action": "assert", "label": "Rapture casts 500ms faster",
+      "actor": "caster", "metric": "spell_cast_time_ms", "spell": 806477, "relative_to": "cast_time_base", "equals": -500
+    }
+  ]
+}

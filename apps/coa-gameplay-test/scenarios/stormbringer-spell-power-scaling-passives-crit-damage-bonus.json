@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Thunderous and Hydro Powered raise spell critical damage natively (#1212, #1686)",
+  "contract": "#1212: Thunderous (804827) is a single SPELL_AURA_MOD_CRIT_DAMAGE_BONUS (163) effect, EffectBasePoints 149 + DieSides 1 = +150, EffectMiscValue 126 (all magic schools). #1686: Hydro Powered (300616) is the same aura, EffectBasePoints 34 + DieSides 1 = +35, same misc 126. Both are unconditional (no class mask), so both apply to any non-physical spell the caster casts. Aura 163 has a no-op handler; the actual math is Unit::SpellCriticalDamageBonus (Unit.cpp:9924-9955): for a magic-class spell (Shock 804020, DmgClass 1, SchoolMask 8 Nature, inside the 126 mask) the pre-mod crit bonus on a 1000 base is damage/2 = 500 (total crit hit 1500, the standard 150% for a magic spell), then crit_mod = GetTotalAuraModifierByMiscMask(MOD_CRIT_DAMAGE_BONUS, schoolMask) is applied via AddPct(crit_bonus, crit_mod) before crit_bonus -= damage. With Thunderous's +150: 1500 * 2.5 = 3750, minus the 1000 base = 2750 bonus, i.e. +2250 over the unmodified 500 bonus (total crit hit 3750 vs 1500). With Hydro Powered's +35: 1500 * 1.35 = 2025, minus 1000 = 1025 bonus, i.e. +525 over the unmodified 500 (total crit hit 2025 vs 1500). spell_critical_damage calculates exactly this function on a fixed base of 1000; the assertion is a delta against a snapshot taken before learning each passive, following the same shape PR #4669's Pyromancer precedent (pyromancer-pyromancy-crit-damage.json) used for the identical aura on a different class. Neither passive has any module code; both close as regression scenarios only.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "sb",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "sb",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "label": "Learn Shock", "actor": "sb", "spell": 804020 },
+    { "action": "snapshot", "label": "BASELINE: Shock critical hit on a 1000 base before either passive",
+      "actor": "sb", "metric": "spell_critical_damage", "spell": 804020, "target": "d", "save_as": "crit0" },
+    { "action": "learn", "label": "Learn Thunderous", "actor": "sb", "spell": 804827 },
+    { "action": "assert", "label": "DISCRIMINATING: Thunderous adds 2250 to Shock's critical hit (150% crit-damage bonus)",
+      "actor": "sb", "metric": "spell_critical_damage", "spell": 804020, "target": "d",
+      "relative_to": "crit0", "min": 2245, "max": 2255 },
+    { "action": "unlearn", "label": "Unlearn Thunderous", "actor": "sb", "spell": 804827 },
+    { "action": "assert", "label": "Unlearning Thunderous restores the baseline critical hit",
+      "actor": "sb", "metric": "spell_critical_damage", "spell": 804020, "target": "d",
+      "relative_to": "crit0", "min": -1, "max": 1 },
+    { "action": "learn", "label": "Learn Hydro Powered", "actor": "sb", "spell": 300616 },
+    { "action": "assert", "label": "DISCRIMINATING: Hydro Powered adds 525 to Shock's critical hit (35% crit-damage bonus)",
+      "actor": "sb", "metric": "spell_critical_damage", "spell": 804020, "target": "d",
+      "relative_to": "crit0", "min": 520, "max": 530 }
+  ]
+}

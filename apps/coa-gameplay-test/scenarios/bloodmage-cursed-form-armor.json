@@ -1,0 +1,25 @@
+{
+ "schema": 1,
+ "name": "Bloodmage: Eternal Curse raises armor from items (#4210)",
+ "contract": "While Eternal Curse (800157) is active, the Bloodmage's armor contribution from items is increased, so total armor with gear equipped is higher than without the form.",
+ "timeout_ms": 90000,
+ "players": [
+  {
+   "id": "b",
+   "race": 1,
+   "class": 20,
+   "level": 27
+  }
+ ],
+ "steps": [
+  {"action": "wait", "ms": 3000},
+  {"action": "add_item", "actor": "b", "item": 60},
+  {"action": "equip", "actor": "b", "item": 60, "slot": 4},
+  {"action": "wait", "ms": 1500},
+  {"action": "snapshot", "save_as": "before", "actor": "b", "metric": "armor"},
+  {"action": "assert", "metric": "armor", "min": 50, "actor": "b"},
+  {"action": "set_aura", "spell": 800157, "stacks": 1, "actor": "b"},
+  {"action": "wait", "ms": 1500},
+  {"action": "assert", "metric": "armor", "relative_to": "before", "min": 1, "within_ms": 3000, "actor": "b"}
+ ]
+}

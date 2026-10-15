@@ -1,0 +1,737 @@
+{
+  "schema": 1,
+  "name": "Ranger Dragonhawk Tamer summons one combat guardian per Horn for 15 seconds (#2174)",
+  "contract": [
+    "Dragonhawk Tamer 573056 is the obtainable Ranger Survival talent at CharacterAdvancement 34199. Its visible client contract promises a Dragonhawk whenever a Horn is used, for $573058d. The passive has aura 42 triggering 573058, 100% chance and no DBC proc flags; the world has no spell_proc row. 573058 summons entry 52393 with SummonProperties 61 and SpellDuration 8 (15000 ms), but the creature is absent.",
+    "The four active Horns 800086, 800088, 806359 and 806360 all carry family 27, family flags (0,0,1), DmgClass MAGIC and are positive casts. A CAST-phase proc fires once for the caster, rather than once for each party recipient. Their ordinary shared category 1253 lasts 60000 ms; a rejected second Horn must not summon another creature. Hunting Quiver 800262 is a positive family-27 magic cast with different flags and must not summon a Dragonhawk.",
+    "Preserved ascension-data cache snapshot 371f9d8db5a9d987f41be19b91fb87873d75654780243c9bd21c110852be0424, enUS/coa-beta creaturecache payload a6648462c0e523ccc110b27c67cbddbec0f64c19ee0aee9d27046f2cfe6e3adc, identifies 52393 as Dragonhawk, Beast, model 17545 with HealthModifier/ManaModifier 1. The existing Ranger companion hook derives weapon damage and attack power from owner-level creature_classlevelstats for 52393, as for War Falcons. The guardian must assist ordinary owner combat, still exist after ten seconds, and leave by sixteen seconds with native update tolerance.",
+    "Talent acquisition goes through specialization 29 and native advancement uploads, without learning the passive directly. Four talented Rangers share a party with an untalented control: party recipients must not proc for someone else's Horn. The untalented Ranger's ordinary Horn and the talented Ranger's unrelated Hunting Quiver are negative controls. Proc and summon counts, native shared-cooldown rejection, owner-level weapon damage, enemy damage after the owner stops attacking, and expiration are observed independently."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "war",
+      "race": 1,
+      "class": 21,
+      "level": 80
+    },
+    {
+      "id": "perseverance",
+      "race": 1,
+      "class": 21,
+      "level": 80
+    },
+    {
+      "id": "endurance",
+      "race": 1,
+      "class": 21,
+      "level": 80
+    },
+    {
+      "id": "alacrity",
+      "race": 1,
+      "class": 21,
+      "level": 80
+    },
+    {
+      "id": "plain",
+      "race": 1,
+      "class": 21,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "war",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "war",
+      "id": 29
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "war",
+      "entry": 34199,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "knows_spell",
+      "label": "SETUP: Dragonhawk Tamer is obtained through the class tree",
+      "spell": 573056,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "aura",
+      "label": "SETUP: the talent passive is active",
+      "spell": 573056,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "war",
+      "spell": 800086
+    },
+    {
+      "action": "specialization",
+      "actor": "perseverance",
+      "id": 29
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "perseverance",
+      "entry": 34199,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "perseverance",
+      "metric": "knows_spell",
+      "label": "SETUP: Dragonhawk Tamer is obtained through the class tree",
+      "spell": 573056,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "perseverance",
+      "metric": "aura",
+      "label": "SETUP: the talent passive is active",
+      "spell": 573056,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "perseverance",
+      "spell": 800088
+    },
+    {
+      "action": "specialization",
+      "actor": "endurance",
+      "id": 29
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "endurance",
+      "entry": 34199,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "endurance",
+      "metric": "knows_spell",
+      "label": "SETUP: Dragonhawk Tamer is obtained through the class tree",
+      "spell": 573056,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "endurance",
+      "metric": "aura",
+      "label": "SETUP: the talent passive is active",
+      "spell": 573056,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "endurance",
+      "spell": 806359
+    },
+    {
+      "action": "specialization",
+      "actor": "alacrity",
+      "id": 29
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "alacrity",
+      "entry": 34199,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "alacrity",
+      "metric": "knows_spell",
+      "label": "SETUP: Dragonhawk Tamer is obtained through the class tree",
+      "spell": 573056,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "alacrity",
+      "metric": "aura",
+      "label": "SETUP: the talent passive is active",
+      "spell": 573056,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "alacrity",
+      "spell": 806360
+    },
+    {
+      "action": "group",
+      "actor": "war",
+      "target": "perseverance"
+    },
+    {
+      "action": "group",
+      "actor": "war",
+      "target": "endurance"
+    },
+    {
+      "action": "group",
+      "actor": "war",
+      "target": "alacrity"
+    },
+    {
+      "action": "group",
+      "actor": "war",
+      "target": "plain"
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 800086
+    },
+    {
+      "action": "cast",
+      "actor": "plain",
+      "spell": 800086
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "cast_failure",
+      "label": "CONTROL: the untalented Horn is accepted",
+      "spell": 800086,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "spell_cast_count",
+      "label": "CONTROL: Horns summon nothing without Dragonhawk Tamer",
+      "spell": 573058,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "war",
+      "spell": 800262
+    },
+    {
+      "action": "learn",
+      "actor": "war",
+      "spell": 800088
+    },
+    {
+      "action": "set_power",
+      "actor": "war",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "war",
+      "spell": 800262
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "cast_failure",
+      "label": "CONTROL: the unrelated positive Ranger spell is accepted",
+      "spell": 800262,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "spell_cast_count",
+      "label": "CONTROL: Hunting Quiver does not summon a Dragonhawk",
+      "spell": 573058,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "war",
+      "spell": 800086
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "cast_failure",
+      "label": "The ordinary Horn cast is accepted",
+      "spell": 800086,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "spell_cast_count",
+      "label": "Each Horn triggers exactly one Dragonhawk summon spell",
+      "spell": 573058,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "owned_creature_count",
+      "label": "The caster owns exactly one Dragonhawk",
+      "entry": 52393,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "owned_creature_weapon_damage_min",
+      "label": "The guardian uses its level-80 owner's weapon damage",
+      "entry": 52393,
+      "min": 40
+    },
+    {
+      "action": "assert",
+      "actor": "perseverance",
+      "metric": "owned_creature_count",
+      "label": "Party recipients do not own another caster's Dragonhawk",
+      "entry": 52393,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "endurance",
+      "metric": "owned_creature_count",
+      "label": "Party recipients do not own another caster's Dragonhawk",
+      "entry": 52393,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "alacrity",
+      "metric": "owned_creature_count",
+      "label": "Party recipients do not own another caster's Dragonhawk",
+      "entry": 52393,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "owned_creature_count",
+      "label": "Party recipients do not own another caster's Dragonhawk",
+      "entry": 52393,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "war",
+      "spell": 800088
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "cast_failure",
+      "label": "CONTROL: the shared Horn cooldown rejects a second Horn",
+      "spell": 800088,
+      "equals": 67
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "spell_cast_count",
+      "label": "A rejected Horn does not trigger another summon",
+      "spell": 573058,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "owned_creature_count",
+      "label": "A rejected Horn does not add another Dragonhawk",
+      "entry": 52393,
+      "equals": 1
+    },
+    {
+      "action": "attack",
+      "actor": "war",
+      "target": "enemy"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "war"
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "health",
+      "save_as": "enemy_after_owner_stops"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "owned_creature_count",
+      "label": "The Dragonhawk remains active after ten seconds",
+      "entry": 52393,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "health",
+      "label": "The Dragonhawk deals combat damage after its owner stops attacking",
+      "relative_to": "enemy_after_owner_stops",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "owned_creature_count",
+      "label": "The Dragonhawk expires after fifteen seconds",
+      "entry": 52393,
+      "equals": 0,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "spell_cast_count",
+      "label": "The Horn does not repeatedly summon during its aura",
+      "spell": 573058,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "perseverance",
+      "spell": 800088
+    },
+    {
+      "action": "assert",
+      "actor": "perseverance",
+      "metric": "cast_failure",
+      "label": "The ordinary Horn cast is accepted",
+      "spell": 800088,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "perseverance",
+      "metric": "spell_cast_count",
+      "label": "Each Horn triggers exactly one Dragonhawk summon spell",
+      "spell": 573058,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "perseverance",
+      "metric": "owned_creature_count",
+      "label": "The caster owns exactly one Dragonhawk",
+      "entry": 52393,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "perseverance",
+      "metric": "owned_creature_weapon_damage_min",
+      "label": "The guardian uses its level-80 owner's weapon damage",
+      "entry": 52393,
+      "min": 40
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "owned_creature_count",
+      "label": "Party recipients do not own another caster's Dragonhawk",
+      "entry": 52393,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "endurance",
+      "metric": "owned_creature_count",
+      "label": "Party recipients do not own another caster's Dragonhawk",
+      "entry": 52393,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "alacrity",
+      "metric": "owned_creature_count",
+      "label": "Party recipients do not own another caster's Dragonhawk",
+      "entry": 52393,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "owned_creature_count",
+      "label": "Party recipients do not own another caster's Dragonhawk",
+      "entry": 52393,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "perseverance",
+      "metric": "owned_creature_count",
+      "label": "The Dragonhawk remains active after ten seconds",
+      "entry": 52393,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "perseverance",
+      "metric": "owned_creature_count",
+      "label": "The Dragonhawk expires after fifteen seconds",
+      "entry": 52393,
+      "equals": 0,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "perseverance",
+      "metric": "spell_cast_count",
+      "label": "The Horn does not repeatedly summon during its aura",
+      "spell": 573058,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "endurance",
+      "spell": 806359
+    },
+    {
+      "action": "assert",
+      "actor": "endurance",
+      "metric": "cast_failure",
+      "label": "The ordinary Horn cast is accepted",
+      "spell": 806359,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "endurance",
+      "metric": "spell_cast_count",
+      "label": "Each Horn triggers exactly one Dragonhawk summon spell",
+      "spell": 573058,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "endurance",
+      "metric": "owned_creature_count",
+      "label": "The caster owns exactly one Dragonhawk",
+      "entry": 52393,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "endurance",
+      "metric": "owned_creature_weapon_damage_min",
+      "label": "The guardian uses its level-80 owner's weapon damage",
+      "entry": 52393,
+      "min": 40
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "owned_creature_count",
+      "label": "Party recipients do not own another caster's Dragonhawk",
+      "entry": 52393,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "perseverance",
+      "metric": "owned_creature_count",
+      "label": "Party recipients do not own another caster's Dragonhawk",
+      "entry": 52393,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "alacrity",
+      "metric": "owned_creature_count",
+      "label": "Party recipients do not own another caster's Dragonhawk",
+      "entry": 52393,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "owned_creature_count",
+      "label": "Party recipients do not own another caster's Dragonhawk",
+      "entry": 52393,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "endurance",
+      "metric": "owned_creature_count",
+      "label": "The Dragonhawk remains active after ten seconds",
+      "entry": 52393,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "endurance",
+      "metric": "owned_creature_count",
+      "label": "The Dragonhawk expires after fifteen seconds",
+      "entry": 52393,
+      "equals": 0,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "endurance",
+      "metric": "spell_cast_count",
+      "label": "The Horn does not repeatedly summon during its aura",
+      "spell": 573058,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "alacrity",
+      "spell": 806360
+    },
+    {
+      "action": "assert",
+      "actor": "alacrity",
+      "metric": "cast_failure",
+      "label": "The ordinary Horn cast is accepted",
+      "spell": 806360,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "alacrity",
+      "metric": "spell_cast_count",
+      "label": "Each Horn triggers exactly one Dragonhawk summon spell",
+      "spell": 573058,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "alacrity",
+      "metric": "owned_creature_count",
+      "label": "The caster owns exactly one Dragonhawk",
+      "entry": 52393,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "alacrity",
+      "metric": "owned_creature_weapon_damage_min",
+      "label": "The guardian uses its level-80 owner's weapon damage",
+      "entry": 52393,
+      "min": 40
+    },
+    {
+      "action": "assert",
+      "actor": "war",
+      "metric": "owned_creature_count",
+      "label": "Party recipients do not own another caster's Dragonhawk",
+      "entry": 52393,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "perseverance",
+      "metric": "owned_creature_count",
+      "label": "Party recipients do not own another caster's Dragonhawk",
+      "entry": 52393,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "endurance",
+      "metric": "owned_creature_count",
+      "label": "Party recipients do not own another caster's Dragonhawk",
+      "entry": 52393,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "owned_creature_count",
+      "label": "Party recipients do not own another caster's Dragonhawk",
+      "entry": 52393,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "alacrity",
+      "metric": "owned_creature_count",
+      "label": "The Dragonhawk remains active after ten seconds",
+      "entry": 52393,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "alacrity",
+      "metric": "owned_creature_count",
+      "label": "The Dragonhawk expires after fifteen seconds",
+      "entry": 52393,
+      "equals": 0,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "alacrity",
+      "metric": "spell_cast_count",
+      "label": "The Horn does not repeatedly summon during its aura",
+      "spell": 573058,
+      "equals": 1
+    }
+  ]
+}

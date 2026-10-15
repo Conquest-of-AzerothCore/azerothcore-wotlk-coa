@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Item scaling: Worldforged chest items stay their authored entries for a level-scaled character",
+  "contract": "Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1, DestinyWeaver.Scaling.Offset=4, CoA.ItemScaling=1 and mod-worldforged-upgrades. Issue #6767: the Guardian of Time offers an upgrade only for the exact base item entry, so a Worldforged item must never be replaced by a lifted copy. Theramore Equipment 254582 holds Theramore Girdle 354518 (green, item level 40, description @Worldforged@) at 100%; a level 60 character with open-world scaling on meets content at level 56, which the copy path would lift for any other unladdered green when native item scaling is off (CoA.ItemScaling.Native=0); with native active the copy path makes no copies at all. Harvest Golem Scythe 1345068 holds Harvest Golem Scythe 450560 (blue, item level 18), an upgrade base in worldforged_upgrade whose description lacks the marker. Both must loot as their authored entries and item levels, and the scythe, which has an ItemStat.dbc ladder for levels 13 to 23, must not get a native scaling level either. The store window itself is not exercised.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -9465, "y": 64, "z": 56, "o": 0 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "level_scaling_packet", "actor": "hero", "value": 1 },
+
+    { "action": "summon_gameobject", "actor": "hero", "entry": 254582 },
+    { "action": "wait", "label": "Let the chest become ready", "ms": 1000 },
+    { "action": "loot_gameobject", "actor": "hero", "entry": 254582 },
+    { "action": "assert", "label": "The chest holds the authored Theramore Girdle", "actor": "hero", "metric": "loot_entry", "item": 354518, "equals": 354518 },
+    { "action": "assert", "label": "The girdle keeps item level 40", "actor": "hero", "metric": "loot_item_level", "item": 354518, "equals": 40 },
+    { "action": "loot_slot", "actor": "hero", "item": 354518 },
+    { "action": "assert", "label": "The looted girdle keeps item level 40", "actor": "hero", "metric": "carried_item_level", "item": 354518, "equals": 40, "within_ms": 2000 },
+    { "action": "assert", "label": "The looted girdle keeps required level 35", "actor": "hero", "metric": "carried_item_required_level", "item": 354518, "equals": 35 },
+    { "action": "close_loot", "actor": "hero" },
+
+    { "action": "summon_gameobject", "actor": "hero", "entry": 1345068 },
+    { "action": "wait", "label": "Let the chest become ready", "ms": 1000 },
+    { "action": "loot_gameobject", "actor": "hero", "entry": 1345068 },
+    { "action": "assert", "label": "The chest holds the authored Harvest Golem Scythe", "actor": "hero", "metric": "loot_entry", "item": 450560, "equals": 450560 },
+    { "action": "assert", "label": "The scythe keeps item level 18", "actor": "hero", "metric": "loot_item_level", "item": 450560, "equals": 18 },
+    { "action": "loot_slot", "actor": "hero", "item": 450560 },
+    { "action": "assert", "label": "The looted scythe keeps its authored entry", "actor": "hero", "metric": "item_count", "item": 450560, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "The looted scythe gets no native scaling level", "actor": "hero", "metric": "carried_item_scaling_level", "item": 450560, "equals": 0 },
+    { "action": "close_loot", "actor": "hero" }
+  ]
+}

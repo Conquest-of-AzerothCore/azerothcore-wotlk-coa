@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CoA DBC Viewer</title>
+<style>
+  :root { color-scheme: dark; font: 15px/1.5 system-ui, sans-serif; background: #111820; color: #e1e8ef; }
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  header { padding: 22px 28px; border-bottom: 1px solid #354350; }
+  h1 { font-size: 23px; margin: 0; } h2 { font-size: 20px; } h3 { font-size: 16px; margin: 22px 0 8px; }
+  p { margin: 7px 0; } .muted { color: #a9bac9; } .note { color: #ffd99a; }
+  main { display: grid; grid-template-columns: 300px minmax(0, 1fr); min-height: 80vh; }
+  aside { padding: 20px; border-right: 1px solid #354350; }
+  article { padding: 20px 28px; min-width: 0; }
+  label { display: block; color: #bdccd9; font-size: 13px; margin: 12px 0 5px; }
+  input, select, button { font: inherit; color: inherit; border: 1px solid #516374; border-radius: 5px; }
+  input, select { background: #192631; padding: 9px; width: 100%; }
+  button { background: #233c4b; padding: 7px 11px; cursor: pointer; }
+  button:hover { background: #36596c; } button:disabled { opacity: .4; cursor: default; }
+  .result { display: block; width: 100%; text-align: left; margin: 6px 0; overflow-wrap: anywhere; }
+  .toolbar { display: flex; gap: 8px; margin: 13px 0; align-items: center; flex-wrap: wrap; }
+  .badge { display: inline-block; padding: 3px 8px; background: #243b35; color: #afdec1; border-radius: 5px; }
+  .source { padding: 12px; background: #1b2732; border-radius: 5px; overflow-wrap: anywhere; }
+  .scroll { overflow-x: auto; } table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { padding: 9px; text-align: left; border-bottom: 1px solid #30404d; vertical-align: top; }
+  th { color: #a9bac9; } td:nth-child(3) { min-width: 240px; max-width: 600px; overflow-wrap: anywhere; }
+  code, pre { font: 12px/1.5 ui-monospace, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+  details { background: #1b2732; border-radius: 5px; padding: 10px; margin: 9px 0; }
+  summary { cursor: pointer; } a { color: #8bd5ee; }
+  #status { min-height: 24px; } .error { color: #ffb4b4; }
+  #results { max-height: 48vh; overflow: auto; }
+  @media(max-width: 800px) { main { grid-template-columns: 1fr; } aside { border-right: 0; } }
+</style>
+<header>
+  <h1>CoA DBC Viewer</h1>
+  <p class="muted">Trace an ability from its data to its verification scenario.</p>
+</header>
+<main>
+  <aside>
+    <form id="search-form">
+      <label for="table">Table</label><select id="table"></select>
+      <label for="query">Name or ID</label><input id="query" placeholder="Frostbolt or 116" autocomplete="off">
+      <label for="locale">Name locale</label>
+      <select id="locale"><option>enUS</option><option>koKR</option><option>frFR</option><option>deDE</option>
+        <option>zhCN</option><option>zhTW</option><option>esES</option><option>esMX</option>
+        <option>ruRU</option></select>
+      <div class="toolbar"><button type="submit">Search</button><span id="count" class="muted"></span></div>
+    </form>
+    <div id="results"></div>
+    <div class="toolbar"><button id="previous">Previous</button><button id="next">Next</button></div>
+  </aside>
+  <article>
+    <div id="status" role="status" aria-live="polite"></div>
+    <div id="detail"><h2>Inspect a record</h2>
+      <p>Select a table and search by name or ID. References and gameplay scenarios appear with each record.</p>
+      <p class="muted">Selected file values, server corrections and observed gameplay are separate evidence.</p>
+    </div>
+  </article>
+</main>
+<script>
+  const $ = id => document.getElementById(id);
+  const state = { offset: 0, total: 0, request: 0 };
+  const element = (tag, text, cls) => {
+    const node = document.createElement(tag);
+    if (text !== undefined) node.textContent = text;
+    if (cls) node.className = cls;
+    return node;
+  };
+  async function api(route, params = {}) {
+    const response = await fetch('/api/' + route + '?' + new URLSearchParams(params));
+    const data = await response.json();
+    if (!response.ok || data.error) throw new Error(data.error || response.statusText);
+    return data;
+  }
+  async function safely(action) {
+    $('status').textContent = 'Loading…';
+    $('status').className = 'muted';
+    try { await action(); $('status').textContent = ''; }
+    catch (error) { $('status').textContent = error.message; $('status').className = 'error'; }
+  }
+  function reference(table, id, text) {
+    const link = element('a', text || table + ' #' + id);
+    link.href = '#' + new URLSearchParams({ table, id });
+    return link;
+  }
+  async function search() {
+    const data = await api('search', {
+      table: $('table').value, q: $('query').value, locale: $('locale').value, offset: state.offset
+    });
+    state.total = data.total;
+    $('count').textContent = data.total + ' records';
+    $('results').replaceChildren();
+    for (const row of data.records) {
+      const button = element('button', (row.id ?? 'Row ' + row.row) + ' · ' + (row.name || 'Unnamed'), 'result');
+      const table = $('table').value;
+      button.onclick = () => {
+        location.hash = new URLSearchParams({ table, ...(row.id === null ? { row: row.row } : { id: row.id }) });
+      };
+      $('results').append(button);
+    }
+    $('previous').disabled = state.offset === 0;
+    $('next').disabled = state.offset + 50 >= data.total;
+  }
+  function disclosure(parent, title, data) {
+    const details = element('details');
+    details.append(element('summary', title), element('pre', JSON.stringify(data, null, 2)));
+    parent.append(details);
+  }
+  async function record() {
+    const token = ++state.request;
+    const params = Object.fromEntries(new URLSearchParams(location.hash.slice(1)));
+    if (!params.table) return;
+    const data = await api('record', params);
+    if (token !== state.request) return;
+    const parent = $('detail');
+    parent.replaceChildren(element('h2', data.name || data.table),
+      element('p', data.table + ' · ' + (data.id === null ? 'Row ' + data.row : '#' + data.id), 'muted'));
+    const origin = element('div', undefined, 'source');
+    const match = data.origin.manifest_match;
+    origin.append(element('span', match === true ? 'Matches extraction manifest' :
+      match === false ? 'Manifest mismatch' : 'Archive provenance unavailable', match === true ? 'badge' : 'note'));
+    origin.append(element('p', data.origin.directory),
+      element('p', 'Archive: ' + (data.origin.archive || 'unknown')),
+      element('code', 'SHA-256 ' + data.origin.sha256));
+    parent.append(origin);
+    for (const note of data.notes) parent.append(element('p', note, 'note'));
+    disclosure(parent, 'Source and schema details', data.origin);
+    const toolbar = element('div', undefined, 'toolbar');
+    const exportLink = element('a', 'Open record JSON');
+    exportLink.href = '/api/record?' + new URLSearchParams(params);
+    exportLink.target = '_blank';
+    toolbar.append(exportLink);
+    if (data.table === 'Spell' && data.id !== null) {
+      const sourceButton = element('button', 'Find source references');
+      sourceButton.onclick = () => safely(async () => {
+        const source = await api('source', { id: data.id });
+        disclosure(parent, 'Source text references — implementation must be traced', source);
+      });
+      toolbar.append(sourceButton);
+    }
+    parent.append(toolbar);
+    if (data.relationships) {
+      for (const direction of ['outgoing', 'incoming']) {
+        const entries = data.relationships[direction];
+        const details = element('details');
+        details.append(element('summary', direction + ' references (' + entries.length + ')'));
+        for (const entry of entries) {
+          const row = element('p');
+          row.append(reference(entry.table, entry.id), document.createTextNode(' · ' + entry.field));
+          details.append(row);
+        }
+        parent.append(details);
+      }
+      parent.append(element('p', data.relationships.scope, 'muted'));
+    }
+    if (data.mechanics) {
+      parent.append(element('h3', 'Verification scenarios (' + data.mechanics.length + ')'));
+      for (const mechanic of data.mechanics) {
+        const details = element('details');
+        details.append(element('summary', mechanic.name), element('p', mechanic.contract || 'Contract not documented'),
+          element('p', mechanic.evidence, 'muted'), element('code', mechanic.path));
+        if (mechanic.checks.length) details.append(element('pre', JSON.stringify(mechanic.checks, null, 2)));
+        parent.append(details);
+      }
+    }
+    if (data.comparison) disclosure(parent, 'Comparison with second data directory', data.comparison);
+    if (data.sql_layer) disclosure(parent, 'SQL metadata capture', data.sql_layer);
+    if (data.observations) disclosure(parent, 'Recorded gameplay observations (' + data.observations.length + ')',
+      data.observations);
+    parent.append(element('h3', 'Fields'));
+    const filter = element('input');
+    filter.placeholder = 'Filter fields, values or decoded flags';
+    filter.setAttribute('aria-label', 'Filter fields');
+    parent.append(filter);
+    const table = element('table');
+    const heading = element('tr');
+    for (const title of ['Offset', 'Field', 'Value', 'Raw bytes']) heading.append(element('th', title));
+    const thead = element('thead'); thead.append(heading); table.append(thead);
+    const body = element('tbody'); table.append(body);
+    for (const field of data.fields) {
+      const row = element('tr');
+      row.append(element('td', field.offset), element('td', field.name));
+      const value = element('td', field.value === null ? 'Unknown' : String(field.value));
+      if (field.unit) value.append(element('span', ' ' + field.unit, 'muted'));
+      if (field.labels) value.append(element('p', field.labels.join(' · '), 'muted'));
+      if (field.error) value.append(element('p', field.error, 'error'));
+      if (field.unknown_bits && field.unknown_bits !== '0x0') {
+        value.append(element('p', 'Unknown bits: ' + field.unknown_bits, 'note'));
+      }
+      if (field.reference) {
+        const link = element('p');
+        link.append(reference(field.reference.table, field.reference.id)); value.append(link);
+      }
+      const raw = element('td'); raw.append(element('code', field.raw_hex)); row.append(value, raw);
+      body.append(row);
+    }
+    filter.oninput = () => {
+      for (const row of body.children) row.hidden = !row.textContent.toLowerCase().includes(filter.value.toLowerCase());
+    };
+    const scroll = element('div', undefined, 'scroll'); scroll.append(table); parent.append(scroll);
+  }
+  $('search-form').onsubmit = event => { event.preventDefault(); state.offset = 0; safely(search); };
+  $('table').onchange = () => { state.offset = 0; safely(search); };
+  $('previous').onclick = () => { state.offset = Math.max(0, state.offset - 50); safely(search); };
+  $('next').onclick = () => { state.offset += 50; safely(search); };
+  window.onhashchange = () => safely(record);
+  safely(async () => {
+    const data = await api('tables');
+    for (const table of data.tables) {
+      const option = element('option', table.table + (table.schema ? '' : ' · raw'));
+      option.value = table.table; $('table').append(option);
+    }
+    $('table').value = 'Spell';
+    await search();
+    if (location.hash) await record();
+  });
+</script>
+</html>

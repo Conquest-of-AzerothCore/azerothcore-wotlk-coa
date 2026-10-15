@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Reload shortens Quickdraw's cooldown by 4 seconds (#3359)",
+  "contract": "Reload 804190 reads 'Reduces the cooldown of Quickdraw by $/1000;s1 sec.' In the installed Spell.dbc it is passive, family 21, with one effect: SPELL_AURA_ADD_FLAT_MODIFIER (107), misc 11 = SPELLMOD_COOLDOWN, BasePoints -4001 (DieSides 1, so -4000 ms), class mask word 0 = 0x40. Quickdraw ranks 804193 and 806846 have family 21, flag word 0 0x40 and RecoveryTime = CategoryRecoveryTime = 10000 ms. Player::AddSpellAndCategoryCooldowns applies SPELLMOD_COOLDOWN to both times (Player.cpp:11451-11456), and SpellInfo::IsAffectedBySpellMod has no family-21 override, so plain class-mask matching decides. The cooldown becomes 6000 ms. The scenario reads it with the spell_modifier probe on both ranks and on Heartseeking Bolt 805754 (flag word 0 is 0) as the control; it does not cast Quickdraw because the spell is gated behind a critical-strike aura and a ranged weapon that add nothing to this contract.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let level scaling settle", "ms": 5000},
+    {"action": "assert", "label": "Quickdraw rank 1 cooldown is 10000 ms without the talent", "actor": "hunter", "metric": "spell_modifier", "spell": 804193, "op": 11, "base": 10000, "equals": 10000},
+    {"action": "assert", "label": "Quickdraw rank 2 cooldown is 10000 ms without the talent", "actor": "hunter", "metric": "spell_modifier", "spell": 806846, "op": 11, "base": 10000, "equals": 10000},
+    {"action": "learn", "label": "Reload", "actor": "hunter", "spell": 804190},
+    {"action": "assert", "label": "The passive is active", "actor": "hunter", "metric": "aura", "spell": 804190, "equals": 1},
+    {"action": "assert", "label": "Quickdraw rank 1 cooldown is 6000 ms", "actor": "hunter", "metric": "spell_modifier", "spell": 804193, "op": 11, "base": 10000, "equals": 6000},
+    {"action": "assert", "label": "Quickdraw rank 2 cooldown is 6000 ms", "actor": "hunter", "metric": "spell_modifier", "spell": 806846, "op": 11, "base": 10000, "equals": 6000},
+    {"action": "assert", "label": "Heartseeking Bolt is outside the mask", "actor": "hunter", "metric": "spell_modifier", "spell": 805754, "op": 11, "base": 10000, "equals": 10000},
+    {"action": "unlearn", "label": "Drop Reload", "actor": "hunter", "spell": 804190},
+    {"action": "assert", "label": "Quickdraw returns to 10000 ms", "actor": "hunter", "metric": "spell_modifier", "spell": 804193, "op": 11, "base": 10000, "equals": 10000}
+  ]
+}

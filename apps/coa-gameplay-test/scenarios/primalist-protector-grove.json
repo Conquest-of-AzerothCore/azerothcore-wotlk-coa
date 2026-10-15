@@ -1,0 +1,523 @@
+{
+  "schema": 1,
+  "name": "Primalist Protector of the Grove: direct damage reduces all three cooldowns by one second",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500692
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800181
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800094
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 680421
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 803138
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 172
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 680421
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800181
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800094
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500692
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 500692,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 500693,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500692,
+      "min": 100000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800181,
+      "min": 100000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "min": 100000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "min": 100000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500692,
+      "save_as": "baseline_500692"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800181,
+      "save_as": "baseline_800181"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "save_as": "baseline_800094"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "save_as": "baseline_680421"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "baseline_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "relative_to": "baseline_before",
+      "save_as": "baseline_hits",
+      "label": "baseline_hits"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500692,
+      "relative_to": "baseline_500692",
+      "save_as": "baseline_500692_delta",
+      "label": "baseline_500692_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800181,
+      "relative_to": "baseline_800181",
+      "save_as": "baseline_800181_delta",
+      "label": "baseline_800181_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "relative_to": "baseline_800094",
+      "save_as": "baseline_800094_delta",
+      "label": "baseline_800094_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "relative_to": "baseline_680421",
+      "save_as": "baseline_680421_delta",
+      "label": "baseline_680421_delta"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 504198
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500692,
+      "save_as": "talented_500692"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800181,
+      "save_as": "talented_800181"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "save_as": "talented_800094"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "save_as": "talented_680421"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "talented_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "relative_to": "talented_before",
+      "save_as": "talented_hits",
+      "label": "talented_hits"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500692,
+      "relative_to": "talented_500692",
+      "save_as": "talented_500692_delta",
+      "label": "talented_500692_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800181,
+      "relative_to": "talented_800181",
+      "save_as": "talented_800181_delta",
+      "label": "talented_800181_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "relative_to": "talented_800094",
+      "save_as": "talented_800094_delta",
+      "label": "talented_800094_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "relative_to": "talented_680421",
+      "save_as": "talented_680421_delta",
+      "label": "talented_680421_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500692,
+      "save_as": "periodic_500692"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800181,
+      "save_as": "periodic_800181"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "save_as": "periodic_800094"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "save_as": "periodic_680421"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 172,
+      "target": "target",
+      "save_as": "periodic_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 172,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 6300
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 172,
+      "target": "target",
+      "relative_to": "periodic_before",
+      "save_as": "periodic_hits",
+      "label": "periodic_hits"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500692,
+      "relative_to": "periodic_500692",
+      "save_as": "periodic_500692_delta",
+      "label": "periodic_500692_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800181,
+      "relative_to": "periodic_800181",
+      "save_as": "periodic_800181_delta",
+      "label": "periodic_800181_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "relative_to": "periodic_800094",
+      "save_as": "periodic_800094_delta",
+      "label": "periodic_800094_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "relative_to": "periodic_680421",
+      "save_as": "periodic_680421_delta",
+      "label": "periodic_680421_delta"
+    },
+    {
+      "action": "wait",
+      "ms": 12000
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504198
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500692,
+      "save_as": "removed_500692"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800181,
+      "save_as": "removed_800181"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "save_as": "removed_800094"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "save_as": "removed_680421"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "removed_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "relative_to": "removed_before",
+      "save_as": "removed_hits",
+      "label": "removed_hits"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 500692,
+      "relative_to": "removed_500692",
+      "save_as": "removed_500692_delta",
+      "label": "removed_500692_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800181,
+      "relative_to": "removed_800181",
+      "save_as": "removed_800181_delta",
+      "label": "removed_800181_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800094,
+      "relative_to": "removed_800094",
+      "save_as": "removed_800094_delta",
+      "label": "removed_800094_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "relative_to": "removed_680421",
+      "save_as": "removed_680421_delta",
+      "label": "removed_680421_delta"
+    }
+  ]
+}

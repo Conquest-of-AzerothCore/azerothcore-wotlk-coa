@@ -1,0 +1,252 @@
+{
+  "schema": 1,
+  "name": "Guardian formation abilities name the formation they require (#6742-#6748)",
+  "contract": "Six reports (#6742 Knight's Calling 504151, #6743 Linebreaker 806220, #6744 Brace 800313, #6745 Guard 803895, #6746 Raise Shield 500168, #6748 Battle Rush 501548) all say the same thing: the ability 'can only be used when in X Formation despite not mentioning the requirement in the tooltip'. The requirement is real and is enforced by the core - Spell.dbc column 24 (CasterAuraSpell) names the formation aura, and Spell::CheckCasterAuras refuses the cast without it - but the client renders no tooltip line for CasterAuraSpell, and Stances/StancesNot are 0 on every spell the SQL publishes. rev_20261007_10_guardian_formation_tooltips.sql therefore republishes every learnable formation-gated Guardian ability with the prefix the repository already uses for the Runeshroud runes in rev_20261003_00_coa_palm_sigil_runeshroud_tooltip.sql, '$?a<aura>[|cffffffff][|cffff3232]Requires <Formation>|r' plus a line break, ahead of the client's own untouched description; AscensionCompat streams those rows to the client as SMSG_PATCH_SPELL (opcode 2346) at login. This scenario reads the streamed rows and then proves the text it carries is true. Expected before the SQL: none of the 44 rows arrives and every gated cast fails whatever formation the player is in. Expected after: each reported ability's row carries its formation's line, no row borrows another formation's line, and Brace is refused with no formation up while Knight's Calling succeeds once the Tower Formation aura is on the player.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "g",
+      "race": 1,
+      "class": 18,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI, level scaling and the 5 s login patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the shared description table still streams Runeshroud's own gate line as row 500639",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500639,
+      "text": "Requires Runeshroud",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: that same row borrows no formation line",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500639,
+      "text": "Requires Tower Formation",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "#6742 STREAM: Knight's Calling (504151) reaches the client with the Tower Formation requirement",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504151,
+      "text": "Requires Tower Formation",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "#6743 STREAM: Linebreaker (806220) reaches the client with the Line Formation requirement",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 806220,
+      "text": "Requires Line Formation",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "#6744 STREAM: Brace (800313) reaches the client with the Tower Formation requirement",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 800313,
+      "text": "Requires Tower Formation",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "#6745 STREAM: Guard (803895) reaches the client with the Tower Formation requirement",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 803895,
+      "text": "Requires Tower Formation",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "#6746 STREAM: Raise Shield (500168) reaches the client with the Tower Formation requirement",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500168,
+      "text": "Requires Tower Formation",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "#6748 STREAM: Battle Rush Rank 4 (501548) reaches the client with the Assault Formation requirement",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 501548,
+      "text": "Requires Assault Formation",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SIBLINGS: Battle Rush Rank 3 (501547) is covered too, not just the reported rank",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 501547,
+      "text": "Requires Assault Formation",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SIBLINGS: Advance Rank 2 (503344) carries the Line Formation line",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 503344,
+      "text": "Requires Line Formation",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SIBLINGS: Knight's Calling 504693 carries the Tower Formation line as well",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504693,
+      "text": "Requires Tower Formation",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "NO CROSS-TALK: Linebreaker does not claim Tower Formation",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 806220,
+      "text": "Requires Tower Formation",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "NO CROSS-TALK: Brace does not claim Line Formation",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 800313,
+      "text": "Requires Line Formation",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE CLIENT'S OWN TEXT SURVIVES: row 806220 still carries Linebreaker's body",
+      "actor": "g",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 806220,
+      "text": "destroying any damage absorption or damage immunity effects",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "g",
+      "spell": 800313
+    },
+    {
+      "action": "learn",
+      "actor": "g",
+      "spell": 504151
+    },
+    {
+      "action": "cast",
+      "label": "Brace with no formation up: the requirement the tooltip now names is real",
+      "actor": "g",
+      "spell": 800313
+    },
+    {
+      "action": "assert",
+      "label": "REALITY: Brace is refused with 22 SPELL_FAILED_CASTER_AURASTATE while the player is in no formation",
+      "actor": "g",
+      "metric": "cast_failure",
+      "spell": 800313,
+      "equals": 22
+    },
+    {
+      "action": "assert",
+      "label": "REALITY: Brace never went off",
+      "actor": "g",
+      "metric": "spell_go_count",
+      "spell": 800313,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Enter Tower Formation",
+      "actor": "g",
+      "spell": 800317,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Tower Formation 800317 is on the player",
+      "actor": "g",
+      "metric": "aura_stacks",
+      "spell": 800317,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Knight's Calling in Tower Formation: the same gate now lets the cast through",
+      "actor": "g",
+      "spell": 504151
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "REALITY: Knight's Calling is not refused once Tower Formation 800317 is up",
+      "actor": "g",
+      "metric": "cast_failure",
+      "spell": 504151,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "REALITY: the cast went off, so the gate really is CasterAuraSpell 800317",
+      "actor": "g",
+      "metric": "spell_go_count",
+      "spell": 504151,
+      "equals": 1
+    }
+  ]
+}

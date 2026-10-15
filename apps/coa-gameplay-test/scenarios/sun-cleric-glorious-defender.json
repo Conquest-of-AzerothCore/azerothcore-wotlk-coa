@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Glorious Defender raises every Gavel's effectiveness by 25% (#2205)",
+  "contract": "Glorious Defender 680634 (Spell.dbc, SpellFamilyName 33) carries SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue SPELLMOD_ALL_EFFECTS (8), EffectSpellClassMask word B = 32 (bit 5), EffectBasePoints 24 resolving to +25 (percent). Gavel of Light (800611), Gavel of Grace (800614) and Gavel of Wrath (800617) -- the three Gavel root spells the module's own Gavel() helper (AscensionSunCleric.cpp) recognizes -- all carry SpellFamilyFlags word B = 32, the same bit, so SpellInfo::IsAffected(33, mask) admits every one of them. Native path: Unit::ApplyEffectModifiers (Unit.cpp) calls Player::ApplySpellMod(spellId, SPELLMOD_ALL_EFFECTS, value) for every effect of every Gavel cast, with no script required. This scenario drives that call through the harness's spell_modifier metric for all three Gavels.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "Gavel of Light effect value is unmodified before the talent",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 800611, "op": 8, "base": 1000, "equals": 1000
+    },
+    {
+      "action": "assert", "label": "Gavel of Grace effect value is unmodified before the talent",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 800614, "op": 8, "base": 1000, "equals": 1000
+    },
+    {
+      "action": "assert", "label": "Gavel of Wrath effect value is unmodified before the talent",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 800617, "op": 8, "base": 1000, "equals": 1000
+    },
+    { "action": "learn", "actor": "cleric", "spell": 680634 },
+    {
+      "action": "assert", "label": "Glorious Defender raises Gavel of Light's effect value by 25%",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 800611, "op": 8, "base": 1000, "equals": 1250
+    },
+    {
+      "action": "assert", "label": "Glorious Defender raises Gavel of Grace's effect value by 25%",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 800614, "op": 8, "base": 1000, "equals": 1250
+    },
+    {
+      "action": "assert", "label": "Glorious Defender raises Gavel of Wrath's effect value by 25%",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 800617, "op": 8, "base": 1000, "equals": 1250
+    }
+  ]
+}

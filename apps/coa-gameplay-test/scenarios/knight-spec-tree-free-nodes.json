@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Specialization trees grant their free nodes with automatic progression off (#4436)",
+  "contract": "A specialization tree hangs from free (AECost 0, TECost 0) nodes the class grants: Knight of Xoroth War's identity Crusher 4016 (spell 92100), Warbringer 12166 (570727, requires 4016), and the level-gated passives Ripper 11261 (706331, level 20), Carver 30705 (707390, level 30), Render 9262 (704951, level 40) and Knight of the Apocalypse 4217 (520296, level 50); Defiance's identity 4018 (92104) and Shieldgore (301302). The Books of Ascension never sell a tree's free nodes, so they must still be granted when CoA.AutoProgression is 0 (the shipped default, read from the realm's module config). Without them the client draws Warbringer 0/1 and every node below it locked, since each requires Crusher, while it draws the level-gated passives as learned from the level alone. Switching specialization removes the old tree's spells and must grant the new tree's free nodes; levelling up must grant the passives the new level reaches.",
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 40 },
+    { "id": "leveler", "race": 1, "class": 17, "level": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 5000 },
+    { "action": "specialization", "actor": "knight", "id": 18 },
+    { "action": "assert", "label": "War grants its identity Crusher", "actor": "knight", "metric": "knows_spell", "spell": 92100, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "War grants its free first row, Warbringer", "actor": "knight", "metric": "knows_spell", "spell": 570727, "equals": 1 },
+    { "action": "assert", "label": "Level 20 passive Ripper", "actor": "knight", "metric": "knows_spell", "spell": 706331, "equals": 1 },
+    { "action": "assert", "label": "Level 30 passive Carver", "actor": "knight", "metric": "knows_spell", "spell": 707390, "equals": 1 },
+    { "action": "assert", "label": "Level 40 passive Render", "actor": "knight", "metric": "knows_spell", "spell": 704951, "equals": 1 },
+    { "action": "assert", "label": "Level 50 passive not yet at level 40", "actor": "knight", "metric": "knows_spell", "spell": 520296, "equals": 0 },
+    { "action": "specialization", "actor": "knight", "id": 17 },
+    { "action": "assert", "label": "Defiance grants its identity", "actor": "knight", "metric": "knows_spell", "spell": 92104, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Defiance grants its free first row, Shieldgore", "actor": "knight", "metric": "knows_spell", "spell": 301302, "equals": 1 },
+    { "action": "assert", "label": "The switch removed War's identity", "actor": "knight", "metric": "knows_spell", "spell": 92100, "equals": 0 },
+    { "action": "assert", "label": "The switch removed War's Ripper", "actor": "knight", "metric": "knows_spell", "spell": 706331, "equals": 0 },
+    { "action": "specialization", "actor": "leveler", "id": 18 },
+    { "action": "assert", "label": "Leveler has Crusher at 15", "actor": "leveler", "metric": "knows_spell", "spell": 92100, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Leveler has no Ripper below 20", "actor": "leveler", "metric": "knows_spell", "spell": 706331, "equals": 0 },
+    { "action": "set_level", "actor": "leveler", "value": 31 },
+    { "action": "assert", "label": "Levelling to 31 grants Ripper", "actor": "leveler", "metric": "knows_spell", "spell": 706331, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Levelling to 31 grants Carver", "actor": "leveler", "metric": "knows_spell", "spell": 707390, "equals": 1 },
+    { "action": "assert", "label": "Render still waits for 40", "actor": "leveler", "metric": "knows_spell", "spell": 704951, "equals": 0 }
+  ]
+}

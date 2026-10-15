@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Moonlight Ripple cuts the mana cost of Aegis spells by 10% (#1893)",
+  "contract": "Spell.dbc 503583 Moonlight Ripple (family 32) reads 'Reduces the mana cost of your Aegis spells by $s2%'; effect 1 is aura 107 ADD_FLAT_MODIFIER, EffectMiscValue 3 (SPELLMOD_EFFECT1), EffectBasePoints -11 with DieSides 1 -> -10, EffectSpellClassMask [0, 0, 0x10000000]. That mask matches only the helper 807032 'Aegis - Mana Cost %' (SpellFamilyFlags word 2 0x10000000, its own effect 0 being a +30 COST modifier on word 1 0x10000000), which no code or SQL ever applies. The Aegis spells 704777, 801126 and 806155 carry SpellFamilyFlags word 1 0x10000000, and their cost is the hard-coded StarcallerCosts row (30% of max mana, ManaCostPercentage with UsesMaxManaForCost, AscensionStarcallerContracts.cpp), so the modifier never touched a cost. Fix: the load-time contract turns 503583 effect 1 into ADD_PCT_MODIFIER -10 on SPELLMOD_COST with the Aegis mask [0, 0x10000000, 0]; SpellInfo::CalcPowerCost applies it through ApplySpellMod(SPELLMOD_COST) after the percentage cost. Celestial Aegis 801126 is the fixture; the fixture is the same character before and after learning the passive, so max mana and level scaling cancel in the ratio: 30% of max mana becomes 27%, ratio 0.9 (the bounds allow integer truncation). spell_power_cost calls SpellInfo::CalcPowerCost natively and submits no cast. Whether the client data means 10 percentage points (30% to 20%, via helper 807032) rather than a relative 10% is a maintainer question; the tooltip's plain wording is asserted here.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "starcaller", "race": 1, "class": 26, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "starcaller", "spell": 801126 },
+    {
+      "action": "snapshot",
+      "label": "Celestial Aegis mana cost without the talent",
+      "actor": "starcaller",
+      "metric": "spell_power_cost",
+      "spell": 801126,
+      "save_as": "aegis_cost_base"
+    },
+    {
+      "action": "assert",
+      "label": "Baseline cost is a positive mana amount",
+      "actor": "starcaller",
+      "metric": "spell_power_cost",
+      "spell": 801126,
+      "min": 1
+    },
+    { "action": "learn", "actor": "starcaller", "spell": 503583 },
+    {
+      "action": "assert",
+      "label": "Learning the passive applies its aura",
+      "actor": "starcaller",
+      "metric": "aura",
+      "spell": 503583,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Celestial Aegis costs 10% less mana",
+      "actor": "starcaller",
+      "metric": "spell_power_cost",
+      "spell": 801126,
+      "ratio_to": "aegis_cost_base",
+      "min": 0.89,
+      "max": 0.91
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Sage Nauchol sizes up the player he dresses in the Grimtotem Disguise",
+  "contract": [
+    "rev_20261004_97_coa_nauchol_disguise_line gives Sage Nauchol 161819 a monster say when he hands out the Grimtotem",
+    "Disguise (gossip 932450 option 0): \"You almost look like one of us. Yes. It'll do... as long as your attitude",
+    "doesn't give you away. Remember: chin up and eyes full of arrogance!\" Expected: after 1660032 is rewarded, taking",
+    "the disguise from him sends the hero exactly one chat line."
+  ],
+  "timeout_ms": 30000,
+  "location": {"map": 1, "x": -3628.05, "y": -1035.92, "z": 203.14, "o": 1},
+  "players": [{"id": "hero", "race": 6, "class": 1, "level": 6}],
+  "creatures": [{"id": "nauchol", "owner": "hero", "entry": 161819, "faction": 35, "level": 13, "distance": 2}],
+  "steps": [
+    {"action": "wait", "ms": 500},
+    {"action": "prepare_quest", "actor": "hero", "quest": 1660030},
+    {"action": "reward_quest", "actor": "hero", "quest": 1660030},
+    {"action": "prepare_quest", "actor": "hero", "quest": 1660031},
+    {"action": "reward_quest", "actor": "hero", "quest": 1660031},
+    {"action": "prepare_quest", "actor": "hero", "quest": 1660032},
+    {"action": "reward_quest", "actor": "hero", "quest": 1660032},
+    {"action": "assert", "label": "We'll need a disguise is rewarded", "actor": "hero", "metric": "quest_status",
+     "quest": 1660032, "equals": 6},
+    {"action": "wait", "ms": 500},
+    {"action": "snapshot", "actor": "hero", "metric": "system_messages", "save_as": "chat_before_disguise"},
+    {"action": "gossip_hello", "actor": "hero", "target": "nauchol", "label": "Speak to Nauchol"},
+    {"action": "gossip_select", "actor": "hero", "option": 0, "label": "Ask for the disguise"},
+    {"action": "assert", "label": "Nauchol speaks his line", "actor": "hero", "metric": "system_messages",
+     "relative_to": "chat_before_disguise", "equals": 1, "within_ms": 2000},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "and says it only once", "actor": "hero", "metric": "system_messages",
+     "relative_to": "chat_before_disguise", "equals": 1}
+  ]
+}

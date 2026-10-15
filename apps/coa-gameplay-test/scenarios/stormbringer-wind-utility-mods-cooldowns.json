@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Child of the Storm and Storm Rider reduce cooldowns natively (#777, #2790)",
+  "contract": "#777 and #2790 report 'Spell Script / Aura Handler Not Implemented' for two passives that are plain Spell.dbc SPELLMOD_COOLDOWN modifiers under Stormbringer's own SpellFamilyName 22, matched by SpellInfo::IsAffectedBySpellMod/IsAffected with no per-family override anywhere in SpellInfo.cpp, and consumed generically by Player::GetSpellRecoveryTime. #777: Child of the Storm (804038) is aura 108 ADD_PCT_MODIFIER, EffectMiscValue 11 (SPELLMOD_COOLDOWN), EffectBasePoints -21 + 1 = -20%, EffectSpellClassMask[2] = 0xC00000 = bit22|bit23, matching Cloudburst 801838's SpellFamilyFlags[2] = 0x800000 (bit23) and Windsurf 500042's SpellFamilyFlags[2] = 0x400000 (bit22). #2790: Storm Rider (705677) is aura 107 ADD_FLAT_MODIFIER, same MiscValue 11, EffectBasePoints -5001 + 1 = -5000 ms, EffectSpellClassMask[1] = 0x800 matching Gale Guard 500923/504872's SpellFamilyFlags[1] = 0x800, and EffectSpellClassMask[2] = 0x800000 matching Cloudburst's own bit23 again. Neither target spell sets SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (0x20000000); Gale Guard rank 2's unrelated AttributesEx3 bit (0x40000000) does not block the modifier. Zero hits for either spell ID in the module/scripts/pending SQL, matching each issue's own grep claim, is expected: both are stock generic-pipeline percent/flat cooldown mods that need no module code. Values are the server's own Player::ApplySpellMod, measured before and after learning on the same actor.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Cloudburst so it exists in the spellbook",
+      "actor": "s",
+      "spell": 801838
+    },
+    {
+      "action": "learn",
+      "label": "Learn Windsurf so it exists in the spellbook",
+      "actor": "s",
+      "spell": 500042
+    },
+    {
+      "action": "learn",
+      "label": "Learn Gale Guard so it exists in the spellbook",
+      "actor": "s",
+      "spell": 500923
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Cloudburst's cooldown modifier is 0 without Child of the Storm or Storm Rider",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 801838,
+      "op": 11,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Windsurf's cooldown modifier is 0 without Child of the Storm",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 500042,
+      "op": 11,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Gale Guard's cooldown modifier is 0 without Storm Rider",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 500923,
+      "op": 11,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Child of the Storm",
+      "actor": "s",
+      "spell": 804038
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Child of the Storm cuts Cloudburst's cooldown by 20% (via classmask bit23)",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 801838,
+      "op": 11,
+      "base": 1000,
+      "equals": 800
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Child of the Storm cuts Windsurf's cooldown by 20% (via classmask bit22)",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 500042,
+      "op": 11,
+      "base": 1000,
+      "equals": 800
+    },
+    {
+      "action": "assert",
+      "label": "Child of the Storm's mask does not touch Gale Guard (control)",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 500923,
+      "op": 11,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Storm Rider",
+      "actor": "s",
+      "spell": 705677
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Storm Rider cuts Gale Guard's cooldown by a flat 5000 ms (via classmask bit11)",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 500923,
+      "op": 11,
+      "base": 10000,
+      "equals": 5000
+    }
+  ]
+}

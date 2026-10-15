@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Visceral Magic adds 40% armor to Blood Shield (#872)",
+  "contract": "Visceral Magic 707371 effect 0 is aura 107 with MiscValue 3 (SPELLMOD_EFFECT1, which Unit::ApplyEffectModifiers maps to effect index 0) and BasePoints 39 + DieSides 1 = +40, over EffectSpellClassMask (268435456, 0, 0) = word 0 bit 28 = Blood Shield 504296 and no other family-26 row. Blood Shield's effect 0 is aura 142 MOD_BASE_RESISTANCE_PCT with MiscValue 1 and value 20, so it becomes 60, and Blood Shield's own tooltip reads \"Increases armor contribution from items by $s1%\". Tooltip: \"Adds $s1% to the Armor contribution from items by Blood Shield.\" Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Blood Shield grants its authored 20% before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 504296,
+      "op": 3,
+      "base": 20,
+      "equals": 20
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707371
+    },
+    {
+      "action": "assert",
+      "label": "Visceral Magic raises Blood Shield's armor effect to 60",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 504296,
+      "op": 3,
+      "base": 20,
+      "equals": 60
+    },
+    {
+      "action": "assert",
+      "label": "Visceral Magic does not touch Bloodbolt",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 3,
+      "base": 20,
+      "equals": 20
+    }
+  ]
+}

@@ -1,0 +1,1205 @@
+{
+  "schema": 1,
+  "name": "primalist-totem-warrior",
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "enemy",
+      "race": 5,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "pvp",
+      "actor": "primalist",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9612.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 95
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 196
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 674
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500939
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 800140,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800140
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 803138
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 2134
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 2134,
+      "slot": 16
+    },
+    {
+      "action": "learn",
+      "actor": "enemy",
+      "spell": 750
+    },
+    {
+      "action": "add_item",
+      "actor": "enemy",
+      "item": 16730
+    },
+    {
+      "action": "equip",
+      "actor": "enemy",
+      "item": 16730,
+      "slot": 4
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "armor",
+      "min": 500
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500939
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 500939,
+      "equals": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_800140_count",
+      "label": "baseline_800140_count",
+      "spell": 800140,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "baseline_800140_total",
+      "label": "baseline_800140_total",
+      "spell": 800140,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_504240_count",
+      "label": "baseline_504240_count",
+      "spell": 504240,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "baseline_504240_total",
+      "label": "baseline_504240_total",
+      "spell": 504240,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_555732_count",
+      "label": "baseline_555732_count",
+      "spell": 555732,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "baseline_555732_total",
+      "label": "baseline_555732_total",
+      "spell": 555732,
+      "target": "enemy"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520566,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520565,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520564,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520563,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520562,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520561,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520560,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 800140,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800140
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800140,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 800140,
+      "target": "enemy",
+      "relative_to": "baseline_800140_count",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 504240,
+      "target": "enemy",
+      "relative_to": "baseline_504240_count",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 555732,
+      "target": "enemy",
+      "relative_to": "baseline_555732_count",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "baseline_800140_damage",
+      "label": "baseline_800140_damage",
+      "spell": 800140,
+      "target": "enemy",
+      "relative_to": "baseline_800140_total"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "baseline_504240_damage",
+      "label": "baseline_504240_damage",
+      "spell": 504240,
+      "target": "enemy",
+      "relative_to": "baseline_504240_total"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "baseline_555732_damage",
+      "label": "baseline_555732_damage",
+      "spell": 555732,
+      "target": "enemy",
+      "relative_to": "baseline_555732_total"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 704099
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "first_rank_800140_count",
+      "label": "first_rank_800140_count",
+      "spell": 800140,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "first_rank_800140_total",
+      "label": "first_rank_800140_total",
+      "spell": 800140,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "first_rank_504240_count",
+      "label": "first_rank_504240_count",
+      "spell": 504240,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "first_rank_504240_total",
+      "label": "first_rank_504240_total",
+      "spell": 504240,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "first_rank_555732_count",
+      "label": "first_rank_555732_count",
+      "spell": 555732,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "first_rank_555732_total",
+      "label": "first_rank_555732_total",
+      "spell": 555732,
+      "target": "enemy"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520566,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520565,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520564,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520563,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520562,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520561,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 520560,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 800140,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800140
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800140,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 800140,
+      "target": "enemy",
+      "relative_to": "first_rank_800140_count",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 504240,
+      "target": "enemy",
+      "relative_to": "first_rank_504240_count",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 555732,
+      "target": "enemy",
+      "relative_to": "first_rank_555732_count",
+      "equals": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "first_rank_800140_damage",
+      "label": "first_rank_800140_damage",
+      "spell": 800140,
+      "target": "enemy",
+      "relative_to": "first_rank_800140_total"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "first_rank_504240_damage",
+      "label": "first_rank_504240_damage",
+      "spell": 504240,
+      "target": "enemy",
+      "relative_to": "first_rank_504240_total"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "first_rank_555732_damage",
+      "label": "first_rank_555732_damage",
+      "spell": 555732,
+      "target": "enemy",
+      "relative_to": "first_rank_555732_total"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 520566
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "highest_rank_520566_count",
+      "label": "highest_rank_520566_count",
+      "spell": 520566,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "highest_rank_520566_total",
+      "label": "highest_rank_520566_total",
+      "spell": 520566,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "highest_rank_504240_count",
+      "label": "highest_rank_504240_count",
+      "spell": 504240,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "highest_rank_504240_total",
+      "label": "highest_rank_504240_total",
+      "spell": 504240,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "highest_rank_555732_count",
+      "label": "highest_rank_555732_count",
+      "spell": 555732,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "highest_rank_555732_total",
+      "label": "highest_rank_555732_total",
+      "spell": 555732,
+      "target": "enemy"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 520566
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520566,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520566,
+      "target": "enemy",
+      "relative_to": "highest_rank_520566_count",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 504240,
+      "target": "enemy",
+      "relative_to": "highest_rank_504240_count",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 555732,
+      "target": "enemy",
+      "relative_to": "highest_rank_555732_count",
+      "equals": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "highest_rank_520566_damage",
+      "label": "highest_rank_520566_damage",
+      "spell": 520566,
+      "target": "enemy",
+      "relative_to": "highest_rank_520566_total"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "highest_rank_504240_damage",
+      "label": "highest_rank_504240_damage",
+      "spell": 504240,
+      "target": "enemy",
+      "relative_to": "highest_rank_504240_total"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "highest_rank_555732_damage",
+      "label": "highest_rank_555732_damage",
+      "spell": 555732,
+      "target": "enemy",
+      "relative_to": "highest_rank_555732_total"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 82888,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 26395,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "critical_520566_count",
+      "label": "critical_520566_count",
+      "spell": 520566,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "critical_520566_total",
+      "label": "critical_520566_total",
+      "spell": 520566,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "critical_504240_count",
+      "label": "critical_504240_count",
+      "spell": 504240,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "critical_504240_total",
+      "label": "critical_504240_total",
+      "spell": 504240,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "critical_555732_count",
+      "label": "critical_555732_count",
+      "spell": 555732,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "critical_555732_total",
+      "label": "critical_555732_total",
+      "spell": 555732,
+      "target": "enemy"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 520566
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520566,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520566,
+      "target": "enemy",
+      "relative_to": "critical_520566_count",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 504240,
+      "target": "enemy",
+      "relative_to": "critical_504240_count",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 555732,
+      "target": "enemy",
+      "relative_to": "critical_555732_count",
+      "equals": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "critical_520566_damage",
+      "label": "critical_520566_damage",
+      "spell": 520566,
+      "target": "enemy",
+      "relative_to": "critical_520566_total"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "critical_504240_damage",
+      "label": "critical_504240_damage",
+      "spell": 504240,
+      "target": "enemy",
+      "relative_to": "critical_504240_total"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "critical_555732_damage",
+      "label": "critical_555732_damage",
+      "spell": 555732,
+      "target": "enemy",
+      "relative_to": "critical_555732_total"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520566,
+      "target": "enemy",
+      "critical": true,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 504240,
+      "target": "enemy",
+      "critical": true,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 500939,
+      "stacks": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "no_boon_520566_count",
+      "label": "no_boon_520566_count",
+      "spell": 520566,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "no_boon_520566_total",
+      "label": "no_boon_520566_total",
+      "spell": 520566,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "no_boon_504240_count",
+      "label": "no_boon_504240_count",
+      "spell": 504240,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "no_boon_504240_total",
+      "label": "no_boon_504240_total",
+      "spell": 504240,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "no_boon_555732_count",
+      "label": "no_boon_555732_count",
+      "spell": 555732,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "no_boon_555732_total",
+      "label": "no_boon_555732_total",
+      "spell": 555732,
+      "target": "enemy"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 520566
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520566,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520566,
+      "target": "enemy",
+      "relative_to": "no_boon_520566_count",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 504240,
+      "target": "enemy",
+      "relative_to": "no_boon_504240_count",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 555732,
+      "target": "enemy",
+      "relative_to": "no_boon_555732_count",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "no_boon_520566_damage",
+      "label": "no_boon_520566_damage",
+      "spell": 520566,
+      "target": "enemy",
+      "relative_to": "no_boon_520566_total"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "no_boon_504240_damage",
+      "label": "no_boon_504240_damage",
+      "spell": 504240,
+      "target": "enemy",
+      "relative_to": "no_boon_504240_total"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "no_boon_555732_damage",
+      "label": "no_boon_555732_damage",
+      "spell": 555732,
+      "target": "enemy",
+      "relative_to": "no_boon_555732_total"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 704099,
+      "all_specs": true
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500939
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_520566_count",
+      "label": "removed_520566_count",
+      "spell": 520566,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "removed_520566_total",
+      "label": "removed_520566_total",
+      "spell": 520566,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_504240_count",
+      "label": "removed_504240_count",
+      "spell": 504240,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "removed_504240_total",
+      "label": "removed_504240_total",
+      "spell": 504240,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_555732_count",
+      "label": "removed_555732_count",
+      "spell": 555732,
+      "target": "enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "removed_555732_total",
+      "label": "removed_555732_total",
+      "spell": 555732,
+      "target": "enemy"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 520566
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520566,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 400
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 520566,
+      "target": "enemy",
+      "relative_to": "removed_520566_count",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 504240,
+      "target": "enemy",
+      "relative_to": "removed_504240_count",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 555732,
+      "target": "enemy",
+      "relative_to": "removed_555732_count",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "removed_520566_damage",
+      "label": "removed_520566_damage",
+      "spell": 520566,
+      "target": "enemy",
+      "relative_to": "removed_520566_total"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "removed_504240_damage",
+      "label": "removed_504240_damage",
+      "spell": 504240,
+      "target": "enemy",
+      "relative_to": "removed_504240_total"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "save_as": "removed_555732_damage",
+      "label": "removed_555732_damage",
+      "spell": 555732,
+      "target": "enemy",
+      "relative_to": "removed_555732_total"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 555732,
+      "target": "enemy",
+      "critical": true,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 704099
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "unrelated_extra",
+      "label": "unrelated_extra",
+      "spell": 555732,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 555732,
+      "target": "enemy",
+      "relative_to": "unrelated_extra",
+      "equals": 0
+    }
+  ],
+  "contract": "With the talent and Boon of the Bear, every Wildclaw hand adds one hit for 40% of its completed damage. Both ranks, critical hits, spell power, armor, talent removal, missing Boon and unrelated spells are controls. The repeated hit must not critically strike or reapply damage modifiers. Lower-rank casts explicitly unlearn higher weapon ranks first, then relearn the tested rank; the native cast path stays enabled. Rank fixtures remove the grant from all specs, including the tested lower rank, before relearning it to restore native active-rank selection."
+}

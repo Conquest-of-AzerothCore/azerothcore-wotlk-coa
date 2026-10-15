@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "name": "Moonblessed Aspects raises the effectiveness of Aspects by 15% (#1287)",
+  "contract": "Moonblessed Aspects 706232 reads \"Increases the effectiveness of Aspects by $s1%\". Effect[0] is SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue SPELLMOD_ALL_EFFECTS (8), EffectBasePoints 14 (15) and EffectSpellClassMask (word0 0x4, word2 0x40000800); Effect[1] is the same aura with SPELLMOD_DAMAGE (0), 15, mask word1 0x8000000, which selects only Aspect of the Stars' hit 800507 (family 32, flags word1 0x8000000). The report could not decide by reading code because the module bypasses the parents' amounts: AscensionStarcaller.cpp Aspect() copies the triggering damage as-is into Warden's helper 801129 (ignoring 801128 Effect[0] 99) and damage/4 into Huntress' 805357 (ignoring 805356 Effect[0] 24), and copies Amount(800510, 1) into 800507, which both ALL_EFFECTS (flags word2 0x800 on 800510) and DAMAGE select, so Aspect of the Stars might be raised twice. What a scenario can observe without random procs is each factor separately, and the assertions are: (1) Aspect of the Warden 801128 Effect[0] (99, tooltip \"strike 3 additional times for $s1% of the damage\") through spell_effect_value, 15% above the control; (2) Aspect of the Cosmos 801124 Effect[1] (aura 33, -21 i.e. -20% movement) and Aspect of the Goddess 802203 Effect[0] (aura 136, healing done) in the same way, with ratio bounds that absorb integer truncation of a 15% step on a small integer (a missing modifier reads 1.0, a doubled one about 1.32); (3) the Aspect of the Stars hit 800507 through spell_damage_done on a 1000 base, whose DAMAGE modifier must read exactly x1.15 (1.14-1.16), so the hit's visible scaling is 15% and not more. The base-point step of Aspect of the Stars (800510 Effect[1], 4) is also raised by ALL_EFFECTS before the copy; its small integer value cannot separate a single from a double application, so that half is not asserted and the delivered hit total (base copy times damage modifier) stays for a proc-based measurement. Control and talent fixtures share race, class and level and have no gear.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_control",
+      "owner": "control",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "dummy_talent",
+      "owner": "talent",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 706232
+    },
+    {
+      "action": "assert",
+      "label": "The passive is present on the talent fixture",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 706232,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "label": "Warden strike percentage without the talent",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "save_as": "warden_base",
+      "spell": 801128,
+      "effect": 0
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of the Warden's strike percentage is 15% higher",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 801128,
+      "effect": 0,
+      "ratio_to": "warden_base",
+      "min": 1.14,
+      "max": 1.16
+    },
+    {
+      "action": "snapshot",
+      "label": "Cosmos slow without the talent",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "save_as": "cosmos_base",
+      "spell": 801124,
+      "effect": 1
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of the Cosmos' slow is stronger by about 15%",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 801124,
+      "effect": 1,
+      "ratio_to": "cosmos_base",
+      "min": 1.1,
+      "max": 1.2
+    },
+    {
+      "action": "snapshot",
+      "label": "Goddess healing bonus without the talent",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "save_as": "goddess_base",
+      "spell": 802203,
+      "effect": 0
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of the Goddess' healing bonus is stronger by about 15%, not doubled",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 802203,
+      "effect": 0,
+      "ratio_to": "goddess_base",
+      "min": 1.09,
+      "max": 1.21
+    },
+    {
+      "action": "snapshot",
+      "label": "Aspect of the Stars hit without the talent",
+      "actor": "control",
+      "metric": "spell_damage_done",
+      "save_as": "stars_base",
+      "spell": 800507,
+      "effect": 0,
+      "target": "dummy_control"
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of the Stars' hit scales by exactly 15%",
+      "actor": "talent",
+      "metric": "spell_damage_done",
+      "spell": 800507,
+      "effect": 0,
+      "target": "dummy_talent",
+      "ratio_to": "stars_base",
+      "min": 1.14,
+      "max": 1.16
+    }
+  ]
+}

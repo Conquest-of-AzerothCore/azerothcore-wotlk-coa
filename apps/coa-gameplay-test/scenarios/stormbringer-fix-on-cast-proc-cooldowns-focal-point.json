@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Focal Point gives the group 5% crit on Call Lightning (#3079)",
+  "contract": "Focal Point 706629 (Spell.dbc: passive Attributes 320, Effect[0] APPLY_AURA / aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 680876, TARGET_UNIT_CASTER) promises \"Casting $?s707615[Aeroblast][Call Lightning] now increases the critical strike chance of party and raid members by $680876s1% for $680876d\". 680876 is Effect[0] SPELL_EFFECT_APPLY_AREA_AURA_RAID with ApplyAuraName 290 SPELL_AURA_MOD_CRIT_PCT, EffectBasePoints 4 + EffectDieSides 1 = 5, EffectMiscValue 0 and an empty EffectSpellClassMask, EffectRadiusIndex 12 = 100 yd and DurationIndex 1 = 10000 ms, so it is a flat 5 percentage-point crit bonus for 10 s. AuraEffect::HandleAuraModCritPct calls Player::UpdateAllSpellCritChances and Player::UpdateSpellCritChance folds aura 290 into PLAYER_SPELL_CRIT_PERCENTAGE, so the delta is exact and stat-independent. 706629's DBC ProcFlags are 0, so SpellMgr::LoadSpellProcs skips proc-entry generation and, with no spell_proc row, the aura has no entry in mSpellProcMap and the group buff is never cast. Call Lightning rank 13 (501399) carries SpellFamilyFlags1 0x10, the bit shared with Aeroblast; Arm of Thorim (SpellFamilyFlags1 0x2, no mana cost) is the negative control. The tooltip's \"Does not stack with similar effects\" clause has no spell_group backing and is deliberately not asserted here. The enemy is a Harvest Golem (36), not a Rabbit (721): CritterAI::JustEngagedWith puts a damaged critter into a timed flee, and Call Lightning and Arm of Thorim both carry FacingCasterFlags 1, so the talented Call Lightning was rejected with SPELL_FAILED_UNIT_NOT_INFRONT (134) whenever the fleeing Rabbit ended up outside the caster's front arc and no Focal Point proc could follow.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 2, "class": 16, "level": 80, "spell_hit_rating": 10000 },
+    { "id": "ally", "race": 2, "class": 16, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "caster", "entry": 36, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "group", "actor": "caster", "target": "ally" },
+    { "action": "learn", "actor": "caster", "spell": 501399 },
+    { "action": "learn", "actor": "caster", "spell": 567520 },
+    { "action": "set_aura", "actor": "caster", "spell": 803102, "stacks": 100 },
+    { "action": "snapshot", "actor": "ally", "metric": "spell_crit_chance", "save_as": "ally_crit" },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_crit_chance", "save_as": "caster_crit" },
+    {
+      "action": "assert", "label": "BASELINE: nobody carries the Focal Point buff before the talent is learned",
+      "actor": "ally", "metric": "aura", "spell": 680876, "equals": 0
+    },
+    { "action": "snapshot", "actor": "dummy", "metric": "health", "save_as": "dummy_before_untalented" },
+    { "action": "cast", "actor": "caster", "spell": 501399, "target": "dummy" },
+    { "action": "wait", "ms": 2600 },
+    {
+      "action": "assert", "label": "SETUP: the untalented Call Lightning cast really landed",
+      "actor": "dummy", "metric": "health", "relative_to": "dummy_before_untalented", "max": -1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "BASELINE: without the talent the group gets nothing",
+      "actor": "ally", "metric": "aura", "spell": 680876, "equals": 0
+    },
+    {
+      "action": "assert", "label": "BASELINE: the ally's crit chance is unchanged",
+      "actor": "ally", "metric": "spell_crit_chance", "relative_to": "ally_crit", "min": -0.1, "max": 0.1
+    },
+    { "action": "learn", "actor": "caster", "spell": 706629 },
+    {
+      "action": "assert", "label": "SETUP: Focal Point is passive and self-applies on learn",
+      "actor": "caster", "metric": "aura", "spell": 706629, "equals": 1, "within_ms": 1000
+    },
+    { "action": "cast", "actor": "caster", "spell": 501399, "target": "dummy" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the raid area aura reaches the grouped ally",
+      "actor": "ally", "metric": "aura", "spell": 680876, "equals": 1, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the amount is 5 (680876 EffectBasePoints 4 + 1 die side)",
+      "actor": "ally", "metric": "aura_amount", "spell": 680876, "effect": 0, "equals": 5
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the buff lasts 10000 ms (SpellDuration index 1)",
+      "actor": "ally", "metric": "aura_duration_ms", "spell": 680876, "min": 8000, "max": 10000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the ally's spell crit chance rises by exactly 5 percentage points",
+      "actor": "ally", "metric": "spell_crit_chance", "relative_to": "ally_crit", "min": 4.9, "max": 5.1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: a raid area aura includes its caster",
+      "actor": "caster", "metric": "aura", "spell": 680876, "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the caster's own crit chance rises by the same 5 points",
+      "actor": "caster", "metric": "spell_crit_chance", "relative_to": "caster_crit", "min": 4.9, "max": 5.1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Focal Point procs once per cast",
+      "actor": "caster", "metric": "spell_proc_count", "spell": 706629, "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the buff expires on its own",
+      "actor": "ally", "metric": "aura", "spell": 680876, "equals": 0, "within_ms": 12000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the ally's crit chance returns to its baseline",
+      "actor": "ally", "metric": "spell_crit_chance", "relative_to": "ally_crit", "min": -0.1, "max": 0.1
+    },
+    { "action": "set_aura", "actor": "caster", "spell": 803102, "stacks": 100 },
+    { "action": "snapshot", "actor": "dummy", "metric": "health", "save_as": "dummy_before_thorim" },
+    { "action": "cast", "actor": "caster", "spell": 567520, "target": "dummy" },
+    { "action": "wait", "ms": 1700 },
+    {
+      "action": "assert", "label": "SETUP: the Arm of Thorim cast really landed",
+      "actor": "dummy", "metric": "health", "relative_to": "dummy_before_thorim", "max": -1, "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Arm of Thorim is family 22 but outside mask1 0x10, so no group buff is granted",
+      "actor": "ally", "metric": "aura", "spell": 680876, "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: and no further proc is counted",
+      "actor": "caster", "metric": "spell_proc_count", "spell": 706629, "equals": 1
+    }
+  ]
+}

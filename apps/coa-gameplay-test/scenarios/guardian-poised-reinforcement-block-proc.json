@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "name": "Guardian Poised Reinforcement grants block value on every block below 75% health",
+  "contract": "Follow-up of #156 (PR #5213). Poised Reinforcement 653278 reads 'Reinforce your shield with magic, causing blocking attacks while below 75% health to grant you $653305s1% increased block value for $653305d.' - no chance is stated. It is SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY (shield only) with SpellItemEnchantment 1018, whose effect 0 is ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL 653410: a hidden passive PROC_TRIGGER_SPELL aura for 653305 (MOD_SHIELD_BLOCKVALUE_PCT 25, 5 s). Server proc data: spell_proc ProcFlags 40, HitMask 8256 (block, full block) with Chance 0, so the chance fell back to 653410's Spell.dbc ProcChance 30; aura_ascension_guardian_event requires a block while the owner is below 75% health and casts 653305. 30 is the shield-reinforcement family template value (Weighted 653409 and Magic 653304 carry it without proccing, Spiked 653386 had it until #156), the one family member with a real chance states it in its tooltip (Jagged 653279, '$653281h% chance'), and the previous Poised Reinforcement 280415 with the same unconditional wording used aura 280416 with ProcChance 100. Expected: every blocked melee attack taken below 75% health grants 653305, and none above 75% health. The harness cannot cast a spell on an item target, so the equipped enchant's aura 653410 is applied as a fixture; QA Test 100% Block 10021 makes every frontal swing a block and the attacker's hit and expertise ratings remove misses, dodges and parries. With a 30% chance the proc/swing ratio is about 0.3, so the 0.8 lower bound fails before the fix.",
+  "timeout_ms": 150000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    {
+      "id": "guardian", "race": 1, "class": 18, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000,
+      "allow_regeneration": false
+    },
+    { "id": "attacker", "race": 2, "class": 1, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 3000 },
+    { "action": "pvp", "actor": "guardian", "enabled": true },
+    { "action": "pvp", "actor": "attacker", "enabled": true },
+    { "action": "learn", "label": "Block, needed for CanBlock", "actor": "guardian", "spell": 107 },
+    { "action": "learn", "label": "Shield proficiency", "actor": "guardian", "spell": 9116 },
+    { "action": "add_item", "actor": "guardian", "item": 2362 },
+    { "action": "equip", "label": "Equip a shield in the off hand", "actor": "guardian", "item": 2362, "slot": 16 },
+    {
+      "action": "set_aura", "label": "Every frontal swing is blocked", "actor": "guardian", "spell": 10021, "stacks": 1
+    },
+    { "action": "wait", "label": "Let the equipment update settle", "ms": 1000 },
+    {
+      "action": "assert", "label": "SETUP: the guardian blocks every swing", "actor": "guardian",
+      "metric": "block_chance", "min": 90
+    },
+    { "action": "set_health", "actor": "guardian", "maximum": 100000, "value": 100000 },
+    { "action": "set_health", "actor": "attacker", "maximum": 100000, "value": 100000 },
+    { "action": "teleport", "actor": "guardian", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "attacker", "map": 0, "x": -9614.06, "y": -288.949, "z": 57.3053, "o": 3.14159 },
+    {
+      "action": "set_aura", "label": "The shield enchant's equip aura", "actor": "guardian", "spell": 653410,
+      "stacks": 1
+    },
+    { "action": "assert", "actor": "guardian", "metric": "aura", "spell": 653410, "equals": 1 },
+    { "action": "snapshot", "actor": "attacker", "metric": "melee_attack_count", "save_as": "control_swings_start" },
+    {
+      "action": "snapshot", "actor": "guardian", "metric": "spell_proc_count", "spell": 653410,
+      "save_as": "control_procs_start"
+    },
+    { "action": "attack", "label": "Hostile player swings at the guardian", "actor": "attacker", "target": "guardian" },
+    { "action": "wait", "label": "Control: blocked swings above 75% health", "ms": 6000 },
+    {
+      "action": "assert", "label": "SETUP: the control swings landed", "actor": "attacker",
+      "metric": "melee_attack_count", "relative_to": "control_swings_start", "min": 2
+    },
+    {
+      "action": "assert", "label": "SETUP: the guardian stayed above 75% health", "actor": "guardian",
+      "metric": "health_pct", "min": 80
+    },
+    {
+      "action": "assert", "label": "CONTROL: no Poised Reinforcement above 75% health", "actor": "guardian",
+      "metric": "spell_proc_count", "spell": 653410, "relative_to": "control_procs_start", "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: no block value buff above 75% health", "actor": "guardian",
+      "metric": "aura", "spell": 653305, "equals": 0
+    },
+    { "action": "set_health", "label": "Drop the guardian to half health", "actor": "guardian", "value": 50000 },
+    { "action": "snapshot", "actor": "attacker", "metric": "melee_attack_count", "save_as": "swings_start" },
+    {
+      "action": "snapshot", "actor": "guardian", "metric": "spell_proc_count", "spell": 653410,
+      "save_as": "procs_start"
+    },
+    { "action": "wait", "label": "About twenty blocked swings below 75% health", "ms": 40000 },
+    {
+      "action": "snapshot", "actor": "attacker", "metric": "melee_attack_count", "relative_to": "swings_start",
+      "save_as": "swings"
+    },
+    {
+      "action": "assert", "label": "SETUP: enough blocked swings for a rate", "actor": "attacker",
+      "metric": "melee_attack_count", "relative_to": "swings_start", "min": 12
+    },
+    {
+      "action": "assert", "label": "SETUP: the guardian stayed below 75% health", "actor": "guardian",
+      "metric": "health_pct", "min": 1, "max": 74
+    },
+    {
+      "action": "assert", "label": "CONTRACT: every block below 75% health procs Poised Reinforcement",
+      "actor": "guardian", "metric": "spell_proc_count", "spell": 653410, "relative_to": "procs_start",
+      "ratio_to": "swings", "min": 0.8, "max": 1.05
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the block value buff is active", "actor": "guardian", "metric": "aura",
+      "spell": 653305, "within_ms": 3000, "equals": 1
+    },
+    { "action": "stop_attack", "actor": "attacker" }
+  ]
+}

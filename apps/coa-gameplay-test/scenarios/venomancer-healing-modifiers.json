@@ -1,0 +1,523 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Tranquil Essence, Soothing Venoms and Spirit of the Jungle modifiers (#978, #1048, #1084)",
+  "contract": "#978 Tranquil Essence (504799 rank 1, 505204 rank 2): two SPELL_AURA_ADD_PCT_MODIFIER (108) effects, EffectMiscValue 2 (SPELLMOD_THREAT, BasePoints -11/-21 + die 1 = -10/-20) and 22 (SPELLMOD_DOT, 2/5 + 1 = +3/+6), class mask (0x80801, 0x8008000, 0x80000) selecting Shadra's Balm (800901, word0 0x800) and the Rejuvenating Venom heal (630869, words 1 and 2). ThreatManager.cpp applies SPELLMOD_THREAT and Unit::SpellHealingBonusDone applies SPELLMOD_DOT for periodic healing, both through Player::ApplySpellMod, so spell_modifier reads exactly what a cast uses. Base 1000 gives 900/800 for threat and 1030/1060 for DoT (percent DoT modifiers are multiplicative, ApplySpellMod). #1048 Soothing Venoms (707726, 707869): aura 108 with misc 15 (SPELLMOD_CRIT_DAMAGE_BONUS), 24/49 + 1 = +25/+50, mask (0, 0x8000000, 0x40000) selecting Shadra's Prayer (800870) and Emerald Veil (800926); Unit::SpellCriticalHealingBonus applies the modifier to the crit bonus at Unit.cpp:9993. The harness has no critical-healing metric, so the modifier itself is asserted (1000 -> 1250/1500). #1084 Spirit of the Jungle (681048): aura 107 (flat) misc 18 (SPELLMOD_CHANCE_OF_SUCCESS), 9 + 1 = +10, mask word1 0x400 selecting the Rejuvenating Venom activation 630868, whose spell_proc row has Chance 0 so SpellMgr.cpp uses Spell.dbc ProcChance 20; Aura::CalcProcChance then applies the modifier (SpellAuras.cpp:2313) for 30%. The proc rate itself is statistical and is not sampled here; the modifier on the base chance is. Ranks 1 and 2 are fixtured on separate actors so the modifiers do not stack. Controls: Hivebreak and Shadra's Balm/Prayer outside each mask, and an unlearned actor.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "r1",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "r2",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000,
+      "label": "Let spawn AI and level scaling settle"
+    },
+    {
+      "action": "assert",
+      "label": "r1: no threat modifier on Shadra's Balm before Tranquil Essence",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 800901,
+      "op": 2,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "assert",
+      "label": "r1: no DoT modifier on Shadra's Balm before Tranquil Essence",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 800901,
+      "op": 22,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "assert",
+      "label": "r1: no crit-healing modifier on Shadra's Prayer before Soothing Venoms",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 800870,
+      "op": 15,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "assert",
+      "label": "r1: no crit-healing modifier on Emerald Veil before Soothing Venoms",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 800926,
+      "op": 15,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "assert",
+      "label": "r2: no threat modifier on Shadra's Balm before Tranquil Essence",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 800901,
+      "op": 2,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "assert",
+      "label": "r2: no DoT modifier on Shadra's Balm before Tranquil Essence",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 800901,
+      "op": 22,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "assert",
+      "label": "r2: no crit-healing modifier on Shadra's Prayer before Soothing Venoms",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 800870,
+      "op": 15,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "assert",
+      "label": "r2: no crit-healing modifier on Emerald Veil before Soothing Venoms",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 800926,
+      "op": 15,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "assert",
+      "label": "No proc-chance modifier on Rejuvenating Venom before Spirit of the Jungle",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 630868,
+      "op": 18,
+      "base": 20,
+      "min": 19.9,
+      "max": 20.1
+    },
+    {
+      "action": "snapshot",
+      "actor": "r1",
+      "metric": "spell_healing_done",
+      "spell": 800901,
+      "target": "r1",
+      "periodic": true,
+      "save_as": "balm_hot_before_r1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r2",
+      "metric": "spell_healing_done",
+      "spell": 800901,
+      "target": "r2",
+      "periodic": true,
+      "save_as": "balm_hot_before_r2"
+    },
+    {
+      "action": "learn",
+      "actor": "r1",
+      "spell": 504799
+    },
+    {
+      "action": "learn",
+      "actor": "r2",
+      "spell": 505204
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 effect 0 stores -10% threat",
+      "actor": "r1",
+      "metric": "aura_amount",
+      "spell": 504799,
+      "effect": 0,
+      "equals": -10,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 effect 1 stores +3% periodic healing",
+      "actor": "r1",
+      "metric": "aura_amount",
+      "spell": 504799,
+      "effect": 1,
+      "equals": 3,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 effect 0 stores -20% threat",
+      "actor": "r2",
+      "metric": "aura_amount",
+      "spell": 505204,
+      "effect": 0,
+      "equals": -20,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 effect 1 stores +6% periodic healing",
+      "actor": "r2",
+      "metric": "aura_amount",
+      "spell": 505204,
+      "effect": 1,
+      "equals": 6,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 cuts Shadra's Balm threat to 900 per 1000",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 800901,
+      "op": 2,
+      "base": 1000,
+      "min": 899.9,
+      "max": 900.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises Shadra's Balm periodic healing to 1030 per 1000",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 800901,
+      "op": 22,
+      "base": 1000,
+      "min": 1029.9,
+      "max": 1030.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 cuts Rejuvenating Venom heal threat to 900 per 1000",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 630869,
+      "op": 2,
+      "base": 1000,
+      "min": 899.9,
+      "max": 900.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises Rejuvenating Venom heal periodic healing to 1030 per 1000",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 630869,
+      "op": 22,
+      "base": 1000,
+      "min": 1029.9,
+      "max": 1030.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 leaves Hivebreak's threat alone",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 803193,
+      "op": 2,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 leaves Hivebreak's DoT modifier alone",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 803193,
+      "op": 22,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 cuts Shadra's Balm threat to 800 per 1000",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 800901,
+      "op": 2,
+      "base": 1000,
+      "min": 799.9,
+      "max": 800.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises Shadra's Balm periodic healing to 1060 per 1000",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 800901,
+      "op": 22,
+      "base": 1000,
+      "min": 1059.9,
+      "max": 1060.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 cuts Rejuvenating Venom heal threat to 800 per 1000",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 630869,
+      "op": 2,
+      "base": 1000,
+      "min": 799.9,
+      "max": 800.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises Rejuvenating Venom heal periodic healing to 1060 per 1000",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 630869,
+      "op": 22,
+      "base": 1000,
+      "min": 1059.9,
+      "max": 1060.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 leaves Hivebreak's threat alone",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 803193,
+      "op": 2,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 leaves Hivebreak's DoT modifier alone",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 803193,
+      "op": 22,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises the native periodic healing calculation by 3%",
+      "actor": "r1",
+      "metric": "spell_healing_done",
+      "spell": 800901,
+      "target": "r1",
+      "periodic": true,
+      "ratio_to": "balm_hot_before_r1",
+      "min": 1.029,
+      "max": 1.031
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises the native periodic healing calculation by 6%",
+      "actor": "r2",
+      "metric": "spell_healing_done",
+      "spell": 800901,
+      "target": "r2",
+      "periodic": true,
+      "ratio_to": "balm_hot_before_r2",
+      "min": 1.059,
+      "max": 1.061
+    },
+    {
+      "action": "learn",
+      "actor": "r1",
+      "spell": 707726
+    },
+    {
+      "action": "learn",
+      "actor": "r2",
+      "spell": 707869
+    },
+    {
+      "action": "assert",
+      "label": "Soothing Venoms rank 1 stores +25% critical healing",
+      "actor": "r1",
+      "metric": "aura_amount",
+      "spell": 707726,
+      "effect": 0,
+      "equals": 25,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Soothing Venoms rank 2 stores +50% critical healing",
+      "actor": "r2",
+      "metric": "aura_amount",
+      "spell": 707869,
+      "effect": 0,
+      "equals": 50,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises Shadra's Prayer critical bonus to 1250 per 1000",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 800870,
+      "op": 15,
+      "base": 1000,
+      "min": 1249.9,
+      "max": 1250.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises Emerald Veil critical bonus to 1250 per 1000",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 800926,
+      "op": 15,
+      "base": 1000,
+      "min": 1249.9,
+      "max": 1250.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 leaves Shadra's Balm's critical bonus alone",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 800901,
+      "op": 15,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 leaves Hivebreak's critical bonus alone",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 803193,
+      "op": 15,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises Shadra's Prayer critical bonus to 1500 per 1000",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 800870,
+      "op": 15,
+      "base": 1000,
+      "min": 1499.9,
+      "max": 1500.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises Emerald Veil critical bonus to 1500 per 1000",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 800926,
+      "op": 15,
+      "base": 1000,
+      "min": 1499.9,
+      "max": 1500.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 leaves Shadra's Balm's critical bonus alone",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 800901,
+      "op": 15,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 leaves Hivebreak's critical bonus alone",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 803193,
+      "op": 15,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "learn",
+      "actor": "r1",
+      "spell": 681048
+    },
+    {
+      "action": "assert",
+      "label": "Spirit of the Jungle stores +10 proc chance",
+      "actor": "r1",
+      "metric": "aura_amount",
+      "spell": 681048,
+      "effect": 0,
+      "equals": 10,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Rejuvenating Venom's 20% proc chance becomes 30%",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 630868,
+      "op": 18,
+      "base": 20,
+      "min": 29.9,
+      "max": 30.1
+    },
+    {
+      "action": "assert",
+      "label": "Another Venom activation (Debilitating Venom 805731) keeps its 30% base chance",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 805731,
+      "op": 18,
+      "base": 30,
+      "min": 29.9,
+      "max": 30.1
+    },
+    {
+      "action": "assert",
+      "label": "The untrained control keeps Rejuvenating Venom at 20%",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 630868,
+      "op": 18,
+      "base": 20,
+      "min": 19.9,
+      "max": 20.1
+    }
+  ]
+}

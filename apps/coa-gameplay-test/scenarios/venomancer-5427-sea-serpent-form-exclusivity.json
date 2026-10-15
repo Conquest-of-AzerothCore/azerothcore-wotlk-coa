@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Sea Serpent Form is exclusive with other forms (#5427)",
+  "contract": "#5427: Sea Serpent Form (803212) effects are [58, 56, 82] (Spell.dbc, coa-dbc-viewer record --id 803212) and carry no SPELL_AURA_MOD_SHAPESHIFT (aura 36), unlike Spider (800841), Beetle (803183), Weaver (804980), Venomwing (520307) and Vizier Form (800912), whose second effect is aura 36 in every case. AzerothCore's native shapeshift handling keeps those five mutually exclusive but leaves Sea Serpent Form untouched in both directions. rev_20260929_30_venomancer_form_exclusivity.sql adds all six to spell_group 1143 with SPELL_GROUP_STACK_RULE_EXCLUSIVE (1), so entering any one removes whichever of the others is active.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn settle", "ms": 3000 },
+    { "action": "learn", "actor": "v", "spell": 803212 },
+    { "action": "learn", "actor": "v", "spell": 804980 },
+    { "action": "assert", "label": "SETUP: no form is active yet", "actor": "v", "metric": "aura", "spell": 803212, "equals": 0 },
+    { "action": "cast", "actor": "v", "spell": 803212 },
+    { "action": "assert", "label": "SETUP: Sea Serpent Form is active", "actor": "v", "metric": "aura",
+      "spell": 803212, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Global cooldown", "ms": 2000 },
+    { "action": "cast", "actor": "v", "spell": 804980 },
+    { "action": "assert", "label": "SETUP: Weaver Form is active", "actor": "v", "metric": "aura",
+      "spell": 804980, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: Sea Serpent Form was removed by Weaver Form",
+      "actor": "v", "metric": "aura", "spell": 803212, "equals": 0 },
+    { "action": "wait", "label": "Global cooldown", "ms": 2000 },
+    { "action": "cast", "actor": "v", "spell": 803212 },
+    { "action": "assert", "label": "SETUP: Sea Serpent Form is active again", "actor": "v", "metric": "aura",
+      "spell": 803212, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: entering Sea Serpent Form also removes Weaver Form",
+      "actor": "v", "metric": "aura", "spell": 804980, "equals": 0 }
+  ]
+}

@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "name": "Arbalist grants ranged attack power equal to 100% of Intellect (#1380)",
+  "contract": "Arbalist 520851 has E0 aura 212 (SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT), MiscValue 3 (Intellect), BasePoints 99 / DieSides 1 = 100%; the description reads 'Increases your attack power by $s1% of your Intellect'. Player::UpdateAttackPowerAndDamage adds CalculatePct(Intellect, 100) to ranged attack power for classes that do not use wands (class 15 does not), and Unit::UpdateStats refreshes it when Intellect changes. The scenario applies Arcane Intellect 36880 (E0 aura 29 SPELL_AURA_MOD_STAT, MiscValue 3, BasePoints 99 / DieSides 1 = +100 Intellect), so the ranged attack power must rise by exactly 100 with the passive and not without it. The record is aura 212 (ranged); the melee counterpart is aura 268 which Arbalist does not carry, so the melee attack power is asserted unchanged as a pin of the authored record, not as a claim about the intended scope. Two fixture assumptions are asserted first: the aura adds exactly 100 Intellect (no Intellect percent modifier on a bare level-80 Witch Hunter) and no attack power moves without the passive.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 520851,
+      "all_specs": true,
+      "label": "Start without the passive"
+    },
+    {
+      "action": "snapshot",
+      "label": "Intellect before",
+      "actor": "hunter",
+      "metric": "stat",
+      "save_as": "int_before",
+      "stat": 3
+    },
+    {
+      "action": "snapshot",
+      "label": "Ranged attack power before",
+      "actor": "hunter",
+      "metric": "ranged_attack_power",
+      "save_as": "rap_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Melee attack power before",
+      "actor": "hunter",
+      "metric": "attack_power",
+      "save_as": "ap_before"
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply +100 Intellect",
+      "actor": "hunter",
+      "spell": 36880,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Fixture assumption: the aura adds exactly 100 Intellect",
+      "actor": "hunter",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "int_before",
+      "min": 99.5,
+      "max": 100.5
+    },
+    {
+      "action": "assert",
+      "label": "Fixture assumption: no ranged attack power without the passive",
+      "actor": "hunter",
+      "metric": "ranged_attack_power",
+      "relative_to": "rap_before",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "set_aura",
+      "label": "Remove the Intellect aura",
+      "actor": "hunter",
+      "spell": 36880,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 520851
+    },
+    {
+      "action": "assert",
+      "label": "The passive aura is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 520851,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Ranged attack power with the passive",
+      "actor": "hunter",
+      "metric": "ranged_attack_power",
+      "save_as": "rap_with"
+    },
+    {
+      "action": "snapshot",
+      "label": "Melee attack power with the passive",
+      "actor": "hunter",
+      "metric": "attack_power",
+      "save_as": "ap_with"
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply +100 Intellect again",
+      "actor": "hunter",
+      "spell": 36880,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Ranged attack power rises by 100% of the added Intellect",
+      "actor": "hunter",
+      "metric": "ranged_attack_power",
+      "relative_to": "rap_with",
+      "min": 99,
+      "max": 101
+    },
+    {
+      "action": "assert",
+      "label": "Melee attack power does not follow Intellect",
+      "actor": "hunter",
+      "metric": "attack_power",
+      "relative_to": "ap_with",
+      "min": -0.5,
+      "max": 0.5
+    }
+  ]
+}

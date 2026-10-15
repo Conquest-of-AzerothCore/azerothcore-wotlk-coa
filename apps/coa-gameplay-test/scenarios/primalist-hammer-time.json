@@ -1,0 +1,548 @@
+{
+  "schema": 1,
+  "name": "Primalist Hammer Time native Mountain Hammer targets",
+  "contract": "First/highest Mountain Hammer hits exactly five of six available enemies with Hammer Time, versus one at baseline and after removal. Six unarmed hostile players avoid full shield blocks masking selected low-rank victims.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "target",
+      "race": 2,
+      "class": 8,
+      "level": 80
+    },
+    {
+      "id": "extra1",
+      "race": 2,
+      "class": 8,
+      "level": 80
+    },
+    {
+      "id": "extra2",
+      "race": 2,
+      "class": 8,
+      "level": 80
+    },
+    {
+      "id": "extra3",
+      "race": 2,
+      "class": 8,
+      "level": 80
+    },
+    {
+      "id": "extra4",
+      "race": 2,
+      "class": 8,
+      "level": 80
+    },
+    {
+      "id": "extra5",
+      "race": 2,
+      "class": 8,
+      "level": 80
+    }
+  ],
+  "creatures": [],
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "pvp",
+      "actor": "primalist",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "target",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "target",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "maximum": 100000,
+      "value": 90000
+    },
+    {
+      "action": "pvp",
+      "actor": "extra1",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "extra1",
+      "map": 0,
+      "x": -9613.859999999999,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "extra1",
+      "maximum": 100000,
+      "value": 90000
+    },
+    {
+      "action": "pvp",
+      "actor": "extra2",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "extra2",
+      "map": 0,
+      "x": -9613.66,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "extra2",
+      "maximum": 100000,
+      "value": 90000
+    },
+    {
+      "action": "pvp",
+      "actor": "extra3",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "extra3",
+      "map": 0,
+      "x": -9613.46,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "extra3",
+      "maximum": 100000,
+      "value": 90000
+    },
+    {
+      "action": "pvp",
+      "actor": "extra4",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "extra4",
+      "map": 0,
+      "x": -9613.26,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "extra4",
+      "maximum": 100000,
+      "value": 90000
+    },
+    {
+      "action": "pvp",
+      "actor": "extra5",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "extra5",
+      "map": 0,
+      "x": -9613.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "extra5",
+      "maximum": 100000,
+      "value": 90000
+    },
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 60
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681435,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 680405,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681424,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681423,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681422,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681421,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681420,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681130,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 681130
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 681130
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681130,
+      "save_as": "baseline_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681130,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681130,
+      "relative_to": "baseline_before",
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 681435
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681424,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681423,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681422,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681421,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681420,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681130,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 681130
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 681130
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681130,
+      "save_as": "first_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681130,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681130,
+      "relative_to": "first_before",
+      "equals": 5
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681424,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681423,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681422,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681421,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681420,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681130,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 681424
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 681424
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681424,
+      "save_as": "highest_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681424,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681424,
+      "relative_to": "highest_before",
+      "equals": 5
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681435,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681424,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681423,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681422,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681421,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681420,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681130,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 681424
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 681424
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681424,
+      "save_as": "removed_before"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681424,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681424,
+      "relative_to": "removed_before",
+      "equals": 1
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

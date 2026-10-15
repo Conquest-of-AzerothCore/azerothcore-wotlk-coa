@@ -21,6 +21,7 @@
 #include "Opcodes.h"
 #include "Player.h"
 #include "World.h"
+#include <cmath>
 
 Quest::Quest(Field* questRecord)
 {
@@ -173,7 +174,7 @@ void Quest::LoadQuestOfferReward(Field* fields)
 void Quest::LoadQuestTemplateAddon(Field* fields)
 {
     MaxLevel = fields[1].Get<uint8>();
-    RequiredClasses = ExpandLegacyClassMask(fields[2].Get<uint32>());
+    RequiredClasses = ExpandLegacyQuestClassMask(fields[2].Get<uint32>());
     SourceSpellid = fields[3].Get<uint32>();
     PrevQuestId = fields[4].Get<int32>();
     NextQuestId = fields[5].Get<uint32>();
@@ -197,10 +198,20 @@ void Quest::LoadQuestTemplateAddon(Field* fields)
     }
 }
 
-uint32 Quest::XPValue(uint8 playerLevel) const
+uint32 Quest::XPValue(uint8 playerLevel, bool levelScaling) const
 {
-    int32 quest_level = LocalLevelScaling::QuestEnabled.load(std::memory_order_relaxed) ?
-        LocalLevelScaling::ScaleQuestLevel(Level, playerLevel) : (Level == -1 ? playerLevel : Level);
+    int32 quest_level = Level == -1 ? playerLevel : Level;
+    if (LocalLevelScaling::QuestCurve const* curve = LocalLevelScaling::ScalingCurveFor(levelScaling, Id))
+    {
+        int32 const scaledLevel = LocalLevelScaling::EffectiveQuestLevel(Level, playerLevel, curve);
+        if (scaledLevel != (Level > 0 ? Level : int32(playerLevel)))
+        {
+            if (RewardXPDifficulty >= 10)
+                return 0;
+            quest_level = scaledLevel;
+        }
+    }
+
     QuestXPEntry const* xpentry = sQuestXPStore.LookupEntry(quest_level);
     if (!xpentry)
     {
@@ -238,7 +249,39 @@ uint32 Quest::XPValue(uint8 playerLevel) const
     return xp;
 }
 
-int32 Quest::GetRewOrReqMoney(uint8 playerLevel) const
+/// The tier of the realm's per-level money table (QuestMoneyReward, the client's own values) this
+/// quest's reward was authored from.
+///
+/// AzerothCore expects the quest data to name that tier in RewardMoneyDifficulty. This realm's data
+/// carries the client's "money at max level" in that column instead, which is never a usable index,
+/// so the tier has to be recovered from the reward itself: the tier whose value at the quest's own
+/// level is closest to RewardMoney.
+int8 Quest::FindMoneyTier() const
+{
+    if (RewardMoney <= 0 || Level <= 0 || Level > UINT8_MAX)
+        return -1;
+
+    int8 bestTier = -1;
+    uint32 bestGap = 0;
+    for (uint8 tier = 0; tier < MAX_QUEST_MONEY_REWARDS; ++tier)
+    {
+        uint32 const value = sObjectMgr->GetQuestMoneyReward(uint8(Level), tier);
+        if (!value)
+            continue;
+
+        uint32 const reward = uint32(RewardMoney);
+        uint32 const gap = value > reward ? value - reward : reward - value;
+        if (bestTier < 0 || gap < bestGap)
+        {
+            bestTier = int8(tier);
+            bestGap = gap;
+        }
+    }
+
+    return bestTier;
+}
+
+int32 Quest::GetRewOrReqMoney(uint8 playerLevel, bool levelScaling) const
 {
     int32 rewardedMoney = RewardMoney;
     if (rewardedMoney < 0)
@@ -246,25 +289,46 @@ int32 Quest::GetRewOrReqMoney(uint8 playerLevel) const
         return rewardedMoney;
     }
 
-    if (playerLevel && RewardMoneyDifficulty)
+    if (playerLevel)
     {
-        if (uint32 questRewardedMoney = sObjectMgr->GetQuestMoneyReward(playerLevel, RewardMoneyDifficulty))
+        if (RewardMoneyDifficulty && RewardMoneyDifficulty < MAX_QUEST_MONEY_REWARDS)
         {
-            rewardedMoney = questRewardedMoney;
+            // Stock AzerothCore: the quest data names a real tier of the per-level table.
+            if (uint32 questRewardedMoney = sObjectMgr->GetQuestMoneyReward(playerLevel, RewardMoneyDifficulty))
+            {
+                rewardedMoney = questRewardedMoney;
+            }
+        }
+        else if (LocalLevelScaling::QuestCurve const* curve = LocalLevelScaling::ScalingCurveFor(levelScaling, Id))
+        {
+            // A scaled quest pays its own tier's ratio between the level it is played at and its own
+            // level, and never less than the authored reward.
+            int32 const effectiveLevel = LocalLevelScaling::EffectiveQuestLevel(Level, playerLevel, curve);
+            int8 const tier = FindMoneyTier();
+            if (tier >= 0 && rewardedMoney > 0 && effectiveLevel != Level && effectiveLevel <= UINT8_MAX)
+            {
+                uint32 const own = sObjectMgr->GetQuestMoneyReward(uint8(Level), uint8(tier));
+                uint32 const at = sObjectMgr->GetQuestMoneyReward(uint8(effectiveLevel), uint8(tier));
+                if (own && at > own)
+                {
+                    double const scaled = std::round(double(rewardedMoney) * double(at) / double(own));
+                    rewardedMoney = int32(std::min(scaled, double(INT32_MAX)));
+                }
+            }
         }
     }
 
     return static_cast<int32>(rewardedMoney * sWorld->getRate(RATE_REWARD_QUEST_MONEY));
 }
 
-uint32 Quest::GetRewMoneyMaxLevel() const
+uint32 Quest::GetRewMoneyMaxLevel(bool levelScaling) const
 {
     uint32 rewMoney = 0;
 
     if (HasFlag(QUEST_FLAGS_NO_MONEY_FROM_XP))
         return rewMoney;
 
-    rewMoney = (XPValue(sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL)) * (6 * COPPER));
+    rewMoney = (XPValue(sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL), levelScaling) * (6 * COPPER));
     // https://wowpedia.fandom.com/wiki/Quest?oldid=1035002 Formula is XP gained * 6c
     return static_cast<int32>(rewMoney * sWorld->getRate(RATE_REWARD_BONUS_MONEY));
 }

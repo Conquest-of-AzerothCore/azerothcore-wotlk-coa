@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Wicked Howl raises maximum health by 30% for its duration (#3365)",
+  "contract": "Wicked Howl 804207 has a single effect in Spell.dbc: SPELL_EFFECT_APPLY_AURA with aura 133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT, BasePoints 29 + DieSides 1 = 30%, duration index 8 (15000 ms) and RecoveryTime 120000. The native handler is AuraEffect::HandleAuraModIncreaseHealthPercent. The bindmysoul snapshot says 20 seconds where the shipped duration index gives 15; the installed DBC wins. 804207 carries CasterAuraSpell 525031, one of the two Cursed Form markers AscensionBloodmageTalents.cpp mirrors onto the real form state, so the caster is given that marker as a fixture.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 20, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "set_aura", "actor": "caster", "spell": 525031, "stacks": 1 },
+    { "action": "snapshot", "actor": "caster", "metric": "max_health", "save_as": "health_before" },
+    { "action": "set_power", "actor": "caster", "power": 1, "value": 1000 },
+    { "action": "learn", "label": "Fixture: know the howl", "actor": "caster", "spell": 804207 },
+    { "action": "cast", "actor": "caster", "spell": 804207 },
+    {
+      "action": "assert", "label": "Maximum health rises by 30%",
+      "actor": "caster", "metric": "max_health", "ratio_to": "health_before",
+      "min": 1.299, "max": 1.301, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The buff runs no longer than its shipped 15 seconds",
+      "actor": "caster", "metric": "aura_duration_ms", "spell": 804207, "min": 1, "max": 15000
+    },
+    { "action": "wait", "label": "Let the buff expire", "ms": 17000 },
+    {
+      "action": "assert", "label": "Maximum health returns to its baseline",
+      "actor": "caster", "metric": "max_health", "ratio_to": "health_before",
+      "min": 0.999, "max": 1.001
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "name": "Bloodsurge turns into Bloodchaser on expiry and on Accursed Form (#1201)",
+  "contract": "Bloodsurge 553267 has three effects. Effect 0 (aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 32 = Shadow, BasePoints 29) and effect 2 (aura 216 SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK, MiscValue 126, BasePoints 29) are native and already work. Effect 1 is SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on Bloodchaser 523721, and Spell.dbc gives 553267 ProcFlags 0. The tooltip's condition - 'At the end of the duration, or whenever you trigger Accursed Form, gain Bloodchaser instead' - cannot be a spell_proc row at all: an aura reaching the end of its duration is not a proc event and an Accursed Form application is not a damage or cast event, so the clause is implemented in AscensionBloodmageTalents.cpp. Bloodsurge lasts 20 s (DurationIndex 18) and Bloodchaser 30 s (DurationIndex 9). The buff is fixtured with set_aura rather than cast because 553267 has a 180 s cooldown and ExcludeCasterAuraSpell 802877; the fixture uses Player::AddAura with the player as caster, so the expiry reports the ordinary AURA_REMOVE_BY_EXPIRE the script requires. The regression control reads cast_speed_multiplier rather than spell_modifier because effect 0 is aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, which is not a SpellModOp and therefore invisible to that metric, while effect 2's aura 216 feeds the native cast-speed multiplier directly. Note that the installed Spell.dbc says 'spell haste' for $s3 and effect 2 is aura 216, while the bindmysoul snapshot renders 'spell critical strike chance'; the installed DBC is authority here and neither is changed.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "bloodmage",
+      "spell": 553267,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Bloodsurge is up",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 553267,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Bloodchaser is not",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 523721,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "bloodmage",
+      "spell": 562572,
+      "stacks": 1,
+      "label": "Trigger Accursed Form while Bloodsurge is running"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Accursed Form converts Bloodsurge into Bloodchaser",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 523721,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and Bloodsurge is gone, because the tooltip says 'instead'",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 553267,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "bloodmage",
+      "spell": 523721,
+      "stacks": 0,
+      "label": "Clear it again for the expiry half"
+    },
+    {
+      "action": "set_aura",
+      "actor": "bloodmage",
+      "spell": 562572,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "bloodmage",
+      "spell": 553267,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "The native spell-haste half (effect 2, aura 216) is in effect",
+      "actor": "bloodmage",
+      "metric": "cast_speed_multiplier",
+      "max": 0.99
+    },
+    {
+      "action": "wait",
+      "label": "Let the 20 s buff run out on its own",
+      "ms": 21000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bloodsurge's expiry grants Bloodchaser",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 523721,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

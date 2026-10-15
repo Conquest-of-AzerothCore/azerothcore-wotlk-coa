@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Issue 3193: Convergence adds its Elemental damage to the next 10 Weapon Engravings",
+  "contract": [
+    "Convergence 801086 reads 'For $d, the next 10 Weapon Engravings you trigger will now deal an additional",
+    "${$560241m1*$<scalingbp>+$SP*0.3+$AP*0.2} Elemental Damage.' Effect 0 is aura 42 triggering 560241 (Fire, Frost",
+    "and Arcane school damage), ProcChance 100, ProcCharges 0 and DBC ProcFlags 0; there is no spell_proc row, so",
+    "the aura never procs. Every Weapon Engraving effect spell (Fire 653210, Water 653261, Ice 653217, Arcane 653263,",
+    "Earth 653272, Air 653226) carries family 38 mask0 0x20000. Earth Engraving 653219 is applied as a fixture aura",
+    "and Earthen Fists 806982 at 5 stacks raises its proc to 65% (runemaster-earth-engraving.json). Expected: cast",
+    "Convergence holds 10 charges, and an engraving that hits the target triggers 560241 on that target (about 10",
+    "swings in 14 sec, so no Earth proc has probability 0.35^10 < 3e-5)."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000,
+      "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 60, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 1180},
+    {"action": "learn", "actor": "rm", "spell": 801086},
+    {"action": "add_item", "actor": "rm", "item": 2092},
+    {"action": "equip", "label": "A fast dagger lands many swings", "actor": "rm", "item": 2092, "slot": 15},
+    {"action": "set_aura", "label": "Earth Engraving, the equip spell of Weapon Engraving: Earth", "actor": "rm",
+      "spell": 653219, "stacks": 1},
+    {"action": "assert", "label": "SETUP: Earth Engraving grants its proc aura", "actor": "rm", "metric": "aura",
+      "spell": 653221, "equals": 1, "within_ms": 1000},
+    {"action": "cast", "actor": "rm", "spell": 801086},
+    {"action": "assert", "label": "SETUP: Convergence is active", "actor": "rm", "metric": "aura",
+      "spell": 801086, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "CONTRACT: Convergence covers the next 10 Weapon Engravings", "actor": "rm",
+      "metric": "aura_charges", "spell": 801086, "equals": 10},
+    {"action": "set_aura", "label": "Earthen Fists at 5 stacks", "actor": "rm", "spell": 806982, "stacks": 5},
+    {"action": "snapshot", "actor": "rm", "metric": "melee_damage_count", "hand": 0, "save_as": "swings"},
+    {"action": "attack", "actor": "rm", "target": "dummy"},
+    {"action": "wait", "ms": 7000},
+    {"action": "set_aura", "actor": "rm", "spell": 806982, "stacks": 0},
+    {"action": "set_aura", "label": "Refresh Earthen Fists", "actor": "rm", "spell": 806982, "stacks": 5},
+    {"action": "wait", "ms": 7000},
+    {"action": "stop_attack", "actor": "rm"},
+    {"action": "assert", "label": "SETUP: auto attacks landed", "actor": "rm", "metric": "melee_damage_count",
+      "hand": 0, "relative_to": "swings", "min": 6},
+    {"action": "assert", "label": "SETUP: the engraving dealt Weapon Engraving: Earth damage", "actor": "rm",
+      "metric": "spell_damage_count", "spell": 653272, "target": "dummy", "min": 1},
+    {"action": "assert", "label": "CONTRACT: the engraving hit triggers Convergence damage on the target",
+      "actor": "rm", "metric": "spell_damage_count", "spell": 560241, "target": "dummy", "min": 1},
+    {"action": "assert", "label": "CONTRACT: each triggered Weapon Engraving consumes a Convergence charge",
+      "actor": "rm", "metric": "aura_charges", "spell": 801086, "max": 9},
+    {"action": "set_aura", "actor": "rm", "spell": 806982, "stacks": 0},
+    {"action": "set_aura", "actor": "rm", "spell": 653219, "stacks": 0}
+  ]
+}

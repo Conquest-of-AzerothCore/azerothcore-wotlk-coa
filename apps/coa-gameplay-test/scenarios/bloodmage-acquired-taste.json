@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "Acquired Taste grants extra Pooled Vitality when Vampyr's Kiss is cast (#3683)",
+  "contract": "Acquired Taste 807566 reads 'Casting Infuse or Vampyr's Kiss now generates 2 additional stacks of Pooled Vitality'. Its effect 0 is aura 42 (proc trigger spell) on Pooled Vitality +2 524905, a SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS with MiscValue 2 and TriggerSpell 680687; Spell::EffectAscensionModifyAuraStacks -> ModifyAscensionAuraStacks adds exactly two stacks of Pooled Vitality 680687 and applies the aura when it is missing. Spell.dbc gives 807566 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and the talent added nothing. Vampyr's Kiss is cast as rank 504281, the top of its spell_ranks chain 504275-504281; every rank carries SpellFamilyFlags (32768, 0, 0), which is the mask the new row uses. 504281 has ExcludeCasterAuraSpell 524861, so no Cursed Form marker is fixtured here. Its cost is 20% of health, so one cast is affordable at full health.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 807566
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504281
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Acquired Taste passive is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 807566,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Vampyr's Kiss rank 504281 is known",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 504281,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Pooled Vitality stacks before the cast",
+      "actor": "bloodmage",
+      "metric": "aura_stacks",
+      "spell": 680687,
+      "save_as": "pv_before"
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 504281,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Vampyr's Kiss adds at least 2 Pooled Vitality stacks",
+      "actor": "bloodmage",
+      "metric": "aura_stacks",
+      "spell": 680687,
+      "relative_to": "pv_before",
+      "min": 2,
+      "within_ms": 5000
+    }
+  ]
+}

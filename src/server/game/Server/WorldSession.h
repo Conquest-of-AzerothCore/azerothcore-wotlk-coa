@@ -27,7 +27,6 @@
 #include "AuthDefines.h"
 #include "CircularBuffer.h"
 #include "Common.h"
-#include "NativeClientConfig.h"
 #include "DatabaseEnv.h"
 #include "Duration.h"
 #include "GossipDef.h"
@@ -39,7 +38,9 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <utility>
+#include <vector>
 
 class Creature;
 class GameObject;
@@ -453,6 +454,7 @@ public:
 
     void ReadAddonsInfo(ByteBuffer& data);
     void SendAddonsInfo();
+    std::vector<std::string> const& GetClientAddonNames() const { return m_clientAddonNames; }
 
     void ReadMovementInfo(WorldPacket& data, MovementInfo* mi);
     void WriteMovementInfo(WorldPacket* data, MovementInfo* mi);
@@ -462,18 +464,6 @@ public:
     bool ProcessMovementInfo(MovementInfo& movementInfo, Unit* mover, Player* plrMover, WorldPacket& recvData);
 
     void SendPacket(WorldPacket const* packet);
-    NativeClientConfig& GetNativeClientConfig() { return _nativeClientConfig; }
-    // Authoritative state mirrored by the existing 0x90B sender.
-    void SetNativeGameModeMask(uint32 mask, ObjectGuid::LowType guid)
-    {
-        _nativeGameModeMask = mask;
-        _nativeGameModeGuid = guid;
-        _nativeGameModeKnown = true;
-    }
-    bool HasNativeGameModeMask() const { return _nativeGameModeKnown; }
-    uint32 GetNativeGameModeMask() const { return _nativeGameModeMask; }
-    ObjectGuid::LowType GetNativeGameModeGuid() const { return _nativeGameModeGuid; }
-    void SendNativeClientConfig();
     // Socketless integration tests can observe native responses without opening a client connection.
     void SetSocketlessPacketObserver(std::function<void(WorldPacket const&)> observer)
     {
@@ -528,7 +518,7 @@ public:
     std::string const& GetRemoteAddress() { return m_Address; }
 
     // Set by WorldSocket: the connection uses the Ascension client protocol
-    // (loopback or AscensionCompat.AllowRemoteClients, and AscensionCompat.Enable).
+    // (loopback or CoA.AllowRemoteClients, and CoA.Enable).
     bool IsAscensionCompatEnabled() const { return _ascensionCompatEnabled; }
     void SetAscensionCompatEnabled(bool enabled) { _ascensionCompatEnabled = enabled; }
     void SetPlayer(Player* player);
@@ -591,8 +581,11 @@ public:
 
     //void SendTestCreatureQueryOpcode(uint32 entry, ObjectGuid guid, uint32 testvalue);
     void SendNameQueryOpcode(ObjectGuid guid);
+    void SendItemQuerySingleResponse(uint32 item);
 
-    void SendTrainerList(Creature* npc);
+    /// `onlyTrainable` leaves out the rows of the window the player cannot buy yet; see
+    /// Trainer::SendSpells.
+    void SendTrainerList(Creature* npc, bool onlyTrainable = false);
     void SendListInventory(ObjectGuid guid, uint32 vendorEntry = 0);
     void SendShowBank(ObjectGuid guid);
     bool CanOpenMailBox(ObjectGuid guid);
@@ -897,6 +890,7 @@ public:                                                 // opcodes handlers
     void HandleTaxiQueryAvailableNodes(WorldPacket& recvPacket);
     void HandleActivateTaxiOpcode(WorldPacket& recvPacket);
     void HandleActivateTaxiExpressOpcode(WorldPacket& recvPacket);
+    void HandleTaxiRequestEarlyLandingOpcode(WorldPacket& recvPacket);
     void HandleMoveSplineDoneOpcode(WorldPacket& recvPacket);
     void SendActivateTaxiReply(ActivateTaxiReply reply);
 
@@ -912,6 +906,7 @@ public:                                                 // opcodes handlers
     void HandleListStabledPetsOpcode(WorldPacket& recvPacket);
     void HandleStablePet(WorldPacket& recvPacket);
     void HandleUnstablePet(WorldPacket& recvPacket);
+    void HandleStableDeletePet(WorldPacket& recvPacket);
     void HandleBuyStableSlot(WorldPacket& recvPacket);
     void HandleStableRevivePet(WorldPacket& recvPacket);
     void HandleStableSwapPet(WorldPacket& recvPacket);
@@ -1102,6 +1097,11 @@ public:                                                 // opcodes handlers
     void HandleTimeSyncResp(WorldPacket& recvData);
     void HandleWhoisOpcode(WorldPacket& recvData);
     void HandleResetInstancesOpcode(WorldPackets::Instance::ResetInstances& packet);
+    void HandleResetDungeonsOpcode(WorldPacket& recvData);
+    void ResetAllDungeons();
+    void HandlePortGraveyardOpcode(WorldPacket& recvData);
+    void HandleQueryInstanceBindsOpcode(WorldPacket& recvData);
+    void HandleResetInstanceOpcode(WorldPacket& recvData);
     void HandleHearthAndResurrect(WorldPacket& recvData);
     void HandleInstanceLockResponse(WorldPackets::Instance::InstanceLockResponse& packet);
     void HandleUpdateMissileTrajectory(WorldPacket& recvPacket);
@@ -1249,8 +1249,18 @@ public:                                                 // opcodes handlers
      */
 
     QueryCallbackProcessor& GetQueryProcessor() { return _queryProcessor; }
+    void QueueQueryCallback(QueryCallback&& callback);
     TransactionCallback& AddTransactionCallback(TransactionCallback&& callback);
     SQLQueryHolderCallback& AddQueryHolderCallback(SQLQueryHolderCallback&& callback);
+
+    [[nodiscard]] bool HasPendingAsyncCallbacks() const
+    {
+        std::lock_guard lock(_queuedQueryCallbacksMutex);
+        if (!_queuedQueryCallbacks.empty())
+            return true;
+
+        return !_queryProcessor.Empty() || !_transactionCallbacks.Empty() || !_queryHolderProcessor.Empty();
+    }
 
     void InitializeSession();
     void InitializeSessionCallback(CharacterDatabaseQueryHolder const& realmHolder, uint32 clientCacheVersion);
@@ -1265,13 +1275,11 @@ public:                                                 // opcodes handlers
     }
 
 private:
-    NativeClientConfig _nativeClientConfig;
-    uint32 _nativeGameModeMask = 0;
-    bool _nativeGameModeKnown = false;
-    ObjectGuid::LowType _nativeGameModeGuid = 0;
     void ProcessQueryCallbacks();
 
     QueryCallbackProcessor _queryProcessor;
+    mutable std::mutex _queuedQueryCallbacksMutex;
+    std::vector<QueryCallback> _queuedQueryCallbacks;
     AsyncCallbackProcessor<TransactionCallback> _transactionCallbacks;
     AsyncCallbackProcessor<SQLQueryHolderCallback> _queryHolderProcessor;
 
@@ -1363,6 +1371,7 @@ private:
     uint32 m_Tutorials[MAX_ACCOUNT_TUTORIAL_VALUES];
     bool   m_TutorialsChanged;
     AddonsList m_addonsList;
+    std::vector<std::string> m_clientAddonNames;
     uint32 recruiterId;
     bool isRecruiter;
     LockedQueue<WorldPacket*> _recvQueue;

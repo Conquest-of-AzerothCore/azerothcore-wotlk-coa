@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Crossbow Frenzy gives Twilight Frenzy 40% movement speed (#2705)",
+  "contract": "Crossbow Frenzy 705499 reads 'While Twilight Frenzy is active, your movement speed is now increased by $s1%.' In the installed Spell.dbc (server DBC 2026-09-17) it is passive, family 21, effect 0 = SPELL_AURA_ADD_FLAT_MODIFIER (107), misc 12 = SPELLMOD_EFFECT2, class mask word 1 = 0x100000, BasePoints 39 (DieSides 1, so +40). Twilight Frenzy 805751 carries family 21 and flag word 1 0x100000, and its effect 1 is SPELL_AURA_MOD_INCREASE_SPEED (31) with BasePoints -1 (DieSides 1, so 0). Player::ApplySpellMod (Player.cpp:10219) adds the flat 40 through Unit::ApplyEffectModifiers (Unit.cpp:12149), so effect 1 resolves to 40 and the stock speed aura raises the run speed rate by 40%. The module only suppresses effect 0 of 805751 (AscensionChangelogCompat) and handles Evasive/cleanup (AscensionWitchHunterDefenses.cpp), neither touches effect 1. The buff is applied as fixture state (it lasts 5 s, duration index 28), so every reading is taken within seconds of the fixture.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let level scaling settle", "ms": 5000},
+    {"action": "snapshot", "actor": "hunter", "metric": "run_speed_rate", "save_as": "speed_base"},
+    {"action": "assert", "label": "Without the talent effect 1 resolves to 0", "actor": "hunter", "metric": "spell_effect_value", "spell": 805751, "effect": 1, "equals": 0},
+    {"action": "set_aura", "label": "Fixture Twilight Frenzy without the talent", "actor": "hunter", "spell": 805751, "stacks": 1},
+    {"action": "assert", "label": "Live aura effect 1 is 0", "actor": "hunter", "metric": "aura_amount", "spell": 805751, "effect": 1, "equals": 0},
+    {"action": "assert", "label": "No speed change without the talent", "actor": "hunter", "metric": "run_speed_rate", "ratio_to": "speed_base", "min": 0.999, "max": 1.001},
+    {"action": "set_aura", "label": "Remove Twilight Frenzy", "actor": "hunter", "spell": 805751, "stacks": 0},
+    {"action": "learn", "label": "Crossbow Frenzy", "actor": "hunter", "spell": 705499},
+    {"action": "assert", "label": "Effect 1 resolves to 40 (BasePoints 39 + 1 flat on a base of 0)", "actor": "hunter", "metric": "spell_effect_value", "spell": 805751, "effect": 1, "equals": 40},
+    {"action": "set_aura", "label": "Fixture Twilight Frenzy with the talent", "actor": "hunter", "spell": 805751, "stacks": 1},
+    {"action": "assert", "label": "Live aura effect 1 is 40", "actor": "hunter", "metric": "aura_amount", "spell": 805751, "effect": 1, "equals": 40},
+    {"action": "assert", "label": "Run speed is 40% higher", "actor": "hunter", "metric": "run_speed_rate", "ratio_to": "speed_base", "min": 1.39, "max": 1.41},
+    {"action": "set_aura", "label": "Remove Twilight Frenzy", "actor": "hunter", "spell": 805751, "stacks": 0},
+    {"action": "unlearn", "label": "Drop Crossbow Frenzy", "actor": "hunter", "spell": 705499},
+    {"action": "assert", "label": "Effect 1 returns to 0", "actor": "hunter", "metric": "spell_effect_value", "spell": 805751, "effect": 1, "equals": 0}
+  ]
+}

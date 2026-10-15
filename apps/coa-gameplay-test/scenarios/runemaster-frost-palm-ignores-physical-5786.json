@@ -1,0 +1,163 @@
+{
+  "schema": 1,
+  "name": "Frost Palm Sigil ignores physical damage but consumes on direct magic (#5786)",
+  "contract": [
+    "Original Palm Sigil 805381 affects the next direct magic hit. Physical auto attacks and periodic damage are independent negative controls.",
+    "Observe a real nonqualifying damaging hit, then a normal Elemental Burst. The former must preserve the charge and cast no helper; the latter must trigger once and consume it.",
+    "The physical control equips the same fast dagger used by existing Runemaster melee scenarios and explicitly trains its skill with native hit/expertise ratings. A landed damaging hit is required."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "rm",
+      "entry": 36,
+      "level": 80,
+      "health": 10000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "rm",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "rm",
+      "item": 2092,
+      "slot": 15,
+      "label": "Fixture: a fast native physical weapon"
+    },
+    {
+      "action": "set_skill",
+      "actor": "rm",
+      "skill": 173,
+      "value": 400,
+      "maximum": 400,
+      "label": "Fixture: trained level-80 dagger skill"
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 805381
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 502838
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 805381
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura_charges",
+      "spell": 805381,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "attack",
+      "actor": "rm",
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "melee_damage_count",
+      "min": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "rm"
+    },
+    {
+      "action": "assert",
+      "label": "An actual physical hit does not consume the next-direct-magic charge",
+      "actor": "rm",
+      "metric": "aura_charges",
+      "spell": 805381,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807825,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 502838,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 502838,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807825,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 805381,
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Felsworn: Pit Lord's Strength rank 2 gives Annihilation 7 guaranteed-crit attacks (#1337)",
+  "contract": "Pit Lord's Strength rank 2 802110 has effect 1 SPELL_AURA_ADD_FLAT_MODIFIER on SPELLMOD_CHARGES with base points 1 and die sides 1 (+2), mask on Annihilation 803904, description 'Your Annihilation now affects 2 additional attacks'. Annihilation's DBC ProcCharges is 5. The module counts the attacks in its own script value, which AscensionFelswornAuras.cpp set to a hard-coded 5 on apply, so the modifier never reached it. Untalented stays at 5, the rank 2 Felsworn gets 7.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 14, "level": 80 },
+    { "id": "talent", "race": 1, "class": 14, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "control", "spell": 803904 },
+    { "action": "learn", "actor": "talent", "spell": 803904 },
+    { "action": "learn", "actor": "talent", "spell": 802110 },
+    { "action": "cast", "actor": "control", "spell": 803904 },
+    { "action": "cast", "actor": "talent", "spell": 803904 },
+    { "action": "assert", "actor": "control", "metric": "aura", "spell": 803904, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "actor": "talent", "metric": "aura", "spell": 803904, "equals": 1, "within_ms": 3000 },
+    {
+      "action": "assert",
+      "label": "Untalented Annihilation counts 5 attacks",
+      "actor": "control",
+      "metric": "aura_script_value",
+      "spell": 803904,
+      "key": 803904,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength rank 2 adds 2 attacks",
+      "actor": "talent",
+      "metric": "aura_script_value",
+      "spell": 803904,
+      "key": 803904,
+      "equals": 7
+    }
+  ]
+}

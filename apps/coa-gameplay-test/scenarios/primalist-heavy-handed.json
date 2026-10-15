@@ -1,0 +1,900 @@
+{
+  "schema": 1,
+  "name": "Primalist Heavy Handed: both recipients, self-healing and expiry",
+  "contract": "Hand of the Earthmother applies its native 10% armor buff to caster and healed ally for ten seconds. Both first/highest heal ranks trigger it; a self-heal must grant the same bonus once, not duplicate the two recipient effects. Baseline, unrelated healing, expiry and unlearning are checked.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 750
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 16730
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 16730,
+      "slot": 4
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 16732
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 16732,
+      "slot": 6
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "armor",
+      "save_as": "primalist_base_armor"
+    },
+    {
+      "action": "specialization",
+      "actor": "ally",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "ally",
+      "spell": 750
+    },
+    {
+      "action": "add_item",
+      "actor": "ally",
+      "item": 16730
+    },
+    {
+      "action": "equip",
+      "actor": "ally",
+      "item": 16730,
+      "slot": 4
+    },
+    {
+      "action": "add_item",
+      "actor": "ally",
+      "item": 16732
+    },
+    {
+      "action": "equip",
+      "actor": "ally",
+      "item": 16732,
+      "slot": 6
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "armor",
+      "save_as": "ally_base_armor"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "primalist_base_armor",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 800135,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502808,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502807,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502806,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502805,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502804,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502803,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502802,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800135
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 560179
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800135,
+      "target": "ally",
+      "save_as": "baseline_heals"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800135,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800135,
+      "target": "ally",
+      "relative_to": "baseline_heals",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor",
+      "relative_to": "primalist_base_armor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "ally_base_armor",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor",
+      "relative_to": "primalist_base_armor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "ally_base_armor",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 706344
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800135,
+      "target": "ally",
+      "save_as": "first_heals"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800135,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800135,
+      "target": "ally",
+      "relative_to": "first_heals",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 706345,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor",
+      "relative_to": "primalist_base_armor",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "armor",
+      "save_as": "primalist_buffed_armor"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 706345,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "ally_base_armor",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "armor",
+      "save_as": "ally_buffed_armor"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "primalist_buffed_armor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "spell": 706345,
+      "min": 8500,
+      "max": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor",
+      "relative_to": "primalist_base_armor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "ally_base_armor",
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 502808,
+      "target": "ally",
+      "save_as": "highest_heals"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502808
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502808,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 502808,
+      "target": "ally",
+      "relative_to": "highest_heals",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 706345,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor",
+      "relative_to": "primalist_base_armor",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor",
+      "relative_to": "primalist_buffed_armor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 706345,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "ally_base_armor",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "ally_buffed_armor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "spell": 706345,
+      "min": 8500,
+      "max": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor",
+      "relative_to": "primalist_base_armor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "ally_base_armor",
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 502808,
+      "target": "primalist",
+      "save_as": "self_heals"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502808,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 502808,
+      "target": "primalist",
+      "relative_to": "self_heals",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 706345,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor",
+      "relative_to": "primalist_base_armor",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor",
+      "relative_to": "primalist_buffed_armor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "ally_base_armor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "spell": 706345,
+      "min": 8500,
+      "max": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor",
+      "relative_to": "primalist_base_armor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "ally_base_armor",
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 560179,
+      "target": "primalist",
+      "save_as": "unrelated_heals"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 560179,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 560179,
+      "target": "primalist",
+      "relative_to": "unrelated_heals",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor",
+      "relative_to": "primalist_base_armor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "ally_base_armor",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor",
+      "relative_to": "primalist_base_armor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "ally_base_armor",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706344
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 502808,
+      "target": "ally",
+      "save_as": "removed_heals"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502808,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 502808,
+      "target": "ally",
+      "relative_to": "removed_heals",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor",
+      "relative_to": "primalist_base_armor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "ally_base_armor",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor",
+      "relative_to": "primalist_base_armor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 706345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "armor",
+      "relative_to": "ally_base_armor",
+      "equals": 0
+    }
+  ]
+}

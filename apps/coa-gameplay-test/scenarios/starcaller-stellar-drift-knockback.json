@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "Stellar Drift slows enemies, then knocks them back after 3 seconds (#4013)",
+  "contract": "Stellar Drift 800501 reads \"slowing the movement speed of all nearby enemies by $802773s1% for $d. After $d, you knock back all nearby enemies a great distance\". Effect[0] is aura 23 (periodic trigger spell) on the caster with amplitude 3000 ms and DurationIndex 27 (3000 ms), trigger 800500; Effect[1] is SPELL_EFFECT_TRIGGER_SPELL 802773 on TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY (radius index 14, 8 yd): the -50% slow aura (aura 33, EffectBasePoints -51, DurationIndex 27). 800500 is SPELL_EFFECT_KNOCK_BACK (98) with EffectBasePoints 99, EffectMiscValue 240 and the same targeting, so Spell::EffectKnockBack derives speedXY 24 and speedZ 10 and the arc carries the target about 2 * (10 / 19.29) * 24 = 24.9 yd (same formula the merged Chronomancer knockback scenario documents). No module code or SQL touches these ids. The reporter says the slow works and the knockback never happens; static reading found no defect (the single periodic tick lands at the aura's expiry, HandlePeriodicTriggerSpellAuraTick casts 800500), so only a run decides. The scenario casts the spell with a hostile creature 3 yd ahead (harness default faction 14; training dummies are faction 7 and are not enemies), asserts the slow is on it, asserts it has not been moved 1.5 s in (so the displacement measured later is the delayed knockback and not a cast-time push), and then asserts its 2D distance from the caster has grown by at least 15 yd within 4 s more. The 15 yd floor is a threshold chosen for \"a great distance\": the Chronomancer scenario calls a 10.9 yd arc a slight knockback, and the native value here is 24.9, so 15 sits between them. Entry 36 has been knocked back by the same native effect in the Waves of Time scenario, so creature immunity is not the variable. The caster is level 80 with raised spell hit rating.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 530,
+    "x": 7633.86,
+    "y": -6810.22,
+    "z": 79.5987,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800501
+    },
+    {
+      "action": "assert",
+      "label": "The creature stands about 3 yards ahead",
+      "actor": "caster",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.5,
+      "max": 3.5
+    },
+    {
+      "action": "snapshot",
+      "label": "Separation before the cast",
+      "actor": "caster",
+      "metric": "distance",
+      "save_as": "before_cast",
+      "target": "dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Stellar Drift",
+      "actor": "caster",
+      "spell": 800501
+    },
+    {
+      "action": "assert",
+      "label": "The 50% slow is on the creature",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 802773,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Half way through the 3 second slow",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The creature has not been pushed yet",
+      "actor": "caster",
+      "metric": "distance",
+      "target": "dummy",
+      "relative_to": "before_cast",
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "After the slow the knockback throws the creature at least 15 yards",
+      "actor": "caster",
+      "metric": "distance",
+      "target": "dummy",
+      "relative_to": "before_cast",
+      "min": 15,
+      "within_ms": 4500
+    }
+  ]
+}

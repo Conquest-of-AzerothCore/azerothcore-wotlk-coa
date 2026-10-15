@@ -1,0 +1,316 @@
+{
+  "schema": 1,
+  "name": "Primalist Sacred Grove twelve-recipient bound",
+  "contract": "Thirteen friendly actors are inside the ground effect; exactly twelve receive its benefits, and all applications disappear on expiry.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "ally1",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "ally2",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "ally3",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "ally4",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "ally5",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "ally6",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "ally7",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "guard0",
+      "owner": "primalist",
+      "entry": 68,
+      "level": 80,
+      "health": 30000,
+      "distance": 2.0,
+      "faction": 1
+    },
+    {
+      "id": "guard1",
+      "owner": "primalist",
+      "entry": 68,
+      "level": 80,
+      "health": 30000,
+      "distance": 2.5,
+      "faction": 1
+    },
+    {
+      "id": "guard2",
+      "owner": "primalist",
+      "entry": 68,
+      "level": 80,
+      "health": 30000,
+      "distance": 3.0,
+      "faction": 1
+    },
+    {
+      "id": "guard3",
+      "owner": "primalist",
+      "entry": 68,
+      "level": 80,
+      "health": 30000,
+      "distance": 3.5,
+      "faction": 1
+    },
+    {
+      "id": "guard4",
+      "owner": "primalist",
+      "entry": 68,
+      "level": 80,
+      "health": 30000,
+      "distance": 4.0,
+      "faction": 1
+    }
+  ],
+  "timeout_ms": 60000,
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800180
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800180
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 800180,
+      "save_as": "recipient_primalist"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally1",
+      "metric": "aura",
+      "spell": 800180,
+      "save_as": "recipient_ally1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally2",
+      "metric": "aura",
+      "spell": 800180,
+      "save_as": "recipient_ally2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally3",
+      "metric": "aura",
+      "spell": 800180,
+      "save_as": "recipient_ally3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally4",
+      "metric": "aura",
+      "spell": 800180,
+      "save_as": "recipient_ally4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally5",
+      "metric": "aura",
+      "spell": 800180,
+      "save_as": "recipient_ally5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally6",
+      "metric": "aura",
+      "spell": 800180,
+      "save_as": "recipient_ally6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally7",
+      "metric": "aura",
+      "spell": 800180,
+      "save_as": "recipient_ally7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "guard0",
+      "metric": "aura",
+      "spell": 800180,
+      "save_as": "recipient_guard0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "guard1",
+      "metric": "aura",
+      "spell": 800180,
+      "save_as": "recipient_guard1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "guard2",
+      "metric": "aura",
+      "spell": 800180,
+      "save_as": "recipient_guard2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "guard3",
+      "metric": "aura",
+      "spell": 800180,
+      "save_as": "recipient_guard3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "guard4",
+      "metric": "aura",
+      "spell": 800180,
+      "save_as": "recipient_guard4"
+    },
+    {
+      "action": "wait",
+      "ms": 17000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 800180,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally1",
+      "metric": "aura",
+      "spell": 800180,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally2",
+      "metric": "aura",
+      "spell": 800180,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally3",
+      "metric": "aura",
+      "spell": 800180,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally4",
+      "metric": "aura",
+      "spell": 800180,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally5",
+      "metric": "aura",
+      "spell": 800180,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally6",
+      "metric": "aura",
+      "spell": 800180,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally7",
+      "metric": "aura",
+      "spell": 800180,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guard0",
+      "metric": "aura",
+      "spell": 800180,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guard1",
+      "metric": "aura",
+      "spell": 800180,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guard2",
+      "metric": "aura",
+      "spell": 800180,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guard3",
+      "metric": "aura",
+      "spell": 800180,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guard4",
+      "metric": "aura",
+      "spell": 800180,
+      "equals": 0
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

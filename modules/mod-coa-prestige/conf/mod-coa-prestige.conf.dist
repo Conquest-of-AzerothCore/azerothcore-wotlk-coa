@@ -1,0 +1,41 @@
+###################################################################################################
+#  mod-coa-prestige
+#
+#  Chromie's Prestige Mode. A character at the Prestige level asks Chromie (creature 178081,
+#  beside the Worldforged guardian in Stormwind and Orgrimmar) to wind back time: it returns to
+#  level 1 in its starting zone, its active specialization loses its talents and abilities and
+#  stays locked until the Prestige level is reached again, and it earns the Prestige rewards and
+#  a multiplied experience rate on the way back up.
+#
+#  This code is part of the AzerothCore project. See AUTHORS file for Copyright information.
+###################################################################################################
+
+#    CoAPrestige.Enable
+#        Description: Whether Chromie offers Prestige Mode. Disabled keeps every character's
+#                     Prestige level and state; it only stops activation, the experience bonus
+#                     and the specialization lock.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+CoAPrestige.Enable = 1
+
+#    CoAPrestige.RequiredLevel
+#        Description: The level a character must reach to activate Prestige Mode, and to complete
+#                     it again. The client's Prestige window checks level 60 on its own.
+#        Default:     60
+CoAPrestige.RequiredLevel = 60
+
+#    CoAPrestige.ExperienceBonusPercent
+#        Description: Total experience, in percent, for a character in an active prestige cycle
+#                     (the Prestige Challenge aura 9930831). mod-coa-challenges applies it and
+#                     skips it while a Resolute / NO_BONUS_EXPERIENCE challenge is active. The
+#                     aura is SPELL_AURA_DUMMY (no mechanical effect); the client tooltip says
+#                     "by 300%".
+#        Default:     300 - (3 times the experience)
+CoAPrestige.ExperienceBonusPercent = 300
+
+#    CoAPrestige.Rewards
+#        Description: The items every activation pays, as item:count pairs. Whatever does not fit
+#                     in the character's bags is mailed.
+#        Default:     "1287330:1 375250:100000 90004:100"
+#                     - one Prestigious Cache, 100000 Runes of Ascension and 100 Tokens of Prestige
+CoAPrestige.Rewards = "1287330:1 375250:100000 90004:100"

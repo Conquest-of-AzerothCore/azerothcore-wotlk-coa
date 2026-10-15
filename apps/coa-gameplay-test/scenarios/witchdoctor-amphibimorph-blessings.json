@@ -1,0 +1,149 @@
+{
+  "schema": 1,
+  "name": "Gonk's Blessing and Krag'wa's Blessing modify Amphibimorph natively (#1179, #3693)",
+  "contract": "Gonk's Blessing 806469 and Krag'wa's Blessing 807855 (SpellFamilyName 19) are passive spell mods on Amphibimorph 500952 (SpellFamilyFlags[0] = 0x80000000), not scripted effects, and no module code or SQL touches any of the three ids (grep of modules/, src/server/, data/sql/ found nothing beyond the mod-spellbook tree listing). 806469 effect 0 is aura 107 ADD_FLAT_MODIFIER, MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -60001 + DieSides 1 = -60000ms; effect 1 is aura 107 ADD_FLAT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints 499 + DieSides 1 = +500ms. 807855 effect 0 is aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -101 + DieSides 1 = -100%. Both carry EffectSpellClassMask word 0 = 0x80000000, matching Amphibimorph's family flags, and AttributesEx3 = 0 (SPELL_ATTR3_IGNORE_CASTER_MODIFIERS is NOT set), so SpellInfo::IsAffectedBySpellMod's family-19 fallthrough (SpellInfo.cpp:1552, IsAffected) applies them: Player::ApplySpellMod (Player.cpp:10218) folds op 11 into 120000 - 60000 = 60000ms and op 10 into (1000+500)*1 = 1500ms for Gonk, and (1000+0)*0 = 0ms for Krag'wa (Player.cpp:10262 only skips a -100% cast-time mod when base >= 10000, so Amphibimorph's 1000ms base is not skipped). This scenario proves both stay wired through the native spell-mod pipeline with no CoA class code involved, and fails if a future change (e.g. adding these ids to DoctorSpells / AscensionWitchDoctor::ApplyContracts, or setting SPELL_ATTR3_IGNORE_CASTER_MODIFIERS anywhere upstream) breaks that native path.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Amphibimorph keeps its authored cooldown before any blessing",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 500952,
+      "op": 11,
+      "base": 120000,
+      "equals": 120000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Amphibimorph keeps its authored cast time before any blessing",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 500952,
+      "op": 10,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "snapshot",
+      "label": "Unmodified Amphibimorph cast time, folding any base haste",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 500952,
+      "save_as": "base_cast"
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Amphibimorph is not instant on its own",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 500952,
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "label": "Learn Gonk's Blessing (#1179)",
+      "actor": "caster",
+      "spell": 806469
+    },
+    {
+      "action": "assert",
+      "label": "#1179 DISCRIMINATING: Gonk's Blessing cuts Amphibimorph's cooldown by 60000ms (120000 -> 60000)",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 500952,
+      "op": 11,
+      "base": 120000,
+      "equals": 60000
+    },
+    {
+      "action": "assert",
+      "label": "#1179 DISCRIMINATING: Gonk's Blessing adds 500ms to Amphibimorph's cast time (1000 -> 1500)",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 500952,
+      "op": 10,
+      "base": 1000,
+      "equals": 1500
+    },
+    {
+      "action": "unlearn",
+      "label": "Remove Gonk's Blessing to isolate Krag'wa's Blessing",
+      "actor": "caster",
+      "spell": 806469
+    },
+    {
+      "action": "assert",
+      "label": "Cleanup: cooldown mod is gone after unlearning Gonk's Blessing",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 500952,
+      "op": 11,
+      "base": 120000,
+      "equals": 120000
+    },
+    {
+      "action": "assert",
+      "label": "Cleanup: cast time mod is gone after unlearning Gonk's Blessing",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 500952,
+      "op": 10,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Krag'wa's Blessing (#3693)",
+      "actor": "caster",
+      "spell": 807855
+    },
+    {
+      "action": "assert",
+      "label": "#3693 DISCRIMINATING: Krag'wa's Blessing zeroes Amphibimorph's cast time via a -100% modifier",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 500952,
+      "op": 10,
+      "base": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "#3693 DISCRIMINATING: Amphibimorph becomes instant cast",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 500952,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "label": "Remove Krag'wa's Blessing",
+      "actor": "caster",
+      "spell": 807855
+    },
+    {
+      "action": "assert",
+      "label": "Cleanup: cast time is restored to its unmodified reading after unlearning Krag'wa's Blessing",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 500952,
+      "ratio_to": "base_cast",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

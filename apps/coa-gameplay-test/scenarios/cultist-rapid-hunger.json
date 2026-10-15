@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Cultist: Rapid Hunger makes Devour Magic instant cast natively (#1790)",
+  "contract": "301010 is ADD_PCT_MODIFIER (108), MiscValue=10 (SPELLMOD_CASTING_TIME), EffectBasePoints=-101/DieSides=1 giving a flat -100% (SpellInfo.cpp:489), classmask dword0=8388608 (bit23). Verified against Spell.dbc: 520151 'Devour Magic' has SpellFamilyFlags dword0=8388608 (bit23 set) and CastingTimeIndex=4 (base 1000 ms); 520151 is also the spell the Cultist's class-spell table actually grants at level 26 (AscensionCustomClassData.h:553), not the sibling ID 520152 (whose SpellFamilyFlags are all zero and does not match). Player::ApplySpellMod (Player.cpp:10315) applies SPELLMOD_CASTING_TIME as (base + flat) * totalmul, so a -100% multiplier collapses any positive base to 0 -- instant cast, matching the tooltip exactly. No script needed.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "c", "race": 1, "class": 25, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: Devour Magic keeps its 1000 ms base cast time before Rapid Hunger",
+      "actor": "c", "metric": "spell_modifier", "spell": 520151, "op": 10, "base": 1000, "min": 1000, "max": 1000
+    },
+    {
+      "action": "assert", "label": "SETUP: the non-matching sibling ID 520152 stays unaffected",
+      "actor": "c", "metric": "spell_modifier", "spell": 520152, "op": 10, "base": 1000, "min": 1000, "max": 1000
+    },
+    { "action": "learn", "actor": "c", "spell": 301010 },
+    {
+      "action": "assert", "label": "Rapid Hunger makes Devour Magic instant cast",
+      "actor": "c", "metric": "spell_modifier", "spell": 520151, "op": 10, "base": 1000, "min": 0, "max": 0
+    },
+    {
+      "action": "assert", "label": "Rapid Hunger does not touch the non-matching sibling ID 520152",
+      "actor": "c", "metric": "spell_modifier", "spell": 520152, "op": 10, "base": 1000, "min": 1000, "max": 1000
+    }
+  ]
+}

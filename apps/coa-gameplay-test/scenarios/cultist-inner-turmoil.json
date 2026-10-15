@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Cultist: Inner Turmoil boosts Wrath of the Black Empire's damage by 25% through a native spell mod (#3092)",
+  "contract": "706722 is SpellFamilyName 31, effect0 ADD_PCT_MODIFIER (108), MiscValue=0 (SPELLMOD_DAMAGE), BasePoints=24 -> CalcValue 25, SpellClassMask [0,32,0] (dword1 bit5). Wrath of the Black Empire's ranks (500724, 502156, 502172, 504904, 800413) are SpellFamilyName 31 with SpellFamilyFlags[1] carrying bit5 (32 or 288), an exact classmask match. Player::ApplySpellMod resolves a percent SPELLMOD_DAMAGE mod multiplicatively (totalmul *= 1.25) with zero custom C++ (Player.cpp ~10272-10273). Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "c", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: Wrath of the Black Empire's damage is unmodified before Inner Turmoil",
+      "actor": "c", "metric": "spell_modifier", "spell": 500724, "op": 0, "base": 1000, "min": 1000, "max": 1000
+    },
+    { "action": "learn", "actor": "c", "spell": 706722 },
+    {
+      "action": "assert", "label": "Inner Turmoil adds 25% to Wrath of the Black Empire rank 1 (#3092)",
+      "actor": "c", "metric": "spell_modifier", "spell": 500724, "op": 0, "base": 1000, "min": 1249, "max": 1251
+    },
+    {
+      "action": "assert", "label": "Inner Turmoil adds 25% to a higher Wrath of the Black Empire rank too (#3092)",
+      "actor": "c", "metric": "spell_modifier", "spell": 504904, "op": 0, "base": 1000, "min": 1249, "max": 1251
+    },
+    {
+      "action": "assert", "label": "Inner Turmoil leaves an unrelated Sermon of Dread effect alone (control)",
+      "actor": "c", "metric": "spell_modifier", "spell": 620610, "op": 0, "base": 1000, "min": 1000, "max": 1000
+    }
+  ]
+}

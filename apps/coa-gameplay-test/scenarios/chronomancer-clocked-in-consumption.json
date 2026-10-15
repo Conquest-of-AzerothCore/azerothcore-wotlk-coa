@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Artificer's Wand consumes Clocked In (#5019)",
+  "contract": "Clocked In 520168 reads 'Your next Artificer's Wand within 15s is instant cast and generates an additional Echo Fragment.' Spell.dbc gives it ProcFlags 0 and no spell_proc row existed, so its own aura 42 proc-trigger effect (-> 520170 -> Echo Fragment) never fired and the buff only ever expired on its own duration instead of being consumed by the next Artificer's Wand hit. The new spell_proc row keys on the ranged class damage of Artificer's Wand only (family 28 word2 512, 561064's own SpellFamilyFlags), Chance 100 and Charges 1, so the very next Artificer's Wand hit both grants the bonus fragment and removes Clocked In. Fails before the fix (the buff survives the cast, no extra fragment), passes after.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "chronomancer", "entry": 36, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "chronomancer", "spell": 561064 },
+    { "action": "set_aura", "actor": "chronomancer", "spell": 520168, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "Clocked In is up before any Artificer's Wand hit",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 520168,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Echo Fragment stacks before the hit",
+      "actor": "chronomancer",
+      "metric": "aura_stacks",
+      "spell": 804455,
+      "save_as": "frag_before"
+    },
+    { "action": "cast", "actor": "chronomancer", "spell": 561064, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "Artificer's Wand landed",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 561064,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Clocked In is consumed by the hit",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 520168,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The hit generated an extra Echo Fragment",
+      "actor": "chronomancer",
+      "metric": "aura_stacks",
+      "spell": 804455,
+      "relative_to": "frag_before",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

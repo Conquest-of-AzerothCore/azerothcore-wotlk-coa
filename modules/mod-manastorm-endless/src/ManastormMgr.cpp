@@ -2,7 +2,7 @@
 #include "ManastormModuleConfig.h"
 #include "ManastormMgr.h"
 #include "ManastormPotionClient.h"
-#include "../../mod-ascension-compat/src/AscensionManastormGadgets.h"
+#include "AscensionManastormGadgets.h"
 
 #include "ObjectAccessor.h"
 #include "Creature.h"
@@ -396,7 +396,6 @@ namespace
     constexpr uint32 SEGMENT_MESHLOK_NORMAL = 684;
     constexpr uint32 SEGMENT_MESHLOK_ENDGAME = 683;
 
-
     // Native TrinityCore 3.3.5 RFD gong's final Tuten'kash summon
     // position (not the player-authored game_tele 2158 arrival point).
     Position const TUTEN_KASH_GONG_POSITION =
@@ -508,7 +507,6 @@ namespace
     constexpr ObjectGuid::LowType SPAWN_EARTHCALLER_HALMGAR = 1975863;
     constexpr float HALMGAR_SPAWN_X = 2118.58f;
     constexpr float HALMGAR_SPAWN_Y = 1695.32f;
-
 
     bool BootstrapRazelikhEncounter(
         Map* map,
@@ -1219,7 +1217,6 @@ namespace
 
         return true;
     }
-
 
     bool BootstrapRazorfenKraulHalmgarEncounter(
         Map* map,
@@ -5090,7 +5087,6 @@ void ManastormMgr::FinishPreviousStageTransition(
     run.ClearPreviousStageTransition();
 }
 
-
 ManastormRun* ManastormMgr::StartRun(
     Player* player,
     uint32 depth,
@@ -5263,7 +5259,6 @@ ManastormRun* ManastormMgr::StartRun(
         endgame =
             authoringForcedSegment->Difficulty == 2;
 
-
     ManastormProgressionSnapshot progression;
 
     if (!ManastormProgression::LoadSnapshot(
@@ -5318,7 +5313,6 @@ ManastormRun* ManastormMgr::StartRun(
 
         return nullptr;
     }
-
 
     ManastormGenerator generator;
 
@@ -8520,7 +8514,6 @@ void ManastormMgr::OnUnitDeath(
         }
 }
 
-
 bool ManastormMgr::UseStagePortal(
     Player* player,
     Creature* portal,
@@ -9077,7 +9070,6 @@ bool ManastormMgr::TransitionToNextStage(
 
     return true;
 }
-
 
 void ManastormMgr::UpdateHeartPickups(uint32 diff)
 {

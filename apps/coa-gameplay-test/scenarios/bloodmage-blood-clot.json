@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Blood Clot doubles Scarlet Delirium's periodic damage (#646)",
+  "contract": "Blood Clot 680657 effect 2 is aura 108 with MiscValue 22 (SPELLMOD_DOT), BasePoints 99 + DieSides 1 = +100%, over EffectSpellClassMask (0, 0, 256) = word 2 bit 8 = the six Scarlet Delirium records (801074, 803684-803688). Scarlet Delirium's effect 1 is aura 53 PERIODIC_LEECH with Amplitude 3000, and Unit::SpellDamageBonusDone applies SPELLMOD_DOT to periodic damage (damagetype == DOT ? SPELLMOD_DOT : SPELLMOD_DAMAGE), reached from AuraEffect::HandlePeriodicHealthLeech. Tooltip: \"Your Scarlet Delirium now deals $s3% increased damage\", where $s3 is effect 3's value, 100. Effect 0 is aura 108 with MiscValue 10 (SPELLMOD_CASTING_TIME) and BasePoints -1 + DieSides 1 = 0%, an inert no-op. Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Scarlet Delirium's periodic damage unmodified before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 803688,
+      "op": 22,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680657
+    },
+    {
+      "action": "assert",
+      "label": "Blood Clot doubles Scarlet Delirium's periodic damage",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 803688,
+      "op": 22,
+      "base": 100,
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "label": "The inert cast-time effect leaves the cast time alone",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 803688,
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Blood Clot does not touch Bloodbolt's periodic damage",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 22,
+      "base": 100,
+      "equals": 100
+    }
+  ]
+}

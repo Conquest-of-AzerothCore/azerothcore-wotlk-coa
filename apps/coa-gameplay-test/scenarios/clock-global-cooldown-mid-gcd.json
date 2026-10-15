@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Clock probe: the global cooldown reads its remaining game time in the middle of the GCD",
+  "contract": [
+    "Slow Fall 130 in the installed Spell.dbc is instant, self-castable and reagent-free, with StartRecoveryCategory",
+    "133 and StartRecoveryTime 1500 ms. Spell::TriggerGlobalCooldown keeps 1500 inside [MIN_GCD, MAX_GCD] and",
+    "scales it by UNIT_MOD_CAST_SPEED, which is 1.0 for the fresh level-80 mage (asserted), so the cast starts a",
+    "1500 ms category-133 global cooldown. GlobalCooldownMgr stores its start in game milliseconds and",
+    "GetGlobalCooldown subtracts getMSTime(). The Slow Fall aura shows that the cast was accepted before any",
+    "reading. Three step ticks after the cast 1300..1500 ms remain. After a 700 ms wait the reading has fallen by at",
+    "least 700 ms and by at most 1050 ms, leaving 400..800 ms, and it reaches 0 within the following 1.5 s. The",
+    "bands cover the step ticks around the wait for world ticks up to about 50 ms. A getMSTime() that is not the",
+    "simulated game time leaves the reading near 1500 after a fast-forwarded wait; one that runs half again as fast",
+    "as game time makes it fall by more than 1050 ms."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "mage", "race": 1, "class": 8, "level": 80 }
+  ],
+  "steps": [
+    {
+      "action": "assert", "label": "SETUP: no category-133 global cooldown is running", "actor": "mage",
+      "metric": "global_cooldown_ms", "spell": 130, "equals": 0, "within_ms": 5000
+    },
+    { "action": "learn", "actor": "mage", "spell": 130 },
+    {
+      "action": "assert", "label": "SETUP: no haste scales the global cooldown", "actor": "mage",
+      "metric": "cast_speed_multiplier", "min": 0.999, "max": 1.001
+    },
+    { "action": "cast", "actor": "mage", "spell": 130 },
+    {
+      "action": "assert", "label": "SETUP: the cast applied Slow Fall", "actor": "mage",
+      "metric": "aura", "spell": 130, "equals": 1
+    },
+    {
+      "action": "snapshot", "label": "Global cooldown right after the cast", "actor": "mage",
+      "metric": "global_cooldown_ms", "spell": 130, "save_as": "gcd_after_cast"
+    },
+    {
+      "action": "assert", "label": "SETUP: the cast started the 1500 ms global cooldown", "actor": "mage",
+      "metric": "global_cooldown_ms", "spell": 130, "min": 1300, "max": 1500
+    },
+    { "action": "wait", "label": "Wait into the middle of the global cooldown", "ms": 700 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the global cooldown fell by the game time that passed",
+      "actor": "mage", "metric": "global_cooldown_ms", "spell": 130, "relative_to": "gcd_after_cast",
+      "min": -1050, "max": -699
+    },
+    {
+      "action": "assert", "label": "Mid-GCD: 400..800 ms remain", "actor": "mage",
+      "metric": "global_cooldown_ms", "spell": 130, "min": 400, "max": 800
+    },
+    {
+      "action": "assert", "label": "The global cooldown ends on time", "actor": "mage",
+      "metric": "global_cooldown_ms", "spell": 130, "equals": 0, "within_ms": 1500
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Runemaster audit #2758: Runic Affinity extends Zenith's duration by 6 seconds",
+  "contract": [
+    "Runic Affinity 705621: 'Increases the duration of Zenith by $/1000;s1 sec.' Re-verified in Spell.dbc: single",
+    "Effect0 SPELL_AURA_ADD_FLAT_MODIFIER (107), MiscValue 1 = SPELLMOD_DURATION, EffectBasePoints0 5999 with",
+    "DieSides 1 = +6000ms, EffectSpellClassMask mask0 268435456 (0x10000000) on family 38. Both DBC spells named",
+    "Zenith (712325, and its 2-charge upgrade 712389) carry SpellFamilyName 38, SpellFamilyFlags[0] 268435456 -",
+    "an exact match on both. This is the native AzerothCore spellmod system (SPELLMOD_DURATION applied before",
+    "SpellInfo::GetDuration/CalcDuration); no occurrence of 705621 exists in src/server/coa/.",
+    "Verification note: a live re-cast of Zenith is not a safe discriminator here. Zenith's own cooldown is",
+    "additionally governed by src/server/coa/AscensionRunemasterEchoes.cpp, a custom 'Echoes' cooldown-pooling",
+    "ledger shared with its 2-charge variant 712389 (stored via Player::UpdatePlayerSetting under",
+    "'core.runemaster.echoes' and a 'core.spell_charge.712389' charge pool). Recasting Zenith right after",
+    "resetting only its plain m_spellCooldowns entry (RemoveSpellCooldown) still fails with",
+    "SPELL_FAILED_NOT_READY (67) end to end, confirmed live: cooldown_ms read 0 immediately after reset and",
+    "after a 2s wait, yet the second CMSG_CAST_SPELL was still rejected - the ledger enforces its own recovery",
+    "state independent of the plain cooldown map, and the harness has no action to clear it. Expected: instead,",
+    "probe SPELLMOD_DURATION directly via the generic spell_modifier metric (the same native ApplySpellMod path",
+    "SpellInfo::GetDuration/CalcDuration consumes), which needs no cast/cooldown/ledger interaction at all -",
+    "before the talent the op-1 probe against 712325 is unmodified; with Runic Affinity learned it rises by",
+    "exactly 6000ms."
+  ],
+  "timeout_ms": 60000,
+  "players": [{"id": "rm", "race": 1, "class": 32, "level": 80}],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 3000},
+    {"action": "snapshot", "label": "Base Zenith duration modifier", "actor": "rm", "metric": "spell_modifier",
+      "spell": 712325, "op": 1, "base": 0, "save_as": "base_dur"},
+    {"action": "assert", "label": "SETUP: no duration modifier on Zenith before the talent", "actor": "rm",
+      "metric": "spell_modifier", "spell": 712325, "op": 1, "base": 0, "equals": 0},
+    {"action": "learn", "actor": "rm", "spell": 705621},
+    {"action": "assert", "label": "CONTRACT: Runic Affinity is active", "actor": "rm", "metric": "aura",
+      "spell": 705621, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "CONTRACT: Zenith's duration modifier rises by 6000ms", "actor": "rm",
+      "metric": "spell_modifier", "spell": 712325, "op": 1, "base": 0, "relative_to": "base_dur", "equals": 6000},
+    {"action": "assert", "label": "CONTRACT: the 2-charge upgrade 712389 shares the same classmask match",
+      "actor": "rm", "metric": "spell_modifier", "spell": 712389, "op": 1, "base": 0, "equals": 6000}
+  ]
+}

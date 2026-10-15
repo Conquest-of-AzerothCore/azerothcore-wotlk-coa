@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Duskwood: the caged worgen credits 'The Interrogation' on its third gossip step",
+  "contract": "Quest 254086 'The Interrogation' (rev_20261011_95_coa_duskwood_restore.sql, rev_20261011_97_coa_duskwood_dialogue.sql) is credited by talking the caged Nightbane Worgen 764561 through its recorded conversation: npc_text 58094 with 'I don't mean you any harm...', 58095 with 'Please, try to remember...', and 58096 with 'Julie, hmm? That might be the most I'll get here.' (MatodanDLC jLBZUj7KUhw, 2026-07-20, 0:03:01-0:03:03). Opening the gossip alone must not credit 254086; choosing the third step must.",
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -10560.0, "y": -1150.0, "z": 28.0, "o": 0},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 30}
+  ],
+  "creatures": [
+    {"id": "worgen", "owner": "hero", "entry": 764561, "distance": 3, "faction": 35, "level": 24}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"label": "SETUP: the hero carries 254086 unfinished", "action": "prepare_quest", "actor": "hero",
+     "quest": 254086, "complete": false},
+    {"label": "SETUP: the hero has no 254086 credit yet", "action": "assert", "actor": "hero",
+     "metric": "quest_objective_count", "quest": 254086, "equals": 0},
+    {"label": "the hero opens the caged worgen's gossip", "action": "gossip_hello", "actor": "hero",
+     "target": "worgen"},
+    {"label": "the first step offers one option", "action": "assert", "actor": "hero", "metric": "gossip_options",
+     "equals": 1},
+    {"label": "the first option is the recorded opener", "action": "assert", "actor": "hero",
+     "metric": "gossip_option_text", "index": 0,
+     "text": "I don't mean you any harm. I heard you might still remember your old life.", "equals": 1},
+    {"action": "wait", "ms": 1000},
+    {"label": "DISCRIMINATING: opening the gossip does not credit 254086", "action": "assert", "actor": "hero",
+     "metric": "quest_objective_count", "quest": 254086, "equals": 0},
+    {"label": "the hero chooses the first step", "action": "gossip_select", "actor": "hero", "option": 0},
+    {"label": "the second option asks the worgen's name", "action": "assert", "actor": "hero",
+     "metric": "gossip_option_text", "index": 0,
+     "text": "Please, try to remember, you were a human once, weren't you? What was your name?", "equals": 1},
+    {"label": "the hero chooses the second step", "action": "gossip_select", "actor": "hero", "option": 0},
+    {"label": "the third option names Julie", "action": "assert", "actor": "hero", "metric": "gossip_option_text",
+     "index": 0, "text": "Julie, hmm? That might be the most I'll get here.", "equals": 1},
+    {"label": "the second step does not credit 254086 yet", "action": "assert", "actor": "hero",
+     "metric": "quest_objective_count", "quest": 254086, "equals": 0},
+    {"label": "the hero chooses the third step", "action": "gossip_select", "actor": "hero", "option": 0},
+    {"label": "the third step credits 254086", "action": "assert", "actor": "hero",
+     "metric": "quest_objective_count", "quest": 254086, "equals": 1, "within_ms": 3000},
+    {"label": "254086 is complete", "action": "assert", "actor": "hero", "metric": "quest_status", "quest": 254086,
+     "equals": 1, "within_ms": 3000}
+  ]
+}

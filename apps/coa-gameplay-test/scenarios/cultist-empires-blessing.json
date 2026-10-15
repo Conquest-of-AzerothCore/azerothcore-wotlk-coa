@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Empire's Blessing reduces the mana cost of Void Shield by 20% (#808)",
+  "contract": "Empire's Blessing 704895 reads 'Reduces the mana cost of Void Shield by 20%.' In the installed Spell.dbc it is passive, family 31, effect 0 is SPELL_AURA_ADD_PCT_MODIFIER (108), misc 14 = SPELLMOD_COST, BasePoints -21 / DieSides 1 = -20%, class mask dword 1 = 536870912 = bit 29. Void Shield 500715 (family 31) carries SpellFamilyFlags[1] 536870912 (bit 29) -- exact match -- ManaCost 0 and ManaCostPercentage 26 (its real cost is 26% of max mana, verified directly). SpellInfo::CalcPowerCost (SpellInfo.cpp:3002-3077) computes powerCost = int32(CalculatePct(caster max mana, 26)) and only then applies modOwner->ApplySpellMod(Id, SPELLMOD_COST, powerCost, spell) at line 3077, so the PCT mod reduces the already-percentage-based cost rather than a separate flat ManaCost. Player::ApplySpellMod computes non-duration ops as base*totalmul+totalflat (Player.cpp:10324); with only the -20% PCT mod, cost*0.8. The scenario probes the raw cost op with a synthetic base and separately reads the live power cost of Void Shield itself before/after learning, asserting an 80% ratio (integer-rounding tolerance). Grasp of Zek'voz 573028 (family 31, SpellFamilyFlags dword 1 = 0) does not carry bit 29 and is the control.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "c", "race": 1, "class": 25, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the fixtures settle", "ms": 5000},
+    {"action": "assert", "label": "SETUP: Void Shield's cost op is unmodified", "actor": "c", "metric": "spell_modifier", "spell": 500715, "op": 14, "base": 1000, "equals": 1000},
+    {"action": "assert", "label": "SETUP: control spell unmodified", "actor": "c", "metric": "spell_modifier", "spell": 573028, "op": 14, "base": 1000, "equals": 1000},
+    {"action": "snapshot", "label": "Void Shield's real live power cost before", "actor": "c", "metric": "spell_power_cost", "spell": 500715, "save_as": "cost_before"},
+    {"action": "learn", "label": "Learn Empire's Blessing", "actor": "c", "spell": 704895},
+    {"action": "assert", "label": "The passive is active", "actor": "c", "metric": "aura", "spell": 704895, "equals": 1},
+    {"action": "assert", "label": "Void Shield's cost op is now -20%", "actor": "c", "metric": "spell_modifier", "spell": 500715, "op": 14, "base": 1000, "equals": 800},
+    {"action": "assert", "label": "Grasp of Zek'voz is outside the mask", "actor": "c", "metric": "spell_modifier", "spell": 573028, "op": 14, "base": 1000, "equals": 1000},
+    {"action": "assert", "label": "Void Shield's real live power cost drops to ~80% of the pre-talent cost", "actor": "c", "metric": "spell_power_cost", "spell": 500715, "ratio_to": "cost_before", "min": 0.78, "max": 0.82},
+    {"action": "unlearn", "label": "Drop Empire's Blessing", "actor": "c", "spell": 704895},
+    {"action": "assert", "label": "Void Shield's cost op returns to unmodified", "actor": "c", "metric": "spell_modifier", "spell": 500715, "op": 14, "base": 1000, "equals": 1000}
+  ]
+}

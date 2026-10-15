@@ -1,0 +1,41 @@
+-- Petrified Legions (500012) and Screech of the Darkwing (300260): both Bloodmage passives trigger
+-- Call of the Darkwing 801958 through SPELL_AURA_PROC_TRIGGER_SPELL (aura 42), both have Spell.dbc
+-- ProcFlags 0 and neither had a `spell_proc` row, so SpellMgr::LoadSpellProcs generated no entry
+-- ("Skip if no proc flags in DBC") and Aura::GetProcEffectMask returned 0 for both.
+-- Call of the Darkwing 801958 itself is native and correct: SPELL_EFFECT_SUMMON (28), MiscValue 50069,
+-- MiscValueB 61, DieSides 2 (one or two Shadow Bats), radius index 10.
+--
+-- Petrified Legions (500012): "Physical damage you deal or take now has a $h% chance to trigger a Call of
+-- the Darkwing." ProcFlags 60 = PROC_FLAG_DONE_MELEE_AUTO_ATTACK (0x4) |
+-- PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK (0x8) | PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS (0x10) |
+-- PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS (0x20) - the "deal or take" pair in both melee directions.
+-- SchoolMask 1 pins the tooltip's "Physical": melee-damage-class abilities are not necessarily Physical
+-- (Enraging Wound 560589 is DmgClass 2 with SchoolMask 32), and SpellMgr::CanSpellTriggerProcOnEvent
+-- compares this against eventInfo.GetSchoolMask(). SpellTypeMask 1 (PROC_SPELL_TYPE_DAMAGE),
+-- SpellPhaseMask 2 (HIT), HitMask 0 so the defaults apply (NORMAL|CRITICAL|ABSORB for done procs,
+-- NORMAL|CRITICAL for taken). Chance 0 defers to the record's own ProcChance 10.
+-- AttributesMask 0: the mixed DONE+TAKEN mask is fed by ordinary attacks, not by triggered spells.
+--
+-- Screech of the Darkwing (300260): "Your effects that trigger Call of the Darkwing now trigger an
+-- additional Call of the Darkwing. Can only occur once per sec." The event is Call of the Darkwing itself,
+-- so the row is scoped by SpellFamilyName 26 and SpellFamilyMask1 268435456 - the SpellFamilyFlags
+-- (0, 268435456, 0) that Spell.dbc gives 801958 and its sibling 802578, and that no other family-26 record
+-- carries. 801958 is DmgClass 0 (none) and has no damage or heal effect, so the event it raises is the
+-- none-damage-class one; ProcFlags 5120 = PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS (0x400) |
+-- PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG (0x1000) covers both, because Spell::DoAllEffectOnTarget and the
+-- finish-phase proc in Spell::cast pick the positive or negative bit from SpellInfo::IsPositive() and a
+-- summon record's positivity is not something this row should depend on. SpellPhaseMask 6 = HIT | FINISH
+-- for the same reason: a summon aimed at a destination need not produce a unit hit, and Spell::cast raises
+-- a PROC_SPELL_PHASE_FINISH event for every cast that has an original caster. SpellTypeMask 0 (unset)
+-- because a pure summon reports PROC_SPELL_TYPE_NO_DMG_HEAL at HIT and PROC_SPELL_TYPE_MASK_ALL at FINISH.
+-- AttributesMask 2 (PROC_ATTR_TRIGGERED_CAN_PROC) is required: 801958 is cast as a triggered spell by
+-- Petrified Legions' proc and carries neither SPELL_ATTR3_CAN_PROC_FROM_PROCS nor SPELL_ATTR3_NOT_A_PROC
+-- (its AttributesEx3 is 0x40000000, SPELL_ATTR3_DO_NOT_DISPLAY_RANGE), so Aura::GetProcEffectMask would
+-- otherwise refuse the event. This does not create a loop: the same function refuses to let an aura proc
+-- from a spell its own effect triggered (spell->GetTriggeredByAuraSpellInfo() == m_spellInfo), so the extra
+-- Call cannot re-proc 300260. Cooldown 1000 implements the tooltip's "once per sec"; Chance 0 defers to the
+-- record's own ProcChance 100.
+DELETE FROM `spell_proc` WHERE `SpellId` IN (500012, 300260);
+INSERT INTO `spell_proc` (`SpellId`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `ProcFlags`, `SpellTypeMask`, `SpellPhaseMask`, `HitMask`, `AttributesMask`, `DisableEffectsMask`, `ProcsPerMinute`, `Chance`, `Cooldown`, `Charges`) VALUES
+(500012, 1, 0, 0, 0, 0, 60, 1, 2, 0, 0, 0, 0, 0, 0, 0),
+(300260, 0, 26, 0, 268435456, 0, 5120, 0, 6, 0, 2, 0, 0, 0, 1000, 0);

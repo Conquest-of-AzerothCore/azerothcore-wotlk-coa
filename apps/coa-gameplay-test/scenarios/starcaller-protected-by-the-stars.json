@@ -1,0 +1,268 @@
+{
+  "schema": 1,
+  "name": "Protected by the Stars adds armor from Intellect and shortens stuns and disarms (#1531)",
+  "contract": "Protected by the Stars 300258 (Spell.dbc, passive) has three effects. Effect 0 is SPELL_AURA_MOD_RESISTANCE_OF_STAT_PERCENT (182, the issue's 'Aura_182'), EffectMiscValue 1 (physical school mask), EffectMiscValueB 3 (Intellect), EffectBasePoints 299 with DieSides 1 -> 300%. Effects 1 and 2 are SPELL_AURA_MECHANIC_DURATION_MOD (232) for mechanic 3 (MECHANIC_DISARM) and 12 (MECHANIC_STUN), EffectBasePoints -26 -> -25%. The tooltip is 'Increases your Armor by 300% of your Intellect and reduces the duration of stuns and disarms against you by 25%.'. Nothing in the module or SQL touches 300258. ARMOR: Player::UpdateArmor (StatSystem.cpp:371) adds CalculatePct(GetStat(Intellect), amount) for each 182 effect whose misc value intersects SPELL_SCHOOL_MASK_NORMAL, and STAT_INTELLECT updates call UpdateArmor. The absolute Intellect of a Starcaller is not in any file this task may read, so the scenario adds a known +100 Intellect with Arcane Intellect 36880 (aura 29 Intellect, EffectBasePoints 99 -> +100, self-target, 30 minutes) and asserts the armor delta: 300% of +100 is +300 on the talented fixture and 0 on the control (its armor has no Intellect term); the band 295-305 allows integer truncation. DURATIONS: Unit::ModSpellDuration applies GetTotalAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD, mechanic) to negative auras for every mechanic in the spell's effect mask, and self casts are included (the comment 'also calculate self casts'), with no diminishing return on a self cast (Spell.cpp: unit != m_caster is required). The fixtures are two real self casts, never set_aura, because Unit::AddAura never calls ModSpellDuration: Dropped Weapon 25057 (SpellFamilyName 0, SPELL_ATTR0_AURA_IS_DEBUFF 0x4000000, effect 0 self-target aura 67 disarm, Mechanic 3, DurationIndex 1 = 10000 ms) and Exhaustion 35492 (SpellFamilyName 0, 0x4000000, aura 12 stun, Mechanic 12, DurationIndex 27 = 3000 ms). Expected on the talented fixture: 7500 ms and 2250 ms; the control keeps 10000 and 3000. Bands allow scheduling delay between cast and read: disarm 6500-7600 vs control >= 9000, stun 1500-2300 vs control >= 2400. The stun is cast last because a stunned fixture can cast nothing more.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 300258
+    },
+    {
+      "action": "assert",
+      "label": "Learning the talent applies its passive aura",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 300258,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Armor effect resolves to 300 percent",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 300258,
+      "effect": 0,
+      "equals": 300
+    },
+    {
+      "action": "assert",
+      "label": "Disarm duration effect resolves to -25 percent",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 300258,
+      "effect": 1,
+      "equals": -25
+    },
+    {
+      "action": "assert",
+      "label": "Stun duration effect resolves to -25 percent",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 300258,
+      "effect": 2,
+      "equals": -25
+    },
+    {
+      "action": "snapshot",
+      "label": "Control Intellect before the fixture buff",
+      "actor": "control",
+      "metric": "stat",
+      "save_as": "int_control_before",
+      "stat": 3
+    },
+    {
+      "action": "snapshot",
+      "label": "Talented Intellect before the fixture buff",
+      "actor": "talent",
+      "metric": "stat",
+      "save_as": "int_talent_before",
+      "stat": 3
+    },
+    {
+      "action": "snapshot",
+      "label": "Control armor before the fixture buff",
+      "actor": "control",
+      "metric": "armor",
+      "save_as": "armor_control_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Talented armor before the fixture buff",
+      "actor": "talent",
+      "metric": "armor",
+      "save_as": "armor_talent_before"
+    },
+    {
+      "action": "set_aura",
+      "label": "Add a known +100 Intellect to the control",
+      "actor": "control",
+      "spell": 36880,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Add a known +100 Intellect to the talented fixture",
+      "actor": "talent",
+      "spell": 36880,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control Intellect rose by exactly the buff",
+      "actor": "control",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "int_control_before",
+      "min": 99,
+      "max": 101,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Talented Intellect rose by exactly the buff",
+      "actor": "talent",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "int_talent_before",
+      "min": 99,
+      "max": 101,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Control armor does not follow Intellect",
+      "actor": "control",
+      "metric": "armor",
+      "relative_to": "armor_control_before",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Talented armor rose by 300% of the added Intellect",
+      "actor": "talent",
+      "metric": "armor",
+      "relative_to": "armor_talent_before",
+      "min": 295,
+      "max": 305,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 25057
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 25057
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 35492
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 35492
+    },
+    {
+      "action": "cast",
+      "label": "Control disarms itself",
+      "actor": "control",
+      "spell": 25057
+    },
+    {
+      "action": "cast",
+      "label": "Talented fixture disarms itself",
+      "actor": "talent",
+      "spell": 25057
+    },
+    {
+      "action": "assert",
+      "label": "Control caught the disarm",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 25057,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Talented fixture caught the disarm",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 25057,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Control disarm lasts the authored 10 seconds",
+      "actor": "control",
+      "metric": "aura_duration_ms",
+      "spell": 25057,
+      "min": 9000,
+      "max": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Talented disarm lasts 25% less (7500 ms)",
+      "actor": "talent",
+      "metric": "aura_duration_ms",
+      "spell": 25057,
+      "min": 6500,
+      "max": 7600
+    },
+    {
+      "action": "cast",
+      "label": "Control stuns itself",
+      "actor": "control",
+      "spell": 35492
+    },
+    {
+      "action": "cast",
+      "label": "Talented fixture stuns itself",
+      "actor": "talent",
+      "spell": 35492
+    },
+    {
+      "action": "assert",
+      "label": "Control caught the stun",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 35492,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Talented fixture caught the stun",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 35492,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Control stun lasts the authored 3 seconds",
+      "actor": "control",
+      "metric": "aura_duration_ms",
+      "spell": 35492,
+      "min": 2400,
+      "max": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Talented stun lasts 25% less (2250 ms)",
+      "actor": "talent",
+      "metric": "aura_duration_ms",
+      "spell": 35492,
+      "min": 1500,
+      "max": 2300
+    }
+  ]
+}

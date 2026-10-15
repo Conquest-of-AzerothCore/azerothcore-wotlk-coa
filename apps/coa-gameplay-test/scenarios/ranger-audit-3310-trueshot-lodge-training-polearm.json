@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Trueshot Lodge Training's bleed bonus only applies while wielding a polearm (#3310)",
+  "contract": "Trueshot Lodge Training rank 1 (803113) reads 'Increases your off-hand weapon damage by 25%. While wielding a polearm, the damage of your bleed effects is increased by 25%.' Its effect 1 is SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, Amplitude 10000 ms, casting the helper 803854 on the caster with BasePoints 25 carried via SPELLVALUE_BASE_POINT0. 803854 applies SPELL_AURA_ADD_PCT_MODIFIER (SPELLMOD_DOT, MiscValue 22) on class mask (0, 4096, 2147483776) = bits matching Serrated Shot's SpellFamilyFlags[2]=128, for 11000 ms (DurationIndex 38, bridging the 10 sec retrigger). 803854 carries EquippedItemClass 2 / EquippedItemSubClassMask 64 (polearm) but AttributesEx3 is 0 - neither SPELL_ATTR3_REQUIRES_MAIN_HAND_WEAPON nor _OFF_HAND_WEAPON - so Spell::CheckItems (Spell.cpp) never calls Item::IsFitToSpellRequirements for it, and the periodic cast (TRIGGERED_FULL_MASK, which does not include TRIGGERED_IGNORE_EQUIPPED_ITEM_REQUIREMENT) lands with any weapon, or none. spell_ascension_ranger_trueshot_lodge_polearm (src/server/coa/AscensionRangerSecondary.cpp) adds an OnCheckCast hook on 803854 that requires the caster's main-hand weapon to satisfy 803854's own equipped-item requirements (the same Item::IsFitToSpellRequirements the engine already runs for the ATTR3 case). Expected: with a non-polearm main-hand weapon, spell_modifier(Serrated Shot 500073, SPELLMOD_DOT) stays at its unmodified base of 1000 through at least one 10 sec tick; after swapping to a polearm, the next tick raises it by 25% to about 1250. Before the fix the bonus reaches 1250 even without a polearm equipped.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "learn", "actor": "ranger", "spell": 803113 },
+    {
+      "action": "assert", "label": "SETUP: Trueshot Lodge Training is active",
+      "actor": "ranger", "metric": "aura", "spell": 803113, "equals": 1, "within_ms": 3000
+    },
+    { "action": "add_item", "actor": "ranger", "item": 5551 },
+    { "action": "equip", "label": "Fast Test 1H Axe - not a polearm", "actor": "ranger", "item": 5551, "slot": 15 },
+    { "action": "wait", "label": "Let the equipment settle", "ms": 1500 },
+    { "action": "wait", "label": "Cross the first 10 sec periodic tick", "ms": 11000 },
+    {
+      "action": "assert", "label": "CONTRACT: no bleed bonus without a polearm equipped",
+      "actor": "ranger", "metric": "spell_modifier", "spell": 500073, "op": 22, "base": 1000, "min": 998, "max": 1002
+    },
+    { "action": "add_item", "actor": "ranger", "item": 5545 },
+    { "action": "equip", "label": "Fast Test Polearm", "actor": "ranger", "item": 5545, "slot": 15 },
+    { "action": "wait", "label": "Let the equipment settle", "ms": 1500 },
+    { "action": "wait", "label": "Cross the next 10 sec periodic tick", "ms": 11000 },
+    {
+      "action": "assert", "label": "CONTRACT: the bleed bonus is 25% once a polearm is equipped",
+      "actor": "ranger", "metric": "spell_modifier", "spell": 500073, "op": 22, "base": 1000, "min": 1240, "max": 1260
+    }
+  ]
+}

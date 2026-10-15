@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "name": "Issue 2746: Runic Omen empowers Runeblade after its 3rd cast",
+  "contract": [
+    "Runic Omen 705580 reads 'Every 3rd cast of Runeblade now deals $705596s1% increased damage.' Effect 0 is a",
+    "PROC_TRIGGER_SPELL of 520285, ProcChance 100, but Spell.dbc gives 705580 itself ProcFlags 0, so the aura",
+    "never registered a proc and 520285 never applied on any Runeblade cast. Runeblade (707141-707148,",
+    "573444-573447) is the only family 38 spell with mask2 0x40000 (DmgClass melee); 520285 carries its own",
+    "StackAmount 3 (DurationIndex 8, 15 sec), so once the proc fires on every Runeblade cast the native aura",
+    "system stacks it by 1 per cast, capped at 3 -- the 'every 3rd cast' counter already lives in the DBC record.",
+    "520285's own effect 1 is SPELL_EFFECT_DUMMY with EffectTriggerSpell 705596: aura_ascension_runemaster_runic_",
+    "omen_empower reads that on every cast of 520285, and once the counter has just reached 3 stacks it removes",
+    "520285 and casts 705596, a self-contained ADD_PCT_MODIFIER (+30%, family 38 mask2 0x40000 = Runeblade, 10",
+    "sec window) that is the tooltip's 'deals X% increased damage' payoff. Expected: the 1st and 2nd Runeblade",
+    "cast leave 520285 at 1 and 2 stacks with no change to Runeblade's damage modifier; the 3rd cast removes",
+    "520285, applies 705596, and raises Runeblade's SPELLMOD_DAMAGE modifier from 100 to 130."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80, "melee_hit_rating": 10000, "spell_hit_rating": 10000,
+      "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 707141},
+    {"action": "learn", "actor": "rm", "spell": 705580},
+    {"action": "assert", "label": "SETUP: Runic Omen is known", "actor": "rm", "metric": "aura",
+      "spell": 705580, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "SETUP: the counter is absent", "actor": "rm", "metric": "aura_stacks",
+      "spell": 520285, "equals": 0},
+    {"action": "assert", "label": "SETUP: Runeblade's damage modifier starts at 100", "actor": "rm",
+      "metric": "spell_modifier", "spell": 707141, "op": 0, "base": 100, "equals": 100},
+    {"action": "restore_charges", "actor": "rm", "spell": 707141},
+    {"action": "assert", "label": "SETUP: Runeblade holds 3 charges", "actor": "rm", "metric": "spell_charges",
+      "spell": 707141, "equals": 3},
+    {"action": "cast", "label": "Runeblade 1", "actor": "rm", "spell": 707141, "target": "dummy"},
+    {"action": "assert", "label": "After the 1st cast the counter has 1 stack", "actor": "rm",
+      "metric": "aura_stacks", "spell": 520285, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "After the 1st cast Runeblade's damage modifier is unchanged", "actor": "rm",
+      "metric": "spell_modifier", "spell": 707141, "op": 0, "base": 100, "equals": 100},
+    {"action": "wait", "label": "Runeblade global cooldown", "ms": 1300},
+    {"action": "cast", "label": "Runeblade 2", "actor": "rm", "spell": 707141, "target": "dummy"},
+    {"action": "assert", "label": "After the 2nd cast the counter has 2 stacks", "actor": "rm",
+      "metric": "aura_stacks", "spell": 520285, "equals": 2, "within_ms": 2000},
+    {"action": "assert", "label": "After the 2nd cast Runeblade's damage modifier is unchanged", "actor": "rm",
+      "metric": "spell_modifier", "spell": 707141, "op": 0, "base": 100, "equals": 100},
+    {"action": "wait", "label": "Runeblade global cooldown", "ms": 1300},
+    {"action": "cast", "label": "Runeblade 3", "actor": "rm", "spell": 707141, "target": "dummy"},
+    {"action": "assert", "label": "CONTRACT: the 3rd cast consumes the counter", "actor": "rm",
+      "metric": "aura_stacks", "spell": 520285, "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "CONTRACT: the empower buff is granted", "actor": "rm", "metric": "aura",
+      "spell": 705596, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "CONTRACT: Runeblade's damage modifier rises to 130", "actor": "rm",
+      "metric": "spell_modifier", "spell": 707141, "op": 0, "base": 100, "min": 129.9, "max": 130.1,
+      "within_ms": 1000},
+    {"action": "unlearn", "actor": "rm", "spell": 705580},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 705580, "equals": 0, "within_ms": 2000}
+  ]
+}

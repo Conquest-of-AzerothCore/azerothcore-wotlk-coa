@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Blood Howl taunts nearby enemies (#3187)",
+  "contract": "Blood Howl 800782 ships two SPELL_EFFECT_APPLY_AURA effects in Spell.dbc, both aura 11 SPELL_AURA_MOD_TAUNT, TargetA 22 / TargetB 15 (caster-area enemy), radius index 13 (10 yards), duration index 28 and RecoveryTime 150000. The native handler is AuraEffect::HandleModTaunt. Effect 1's BasePoints 19 is not read by the taunt handler and needs no implementation. The README lists no \"current victim\" metric, so the discriminator is the taunt aura landing on a hostile creature inside the radius; a neutral training dummy would be the wrong fixture because hostility-gated code does not run against faction 7, so the creature keeps the harness default faction 14. 800782 carries CasterAuraSpell 524861, one of the two Cursed Form markers AscensionBloodmageTalents.cpp mirrors onto the real form state, so the caster is given that marker as a fixture. 800782 is not passive (Attributes 0x40010, no SPELL_ATTR0_PASSIVE 0x40), so Player::addSpell does not self-cast it at learn and, more to the point, WorldSession::HandleCastSpellOpcode (SpellHandler.cpp:460) discards a cast whose spell the caster does not hold (HasActiveSpell); the scenario therefore learns it before casting.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 20, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "caster", "entry": 36, "level": 1, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "label": "Know the howl before casting it", "actor": "caster", "spell": 800782 },
+    { "action": "set_aura", "actor": "caster", "spell": 524861, "stacks": 1 },
+    { "action": "set_power", "actor": "caster", "power": 1, "value": 1000 },
+    { "action": "cast", "actor": "caster", "spell": 800782 },
+    {
+      "action": "assert", "label": "The taunt lands on the nearby enemy",
+      "actor": "enemy", "metric": "aura", "spell": 800782, "caster": "caster", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The taunted creature is in combat with the caster",
+      "actor": "enemy", "metric": "combat", "equals": 1, "within_ms": 3000
+    }
+  ]
+}

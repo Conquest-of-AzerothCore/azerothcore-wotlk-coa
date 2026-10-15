@@ -135,6 +135,7 @@ foreach(APPLICATION_NAME ${APPLICATIONS_BUILD_LIST})
     target_link_libraries(${APP_PROJECT_NAME}
       PUBLIC
         modules
+        coa
         scripts
         game
         gsoap

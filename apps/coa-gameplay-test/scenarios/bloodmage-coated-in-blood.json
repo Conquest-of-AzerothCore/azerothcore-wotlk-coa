@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "name": "Coated In Blood raises Blood Pact's effect values by 50% (#3144)",
+  "contract": "Coated In Blood 707626 effect 1 is aura 108 SPELL_AURA_ADD_PCT_MODIFIER with MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 49 + DieSides 1 = +50%, over EffectSpellClassMask (0, 0, 65536) = word 2 bit 16 = Blood Pact (801955, 801964) and no other family-26 row. Unit::ApplyEffectModifiers applies SPELLMOD_ALL_EFFECTS to every effect value. Tooltip: \"Increases the effectiveness of Blood Pact by $s2%\", where $s2 is effect 2's value, 50. Effect 0 of 707626 is aura 107 with MiscValue 11 (SPELLMOD_COOLDOWN) and BasePoints -1 + DieSides 1 = 0, an inert no-op that the tooltip does not describe. Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Blood Pact keeps its authored effect values before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 801955,
+      "op": 8,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707626
+    },
+    {
+      "action": "assert",
+      "label": "Coated In Blood raises every Blood Pact effect by 50%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 801955,
+      "op": 8,
+      "base": 100,
+      "equals": 150
+    },
+    {
+      "action": "assert",
+      "label": "The inert cooldown effect changes nothing",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 801955,
+      "op": 11,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Coated In Blood does not touch Bloodbolt",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 8,
+      "base": 100,
+      "equals": 100
+    }
+  ]
+}

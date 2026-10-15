@@ -1,0 +1,104 @@
+#
+# Ethereal Bazaar - Tiraxis and the Bazaar Token economy
+#
+
+[worldserver]
+
+# Turn the whole module off without removing it. Tiraxis stays in the world but
+# stops answering; his rotation does not run.
+# Default: 1 (enabled)
+EtherealBazaar.Enable = 1
+
+# How long one rotation lasts. A new interval is drawn for every rotation, so
+# the shop does not change at a time players can set their watch by.
+# Default: 3 to 6 hours
+EtherealBazaar.RotationMinHours = 3
+EtherealBazaar.RotationMaxHours = 6
+
+# How many items each price band contributes to a rotation.
+#
+# These are deliberately uneven. The pool is uneven: roughly 3300 items below
+# 1000 tokens, 440 between 1000 and 1500, and 190 above. Equal slot counts
+# would make an expensive item come round far MORE often than a cheap one,
+# because it is drawn from a much smaller bag. With the numbers below a given
+# cheap item returns about every 10 days, a mid one every 14, an expensive one
+# every 24, at four rotations a day. Together with the cache row they fill the
+# nine pages of ten the live Bazaar showed.
+#
+# If you change the pool, check those three numbers again before you change
+# these. Slots follow the size of the band, not how rare the item should feel.
+EtherealBazaar.Slots.Cheap = 79
+EtherealBazaar.Slots.Mid = 8
+EtherealBazaar.Slots.Expensive = 2
+
+#
+# The module logs under "module.bazaar": what the pool holds, what each
+# rotation drew, and when the next one is due. AzerothCore only prints a
+# logger that is configured, and an unconfigured one falls back to the root
+# logger, which normally shows errors only. To see any of it, add this to
+# worldserver.conf next to the other Logger lines:
+#
+#   Logger.module.bazaar=4,Console Server
+#
+# Without it the module runs exactly the same, it just says nothing.
+
+#
+# Where Bazaar Tokens come from
+#
+# Ascension sold them for money and let players trade them on the auction
+# house. With the shop gone the only source left is playing, so a little comes
+# from everything and more from harder content. The lower two ranges start at
+# zero on purpose: most kills give nothing, which keeps a token worth noticing.
+# Default: 1 (enabled)
+EtherealBazaar.Tokens.Enable = 1
+
+EtherealBazaar.Tokens.Quest.Min = 0
+EtherealBazaar.Tokens.Quest.Max = 12
+EtherealBazaar.Tokens.Creature.Min = 0
+EtherealBazaar.Tokens.Creature.Max = 3
+EtherealBazaar.Tokens.DungeonBoss.Min = 14
+EtherealBazaar.Tokens.DungeonBoss.Max = 22
+EtherealBazaar.Tokens.RaidBoss.Min = 41
+EtherealBazaar.Tokens.RaidBoss.Max = 53
+
+# From this level on every amount is multiplied by the percentage below, so a
+# character who has stopped levelling does not stop earning.
+EtherealBazaar.Tokens.BonusLevel = 60
+EtherealBazaar.Tokens.BonusPercent = 150
+
+# The "item received" toast in the top right. Tokens drop often enough that it
+# turns into noise; the bag updates either way.
+# Default: 0 (no toast)
+EtherealBazaar.Tokens.Announce = 0
+
+# Groot Coins (item 910001): staff mail them for useful bug reports, players
+# exchange carried coins with Tiraxis for Bazaar Tokens. All keys are read
+# once at startup. Turning a switch off stops new awards or exchanges only;
+# coins already held and every audit record stay. See
+# modules/mod-ethereal-bazaar/GROOT_COINS.md.
+
+# .groot award. Also needs RBAC permission 1001 and Game Master security.
+# Default: 0 (off)
+GrootCoin.Enable = 0
+
+# The "I want to exchange Groot Coins" option at Tiraxis.
+# Default: 0 (off)
+GrootCoin.ExchangeEnable = 0
+
+# Bazaar Tokens paid per coin. Exchanges are 1, 5 or 10 coins.
+# Default: 100
+GrootCoin.TokensPerCoin = 100
+
+# Largest single award.
+# Default: 25
+GrootCoin.MaxAward = 25
+
+# Pay award requests that a website or bot inserts into the characters table
+# groot_coin_award_queue (see GROOT_COINS.md, "Website / external awards").
+# Needs GrootCoin.Enable = 1 as well. Off: queued rows wait untouched.
+# Default: 0 (off)
+GrootCoin.ExternalAwardsEnable = 0
+
+# Seconds between reads of groot_coin_award_queue (minimum 5).
+# Default: 60
+GrootCoin.QueuePollInterval = 60

@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "name": "Necromancer Reclaimed Life shortens Raise cast times by 15% (#1206)",
+  "contract": "Reclaimed Life 707670 is a Class-tab node (CharacterAdvancement 31048, ClassType 25 = class 23, Tab 87, AbilityEssenceCost 1, SpellFamilyName 29) whose description reads 'Reduces the cast time of your Raise spells by $s1%.' (its aura ToolTip about Sacrifice Undead is a leftover of another talent: the spell has no effect for it). Its only effect is SPELL_AURA_ADD_PCT_MODIFIER (108) MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -16 + DieSides 1 = -15, EffectSpellClassMask (0, 0, 0x2) in family 29: the Raise flag that AscensionNecromancer::Raised also tests, carried by Raise: Ghoul 500971 (1500 ms) and Raise: Skeletal Mage 500331 (2000 ms) but not by Ice Barrage 501992 (2000 ms, family flags 0, 0x40, 0). The aura is not 42/354, so the Necromancer load contract leaves it intact, and Unit::ModSpellCastTime applies the caster's SPELLMOD_CASTING_TIME natively. Expected: with the talent Raise cast times are 85% of their base (1275 ms and 1700 ms) and Ice Barrage keeps its cast time; a real Raise: Ghoul cast starts with at most 1275 ms left instead of about 1500 ms, and still raises its Ghoul; unlearning restores the base cast time.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and stat updates settle", "ms": 3000 },
+    { "action": "learn", "actor": "necro", "spell": 500971 },
+    {
+      "action": "assert", "label": "SETUP: the fixture does not have Reclaimed Life yet", "actor": "necro",
+      "metric": "aura", "spell": 707670, "equals": 0
+    },
+    { "action": "snapshot", "actor": "necro", "metric": "spell_cast_time_ms", "spell": 500971, "save_as": "ghoul0" },
+    { "action": "snapshot", "actor": "necro", "metric": "spell_cast_time_ms", "spell": 500331, "save_as": "mage0" },
+    { "action": "snapshot", "actor": "necro", "metric": "spell_cast_time_ms", "spell": 501992, "save_as": "barrage0" },
+    {
+      "action": "assert", "label": "SETUP: Raise: Ghoul has its 1.5 sec cast", "actor": "necro",
+      "metric": "spell_cast_time_ms", "spell": 500971, "min": 1400, "max": 1500
+    },
+    { "action": "cast", "label": "Raise a Ghoul without the talent", "actor": "necro", "spell": 500971 },
+    {
+      "action": "assert", "label": "CONTROL: the Raise starts with about 1.5 sec to go", "actor": "necro",
+      "metric": "cast_remaining_ms", "spell": 500971, "min": 1300, "max": 1500
+    },
+    {
+      "action": "assert", "label": "SETUP: the first Ghoul is raised", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50073, "equals": 1, "within_ms": 4000
+    },
+    { "action": "learn", "actor": "necro", "spell": 707670 },
+    {
+      "action": "assert", "label": "The talent aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 707670, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Raise: Ghoul casts 15% faster", "actor": "necro",
+      "metric": "spell_cast_time_ms", "spell": 500971, "ratio_to": "ghoul0", "min": 0.845, "max": 0.855
+    },
+    {
+      "action": "assert", "label": "Raise: Skeletal Mage casts 15% faster", "actor": "necro",
+      "metric": "spell_cast_time_ms", "spell": 500331, "ratio_to": "mage0", "min": 0.845, "max": 0.855
+    },
+    {
+      "action": "assert", "label": "CONTROL: a non-Raise spell keeps its cast time", "actor": "necro",
+      "metric": "spell_cast_time_ms", "spell": 501992, "ratio_to": "barrage0", "min": 0.999, "max": 1.001
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "Raise a Ghoul with the talent", "actor": "necro", "spell": 500971 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the real Raise starts with at most 1275 ms to go", "actor": "necro",
+      "metric": "cast_remaining_ms", "spell": 500971, "min": 1075, "max": 1275
+    },
+    {
+      "action": "assert", "label": "The faster Raise still raises its Ghoul", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50073, "equals": 2, "within_ms": 4000
+    },
+    { "action": "unlearn", "actor": "necro", "spell": 707670 },
+    {
+      "action": "assert", "label": "Unlearning removes the talent aura", "actor": "necro",
+      "metric": "aura", "spell": 707670, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Unlearning restores the base Raise cast time", "actor": "necro",
+      "metric": "spell_cast_time_ms", "spell": 500971, "ratio_to": "ghoul0", "min": 0.999, "max": 1.001
+    }
+  ]
+}

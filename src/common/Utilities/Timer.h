@@ -20,6 +20,7 @@
 
 #include "Common.h"
 #include "Duration.h"
+#include <atomic>
 
 enum class TimeFormat : uint8
 {
@@ -57,8 +58,10 @@ namespace Acore::Time
     AC_COMMON_API std::string TimeToTimestampStr(Seconds time = 0s, std::string_view fmt = {});
     AC_COMMON_API std::string TimeToHumanReadable(Seconds time = 0s, std::string_view fmt = {});
 
-    AC_COMMON_API time_t GetNextTimeWithDayAndHour(int8 dayOfWeek, int8 hour); // int8 dayOfWeek: 0 (sunday) to 6 (saturday)
-    AC_COMMON_API time_t GetNextTimeWithMonthAndHour(int8 month, int8 hour); // int8 month: 0 (january) to 11 (december)
+    // int8 dayOfWeek: 0 (sunday) to 6 (saturday); from: the time to count from, 0 for now
+    AC_COMMON_API time_t GetNextTimeWithDayAndHour(int8 dayOfWeek, int8 hour, time_t from = 0);
+    // int8 month: 0 (january) to 11 (december); from: the time to count from, 0 for now
+    AC_COMMON_API time_t GetNextTimeWithMonthAndHour(int8 month, int8 hour, time_t from = 0);
 
     AC_COMMON_API uint32 GetSeconds(Seconds time = 0s);      // seconds after the minute - [0, 60]
     AC_COMMON_API uint32 GetMinutes(Seconds time = 0s);      // minutes after the hour - [0, 59]
@@ -68,6 +71,8 @@ namespace Acore::Time
     AC_COMMON_API uint32 GetDayInYear(Seconds time = 0s);    // days since January 1 - [0, 365]
     AC_COMMON_API uint32 GetMonth(Seconds time = 0s);        // months since January - [0, 11]
     AC_COMMON_API uint32 GetYear(Seconds time = 0s);         // years since 1900
+
+    AC_COMMON_API extern std::atomic<int64> SimulatedMSTime;
 }
 
 AC_COMMON_API struct tm* localtime_r(time_t const* time, struct tm* result);
@@ -103,6 +108,10 @@ inline Milliseconds GetMSTimeDiff(Milliseconds oldMSTime, Milliseconds newMSTime
 inline uint32 getMSTime()
 {
     using namespace std::chrono;
+
+    int64 const simulatedMSTime = Acore::Time::SimulatedMSTime.load(std::memory_order_relaxed);
+    if (simulatedMSTime >= 0)
+        return uint32(simulatedMSTime);
 
     return uint32(duration_cast<milliseconds>(steady_clock::now() - GetApplicationStartTime()).count());
 }

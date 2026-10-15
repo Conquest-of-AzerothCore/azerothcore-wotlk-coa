@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "name": "Pyromancer Scorching Spirit and Flamer scale Spirit and cast speed (#3534, #1954)",
+  "contract": "#3534 Scorching Spirit 805552 (+10%) and 807935 (+20%): one APPLY_AURA 137 (MOD_TOTAL_STAT_PERCENTAGE) with MiscValue 4 (Spirit), handled by HandleModTotalPercentStat, so the character-sheet Spirit rises by that factor. #1954 Flamer 680836 (+4%) and 520546 (+8%): one APPLY_AURA 216 (HASTE_SPELLS) handled by HandleModCastingSpeed, which scales the unit's cast-time multiplier by 100/104 and 100/108. The two ranks are asserted on separate players because the ranks are not meant to stack. Regression guard for behaviour that already works natively: the asserted quantities are ratios to a snapshot taken on the same player before it learns the passives.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "r1",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    },
+    {
+      "id": "r2",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "rank 1 player: Spirit before the passives",
+      "actor": "r1",
+      "metric": "stat",
+      "save_as": "r1_spirit0",
+      "stat": 4
+    },
+    {
+      "action": "snapshot",
+      "label": "rank 1 player: cast-time multiplier before the passives",
+      "actor": "r1",
+      "metric": "cast_speed_multiplier",
+      "save_as": "r1_haste0"
+    },
+    {
+      "action": "learn",
+      "actor": "r1",
+      "spell": 805552
+    },
+    {
+      "action": "learn",
+      "actor": "r1",
+      "spell": 680836
+    },
+    {
+      "action": "assert",
+      "label": "Scorching Spirit rank 1 raises Spirit by 10%",
+      "actor": "r1",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "r1_spirit0",
+      "min": 1.09,
+      "max": 1.11,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Flamer rank 1 multiplies cast times by 100/104 (4% spell haste)",
+      "actor": "r1",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "r1_haste0",
+      "min": 0.955,
+      "max": 0.968,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "rank 2 player: Spirit before the passives",
+      "actor": "r2",
+      "metric": "stat",
+      "save_as": "r2_spirit0",
+      "stat": 4
+    },
+    {
+      "action": "snapshot",
+      "label": "rank 2 player: cast-time multiplier before the passives",
+      "actor": "r2",
+      "metric": "cast_speed_multiplier",
+      "save_as": "r2_haste0"
+    },
+    {
+      "action": "learn",
+      "actor": "r2",
+      "spell": 807935
+    },
+    {
+      "action": "learn",
+      "actor": "r2",
+      "spell": 520546
+    },
+    {
+      "action": "assert",
+      "label": "Scorching Spirit rank 2 raises Spirit by 20%",
+      "actor": "r2",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "r2_spirit0",
+      "min": 1.19,
+      "max": 1.21,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Flamer rank 2 multiplies cast times by 100/108 (8% spell haste)",
+      "actor": "r2",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "r2_haste0",
+      "min": 0.92,
+      "max": 0.932,
+      "within_ms": 3000
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "name": "Astral Projection reduces the energy cost of Celestial Strike and Moon Arrow by 10 (#1788)",
+  "contract": "Astral Projection 300994 (Spell.dbc, SpellFamilyName 32, passive) carries one effect: SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 14 = SPELLMOD_COST, EffectBasePoints -11 with DieSides 1 resolving to -10, and EffectSpellClassMask word1 0x6. Celestial Strike (800496, 502286-502294; SpellFamilyFlags word1 0x2, PowerType 3 energy, ManaCost 40) and Moon Arrow (801972, 803918-803925; word1 0x4, PowerType 3, ManaCost 40) carry those bits. The tooltip reads 'Reduces the Energy cost of Celestial Strike and Moon Arrow by $s1.' (s1 = 10). Native path only: SpellInfo::CalcPowerCost applies Player::ApplySpellMod(SPELLMOD_COST) to the power cost after the base cost, and a flat modifier is added as is (Player::ApplySpellMod, basevalue * totalmul + totalflat). None of these spells has ManaCostPercentage, and AscensionStarcallerContracts.cpp rewrites costs only for the ids in StarcallerCosts (Aegis and other mana spells), none of which is a Celestial Strike or Moon Arrow rank. The spell_power_cost metric calls SpellInfo::CalcPowerCost for the fixture. Both fixtures are the same race, class and level with no gear, so the difference of the two readings can only come from the passive. Rank 1 and the top rank of each spell are checked because the mask covers every rank.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Celestial Strike rank 1 energy cost without the passive",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 800496,
+      "save_as": "cost_800496"
+    },
+    {
+      "action": "snapshot",
+      "label": "Celestial Strike rank 10 energy cost without the passive",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 502294,
+      "save_as": "cost_502294"
+    },
+    {
+      "action": "snapshot",
+      "label": "Moon Arrow rank 1 energy cost without the passive",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 801972,
+      "save_as": "cost_801972"
+    },
+    {
+      "action": "snapshot",
+      "label": "Moon Arrow rank 9 energy cost without the passive",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 803925,
+      "save_as": "cost_803925"
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 300994
+    },
+    {
+      "action": "assert",
+      "label": "Learning the passive applies its aura",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 300994,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Celestial Strike rank 1 costs 10 less energy",
+      "actor": "talent",
+      "metric": "spell_power_cost",
+      "spell": 800496,
+      "relative_to": "cost_800496",
+      "equals": -10
+    },
+    {
+      "action": "assert",
+      "label": "Celestial Strike rank 10 costs 10 less energy",
+      "actor": "talent",
+      "metric": "spell_power_cost",
+      "spell": 502294,
+      "relative_to": "cost_502294",
+      "equals": -10
+    },
+    {
+      "action": "assert",
+      "label": "Moon Arrow rank 1 costs 10 less energy",
+      "actor": "talent",
+      "metric": "spell_power_cost",
+      "spell": 801972,
+      "relative_to": "cost_801972",
+      "equals": -10
+    },
+    {
+      "action": "assert",
+      "label": "Moon Arrow rank 9 costs 10 less energy",
+      "actor": "talent",
+      "metric": "spell_power_cost",
+      "spell": 803925,
+      "relative_to": "cost_803925",
+      "equals": -10
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Barbarian audit: Unrelenting's damage and crit-rating auras apply natively (#2549)",
+  "contract": "#2549 covers two Unrelenting spell ids. 705169 carries SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79, amount 5, MiscValue 1 = Physical) and SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN (87, amount 5, MiscValue 1 = Physical). Effect 0's real handler, AuraEffect::HandleModDamagePercentDone, calls UpdateAllDamagePctDoneMods when the school mask includes SPELL_SCHOOL_MASK_NORMAL -- but Unit::MeleeDamageBonusDone explicitly skips applying SPELL_AURA_MOD_DAMAGE_PERCENT_DONE for SPELL_SCHOOL_MASK_NORMAL (its own comment: 'already factored in base melee damage calculation'), because UpdateAllDamagePctDoneMods instead bakes the factor into UNIT_MOD_DAMAGE_MAINHAND/OFFHAND/RANGED via SetStatPctModifier, i.e. into the weapon's own min/max damage stat rather than into MeleeDamageBonusDone's return value. The harness has no metric that reads UnitMod TOTAL_PCT, so effect 0's delivery is proven by aura_amount alone (the same generic HandleNoImmediateEffect->CalcValue path every other passive in this audit uses), not by melee_damage_done. Effect 1 (damage taken pct) has no such carve-out -- Unit::MeleeDamageBonusTaken applies SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN unconditionally regardless of school mask -- so it is read through melee_damage_taken as before. 705170 carries SPELL_AURA_MOD_RATING (189, amount 5, MiscValue 768 = bit 8 CR_CRIT_MELEE | bit 9 CR_CRIT_RANGED); AuraEffect::HandleModRating iterates MAX_COMBAT_RATING bits and applies GetAmount() to each PLAYER_FIELD_COMBAT_RATING_1+rating the mask selects, which the combat_rating metric reads directly. Neither id needs a script. Unlike 705169, 705170's own Spell.dbc Attributes field is 0x80 (SPELL_ATTR0_DO_NOT_DISPLAY only) with SPELL_ATTR0_PASSIVE (0x40) unset -- confirmed by direct decode of both records -- so the harness's learn action (a bare Player::learnSpell with no auto-cast) never applies its aura the way it does for 705169's 0xC0 (PASSIVE|DO_NOT_DISPLAY); an explicit cast is required first. Player::removeSpell's unconditional RemoveOwnedAura(spell_id) call still strips the aura on unlearn regardless of how it was applied, so the existing unlearn/assert pair needs no change. 705170's DurationIndex is also 0 (no DBC duration entry), which is otherwise a genuine bug: Aura::CalcMaxDuration only forces a permanent duration for a missing DurationEntry when the spell IsPassive(), and 705170 is not, so every aura it grants -- cast, or even the harness's own set_aura fixture action, since both reach the identical CalcMaxDuration code -- was created with a computed 0ms duration and expired before it could ever be observed active. barbarian_casts (AscensionBarbarianCompletion.cpp) now hooks ALLSPELLHOOK_ON_CALC_MAX_DURATION and forces duration = -1 for aura id 705170 specifically, mirroring the engine's own native fallback for true passives with the same missing-duration-data shape.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "b", "race": 1, "class": 12, "level": 80 },
+    { "id": "d", "race": 1, "class": 12, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+
+    { "action": "snapshot", "label": "Baseline melee damage taken from d", "actor": "b", "metric": "melee_damage_taken", "target": "d", "save_as": "dmg_taken0" },
+
+    { "action": "learn", "actor": "b", "spell": 705169 },
+    { "action": "assert", "label": "Unrelenting (705169) is active", "actor": "b", "metric": "aura", "spell": 705169, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Effect 0 (damage done pct) resolves to 5", "actor": "b", "metric": "aura_amount", "spell": 705169, "effect": 0, "equals": 5 },
+    { "action": "assert", "label": "Effect 1 (damage taken pct) resolves to 5", "actor": "b", "metric": "aura_amount", "spell": 705169, "effect": 1, "equals": 5 },
+    { "action": "assert", "label": "Melee damage taken rises by 5%", "actor": "b", "metric": "melee_damage_taken", "target": "d", "ratio_to": "dmg_taken0", "min": 1.03, "max": 1.07, "within_ms": 3000 },
+    { "action": "unlearn", "actor": "b", "spell": 705169 },
+    { "action": "assert", "label": "Unlearning restores melee damage taken", "actor": "b", "metric": "melee_damage_taken", "target": "d", "ratio_to": "dmg_taken0", "min": 0.99, "max": 1.01, "within_ms": 3000 },
+
+    { "action": "snapshot", "label": "Baseline melee crit rating", "actor": "b", "metric": "combat_rating", "rating": 8, "save_as": "crit_melee0" },
+    { "action": "snapshot", "label": "Baseline ranged crit rating", "actor": "b", "metric": "combat_rating", "rating": 9, "save_as": "crit_ranged0" },
+
+    { "action": "learn", "actor": "b", "spell": 705170 },
+    { "action": "cast", "actor": "b", "spell": 705170 },
+    { "action": "assert", "label": "Unrelenting (705170) is active", "actor": "b", "metric": "aura", "spell": 705170, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Effect 0 (crit rating) resolves to 5", "actor": "b", "metric": "aura_amount", "spell": 705170, "effect": 0, "equals": 5 },
+    { "action": "assert", "label": "Melee crit rating rises by 5", "actor": "b", "metric": "combat_rating", "rating": 8, "relative_to": "crit_melee0", "equals": 5, "within_ms": 3000 },
+    { "action": "assert", "label": "Ranged crit rating rises by 5", "actor": "b", "metric": "combat_rating", "rating": 9, "relative_to": "crit_ranged0", "equals": 5, "within_ms": 3000 },
+    { "action": "unlearn", "actor": "b", "spell": 705170 },
+    { "action": "assert", "label": "Unlearning restores melee crit rating", "actor": "b", "metric": "combat_rating", "rating": 8, "relative_to": "crit_melee0", "equals": 0, "within_ms": 3000 }
+  ]
+}

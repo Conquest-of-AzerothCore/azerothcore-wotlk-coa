@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Adrenaline carries a -25% duration modifier for root, snare and bleed (#1785)",
+  "contract": "Adrenaline 300986: \"Reduces the duration of bleed, root, and movement slowing effects against you by $s1%.\" All three effects are aura 232 SPELL_AURA_MECHANIC_DURATION_MOD with amount -25 and TargetA 1 (the Bloodmage itself), carrying MiscValue 7, 11 and 15 = MECHANIC_ROOT, MECHANIC_SNARE and MECHANIC_BLEED (SharedDefines.h:1409/1413/1417) - exactly root, movement slowing and bleed. The reduction is applied by Unit::ModSpellDuration (Unit.cpp:12134-12161), which picks the strongest negative modifier per mechanic and AddPct's it onto the duration. HARNESS LIMIT: that reduction can only be observed on a debuff an enemy really casts on the Bloodmage. Fixture creatures spawn REACT_PASSIVE and never attack, two fixture players are not mutually attackable, and the set_aura fixture goes through Unit::AddAura, which never calls ModSpellDuration (its only callers are Spell.cpp:3224 and SpellEffects.cpp:4105, both on the real cast path). This scenario therefore asserts what the harness can observe - that all three aura 232 effects exist and each carries -25 - and the duration reduction itself needs a Ghost e2e test in which a hostile NPC lands a root, a pure snare (not one that also carries MECHANIC_DISORIENTED, which Unit.cpp:12147 skips) and a bleed on the Bloodmage and compares each aura's duration against a control character without 300986.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 300986
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 300986,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Root duration modifier is -25%",
+      "actor": "b",
+      "metric": "aura_amount",
+      "spell": 300986,
+      "effect": 0,
+      "equals": -25
+    },
+    {
+      "action": "assert",
+      "label": "Snare duration modifier is -25%",
+      "actor": "b",
+      "metric": "aura_amount",
+      "spell": 300986,
+      "effect": 1,
+      "equals": -25
+    },
+    {
+      "action": "assert",
+      "label": "Bleed duration modifier is -25%",
+      "actor": "b",
+      "metric": "aura_amount",
+      "spell": 300986,
+      "effect": 2,
+      "equals": -25
+    }
+  ]
+}

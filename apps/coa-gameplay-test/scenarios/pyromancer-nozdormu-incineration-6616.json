@@ -1,0 +1,289 @@
+{
+  "schema": 1,
+  "name": "Incineration cannot buy Draconic Echo ranks from the Book of Ascension (#6616)",
+  "contract": [
+    "Independent current Draconic tree and CharacterAdvancement29857 assign520937 the Explode-to-Echo conversion; Incineration38 must not acquire its ranks. Use normal specialization and native Book purchases, with no direct Echo learn.",
+    "The reported level57 rank567589 belongs to the same Draconic family as the first book offer803407. A missing book row and a refused purchase must preserve money and spellbook; Draconic39 must still grant its normally converted ranks.",
+    "Use the canonical ten Echo ranks shared with the native Pyromancer handler. All ranks must be absent from Incineration offers, including the reported rank and the level60 rank. Draconic keeps its existing conversion and level cap; the ordinary Book purchase supplies Explode when it was not acquired at character creation. No Echo or conversion talent is directly learned by the fixture."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "pyro",
+      "race": 1,
+      "class": 24,
+      "level": 57
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "money",
+      "actor": "pyro",
+      "copper": 1000000
+    },
+    {
+      "action": "specialization",
+      "actor": "pyro",
+      "id": 38
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "aura",
+      "spell": 520937,
+      "equals": 0,
+      "label": "Incineration has no Draconic conversion"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 567589,
+      "equals": 0,
+      "label": "Reported Echo rank is absent before any purchase"
+    },
+    {
+      "action": "learn",
+      "actor": "pyro",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "pyro",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "pyro"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_rows",
+      "min": 1,
+      "label": "The normal class book publishes its rows"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 803407,
+      "equals": -1,
+      "label": "Incineration is not offered Draconic Echo rank2"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 802174,
+      "equals": -1,
+      "label": "Incineration excludes Draconic Echo rank 802174"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 803408,
+      "equals": -1,
+      "label": "Incineration excludes Draconic Echo rank 803408"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 803409,
+      "equals": -1,
+      "label": "Incineration excludes Draconic Echo rank 803409"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 803410,
+      "equals": -1,
+      "label": "Incineration excludes Draconic Echo rank 803410"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 578307,
+      "equals": -1,
+      "label": "Incineration excludes Draconic Echo rank 578307"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 578308,
+      "equals": -1,
+      "label": "Incineration excludes Draconic Echo rank 578308"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 578309,
+      "equals": -1,
+      "label": "Incineration excludes Draconic Echo rank 578309"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 567589,
+      "equals": -1,
+      "label": "Incineration excludes Draconic Echo rank 567589"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 567590,
+      "equals": -1,
+      "label": "Incineration excludes Draconic Echo rank 567590"
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "carried_money",
+      "save_as": "money_before"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "pyro",
+      "spell": 803407
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "spellbook_buy_failed",
+      "spell": 803407,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "carried_money",
+      "relative_to": "money_before",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 803407,
+      "equals": 0
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "pyro",
+      "spell": 800792,
+      "label": "Request the ordinary Explode lesson through the Book"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 800792,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Normal acquisition owns Explode before its conversion"
+    },
+    {
+      "action": "specialization",
+      "actor": "pyro",
+      "id": 39
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "aura",
+      "spell": 520937,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 567589,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Draconic grants the reported level56 Echo rank normally"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 567590,
+      "equals": 0,
+      "label": "Level57 Draconic does not acquire the level60 rank"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "temporary_spell_replacement",
+      "spell": 800792,
+      "equals": 567589,
+      "within_ms": 1000,
+      "label": "The ordinary Explode button converts to the appropriate Echo rank"
+    },
+    {
+      "action": "specialization",
+      "actor": "pyro",
+      "id": 38
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 567589,
+      "equals": 0,
+      "within_ms": 1000,
+      "label": "Returning to Incineration removes Echo"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "aura",
+      "spell": 520937,
+      "equals": 0,
+      "within_ms": 1000,
+      "label": "Incineration removes the Draconic conversion"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "temporary_spell_replacement",
+      "spell": 800792,
+      "equals": 800792,
+      "within_ms": 1000,
+      "label": "Incineration restores ordinary Explode"
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "pyro"
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "trainer_window_state",
+      "spell": 567589,
+      "equals": -1,
+      "label": "Returning to Incineration still excludes the reported Echo rank"
+    }
+  ]
+}

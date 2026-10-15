@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "name": "Dark Essence heals Blood Rituals allies when Bloodbolt is cast (#508)",
+  "contract": "Dark Essence 680732 is a single aura 4 (SPELL_AURA_DUMMY) marker with BasePoints -1: 'Casting Cursed Form abilities or Bloodbolt will now heal allies affected by Blood Rituals for ${$681036m1+$681036ppl1+$BH*0.1} every $681036t1 sec for $681036d.' Every number is in 681036: aura 8 SPELL_AURA_PERIODIC_HEAL, BasePoints 29 / DieSides 5 / RealPointsPerLevel 2.0, Amplitude 1500, TargetA 22 (TARGET_SRC_CASTER) + TargetB 30 (TARGET_UNIT_SRC_AREA_ALLY), RadiusIndex 23. The only Spell.dbc row that triggers 681036 is 806945, a different 'Dark Essence' record that coa-obtainable --class 20 (222/222 identical between the shipped CharacterAdvancement.dbc and the live-client capture) reports as advancement=none, live_capture=False, so the obtainable talent healed nobody. Blood Rituals is 706623. 578305 is the Bloodbolt rank a level-80 character owns. The second player carries Blood Rituals; the third does not and is the control that proves the area selection is narrowed to Blood Rituals carriers, which the native area aura would ignore.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ritual_ally",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    },
+    {
+      "id": "plain_ally",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 680732
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 578305
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ritual_ally"
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "plain_ally"
+    },
+    {
+      "action": "set_aura",
+      "label": "Blood Rituals on one ally only",
+      "actor": "ritual_ally",
+      "spell": 706623,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Bloodbolt without the talent",
+      "actor": "caster",
+      "spell": 578305,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "No Dark Essence heal without the talent",
+      "actor": "ritual_ally",
+      "metric": "aura",
+      "spell": 681036,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680732
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Bloodbolt with the talent",
+      "actor": "caster",
+      "spell": 578305,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "The Blood Rituals ally receives Dark Essence",
+      "actor": "ritual_ally",
+      "metric": "aura",
+      "spell": 681036,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "It ticks at 681036's own 1.5 second interval",
+      "actor": "ritual_ally",
+      "metric": "aura_amplitude_ms",
+      "spell": 681036,
+      "effect": 0,
+      "equals": 1500
+    },
+    {
+      "action": "assert",
+      "label": "An ally without Blood Rituals is not healed",
+      "actor": "plain_ally",
+      "metric": "aura",
+      "spell": 681036,
+      "equals": 0
+    }
+  ]
+}

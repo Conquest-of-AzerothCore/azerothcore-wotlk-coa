@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Ranger War Falcons: each active falcon generates 1 Focus per second",
+  "contract": "Follow-up of #481 (PR #5285). 680278 'War Falcon' has the aura text 'You have a War Falcon active! Generating 1 Focus per second.$?s705098[ Reduces damage taken by ${$w3}%.][]'. Effects 0 and 1 are SPELL_EFFECT_APPLY_AREA_AURA_OWNER from TARGET_UNIT_CASTER with radius index 12 (100 yd): a dummy counter and SPELL_AURA_PERIODIC_ENERGIZE, MiscValue 2 (Focus), BasePoints 0 + DieSides 1 = 1 every 1000 ms. An owner area aura from the caster reaches only the caster's owner, so its caster is the falcon, and SPELL_ATTR3_DOT_STACKING_RULE keeps one aura per falcon. No spell triggers 680278 and no War Falcon template carried it. Falcon Dive 806341 is a self-cast with two SPELL_EFFECT_SUMMON effects of creature 50393 'War Falcon' (SummonProperties 61, a guardian) for DurationIndex 29 = 12000 ms, and costs no Focus. The Ranger's own Focus regeneration is suppressed (allow_regeneration false), so its Focus changes only through spell energizes. Expected: no Focus without a falcon; with two falcons active each falcon wears 680278, the Ranger carries the War Falcon presence and gains 2 Focus per second (about 10 in 5 s); after the falcons expire the presence and the gain stop. Before the fix the falcons wear no 680278 and the Ranger's Focus stays 0. Wingman's -2% per falcon stays on its own aura script (ranger-wingman-war-falcons).",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 80, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "ranger", "spell": 806341 },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 0 },
+    { "action": "wait", "label": "Control: no falcon", "ms": 3000 },
+    {
+      "action": "assert", "label": "CONTROL: no Focus without a War Falcon", "actor": "ranger", "metric": "power",
+      "power": 2, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: no War Falcon presence without a falcon", "actor": "ranger",
+      "metric": "aura", "spell": 680278, "equals": 0
+    },
+    { "action": "cast", "label": "Falcon Dive calls two War Falcons", "actor": "ranger", "spell": 806341 },
+    {
+      "action": "assert", "label": "SETUP: two War Falcons are active", "actor": "ranger",
+      "metric": "owned_creature_count", "entry": 50393, "equals": 2, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: each War Falcon wears its presence aura", "actor": "ranger",
+      "metric": "owned_creature_count", "entry": 50393, "spell": 680278, "equals": 2, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the War Falcon presence reaches the Ranger", "actor": "ranger",
+      "metric": "aura", "spell": 680278, "equals": 1, "within_ms": 2000
+    },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 0 },
+    { "action": "wait", "label": "Five seconds with two falcons", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: both War Falcons are still active", "actor": "ranger",
+      "metric": "owned_creature_count", "entry": 50393, "equals": 2
+    },
+    {
+      "action": "assert", "label": "CONTRACT: two falcons generate 2 Focus per second", "actor": "ranger",
+      "metric": "power", "power": 2, "min": 8, "max": 12
+    },
+    {
+      "action": "assert", "label": "The War Falcons leave after 12 seconds", "actor": "ranger",
+      "metric": "owned_creature_count", "entry": 50393, "equals": 0, "within_ms": 15000
+    },
+    {
+      "action": "assert", "label": "The War Falcon presence ends with the falcons", "actor": "ranger",
+      "metric": "aura", "spell": 680278, "equals": 0, "within_ms": 2000
+    },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 0 },
+    { "action": "wait", "label": "Control after expiry", "ms": 3000 },
+    {
+      "action": "assert", "label": "No Focus after the falcons expire", "actor": "ranger", "metric": "power",
+      "power": 2, "equals": 0
+    }
+  ]
+}

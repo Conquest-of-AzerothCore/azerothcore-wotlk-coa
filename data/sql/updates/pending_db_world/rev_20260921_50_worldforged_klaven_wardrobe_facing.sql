@@ -1,0 +1,23 @@
+-- Worldforged pickup "Klaven's Wardrobe" (entry 95784, spawn 6901197) stands at an angle to the wall on the
+-- top floor of the Westfall Magetower, one corner buried in the stonework and the other jutting into the room.
+--
+-- Its position is an observed one and is right: the spawn's z 70.433 lands exactly on that floor's collision
+-- surface, the same level Klaven Mortwake (70.3957) and the room's chairs (70.43) sit on. The facing is not
+-- observed at all. modules/mod-worldforged-pickups/data/sql/db-world/2026_09_16_00_worldforged_pickups.sql
+-- states it outright: "no source holds the realm's own facing for these objects, so each spawn carries a
+-- stable per-object facing (build_pickups.py::facing_of)". For a piece of furniture against a wall that
+-- arbitrary angle is visible, and here it is 70 degrees out.
+--
+-- Measured against the client's own geometry (WESTFALL_MAGETOWER.WMO, placed by Azeroth_30_52.adt MODF at
+-- world -11126.86/569.96/36.63, yaw 238): rays cast from the spawn through the tower's collision hull put the
+-- nearest wall a flat 0.667 yd away at local bearing 315 for every height the wardrobe occupies, with the room
+-- opening opposite it. The wall is curved, so the alcove's inward normal is local bearing 135, which is world
+-- yaw 193. Facing that, the model (1.35 yd deep, 2.14 yd wide, back face 0.64 yd behind its origin) clears the
+-- stonework by 0.03 yd on every corner, so only the facing changes and the observed position is left alone.
+--
+-- rotation2/rotation3 follow the convention the rest of that file uses: sin(o/2), cos(o/2) about Z.
+--
+-- A regenerated pickups file would rewrite this spawn; upstream records such corrections in
+-- data/placements/overrides.csv, which is not carried in this repository.
+UPDATE `gameobject` SET `orientation` = 3.36849, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.993572,
+    `rotation3` = -0.113203 WHERE `guid` = 6901197 AND `id` = 95784;

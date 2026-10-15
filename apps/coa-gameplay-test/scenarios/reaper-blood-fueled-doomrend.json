@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "Reaper Blood Fueled raises the Doomrend heal absorb by 30%",
+  "contract": "Blood Fueled (705416) increases the healing absorbed by Doomrend (502668) by 30%.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "r",
+      "race": 5,
+      "class": 30,
+      "level": 43,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "b",
+      "race": 5,
+      "class": 30,
+      "level": 43,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "r",
+      "entry": 299,
+      "level": 43,
+      "distance": 2,
+      "health": 1000000
+    },
+    {
+      "id": "e",
+      "owner": "b",
+      "entry": 299,
+      "level": 43,
+      "distance": 2,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "r",
+      "id": 56
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 502668
+    },
+    {
+      "action": "set_aura",
+      "actor": "r",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "specialization",
+      "actor": "b",
+      "id": 56
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 502668
+    },
+    {
+      "action": "set_aura",
+      "actor": "b",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 705416
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Blood Fueled is known",
+      "actor": "b",
+      "metric": "knows_spell",
+      "spell": 705416,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Blood Fueled aura is active",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 705416,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 502668,
+      "target": "d"
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 502668,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "Doomrend absorbs the base amount",
+      "actor": "d",
+      "metric": "aura_amount",
+      "spell": 560361,
+      "effect": 0,
+      "caster": "r",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Blood Fueled raises the absorb by 30%",
+      "actor": "e",
+      "metric": "aura_amount",
+      "spell": 560361,
+      "effect": 0,
+      "caster": "b",
+      "equals": 130
+    }
+  ]
+}

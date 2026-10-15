@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Issue 4017: Palm Sigil cannot be cast while in Runeshroud",
-  "contract": "Palm Sigil (805380/805381/805382) is natively gated by CasterAuraSpell=808089, a marker named 'Runeshroud or Waveforged' that nothing else grants. SyncRuneshroudOrWaveforged mirrors Runeshroud (500288) / Waveforged (705565) onto that marker.",
+  "contract": "Palm Sigil (805380/805381/805382) is natively gated by CasterAuraSpell=808089, a marker named 'Runeshroud or Waveforged' that nothing else grants. SyncRuneshroudOrWaveforged mirrors Runeshroud (500288) / the Waveforged window (500469) onto that marker.",
   "timeout_ms": 90000,
   "players": [
     { "id": "runemaster", "race": 1, "class": 32, "level": 20 }

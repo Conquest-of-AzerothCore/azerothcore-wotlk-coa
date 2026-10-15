@@ -1,0 +1,972 @@
+{
+  "schema": 1,
+  "name": "Destiny Weaver: queued choices, armor, level refresh and fractional damage",
+  "contract": "Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1, offset=4, CoA.QuestLevelScaling=1. A level-59 caster sees the level-1 fixture at 55. A network-thread request must not change player state until a player update. Creature level and transmitted fields follow level changes; armor reduction changes physical mitigation; 67 one-damage hits against a level-1 pool viewed at level 55 remove one real HP, not 67. Scaling OFF restores ordinary damage. No network delivery or rendering is tested. Fixture entry 1501 uses the installed 0.93 HealthModifier: native health is 40 at level 1 and 2432 at level 55.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 8,
+      "level": 59,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "caster",
+      "entry": 1501,
+      "level": 1,
+      "health": 40,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "caster",
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "view_level",
+      "target": "target",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "caster",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "view_level",
+      "target": "target",
+      "equals": 55,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "sent_level",
+      "target": "target",
+      "equals": 55,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "sent_max_health",
+      "target": "target",
+      "equals": 2432,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 58
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "view_level",
+      "target": "target",
+      "equals": 54
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "sent_level",
+      "target": "target",
+      "equals": 54,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "sent_max_health",
+      "target": "target",
+      "min": 1,
+      "max": 2431,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 59
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "sent_level",
+      "target": "target",
+      "equals": 55,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "sent_max_health",
+      "target": "target",
+      "equals": 2432,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 770
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "armor_reduced_damage",
+      "spell": 78,
+      "target": "target",
+      "save_as": "armored_hit"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 770,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 770,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "armor_reduced_damage",
+      "spell": 78,
+      "target": "target",
+      "relative_to": "armored_hit",
+      "min": 1,
+      "label": "Armor debuff increases physical damage against the scaled view"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 705798
+    },
+    {
+      "action": "wait",
+      "ms": 1500,
+      "label": "Let the armor spell finish before measuring tiny hits"
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "before_tiny_hits"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 1"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 2"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 3"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 4"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 5"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 6"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 7"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 8"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 9"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 10"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "before_tiny_hits",
+      "equals": 0,
+      "label": "Ten tiny hits remain fractional"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 11"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 12"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 13"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 14"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 15"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 16"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 17"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 18"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 19"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 20"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 21"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 22"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 23"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 24"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 25"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 26"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 27"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 28"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 29"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 30"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 31"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 32"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 33"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 34"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 35"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 36"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 37"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 38"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 39"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 40"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 41"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 42"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 43"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 44"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 45"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 46"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 47"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 48"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 49"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 50"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 51"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 52"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 53"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 54"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 55"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 56"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 57"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 58"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 59"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 60"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 61"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 62"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 63"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 64"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 65"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 66"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target",
+      "label": "One-damage hit 67"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "before_tiny_hits",
+      "equals": -1,
+      "label": "Fractional hits accumulate to one real HP"
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "caster",
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "view_level",
+      "target": "target",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "before_unscaled_hit"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705798,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "before_unscaled_hit",
+      "equals": -1,
+      "within_ms": 2000,
+      "label": "Scaling OFF preserves a one-damage hit"
+    }
+  ]
+}

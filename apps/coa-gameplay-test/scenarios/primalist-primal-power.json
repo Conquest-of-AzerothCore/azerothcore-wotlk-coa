@@ -1,0 +1,263 @@
+{
+  "schema": 1,
+  "name": "Primalist Primal Power: next heal costs half Rage",
+  "contract": "Seismic Wave grants one 50% Hand of the Earthmother cost reduction, lasting eight seconds; other casts do not consume it.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 58
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 572878
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502808
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 520841
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 502808,
+      "equals": 350
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 572878,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 805463,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 8200
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 706216
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 572878,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 805463,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_charges",
+      "spell": 805463,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "spell": 805463,
+      "min": 7500,
+      "max": 8000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 502808,
+      "equals": 175
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520841,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_charges",
+      "spell": 805463,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502808,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "health",
+      "min": 800
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "power",
+      "power": 1,
+      "min": 800,
+      "max": 825
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 805463,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 502808,
+      "equals": 350
+    },
+    {
+      "action": "wait",
+      "ms": 8200
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 572878,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_charges",
+      "spell": 805463,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 8300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 805463,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 502808,
+      "equals": 350
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706216
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 572878,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 805463,
+      "equals": 0
+    }
+  ]
+}

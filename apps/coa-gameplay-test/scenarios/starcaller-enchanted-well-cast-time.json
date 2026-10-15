@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "Enchanted Well reduces Moonwell Splash's cast time by 0.3 sec (#1194)",
+  "contract": "Enchanted Well 680820 (Spell.dbc, SpellFamilyName 32, passive) effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 10 (SPELLMOD_CASTING_TIME), EffectBasePoints -301 with DieSides 1 -> -300 ms, EffectSpellClassMask word1 0x8. Moonwell Splash ranks 1-12 (800370, 503019-503029) carry SpellFamilyFlags word1 0x8 and CastingTimeIndex 19 (SpellCastTimes.dbc row 19 = 2500 ms), so the mask selects every rank; the tooltip is 'Reduces the cast time of Moonwell Splash by 0.3 sec.'. Native path: Player::ApplySpellMod adds the flat modifier inside SpellInfo::CalcCastTime before the haste multiplier. The module's own cast-time change for Moonwell Splash (AscensionStarcallerContracts.cpp:60, a -100% modifier on Eclipse 800386) needs the Eclipse aura, absent on both fixtures. The spell_cast_time_ms metric returns SpellInfo::CalcCastTime(player). Both fixtures are the same race, class and level with no ratings, so their cast-speed multipliers are identical. Expected: 2500 on the control, 2200 (-300) with the talent, on rank 12 (503029) and rank 1 (800370).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 680820
+    },
+    {
+      "action": "assert",
+      "label": "Learning the talent applies its passive aura",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 680820,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Moonwell Splash rank 12 cast time without the talent",
+      "actor": "control",
+      "metric": "spell_cast_time_ms",
+      "save_as": "cast_base",
+      "spell": 503029
+    },
+    {
+      "action": "assert",
+      "label": "Control keeps the authored 2500 ms",
+      "actor": "control",
+      "metric": "spell_cast_time_ms",
+      "spell": 503029,
+      "equals": 2500
+    },
+    {
+      "action": "assert",
+      "label": "Enchanted Well removes 300 ms",
+      "actor": "talent",
+      "metric": "spell_cast_time_ms",
+      "spell": 503029,
+      "relative_to": "cast_base",
+      "equals": -300
+    },
+    {
+      "action": "snapshot",
+      "label": "Moonwell Splash rank 1 cast time without the talent",
+      "actor": "control",
+      "metric": "spell_cast_time_ms",
+      "save_as": "cast_r1_base",
+      "spell": 800370
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 loses 300 ms too",
+      "actor": "talent",
+      "metric": "spell_cast_time_ms",
+      "spell": 800370,
+      "relative_to": "cast_r1_base",
+      "equals": -300
+    }
+  ]
+}

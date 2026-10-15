@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Ranger Pathfinder (500336) rallies the party with native auras once cast (#1874)",
+  "contract": "Pathfinder 500336 (SpellFamilyName 27) reads 'Rally all party members within $a1yd, increasing movement speed by $s1% for $d and making them less likely to be detected by monsters.' Spell.dbc gives it three SPELL_EFFECT_APPLY_AURA effects on TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_PARTY with SpellRadius 18 = 15 yds and DurationIndex 29 = 12 sec: SPELL_AURA_MOD_INCREASE_SPEED (31) with BasePoints 69 + DieSides 1 = +70%, SPELL_AURA_DUMMY and SPELL_AURA_MOD_DETECTED_RANGE (152) with -15. All three are native aura handlers, so no script is needed; the audit's 'Effect 0: None' reading is not what the record holds. The record is granted by nothing in the live client catalog (SkillLineAbility 91484 on Farstrider only, AcquireMethod 0, no CharacterAdvancement row); the Ranger's live Pathfinder is the Archery talent 706284, covered by ranger-pathfinder-adrenaline-rush-elude. Expected once cast: the Ranger and a grouped ally within 15 yds both carry the aura, and the ally's run speed rises by exactly 70%.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 80 },
+    { "id": "ally", "race": 1, "class": 1, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the characters settle", "ms": 3000 },
+    { "action": "group", "actor": "ranger", "target": "ally" },
+    { "action": "learn", "actor": "ranger", "spell": 500336 },
+    { "action": "snapshot", "actor": "ally", "metric": "run_speed_rate", "save_as": "ally_speed" },
+    { "action": "cast", "label": "Rally the party", "actor": "ranger", "spell": 500336 },
+    {
+      "action": "assert", "label": "The Ranger carries Pathfinder", "actor": "ranger",
+      "metric": "aura", "spell": 500336, "caster": "ranger", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The grouped ally carries Pathfinder", "actor": "ally",
+      "metric": "aura", "spell": 500336, "caster": "ranger", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The ally's run speed rises by 70%", "actor": "ally",
+      "metric": "run_speed_rate", "ratio_to": "ally_speed", "min": 1.69, "max": 1.71
+    }
+  ]
+}

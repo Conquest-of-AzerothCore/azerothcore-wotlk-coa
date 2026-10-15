@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "name": "Predator chains Sanguine Mend and raises two crit damage bonuses (#1669)",
+  "contract": "Predator 300590 effect 0 is aura 108 with MiscValue 15 (SPELLMOD_CRIT_DAMAGE_BONUS), BasePoints 9 + DieSides 1 = +10%, over EffectSpellClassMask (0, 2097152, 16384) = word 1 bit 21 (the Sanguine Rupture damage rows 800775, 802496) and word 2 bit 14 (Claw Sweep 500169, 500436-500441, 500444). Effect 1 is aura 107 with MiscValue 17 (SPELLMOD_JUMP_TARGETS) and BasePoints 1 + DieSides 1 = +2, over (524288, 0, 0) = word 0 bit 19 = the nine Sanguine Mend records (504079-504086, 802310). Spell::SelectImplicitChainTargets starts from ChainTarget 0, applies SPELLMOD_JUMP_TARGETS to reach 2 and chains to maxTargets - 1 = 1 extra ally. Tooltip: \"Your Sanguine Mend now heals ${$m2-1} additional nearby target. Increases the critical damage of Claw Sweep and Sanguine Rupture by $s1%.\" Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Sanguine Mend chains to nobody before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 504086,
+      "op": 17,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Claw Sweep's critical damage unmodified before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 500444,
+      "op": 15,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 300590
+    },
+    {
+      "action": "assert",
+      "label": "Predator raises Sanguine Mend's chain target count to 2",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 504086,
+      "op": 17,
+      "base": 0,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Predator raises Claw Sweep's critical damage by 10%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 500444,
+      "op": 15,
+      "base": 100,
+      "equals": 110
+    },
+    {
+      "action": "assert",
+      "label": "Predator raises Sanguine Rupture's critical damage by 10%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 800775,
+      "op": 15,
+      "base": 100,
+      "equals": 110
+    },
+    {
+      "action": "assert",
+      "label": "Predator does not touch Bloodbolt",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 15,
+      "base": 100,
+      "equals": 100
+    }
+  ]
+}

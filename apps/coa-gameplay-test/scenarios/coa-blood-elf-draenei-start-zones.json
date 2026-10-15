@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Blood Elves start in Deathknell and Draenei in Shadowglen",
+  "contract": "A new Blood Elf is created at the Undead start in Deathknell, Tirisfal Glades (map 0, 1676.71 1678.31 121.67), and a new Draenei at the Night Elf start in Shadowglen, Teldrassil (map 1, 10311.3 832.463 1326.41), instead of Sunstrider Isle and Ammen Vale on map 530. Each character's hearthstone is bound where it starts.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "bloodelf", "race": 10, "class": 20, "level": 1 },
+    { "id": "draenei", "race": 11, "class": 20, "level": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the characters settle", "ms": 2000 },
+    { "action": "assert", "label": "The Blood Elf is on Eastern Kingdoms", "actor": "bloodelf", "metric": "map_id", "equals": 0 },
+    { "action": "assert", "label": "At the Deathknell start", "actor": "bloodelf", "metric": "position_x", "min": 1674.71, "max": 1678.71 },
+    { "action": "assert", "actor": "bloodelf", "metric": "position_y", "min": 1676.31, "max": 1680.31 },
+    { "action": "assert", "label": "Its hearthstone is bound there", "actor": "bloodelf", "metric": "at_homebind", "equals": 1 },
+    { "action": "assert", "label": "The Draenei is on Kalimdor", "actor": "draenei", "metric": "map_id", "equals": 1 },
+    { "action": "assert", "label": "At the Shadowglen start", "actor": "draenei", "metric": "position_x", "min": 10309.3, "max": 10313.3 },
+    { "action": "assert", "actor": "draenei", "metric": "position_y", "min": 830.463, "max": 834.463 },
+    { "action": "assert", "label": "Its hearthstone is bound there", "actor": "draenei", "metric": "at_homebind", "equals": 1 }
+  ]
+}

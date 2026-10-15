@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Gorge grants and refreshes 10 Pooled Vitality stacks every 5 sec (#3446)",
+  "contract": "Spell.dbc gives Gorge 804805 DurationIndex 8 (15000 ms), AttributesEx5 0x200 (SPELL_ATTR5_EXTRA_INITIAL_PERIOD, so it ticks at 0/5/10/15 s) and effect 0 = aura 23 (SPELL_AURA_PERIODIC_TRIGGER_SPELL) with Amplitude 5000 and TriggerSpell 520318. 520318 carries effect 175 (SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS) with MiscValue 10 and TriggerSpell 680687 (Pooled Vitality, StackAmount 10, DurationIndex 2). The tooltip - 'Instantly gain 10 stacks of Pooled Vitality every 5 sec for 15 sec' - is met by native code alone: AuraEffect::HandlePeriodicTriggerSpellAuraTick casts the child with TRIGGERED_FULL_MASK and Spell::EffectAscensionModifyAuraStacks -> ModifyAscensionAuraStacks adds the stacks or applies the aura with them. No module script is involved, so this scenario is a regression guard, not a fix check. Ten is already the cap, so the periodic half is proven by the duration refresh instead: ModifyAscensionAuraStacks calls Aura::ModStackAmount, which refreshes timers for every aura except the Stormbringer/Earthshaping special cases.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling and login settle", "ms": 5000 },
+    { "action": "learn", "actor": "bloodmage", "spell": 804805 },
+    { "action": "cast", "actor": "bloodmage", "spell": 804805 },
+    { "action": "wait", "label": "Past the initial period at t+0", "ms": 1000 },
+    {
+      "action": "assert",
+      "label": "Gorge is running",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 804805,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The initial tick grants the full 10 Pooled Vitality stacks",
+      "actor": "bloodmage",
+      "metric": "aura_stacks",
+      "spell": 680687,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Gorge is on its 90 sec cooldown",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 804805,
+      "min": 80000
+    },
+    { "action": "wait", "label": "Approach the 5 sec tick", "ms": 3000 },
+    {
+      "action": "snapshot",
+      "label": "Pooled Vitality duration just before the second tick",
+      "actor": "bloodmage",
+      "metric": "aura_duration_ms",
+      "spell": 680687,
+      "save_as": "pool_before_tick"
+    },
+    { "action": "wait", "label": "Cross the 5 sec tick boundary", "ms": 1500 },
+    {
+      "action": "assert",
+      "label": "The 5 sec tick refreshed Pooled Vitality instead of letting it run down",
+      "actor": "bloodmage",
+      "metric": "aura_duration_ms",
+      "spell": 680687,
+      "relative_to": "pool_before_tick",
+      "min": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The refreshed aura is still capped at 10 stacks",
+      "actor": "bloodmage",
+      "metric": "aura_stacks",
+      "spell": 680687,
+      "equals": 10
+    }
+  ]
+}

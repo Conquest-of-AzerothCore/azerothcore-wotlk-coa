@@ -1,0 +1,509 @@
+#
+# CoA: Ascension client compatibility
+#
+
+[worldserver]
+
+# Enable the compatibility packet filter.
+CoA.Enable = 1
+
+# Maximum crafted-item upgrade steps: 0 disables upgrade kits, 1 allows Refined,
+# 2 allows Superior, and 3 allows Masterwork. Default: 2. Values are clamped to 0-3.
+# Applies on startup and config reload; existing upgraded items remain unchanged.
+# Shirts, bags/quivers, Arclight Spanner and excluded ambiguous families cannot be upgraded.
+CoA.Crafting.MaxUpgradeSteps = 2
+
+# Apply the Ascension protocol settings to remote connections as well as loopback
+# (extension opcodes, ping interval, spell-modifier layout, class-10 mapping).
+# Enable only on realms dedicated to the matching Ascension client build.
+# Authentication proofs and packet size checks remain required. Restart to apply.
+CoA.AllowRemoteClients = 0
+
+# Ascension's classless character creator submits class ID 10 (Hero).
+# 1 - Create a stock warrior shell instead.
+# 0 - Create a Hero. Use this on a realm with CoA.ClassModel = "hero".
+CoA.MapClass10ToWarrior = 1
+
+# Log each consumed extension packet during protocol discovery.
+CoA.LogConsumedPackets = 1
+
+# Ascension character screen: enable/disable (activate/deactivate) and the
+# per-account character list sort order.
+# Requests: CMSG 0x072E / 0x072F / 0x0772.
+# Responses: SMSG 0x075E / 0x075F / 0x0760 / 0x076F / 0x0770 / 0x0771.
+CoA.CharacterSelectionEnable = 1
+
+# Maximum simultaneously active characters per account (1-128).
+# Deactivated characters stay stored, are hidden from the standard character
+# list and can be re-activated later.
+CoA.CharacterSelectionMaxActive = 128
+
+# Automatically add appearance and vanity entries for items obtained by a character.
+CoA.AutoCollectAppearances = 1
+
+# Drop at most one wearable item matching an enemy's visible equipment on a rewarded kill.
+# Uses NPC display presets or CreatureDisplayInfoExtra, plus the current weapon/shield entries.
+# Only unbound/BoE gear up to uncommon quality, at or below the enemy's level, is eligible.
+# Stats prefer caster Intellect, defender defenses/Stamina or physical Strength/Agility.
+# The per-kill percentage is a local reconstruction default; original rates were not captured.
+CoA.EquippedGearLoot = 1
+CoA.EquippedGearLootChance = 5
+
+# Health and damage multipliers for regular-difficulty creatures, tuned to Ascension's combat logs.
+# Health is multiplied when a creature takes its level; damage applies to hits on players and their pets.
+# Heroic/Mythic, battlegrounds, arenas, pets, summons, totems, triggers, critters and training dummies are
+# not changed; raid creatures listed in coa_boss_flex keep their measured flex health.
+# MapHealth/MapDamage replace the context value per map as "mapId:multiplier".
+# Without this section the server keeps these multipliers but leaves the feature disabled.
+CoA.CreatureScaling.Enable = 1
+CoA.CreatureScaling.World.Health = 2.5
+CoA.CreatureScaling.Dungeon.Health = 2.5
+CoA.CreatureScaling.Raid.Health = 2.2
+CoA.CreatureScaling.MapHealth = "36:2.2 43:2.0 229:4.0 389:3.0 469:5.0"
+CoA.CreatureScaling.World.Damage = 2.0
+CoA.CreatureScaling.Dungeon.Damage = 1.5
+CoA.CreatureScaling.Raid.Damage = 1.0
+CoA.CreatureScaling.MapDamage = ""
+
+# Wardrobe, outfits, vanity and mount/companion collections for characters played by bots.
+# 0 - never: bot sessions skip the collections (default).
+# 1 - only characters of player accounts played as bots (alts), never random bot accounts:
+#     their saved outfits and appearances are applied as for the player.
+# 2 - every bot session.
+# Random bot accounts are recognised by their name prefix, CoA.RandomBotAccountPrefix, which
+# must match AiPlayerbot.RandomBotAccountPrefix of mod-playerbots (default: rndbot).
+CoA.CollectionsForBots = 0
+CoA.RandomBotAccountPrefix = "rndbot"
+
+# Solo-server convenience: unlock the complete local appearance catalog. The
+# per-category value balances the initial snapshot; remaining appearances are
+# streamed afterward to stay below the legacy client's 64 KiB packet limit.
+CoA.UnlockLocalAppearanceCatalog = 1
+CoA.AppearanceCatalogPerCategory = 500
+
+# Solo-server convenience: expose every static VanityCollection entry as account-owned.
+# Custom Ascension-only entries still require matching server item/spell templates to deliver.
+CoA.UnlockAllVanity = 1
+
+# If a vanity item has no server item template but its DBC row names a valid spell,
+# learn that spell directly when delivery is requested.
+CoA.AllowLearnedSpellDelivery = 1
+
+# Teach owned Vanity mount/companion spells permanently, in small login batches.
+# Ownership remains unchanged. Entries without a local spell are not invented.
+CoA.LearnOwnedCompanions = 1
+
+# Solo-server convenience: all riding ranks (300/300) and Cold Weather Flying
+# from the first login, including level-one characters. No profession grants.
+CoA.MaxRidingFromStart = 1
+
+# Give a character that carries none of the three PvP ruleset auras the PvE set at login,
+# because character creation grants no ruleset and the client's selection frame is level- and
+# rested-area gated. The PvE set is the PvE Mode aura 9931032 alone, exactly what pressing
+# "PvE Mode" applies. Independently of this setting, a character carrying the War Mode aura 1004119
+# next to PvE Mode loses the War Mode aura at login.
+# Set to 0 to leave such characters on Ruleset.None instead.
+CoA.RulesetLoginDefault = 1
+
+# War Mode (1004119 without PvE Mode) and High-Risk (1004019) switch creature, chest and quest level
+# scaling off in the open world, as their tooltips state: "Level scaling is disabled while in War
+# Mode / High-Risk". Instances keep the character's own choice. Set to 0 to let the rulesets scale.
+CoA.Ruleset.DisableLevelScaling = 1
+
+# Quests with a row in the client's QuestTemplateScaling.dbc trail the character: the row's highest
+# point at or below the character's level sets the quest to that level plus its offset (the shipped
+# rows trail by 4 to 1 levels), held within the row's minimum and maximum level and never below the
+# quest's own level. Experience is priced at that level, and money by its tier's ratio between that
+# level and the quest's own. Quests without a row keep their authored level.
+CoA.QuestLevelScaling = 1
+
+# Mark a quest on its curve with the client's scaling flag (0x01000000), which colours it "standard"
+# instead of by level. Live quest caches never carried the flag.
+CoA.QuestLevelScaling.ClientFlag = 0
+
+# Weapons and armor dropped by level-scaled creatures, found in chests by characters who chose
+# level scaling or given by level-scaled quests are lifted to the level of that content, rounded down
+# to a step of five levels, as copies with entries from 4400001 up. Shirts, tabards and items without
+# an item level are left as they are.
+# Set to 0 to stop new lifts; copies already handed out keep working. While native item scaling
+# (CoA.ItemScaling.Native) is active no new copies are made either.
+CoA.ItemScaling = 1
+
+# Weapons and armor that the client's ItemStat.dbc has a level ladder for keep their own entry and are
+# given a scaling level instead of a copy: the looter's level plus LootLevelOffset, from 1 to 65, set
+# once when the item is looted, won in a roll or, with QuestRewards, given by a quest. Their stats come
+# from the ladder row for that level, and the client asks for the same row with opcode 0x6FF.
+# Worldforged items and items the copy path never lifts stay as they are. While it is active the copy
+# path (CoA.ItemScaling) makes no new copies at all; copies already handed out keep working.
+# Read at startup only. With 0, items keep their authored stats and the copy path handles them again.
+CoA.ItemScaling.Native = 1
+CoA.ItemScaling.Native.LootLevelOffset = 0
+CoA.ItemScaling.Native.QuestRewards = 1
+
+# LevelKeys stores the client's item key for the level instead of the level itself (level + 2 up to 20,
+# + 3 up to 30, + 4 up to 50, + 5 up to 60, the client's table above), as the Ascension client does;
+# a quest reward then takes the quest's own scaled level, or the key of the player's level.
+# Preview (needs LevelKeys) shows each character the version of an item they would receive: the
+# loot window and corpse level, roll frames, inspect, mail and auctions. Both are read at startup only.
+CoA.ItemScaling.Native.LevelKeys = 0
+CoA.ItemScaling.Native.Preview = 0
+
+# Automatic progression: hand out the class abilities and rank upgrades for the
+# character's class and level as they level up. Set to 0 to stop that
+# and let the player ask instead - a Book of Ascension grants them, so a realm that
+# wants the books to be the way abilities are earned runs with this off. A talent
+# tree's free nodes are granted either way: the books do not sell them. Reloadable.
+CoA.AutoProgression = 0
+
+# Stream the CreatureDisplayInfo patch rows the installed Ascension client cannot
+# resolve from its own files (custom display ids). The stream starts after the
+# client's extension handshake, with a short login fallback when it never arrives.
+CoA.SendDisplayPatches = 1
+
+# Unpatched copy of the client's CreatureDisplayInfo.dbc, used to stream exactly
+# the rows the client is missing. Empty selects DataDir/dbc_clientset; when the
+# copy is unavailable, every display id at or above 652000 is streamed instead.
+CoA.ClientDbcDirectory = ""
+
+# Extension range derived from the installed client's opcode dispatch table.
+# Keep these values decimal because ConfigMgr numeric values are parsed as decimal.
+CoA.FirstExtensionOpcode = 1311
+CoA.LastExtensionOpcode = 2515
+
+# Experimental local Manastorm. Requires the matching character migration and client UI patch.
+# Startup-only: solo levels 10-59, three scenes, depths 1-15. Realm level cap is unchanged.
+# Enable only with the reviewed installation package; native gameplay acceptance is still required.
+Ascension.Manastorm.Enable = 0
+
+# What kind of realm the client is told it is on: one or more of live,
+# seasonal, league, ptr and development, separated by spaces. Each type sent
+# opens the client's rows flagged for it, so "live seasonal" shows the
+# Character Advancement entries of both, as a seasonal realm on live
+# infrastructure does. An empty or unknown value sends live.
+#
+# This is not cosmetic. The client builds its vanity catalogue only from rows
+# that match an active realm type, so with none set the Vanity Collection stays
+# empty no matter what the account owns.
+# Default: live
+CoA.RealmType = "live"
+
+#
+#    CoA.ClassModel
+#        Description: Character-creation mode advertised to the client in
+#                     SMSG_REALM_INFO when the character list is requested.
+#                     "coa"  - Conquest of Azeroth classes. Default.
+#                     "wcr"  - Warcraft Reborn (classic) classes.
+#                     "hero" - free-pick Hero.
+#        Default:     "coa"
+#
+
+CoA.ClassModel = "coa"
+
+#
+#    CoA.GameModeMask
+#        Description: Custom game-mode bits sent to the client when a character logs in, which
+#                     turn on the matching client UI and rules. Add values to combine modes.
+#                     2    - Ironman
+#                     4    - Survivalist
+#                     8    - Draft
+#                     32   - Resolute
+#                     64   - Wildcard
+#                     128  - Felforged
+#                     256  - Nightmare
+#                     2048 - Build Draft
+#                     4096 - Crusader
+#        Default:     0 - no custom game mode
+#
+
+CoA.GameModeMask = 0
+
+#
+#    CoA.ClientBooleanConfigs
+#    CoA.ClientIntegerConfigs
+#        Description: Extra client configs sent in SMSG_COA_CONFIG, as a comma-separated NAME=value list.
+#                     They select realm-specific client UI, for example
+#                     "CONFIG_LEGACY_CHARACTER_ADVANCEMENT_ENABLED=0" loads the current Character
+#                     Advancement UI instead of the Season 9 one on a free-pick realm.
+#        Default:     "" - none
+#
+
+CoA.ClientBooleanConfigs = ""
+CoA.ClientIntegerConfigs = ""
+
+###################################################################################################
+# HIGH-RISK PACKAGE
+#
+#    HighRisk.Losses
+#        Description: Deaths in the open world while under the High-Risk ruleset (aura 1004019) move
+#                     tradeable equipment, bag resources and gold into a persistent chest that any
+#                     living High-Risk player nearby can recover. Kill XP is unchanged: the ruleset
+#                     aura already carries the native bonus.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+HighRisk.Losses = 0
+
+#    HighRisk.GearChance
+#    HighRisk.ResourceChance
+#    HighRisk.GoldChance
+#        Description: Percent chance, per eligible death, that each category is lost. Realm tuning,
+#                     not verified Ascension rates. If every roll misses, one available category is
+#                     still chosen so an eligible death never silently produces no chest.
+#        Default:     50
+
+HighRisk.GearChance = 50
+HighRisk.ResourceChance = 50
+HighRisk.GoldChance = 50
+
+###################################################################################################
+# RATED SOLO ARENA
+#
+#    RatedSoloArena.RoleBalanceWaitSeconds
+#        Description: Seconds the oldest rated solo queue entry waits before matchmaking may ignore the
+#                     healer balance (one healer per side or none). Balanced lineups stay preferred.
+#        Default:     60
+#                     0 - (Never relax the healer balance)
+
+RatedSoloArena.RoleBalanceWaitSeconds = 60
+
+#    RatedSoloArena.RoleBalance.2v2
+#    RatedSoloArena.RoleBalance.3v3
+#        Description: Whether rated solo lineups of the bracket require the healer balance until
+#                     RatedSoloArena.RoleBalanceWaitSeconds has elapsed. When disabled, any split is
+#                     accepted from the start and a role-balanced split is still preferred when one exists.
+#        Default:     0 - (2v2: double damage lineups allowed)
+#                     1 - (3v3: healer balance required)
+
+RatedSoloArena.RoleBalance.2v2 = 0
+RatedSoloArena.RoleBalance.3v3 = 1
+
+#    RatedSoloArena.Win.ArenaPoints.1v1
+#    RatedSoloArena.Win.ArenaPoints.2v2
+#    RatedSoloArena.Win.ArenaPoints.3v3
+#        Description: Arena Points granted to each winner of a rated solo or party match, by bracket.
+#        Default:     25 (1v1), 300 (2v2), 300 (3v3)
+
+RatedSoloArena.Win.ArenaPoints.1v1 = 25
+RatedSoloArena.Win.ArenaPoints.2v2 = 300
+RatedSoloArena.Win.ArenaPoints.3v3 = 300
+
+#    RatedSoloArena.Win.RunesOfAscension
+#        Description: Runes of Ascension (item 375250) granted to each winner of a rated solo or party match.
+#        Default:     25
+
+RatedSoloArena.Win.RunesOfAscension = 25
+
+#    RatedSoloArena.SeasonCap.PerWeek
+#        Description: Conquest cap on Arena Points earned from rated solo arena wins during the current
+#                     arena season. The cap grows by this amount at each weekly reset since the season
+#                     started (week 1 = one step).
+#        Default:     12000
+
+RatedSoloArena.SeasonCap.PerWeek = 12000
+
+#    RatedSoloArena.SeasonCap.Max
+#        Description: Upper limit of the season conquest cap.
+#        Default:     0 - (No limit)
+
+RatedSoloArena.SeasonCap.Max = 0
+
+#    RatedSoloArena.Tier.Combatant
+#        Description: Personal rating shown as the Combatant rank in the PvP frame. Combatant has no title.
+#        Default:     1400
+
+RatedSoloArena.Tier.Combatant = 1400
+
+#    RatedSoloArena.Title.Challenger
+#    RatedSoloArena.Title.Rival
+#    RatedSoloArena.Title.Duelist
+#    RatedSoloArena.Title.Gladiator
+#        Description: Personal rating in a rated solo bracket that grants the matching character title
+#                     the first time it is reached. Titles are never removed.
+#        Default:     1700 (Challenger), 2000 (Rival), 2300 (Duelist), 2600 (Gladiator)
+
+RatedSoloArena.Title.Challenger = 1700
+RatedSoloArena.Title.Rival = 2000
+RatedSoloArena.Title.Duelist = 2300
+RatedSoloArena.Title.Gladiator = 2600
+
+#    PvpPower.Enable
+#        Description: Item spells named "PvP Power (+N)" scale damage and healing at level 60, capped at
+#                     495 points. Damage +0.05% per point against players (and against uncontrolled
+#                     creatures for a High-Risk attacker in the open world); creature damage received
+#                     there -0.05% per point; healing and shields +0.02% per point in War Mode,
+#                     High-Risk open world and battlegrounds.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+PvpPower.Enable = 0
+
+#    Bloodforged.Enable
+#        Description: Adds one independent Bloodforged roll to eligible open-world creature corpses
+#                     for High-Risk players from level 15, drawn from the reviewed catalogue in
+#                     coa_bloodforged_catalogue. Requires PvpPower.Enable.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+Bloodforged.Enable = 0
+
+#    Bloodforged.Rates15
+#    Bloodforged.Rates25
+#    Bloodforged.Rates35
+#    Bloodforged.Rates45
+#    Bloodforged.Rates55
+#        Description: Percent per eligible corpse for the level band starting at that level, as three
+#                     values: uncommon, rare, epic. Independent rolls, one quality per roll.
+#        Default:     "4.50 0.50 0.00", "4.00 1.00 0.00", "3.80 1.40 0.15", "3.60 1.80 0.25", "3.40 2.20 0.40"
+
+Bloodforged.Rates15 = "4.50 0.50 0.00"
+Bloodforged.Rates25 = "4.00 1.00 0.00"
+Bloodforged.Rates35 = "3.80 1.40 0.15"
+Bloodforged.Rates45 = "3.60 1.80 0.25"
+Bloodforged.Rates55 = "3.40 2.20 0.40"
+
+#
+#    Ascension.PrestigiousCache.ReleaseStage
+#        Description: The newest tier the realm has released, 1-6. A Prestigious Cache pays
+#                     tokens of its own content only, and never one from a tier above this
+#                     one, so a Classic-stage realm never hands out a Tier 6 token. Tier
+#                     2.5 counts as 2.5, so 3 still covers it.
+#        Default:     6
+
+Ascension.PrestigiousCache.ReleaseStage = 6
+
+#
+#    Ascension.PrestigiousCache.TokenChancePercent
+#        Description: Chance for a Prestigious Cache to also hand over one of its own tier's
+#                     tokens, "a chance of one or more global tier tokens, if tiers are
+#                     released" as the cache's own description puts it. A cache whose
+#                     content has no token of its own pays none.
+#        Default:     25
+
+Ascension.PrestigiousCache.TokenChancePercent = 25
+
+#
+#    Ascension.PrestigiousCache.SecondTokenChancePercent
+#        Description: Chance for that first token to be two.
+#        Default:     5
+
+Ascension.PrestigiousCache.SecondTokenChancePercent = 5
+
+#
+#    Ascension.PrestigiousCache.ClassicStages
+#        Description: How many of the Classic Prestigious Caches are released, 0-8, in the
+#                     order 1287304 held for Heroic Dungeons, Zul'Gurub, Molten Core,
+#                     Onyxia, Blackwing Lair, Ruins of Ahn'Qiraj, Temple of Ahn'Qiraj,
+#                     Naxxramas. The generic "most recent Prestigious Cache available"
+#                     resolves to the newest released one.
+#        Default:     8
+
+Ascension.PrestigiousCache.ClassicStages = 8
+
+#
+#    Ascension.PrestigiousCache.TbcStages
+#        Description: How many of the Burning Crusade Prestigious Caches are released, 0-9,
+#                     in the order 1297310 held for Karazhan, Gruul's Lair, Magtheridon's
+#                     Lair, Serpentshrine Caverns, Tempest Keep, Zul'Aman, The Battle for
+#                     Mount Hyjal, Black Temple, Sunwell. Zero keeps the generic caches on
+#                     the Classic ladder.
+#        Default:     0
+
+Ascension.PrestigiousCache.TbcStages = 0
+
+#
+#    Ascension.CallboardCache.ReleaseStage
+#        Description: The realm's current content progression stage, 0-7, in the order the
+#                     Callboard Caches released: Heroic and Mythic Dungeons, Zul'Gurub,
+#                     Molten Core, Onyxia's Lair, Blackwing Lair, Ruins of Ahn'Qiraj,
+#                     Temple of Ahn'Qiraj, Naxxramas. A generic Callboard Cache resolves
+#                     to a tier at or below this stage.
+#                     The same stage gates the Classic raids: a raid above it is closed,
+#                     entering it shows "Instance is closed" and a character logging in
+#                     inside it is moved out (0 closes every raid, 2 opens Zul'Gurub and
+#                     Molten Core). Game Masters still enter; other maps are not affected.
+#                     Applied on .reload config.
+#        Default:     7
+
+Ascension.CallboardCache.ReleaseStage = 7
+
+#
+#    Ascension.CallboardCache.PreviousStageOnly
+#        Description: Hold every generic Callboard Cache one stage below the released one.
+#                     The 1378050 cache promises "gear up to the previous tier released"
+#                     and stops there on its own whatever this is set to.
+#        Default:     0
+
+Ascension.CallboardCache.PreviousStageOnly = 0
+
+#
+#    Ascension.CallboardCache.ItemLevelAllowance
+#        Description: How far above the opener's average equipped item level a Callboard
+#                     Cache may reach: "This Callboard Cache gives you rewards based on
+#                     your item level." Rewards are preferred at the opener's own level or
+#                     above, never further up than this allowance.
+#        Default:     6
+
+Ascension.CallboardCache.ItemLevelAllowance = 6
+
+#
+#    Ascension.CallboardCache.CachePoints
+#        Description: Callboard Cache progress points that pay one cache. Each Callboard
+#                     quest adds its points from ascension_callboard_quest_points; a full
+#                     bar pays the cache of the highest released ascension_callboard_cache_tier
+#                     row at or below the character's highest average item level reached,
+#                     and the remainder carries over. The client shows a tenth of every
+#                     amount: a 150-point bar as 15, a 25-point quest as 3 (rounded up).
+#        Default:     150
+
+Ascension.CallboardCache.CachePoints = 150
+
+#
+#    Ascension.CallboardCache.GoldMin
+#    Ascension.CallboardCache.GoldMax
+#        Description: Gold paid on top of the item when a Callboard Cache opens, rolled
+#                     between these two amounts. GoldMax 0 pays no gold.
+#        Default:     5, 15
+
+Ascension.CallboardCache.GoldMin = 5
+Ascension.CallboardCache.GoldMax = 15
+
+#
+#    CoA.DungeonTuning.Enable
+#        Description: Allow `.mythic damage` and `.mythic health` in 5-man dungeons. Every player can
+#                     raise or lower the damage and health of the creatures in their own instance
+#                     by a percentage to try values; each change is logged as a TUNING line.
+#                     For test realms; switch it off on a live realm.
+#        Default:     1
+
+CoA.DungeonTuning.Enable = 1
+
+#
+#    CoA.TestZoneBonus.AnnounceIntervalMinutes
+#        Description: How often every player is told which test zones are active and what they earn
+#                     there. The zones themselves live in coa_test_zone_bonus and are managed with
+#                     .testzone; making a zone a test zone is always announced. 0 turns the reminder off.
+#        Default:     15
+
+CoA.TestZoneBonus.AnnounceIntervalMinutes = 15
+
+CrowsCache.Enable = 0
+CrowsCache.IntervalSeconds = 10800
+CrowsCache.WarningSeconds = 1800
+CrowsCache.X = -7831
+CrowsCache.Y = -3465
+CrowsCache.Z = 56.87
+
+CrowsCache.RandomLocation = 1
+CrowsCache.Silithus.X = -7203.1616
+CrowsCache.Silithus.Y = 372.38562
+CrowsCache.Silithus.Z = 25.355282
+CrowsCache.Silithus.O = 4.4326873
+
+CrowsCache.Needles.X = -5805.1646
+CrowsCache.Needles.Y = -3899.4047
+CrowsCache.Needles.Z = -95.3205
+CrowsCache.Needles.O = 3.215081
+CrowsCache.Barrens.X = -763.6296
+CrowsCache.Barrens.Y = -3191.6892
+CrowsCache.Barrens.Z = 91.666626
+CrowsCache.Barrens.O = 2.3004022

@@ -1,0 +1,272 @@
+{
+  "schema": 1,
+  "name": "Primalist Therazane's Gift: native Rage and mana bonuses",
+  "contract": "Native flat modifiers add 5 Rage and five percentage points of maximum mana to Therazane's Rage. Verify ordinary casts before, with and after the talent, measuring energize packets separately from regeneration.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 503736
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "max_power",
+      "power": 0,
+      "save_as": "max_mana"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 503735,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 503736
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 503736,
+      "power": 0,
+      "save_as": "baseline_p0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 503736,
+      "power": 1,
+      "save_as": "baseline_p1"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 503736
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 503736,
+      "power": 1,
+      "relative_to": "baseline_p1",
+      "equals": 200
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 503736,
+      "power": 0,
+      "relative_to": "baseline_p0",
+      "save_as": "baseline_mana",
+      "label": "baseline_mana"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 503735,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 504219
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 503735,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 503736
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 503736,
+      "power": 0,
+      "save_as": "talented_p0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 503736,
+      "power": 1,
+      "save_as": "talented_p1"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 503736
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 503736,
+      "power": 1,
+      "relative_to": "talented_p1",
+      "equals": 250
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 503736,
+      "power": 0,
+      "relative_to": "talented_p0",
+      "save_as": "talented_mana",
+      "label": "talented_mana"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 503735,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504219
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 503735,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 503736
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 503736,
+      "power": 0,
+      "save_as": "removed_p0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 503736,
+      "power": 1,
+      "save_as": "removed_p1"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 503736
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 503736,
+      "power": 1,
+      "relative_to": "removed_p1",
+      "equals": 200
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 503736,
+      "power": 0,
+      "relative_to": "removed_p0",
+      "save_as": "removed_mana",
+      "label": "removed_mana"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 503735,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    }
+  ]
+}

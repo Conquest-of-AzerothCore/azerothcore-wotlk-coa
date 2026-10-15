@@ -1,0 +1,406 @@
+{
+  "schema": 1,
+  "name": "Primalist Raging Earth: one ground fissure per Quake, three ticks, AP scaling and removal",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "empty",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "enemy",
+      "race": 5,
+      "class": 1,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    },
+    {
+      "id": "target2",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 4
+    },
+    {
+      "id": "far",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "pvp",
+      "actor": "primalist",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "empty",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "ally",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9621.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "empty",
+      "map": 0,
+      "x": -9517.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 196
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 505157
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 803138
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "specialization",
+      "actor": "empty",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "empty",
+      "spell": 196
+    },
+    {
+      "action": "learn",
+      "actor": "empty",
+      "spell": 505157
+    },
+    {
+      "action": "learn",
+      "actor": "empty",
+      "spell": 803138
+    },
+    {
+      "action": "add_item",
+      "actor": "empty",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "empty",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 681089,
+      "periodic": true,
+      "target": "far",
+      "save_as": "base_damage"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 681089,
+      "periodic": true,
+      "target": "far",
+      "relative_to": "base_damage",
+      "min": 6,
+      "max": 7
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 26395,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 681089,
+      "periodic": true,
+      "target": "far",
+      "relative_to": "base_damage",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 26395,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 706622
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object",
+      "spell": 681089,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 505157,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 750
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object",
+      "spell": 681089,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object_duration_ms",
+      "spell": 681089,
+      "min": 4500,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 6500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681089,
+      "equals": 9
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681089,
+      "target": "enemy",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681089,
+      "target": "target",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681089,
+      "target": "target2",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681089,
+      "target": "ally",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681089,
+      "target": "far",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object",
+      "spell": 681089,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706622
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 505157,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 6500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681089,
+      "equals": 9
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object",
+      "spell": 681089,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "empty",
+      "spell": 706622
+    },
+    {
+      "action": "cast",
+      "actor": "empty",
+      "spell": 505157
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "empty",
+      "metric": "dynamic_object",
+      "spell": 681089,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 6500
+    },
+    {
+      "action": "assert",
+      "actor": "empty",
+      "metric": "dynamic_object",
+      "spell": 681089,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "empty",
+      "metric": "spell_damage_count",
+      "spell": 681089,
+      "equals": 0
+    }
+  ],
+  "contract": "The fissure coefficient probe queries the unhit creature 'far', so normal class 887019 (-15%) and Mountain King 887085 (+1%) tuning multiply it by 0.8585: the 100 AP increase of 7-9 before tuning reads 6-7 (1016 x 0.8585 = 872, 1024 x 0.8585 = 879)."
+}

@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Blazing Chariot already boosts Radiance's healing and damage by 125% (#1574)",
+  "contract": "300350 is ADD_PCT_MODIFIER (aura 108), MiscValue 0 = SPELLMOD_DAMAGE, EffectSpellClassMask word 0 = 0x80000000. Radiance's cast spell (800038) carries that exact bit in its own SpellFamilyFlags word 0 (0x80000000, a top-bit encoding). SpellInfo::IsAffectedBySpellMod's generic flag96 AND matches. BasePoints 124 resolves to 125 (DieSides 1), matching 'Increases the healing and damage of Radiance by 125%'. SPELLMOD_DAMAGE is applied inside both Unit::SpellHealingBonusDone (effect 0, SPELL_EFFECT_HEAL) and Unit::SpellDamageBonusDone (effect 1, SPELL_EFFECT_SCHOOL_DAMAGE), which is why the same modifier boosts both halves of a hybrid heal/damage spell. Native only, no server code needed.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 27, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "caster", "entry": 36, "level": 80, "health": 100000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_healing_done", "spell": 800038, "target": "target", "effect": 0, "save_as": "heal_base" },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_damage_done", "spell": 800038, "target": "target", "effect": 1, "save_as": "damage_base" },
+    { "action": "learn", "label": "Increases the healing and damage of Radiance by 125%", "actor": "caster", "spell": 300350 },
+    {
+      "action": "assert", "label": "Radiance's healing is boosted to 225% of base",
+      "actor": "caster", "metric": "spell_healing_done", "spell": 800038, "target": "target", "effect": 0, "ratio_to": "heal_base", "equals": 2.25
+    },
+    {
+      "action": "assert", "label": "Radiance's damage is boosted to 225% of base",
+      "actor": "caster", "metric": "spell_damage_done", "spell": 800038, "target": "target", "effect": 1, "ratio_to": "damage_base", "equals": 2.25
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Malformed early packets are dropped and the session keeps working",
+  "contract": "Ascension packets are handled by CanPacketReceiveEarly on the socket thread, where an escaping exception terminates the worldserver. A payload too short or not valid UTF-8 for its handler must be dropped there instead: a one-byte 0xC2 character sort order (CMSG 0x0772), a one-byte CMSG_QUERY_CUSTOM_STORE (0x06B9) and a CMSG_PURCHASE_CUSTOM_STORE_ITEM (0x06BB) carrying only its key. Expected: each is consumed without an error reaching the caller, and a well-formed store query sent afterwards is still answered with QUERY_CUSTOM_STORE_OK (SMSG 0x06BA).",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "sender", "race": 1, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    {
+      "action": "client_packet", "label": "Sort order that is not a valid string", "actor": "sender", "opcode": 1906,
+      "fields": [ { "u8": 194 } ]
+    },
+    {
+      "action": "client_packet", "label": "Store query without its store id", "actor": "sender", "opcode": 1721,
+      "fields": [ { "u8": 1 } ]
+    },
+    {
+      "action": "client_packet", "label": "Store purchase without its quantity", "actor": "sender", "opcode": 1723,
+      "fields": [ { "u32": 1 } ]
+    },
+    {
+      "action": "client_packet", "label": "A well-formed query for a store nobody serves", "actor": "sender",
+      "opcode": 1721, "fields": [ { "u32": 99 } ]
+    },
+    {
+      "action": "assert", "label": "The session still answers it", "actor": "sender", "metric": "server_packet_contains",
+      "opcode": 1722, "text": "QUERY_CUSTOM_STORE_OK", "equals": 1, "within_ms": 1000
+    }
+  ]
+}

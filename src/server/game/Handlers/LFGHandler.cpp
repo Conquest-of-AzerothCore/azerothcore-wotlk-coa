@@ -20,6 +20,7 @@
 #include "Group.h"
 #include "LFGMgr.h"
 #include "LFGPackets.h"
+#include "LocalLevelScaling.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
 #include "Player.h"
@@ -157,7 +158,7 @@ void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket& /*recvData*
     // Get Random dungeons that can be done at a certain level and expansion
     uint8 level = GetPlayer()->GetLevel();
     lfg::LfgDungeonSet const& randomDungeons =
-        sLFGMgr->GetRandomAndSeasonalDungeons(level, GetPlayer()->GetSession()->Expansion());
+        sLFGMgr->GetRandomAndSeasonalDungeons(level, std::min<uint8>(GetPlayer()->GetSession()->Expansion(), sWorld->getIntConfig(CONFIG_LFG_MAX_EXPANSION)));
 
     // Get player locked Dungeons
     sLFGMgr->InitializeLockedDungeons(GetPlayer(), GetPlayer()->GetGroup()); // pussywizard
@@ -193,9 +194,9 @@ void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket& /*recvData*
             sScriptMgr->OnPlayerBeforeGetLevelForXPGain(GetPlayer(), playerLevelForXP);
 
             data << uint8(done);
-            data << uint32(quest->GetRewOrReqMoney(playerLevel));
+            data << uint32(quest->GetRewOrReqMoney(playerLevel, LocalLevelScaling::QuestScalingEnabled(GetPlayer())));
             if (playerLevelForXP < GetPlayer()->GetUInt32Value(PLAYER_FIELD_MAX_LEVEL))
-                data << uint32(quest->XPValue(playerLevelForXP));
+                data << uint32(quest->XPValue(playerLevelForXP, LocalLevelScaling::QuestScalingEnabled(GetPlayer())));
             else
                 data << uint32(0);
             data << uint32(0);
@@ -491,8 +492,8 @@ void WorldSession::SendLfgPlayerReward(lfg::LfgPlayerRewardData const& rewardDat
     data << uint32(rewardData.sdungeonEntry);              // Dungeon Finished
     data << uint8(rewardData.done);
     data << uint32(1);
-    data << uint32(rewardData.quest->GetRewOrReqMoney(playerLevel));
-    data << uint32(rewardData.quest->XPValue(playerLevelForXP));
+    data << uint32(rewardData.quest->GetRewOrReqMoney(playerLevel, LocalLevelScaling::QuestScalingEnabled(GetPlayer())));
+    data << uint32(rewardData.quest->XPValue(playerLevelForXP, LocalLevelScaling::QuestScalingEnabled(GetPlayer())));
     data << uint32(0);
     data << uint32(0);
     data << uint8(itemNum);

@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Paying The Tithe adds charges to Seraphic Bulwark and crit to Dawnbreak (#1008)",
+  "contract": "Paying The Tithe 681468 (Spell.dbc, SpellFamilyName 33) carries two SPELL_AURA_ADD_FLAT_MODIFIER (107) effects. Effect 0: EffectMiscValue SPELLMOD_CHARGES (4), EffectSpellClassMask word A = 256 (bit 8), EffectBasePoints 3 resolving to +4. Seraphic Bulwark 560095 carries SpellFamilyFlags word A = 256 (the same bit) and its own ProcCharges = 5, and Aura::CalcMaxAuraStacks-equivalent charge setup (SpellAuras.cpp) calls modOwner->ApplySpellMod(GetId(), SPELLMOD_CHARGES, maxProcCharges) using the aura's own spell id, so this raises Seraphic Bulwark's charges from 5 to 9. Effect 1: EffectMiscValue SPELLMOD_CRITICAL_CHANCE (7), EffectSpellClassMask word B = 1073741824 (bit 30), EffectBasePoints 19 resolving to +20. Every Dawnbreak rank (e.g. rank 1, spell 800654) carries SpellFamilyFlags word B = 1073741824, the same bit, so SpellInfo::IsAffected(33, mask) admits it and Player::ApplySpellMod adds +20 crit chance with no script. This scenario drives both native calls through the harness's spell_modifier metric.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "Seraphic Bulwark keeps its native 5 charges before the talent",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 560095, "op": 4, "base": 5, "equals": 5
+    },
+    {
+      "action": "assert", "label": "Dawnbreak crit chance modifier is zero before the talent",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 800654, "op": 7, "base": 0, "equals": 0
+    },
+    { "action": "learn", "actor": "cleric", "spell": 681468 },
+    {
+      "action": "assert", "label": "Paying The Tithe raises Seraphic Bulwark to 9 charges",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 560095, "op": 4, "base": 5, "equals": 9
+    },
+    {
+      "action": "assert", "label": "Paying The Tithe adds 20 to Dawnbreak's crit chance",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 800654, "op": 7, "base": 0, "equals": 20
+    }
+  ]
+}

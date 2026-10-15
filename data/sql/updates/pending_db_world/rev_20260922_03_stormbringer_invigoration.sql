@@ -1,0 +1,31 @@
+-- #2805 Invigoration (705700): "Your Aeroblast now grants your Air Elemental a stack of Invigoration."
+--
+-- 705700 is Attributes 192 (SPELL_ATTR0_PASSIVE | SPELL_ATTR0_DO_NOT_DISPLAY) with Effect[0]
+-- SPELL_EFFECT_APPLY_AURA / aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell[0] 681273 and
+-- ProcChance 100, but ProcFlags 0. SpellMgr::LoadSpellProcs generates no fallback record for a spell without
+-- DBC proc flags ("Skip if no proc flags in DBC", src/server/game/Spells/SpellMgr.cpp) and
+-- Aura::GetProcEffectMask returns 0 for an aura with no proc entry ("only auras with spell proc entry can
+-- trigger proc", src/server/game/Spells/Auras/SpellAuras.cpp), so this talent has never granted a stack.
+--
+-- The rest of the chain is already in place. 681273 Effect[0] is SPELL_EFFECT_FORCE_CAST with
+-- EffectImplicitTargetA 5 TARGET_UNIT_PET and EffectTriggerSpell 680918, and 680918 is the same Invigoration
+-- buff (SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, EffectBasePoints 2 + EffectDieSides 1 = 3%, StackAmount 10,
+-- DurationIndex 8 = 15000 ms) the Air Elemental already receives from its own damage source
+-- (806020 -> 500348 -> 680918, modules/mod-ascension-compat/src/AscensionStormbringerPet.cpp registered by
+-- data/sql/updates/pending_db_world/rev_20260914_09_air_elemental.sql). Only the proc record is missing.
+--
+-- SpellFamilyName 22 with SpellFamilyMask0 8388608 is exactly "Aeroblast, all ranks": scanning this client's
+-- Spell.dbc, the family-22 records with bit 0x800000 of SpellFamilyFlags[0] are the ten Aeroblast rows
+-- (501450-501458 and 801839) and nothing else. SpellMgr::CanSpellTriggerProcOnEvent filters the event spell
+-- with eventSpellInfo->IsAffected(procEntry.SpellFamilyName, procEntry.SpellFamilyMask).
+-- ProcFlags 65536 is PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG (src/server/game/Spells/SpellMgr.h): every
+-- Aeroblast rank is DmgClass 1 SPELL_DAMAGE_CLASS_MAGIC and negative. SpellTypeMask 1 PROC_SPELL_TYPE_DAMAGE
+-- and SpellPhaseMask 2 PROC_SPELL_PHASE_HIT keep the proc on the damage hit, the shape the shipped 806020 row
+-- already uses; HitMask 0 takes the done-proc default of normal, critical and absorbed hits.
+-- DisableEffectsMask 2 leaves Effect[1] out of the proc: it is an unscripted SPELL_AURA_DUMMY carrying
+-- EffectBasePoints 39 + EffectDieSides 1 = 40, the "$705700s2%" that Aeroblast's own tooltip reads, and it
+-- has no TriggerSpell of its own.
+-- Chance 100 is the record's own ProcChance and Charges stays 0 (ProcCharges 0 - the aura is permanent).
+DELETE FROM `spell_proc` WHERE `SpellId` = 705700;
+INSERT INTO `spell_proc` (`SpellId`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `ProcFlags`, `SpellTypeMask`, `SpellPhaseMask`, `HitMask`, `AttributesMask`, `DisableEffectsMask`, `ProcsPerMinute`, `Chance`, `Cooldown`, `Charges`) VALUES
+(705700, 0, 22, 8388608, 0, 0, 65536, 1, 2, 0, 0, 2, 0, 100, 0, 0);

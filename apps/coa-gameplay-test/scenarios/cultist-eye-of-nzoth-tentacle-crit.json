@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Eye of N'zoth applies its crit-chance/crit-damage aura to an already-summoned Tentacle (Refs #1072)",
+  "contract": "802728 uses the generic native effect SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (SpellAuras.cpp UnitAura::FillTargetMap, case SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS), which periodically (Aura::UpdateOwner, UPDATE_TARGET_MAP_INTERVAL) scans owner->m_Controlled for living owned summons and applies the passive's own two aura effects to them. Effect0 is aura 290 SPELL_AURA_MOD_CRIT_PCT and effect1 is aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, both BasePoints 9 / DieSides 1 -> value 10, matching the tooltip's single $s1=10%. Eldritch Tentacle (500707) summons creature entry 500464 with SummonProperties row 61 (Category 1 SUMMON_CATEGORY_ALLY, Type 2 SUMMON_TYPE_GUARDIAN); Map::SummonCreature (Object.cpp) resolves Category ALLY + Type GUARDIAN to UNIT_MASK_GUARDIAN, so the summon is created as a Guardian/Minion and registered into the caster's m_Controlled via Unit::SetMinion -- this makes it a genuine owned summon for the ASCENSION_APPLY_AURA_TO_SUMMONS filter (IsSummon() && GetOwnerGUID()==owner). HARNESS-METRIC CORRECTION (this scenario previously asserted the opposite): being a Guardian-class object does NOT put it in the player's guardian-pet slot. Unit::SetMinion (Unit.cpp) only calls SetPetGUID(...) inside its `if (minion->IsGuardianPet())` branch, and Minion::IsGuardianPet() (TemporarySummon.cpp) returns `IsPet() || (m_Properties && m_Properties->Category == SUMMON_CATEGORY_PET)` -- true only for Category 2 (SUMMON_CATEGORY_PET) or an actual Pet-class instance (tamed/hunter pet). Eldritch Tentacle's SummonProperties row 61 has Category 1 (SUMMON_CATEGORY_ALLY), not Category 2, so IsGuardianPet() is false and SetPetGUID is never called: the Tentacle is a real owned m_Controlled summon but structurally never occupies the guardian-pet slot. The harness README's own pet_entry definition ('the player's current guardian pet entry ... or zero if absent') and pet_aura_amount (which reads the current pet) therefore always read 0/absent for this summon regardless of whether Eye of N'zoth's aura is actually installed -- this is a harness-metric mismatch, not evidence the passive is broken. owned_creature_count is the metric that matches the actual mechanism: it counts living creatures of an entry owned/created/summoned by the player, including summons outside the guardian-pet slot, and its optional spell+caster filter restricts the count to creatures currently carrying that aura. This lets the scenario prove that both of Eye of N'zoth's aura effects (bundled as one installed aura object) land on the already-summoned Tentacle via the periodic rescan, without a re-summon. What owned_creature_count cannot do is read the aura's own amount or distinguish effect 0 from effect 1, so this scenario proves presence of the passive's aura on the real summon (the native SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS mechanism firing for a non-pet-slot Guardian), not the exact +10/+10 magnitude claimed by the tooltip. Fixes must become Refs for #1072: the original commit claimed this scenario proves the tooltip's exact numeric values via pet_entry/pet_aura_amount; that claim was based on a mistaken trace of Unit::SetMinion/IsGuardianPet() and cannot be proven with any metric this harness exposes for a non-pet-slot owned summon.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 40 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn/level settle", "ms": 3000 },
+    { "action": "learn", "actor": "cultist", "spell": 500707 },
+    {
+      "action": "assert", "label": "SETUP: no owned Tentacle yet",
+      "actor": "cultist", "metric": "owned_creature_count", "entry": 500464, "equals": 0
+    },
+    { "action": "cast", "label": "Summon a Tentacle before Eye of N'zoth is known", "actor": "cultist", "spell": 500707 },
+    {
+      "action": "assert", "label": "SETUP: a real owned Tentacle (entry 500464) exists",
+      "actor": "cultist", "metric": "owned_creature_count", "entry": 500464, "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "BASELINE: the Tentacle does not yet carry Eye of N'zoth's aura",
+      "actor": "cultist", "metric": "owned_creature_count", "entry": 500464, "spell": 802728, "caster": "cultist", "equals": 0
+    },
+    { "action": "learn", "actor": "cultist", "spell": 802728 },
+    {
+      "action": "assert", "label": "Eye of N'zoth's aura lands on the existing Tentacle via the periodic rescan, without a re-summon",
+      "actor": "cultist", "metric": "owned_creature_count", "entry": 500464, "spell": 802728, "caster": "cultist", "min": 1, "within_ms": 3000
+    }
+  ]
+}

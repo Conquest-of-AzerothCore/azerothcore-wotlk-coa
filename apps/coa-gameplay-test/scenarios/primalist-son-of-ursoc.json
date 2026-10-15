@@ -1,0 +1,968 @@
+{
+  "schema": 1,
+  "name": "Primalist Son of Ursoc: transformation, cleanse, bonuses and cleanup",
+  "contract": "Savage Frenzy transforms only its talented owner into the archived Golden Saberon, removes existing roots/slows, grants 50% stronger bonuses to owner and pet and uses a 120-second cooldown. Baseline and unlearning retain ordinary bonuses and 180-second cooldown. Expiry and early cancellation restore the owner. Cooldowns are reset explicitly between independent cases. Pet movement bonuses are checked on the applied native aura; its effective follow speed also changes with owner distance.",
+  "timeout_ms": 240000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "spirit",
+      "owner": "primalist",
+      "entry": 1188,
+      "level": 19,
+      "health": 100000,
+      "distance": 5
+    },
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 806549
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 574301
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 574301,
+      "target": "spirit"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 24000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "display_id",
+      "save_as": "base_display_id"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "save_as": "base_attack_time_ms"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "weapon_damage_min",
+      "save_as": "base_weapon_damage_min"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "save_as": "base_run_speed_rate"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 806549
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 806549,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 122,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 122,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 116,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 116,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 806549
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 806549,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 806048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "display_id",
+      "relative_to": "base_display_id",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 806549,
+      "min": 179000,
+      "max": 180000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 122,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 122,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 116,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 116,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 806549,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 806549,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 806549,
+      "effect": 1,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 806549,
+      "effect": 1,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 806549,
+      "effect": 2,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 806549,
+      "effect": 2,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "ratio_to": "base_attack_time_ms",
+      "min": 0.7672307692307692,
+      "max": 0.7712307692307692
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "weapon_damage_min",
+      "ratio_to": "base_weapon_damage_min",
+      "min": 1.198,
+      "max": 1.202
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "ratio_to": "base_run_speed_rate",
+      "min": 1.298,
+      "max": 1.302
+    },
+    {
+      "action": "wait",
+      "ms": 18300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 806048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "display_id",
+      "relative_to": "base_display_id",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "relative_to": "base_attack_time_ms",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "weapon_damage_min",
+      "relative_to": "base_weapon_damage_min",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "relative_to": "base_run_speed_rate",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 706176
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 806549
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 806549,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 122,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 122,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 116,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 116,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 806549
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 806549,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 806048,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "display_id",
+      "equals": 328642
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 806549,
+      "min": 119000,
+      "max": 120000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 122,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 122,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 116,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 116,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 806549,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 806549,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 806549,
+      "effect": 1,
+      "equals": 45
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 806549,
+      "effect": 1,
+      "equals": 45
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 806549,
+      "effect": 2,
+      "equals": 45
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 806549,
+      "effect": 2,
+      "equals": 45
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "ratio_to": "base_attack_time_ms",
+      "min": 0.6876551724137931,
+      "max": 0.6916551724137932
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "weapon_damage_min",
+      "ratio_to": "base_weapon_damage_min",
+      "min": 1.298,
+      "max": 1.302
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "ratio_to": "base_run_speed_rate",
+      "min": 1.448,
+      "max": 1.452
+    },
+    {
+      "action": "wait",
+      "ms": 18300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 806048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "display_id",
+      "relative_to": "base_display_id",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "relative_to": "base_attack_time_ms",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "weapon_damage_min",
+      "relative_to": "base_weapon_damage_min",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "relative_to": "base_run_speed_rate",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706176
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 806549
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 806549,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 122,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 122,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 116,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 116,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 806549
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 806549,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 806048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "display_id",
+      "relative_to": "base_display_id",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 806549,
+      "min": 179000,
+      "max": 180000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 122,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 122,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 116,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 116,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 806549,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 806549,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 806549,
+      "effect": 1,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 806549,
+      "effect": 1,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 806549,
+      "effect": 2,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 806549,
+      "effect": 2,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "ratio_to": "base_attack_time_ms",
+      "min": 0.7672307692307692,
+      "max": 0.7712307692307692
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "weapon_damage_min",
+      "ratio_to": "base_weapon_damage_min",
+      "min": 1.198,
+      "max": 1.202
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "ratio_to": "base_run_speed_rate",
+      "min": 1.298,
+      "max": 1.302
+    },
+    {
+      "action": "wait",
+      "ms": 18300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 806048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "display_id",
+      "relative_to": "base_display_id",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "relative_to": "base_attack_time_ms",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "weapon_damage_min",
+      "relative_to": "base_weapon_damage_min",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "relative_to": "base_run_speed_rate",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 706176
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 806549
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 806549,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 122,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 122,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 116,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 116,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 806549
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 806549,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 806048,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "display_id",
+      "equals": 328642
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 806549,
+      "min": 119000,
+      "max": 120000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 122,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 122,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 116,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 116,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 806549,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 806549,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 806549,
+      "effect": 1,
+      "equals": 45
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 806549,
+      "effect": 1,
+      "equals": 45
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 806549,
+      "effect": 2,
+      "equals": 45
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 806549,
+      "effect": 2,
+      "equals": 45
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "ratio_to": "base_attack_time_ms",
+      "min": 0.6876551724137931,
+      "max": 0.6916551724137932
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "weapon_damage_min",
+      "ratio_to": "base_weapon_damage_min",
+      "min": 1.298,
+      "max": 1.302
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "ratio_to": "base_run_speed_rate",
+      "min": 1.448,
+      "max": 1.452
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 806549,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 806048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "display_id",
+      "relative_to": "base_display_id",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "relative_to": "base_attack_time_ms",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "weapon_damage_min",
+      "relative_to": "base_weapon_damage_min",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "relative_to": "base_run_speed_rate",
+      "min": -0.001,
+      "max": 0.001
+    }
+  ]
+}

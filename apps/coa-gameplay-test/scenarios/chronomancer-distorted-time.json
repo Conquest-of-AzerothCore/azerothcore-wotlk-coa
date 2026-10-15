@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "name": "Distorted Time shortens Timerend's cooldown and lengthens Decomposition (#982)",
+  "contract": "Distorted Time 707553's tooltip reads \"Reduces the cooldown of Timerend by $/1000;s2 sec and increases the duration of Decomposition by $/1000;s1 sec\". In Spell.dbc both effects are SPELL_AURA_ADD_FLAT_MODIFIER (107): Effect[0] EffectMiscValue 1 (SPELLMOD_DURATION), EffectBasePoints 2999 + DieSides 1 = +3000 ms, EffectSpellClassMask [0,524288,0], which inside SpellFamilyName 28 selects Decomposition (800856, 801028-801033, 802597); Effect[1] EffectMiscValue 11 (SPELLMOD_COOLDOWN), EffectBasePoints -2001 + DieSides 1 = -2000 ms, EffectSpellClassMask [0,16777216,0], which selects Timerend (501831-501835, 572578, 801291). Timerend carries CategoryRecoveryTime 20000 and Decomposition DurationIndex 86; neither has SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, so SpellInfo::IsAffectedBySpellMod admits both modifiers. Aura::CalcMaxDuration consumes SPELLMOD_DURATION (SpellAuras.cpp) and Player::ApplySpellMod applies SPELLMOD_COOLDOWN to RecoveryTime and CategoryRecoveryTime (Player.cpp). Generic core machinery. This scenario is a regression guard for behaviour that already works. The client renders $/1000;s2 as -2, so the shipped tooltip says \"by -2 sec\"; that is a text artefact, not a server defect.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Timerend's 20 s category cooldown before the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 501831,
+      "op": 11,
+      "base": 20000,
+      "save_as": "timerend_cd"
+    },
+    {
+      "action": "snapshot",
+      "label": "A 10 s Decomposition duration before the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 800856,
+      "op": 1,
+      "base": 10000,
+      "save_as": "decomp_duration"
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, the cooldown modifier leaves 20000 ms alone",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 501831,
+      "op": 11,
+      "base": 20000,
+      "equals": 20000
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, the duration modifier leaves 10000 ms alone",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 800856,
+      "op": 1,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 707553
+    },
+    {
+      "action": "assert",
+      "label": "Distorted Time self-applies its passive",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 707553,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Timerend's cooldown drops by 2000 ms",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 501831,
+      "op": 11,
+      "base": 20000,
+      "equals": 18000
+    },
+    {
+      "action": "assert",
+      "label": "That is exactly -2000 ms against the baseline",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 501831,
+      "op": 11,
+      "base": 20000,
+      "relative_to": "timerend_cd",
+      "equals": -2000
+    },
+    {
+      "action": "assert",
+      "label": "Decomposition's duration rises by 3000 ms",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 800856,
+      "op": 1,
+      "base": 10000,
+      "equals": 13000
+    },
+    {
+      "action": "assert",
+      "label": "That is exactly +3000 ms against the baseline",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 800856,
+      "op": 1,
+      "base": 10000,
+      "relative_to": "decomp_duration",
+      "equals": 3000
+    }
+  ]
+}

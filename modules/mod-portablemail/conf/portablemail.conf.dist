@@ -1,0 +1,29 @@
+###################################################################################################
+#  mod-portablemail
+#
+#  Restores the world objects that CoA's portable gadgets summon - the Gnomish Portable Post
+#  Tube is a mailbox, the transpolyporters are spellcasters, the Mystic Enchanting Altar is a
+#  binder. The objects themselves are inserted by data/sql/db-world/portablemail.sql, which the
+#  DB updater applies at startup; that file also carries the Fel Gateway's spell override, which
+#  sets its lifetime to the 30 seconds the gadget's own text promises. This config file only
+#  controls the module's own checks.
+#
+#  This code is part of the AzerothCore project. See AUTHORS file for Copyright information.
+###################################################################################################
+
+#    PortableMail.VerifyOnStartup
+#        Description: Check once at startup that each listed item's on-use spell summons the
+#                     expected object with the expected lifetime, type, model and size, and
+#                     that each portal's click spell is the expected teleport and exists.
+#                     Log an error naming any broken link. This verifies server data only;
+#                     it does not validate the altars' client enchanting feature.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+PortableMail.VerifyOnStartup = 1
+
+#    PortableMail.Command
+#        Description: Enable the `.portablemail status` game master command, which reports the
+#                     same list on demand.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+PortableMail.Command = 1

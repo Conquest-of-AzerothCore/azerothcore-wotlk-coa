@@ -1,0 +1,239 @@
+{
+  "schema": 1,
+  "name": "Pyromancer passives modify their named spells through native spell mods (#2425, #1781, #1263, #1112)",
+  "contract": "All four passives are ADD_PCT_MODIFIER (108) or ADD_FLAT_MODIFIER (107) auras over SpellFamilyName 30 class masks, so Player::ApplySpellMod applies them natively. #2425 Ember Charm 704861: SPELLMOD_CASTING_TIME (10) -16+1 = -15%, mask {0x2,0,0} = Cinderheart 800806 (2000 ms) and Kindle 803819 (2000 ms), so 1700 ms. #1263 Blackrock Mountaineer 707494: SPELLMOD_COOLDOWN (11) flat -30001+1 = -30000 ms, mask {0,0,0x20000000} = Eruption 800103 alone (RecoveryTime 120000), so 90000 ms. #1781 Alexstrasza's Gift 300956: SPELLMOD_DAMAGE (0) +14+1 = +15%, mask {0x40,0x8080,0} = Ember Touch 800818, Echo of Nozdormu 802174 and Flames of Neltharion 801915. #1112 Cinderstorm 706875: SPELLMOD_THREAT (2) -26+1 = -25% and SPELLMOD_CRITICAL_CHANCE (7) +9+1 = +10, both on mask {0,0,0x2000} = every Firefall row (801912 asserted). Every value is read through the spell_modifier metric, which applies the player's native spell mods to a fixed base; a control spell outside each mask (Blaze 805500, Cinderheart 800806) must stay unchanged. Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Cinderheart keeps 2000 ms before Ember Charm",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 800806,
+      "op": 10,
+      "base": 2000,
+      "min": 2000,
+      "max": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Eruption keeps its 120000 ms cooldown before Blackrock Mountaineer",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 800103,
+      "op": 11,
+      "base": 120000,
+      "min": 120000,
+      "max": 120000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Ember Touch keeps its damage-and-healing base before Alexstrasza's Gift",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 800818,
+      "op": 0,
+      "base": 1000,
+      "min": 1000,
+      "max": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Firefall threat unmodified before Cinderstorm",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 801912,
+      "op": 2,
+      "base": 1000,
+      "min": 1000,
+      "max": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Firefall crit chance unmodified before Cinderstorm",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 801912,
+      "op": 7,
+      "base": 5,
+      "min": 5,
+      "max": 5
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 704861
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 707494
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 300956
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 706875
+    },
+    {
+      "action": "assert",
+      "label": "Ember Charm cuts Cinderheart's 2000 ms cast time by 15% (#2425)",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 800806,
+      "op": 10,
+      "base": 2000,
+      "min": 1699,
+      "max": 1701
+    },
+    {
+      "action": "assert",
+      "label": "Ember Charm cuts Kindle's 2000 ms cast time by 15% (#2425)",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 803819,
+      "op": 10,
+      "base": 2000,
+      "min": 1699,
+      "max": 1701
+    },
+    {
+      "action": "assert",
+      "label": "Ember Charm leaves Blaze's cast time alone (#2425)",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 805500,
+      "op": 10,
+      "base": 2000,
+      "min": 2000,
+      "max": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Blackrock Mountaineer takes 30 s off Eruption's 120 s cooldown (#1263)",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 800103,
+      "op": 11,
+      "base": 120000,
+      "min": 90000,
+      "max": 90000
+    },
+    {
+      "action": "assert",
+      "label": "Blackrock Mountaineer leaves Cinderheart's cooldown alone (#1263)",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 800806,
+      "op": 11,
+      "base": 120000,
+      "min": 120000,
+      "max": 120000
+    },
+    {
+      "action": "assert",
+      "label": "Alexstrasza's Gift adds 15% to Ember Touch (#1781)",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 800818,
+      "op": 0,
+      "base": 1000,
+      "min": 1149,
+      "max": 1151
+    },
+    {
+      "action": "assert",
+      "label": "Alexstrasza's Gift adds 15% to Echo of Nozdormu (#1781)",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 802174,
+      "op": 0,
+      "base": 1000,
+      "min": 1149,
+      "max": 1151
+    },
+    {
+      "action": "assert",
+      "label": "Alexstrasza's Gift adds 15% to Flames of Neltharion (#1781)",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 801915,
+      "op": 0,
+      "base": 1000,
+      "min": 1149,
+      "max": 1151
+    },
+    {
+      "action": "assert",
+      "label": "Alexstrasza's Gift leaves Cinderheart alone (#1781)",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 800806,
+      "op": 0,
+      "base": 1000,
+      "min": 1000,
+      "max": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Cinderstorm cuts Firefall's threat by 25% (#1112)",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 801912,
+      "op": 2,
+      "base": 1000,
+      "min": 749,
+      "max": 751
+    },
+    {
+      "action": "assert",
+      "label": "Cinderstorm adds 10 points to Firefall's crit chance (#1112)",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 801912,
+      "op": 7,
+      "base": 5,
+      "min": 15,
+      "max": 15
+    },
+    {
+      "action": "assert",
+      "label": "Cinderstorm leaves Blaze's threat alone (#1112)",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 805500,
+      "op": 2,
+      "base": 1000,
+      "min": 1000,
+      "max": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Cinderstorm leaves Blaze's crit chance alone (#1112)",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 805500,
+      "op": 7,
+      "base": 5,
+      "min": 5,
+      "max": 5
+    }
+  ]
+}

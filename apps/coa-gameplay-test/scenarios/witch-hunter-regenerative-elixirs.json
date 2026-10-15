@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Regenerative Elixirs restores 30 Rage when a Tonic is drunk (#2717)",
+  "contract": "Regenerative Elixirs 705528 reads 'Drinking Tonics now also restores $/10;521232s1 Rage.' In the installed Spell.dbc it is a passive, family 21, with one effect: SPELL_AURA_PROC_TRIGGER_SPELL (42) triggering 521232 ('Energize +30 Rage': SPELL_EFFECT_ENERGIZE, misc 1 = Rage, BasePoints 299, DieSides 1, so 300 in the core's tenths of Rage, i.e. the 30 in the text). The proc conditions live in data/sql/updates/pending_db_world/rev_20260907_12_witch_hunter_tonic_procs.sql: family 21, SpellFamilyMask2 512, ProcFlags 81920 (DONE_SPELL_MAGIC_DMG_CLASS_POS | NEG), SpellTypeMask 7, SpellPhaseMask 4 (finish), Chance 100. Dark Tonic 680491 carries family 21, flag word 2 0x200 and DmgClass 1 (magic), so it matches. Whether a self-cast Tonic reaches the finish-phase proc with the caster as target was only read, not run, so this scenario is the proof: a Tonic without the talent must energize nothing, and with it exactly one 300-point Rage energize by 521232 with one proc counted. The energize is read from the native energize log (spell_energize_total) rather than from the Rage bar, which decays out of combat.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Dark Tonic", "actor": "hunter", "spell": 680491},
+    {"action": "cast", "label": "Control: drink a Tonic without the talent", "actor": "hunter", "spell": 680491},
+    {"action": "assert", "label": "The Tonic was drunk", "actor": "hunter", "metric": "aura", "spell": 680491, "equals": 1, "within_ms": 3000},
+    {"action": "wait", "label": "Give a wrongly present proc time to fire", "ms": 1500},
+    {"action": "assert", "label": "No Rage energize without the talent", "actor": "hunter", "metric": "spell_energize_total", "spell": 521232, "power": 1, "equals": 0},
+    {"action": "set_aura", "label": "Remove the control Tonic", "actor": "hunter", "spell": 680491, "stacks": 0},
+    {"action": "reset_cooldown", "label": "Clear the Tonic cooldown", "actor": "hunter", "spell": 680491},
+    {"action": "wait", "label": "Let the global cooldown pass", "ms": 2500},
+    {"action": "learn", "label": "Regenerative Elixirs", "actor": "hunter", "spell": 705528},
+    {"action": "assert", "label": "The passive is active", "actor": "hunter", "metric": "aura", "spell": 705528, "equals": 1},
+    {"action": "cast", "label": "Drink a Tonic with the talent", "actor": "hunter", "spell": 680491},
+    {"action": "assert", "label": "The proc fired once", "actor": "hunter", "metric": "spell_proc_count", "spell": 705528, "min": 1, "within_ms": 3000},
+    {"action": "assert", "label": "Exactly 300 tenths of Rage (30 Rage) were energized", "actor": "hunter", "metric": "spell_energize_total", "spell": 521232, "power": 1, "equals": 300, "within_ms": 3000}
+  ]
+}

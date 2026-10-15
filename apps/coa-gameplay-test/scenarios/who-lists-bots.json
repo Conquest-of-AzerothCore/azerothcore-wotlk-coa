@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Who lists bot sessions with the default Who.ShowBots",
+  "contract": "With the shipped Who.ShowBots=1 a native Who response lists bot sessions exactly like players, so the setting is what hides them and nothing else.",
+  "players": [
+    { "id": "player", "race": 1, "class": 18, "level": 20 },
+    { "id": "mate", "race": 1, "class": 29, "level": 20 },
+    { "id": "botone", "race": 1, "class": 31, "level": 20, "bot": true },
+    { "id": "bottwo", "race": 1, "class": 32, "level": 20, "bot": true }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "who", "actor": "player" },
+    { "action": "assert", "actor": "player", "metric": "who_count", "equals": 4 },
+    { "action": "assert", "actor": "player", "metric": "who_class", "target": "botone", "equals": 31 },
+    { "action": "assert", "actor": "player", "metric": "who_class", "target": "bottwo", "equals": 32 },
+    { "action": "who", "actor": "player", "target": "botone" },
+    { "action": "assert", "actor": "player", "metric": "who_count", "equals": 1 }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Air Flow and Storm Warning native casting-time mods (#1250, #2053)",
+  "contract": "#1250: Air Flow (707548) effect1 is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), EffectBasePoints -301 + EffectDieSides 1 = -300 ms (SpellEffectInfo::CalcValue, SpellInfo.cpp:494-496), EffectSpellClassMask word0 8388608 (0x800000) matching Aeroblast's (501450) own SpellFamilyFlags word0 exactly. Effect0 is the same aura/op with EffectBasePoints -1+1=0, an inert filler slot. #2053: Storm Warning (567533) effect0 is the identical mechanism, EffectBasePoints -501+1=-500 ms, EffectSpellClassMask word0 67108864 (0x4000000) matching Storm Alert's (707044) own SpellFamilyFlags word0 exactly. Both talents are SpellFamilyName 22 (Stormbringer). SPELLMOD_CASTING_TIME is applied generically by Player::ApplySpellMod (Player.cpp:10219-10327, non-CASTING_TIME/DURATION branch is basevalue*totalmul+totalflat, and the CASTING_TIME branch is (basevalue+totalflat)*totalmul) via Unit::CalcCastTime, gated only by SpellInfo::IsAffectedBySpellmod's classmask check -- no exemption for SpellFamilyName 22. Aeroblast's CastingTimeIndex is 19 (SpellCastTimes.dbc CastTime 2500 ms) and Storm Alert's CastingTimeIndex is 5 (SpellCastTimes.dbc CastTime 2000 ms), both confirmed today via coa-dbc-viewer against /home/fab/CoaServer/dbc_clientset. Neither talent has any module code (zero hits for 707548 or 567533 under modules/ or src/server/scripts/), and none is needed; both close as regression scenarios only.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "sb",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "label": "Learn Aeroblast", "actor": "sb", "spell": 501450 },
+    { "action": "learn", "label": "Learn Storm Alert", "actor": "sb", "spell": 707044 },
+    { "action": "assert", "label": "BASELINE: Aeroblast casts in 2500 ms per SpellCastTimes index 19",
+      "actor": "sb", "metric": "spell_cast_time_ms", "spell": 501450, "equals": 2500 },
+    { "action": "assert", "label": "BASELINE: no casting-time modifier on Aeroblast before Air Flow",
+      "actor": "sb", "metric": "spell_modifier", "spell": 501450, "op": 10, "base": 2500, "equals": 2500 },
+    { "action": "assert", "label": "BASELINE: Storm Alert casts in 2000 ms per SpellCastTimes index 5",
+      "actor": "sb", "metric": "spell_cast_time_ms", "spell": 707044, "equals": 2000 },
+    { "action": "assert", "label": "BASELINE: no casting-time modifier on Storm Alert before Storm Warning",
+      "actor": "sb", "metric": "spell_modifier", "spell": 707044, "op": 10, "base": 2000, "equals": 2000 },
+    { "action": "learn", "label": "Learn Air Flow", "actor": "sb", "spell": 707548 },
+    { "action": "assert", "label": "DISCRIMINATING: Air Flow is a -300 ms casting-time modifier on Aeroblast",
+      "actor": "sb", "metric": "spell_modifier", "spell": 501450, "op": 10, "base": 2500, "equals": 2200 },
+    { "action": "assert", "label": "DISCRIMINATING: Aeroblast now casts in 2200 ms (2500 - 300)",
+      "actor": "sb", "metric": "spell_cast_time_ms", "spell": 501450, "equals": 2200 },
+    { "action": "assert", "label": "Air Flow leaves Storm Alert's casting-time modifier untouched",
+      "actor": "sb", "metric": "spell_modifier", "spell": 707044, "op": 10, "base": 2000, "equals": 2000 },
+    { "action": "assert", "label": "Air Flow leaves Storm Alert's cast time untouched",
+      "actor": "sb", "metric": "spell_cast_time_ms", "spell": 707044, "equals": 2000 },
+    { "action": "learn", "label": "Learn Storm Warning", "actor": "sb", "spell": 567533 },
+    { "action": "assert", "label": "DISCRIMINATING: Storm Warning is a -500 ms casting-time modifier on Storm Alert",
+      "actor": "sb", "metric": "spell_modifier", "spell": 707044, "op": 10, "base": 2000, "equals": 1500 },
+    { "action": "assert", "label": "DISCRIMINATING: Storm Alert now casts in 1500 ms (2000 - 500)",
+      "actor": "sb", "metric": "spell_cast_time_ms", "spell": 707044, "equals": 1500 },
+    { "action": "assert", "label": "Storm Warning leaves Aeroblast's casting-time modifier at Air Flow's -300 ms",
+      "actor": "sb", "metric": "spell_modifier", "spell": 501450, "op": 10, "base": 2500, "equals": 2200 },
+    { "action": "assert", "label": "Storm Warning leaves Aeroblast's cast time at 2200 ms",
+      "actor": "sb", "metric": "spell_cast_time_ms", "spell": 501450, "equals": 2200 }
+  ]
+}

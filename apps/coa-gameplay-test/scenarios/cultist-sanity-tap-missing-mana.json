@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "name": "Sanity Tap restores a percentage of the missing mana (#4271)",
+  "contract": "Spell 802575 needs 20 Insanity (marker aura 680601) and spends it. It restores 20% of the caster's missing mana, not 20% of maximum mana: the second cast restores 20% of what the first left missing, so its gain is 80% of the first. With the maximum-mana bug that ratio is 1.0.",
+  "players": [
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 25,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 802575
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "knows_spell",
+      "spell": 802575,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "cultist",
+      "spell": 500706,
+      "stacks": 60
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "aura_stacks",
+      "spell": 680601,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "The Cultist has the 20 Insanity marker Sanity Tap requires"
+    },
+    {
+      "action": "set_power",
+      "actor": "cultist",
+      "power": 0,
+      "value": 300
+    },
+    {
+      "action": "snapshot",
+      "actor": "cultist",
+      "metric": "power",
+      "power": 0,
+      "save_as": "mana_before_1"
+    },
+    {
+      "action": "cast",
+      "actor": "cultist",
+      "spell": 802575
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "aura_stacks",
+      "spell": 500706,
+      "equals": 40,
+      "within_ms": 1000,
+      "label": "The first cast spends 20 Insanity"
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "power",
+      "power": 0,
+      "relative_to": "mana_before_1",
+      "min": 1,
+      "within_ms": 1000,
+      "label": "Sanity Tap restores mana below the maximum"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "snapshot",
+      "actor": "cultist",
+      "metric": "power",
+      "power": 0,
+      "relative_to": "mana_before_1",
+      "save_as": "first_gain"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "snapshot",
+      "actor": "cultist",
+      "metric": "power",
+      "power": 0,
+      "save_as": "mana_before_2"
+    },
+    {
+      "action": "cast",
+      "actor": "cultist",
+      "spell": 802575
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "power",
+      "power": 0,
+      "relative_to": "mana_before_2",
+      "ratio_to": "first_gain",
+      "min": 0.7,
+      "max": 0.9,
+      "within_ms": 1000,
+      "label": "The second cast restores 80% of the first, from the missing mana"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    }
+  ]
+}

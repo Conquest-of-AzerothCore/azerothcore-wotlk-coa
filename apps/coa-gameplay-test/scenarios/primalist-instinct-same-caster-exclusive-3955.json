@@ -1,0 +1,219 @@
+{
+  "schema": 1,
+  "name": "Primalist Instincts are exclusive per caster, including Greater variants (#3955)",
+  "contract": [
+    "The active Grove and Primal Instinct descriptions permit one Instinct per Primalist on each recipient. The rule applies to their raid-wide Greater versions too, while preserving Instincts supplied by another Primalist.",
+    "Normal single-target and grouped Greater casts exercise replacement in both directions. Highest current single-target ranks are used to avoid rank replacement hiding the conflict."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "one",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "two",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 8,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "one",
+      "target": "two"
+    },
+    {
+      "action": "group",
+      "actor": "one",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "one",
+      "spell": 572816
+    },
+    {
+      "action": "learn",
+      "actor": "one",
+      "spell": 573349
+    },
+    {
+      "action": "learn",
+      "actor": "one",
+      "spell": 572817
+    },
+    {
+      "action": "learn",
+      "actor": "one",
+      "spell": 680310
+    },
+    {
+      "action": "learn",
+      "actor": "two",
+      "spell": 572816
+    },
+    {
+      "action": "learn",
+      "actor": "two",
+      "spell": 573349
+    },
+    {
+      "action": "learn",
+      "actor": "two",
+      "spell": 572817
+    },
+    {
+      "action": "learn",
+      "actor": "two",
+      "spell": 680310
+    },
+    {
+      "action": "cast",
+      "actor": "one",
+      "spell": 572816,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572816,
+      "caster": "one",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "one",
+      "spell": 573349,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 573349,
+      "caster": "one",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572816,
+      "caster": "one",
+      "equals": 0,
+      "label": "One Primalist cannot retain both single-target Instincts"
+    },
+    {
+      "action": "cast",
+      "actor": "two",
+      "spell": 572816,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572816,
+      "caster": "two",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 573349,
+      "caster": "one",
+      "equals": 1,
+      "label": "Another Primalist may supply a different Instinct"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "one",
+      "spell": 572817
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572817,
+      "caster": "one",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 573349,
+      "caster": "one",
+      "equals": 0,
+      "label": "Greater Grove also replaces the same caster's Primal Instinct"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572816,
+      "caster": "two",
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "two",
+      "spell": 680310
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 680310,
+      "caster": "two",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572816,
+      "caster": "two",
+      "equals": 0,
+      "label": "Greater Primal also replaces the same caster's Grove Instinct"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572817,
+      "caster": "one",
+      "equals": 1,
+      "label": "Cross-caster Greater Instincts remain valid"
+    }
+  ]
+}

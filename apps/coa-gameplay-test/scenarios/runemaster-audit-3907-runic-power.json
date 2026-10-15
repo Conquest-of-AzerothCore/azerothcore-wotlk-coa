@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Runemaster Runic Power's raid damage% holds and its Primordial Blast crit-taken debuff now fires (#3907, partial fix)",
+  "contract": [
+    "Runic Power 300944 Effect0 (APPLY_AREA_AURA_RAID, MOD_DAMAGE_PERCENT_DONE, MiscValue 127 = all schools,",
+    "BasePoints 2/DieSides 1 = +3%) is native and already raises spell_damage_done by ~3%; its 'does not stack'",
+    "clause is separately covered by the pending spell_group 2000184 row in",
+    "rev_20260922_27_raid_damage_percent_group.sql (#3910). Neither half is touched here; the first assertion is",
+    "a regression guard proving that half still works. Effect1 is SPELL_AURA_PROC_TRIGGER_SPELL, ProcChance 100,",
+    "trigger 561056 (SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE, BasePoints 2/DieSides 1 = +3%, applied to the",
+    "enemy target, DurationIndex 18 = 20000ms, matching 'for 20 sec' exactly), but Spell.dbc ProcFlags is 0 and,",
+    "before the fix, no spell_proc row existed, so landing Primordial Blast never applied the crit-taken debuff.",
+    "Primordial Blast is family 38, SpellFamilyFlags0/1/2 4194304/1048576/64, DmgClass magic, a harmful",
+    "SPELL_EFFECT_SCHOOL_DAMAGE hit: a hit-phase event carries PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG (0x10000);",
+    "the tooltip does not require a critical hit, so the fix leaves HitMask at its default (normal+critical+",
+    "absorb for a done hit)."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80, "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 80, "health": 5000000, "distance": 10}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 800732},
+    {"action": "assert", "label": "SETUP: no crit-taken debuff on the target yet", "actor": "dummy",
+      "metric": "aura", "spell": 561056, "equals": 0},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_damage_done", "spell": 800732, "target": "dummy",
+      "save_as": "blast_base"},
+
+    {"action": "learn", "actor": "rm", "spell": 300944},
+    {"action": "assert", "label": "REGRESSION GUARD: the raid 3% damage-done aura still applies", "actor": "rm",
+      "metric": "spell_damage_done", "spell": 800732, "target": "dummy", "ratio_to": "blast_base", "min": 1.025,
+      "max": 1.035},
+
+    {"action": "set_aura", "label": "Fixture: mana pool for the Primordial Blast cast", "actor": "rm",
+      "spell": 10040, "stacks": 3},
+    {"action": "assert", "label": "SETUP: the mana fixture landed", "actor": "rm", "metric": "max_power",
+      "power": 0, "min": 20000, "within_ms": 3000},
+    {"action": "set_power", "actor": "rm", "power": 0, "value": 20000},
+    {"action": "cast", "actor": "rm", "spell": 800732, "target": "dummy"},
+    {"action": "assert", "label": "CONTRACT: landing Primordial Blast applies the crit-taken debuff to the target",
+      "actor": "dummy", "metric": "aura", "spell": 561056, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "CONTRACT: the debuff lasts 20 sec", "actor": "dummy", "metric": "aura_duration_ms",
+      "spell": 561056, "min": 18500, "max": 20000}
+  ]
+}

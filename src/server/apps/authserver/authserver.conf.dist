@@ -282,6 +282,42 @@ TOTPMasterSecret =
 ###################################################################################################
 
 ###################################################################################################
+# REALM CARDS
+#
+#    RealmCards.Enable
+#        Description: Also list one offline card entry per realm, named
+#                     "realm!expansion!gamemode!image!unlocked!page!index!spell". The Ascension client's
+#                     realm list reads its cards from these entries and hides a realm without one.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+RealmCards.Enable = 1
+
+#
+#    RealmCards.Category
+#        Description: Realm category (Cfg_Categories.dbc id) of the card entries. The client reads cards
+#                     only from its last category, so this must sort after every realm's own category
+#                     (realmlist.timezone).
+#        Default:     41
+
+RealmCards.Category = 41
+
+#
+#    RealmCards.Expansion
+#    RealmCards.GameMode
+#    RealmCards.Image
+#        Description: Card expansion (EXPANSION_COLORS index), game mode (Enum.RealmGameMode,
+#                     11 = Conquest of Azeroth) and background (Interface\Glues\RealmList\<image>).
+#        Default:     2, 11, "Default"
+
+RealmCards.Expansion = 2
+RealmCards.GameMode = 11
+RealmCards.Image = "Default"
+
+#
+###################################################################################################
+
+###################################################################################################
 # UPDATE SETTINGS
 #
 #    Updates.EnableDatabases

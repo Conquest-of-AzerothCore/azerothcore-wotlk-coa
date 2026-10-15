@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Dark Mending cuts half a second off Sanguine Mend (#1088)",
+  "contract": "Dark Mending 561278 is one effect: aura 107 with MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -501 + DieSides 1 = -500 ms, over EffectSpellClassMask (524288, 0, 0) = word 0 bit 19 = the nine Sanguine Mend records (504079-504086, 802310). Unit::ModSpellCastTime applies SPELLMOD_CASTING_TIME. Tooltip: \"Reduces the cast time of Sanguine Mend by $/1000;S1 sec.\" That Description is the whole of what this issue reports; 561278's separate AuraDescription names an unrelated, unreachable mechanic (504563, triggered only by the record literally named \"Placeholder\"), which is out of scope here. Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Sanguine Mend keeps its authored cast time before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 504086,
+      "op": 10,
+      "base": 2500,
+      "equals": 2500
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 561278
+    },
+    {
+      "action": "assert",
+      "label": "Dark Mending removes 500 ms from Sanguine Mend's cast time",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 504086,
+      "op": 10,
+      "base": 2500,
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Dark Mending does not touch Bloodbolt's cast time",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 10,
+      "base": 2500,
+      "equals": 2500
+    }
+  ]
+}

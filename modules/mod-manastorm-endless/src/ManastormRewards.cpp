@@ -1,4 +1,5 @@
 #include "ManastormRewards.h"
+#include "ScriptMgr.h"
 #include "ManastormExperience.h"
 
 #include "Creature.h"
@@ -1569,7 +1570,6 @@ bool ManastormRewards::PrepareStageCompletion(
             transaction->Append(saveState);
         }
 
-
         if (!PrepareItemDelivery(characterGuid, stacks, transaction, publications, error,
             "Manastorm: level " + std::to_string(run.GetDepth())))
             return false;
@@ -1804,7 +1804,6 @@ bool ManastormRewards::PrepareItemDelivery(
         publications.push_back(
             publication);
     }
-
 
     return true;
 }
@@ -2152,10 +2151,9 @@ uint32 ManastormRewards::GetActiveGameModeMask(ObjectGuid::LowType characterGuid
 {
     Player* player = ObjectAccessor::FindConnectedPlayer(
         ObjectGuid::Create<HighGuid::Player>(characterGuid));
-    WorldSession* session = player ? player->GetSession() : nullptr;
-    if (session && session->HasNativeGameModeMask() &&
-        session->GetNativeGameModeGuid() == characterGuid)
-        return session->GetNativeGameModeMask();
+    if (player)
+        if (std::optional<uint32> mask = sScriptMgr->OnPlayerGetGameModeMask(player))
+            return *mask;
 
     // Offline participants and login before the owner publishes 0x90B use
     // that owner's persistent character state. Do not infer mode from class IDs.

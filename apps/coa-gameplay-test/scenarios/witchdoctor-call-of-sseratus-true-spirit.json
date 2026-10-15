@@ -1,0 +1,184 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Call of Sseratus summons Serpent Wards and grants True Spirit stacks natively (#2233, #489)",
+  "contract": "#2233: Call of Sseratus 681222 is Effect0 SPELL_EFFECT_APPLY_AURA/SPELL_AURA_PERIODIC_TRIGGER_SPELL (EffectAmplitude 199 ms, AttributesEx5 SPELL_ATTR5_EXTRA_INITIAL_PERIOD, RecoveryTime 40000) triggering 572899, whose spell_script_names binding (spell_ascension_witch_doctor_summon, data/sql/updates/pending_db_world/rev_20260909_00_witch_doctor_completion.sql:162-163) calls AscensionWitchDoctor::Summon(), which spawns 4 NpcMassSerpent (50587, AscensionWitchDoctorSummons.cpp:148: count = 4 + (HasAura(SerpentHandler) ? 2 : 0)) and applies player->ApplySpellMod(spell, SPELLMOD_DURATION, duration) (Summons.cpp:149) -- entirely native cooldown/GCD/periodic-trigger handling plus one already-registered SpellScript. #489: 572899's own DBC data also carries Effect1 SPELL_EFFECT_TRIGGER_SPELL -> 681233 (TrueSpiritReady), but AscensionWitchDoctorCompletion.cpp:220-221 (ApplyContracts, called once at spell load from AscensionClassMechanics.cpp:1074) zeroes that effect (`if (id == CallSseratus && info->Effects[EFFECT_1].TriggerSpell == TrueSpiritReady) info->Effects[EFFECT_1].Effect = 0;`), so the only live grant path is the gated one at Summons.cpp:180-182 (`if ((entry == NpcSerpent || NpcMassSerpent || NpcViper || NpcSpirit) && player->HasAura(TrueSpirit)) Cast(player, player, TrueSpiritReady);`), once per summoned ward. 681233 (StackAmount 5, DurationIndex 1 = 10000 ms, EffectApplyAuraName 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectBasePoints 5 + DieSides 1 = 6% per stack, EffectSpellClassMask[0] 570425344 = 33554432|536870912, SpellFamilyName 19) matches Spirit Glaive 806289 (SpellFamilyFlags[0] 33554432) and Spirit Eclipse 801607 (SpellFamilyFlags[0] 536870912) and nothing else. AuraEffect::CalculateAmount ends with `amount *= GetBase()->GetStackAmount()` (SpellAuraEffects.cpp:654, the same generic mechanism documented in chronomancer-unearthed-power.json's contract), so 4 stacks give a native +24% SPELLMOD_DAMAGE registered through Player::ApplySpellMod/CalculateSpellMod, read here via the spell_modifier metric exactly as bloodmage-atheranns-wickedness.json reads SPELLMOD_DAMAGE percent mods. All numbers (4, 6, 40000, 10000, 6%, 12000 base durations for the sibling scenario) are cited from Spell.dbc/SpellDuration.dbc, not invented. Regression guard for native behaviour; both issues classify works_natively.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "base",
+      "race": 1,
+      "class": 13,
+      "level": 80
+    },
+    {
+      "id": "handler",
+      "race": 1,
+      "class": 13,
+      "level": 80
+    },
+    {
+      "id": "spirit",
+      "race": 1,
+      "class": 13,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "base",
+      "spell": 681222
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: nothing buffs Spirit Glaive before any Ward is summoned",
+      "actor": "base",
+      "metric": "spell_modifier",
+      "spell": 806289,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "base",
+      "spell": 681222
+    },
+    {
+      "action": "assert",
+      "label": "#2233: Call of Sseratus summons 4 Serpent Wards (base count, Summons.cpp:148)",
+      "actor": "base",
+      "metric": "owned_creature_count",
+      "entry": 50587,
+      "equals": 4,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "#489 CONTROL: no True Spirit learned -> the native EffectTriggerSpell on 572899 is neutered by ApplyContracts, ward summon grants zero free TrueSpiritReady stacks",
+      "actor": "base",
+      "metric": "aura_stacks",
+      "spell": 681233,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "#2233: native 40 s RecoveryTime cooldown applies with no module code",
+      "actor": "base",
+      "metric": "cooldown_ms",
+      "spell": 681222,
+      "min": 39000,
+      "max": 40000
+    },
+    {
+      "action": "learn",
+      "actor": "handler",
+      "spell": 681222
+    },
+    {
+      "action": "learn",
+      "actor": "handler",
+      "spell": 705939
+    },
+    {
+      "action": "cast",
+      "actor": "handler",
+      "spell": 681222
+    },
+    {
+      "action": "assert",
+      "label": "#2233: SerpentHandler adds 2 more Wards (Summons.cpp:148: 4 + 2 = 6)",
+      "actor": "handler",
+      "metric": "owned_creature_count",
+      "entry": 50587,
+      "equals": 6,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "spirit",
+      "spell": 681222
+    },
+    {
+      "action": "learn",
+      "actor": "spirit",
+      "spell": 802268
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no TrueSpiritReady stacks before casting",
+      "actor": "spirit",
+      "metric": "aura_stacks",
+      "spell": 681233,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "spirit",
+      "spell": 681222
+    },
+    {
+      "action": "assert",
+      "label": "#2233 CONTROL: True Spirit does not change the base Ward count",
+      "actor": "spirit",
+      "metric": "owned_creature_count",
+      "entry": 50587,
+      "equals": 4,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "#489: The True Spirit grants one TrueSpiritReady stack per summoned Ward (Summons.cpp:180-182), 4 wards -> 4 stacks",
+      "actor": "spirit",
+      "metric": "aura_stacks",
+      "spell": 681233,
+      "equals": 4,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "#489: native DurationIndex 1 = 10000 ms (SpellDuration.dbc), aura_duration_ms ticks down from the moment it's applied so we allow drift below the DBC max",
+      "actor": "spirit",
+      "metric": "aura_duration_ms",
+      "spell": 681233,
+      "min": 8000,
+      "max": 10000
+    },
+    {
+      "action": "assert",
+      "label": "#489: 4 stacks x 6% ADD_PCT_MODIFIER = +24% Spirit Glaive damage (SPELLMOD_DAMAGE, CalculateAmount multiplies by GetStackAmount())",
+      "actor": "spirit",
+      "metric": "spell_modifier",
+      "spell": 806289,
+      "op": 0,
+      "base": 1000,
+      "equals": 1240
+    },
+    {
+      "action": "assert",
+      "label": "#489: the same class mask also reaches Spirit Eclipse (SpellFamilyFlags[0] bit 536870912)",
+      "actor": "spirit",
+      "metric": "spell_modifier",
+      "spell": 801607,
+      "op": 0,
+      "base": 1000,
+      "equals": 1240
+    },
+    {
+      "action": "assert",
+      "label": "#489 CONTROL: True Spirit's class mask does not reach Mimic Ward",
+      "actor": "spirit",
+      "metric": "spell_modifier",
+      "spell": 707162,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    }
+  ]
+}

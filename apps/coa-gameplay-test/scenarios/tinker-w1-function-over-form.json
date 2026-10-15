@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "name": "Tinker Function Over Form scales Aether Augmentation (#1344)",
+  "contract": "Function Over Form 572538 is SPELL_AURA_ADD_PCT_MODIFIER +50 on SPELLMOD_EFFECT1 (DBC EffectBasePoints 49, DieSides 1) with class mask 0x8, which selects the two Aether Augmentation passives, both SpellFamilyName 34 with SpellFamilyFlags[0] 0x8. SPELLMOD_EFFECT1 addresses effect index 0 only (Unit::ApplyEffectModifiers, Unit.cpp:12084-12103) and SpellInfo::CalcValue truncates, so 653232's effect 0 goes from 25 (EffectBasePoints 24, DieSides 1) to int32(25 * 1.5) = 37 and 653275's effect 0 from -10 (EffectBasePoints -11, DieSides 1) to -15. 653232's effect 1 is the control: same spell, index 1, so SPELLMOD_EFFECT1 must leave its 25 alone.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Aether Augmentation's crit bonus is the DBC's 25",
+      "actor": "t",
+      "metric": "spell_effect_value",
+      "spell": 653232,
+      "effect": 0,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "Its magic damage reduction is the DBC's -10",
+      "actor": "t",
+      "metric": "spell_effect_value",
+      "spell": 653275,
+      "effect": 0,
+      "equals": -10
+    },
+    {
+      "action": "assert",
+      "label": "Effect 1 starts at 25 as well",
+      "actor": "t",
+      "metric": "spell_effect_value",
+      "spell": 653232,
+      "effect": 1,
+      "equals": 25
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 572538
+    },
+    {
+      "action": "assert",
+      "label": "Function Over Form raises the crit bonus to 37",
+      "actor": "t",
+      "metric": "spell_effect_value",
+      "spell": 653232,
+      "effect": 0,
+      "equals": 37
+    },
+    {
+      "action": "assert",
+      "label": "It deepens the magic damage reduction to -15",
+      "actor": "t",
+      "metric": "spell_effect_value",
+      "spell": 653275,
+      "effect": 0,
+      "equals": -15
+    },
+    {
+      "action": "assert",
+      "label": "Effect 1 is outside SPELLMOD_EFFECT1",
+      "actor": "t",
+      "metric": "spell_effect_value",
+      "spell": 653232,
+      "effect": 1,
+      "equals": 25
+    },
+    {
+      "action": "unlearn",
+      "actor": "t",
+      "spell": 572538
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning restores the crit bonus",
+      "actor": "t",
+      "metric": "spell_effect_value",
+      "spell": 653232,
+      "effect": 0,
+      "equals": 25,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning restores the damage reduction",
+      "actor": "t",
+      "metric": "spell_effect_value",
+      "spell": 653275,
+      "effect": 0,
+      "equals": -10,
+      "within_ms": 3000
+    }
+  ]
+}

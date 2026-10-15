@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Runemaster Runic Breakout keeps Runeshroud abilities usable and instant after Runeshroud breaks (#497)",
+  "contract": [
+    "Tooltip 705583: Runeshroud abilities can be used for 3 sec with no cast time after Runeshroud breaks.",
+    "The passive is a dummy aura; DBC helper 520767 'Runic Breakout (Proc)' lasts 3 sec (SpellDuration 27).",
+    "520767 reduces the cast time of Palm Sigils (family 38 mask2 0x2000) by 100%.",
+    "Palm Sigils require CasterAuraSpell 808089, the marker kept while Runeshroud 500288 is active.",
+    "Palm Sigil: Arcane 805380 normally has a 1.5 sec cast (SpellCastTimes 16).",
+    "With the talent, the marker and an instant Palm Sigil last 3 sec after Runeshroud breaks, then both end.",
+    "Without the talent the marker ends as soon as Runeshroud does."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 20},
+    {"id": "plain", "race": 1, "class": 32, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the characters settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 500288},
+    {"action": "learn", "actor": "rm", "spell": 805380},
+    {"action": "learn", "actor": "rm", "spell": 705583},
+    {"action": "learn", "actor": "plain", "spell": 500288},
+    {"action": "learn", "actor": "plain", "spell": 805380},
+    {
+      "action": "assert", "label": "Runic Breakout passive is active", "actor": "rm", "metric": "aura",
+      "spell": 705583, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Palm Sigil: Arcane normally has a cast time", "actor": "rm",
+      "metric": "spell_cast_time_ms", "spell": 805380, "min": 1000
+    },
+    {"action": "set_aura", "actor": "rm", "spell": 500288, "stacks": 1},
+    {
+      "action": "assert", "label": "Runeshroud opens the Palm Sigil gate", "actor": "rm", "metric": "aura",
+      "spell": 808089, "equals": 1, "within_ms": 1000
+    },
+    {"action": "set_aura", "label": "Runeshroud breaks", "actor": "rm", "spell": 500288, "stacks": 0},
+    {
+      "action": "assert", "label": "Runeshroud is gone", "actor": "rm", "metric": "aura", "spell": 500288, "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Breaking Runeshroud grants the Runic Breakout window", "actor": "rm",
+      "metric": "aura", "spell": 520767, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The Runic Breakout window lasts 3 sec", "actor": "rm",
+      "metric": "aura_duration_ms", "spell": 520767, "min": 2000, "max": 3000
+    },
+    {
+      "action": "assert", "label": "Abilities requiring Runeshroud stay usable after it breaks", "actor": "rm",
+      "metric": "aura", "spell": 808089, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Palm Sigils have no cast time during the window", "actor": "rm",
+      "metric": "spell_cast_time_ms", "spell": 805380, "equals": 0
+    },
+    {"action": "cast", "actor": "rm", "spell": 805380},
+    {
+      "action": "assert", "label": "Palm Sigil: Arcane is cast instantly without Runeshroud", "actor": "rm",
+      "metric": "aura", "spell": 805380, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The Runic Breakout window expires", "actor": "rm", "metric": "aura",
+      "spell": 520767, "equals": 0, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "The Palm Sigil gate closes with the window", "actor": "rm", "metric": "aura",
+      "spell": 808089, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Palm Sigil: Arcane regains its cast time", "actor": "rm",
+      "metric": "spell_cast_time_ms", "spell": 805380, "min": 1000
+    },
+    {"action": "set_aura", "actor": "rm", "spell": 805380, "stacks": 0},
+    {"action": "cast", "actor": "rm", "spell": 805380},
+    {"action": "wait", "label": "Allow a full Palm Sigil cast", "ms": 2500},
+    {
+      "action": "assert", "label": "Palm Sigil fails once the window has closed", "actor": "rm", "metric": "aura",
+      "spell": 805380, "equals": 0
+    },
+    {"action": "set_aura", "actor": "plain", "spell": 500288, "stacks": 1},
+    {
+      "action": "assert", "label": "Control: Runeshroud opens the gate without the talent", "actor": "plain",
+      "metric": "aura", "spell": 808089, "equals": 1, "within_ms": 1000
+    },
+    {"action": "set_aura", "label": "Control: Runeshroud breaks", "actor": "plain", "spell": 500288, "stacks": 0},
+    {
+      "action": "assert", "label": "Control: Runeshroud is gone", "actor": "plain", "metric": "aura", "spell": 500288,
+      "equals": 0, "within_ms": 1000
+    },
+    {"action": "wait", "label": "Allow any proc to land", "ms": 500},
+    {
+      "action": "assert", "label": "Control: no Runic Breakout window without the talent", "actor": "plain",
+      "metric": "aura", "spell": 520767, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Control: the gate closes as soon as Runeshroud breaks", "actor": "plain",
+      "metric": "aura", "spell": 808089, "equals": 0
+    }
+  ]
+}

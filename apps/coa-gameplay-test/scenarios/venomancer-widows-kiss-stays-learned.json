@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Widow's Kiss stays learned while its talent is known",
+  "contract": "Widow's Kiss (807600): every 3rd Venom Fang (800880) becomes Widow's Kiss (504705). The 3.3.5 client prints a chat line for every SMSG_LEARNED_SPELL, SMSG_SUPERCEDED_SPELL and SMSG_REMOVED_SPELL it receives, so the transform spell is learned once with the talent and each proc only swaps the Venom Fang button. After the transform is consumed Venom Fang is back on the bar, 504705 is still known, and no SMSG_REMOVED_SPELL was sent.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 13, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "v", "entry": 36, "distance": 3, "level": 13, "health": 1000000 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn settle", "ms": 3000 },
+    { "action": "learn", "actor": "v", "spell": 92143 },
+    { "action": "learn", "actor": "v", "spell": 807600 },
+    { "action": "learn", "actor": "v", "spell": 800880 },
+    { "action": "learn", "actor": "v", "spell": 800841 },
+    { "action": "cast", "actor": "v", "spell": 800841 },
+    { "action": "assert", "label": "SETUP: Spider Form is active", "actor": "v", "metric": "aura", "spell": 800841, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Widow's Kiss is learned with its talent", "actor": "v", "metric": "knows_spell", "spell": 504705, "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "Venom Fang is not replaced without Brood Marks", "actor": "v", "metric": "temporary_spell_replacement", "spell": 800880, "equals": 800880 },
+    { "action": "wait", "label": "GCD", "ms": 1600 },
+    { "action": "cast", "actor": "v", "spell": 800880, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: 1st Venom Fang cast", "actor": "v", "metric": "cast_failure", "spell": 800880, "equals": 0 },
+    { "action": "wait", "label": "GCD", "ms": 1600 },
+    { "action": "cast", "actor": "v", "spell": 800880, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: 2nd Venom Fang cast", "actor": "v", "metric": "cast_failure", "spell": 800880, "equals": 0 },
+    { "action": "wait", "label": "GCD", "ms": 1600 },
+    { "action": "assert", "label": "SETUP: Widow's Kiss is ready", "actor": "v", "metric": "aura_stacks", "spell": 807244, "equals": 2 },
+    { "action": "assert", "label": "Venom Fang becomes Widow's Kiss", "actor": "v", "metric": "temporary_spell_replacement", "spell": 800880, "equals": 504705, "within_ms": 1500 },
+    { "action": "cast", "actor": "v", "spell": 800880, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: 3rd press (Widow's Kiss) cast", "actor": "v", "metric": "cast_failure", "spell": 504705, "equals": 0 },
+    { "action": "wait", "label": "GCD", "ms": 1600 },
+    { "action": "assert", "label": "SETUP: Widow's Kiss consumed its gate", "actor": "v", "metric": "aura_stacks", "spell": 807244, "equals": 0 },
+    { "action": "assert", "label": "Venom Fang is back on the bar", "actor": "v", "metric": "temporary_spell_replacement", "spell": 800880, "equals": 800880, "within_ms": 1500 },
+    { "action": "assert", "label": "The swap back was sent as a supersede to Venom Fang", "actor": "v", "metric": "server_packet_u32", "opcode": 300, "index": 1, "equals": 800880 },
+    { "action": "assert", "label": "Widow's Kiss is still learned after the proc", "actor": "v", "metric": "knows_spell", "spell": 504705, "equals": 1 },
+    { "action": "assert", "label": "No spell was unlearned during the proc", "actor": "v", "metric": "server_packets", "opcode": 515, "equals": 0 }
+  ]
+}

@@ -1,0 +1,150 @@
+{
+  "schema": 1,
+  "name": "Heartless raises Physical ranged critical damage by 25% and 50% (#2194)",
+  "contract": "Heartless 680326 / 680327 have E0 aura 163 (SPELL_AURA_MOD_CRIT_DAMAGE_BONUS), MiscValue 1 (Physical), BasePoints 24 / 49 with DieSides 1 = +25% / +50%; the description reads 'Increases your Physical ranged critical damage by $s1%'. Unit::SpellCriticalDamageBonus starts a ranged-class spell's crit at 200% of the hit and applies AddPct(crit_bonus, GetTotalAuraModifierByMiscMask(163, school)), so a 1000 base crits for 2000 without the talent, 2500 with rank 1 and 3000 with rank 2. Darkslayer 804179 is Physical ranged-class; Shadowblast 804191 is Shadow (school 0x20) and is the control. Ranks are learned one at a time.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 680326,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 680327,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "label": "Baseline Physical ranged crit is 200% of the hit",
+      "actor": "hunter",
+      "metric": "spell_critical_damage",
+      "spell": 804179,
+      "target": "dummy",
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Baseline Shadow ranged crit is 200% of the hit",
+      "actor": "hunter",
+      "metric": "spell_critical_damage",
+      "spell": 804191,
+      "target": "dummy",
+      "equals": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 680326,
+      "label": "Learn rank 1"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 aura is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 680326,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 Physical crit is 250%",
+      "actor": "hunter",
+      "metric": "spell_critical_damage",
+      "spell": 804179,
+      "target": "dummy",
+      "min": 2495,
+      "max": 2505
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 leaves the Shadow spell alone",
+      "actor": "hunter",
+      "metric": "spell_critical_damage",
+      "spell": 804191,
+      "target": "dummy",
+      "equals": 2000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 680326,
+      "all_specs": true,
+      "label": "Replace rank 1"
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 680327,
+      "label": "Learn rank 2"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 aura is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 680327,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 Physical crit is 300%",
+      "actor": "hunter",
+      "metric": "spell_critical_damage",
+      "spell": 804179,
+      "target": "dummy",
+      "min": 2995,
+      "max": 3005
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 leaves the Shadow spell alone",
+      "actor": "hunter",
+      "metric": "spell_critical_damage",
+      "spell": 804191,
+      "target": "dummy",
+      "equals": 2000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 680327,
+      "all_specs": true,
+      "label": "Remove rank 2"
+    },
+    {
+      "action": "assert",
+      "label": "The crit returns to 200%",
+      "actor": "hunter",
+      "metric": "spell_critical_damage",
+      "spell": 804179,
+      "target": "dummy",
+      "equals": 2000
+    }
+  ]
+}

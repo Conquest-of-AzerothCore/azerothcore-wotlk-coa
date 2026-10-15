@@ -1,0 +1,550 @@
+{
+  "schema": 1,
+  "name": "Primalist Neptulon Wrath caster AP and direct-damage procs",
+  "contract": "Allied players receive fifteen seconds of direct-hit and white-hit Froststorm damage based on thirty-five percent of the caster attack power, even when recipients have different AP. Periodic Seismic damage does not trigger it. The sixty-second Exhaustion excludes both recasting and receipt from another caster. Specialization 58 (Life) grants Douse (807558) automatically at level 40, and each Seismic Crash tick then triggers a direct Douse hit, which Neptulon's Wrath answers as direct damage; the scenario removes Douse so only the periodic Seismic damage is measured.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "outsider",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 100000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 58
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9617.06,
+      "y": -285.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 807467
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "learn",
+      "actor": "ally",
+      "spell": 807467
+    },
+    {
+      "action": "learn",
+      "actor": "ally",
+      "spell": 2136
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 803981,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 503266,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 503265,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 503264,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 503263,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 503262,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 503261,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 503260,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 503259,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 503258,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 807558,
+      "all_specs": true,
+      "label": "Remove the automatic Life Douse, whose direct Frost hit follows every Seismic Crash tick"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 503264
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 9333,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 537252,
+      "target": "target",
+      "save_as": "primalist_damage_done"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "spell_damage_done",
+      "spell": 537252,
+      "target": "target",
+      "save_as": "ally_damage_done"
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "spell_damage_taken",
+      "spell": 537252,
+      "target": "primalist",
+      "save_as": "target_damage_taken"
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "resistance",
+      "school": 3,
+      "save_as": "target_resistance_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "resistance",
+      "school": 4,
+      "save_as": "target_resistance_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "save_as": "caster_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "attack_power",
+      "save_as": "ally_ap"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 807467
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 537250,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 537250,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "aura",
+      "spell": 537250,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 537250,
+      "save_as": "primalist_amount"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "spell": 573255,
+      "min": 58000,
+      "max": 60000
+    },
+    {
+      "action": "wait",
+      "ms": 1700,
+      "label": "Let the ordinary Neptulon cast global cooldown expire"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 537252,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 537252,
+      "save_as": "primalist_hit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 537250,
+      "save_as": "ally_amount"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_duration_ms",
+      "spell": 573255,
+      "min": 56000,
+      "max": 60000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 537252,
+      "save_as": "before_ally_hit"
+    },
+    {
+      "action": "cast",
+      "actor": "ally",
+      "spell": 2136,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 537252,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 537252,
+      "save_as": "ally_hit",
+      "relative_to": "before_ally_hit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 537252,
+      "save_as": "before_white"
+    },
+    {
+      "action": "attack",
+      "actor": "primalist",
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2100
+    },
+    {
+      "action": "stop_attack",
+      "actor": "primalist"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 537252,
+      "relative_to": "before_white",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 537252,
+      "save_as": "before_periodic"
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 5000,
+      "label": "Restore Mana after the earlier Neptulon and Fire Blast casts"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "power",
+      "power": 0,
+      "save_as": "crash_available_mana"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_power_cost",
+      "spell": 503264,
+      "save_as": "crash_mana_cost"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 503264,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 4300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 537252,
+      "relative_to": "before_periodic",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 16000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 537250,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 537250,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 573255,
+      "equals": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 807467
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 807467
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 537250,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 807467,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 573255,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ally",
+      "spell": 807467
+    },
+    {
+      "action": "cast",
+      "actor": "ally",
+      "spell": 807467
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 537250,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 537250,
+      "equals": 0
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

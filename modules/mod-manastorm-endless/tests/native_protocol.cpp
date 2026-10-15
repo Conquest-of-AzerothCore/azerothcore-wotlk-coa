@@ -1,4 +1,4 @@
-#include "../../mod-ascension-compat/src/AscensionManastormProtocol.h"
+#include "../../../src/server/coa/AscensionManastormProtocol.h"
 
 #include "../src/ManastormClientConfig.h"
 #include <string>

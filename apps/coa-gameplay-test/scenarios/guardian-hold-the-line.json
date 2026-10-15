@@ -1,0 +1,801 @@
+{
+  "schema": 1,
+  "name": "Guardian Hold the Line native immunity coverage",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 18,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "guardian",
+      "entry": 36,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "guardian",
+      "target": "ally"
+    },
+    {
+      "action": "add_item",
+      "actor": "guardian",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 803130
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 803130
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 803130,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 803830
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 1776,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 802304,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 1776,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_effect_immune",
+      "spell": 49560,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian before grip movement",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_immune",
+      "spell": 49576,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian before grip cast control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_effect_immune",
+      "spell": 1776,
+      "effect": 2,
+      "target": "enemy",
+      "label": "guardian before gouge",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_immune",
+      "spell": 6770,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian before sap",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_immune",
+      "spell": 2094,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian before blind",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_effect_immune",
+      "spell": 51490,
+      "effect": 2,
+      "target": "enemy",
+      "label": "guardian before knockback",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_effect_immune",
+      "spell": 51469,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian before dest knockback",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_immune",
+      "spell": 802304,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian before root control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_immune",
+      "spell": 853,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian before stun control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_effect_immune",
+      "spell": 49560,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally before grip movement",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 49576,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally before grip cast control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_effect_immune",
+      "spell": 1776,
+      "effect": 2,
+      "target": "enemy",
+      "label": "ally before gouge",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 6770,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally before sap",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 2094,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally before blind",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_effect_immune",
+      "spell": 51490,
+      "effect": 2,
+      "target": "enemy",
+      "label": "ally before knockback",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_effect_immune",
+      "spell": 51469,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally before dest knockback",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 802304,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally before root control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 853,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally before stun control",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "guardian",
+      "spell": 803830
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 803830,
+      "caster": "guardian",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 803830,
+      "caster": "guardian",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 1776,
+      "label": "active gouge aura",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 802304,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_effect_immune",
+      "spell": 49560,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian active grip movement",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_immune",
+      "spell": 49576,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian active grip cast control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_effect_immune",
+      "spell": 1776,
+      "effect": 2,
+      "target": "enemy",
+      "label": "guardian active gouge",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_immune",
+      "spell": 6770,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian active sap",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_immune",
+      "spell": 2094,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian active blind",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_effect_immune",
+      "spell": 51490,
+      "effect": 2,
+      "target": "enemy",
+      "label": "guardian active knockback",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_effect_immune",
+      "spell": 51469,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian active dest knockback",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_immune",
+      "spell": 802304,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian active root control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_immune",
+      "spell": 853,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian active stun control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_effect_immune",
+      "spell": 49560,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally active grip movement",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 49576,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally active grip cast control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_effect_immune",
+      "spell": 1776,
+      "effect": 2,
+      "target": "enemy",
+      "label": "ally active gouge",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 6770,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally active sap",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 2094,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally active blind",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_effect_immune",
+      "spell": 51490,
+      "effect": 2,
+      "target": "enemy",
+      "label": "ally active knockback",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_effect_immune",
+      "spell": 51469,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally active dest knockback",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 802304,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally active root control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 853,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally active stun control",
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -8849.95,
+      "y": -132.493,
+      "z": 83.5312,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "outside party aura",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 803830,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "outside immunity 1776",
+      "actor": "ally",
+      "target": "enemy",
+      "metric": "spell_effect_immune",
+      "spell": 1776,
+      "effect": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "outside immunity 6770",
+      "actor": "ally",
+      "target": "enemy",
+      "metric": "spell_immune",
+      "spell": 6770,
+      "effect": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "outside immunity 51469",
+      "actor": "ally",
+      "target": "enemy",
+      "metric": "spell_effect_immune",
+      "spell": 51469,
+      "effect": 0,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -8949.95,
+      "y": -132.493,
+      "z": 83.5312,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "returned party aura",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 803830,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "returned immunity 1776",
+      "actor": "ally",
+      "target": "enemy",
+      "metric": "spell_effect_immune",
+      "spell": 1776,
+      "effect": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "returned immunity 6770",
+      "actor": "ally",
+      "target": "enemy",
+      "metric": "spell_immune",
+      "spell": 6770,
+      "effect": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "returned immunity 51469",
+      "actor": "ally",
+      "target": "enemy",
+      "metric": "spell_effect_immune",
+      "spell": 51469,
+      "effect": 0,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 15500
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 803830,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 803830,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_effect_immune",
+      "spell": 49560,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian expired grip movement",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_immune",
+      "spell": 49576,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian expired grip cast control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_effect_immune",
+      "spell": 1776,
+      "effect": 2,
+      "target": "enemy",
+      "label": "guardian expired gouge",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_immune",
+      "spell": 6770,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian expired sap",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_immune",
+      "spell": 2094,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian expired blind",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_effect_immune",
+      "spell": 51490,
+      "effect": 2,
+      "target": "enemy",
+      "label": "guardian expired knockback",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_effect_immune",
+      "spell": 51469,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian expired dest knockback",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_immune",
+      "spell": 802304,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian expired root control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "metric": "spell_immune",
+      "spell": 853,
+      "effect": 0,
+      "target": "enemy",
+      "label": "guardian expired stun control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_effect_immune",
+      "spell": 49560,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally expired grip movement",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 49576,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally expired grip cast control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_effect_immune",
+      "spell": 1776,
+      "effect": 2,
+      "target": "enemy",
+      "label": "ally expired gouge",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 6770,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally expired sap",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 2094,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally expired blind",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_effect_immune",
+      "spell": 51490,
+      "effect": 2,
+      "target": "enemy",
+      "label": "ally expired knockback",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_effect_immune",
+      "spell": 51469,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally expired dest knockback",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 802304,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally expired root control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 853,
+      "effect": 0,
+      "target": "enemy",
+      "label": "ally expired stun control",
+      "equals": 0
+    }
+  ],
+  "contract": "Normal Hold the Line protects the party from incapacitate, disorient, knockback and grip for 15 seconds."
+}

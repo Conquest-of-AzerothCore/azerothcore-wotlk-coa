@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "name": "Carbon Dating makes each Sands of Time stack raise Epoch's healing by 10% (#545)",
+  "contract": "Carbon Dating 706102 is a passive whose only effect is SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 23 = SPELLMOD_EFFECT3 and EffectBasePoints 9, resolving to 10 with DieSides 1. Its EffectSpellClassMask [16384,0,0] selects exactly one SpellFamilyName 28 spell: Sands of Time 804488 (SpellFamilyFlags [16384,0,0]). Sands of Time effect 2 is SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue 0 = SPELLMOD_DAMAGE and EffectSpellClassMask [4,0,0], which is Epoch (SpellFamilyFlags [4,0,0]); its EffectBasePoints -1 resolves to 0, so untalented the modifier is worth nothing. SPELLMOD_EFFECT3 is folded into that effect's value by Unit::ApplyEffectModifiers through SpellEffectInfo::CalcValue, and AuraEffect::CalculateAmount then multiplies the result by the stack amount (SpellAuraEffects.cpp), which is what the tooltip's 'each stack' means. The module forces Sands of Time's StackAmount to 5 (AscensionChronomancerTime.cpp ApplyTimeContracts). Unit::SpellHealingBonusDone applies SPELLMOD_DAMAGE to heals, and Sands of Time carries AttributesEx3 0x0, so SPELL_ATTR3_IGNORE_CASTER_MODIFIERS does not block it. Native handlers only: no spell_proc, spell_script_names or module script is involved. Regression scenario for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 22, "level": 80 },
+    { "id": "talent", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talent", "spell": 706102 },
+    {
+      "action": "assert",
+      "label": "Carbon Dating self-applies its passive aura once learned",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 706102,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Sands of Time carries no SPELLMOD_EFFECT3 bonus without the talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 804488,
+      "op": 23,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Carbon Dating adds 10 to Sands of Time's third effect",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 804488,
+      "op": 23,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture five Sands of Time stacks on the control",
+      "actor": "control",
+      "spell": 804488,
+      "stacks": 5
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture five Sands of Time stacks on the talented Chronomancer",
+      "actor": "talent",
+      "spell": 804488,
+      "stacks": 5
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, Sands of Time's Epoch damage modifier stays at zero",
+      "actor": "control",
+      "metric": "aura_amount",
+      "spell": 804488,
+      "caster": "control",
+      "effect": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "With the talent, five stacks resolve to a 50% Epoch modifier",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 804488,
+      "caster": "talent",
+      "effect": 2,
+      "equals": 50
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline Epoch healing at five stacks without the talent",
+      "actor": "control",
+      "metric": "spell_healing_done",
+      "spell": 501779,
+      "target": "control",
+      "save_as": "epoch_heal_base"
+    },
+    {
+      "action": "assert",
+      "label": "Epoch heals 50% harder at five stacks with the talent",
+      "actor": "talent",
+      "metric": "spell_healing_done",
+      "spell": 501779,
+      "target": "talent",
+      "ratio_to": "epoch_heal_base",
+      "min": 1.45,
+      "max": 1.55
+    }
+  ]
+}

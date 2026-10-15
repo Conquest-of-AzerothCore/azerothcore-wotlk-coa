@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Casting Waves of Time grants Warped Reality (#1929)",
+  "contract": "Warping Reality 504602 applies aura 42 (proc trigger spell) on Warped Reality 504603, a 10 s self-buff whose aura 313 is class-masked to SpellFamilyFlags word1 33554944 = Unmake + Melt Reality and is read by type in Unit::CanCastSpellWhileMoving, but Spell.dbc gives 504602 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs generated nothing and Aura::GetProcEffectMask returned 0, leaving the buff unreachable. Its tooltip is \"Casting Waves of Time now grants you Warped Reality for $504603d\", and the record's own ProcChance is 100, so one Waves of Time cast must grant it every time - one cast is therefore already deterministic. The new row uses SpellPhaseMask 1 (PROC_SPELL_PHASE_CAST): the tooltip's trigger is casting, the buff is a movement permission that cannot depend on the cone connecting, and Spell.cpp's CAST-phase Unit::ProcSkillsAndAuras call fires once per non-triggered cast with no target required.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 504602
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 801277
+    },
+    {
+      "action": "assert",
+      "label": "No Warped Reality buff before any cast",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 504603,
+      "caster": "chronomancer",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801277,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Casting Waves of Time grants Warped Reality",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 504603,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

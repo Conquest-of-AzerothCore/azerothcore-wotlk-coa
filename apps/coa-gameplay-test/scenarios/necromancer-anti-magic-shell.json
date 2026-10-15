@@ -1,0 +1,20 @@
+{
+ "schema": 1,
+ "name": "Necromancer: Anti-Magic Shell shields the raised minion, not the caster (#4168)",
+ "contract": "With Anti-Magic Shell (504866), a raised minion gets the magic-absorb shield (505224) for a limited time. The Necromancer never carries the shield.",
+ "timeout_ms": 90000,
+ "players": [
+  { "id": "n", "race": 5, "class": 23, "level": 60 }
+ ],
+ "steps": [
+  { "action": "wait", "ms": 3000 },
+  { "action": "learn", "spell": 500331, "actor": "n" },
+  { "action": "set_aura", "spell": 504866, "stacks": 1, "actor": "n" },
+  { "action": "cast", "spell": 500331, "actor": "n" },
+  { "action": "assert", "label": "minion raised", "metric": "owned_creature_count", "entry": 50075, "min": 1, "within_ms": 8000, "actor": "n" },
+  { "action": "assert", "label": "minion carries the shield", "metric": "owned_creature_count", "entry": 50075, "spell": 505224, "min": 1, "within_ms": 3000, "actor": "n" },
+  { "action": "assert", "label": "caster has no shield", "metric": "aura", "spell": 505224, "equals": 0, "actor": "n" },
+  { "action": "wait", "ms": 1000 },
+  { "action": "assert", "label": "caster still has no shield", "metric": "aura", "spell": 505224, "equals": 0, "actor": "n" }
+ ]
+}

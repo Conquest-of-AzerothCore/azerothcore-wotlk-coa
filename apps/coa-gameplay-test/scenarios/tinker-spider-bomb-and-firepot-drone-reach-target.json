@@ -1,0 +1,1370 @@
+{
+  "schema": 1,
+  "name": "Spider Bomb and Firepot Drone travel to their target and explode (#5291, #5292, #4386)",
+  "contract": [
+    "Build: Spider Bomb 500535 reads 'Build a Spider Bomb that will immediately run towards your target and",
+    "detonate', and Build: Firepot Drone 500600 reads that the drone 'flies towards your target, dropping a",
+    "bomb along its path and exploding upon landing'. AscensionDB (Exiles DB) lists Spider Bomb Explosion",
+    "801982 as cast by NPC 226012. Both builds summon a device (Spider Bomb 226012 at DEST_CASTER_RANDOM",
+    "within 6 yd, Firepot Drone 226112 at DEST_CASTER_FRONT 3 yd) that lives 15 s and runs",
+    "npc_ascension_tinker_device, which explodes once the device is within 2 yd of its focus. The golem",
+    "stands 20 yd in front of the Tinker with passive fixture reaction, so only a device that travels to it",
+    "can damage it. #5291/#5292/#4386 report that both devices stand still and never explode;",
+    "ChaseMovementGenerator pauses whenever the chaser's victim is not the chase target, and the passive",
+    "device never attacks. Each device must reach the golem, damage it and be gone well before its 15 s",
+    "duration. The fixture creatures do not regenerate health. Each of eight ordinary builds per device must",
+    "produce a native detonation spell-go packet from the summoned entry and disappear before its original",
+    "fifteen-second lifetime. Native equal-level NPC explosions retain their authored hit rolls (4% magic",
+    "miss for Spider Bomb, 5% ranged miss for Firepot), so damage is required across eight eligible",
+    "detonations for each device instead of demanding a hit from one roll: the probability of eight misses is",
+    "at most 0.05^8 < 4e-11. Actual detonation packets and timely disappearance prove arrival even when a",
+    "damage roll misses. Refill Mana, reset the parent build cooldown, and restore Firepot's three native",
+    "charges (SpellCharges category 124, ten-second recharge) between independent trials; do not modify",
+    "explosion hit chance or cost handling."
+  ],
+  "timeout_ms": 300000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "golem",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 80,
+      "distance": 20,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 500535
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "bomb_baseline",
+      "label": "Health before eight bomb detonations"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_power_cost",
+      "spell": 500535,
+      "max": 3000,
+      "label": "The native build cost fits the funded sampling budget"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500535
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "save_as": "bomb_0_go"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "bomb_0_health_before"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500535,
+      "target": "golem",
+      "label": "Ordinary bomb build 1"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Exactly one device is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "relative_to": "bomb_0_go",
+      "equals": 1,
+      "within_ms": 6000,
+      "label": "The device reaches the golem and actually casts its detonation"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated device disappears before its natural lifetime"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "bomb_0_health_after"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500535
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "save_as": "bomb_1_go"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "bomb_1_health_before"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500535,
+      "target": "golem",
+      "label": "Ordinary bomb build 2"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Exactly one device is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "relative_to": "bomb_1_go",
+      "equals": 1,
+      "within_ms": 6000,
+      "label": "The device reaches the golem and actually casts its detonation"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated device disappears before its natural lifetime"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "bomb_1_health_after"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500535
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "save_as": "bomb_2_go"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "bomb_2_health_before"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500535,
+      "target": "golem",
+      "label": "Ordinary bomb build 3"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Exactly one device is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "relative_to": "bomb_2_go",
+      "equals": 1,
+      "within_ms": 6000,
+      "label": "The device reaches the golem and actually casts its detonation"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated device disappears before its natural lifetime"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "bomb_2_health_after"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500535
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "save_as": "bomb_3_go"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "bomb_3_health_before"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500535,
+      "target": "golem",
+      "label": "Ordinary bomb build 4"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Exactly one device is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "relative_to": "bomb_3_go",
+      "equals": 1,
+      "within_ms": 6000,
+      "label": "The device reaches the golem and actually casts its detonation"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated device disappears before its natural lifetime"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "bomb_3_health_after"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500535
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "save_as": "bomb_4_go"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "bomb_4_health_before"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500535,
+      "target": "golem",
+      "label": "Ordinary bomb build 5"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Exactly one device is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "relative_to": "bomb_4_go",
+      "equals": 1,
+      "within_ms": 6000,
+      "label": "The device reaches the golem and actually casts its detonation"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated device disappears before its natural lifetime"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "bomb_4_health_after"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500535
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "save_as": "bomb_5_go"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "bomb_5_health_before"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500535,
+      "target": "golem",
+      "label": "Ordinary bomb build 6"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Exactly one device is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "relative_to": "bomb_5_go",
+      "equals": 1,
+      "within_ms": 6000,
+      "label": "The device reaches the golem and actually casts its detonation"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated device disappears before its natural lifetime"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "bomb_5_health_after"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500535
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "save_as": "bomb_6_go"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "bomb_6_health_before"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500535,
+      "target": "golem",
+      "label": "Ordinary bomb build 7"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Exactly one device is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "relative_to": "bomb_6_go",
+      "equals": 1,
+      "within_ms": 6000,
+      "label": "The device reaches the golem and actually casts its detonation"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated device disappears before its natural lifetime"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "bomb_6_health_after"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500535
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "save_as": "bomb_7_go"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "bomb_7_health_before"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500535,
+      "target": "golem",
+      "label": "Ordinary bomb build 8"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Exactly one device is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "relative_to": "bomb_7_go",
+      "equals": 1,
+      "within_ms": 6000,
+      "label": "The device reaches the golem and actually casts its detonation"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated device disappears before its natural lifetime"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "bomb_7_health_after"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "assert",
+      "actor": "golem",
+      "metric": "health",
+      "relative_to": "bomb_baseline",
+      "max": -1,
+      "label": "Eight eligible bomb detonations deal real damage without forcing hit chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "drone_baseline",
+      "label": "Health before eight drone detonations"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_power_cost",
+      "spell": 500600,
+      "max": 3000,
+      "label": "The native build cost fits the funded sampling budget"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "restore_charges",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_charges",
+      "spell": 500600,
+      "equals": 3,
+      "label": "Native Firepot charges are restored for an eligible trial"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "save_as": "drone_0_go"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "drone_0_health_before"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500600,
+      "target": "golem",
+      "label": "Ordinary drone build 1"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "Exactly one device is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "relative_to": "drone_0_go",
+      "equals": 1,
+      "within_ms": 8000,
+      "label": "The device reaches the golem and actually casts its detonation"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated device disappears before its natural lifetime"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "drone_0_health_after"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "restore_charges",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_charges",
+      "spell": 500600,
+      "equals": 3,
+      "label": "Native Firepot charges are restored for an eligible trial"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "save_as": "drone_1_go"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "drone_1_health_before"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500600,
+      "target": "golem",
+      "label": "Ordinary drone build 2"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "Exactly one device is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "relative_to": "drone_1_go",
+      "equals": 1,
+      "within_ms": 8000,
+      "label": "The device reaches the golem and actually casts its detonation"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated device disappears before its natural lifetime"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "drone_1_health_after"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "restore_charges",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_charges",
+      "spell": 500600,
+      "equals": 3,
+      "label": "Native Firepot charges are restored for an eligible trial"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "save_as": "drone_2_go"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "drone_2_health_before"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500600,
+      "target": "golem",
+      "label": "Ordinary drone build 3"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "Exactly one device is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "relative_to": "drone_2_go",
+      "equals": 1,
+      "within_ms": 8000,
+      "label": "The device reaches the golem and actually casts its detonation"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated device disappears before its natural lifetime"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "drone_2_health_after"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "restore_charges",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_charges",
+      "spell": 500600,
+      "equals": 3,
+      "label": "Native Firepot charges are restored for an eligible trial"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "save_as": "drone_3_go"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "drone_3_health_before"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500600,
+      "target": "golem",
+      "label": "Ordinary drone build 4"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "Exactly one device is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "relative_to": "drone_3_go",
+      "equals": 1,
+      "within_ms": 8000,
+      "label": "The device reaches the golem and actually casts its detonation"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated device disappears before its natural lifetime"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "drone_3_health_after"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "restore_charges",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_charges",
+      "spell": 500600,
+      "equals": 3,
+      "label": "Native Firepot charges are restored for an eligible trial"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "save_as": "drone_4_go"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "drone_4_health_before"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500600,
+      "target": "golem",
+      "label": "Ordinary drone build 5"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "Exactly one device is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "relative_to": "drone_4_go",
+      "equals": 1,
+      "within_ms": 8000,
+      "label": "The device reaches the golem and actually casts its detonation"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated device disappears before its natural lifetime"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "drone_4_health_after"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "restore_charges",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_charges",
+      "spell": 500600,
+      "equals": 3,
+      "label": "Native Firepot charges are restored for an eligible trial"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "save_as": "drone_5_go"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "drone_5_health_before"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500600,
+      "target": "golem",
+      "label": "Ordinary drone build 6"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "Exactly one device is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "relative_to": "drone_5_go",
+      "equals": 1,
+      "within_ms": 8000,
+      "label": "The device reaches the golem and actually casts its detonation"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated device disappears before its natural lifetime"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "drone_5_health_after"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "restore_charges",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_charges",
+      "spell": 500600,
+      "equals": 3,
+      "label": "Native Firepot charges are restored for an eligible trial"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "save_as": "drone_6_go"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "drone_6_health_before"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500600,
+      "target": "golem",
+      "label": "Ordinary drone build 7"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "Exactly one device is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "relative_to": "drone_6_go",
+      "equals": 1,
+      "within_ms": 8000,
+      "label": "The device reaches the golem and actually casts its detonation"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated device disappears before its natural lifetime"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "drone_6_health_after"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "restore_charges",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_charges",
+      "spell": 500600,
+      "equals": 3,
+      "label": "Native Firepot charges are restored for an eligible trial"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "save_as": "drone_7_go"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "drone_7_health_before"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500600,
+      "target": "golem",
+      "label": "Ordinary drone build 8"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "Exactly one device is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "relative_to": "drone_7_go",
+      "equals": 1,
+      "within_ms": 8000,
+      "label": "The device reaches the golem and actually casts its detonation"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated device disappears before its natural lifetime"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "drone_7_health_after"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "assert",
+      "actor": "golem",
+      "metric": "health",
+      "relative_to": "drone_baseline",
+      "max": -1,
+      "label": "Eight eligible drone detonations deal real damage without forcing hit chance"
+    }
+  ]
+}

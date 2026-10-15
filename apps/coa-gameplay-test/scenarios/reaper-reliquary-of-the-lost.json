@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "name": "Reaper Reliquary of the Lost launches Soul Bolts",
+  "contract": "Reliquary of the Lost (500631) consumes Reaped Souls and Soul Infusion and launches three Soul Bolts over five seconds that damage enemies in front of the caster. Before the fix it consumed the souls and did nothing.",
+  "players": [
+    {
+      "id": "reaper",
+      "race": 2,
+      "class": 30,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "reaper",
+      "entry": 36,
+      "level": 60,
+      "distance": 6,
+      "health": 1000000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 500631
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500631,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 500363,
+      "equals": 0,
+      "within_ms": 800,
+      "label": "souls consumed"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 500627,
+      "target": "enemy",
+      "min": 3,
+      "within_ms": 8000,
+      "label": "Three Soul Bolts damage the enemy in front of the caster"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "label": "Soul Infusion is consumed"
+    }
+  ]
+}

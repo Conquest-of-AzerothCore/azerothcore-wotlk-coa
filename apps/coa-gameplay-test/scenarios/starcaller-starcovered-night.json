@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Starcovered Night lengthens Blanket of Stars by 4 seconds (#1896)",
+  "contract": "Starcovered Night 503639 (Spell.dbc, SpellFamilyName 32 (Starcaller). Effect 0 SPELL_AURA_ADD_FLAT_MODIFIER (107), EffectMiscValue 1, EffectBasePoints 3999 with DieSides 1 resolves to +4000 ms, EffectSpellClassMask word2 0x2000000. Blanket of Stars 804381 has SpellFamilyFlags word2 0x2000000, RecoveryTime 35000 and DurationIndex 31 (8000 ms), so the tooltip 'Increases the duration of Blanket of Stars by $/1000;s1 sec.' is a flat spellmod on that spell. Native path: Aura::CalcMaxDuration applies SPELLMOD_DURATION to the aura duration (8 s to 12 s). The spell_modifier metric calls Player::ApplySpellMod for 804381 with base 8000. It proves the modifier the cast would apply without needing a shield or a cast. Both fixtures are the same race, class and level with no ratings or gear, so only the learned passive can move the difference. Nothing in AscensionStarcallerContracts.cpp touches this spell id, and the scenario is a regression guard: it is expected to pass on the shipped data.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 503639
+    },
+    {
+      "action": "assert",
+      "label": "Effect 0 resolves to +4000",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 503639,
+      "effect": 0,
+      "equals": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Control keeps Blanket of Stars' 8000",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 804381,
+      "op": 1,
+      "base": 8000,
+      "equals": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Talent gets 12000",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 804381,
+      "op": 1,
+      "base": 8000,
+      "equals": 12000
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Book of N'Zoth adds one native max stack to Shadow of the Void (#1090)",
+  "contract": "806768 effect0 is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 31 = SPELLMOD_MAX_AURA_STACKS, BasePoints 0 / DieSides 1 -> value 1, matching the tooltip's $s1=1. SpellInfo::IsAffectedBySpellMod (SpellInfo.cpp ~1503) already routes it by an explicit case in the family-31 collision table: `case 806768: return Id == 300277;` (alongside 681102/681389), so it is not blocked by the classmask collision the family shares with other Cultist spells. SpellInfo::CalcMaxAuraStacks (~1451) reads Shadow of the Void's own Spell.dbc StackAmount (1) and applies this exact modifier via Player::ApplySpellMod. The harness's spell_max_stacks metric calls CalcMaxAuraStacks directly, so it observes the native routed modifier without needing to actually stack the aura to its cap.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 40 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn/level settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: Shadow of the Void's native max stack is 1 before the talent",
+      "actor": "cultist", "metric": "spell_max_stacks", "spell": 300277, "equals": 1
+    },
+    { "action": "learn", "actor": "cultist", "spell": 806768 },
+    {
+      "action": "assert", "label": "Book of N'Zoth raises the native max stack to 2",
+      "actor": "cultist", "metric": "spell_max_stacks", "spell": 300277, "equals": 2
+    }
+  ]
+}

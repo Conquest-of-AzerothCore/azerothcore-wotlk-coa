@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "name": "Star-Charged reduces the cooldown of Aspects by 5 seconds (#1880)",
+  "contract": "Star-Charged 500608 (Spell.dbc, SpellFamilyName 32, passive) carries one effect: SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 11 = SPELLMOD_COOLDOWN, EffectBasePoints -5001 with DieSides 1 resolving to -5000 ms, and EffectSpellClassMask word2 0x800. That bit is carried by every Aspect parent: Stars 800510 (803887 and 803888 for ranks 2-3), Cosmos 801123, Warden 801128, Goddess 802203, Huntress 805356 and Moonwell 574360 (all Attributes 0x81050000, category 235, RecoveryTime and/or CategoryRecoveryTime 10000). The tooltip reads 'Reduces the cooldown of your Aspects by $/1000;s1 sec.' Native path only: Player::AddSpellAndCategoryCooldowns applies Player::ApplySpellMod(SPELLMOD_COOLDOWN) to both the spell and the category recovery time (Player.cpp, the two calls around 'Now we have cooldown data'), and a flat modifier is added as is. The spell_modifier metric applies the player's SPELLMOD_COOLDOWN modifiers (op 11) for the given spell id to a base of 10000 through Player::ApplySpellMod, the same call the cooldown code makes. The control must read 10000 unchanged, the talented fixture 5000. Not asserted: the resulting live cooldown after casting an Aspect, because the harness cast path for Aspects depends on module proc state; the modifier consumer is the stock code quoted above.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of the Stars keeps its 10000 ms cooldown without the passive",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 800510,
+      "op": 11,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of the Cosmos keeps its 10000 ms cooldown without the passive",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 801123,
+      "op": 11,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of the Warden keeps its 10000 ms cooldown without the passive",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 801128,
+      "op": 11,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of the Goddess keeps its 10000 ms cooldown without the passive",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 802203,
+      "op": 11,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of the Huntress keeps its 10000 ms cooldown without the passive",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 805356,
+      "op": 11,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of the Moonwell keeps its 10000 ms cooldown without the passive",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 574360,
+      "op": 11,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 500608
+    },
+    {
+      "action": "assert",
+      "label": "Learning the passive applies its aura",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 500608,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of the Stars cooldown drops by 5 seconds (10000 -> 5000)",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 800510,
+      "op": 11,
+      "base": 10000,
+      "equals": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of the Cosmos cooldown drops by 5 seconds (10000 -> 5000)",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 801123,
+      "op": 11,
+      "base": 10000,
+      "equals": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of the Warden cooldown drops by 5 seconds (10000 -> 5000)",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 801128,
+      "op": 11,
+      "base": 10000,
+      "equals": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of the Goddess cooldown drops by 5 seconds (10000 -> 5000)",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 802203,
+      "op": 11,
+      "base": 10000,
+      "equals": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of the Huntress cooldown drops by 5 seconds (10000 -> 5000)",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 805356,
+      "op": 11,
+      "base": 10000,
+      "equals": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of the Moonwell cooldown drops by 5 seconds (10000 -> 5000)",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 574360,
+      "op": 11,
+      "base": 10000,
+      "equals": 5000
+    }
+  ]
+}

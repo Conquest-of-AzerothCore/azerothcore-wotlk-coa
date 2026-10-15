@@ -1,0 +1,240 @@
+{
+  "schema": 1,
+  "name": "Venomancer: The Antidote and Relentless work natively (#2235, #2186)",
+  "contract": "#2235 and #2186 report 'Spell Script / Aura Handler Not Implemented' for two passives that need no script. #2235: The Antidote (681315) effect 0 is aura 107 SPELLMOD_DURATION BasePoints 1999 (+2000 ms) and effect 1 is aura 108 SPELLMOD_ACTIVATION_TIME BasePoints -31 (-30%), both class mask (0,0,0x80000) = Rejuvenating Venom 630869 (periodic heal, duration index 32 = 6000 ms, amplitude 2000 ms). Aura::CalcMaxDuration applies SPELLMOD_DURATION and AuraEffect::CalculatePeriodic applies SPELLMOD_ACTIVATION_TIME to the amplitude for a player caster, so the applied aura must last 8000 ms and tick every 1400 ms instead of 6000 ms and 2000 ms. The module casts 630869 with the player as caster (AscensionVenomancer.cpp ApplyVenoms); the fixture applies it the same way through set_aura, which makes the actor its own caster. The tooltip's '+30% tick rate' is implemented as a 30% shorter amplitude, which is what the DBC value says. #2186: Relentless (578320) effects 0 and 1 are aura 110 MOD_POWER_REGEN_PERCENT, BasePoints 19 (+20%), MiscValue 3 (energy) and 0 (mana). Player::UpdateEnergyRegen multiplies the 10 energy per second by GetTotalAuraMultiplierByMiscValue(110, energy) and Player::Regenerate adds it every update, so the same actor's energy gain over an identical six second window must be 1.2x with the passive. The mana half scales only the spirit-based part (Player::UpdateManaRegen), so it is asserted through the aura amount, not sampled. Measured on one actor before and after learning each passive.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "v",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply Rejuvenating Venom with the Venomancer as caster, before The Antidote",
+      "actor": "v",
+      "spell": 630869,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rejuvenating Venom is applied",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 630869,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rejuvenating Venom lasts about 6000 ms without The Antidote",
+      "actor": "v",
+      "metric": "aura_duration_ms",
+      "spell": 630869,
+      "min": 5700,
+      "max": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Rejuvenating Venom ticks every 2000 ms without The Antidote",
+      "actor": "v",
+      "metric": "aura_amplitude_ms",
+      "spell": 630869,
+      "effect": 0,
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "label": "No duration modifier on Rejuvenating Venom before learning",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 630869,
+      "op": 1,
+      "base": 6000,
+      "equals": 6000
+    },
+    {
+      "action": "set_aura",
+      "label": "Remove the baseline Rejuvenating Venom",
+      "actor": "v",
+      "spell": 630869,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "label": "Learn The Antidote",
+      "actor": "v",
+      "spell": 681315
+    },
+    {
+      "action": "assert",
+      "label": "The Antidote adds a flat 2000 ms to Rejuvenating Venom's duration",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 630869,
+      "op": 1,
+      "base": 6000,
+      "equals": 8000
+    },
+    {
+      "action": "assert",
+      "label": "The Antidote cuts Rejuvenating Venom's amplitude by 30%",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 630869,
+      "op": 19,
+      "base": 2000,
+      "min": 1399,
+      "max": 1401
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply Rejuvenating Venom again, now with The Antidote",
+      "actor": "v",
+      "spell": 630869,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rejuvenating Venom is applied again",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 630869,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rejuvenating Venom now lasts about 8000 ms",
+      "actor": "v",
+      "metric": "aura_duration_ms",
+      "spell": 630869,
+      "min": 7700,
+      "max": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Rejuvenating Venom now ticks every 1400 ms",
+      "actor": "v",
+      "metric": "aura_amplitude_ms",
+      "spell": 630869,
+      "effect": 0,
+      "min": 1399,
+      "max": 1400
+    },
+    {
+      "action": "assert",
+      "label": "The Antidote does not change the amplitude of an unrelated spell (Venomtip Poison)",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803195,
+      "op": 19,
+      "base": 2000,
+      "equals": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "Remove Rejuvenating Venom",
+      "actor": "v",
+      "spell": 630869,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "label": "Empty energy for the baseline window",
+      "actor": "v",
+      "power": 3,
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "label": "Baseline regeneration window",
+      "ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "label": "Energy regenerated in six seconds without Relentless",
+      "actor": "v",
+      "metric": "power",
+      "save_as": "energy0",
+      "power": 3
+    },
+    {
+      "action": "assert",
+      "label": "Baseline energy regeneration is positive (about 10 per second)",
+      "actor": "v",
+      "metric": "power",
+      "power": 3,
+      "min": 40,
+      "max": 75
+    },
+    {
+      "action": "learn",
+      "label": "Learn Relentless",
+      "actor": "v",
+      "spell": 578320
+    },
+    {
+      "action": "assert",
+      "label": "Relentless is applied",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 578320,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Relentless raises energy regeneration by 20% (effect 0)",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 578320,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "Relentless raises mana regeneration by 20% (effect 1)",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 578320,
+      "effect": 1,
+      "equals": 20
+    },
+    {
+      "action": "set_power",
+      "label": "Empty energy for the Relentless window",
+      "actor": "v",
+      "power": 3,
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "label": "Same-length regeneration window with Relentless",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Energy regenerated in six seconds is 1.2x the baseline",
+      "actor": "v",
+      "metric": "power",
+      "power": 3,
+      "ratio_to": "energy0",
+      "min": 1.14,
+      "max": 1.26
+    }
+  ]
+}

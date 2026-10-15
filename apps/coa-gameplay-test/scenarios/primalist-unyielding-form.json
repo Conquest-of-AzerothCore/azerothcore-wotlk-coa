@@ -1,0 +1,656 @@
+{
+  "schema": 1,
+  "name": "Primalist Unyielding Form: armor types, parry and dodge in both ranks",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "cloth",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "leather",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "mail",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "plate",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "untrained",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "cloth",
+      "spell": 3127
+    },
+    {
+      "action": "learn",
+      "actor": "cloth",
+      "spell": 8737
+    },
+    {
+      "action": "learn",
+      "actor": "cloth",
+      "spell": 750
+    },
+    {
+      "action": "learn",
+      "actor": "cloth",
+      "spell": 196
+    },
+    {
+      "action": "add_item",
+      "actor": "cloth",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "cloth",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "cloth",
+      "item": 200
+    },
+    {
+      "action": "snapshot",
+      "actor": "cloth",
+      "metric": "armor",
+      "save_as": "cloth_bare",
+      "label": "cloth_bare"
+    },
+    {
+      "action": "equip",
+      "actor": "cloth",
+      "item": 200,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "cloth",
+      "metric": "armor",
+      "save_as": "cloth_armor",
+      "label": "cloth_armor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cloth",
+      "metric": "dodge_chance",
+      "save_as": "cloth_dodge_chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cloth",
+      "metric": "parry_chance",
+      "save_as": "cloth_parry_chance"
+    },
+    {
+      "action": "learn",
+      "actor": "cloth",
+      "spell": 706161
+    },
+    {
+      "action": "assert",
+      "actor": "cloth",
+      "metric": "armor",
+      "relative_to": "cloth_armor",
+      "label": "cloth_rank1",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cloth",
+      "metric": "dodge_chance",
+      "relative_to": "cloth_dodge_chance",
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "assert",
+      "actor": "cloth",
+      "metric": "parry_chance",
+      "relative_to": "cloth_parry_chance",
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "cloth",
+      "spell": 706161
+    },
+    {
+      "action": "assert",
+      "actor": "cloth",
+      "metric": "armor",
+      "relative_to": "cloth_armor",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "cloth",
+      "spell": 707808
+    },
+    {
+      "action": "assert",
+      "actor": "cloth",
+      "metric": "armor",
+      "relative_to": "cloth_armor",
+      "label": "cloth_rank2",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cloth",
+      "metric": "dodge_chance",
+      "relative_to": "cloth_dodge_chance",
+      "min": 5.999,
+      "max": 6.001
+    },
+    {
+      "action": "assert",
+      "actor": "cloth",
+      "metric": "parry_chance",
+      "relative_to": "cloth_parry_chance",
+      "min": 5.999,
+      "max": 6.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "cloth",
+      "spell": 707808
+    },
+    {
+      "action": "assert",
+      "actor": "cloth",
+      "metric": "armor",
+      "relative_to": "cloth_armor",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "leather",
+      "spell": 3127
+    },
+    {
+      "action": "learn",
+      "actor": "leather",
+      "spell": 8737
+    },
+    {
+      "action": "learn",
+      "actor": "leather",
+      "spell": 750
+    },
+    {
+      "action": "learn",
+      "actor": "leather",
+      "spell": 196
+    },
+    {
+      "action": "add_item",
+      "actor": "leather",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "leather",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "leather",
+      "item": 236
+    },
+    {
+      "action": "snapshot",
+      "actor": "leather",
+      "metric": "armor",
+      "save_as": "leather_bare",
+      "label": "leather_bare"
+    },
+    {
+      "action": "equip",
+      "actor": "leather",
+      "item": 236,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "leather",
+      "metric": "armor",
+      "save_as": "leather_armor",
+      "label": "leather_armor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "leather",
+      "metric": "dodge_chance",
+      "save_as": "leather_dodge_chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "leather",
+      "metric": "parry_chance",
+      "save_as": "leather_parry_chance"
+    },
+    {
+      "action": "learn",
+      "actor": "leather",
+      "spell": 706161
+    },
+    {
+      "action": "assert",
+      "actor": "leather",
+      "metric": "armor",
+      "relative_to": "leather_armor",
+      "label": "leather_rank1",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "leather",
+      "metric": "dodge_chance",
+      "relative_to": "leather_dodge_chance",
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "assert",
+      "actor": "leather",
+      "metric": "parry_chance",
+      "relative_to": "leather_parry_chance",
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "leather",
+      "spell": 706161
+    },
+    {
+      "action": "assert",
+      "actor": "leather",
+      "metric": "armor",
+      "relative_to": "leather_armor",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "leather",
+      "spell": 707808
+    },
+    {
+      "action": "assert",
+      "actor": "leather",
+      "metric": "armor",
+      "relative_to": "leather_armor",
+      "label": "leather_rank2",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "leather",
+      "metric": "dodge_chance",
+      "relative_to": "leather_dodge_chance",
+      "min": 5.999,
+      "max": 6.001
+    },
+    {
+      "action": "assert",
+      "actor": "leather",
+      "metric": "parry_chance",
+      "relative_to": "leather_parry_chance",
+      "min": 5.999,
+      "max": 6.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "leather",
+      "spell": 707808
+    },
+    {
+      "action": "assert",
+      "actor": "leather",
+      "metric": "armor",
+      "relative_to": "leather_armor",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "mail",
+      "spell": 3127
+    },
+    {
+      "action": "learn",
+      "actor": "mail",
+      "spell": 8737
+    },
+    {
+      "action": "learn",
+      "actor": "mail",
+      "spell": 750
+    },
+    {
+      "action": "learn",
+      "actor": "mail",
+      "spell": 196
+    },
+    {
+      "action": "add_item",
+      "actor": "mail",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "mail",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "mail",
+      "item": 285
+    },
+    {
+      "action": "snapshot",
+      "actor": "mail",
+      "metric": "armor",
+      "save_as": "mail_bare",
+      "label": "mail_bare"
+    },
+    {
+      "action": "equip",
+      "actor": "mail",
+      "item": 285,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "mail",
+      "metric": "armor",
+      "save_as": "mail_armor",
+      "label": "mail_armor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "mail",
+      "metric": "dodge_chance",
+      "save_as": "mail_dodge_chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "mail",
+      "metric": "parry_chance",
+      "save_as": "mail_parry_chance"
+    },
+    {
+      "action": "learn",
+      "actor": "mail",
+      "spell": 706161
+    },
+    {
+      "action": "snapshot",
+      "actor": "mail",
+      "metric": "armor",
+      "relative_to": "mail_armor",
+      "save_as": "mail_rank1",
+      "label": "mail_rank1"
+    },
+    {
+      "action": "assert",
+      "actor": "mail",
+      "metric": "dodge_chance",
+      "relative_to": "mail_dodge_chance",
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "assert",
+      "actor": "mail",
+      "metric": "parry_chance",
+      "relative_to": "mail_parry_chance",
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "mail",
+      "spell": 706161
+    },
+    {
+      "action": "assert",
+      "actor": "mail",
+      "metric": "armor",
+      "relative_to": "mail_armor",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "mail",
+      "spell": 707808
+    },
+    {
+      "action": "snapshot",
+      "actor": "mail",
+      "metric": "armor",
+      "relative_to": "mail_armor",
+      "save_as": "mail_rank2",
+      "label": "mail_rank2"
+    },
+    {
+      "action": "assert",
+      "actor": "mail",
+      "metric": "dodge_chance",
+      "relative_to": "mail_dodge_chance",
+      "min": 5.999,
+      "max": 6.001
+    },
+    {
+      "action": "assert",
+      "actor": "mail",
+      "metric": "parry_chance",
+      "relative_to": "mail_parry_chance",
+      "min": 5.999,
+      "max": 6.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "mail",
+      "spell": 707808
+    },
+    {
+      "action": "assert",
+      "actor": "mail",
+      "metric": "armor",
+      "relative_to": "mail_armor",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "plate",
+      "spell": 3127
+    },
+    {
+      "action": "learn",
+      "actor": "plate",
+      "spell": 8737
+    },
+    {
+      "action": "learn",
+      "actor": "plate",
+      "spell": 750
+    },
+    {
+      "action": "learn",
+      "actor": "plate",
+      "spell": 196
+    },
+    {
+      "action": "add_item",
+      "actor": "plate",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "plate",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "plate",
+      "item": 8094
+    },
+    {
+      "action": "snapshot",
+      "actor": "plate",
+      "metric": "armor",
+      "save_as": "plate_bare",
+      "label": "plate_bare"
+    },
+    {
+      "action": "equip",
+      "actor": "plate",
+      "item": 8094,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "plate",
+      "metric": "armor",
+      "save_as": "plate_armor",
+      "label": "plate_armor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "plate",
+      "metric": "dodge_chance",
+      "save_as": "plate_dodge_chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "plate",
+      "metric": "parry_chance",
+      "save_as": "plate_parry_chance"
+    },
+    {
+      "action": "learn",
+      "actor": "plate",
+      "spell": 706161
+    },
+    {
+      "action": "snapshot",
+      "actor": "plate",
+      "metric": "armor",
+      "relative_to": "plate_armor",
+      "save_as": "plate_rank1",
+      "label": "plate_rank1"
+    },
+    {
+      "action": "assert",
+      "actor": "plate",
+      "metric": "dodge_chance",
+      "relative_to": "plate_dodge_chance",
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "assert",
+      "actor": "plate",
+      "metric": "parry_chance",
+      "relative_to": "plate_parry_chance",
+      "min": 2.999,
+      "max": 3.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "plate",
+      "spell": 706161
+    },
+    {
+      "action": "assert",
+      "actor": "plate",
+      "metric": "armor",
+      "relative_to": "plate_armor",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "plate",
+      "spell": 707808
+    },
+    {
+      "action": "snapshot",
+      "actor": "plate",
+      "metric": "armor",
+      "relative_to": "plate_armor",
+      "save_as": "plate_rank2",
+      "label": "plate_rank2"
+    },
+    {
+      "action": "assert",
+      "actor": "plate",
+      "metric": "dodge_chance",
+      "relative_to": "plate_dodge_chance",
+      "min": 5.999,
+      "max": 6.001
+    },
+    {
+      "action": "assert",
+      "actor": "plate",
+      "metric": "parry_chance",
+      "relative_to": "plate_parry_chance",
+      "min": 5.999,
+      "max": 6.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "plate",
+      "spell": 707808
+    },
+    {
+      "action": "assert",
+      "actor": "plate",
+      "metric": "armor",
+      "relative_to": "plate_armor",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "untrained",
+      "spell": 3127
+    },
+    {
+      "action": "learn",
+      "actor": "untrained",
+      "spell": 706161
+    },
+    {
+      "action": "assert",
+      "actor": "untrained",
+      "metric": "parry_chance",
+      "min": 7.99,
+      "max": 8.01
+    }
+  ]
+}

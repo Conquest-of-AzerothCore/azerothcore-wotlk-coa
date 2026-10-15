@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "name": "Pyromancer Embrace the Fire raises Blaze and Ignite periodic damage (#1895)",
+  "contract": "#1895: Embrace the Fire (503636) is already native: ADD_PCT_MODIFIER op 22 (DOT) bp 19 die 1 = +20%, mask (0x200,0x100,0) matching Blaze 805500/534600-534604/572159/572160 and Ignite 800791/502020-502031. Asserted through the player's native spell modifiers (SPELLMOD_DOT, the path Unit::SpellDamageBonusDone uses). The native modifier is a float (first run returned 120.00000762939453), so +20% is asserted as 119.99..120.01 rather than exact equality.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 805500
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 534604
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800791
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 502031
+    },
+    {
+      "action": "assert",
+      "label": "Spell 805500 periodic damage is unmodified before Embrace the Fire",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 805500,
+      "op": 22,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Spell 534604 periodic damage is unmodified before Embrace the Fire",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 534604,
+      "op": 22,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Spell 800791 periodic damage is unmodified before Embrace the Fire",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 800791,
+      "op": 22,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Spell 502031 periodic damage is unmodified before Embrace the Fire",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 502031,
+      "op": 22,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Direct-damage modifier of Blaze is unmodified before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 805500,
+      "op": 0,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 503636
+    },
+    {
+      "action": "assert",
+      "label": "Embrace the Fire adds 20% to Blaze 805500 periodic damage",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 805500,
+      "op": 22,
+      "base": 100,
+      "min": 119.99,
+      "max": 120.01
+    },
+    {
+      "action": "assert",
+      "label": "Embrace the Fire adds 20% to Blaze 534604 periodic damage",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 534604,
+      "op": 22,
+      "base": 100,
+      "min": 119.99,
+      "max": 120.01
+    },
+    {
+      "action": "assert",
+      "label": "Embrace the Fire adds 20% to Ignite 800791 periodic damage",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 800791,
+      "op": 22,
+      "base": 100,
+      "min": 119.99,
+      "max": 120.01
+    },
+    {
+      "action": "assert",
+      "label": "Embrace the Fire adds 20% to Ignite 502031 periodic damage",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 502031,
+      "op": 22,
+      "base": 100,
+      "min": 119.99,
+      "max": 120.01
+    },
+    {
+      "action": "assert",
+      "label": "Embrace the Fire leaves Blaze's direct-damage modifier alone",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 805500,
+      "op": 0,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Embrace the Fire leaves an unrelated Pyromancer spell (Cindergrip) alone",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 805476,
+      "op": 22,
+      "base": 100,
+      "equals": 100
+    }
+  ]
+}

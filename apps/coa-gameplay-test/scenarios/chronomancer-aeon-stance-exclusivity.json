@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "name": "Chronomancer Aeons replace the previously active stance",
+  "contract": "An Aeon cast leaves only that stance active, including casts flagged by ALLOW_CAST_WHILE_CASTING.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "chrono", "race": 1, "class": 22, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 5000},
+    {"action": "learn", "actor": "chrono", "spell": 806290},
+    {"action": "set_aura", "actor": "chrono", "spell": 806290, "stacks": 0},
+    {"action": "learn", "actor": "chrono", "spell": 806291},
+    {"action": "set_aura", "actor": "chrono", "spell": 806291, "stacks": 0},
+    {"action": "learn", "actor": "chrono", "spell": 806292},
+    {"action": "set_aura", "actor": "chrono", "spell": 806292, "stacks": 0},
+    {"action": "learn", "actor": "chrono", "spell": 806293},
+    {"action": "set_aura", "actor": "chrono", "spell": 806293, "stacks": 0},
+    {"action": "cast", "actor": "chrono", "spell": 806290},
+    {
+      "action": "assert",
+      "label": "Renewal activation succeeded",
+      "actor": "chrono",
+      "metric": "cast_failure",
+      "spell": 806290,
+      "equals": 0
+    },
+    {"action": "assert", "actor": "chrono", "metric": "aura", "spell": 806290, "equals": 1},
+    {"action": "assert", "actor": "chrono", "metric": "aura", "spell": 806291, "equals": 0},
+    {"action": "assert", "actor": "chrono", "metric": "aura", "spell": 806292, "equals": 0},
+    {"action": "assert", "actor": "chrono", "metric": "aura", "spell": 806293, "equals": 0},
+    {"action": "wait", "ms": 5500},
+    {"action": "cast", "actor": "chrono", "spell": 806291},
+    {
+      "action": "assert",
+      "label": "Resilience activation succeeded",
+      "actor": "chrono",
+      "metric": "cast_failure",
+      "spell": 806291,
+      "equals": 0
+    },
+    {"action": "assert", "actor": "chrono", "metric": "aura", "spell": 806290, "equals": 0},
+    {"action": "assert", "actor": "chrono", "metric": "aura", "spell": 806291, "equals": 1},
+    {"action": "assert", "actor": "chrono", "metric": "aura", "spell": 806292, "equals": 0},
+    {"action": "assert", "actor": "chrono", "metric": "aura", "spell": 806293, "equals": 0},
+    {"action": "wait", "ms": 5500},
+    {"action": "cast", "actor": "chrono", "spell": 806292},
+    {
+      "action": "assert",
+      "label": "Protection activation succeeded",
+      "actor": "chrono",
+      "metric": "cast_failure",
+      "spell": 806292,
+      "equals": 0
+    },
+    {"action": "assert", "actor": "chrono", "metric": "aura", "spell": 806290, "equals": 0},
+    {"action": "assert", "actor": "chrono", "metric": "aura", "spell": 806291, "equals": 0},
+    {"action": "assert", "actor": "chrono", "metric": "aura", "spell": 806292, "equals": 1},
+    {"action": "assert", "actor": "chrono", "metric": "aura", "spell": 806293, "equals": 0},
+    {"action": "wait", "ms": 5500},
+    {"action": "cast", "actor": "chrono", "spell": 806293},
+    {
+      "action": "assert",
+      "label": "Oblivion activation succeeded",
+      "actor": "chrono",
+      "metric": "cast_failure",
+      "spell": 806293,
+      "equals": 0
+    },
+    {"action": "assert", "actor": "chrono", "metric": "aura", "spell": 806290, "equals": 0},
+    {"action": "assert", "actor": "chrono", "metric": "aura", "spell": 806291, "equals": 0},
+    {"action": "assert", "actor": "chrono", "metric": "aura", "spell": 806292, "equals": 0},
+    {"action": "assert", "actor": "chrono", "metric": "aura", "spell": 806293, "equals": 1},
+    {"action": "wait", "ms": 5500},
+    {"action": "cast", "actor": "chrono", "spell": 806290},
+    {
+      "action": "assert",
+      "label": "Renewal activation succeeded",
+      "actor": "chrono",
+      "metric": "cast_failure",
+      "spell": 806290,
+      "equals": 0
+    },
+    {"action": "assert", "actor": "chrono", "metric": "aura", "spell": 806290, "equals": 1},
+    {"action": "assert", "actor": "chrono", "metric": "aura", "spell": 806291, "equals": 0},
+    {"action": "assert", "actor": "chrono", "metric": "aura", "spell": 806292, "equals": 0},
+    {"action": "assert", "actor": "chrono", "metric": "aura", "spell": 806293, "equals": 0}
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Last Call extends Valkyr's Calling's duration by 1 second (#1118)",
+  "contract": "Last Call 681448 (Spell.dbc, SpellFamilyName 33) carries SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue SPELLMOD_DURATION (1), EffectSpellClassMask word C = 2097152 (bit 21), EffectBasePoints 999 resolving to +1000 (milliseconds) with DieSides 1. Valkyr's Calling 520024 carries SpellFamilyFlags word C = 2097152, the exact same bit, so SpellInfo::IsAffected(33, mask) admits it; SpellInfo::IsAffectedBySpellMod additionally exempts SPELLMOD_DURATION from its IsAffectedBySpellMods() gate. Native path: Player::ApplySpellMod's SPELLMOD_DURATION branch adds the flat modifier before any percent multiplier, with no script required. This scenario drives that call through the harness's spell_modifier metric.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "Valkyr's Calling duration modifier is zero before the talent",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 520024, "op": 1, "base": 0, "equals": 0
+    },
+    { "action": "learn", "actor": "cleric", "spell": 681448 },
+    {
+      "action": "assert", "label": "Last Call adds 1000ms to Valkyr's Calling's duration",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 520024, "op": 1, "base": 0, "equals": 1000
+    }
+  ]
+}

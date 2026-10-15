@@ -1,0 +1,245 @@
+{
+  "schema": 1,
+  "name": "Rapid Reload grants 8%, 16% and 25% ranged haste (#891)",
+  "contract": "Rapid Reload rank 1 705512 reads 'Increases your ranged haste by $s1%.' In the installed Spell.dbc it is a passive, family 21, with one effect: SPELL_AURA_MOD_RANGED_HASTE (140), BasePoints 7 (DieSides 1, so 8%). Ranks 707863 and 712479 carry the same shape with 16% and 25%. AuraEffect::HandleAuraModRangedHaste (SpellAuraEffects.cpp:5012) calls Unit::ApplyAttackTimePercentMod(RANGED_ATTACK), which divides the ranged attack time by 1 + pct/100 (Unit.cpp:14145), so the expected ratios 1/1.08 = 0.9259, 1/1.16 = 0.8621 and 1/1.25 = 0.8 come from the DBC amounts. No script or SQL names any of the three ids. The baseline is read after equipping a crossbow so the ranged swing time is a real weapon speed. Each rank is tested on its own character: measured on slot 3, learning rank 2 right after a learn and unlearn of rank 1 on the same character re-taught rank 1 (knows_spell 1, aura 1) and left rank 2's aura absent, while learning rank 2 or 3 directly gave the DBC amounts 16 and 25. That single-character sequence is a fixture artefact of the raw learn action, not one of the tooltip's claims (whether the CoA talent path shares it is not verified).",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "one",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    },
+    {
+      "id": "two",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    },
+    {
+      "id": "three",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Crossbows skill, as in shadowblast-shadow-rage.json",
+      "actor": "one",
+      "spell": 5011
+    },
+    {
+      "action": "add_item",
+      "actor": "one",
+      "item": 15807
+    },
+    {
+      "action": "equip",
+      "actor": "one",
+      "item": 15807,
+      "slot": 17
+    },
+    {
+      "action": "learn",
+      "label": "Crossbows skill, as in shadowblast-shadow-rage.json",
+      "actor": "two",
+      "spell": 5011
+    },
+    {
+      "action": "add_item",
+      "actor": "two",
+      "item": 15807
+    },
+    {
+      "action": "equip",
+      "actor": "two",
+      "item": 15807,
+      "slot": 17
+    },
+    {
+      "action": "learn",
+      "label": "Crossbows skill, as in shadowblast-shadow-rage.json",
+      "actor": "three",
+      "spell": 5011
+    },
+    {
+      "action": "add_item",
+      "actor": "three",
+      "item": 15807
+    },
+    {
+      "action": "equip",
+      "actor": "three",
+      "item": 15807,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "label": "Let the weapon swap cooldown expire",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "label": "Ranged swing time before any haste (one)",
+      "actor": "one",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "save_as": "base_one"
+    },
+    {
+      "action": "snapshot",
+      "label": "Ranged swing time before any haste (two)",
+      "actor": "two",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "save_as": "base_two"
+    },
+    {
+      "action": "snapshot",
+      "label": "Ranged swing time before any haste (three)",
+      "actor": "three",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "save_as": "base_three"
+    },
+    {
+      "action": "learn",
+      "label": "Rapid Reload rank one",
+      "actor": "one",
+      "spell": 705512
+    },
+    {
+      "action": "assert",
+      "label": "Rank one effect 0 is the authored 8%",
+      "actor": "one",
+      "metric": "aura_amount",
+      "spell": 705512,
+      "effect": 0,
+      "equals": 8,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank one ranged swing time is 1/1.08 of the base",
+      "actor": "one",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "ratio_to": "base_one",
+      "min": 0.921,
+      "max": 0.931,
+      "within_ms": 3000
+    },
+    {
+      "action": "unlearn",
+      "label": "Drop Rapid Reload rank one",
+      "actor": "one",
+      "spell": 705512
+    },
+    {
+      "action": "assert",
+      "label": "Swing time returns to the base (rank one)",
+      "actor": "one",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "ratio_to": "base_one",
+      "min": 0.999,
+      "max": 1.001,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Rapid Reload rank two",
+      "actor": "two",
+      "spell": 707863
+    },
+    {
+      "action": "assert",
+      "label": "Rank two effect 0 is the authored 16%",
+      "actor": "two",
+      "metric": "aura_amount",
+      "spell": 707863,
+      "effect": 0,
+      "equals": 16,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank two ranged swing time is 1/1.16 of the base",
+      "actor": "two",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "ratio_to": "base_two",
+      "min": 0.857,
+      "max": 0.867,
+      "within_ms": 3000
+    },
+    {
+      "action": "unlearn",
+      "label": "Drop Rapid Reload rank two",
+      "actor": "two",
+      "spell": 707863
+    },
+    {
+      "action": "assert",
+      "label": "Swing time returns to the base (rank two)",
+      "actor": "two",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "ratio_to": "base_two",
+      "min": 0.999,
+      "max": 1.001,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Rapid Reload rank three",
+      "actor": "three",
+      "spell": 712479
+    },
+    {
+      "action": "assert",
+      "label": "Rank three effect 0 is the authored 25%",
+      "actor": "three",
+      "metric": "aura_amount",
+      "spell": 712479,
+      "effect": 0,
+      "equals": 25,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank three ranged swing time is 1/1.25 of the base",
+      "actor": "three",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "ratio_to": "base_three",
+      "min": 0.795,
+      "max": 0.805,
+      "within_ms": 3000
+    },
+    {
+      "action": "unlearn",
+      "label": "Drop Rapid Reload rank three",
+      "actor": "three",
+      "spell": 712479
+    },
+    {
+      "action": "assert",
+      "label": "Swing time returns to the base (rank three)",
+      "actor": "three",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "ratio_to": "base_three",
+      "min": 0.999,
+      "max": 1.001,
+      "within_ms": 3000
+    }
+  ]
+}

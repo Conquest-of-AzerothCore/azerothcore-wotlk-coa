@@ -1,0 +1,487 @@
+{
+  "schema": 1,
+  "name": "Profession XP: rates, difficulty, capped skill and dynamic XP",
+  "contract": "Provisional local policy approved for this change: XP = floor(next-level XP * 0.02 * 0.4 * profession * difficulty), then Rate.XP.Global (default 0.9295), then dynamic XP. Mining 2.11, herbalism 1.44, skinning 0.55; gray 0, green 0.95, yellow 1, orange 1.05 from PR #4128. Test completed-action skill APIs on real players, not node harvesting or loot. The effective player_xp_for_level row for level 20 is 23200; exact awards truncate only after the profession factors. Requires default profession/global rates and dynamic XP player choice enabled. Capped skill still rewards non-gray actions; missing skill, gray, XP lock and max player level award none. Craft 2330 consumes one each of 2447, 765, 3371 and creates item 118 (Spell.dbc); SkillLineAbility 8053 gives alchemy yellow 55, gray 95. Normal cast verifies crafting rewards and missing-reagent rejection.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "gatherer",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "command",
+      "actor": "gatherer",
+      "command": ".xp 1"
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "metric": "next_level_xp",
+      "equals": 23200
+    },
+    {
+      "action": "set_skill",
+      "actor": "gatherer",
+      "skill": 186,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "snapshot",
+      "actor": "gatherer",
+      "metric": "xp",
+      "save_as": "mining_orange_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "gatherer",
+      "skill": 186,
+      "required": 1
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "label": "mining_orange",
+      "metric": "xp",
+      "relative_to": "mining_orange_before",
+      "equals": 382
+    },
+    {
+      "action": "set_skill",
+      "actor": "gatherer",
+      "skill": 186,
+      "value": 26,
+      "maximum": 75
+    },
+    {
+      "action": "snapshot",
+      "actor": "gatherer",
+      "metric": "xp",
+      "save_as": "mining_yellow_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "gatherer",
+      "skill": 186,
+      "required": 1
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "label": "mining_yellow",
+      "metric": "xp",
+      "relative_to": "mining_yellow_before",
+      "equals": 363
+    },
+    {
+      "action": "set_skill",
+      "actor": "gatherer",
+      "skill": 186,
+      "value": 51,
+      "maximum": 75
+    },
+    {
+      "action": "snapshot",
+      "actor": "gatherer",
+      "metric": "xp",
+      "save_as": "mining_green_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "gatherer",
+      "skill": 186,
+      "required": 1
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "label": "mining_green",
+      "metric": "xp",
+      "relative_to": "mining_green_before",
+      "equals": 345
+    },
+    {
+      "action": "set_skill",
+      "actor": "gatherer",
+      "skill": 182,
+      "value": 26,
+      "maximum": 75
+    },
+    {
+      "action": "snapshot",
+      "actor": "gatherer",
+      "metric": "xp",
+      "save_as": "herbalism_yellow_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "gatherer",
+      "skill": 182,
+      "required": 1
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "label": "herbalism_yellow",
+      "metric": "xp",
+      "relative_to": "herbalism_yellow_before",
+      "equals": 248
+    },
+    {
+      "action": "set_skill",
+      "actor": "gatherer",
+      "skill": 393,
+      "value": 26,
+      "maximum": 75
+    },
+    {
+      "action": "snapshot",
+      "actor": "gatherer",
+      "metric": "xp",
+      "save_as": "skinning_yellow_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "gatherer",
+      "skill": 393,
+      "required": 1
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "label": "skinning_yellow",
+      "metric": "xp",
+      "relative_to": "skinning_yellow_before",
+      "equals": 94
+    },
+    {
+      "action": "set_skill",
+      "actor": "gatherer",
+      "skill": 186,
+      "value": 75,
+      "maximum": 75
+    },
+    {
+      "action": "snapshot",
+      "actor": "gatherer",
+      "metric": "xp",
+      "save_as": "capped_mining_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "gatherer",
+      "skill": 186,
+      "required": 50
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "label": "capped_mining",
+      "metric": "xp",
+      "relative_to": "capped_mining_before",
+      "equals": 363
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "metric": "skill_value",
+      "skill": 186,
+      "equals": 75
+    },
+    {
+      "action": "set_skill",
+      "actor": "gatherer",
+      "skill": 186,
+      "value": 101,
+      "maximum": 150
+    },
+    {
+      "action": "snapshot",
+      "actor": "gatherer",
+      "metric": "xp",
+      "save_as": "gray_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "gatherer",
+      "skill": 186,
+      "required": 1
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "label": "gray",
+      "metric": "xp",
+      "relative_to": "gray_before",
+      "equals": 0
+    },
+    {
+      "action": "set_skill",
+      "actor": "gatherer",
+      "skill": 186,
+      "value": 0,
+      "maximum": 150
+    },
+    {
+      "action": "snapshot",
+      "actor": "gatherer",
+      "metric": "xp",
+      "save_as": "missing_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "gatherer",
+      "skill": 186,
+      "required": 1
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "label": "missing",
+      "metric": "xp",
+      "relative_to": "missing_before",
+      "equals": 0
+    },
+    {
+      "action": "set_skill",
+      "actor": "gatherer",
+      "skill": 633,
+      "value": 26,
+      "maximum": 150
+    },
+    {
+      "action": "snapshot",
+      "actor": "gatherer",
+      "metric": "xp",
+      "save_as": "lockpicking_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "gatherer",
+      "skill": 633,
+      "required": 1
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "label": "lockpicking",
+      "metric": "xp",
+      "relative_to": "lockpicking_before",
+      "equals": 0
+    },
+    {
+      "action": "set_skill",
+      "actor": "gatherer",
+      "skill": 186,
+      "value": 75,
+      "maximum": 75
+    },
+    {
+      "action": "command",
+      "actor": "gatherer",
+      "command": ".xp 1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "gatherer",
+      "metric": "xp",
+      "save_as": "preset1_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "gatherer",
+      "skill": 186,
+      "required": 50
+    },
+    {
+      "action": "snapshot",
+      "actor": "gatherer",
+      "metric": "xp",
+      "relative_to": "preset1_before",
+      "save_as": "single_award"
+    },
+    {
+      "action": "command",
+      "actor": "gatherer",
+      "command": ".xp 3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "gatherer",
+      "metric": "xp",
+      "save_as": "preset3_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "gatherer",
+      "skill": 186,
+      "required": 50
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "label": "Dynamic XP multiplies exactly once",
+      "metric": "xp",
+      "relative_to": "preset3_before",
+      "ratio_to": "single_award",
+      "equals": 3
+    },
+    {
+      "action": "command",
+      "actor": "gatherer",
+      "command": ".xp 1"
+    },
+    {
+      "action": "set_skill",
+      "actor": "gatherer",
+      "skill": 171,
+      "value": 55,
+      "maximum": 150
+    },
+    {
+      "action": "learn",
+      "actor": "gatherer",
+      "spell": 2330
+    },
+    {
+      "action": "add_item",
+      "actor": "gatherer",
+      "item": 2447,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "gatherer",
+      "item": 765,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "gatherer",
+      "item": 3371,
+      "count": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "gatherer",
+      "metric": "xp",
+      "save_as": "craft_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "gatherer",
+      "metric": "item_count",
+      "item": 118,
+      "save_as": "potions_before"
+    },
+    {
+      "action": "cast",
+      "actor": "gatherer",
+      "spell": 2330
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "label": "The normal recipe produces its potion",
+      "metric": "item_count",
+      "item": 118,
+      "relative_to": "potions_before",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "label": "Yellow alchemy XP uses its 3x profession factor",
+      "metric": "xp",
+      "relative_to": "craft_before",
+      "equals": 516
+    },
+    {
+      "action": "snapshot",
+      "actor": "gatherer",
+      "metric": "xp",
+      "save_as": "failed_craft_before"
+    },
+    {
+      "action": "cast",
+      "actor": "gatherer",
+      "spell": 2330
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "label": "Crafting without reagents awards no XP",
+      "metric": "xp",
+      "relative_to": "failed_craft_before",
+      "equals": 0
+    },
+    {
+      "action": "set_xp_enabled",
+      "actor": "gatherer",
+      "enabled": false
+    },
+    {
+      "action": "snapshot",
+      "actor": "gatherer",
+      "metric": "xp",
+      "save_as": "locked_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "gatherer",
+      "skill": 186,
+      "required": 50
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "metric": "xp",
+      "relative_to": "locked_before",
+      "equals": 0
+    },
+    {
+      "action": "set_xp_enabled",
+      "actor": "gatherer",
+      "enabled": true
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "metric": "level",
+      "equals": 20
+    },
+    {
+      "action": "set_level",
+      "actor": "gatherer",
+      "value": 80
+    },
+    {
+      "action": "snapshot",
+      "actor": "gatherer",
+      "metric": "xp",
+      "save_as": "maximum_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "gatherer",
+      "skill": 186,
+      "required": 50
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "metric": "xp",
+      "relative_to": "maximum_before",
+      "equals": 0
+    }
+  ]
+}

@@ -558,12 +558,18 @@ void Map::UpdateNonPlayerObjects(uint32 const diff)
         _AddObjectToUpdateList(obj);
     _pendingAddUpdatableObjectList.clear();
 
+    uint32 const simulatedPhases = GameTime::IsSimulated() ? _simulatedUpdatePhases.load(std::memory_order_relaxed) : 0;
+    auto const skipped = [simulatedPhases](WorldObject const* obj)
+    {
+        return simulatedPhases && !(obj->GetPhaseMask() & simulatedPhases);
+    };
+
     if (_updatableObjectListRecheckTimer.Passed())
     {
         for (uint32 i = 0; i < _updatableObjectList.size();)
         {
             WorldObject* obj = _updatableObjectList[i];
-            if (!obj->IsInWorld())
+            if (!obj->IsInWorld() || skipped(obj))
             {
                 ++i;
                 continue;
@@ -587,7 +593,7 @@ void Map::UpdateNonPlayerObjects(uint32 const diff)
         for (uint32 i = 0; i < _updatableObjectList.size(); ++i)
         {
             WorldObject* obj = _updatableObjectList[i];
-            if (!obj->IsInWorld())
+            if (!obj->IsInWorld() || skipped(obj))
                 continue;
 
             obj->Update(diff);

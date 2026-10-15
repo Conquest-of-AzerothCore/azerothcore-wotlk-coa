@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Profession XP: disabled server rate",
+  "contract": "Run with Rate.XP.Profession=0 and Rate.XP.Global=1. A completed mining action gives no XP even with dynamic XP preset 3.",
+  "players": [
+    {
+      "id": "miner",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_skill",
+      "actor": "miner",
+      "skill": 186,
+      "value": 75,
+      "maximum": 75
+    },
+    {
+      "action": "command",
+      "actor": "miner",
+      "command": ".xp 3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "miner",
+      "metric": "xp",
+      "save_as": "before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "miner",
+      "skill": 186,
+      "required": 50
+    },
+    {
+      "action": "assert",
+      "actor": "miner",
+      "metric": "xp",
+      "relative_to": "before",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "miner",
+      "metric": "level",
+      "equals": 20
+    }
+  ]
+}

@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "name": "Primalist Keeper of the Grove: Bramblepatch cooldown reduction",
+  "contract": "Bramblepatch starts a 120-second native cooldown, reduced to 90 seconds while Keeper of the Grove is learned. An independently unlearned actor returns to 120 seconds; an unrelated spell is unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "id": "baseline"
+    },
+    {
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "id": "talented"
+    },
+    {
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "id": "removed"
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "baseline",
+      "id": 58
+    },
+    {
+      "action": "learn",
+      "actor": "baseline",
+      "spell": 806415
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "spell_modifier",
+      "spell": 806415,
+      "op": 11,
+      "base": 120000,
+      "equals": 120000
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "spell_modifier",
+      "spell": 500692,
+      "op": 11,
+      "base": 20000,
+      "equals": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "baseline",
+      "spell": 806415
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "dynamic_object",
+      "spell": 806415,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 806415,
+      "min": 119000,
+      "max": 120000
+    },
+    {
+      "action": "specialization",
+      "actor": "talented",
+      "id": 58
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 806415
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 706137
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "spell_modifier",
+      "spell": 806415,
+      "op": 11,
+      "base": 120000,
+      "equals": 90000
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "spell_modifier",
+      "spell": 500692,
+      "op": 11,
+      "base": 20000,
+      "equals": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "talented",
+      "spell": 806415
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "dynamic_object",
+      "spell": 806415,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 806415,
+      "min": 89000,
+      "max": 90000
+    },
+    {
+      "action": "specialization",
+      "actor": "removed",
+      "id": 58
+    },
+    {
+      "action": "learn",
+      "actor": "removed",
+      "spell": 806415
+    },
+    {
+      "action": "learn",
+      "actor": "removed",
+      "spell": 706137
+    },
+    {
+      "action": "unlearn",
+      "actor": "removed",
+      "spell": 706137
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "spell_modifier",
+      "spell": 806415,
+      "op": 11,
+      "base": 120000,
+      "equals": 120000
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "spell_modifier",
+      "spell": 500692,
+      "op": 11,
+      "base": 20000,
+      "equals": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "removed",
+      "spell": 806415
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "dynamic_object",
+      "spell": 806415,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 806415,
+      "min": 119000,
+      "max": 120000
+    }
+  ]
+}

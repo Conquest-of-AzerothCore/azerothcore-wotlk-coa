@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Absolutism makes Meatsaw ignore 10% of the target's Armor (#967)",
+  "contract": "Absolutism 706501 reads 'Damage dealt by Meatsaw now ignores -10% of the target's Armor' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z). Effect 0 is the custom aura SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT (338), BasePoints 10, classmask (0,8388608,0) matching Meatsaw's own family flags. Unit::CalcArmorReducedDamage (Unit.cpp:2268-2273) reads this as an attacker-side percentage and shaves it off the target's armor before mitigation, the same aura type already used by AscensionWitchHunterCompletion.cpp (804194) and AscensionSunClericRadiance.cpp (Vindicator). At level 60 the owned Meatsaw rank is 578119 and the owned Sever rank is 501505 (AscensionSpellProgressionData.h).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "knight",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "Fixture assumption: the target has armor to ignore",
+      "actor": "dummy", "metric": "armor", "min": 1
+    },
+    {
+      "action": "assert", "label": "Fixture assumption: that armor mitigates the Meatsaw probe",
+      "actor": "knight", "metric": "armor_reduced_damage", "spell": 578119, "target": "dummy", "max": 999
+    },
+    {
+      "action": "snapshot", "label": "Meatsaw's armor-reduced damage before",
+      "actor": "knight", "metric": "armor_reduced_damage", "spell": 578119, "target": "dummy", "save_as": "meatsaw_before"
+    },
+    {
+      "action": "snapshot", "label": "Sever's armor-reduced damage before",
+      "actor": "knight", "metric": "armor_reduced_damage", "spell": 501505, "target": "dummy", "save_as": "sever_before"
+    },
+    { "action": "learn", "actor": "knight", "spell": 706501 },
+    { "action": "set_aura", "actor": "knight", "spell": 706501, "stacks": 1, "label": "Force the Absolutism passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Absolutism passive is active",
+      "actor": "knight", "metric": "aura", "spell": 706501, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: ignoring 10% armor lets more Meatsaw damage through",
+      "actor": "knight", "metric": "armor_reduced_damage", "spell": 578119, "target": "dummy",
+      "ratio_to": "meatsaw_before", "min": 1.001
+    },
+    {
+      "action": "assert", "label": "REGRESSION: Sever's armor mitigation is untouched",
+      "actor": "knight", "metric": "armor_reduced_damage", "spell": 501505, "target": "dummy",
+      "ratio_to": "sever_before", "min": 0.999, "max": 1.001
+    }
+  ]
+}

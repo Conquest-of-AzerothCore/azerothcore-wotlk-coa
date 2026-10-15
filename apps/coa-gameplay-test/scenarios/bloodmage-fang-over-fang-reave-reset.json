@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "name": "Fang Over Fang's reset payload clears the Reave rank the character owns (#578)",
+  "contract": "Fang Over Fang 504116's single effect is SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on Fang Over Fang 504117, whose single effect is SPELL_EFFECT_ASCENSION_RESET_COOLDOWN (195) with MiscValue 800490 = Reave rank 1 and MiscValueB 1. Spell::EffectAscensionResetCooldown passes MiscValueB as resetCategory, so ResetAscensionCooldown (SpellEffects.cpp:290) calls RemoveSpellCooldown(800490) and then RemoveCategoryCooldown on Reave's category; Player::RemoveCategoryCooldown (Player.cpp:3770) walks sSpellsByCategoryStore, and Category 752 holds exactly the eight Reave ranks 800490 and 802463-802469, every one of them with RecoveryTime 0 and CategoryRecoveryTime 15000. That is what makes the reset reach rank 802469, the rank a level-80 character owns, instead of only the rank 1 named in MiscValue - the same shape that sank the sibling SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN of #3426, which carries MiscValueB 0 and therefore never leaves rank 1. Reave carries CasterAuraSpell 524861, one of the two Cursed Form markers AscensionBloodmageTalents.cpp mirrors onto the real form state, so the caster is given that marker as a fixture. WHAT THIS SCENARIO DOES NOT PROVE: the tooltip's other half, 'Casting Bloodfang Bite now has a $h% chance to reset the cooldown of Reave' at the record's own ProcChance 20, is not asserted here and this scenario does not discriminate the spell_proc row the fix adds. Reave's only cooldown is its 15 s category, and Bloodfang Bite 572551 and Reave both carry StartRecoveryTime 1500 with StartRecoveryCategory 133, so at most nine Bloodfang Bites fit inside one window; a correctly fixed build still fails a single nine-cast observation 0.8^9 = 13.4% of the time, and the 0.1% bar needs 31 casts, i.e. 46 s of global cooldowns, which cannot be fitted into a 15 s window - Category 752 contains only Reave ranks, all at CategoryRecoveryTime 15000, so the observation window cannot be lengthened either, and the harness has no metric that counts proc firings. That half needs a Ghost e2e test that re-arms Reave between batches and counts resets across many windows.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy1",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 802469
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504116
+    },
+    {
+      "action": "learn",
+      "label": "WorldSession::HandleCastSpellOpcode discards a cast the caster does not hold",
+      "actor": "bloodmage",
+      "spell": 504117
+    },
+    {
+      "action": "set_aura",
+      "label": "Cursed Form marker 524861, Reave's CasterAuraSpell",
+      "actor": "bloodmage",
+      "spell": 524861,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Fang Over Fang passive is applied",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 504116,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 802469,
+      "target": "dummy1"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: casting Reave arms the owned rank 802469 on its 15 s category cooldown",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 802469,
+      "min": 12000,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Idle control window",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: three idle seconds only decay the cooldown, they never clear it",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 802469,
+      "min": 9000
+    },
+    {
+      "action": "cast",
+      "label": "The payload the Fang Over Fang proc casts",
+      "actor": "bloodmage",
+      "spell": 504117
+    },
+    {
+      "action": "assert",
+      "label": "The reset payload clears the owned rank 802469, not only the rank 1 its MiscValue names",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 802469,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Reave is usable again straight away",
+      "actor": "bloodmage",
+      "spell": 802469,
+      "target": "dummy1"
+    },
+    {
+      "action": "assert",
+      "label": "and the fresh cast re-arms the same category cooldown",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 802469,
+      "min": 12000,
+      "within_ms": 3000
+    }
+  ]
+}

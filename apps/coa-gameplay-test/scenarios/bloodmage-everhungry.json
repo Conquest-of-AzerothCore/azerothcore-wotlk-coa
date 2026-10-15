@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "Everhungry hastes the Bloodmage on a direct critical strike (#3412)",
+  "contract": "Everhungry 804599 reads 'Direct critical strikes now increase your haste by $802029s1% for $802029d'. Its single effect is aura 42 (proc trigger spell) on Everhungry 802029 (MOD_MELEE_RANGED_HASTE and HASTE_SPELLS, both BasePoints 9 -> +10%, duration index 28, TargetA 1). Spell.dbc gives 804599 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and no crit ever granted the buff. Bloodbolt is cast as rank 578305 (the rank a level-80 character owns; 578304 is only granted up to level 52 and gets no server response) and spell_crit_rating 100000 makes the critical strike deterministic instead of hoping for one.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 100000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 804599
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 578305
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Everhungry passive is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 804599,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "No Everhungry buff before any cast",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 802029,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 578305,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a critical Bloodbolt grants Everhungry 802029",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 802029,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Everhungry grants the DBC value of +10% haste",
+      "actor": "bloodmage",
+      "metric": "aura_amount",
+      "spell": 802029,
+      "equals": 10
+    }
+  ]
+}

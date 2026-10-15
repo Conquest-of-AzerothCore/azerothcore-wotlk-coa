@@ -1,0 +1,19 @@
+[worldset]
+
+#
+#    Worldforged.CostFactor
+#        Description: Multiplies every upgrade price.
+#
+#                     The prices in `worldforged_upgrade` are computed, not
+#                     recovered. No captured store response survives and no
+#                     ItemExtendedCost row names a Worldforged base item, so the
+#                     numbers come from a formula: a base amount, Blizzard's own
+#                     slot weights, and the target item level. This factor is the
+#                     one knob that moves them all without regenerating the table.
+#
+#                     Should a real capture ever turn up, replace the `cost`
+#                     column and set this back to 1.
+#        Default:     1.0
+#
+
+Worldforged.CostFactor = 1.0

@@ -168,6 +168,38 @@ struct npc_garr_firesworn : public ScriptedAI
     }
 };
 
+// Firesworn's on-death Eruption (19497, Mythic/Ascended sibling 350126) is a self-centered AoE whose
+// DBC radius (SpellRadius.dbc id 12, 100 yd) covers effectively the whole Garr room; filtering it down
+// here keeps the vanilla radius id untouched (it is shared by other, unrelated spells) while matching
+// the encounter's own "dies, hits whoever is close to it" design. The radius is a flat, designed 12 yd
+// exact distance (not a measured value): the prior combat-reach-relative melee-range filter (~7-9 yd
+// for two average hitboxes) read as too small a zone per the user's own report.
+class spell_firesworn_eruption_melee_coa : public SpellScript
+{
+    PrepareSpellScript(spell_firesworn_eruption_melee_coa);
+
+    static constexpr float ERUPTION_RADIUS = 12.0f;
+
+    void FilterTargets(std::list<WorldObject*>& targets)
+    {
+        Unit* caster = GetCaster();
+        if (!caster)
+            return;
+
+        targets.remove_if([caster](WorldObject* target)
+        {
+            Unit* unit = target->ToUnit();
+            return !unit || caster->GetExactDist(unit) > ERUPTION_RADIUS;
+        });
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_firesworn_eruption_melee_coa::FilterTargets, EFFECT_0, TARGET_UNIT_DEST_AREA_ENEMY);
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_firesworn_eruption_melee_coa::FilterTargets, EFFECT_1, TARGET_UNIT_DEST_AREA_ENEMY);
+    }
+};
+
 //19515 Frenzy (SERVERSIDE)
 class spell_garr_frenzy : public SpellScript
 {
@@ -197,4 +229,5 @@ void AddSC_boss_garr()
 
     // Spells
     RegisterSpellScript(spell_garr_frenzy);
+    RegisterSpellScript(spell_firesworn_eruption_melee_coa);
 }

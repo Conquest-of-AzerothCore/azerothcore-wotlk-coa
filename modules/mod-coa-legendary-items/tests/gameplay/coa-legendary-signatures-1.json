@@ -1,0 +1,935 @@
+{
+  "schema": 1,
+  "name": "CoA Legendary Items: signatures 1",
+  "contract": "Requires CoALegendaryItems.Enable=1, DropChance=100, StopDropLevel=60, DestinyWeaver.Enable=1, LevelScaling=1, offset=5, CoA.SendDisplayPatches=1. Each signature trinket boosts only its class ability main direct hit by 12% relative to existing class bonuses through a native percentage spell modifier; unrelated spells (including native auras sharing selector bits), secondary triggered spells, periodic effects and unequipped items are unchanged. First and highest available native ranks are checked.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "victim",
+      "race": 1,
+      "class": 8,
+      "level": 32
+    },
+    {
+      "id": "class12",
+      "race": 1,
+      "class": 12,
+      "level": 32
+    },
+    {
+      "id": "class13",
+      "race": 1,
+      "class": 13,
+      "level": 32
+    },
+    {
+      "id": "class14",
+      "race": 1,
+      "class": 14,
+      "level": 32
+    },
+    {
+      "id": "class15",
+      "race": 1,
+      "class": 15,
+      "level": 32
+    },
+    {
+      "id": "class16",
+      "race": 1,
+      "class": 16,
+      "level": 32
+    },
+    {
+      "id": "class17",
+      "race": 1,
+      "class": 17,
+      "level": 32
+    },
+    {
+      "id": "class18",
+      "race": 1,
+      "class": 18,
+      "level": 32
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "class12",
+      "metric": "spell_modifier",
+      "spell": 805808,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class12_spell805808_op0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class12",
+      "metric": "spell_modifier",
+      "spell": 116,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class12_spell116_op0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class12",
+      "metric": "spell_modifier",
+      "spell": 805808,
+      "op": 22,
+      "base": 1000,
+      "save_as": "class12_spell805808_op22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class12",
+      "metric": "spell_modifier",
+      "spell": 572331,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class12_spell572331_op0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class13",
+      "metric": "spell_modifier",
+      "spell": 802087,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class13_spell802087_op0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class13",
+      "metric": "spell_modifier",
+      "spell": 116,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class13_spell116_op0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class13",
+      "metric": "spell_modifier",
+      "spell": 802087,
+      "op": 22,
+      "base": 1000,
+      "save_as": "class13_spell802087_op22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class13",
+      "metric": "spell_modifier",
+      "spell": 501181,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class13_spell501181_op0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class14",
+      "metric": "spell_modifier",
+      "spell": 801895,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class14_spell801895_op0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class14",
+      "metric": "spell_modifier",
+      "spell": 116,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class14_spell116_op0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class14",
+      "metric": "spell_modifier",
+      "spell": 801895,
+      "op": 22,
+      "base": 1000,
+      "save_as": "class14_spell801895_op22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class14",
+      "metric": "spell_modifier",
+      "spell": 501299,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class14_spell501299_op0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class15",
+      "metric": "spell_modifier",
+      "spell": 680537,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class15_spell680537_op0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class15",
+      "metric": "spell_modifier",
+      "spell": 116,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class15_spell116_op0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class15",
+      "metric": "spell_modifier",
+      "spell": 680537,
+      "op": 22,
+      "base": 1000,
+      "save_as": "class15_spell680537_op22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class15",
+      "metric": "spell_modifier",
+      "spell": 681352,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class15_spell681352_op0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class16",
+      "metric": "spell_modifier",
+      "spell": 801847,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class16_spell801847_op0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class16",
+      "metric": "spell_modifier",
+      "spell": 116,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class16_spell116_op0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class16",
+      "metric": "spell_modifier",
+      "spell": 801847,
+      "op": 22,
+      "base": 1000,
+      "save_as": "class16_spell801847_op22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class16",
+      "metric": "spell_modifier",
+      "spell": 567520,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class16_spell567520_op0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class17",
+      "metric": "spell_modifier",
+      "spell": 800081,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class17_spell800081_op0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class17",
+      "metric": "spell_modifier",
+      "spell": 116,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class17_spell116_op0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class17",
+      "metric": "spell_modifier",
+      "spell": 800081,
+      "op": 22,
+      "base": 1000,
+      "save_as": "class17_spell800081_op22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class17",
+      "metric": "spell_modifier",
+      "spell": 503367,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class17_spell503367_op0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class18",
+      "metric": "spell_modifier",
+      "spell": 803129,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class18_spell803129_op0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class18",
+      "metric": "spell_modifier",
+      "spell": 116,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class18_spell116_op0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class18",
+      "metric": "spell_modifier",
+      "spell": 803129,
+      "op": 22,
+      "base": 1000,
+      "save_as": "class18_spell803129_op22"
+    },
+    {
+      "action": "snapshot",
+      "actor": "class18",
+      "metric": "spell_modifier",
+      "spell": 503126,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class18_spell503126_op0"
+    },
+    {
+      "action": "assert",
+      "actor": "class12",
+      "metric": "spell_modifier",
+      "spell": 805808,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class12_spell805808_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "add_item",
+      "actor": "class12",
+      "item": 9700229
+    },
+    {
+      "action": "equip",
+      "actor": "class12",
+      "item": 9700229,
+      "slot": 12
+    },
+    {
+      "action": "assert",
+      "actor": "class12",
+      "metric": "spell_modifier",
+      "spell": 805808,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class12_spell805808_op0",
+      "min": 1.11999,
+      "max": 1.1200100000000002
+    },
+    {
+      "action": "assert",
+      "actor": "class12",
+      "metric": "spell_modifier",
+      "spell": 116,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class12_spell116_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "assert",
+      "actor": "class12",
+      "metric": "spell_modifier",
+      "spell": 805808,
+      "op": 22,
+      "base": 1000,
+      "ratio_to": "class12_spell805808_op22",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "assert",
+      "actor": "class12",
+      "metric": "spell_modifier",
+      "spell": 572331,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class12_spell572331_op0",
+      "min": 1.11999,
+      "max": 1.1200100000000002
+    },
+    {
+      "action": "destroy_item",
+      "actor": "class12",
+      "item": 9700229
+    },
+    {
+      "action": "assert",
+      "actor": "class12",
+      "metric": "spell_modifier",
+      "spell": 805808,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class12_spell805808_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "assert",
+      "actor": "class13",
+      "metric": "spell_modifier",
+      "spell": 802087,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class13_spell802087_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "add_item",
+      "actor": "class13",
+      "item": 9700529
+    },
+    {
+      "action": "equip",
+      "actor": "class13",
+      "item": 9700529,
+      "slot": 12
+    },
+    {
+      "action": "assert",
+      "actor": "class13",
+      "metric": "spell_modifier",
+      "spell": 802087,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class13_spell802087_op0",
+      "min": 1.11999,
+      "max": 1.1200100000000002
+    },
+    {
+      "action": "assert",
+      "actor": "class13",
+      "metric": "spell_modifier",
+      "spell": 116,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class13_spell116_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "assert",
+      "actor": "class13",
+      "metric": "spell_modifier",
+      "spell": 802087,
+      "op": 22,
+      "base": 1000,
+      "ratio_to": "class13_spell802087_op22",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "assert",
+      "actor": "class13",
+      "metric": "spell_modifier",
+      "spell": 501181,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class13_spell501181_op0",
+      "min": 1.11999,
+      "max": 1.1200100000000002
+    },
+    {
+      "action": "destroy_item",
+      "actor": "class13",
+      "item": 9700529
+    },
+    {
+      "action": "assert",
+      "actor": "class13",
+      "metric": "spell_modifier",
+      "spell": 802087,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class13_spell802087_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "assert",
+      "actor": "class14",
+      "metric": "spell_modifier",
+      "spell": 801895,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class14_spell801895_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "snapshot",
+      "actor": "class14",
+      "metric": "spell_modifier",
+      "spell": 300490,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class14_colliding_spell300490"
+    },
+    {
+      "action": "add_item",
+      "actor": "class14",
+      "item": 9700829
+    },
+    {
+      "action": "equip",
+      "actor": "class14",
+      "item": 9700829,
+      "slot": 12
+    },
+    {
+      "action": "assert",
+      "actor": "class14",
+      "metric": "spell_modifier",
+      "spell": 801895,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class14_spell801895_op0",
+      "min": 1.11999,
+      "max": 1.1200100000000002
+    },
+    {
+      "action": "assert",
+      "actor": "class14",
+      "metric": "spell_modifier",
+      "spell": 116,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class14_spell116_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "assert",
+      "actor": "class14",
+      "metric": "spell_modifier",
+      "spell": 801895,
+      "op": 22,
+      "base": 1000,
+      "ratio_to": "class14_spell801895_op22",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "assert",
+      "actor": "class14",
+      "metric": "spell_modifier",
+      "spell": 501299,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class14_spell501299_op0",
+      "min": 1.11999,
+      "max": 1.1200100000000002
+    },
+    {
+      "action": "assert",
+      "actor": "class14",
+      "metric": "spell_modifier",
+      "spell": 300490,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class14_colliding_spell300490",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "destroy_item",
+      "actor": "class14",
+      "item": 9700829
+    },
+    {
+      "action": "assert",
+      "actor": "class14",
+      "metric": "spell_modifier",
+      "spell": 801895,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class14_spell801895_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "assert",
+      "actor": "class15",
+      "metric": "spell_modifier",
+      "spell": 680537,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class15_spell680537_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "add_item",
+      "actor": "class15",
+      "item": 9701129
+    },
+    {
+      "action": "equip",
+      "actor": "class15",
+      "item": 9701129,
+      "slot": 12
+    },
+    {
+      "action": "assert",
+      "actor": "class15",
+      "metric": "spell_modifier",
+      "spell": 680537,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class15_spell680537_op0",
+      "min": 1.11999,
+      "max": 1.1200100000000002
+    },
+    {
+      "action": "assert",
+      "actor": "class15",
+      "metric": "spell_modifier",
+      "spell": 116,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class15_spell116_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "assert",
+      "actor": "class15",
+      "metric": "spell_modifier",
+      "spell": 680537,
+      "op": 22,
+      "base": 1000,
+      "ratio_to": "class15_spell680537_op22",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "assert",
+      "actor": "class15",
+      "metric": "spell_modifier",
+      "spell": 681352,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class15_spell681352_op0",
+      "min": 1.11999,
+      "max": 1.1200100000000002
+    },
+    {
+      "action": "destroy_item",
+      "actor": "class15",
+      "item": 9701129
+    },
+    {
+      "action": "assert",
+      "actor": "class15",
+      "metric": "spell_modifier",
+      "spell": 680537,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class15_spell680537_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "assert",
+      "actor": "class16",
+      "metric": "spell_modifier",
+      "spell": 801847,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class16_spell801847_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "add_item",
+      "actor": "class16",
+      "item": 9701429
+    },
+    {
+      "action": "equip",
+      "actor": "class16",
+      "item": 9701429,
+      "slot": 12
+    },
+    {
+      "action": "assert",
+      "actor": "class16",
+      "metric": "spell_modifier",
+      "spell": 801847,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class16_spell801847_op0",
+      "min": 1.11999,
+      "max": 1.1200100000000002
+    },
+    {
+      "action": "assert",
+      "actor": "class16",
+      "metric": "spell_modifier",
+      "spell": 116,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class16_spell116_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "assert",
+      "actor": "class16",
+      "metric": "spell_modifier",
+      "spell": 801847,
+      "op": 22,
+      "base": 1000,
+      "ratio_to": "class16_spell801847_op22",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "assert",
+      "actor": "class16",
+      "metric": "spell_modifier",
+      "spell": 567520,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class16_spell567520_op0",
+      "min": 1.11999,
+      "max": 1.1200100000000002
+    },
+    {
+      "action": "destroy_item",
+      "actor": "class16",
+      "item": 9701429
+    },
+    {
+      "action": "assert",
+      "actor": "class16",
+      "metric": "spell_modifier",
+      "spell": 801847,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class16_spell801847_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "assert",
+      "actor": "class17",
+      "metric": "spell_modifier",
+      "spell": 800081,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class17_spell800081_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "add_item",
+      "actor": "class17",
+      "item": 9701729
+    },
+    {
+      "action": "equip",
+      "actor": "class17",
+      "item": 9701729,
+      "slot": 12
+    },
+    {
+      "action": "assert",
+      "actor": "class17",
+      "metric": "spell_modifier",
+      "spell": 800081,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class17_spell800081_op0",
+      "min": 1.11999,
+      "max": 1.1200100000000002
+    },
+    {
+      "action": "assert",
+      "actor": "class17",
+      "metric": "spell_modifier",
+      "spell": 116,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class17_spell116_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "assert",
+      "actor": "class17",
+      "metric": "spell_modifier",
+      "spell": 800081,
+      "op": 22,
+      "base": 1000,
+      "ratio_to": "class17_spell800081_op22",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "assert",
+      "actor": "class17",
+      "metric": "spell_modifier",
+      "spell": 503367,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class17_spell503367_op0",
+      "min": 1.11999,
+      "max": 1.1200100000000002
+    },
+    {
+      "action": "destroy_item",
+      "actor": "class17",
+      "item": 9701729
+    },
+    {
+      "action": "assert",
+      "actor": "class17",
+      "metric": "spell_modifier",
+      "spell": 800081,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class17_spell800081_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "assert",
+      "actor": "class18",
+      "metric": "spell_modifier",
+      "spell": 803129,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class18_spell803129_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "snapshot",
+      "actor": "class18",
+      "metric": "spell_modifier",
+      "spell": 501528,
+      "op": 0,
+      "base": 1000,
+      "save_as": "class18_colliding_spell501528"
+    },
+    {
+      "action": "add_item",
+      "actor": "class18",
+      "item": 9702029
+    },
+    {
+      "action": "equip",
+      "actor": "class18",
+      "item": 9702029,
+      "slot": 12
+    },
+    {
+      "action": "assert",
+      "actor": "class18",
+      "metric": "spell_modifier",
+      "spell": 803129,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class18_spell803129_op0",
+      "min": 1.11999,
+      "max": 1.1200100000000002
+    },
+    {
+      "action": "assert",
+      "actor": "class18",
+      "metric": "spell_modifier",
+      "spell": 116,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class18_spell116_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "assert",
+      "actor": "class18",
+      "metric": "spell_modifier",
+      "spell": 803129,
+      "op": 22,
+      "base": 1000,
+      "ratio_to": "class18_spell803129_op22",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "assert",
+      "actor": "class18",
+      "metric": "spell_modifier",
+      "spell": 503126,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class18_spell503126_op0",
+      "min": 1.11999,
+      "max": 1.1200100000000002
+    },
+    {
+      "action": "assert",
+      "actor": "class18",
+      "metric": "spell_modifier",
+      "spell": 501528,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class18_colliding_spell501528",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "destroy_item",
+      "actor": "class18",
+      "item": 9702029
+    },
+    {
+      "action": "assert",
+      "actor": "class18",
+      "metric": "spell_modifier",
+      "spell": 803129,
+      "op": 0,
+      "base": 1000,
+      "ratio_to": "class18_spell803129_op0",
+      "min": 0.99999,
+      "max": 1.00001
+    }
+  ]
+}

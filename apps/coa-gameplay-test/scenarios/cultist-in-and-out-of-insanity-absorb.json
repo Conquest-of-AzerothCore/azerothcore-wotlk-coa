@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "In And Out of Insanity boosts a Cultist shield's absorb amount by the native engine multiplier (#1146)",
+  "contract": "582308 is aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT, BasePoints 19 / DieSides 1 -> value 20, matching $s1=20%, with an empty EffectSpellClassMask (HasSpellClassMask() false). AuraEffect::CalculateAmount (SpellAuraEffects.cpp ~630) already has a generic, class-gated branch: for any SPELL_AURA_SCHOOL_ABSORB/SPELL_AURA_MANA_SHIELD effect whose own spell is SpellFamilyName 31 cast by a CLASS_CULTIST player, it multiplies the resolved amount by GetTotalAuraMultiplier(SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT, ...). This is a different calculation stage from SpellEffectInfo::CalcValue (spell_effect_value would not see it), so the scenario casts a real Cultist shield and reads its applied aura_amount. Void Shield rank 502244 (SpellFamilyName 31, SPELL_AURA_SCHOOL_ABSORB, EffectMiscValue 127) has SpellLevel/BaseLevel 20, EffectBonusMultiplier 0 (no spell-power term for this rank) and EffectBasePoints 240 / EffectDieSides 10, so at caster level 20 (zeroing the 3.5/level term the same way 560002 does) its raw absorb amount is bounded to the DBC-verified range [241, 250] before any percentage boost, and the boosted amount is bounded to [floor(241*1.2), floor(250*1.2)] = [289, 300]. Two independent casts roll independently, so the ratio window [1.15, 1.25] is a true bound covering every combination of the two rolls, not a probabilistic guess -- the same technique the README documents for Arm of Thorim's dice-bounded 20% bonus.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn/level settle", "ms": 3000 },
+    { "action": "learn", "actor": "cultist", "spell": 502244 },
+    { "action": "cast", "label": "Shield before the talent is known", "actor": "cultist", "spell": 502244, "target": "cultist" },
+    {
+      "action": "assert", "label": "The shield lands and its raw absorb amount is inside the DBC-bounded range",
+      "actor": "cultist", "metric": "aura_amount", "spell": 502244, "effect": 0, "min": 241, "max": 250, "within_ms": 1000
+    },
+    {
+      "action": "snapshot", "actor": "cultist", "metric": "aura_amount", "spell": 502244, "effect": 0,
+      "save_as": "absorb_before"
+    },
+    { "action": "learn", "actor": "cultist", "spell": 582308 },
+    {
+      "action": "wait", "ms": 15500,
+      "label": "Let Wracked Mind (502244's own EffectTriggerSpell[2]=805801, ExcludeTargetAuraSpell=805801, SpellDuration 8 = 15000ms no-reshield debuff) expire before recasting, not just the GCD"
+    },
+    { "action": "cast", "label": "Refresh the shield with the talent known", "actor": "cultist", "spell": 502244, "target": "cultist" },
+    {
+      "action": "assert", "label": "In And Out of Insanity boosts the refreshed shield by 20%, within the dice-bounded window",
+      "actor": "cultist", "metric": "aura_amount", "spell": 502244, "effect": 0,
+      "ratio_to": "absorb_before", "min": 1.15, "max": 1.25, "within_ms": 1000
+    }
+  ]
+}

@@ -1,0 +1,529 @@
+{
+  "schema": 1,
+  "name": "Termites in Teldrassil: the map marks the den and the queen, not only the turn-in, at bug size",
+  "contract": "Quest 1660074 'Termites in Teldrassil' is finished by killing 10 Barkshredder Termites 162876 and the single Barkshredder Queen 162877 (RequiredNpcOrGo1 and 2) in the den CoA cut under Dolanaar, but the only quest_poi row it carried was the turn-in pin rev_20260924_60_coa_quest_markers.sql wrote (id 0, ObjectiveIndex -1, at Kaladir), so a player carrying the open quest saw nothing on the world map for either objective (#6914, reported by a level 12 Sun Cleric standing at the giver). This case asks the server for the quest's points with the CMSG_QUEST_POI_QUERY a real client sends and reads SMSG_QUEST_POI_QUERY_RESPONSE itself, so the whole server-to-client path is covered rather than the database rows. The first query is a control for 1660075 'Stay a While', a Teldrassil quest this character does not carry, which must come back with no points at all even though it has a pin of its own; the second is 1660074, which must answer with its unchanged turn-in pin followed by the termite area (ObjectiveIndex 0) and the queen's pin (ObjectiveIndex 1) on Teldrassil (WorldMapAreaId 41, the value the pin and every stock Teldrassil quest use). The queen's marker point is the client's own SuperTrack node 8787 in the bottom chamber, where her spawn stands, and the termite area covers the run the termites patrol, so the map agrees with the world. The last steps walk the player onto a real den spawn of each objective and show that a living termite and the living queen stand within 60 yd of the ground the markers cover, which is the only way the objectives can be found in game. They also pin the size the quest shipped with: at creature_template_model.DisplayScale 1 the termite's Silithid model (display 11091, CreatureDisplayInfo scale 1.15) stands 4.73 yd wide and 2.75 yd tall against the queen's 1.73 x 1.63 (display 141829, scale 0.20), so the termite template must now carry 0.33, where 0.45 still drew them a quarter wider than the queen, while her own DisplayScale stays at 1. The client also resolves its own in-world tracker from those SuperTrack nodes, and 8786 carried NextID 8787, so the termite objective was walked into the queen's chamber and stayed there after she died: the last assertions read the login patch stream (SMSG_PATCH_SUPER_TRACK, 0x06BE) and require row 8786 to carry the mean of the 31 termite spawns with a NextID of 0, which is the only lever a server has over that route without patching the client. These are data assertions rather than a run: the harness cannot see what the client draws.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 1,
+    "x": 9804.09,
+    "y": 938.56,
+    "z": 1307.28,
+    "o": 5.84
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 1,
+      "level": 12
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 1660074 'Termites in Teldrassil' unfinished, the way the reporter did",
+      "actor": "c",
+      "quest": 1660074,
+      "complete": false
+    },
+    {
+      "action": "client_packet",
+      "label": "CONTROL: ask the map to mark 1660075 'Stay a While', a Teldrassil quest this character does not carry",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        { "u32": 1 },
+        { "u32": 1660075 }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the answer names 1660075, so the packet being read is this query's own answer",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 1660075,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and a quest outside the log gets no POIs, so the reading is not off by a whole row",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 1660074, exactly what the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        { "u32": 1 },
+        { "u32": 1660074 }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 1660074's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 1660074,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 1660074 now has three POIs - the turn-in pin, the termite area and the queen - where it had only the pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The turn-in pin is still the first POI, id 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "still carrying ObjectiveIndex -1, the turn-in marker it had before",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on the Kalimdor map, MapID 1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 20,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "drawn on Teldrassil, WorldMapAreaId 41, which every stock Teldrassil quest row uses",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 41,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "as a single point, the pin stock uses for a turn-in",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "unchanged on Kaladir at x 9804",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 9804,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "unchanged on Kaladir at y 939",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 939,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 1 is the termite den, the objective a player could not find on the map",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 52,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "it marks the kill objective, RequiredNpcOrGo1 162876 Barkshredder Termite (ObjectiveIndex 0)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 56,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on MapID 1 Teldrassil, not the Eastern Kingdoms",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 60,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and on WorldMapAreaId 41 Teldrassil, the same value as the pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 41,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the den is an area of seven corners, so the client fills the termite ground instead of pinning one spot",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 7,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its first corner is the crater floor at the den mouth the sentinels hold, x 9701",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 84,
+      "index": 0,
+      "equals": 9701,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its first corner is y 1033, the client's own SuperTrack node 8786 standing inside it",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 1033,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the opposite end reaches the bottom chamber, x 9791",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 92,
+      "index": 0,
+      "equals": 9791,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the opposite end reaches the bottom chamber, y 951",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 96,
+      "index": 0,
+      "equals": 951,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the area covers the shelf, whose far corner is x 9839",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 116,
+      "index": 0,
+      "equals": 9839,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the area covers the shelf, whose far corner is y 1000",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 120,
+      "index": 0,
+      "equals": 1000,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "POI id 2 is the Barkshredder Queen",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 140,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "it marks the quest's second NPC objective, RequiredNpcOrGo2 162877 (ObjectiveIndex 1)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 144,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on MapID 1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 148,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on WorldMapAreaId 41 Teldrassil",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 152,
+      "index": 0,
+      "equals": 41,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "she is one unique creature, so she takes a single point",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 168,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on her spawn in the bottom chamber, the client's own SuperTrack node 8787, x 9792",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 172,
+      "index": 0,
+      "equals": 9792,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on her spawn in the bottom chamber, y 956",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 176,
+      "index": 0,
+      "equals": 956,
+      "within_ms": 4000
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, the phase every CoA Dolanaar spawn lives in (the lane phase hides them)",
+      "actor": "c",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the den's grids activate",
+      "ms": 2000
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "Walk to the world's first den termite, at the tunnel mouth (spawn 9007403)",
+      "actor": "c",
+      "guid": 9007403
+    },
+    {
+      "action": "assert",
+      "label": "The termite area is termite ground: a living Barkshredder Termite stands within 60 yd of the termite spawn the markers cover",
+      "actor": "c",
+      "metric": "nearby_creature_count",
+      "entry": 162876,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "Walk to the queen's spawn in the bottom chamber (spawn 9007402)",
+      "actor": "c",
+      "guid": 9007402
+    },
+    {
+      "action": "assert",
+      "label": "The queen's pin is her ground: the living Barkshredder Queen stands within 60 yd of the point the map now pins",
+      "actor": "c",
+      "metric": "nearby_creature_count",
+      "entry": 162877,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the termites are now drawn under the queen's width - the template's DisplayScale is 0.33, where the quest shipped it at 1",
+      "actor": "c",
+      "metric": "creature_model_scale",
+      "entry": 162876,
+      "min": 0.3299,
+      "max": 0.3301,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the queen's own size is untouched at DisplayScale 1",
+      "actor": "c",
+      "metric": "creature_model_scale",
+      "entry": 162877,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The login patch stream carries the termite objective's SuperTrack row 8786",
+      "actor": "c",
+      "metric": "server_packets",
+      "opcode": 1726,
+      "row": 8786,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Row 8786 is still on Kalimdor",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 8786,
+      "index": 1,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: row 8786 x is the mean of the 31 termite spawns, 9794.24, where the client had 9715.14",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 8786,
+      "index": 2,
+      "equals": 1176045814
+    },
+    {
+      "action": "assert",
+      "label": "Row 8786 y is the mean of the 31 termite spawns, 996.63",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 8786,
+      "index": 3,
+      "equals": 1148790866
+    },
+    {
+      "action": "assert",
+      "label": "Row 8786 z is the mean of the 31 termite spawns, 1243.08",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 8786,
+      "index": 4,
+      "equals": 1151033999
+    },
+    {
+      "action": "assert",
+      "label": "Row 8786 keeps the client's own arrival radius of 4.0 yd",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 8786,
+      "index": 5,
+      "equals": 1082130432
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: row 8786 no longer chains to the queen's chamber - NextID is 0 where the client had 8787",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 8786,
+      "index": 6,
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,675 @@
+{
+  "schema": 1,
+  "name": "Primalist Thanes Guidance: one-second reductions across active ranks",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "baseline",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "talented",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "removed",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "baseline_target",
+      "owner": "baseline",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    },
+    {
+      "id": "talented_target",
+      "owner": "talented",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    },
+    {
+      "id": "removed_target",
+      "owner": "removed",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "baseline",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "baseline",
+      "spell": 196
+    },
+    {
+      "action": "add_item",
+      "actor": "baseline",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "baseline",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "baseline",
+      "spell": 681424
+    },
+    {
+      "action": "learn",
+      "actor": "baseline",
+      "spell": 502724
+    },
+    {
+      "action": "learn",
+      "actor": "baseline",
+      "spell": 680421
+    },
+    {
+      "action": "cast",
+      "actor": "baseline",
+      "spell": 502724,
+      "target": "baseline"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "min": 23000,
+      "max": 25000
+    },
+    {
+      "action": "teleport",
+      "actor": "baseline",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "baseline",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "baseline",
+      "spell": 681424,
+      "target": "baseline_target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "spell_damage_count",
+      "spell": 681424,
+      "target": "baseline_target",
+      "min": 1
+    },
+    {
+      "action": "cast",
+      "actor": "baseline",
+      "spell": 680421,
+      "target": "baseline"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "aura_stacks",
+      "spell": 680421,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "baseline",
+      "spell": 680421,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "save_as": "baseline_before_502724"
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 681424,
+      "save_as": "baseline_before_681424"
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "save_as": "baseline_before_680421"
+    },
+    {
+      "action": "snapshot",
+      "actor": "baseline",
+      "metric": "melee_attack_count",
+      "save_as": "baseline_before_swings"
+    },
+    {
+      "action": "attack",
+      "actor": "baseline",
+      "target": "baseline_target"
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "melee_attack_count",
+      "relative_to": "baseline_before_swings",
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "relative_to": "baseline_before_502724",
+      "label": "delta_502724",
+      "min": -600,
+      "max": 0
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 681424,
+      "relative_to": "baseline_before_681424",
+      "label": "delta_681424",
+      "min": -600,
+      "max": 0
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "relative_to": "baseline_before_680421",
+      "label": "delta_680421",
+      "min": -600,
+      "max": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "talented",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 196
+    },
+    {
+      "action": "add_item",
+      "actor": "talented",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "talented",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 680410
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 681424
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 502724
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 680421
+    },
+    {
+      "action": "cast",
+      "actor": "talented",
+      "spell": 502724,
+      "target": "talented"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "min": 23000,
+      "max": 25000
+    },
+    {
+      "action": "teleport",
+      "actor": "talented",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "talented",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "talented",
+      "spell": 681424,
+      "target": "talented_target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "spell_damage_count",
+      "spell": 681424,
+      "target": "talented_target",
+      "min": 1
+    },
+    {
+      "action": "cast",
+      "actor": "talented",
+      "spell": 680421,
+      "target": "talented"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "aura_stacks",
+      "spell": 680421,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "talented",
+      "spell": 680421,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "save_as": "talented_before_502724"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 681424,
+      "save_as": "talented_before_681424"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "save_as": "talented_before_680421"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "melee_attack_count",
+      "save_as": "talented_before_swings"
+    },
+    {
+      "action": "attack",
+      "actor": "talented",
+      "target": "talented_target"
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "melee_attack_count",
+      "relative_to": "talented_before_swings",
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "relative_to": "talented_before_502724",
+      "label": "delta_502724",
+      "min": -1600,
+      "max": -1000
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 681424,
+      "relative_to": "talented_before_681424",
+      "label": "delta_681424",
+      "min": -1600,
+      "max": -1000
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "relative_to": "talented_before_680421",
+      "label": "delta_680421",
+      "min": -600,
+      "max": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "talented",
+      "spell": 680410
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 681424,
+      "save_as": "after_removal_cd"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "melee_attack_count",
+      "save_as": "after_removal_swings"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "melee_attack_count",
+      "relative_to": "after_removal_swings",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 681424,
+      "relative_to": "after_removal_cd",
+      "min": -2500,
+      "max": -2100
+    },
+    {
+      "action": "specialization",
+      "actor": "removed",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "removed",
+      "spell": 196
+    },
+    {
+      "action": "add_item",
+      "actor": "removed",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "removed",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "removed",
+      "spell": 680410
+    },
+    {
+      "action": "unlearn",
+      "actor": "removed",
+      "spell": 680410
+    },
+    {
+      "action": "learn",
+      "actor": "removed",
+      "spell": 681424
+    },
+    {
+      "action": "learn",
+      "actor": "removed",
+      "spell": 502724
+    },
+    {
+      "action": "learn",
+      "actor": "removed",
+      "spell": 680421
+    },
+    {
+      "action": "cast",
+      "actor": "removed",
+      "spell": 502724,
+      "target": "removed"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "min": 23000,
+      "max": 25000
+    },
+    {
+      "action": "teleport",
+      "actor": "removed",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "removed",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "removed",
+      "spell": 681424,
+      "target": "removed_target"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "spell_damage_count",
+      "spell": 681424,
+      "target": "removed_target",
+      "min": 1
+    },
+    {
+      "action": "cast",
+      "actor": "removed",
+      "spell": 680421,
+      "target": "removed"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "aura_stacks",
+      "spell": 680421,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "removed",
+      "spell": 680421,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "save_as": "removed_before_502724"
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 681424,
+      "save_as": "removed_before_681424"
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "save_as": "removed_before_680421"
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "melee_attack_count",
+      "save_as": "removed_before_swings"
+    },
+    {
+      "action": "attack",
+      "actor": "removed",
+      "target": "removed_target"
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "melee_attack_count",
+      "relative_to": "removed_before_swings",
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 502724,
+      "relative_to": "removed_before_502724",
+      "label": "delta_502724",
+      "min": -600,
+      "max": 0
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 681424,
+      "relative_to": "removed_before_681424",
+      "label": "delta_681424",
+      "min": -600,
+      "max": 0
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "relative_to": "removed_before_680421",
+      "label": "delta_680421",
+      "min": -600,
+      "max": 0
+    }
+  ],
+  "contract": "Each melee auto-attack reduces Mountain Hammer and Primal Rush by one second; Earthen Avatar and actors without the talent retain ordinary cooldowns."
+}

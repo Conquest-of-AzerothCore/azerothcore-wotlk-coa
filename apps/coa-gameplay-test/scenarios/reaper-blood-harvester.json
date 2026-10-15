@@ -1,0 +1,20 @@
+{
+ "schema": 1,
+ "name": "Blood Harvester raises party/raid critical strike chance",
+ "contract": "Blood Harvester 300889 promises party/raid members gain 3% critical strike chance. Its single effect is native SPELL_EFFECT_APPLY_AREA_AURA_RAID (65) with EffectApplyAuraName SPELL_AURA_MOD_CRIT_PCT (290) and EffectBasePoints 2 + DieSides 1 = 3. Both the area-aura target and the crit-percent aura are core-handled with no CoA registration required; #3905's zero-hits-in-source is expected here.",
+ "timeout_ms": 90000,
+ "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+ "players": [
+  {"id": "reaper", "race": 10, "class": 30, "level": 80},
+  {"id": "ally", "race": 1, "class": 1, "level": 80}
+ ],
+ "steps": [
+  {"action": "wait", "label": "Let the world settle", "ms": 6000},
+  {"action": "group", "actor": "reaper", "target": "ally"},
+  {"action": "learn", "actor": "reaper", "spell": 300889},
+  {"action": "cast", "actor": "reaper", "spell": 300889},
+  {"action": "assert", "label": "Cast was accepted", "actor": "reaper", "metric": "cast_failure", "spell": 300889, "equals": 0},
+  {"action": "assert", "label": "Blood Harvester spread to the party member", "actor": "ally", "metric": "aura", "spell": 300889, "equals": 1, "within_ms": 3000},
+  {"action": "assert", "label": "The buff grants 3% critical strike chance", "actor": "ally", "metric": "aura_amount", "spell": 300889, "effect": 0, "equals": 3}
+ ]
+}

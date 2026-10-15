@@ -1,3 +1,14 @@
+# Upstream integration candidate
+
+This checkout integrates upstream `dbb02f53c699f87b12a8b465d9671654ef9ceef6` with the
+SQL-backed feature branch. CoA transport dependencies now live in `src/server/coa`.
+The donor gameplay hooks are not registered; Manastorm configuration joins upstream's
+`RegisterAscensionClientConfig` collector. Chaotic Link additions include affix eligibility.
+
+Read [the installation review](docs/manual-sql-postinstall/INTEGRATION_INSTALL_REVIEW.md)
+before deploying. Original exports remain unchanged; generated review SQL is separate.
+Some historical implementation notes below describe earlier restoration stages.
+
 # Shared Manastorm backend: client modes
 
 Both transports use `ManastormMgr`, the SQL generator, scaling, Hearts,
@@ -43,7 +54,7 @@ a shared snapshot: both Manastorm and Challenges update their keys and send the
 complete snapshot, preserving each other regardless of login order. The snapshot
 is cleared on character logout. Mode 1 emits no Manastorm configuration packets.
 Verified in installed Extensions.dll: handler 0x10196C90 clears all six maps
-before reading them (clear calls at 0x10196D6E–0x10196DBC).
+before reading them (clear calls at 0x10196D6Eâ€“0x10196DBC).
 The previous MS_SHARED handshake/addon has been removed from source and the
 specified client installation; no addon or C_Config override is needed.
 

@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "name": "CoA display patch stream: bot sessions receive no patch rows",
+  "contract": [
+    "Requires CoALegendaryItems.Enable=1, CoA.SendDisplayPatches=1 and the leveling legendary catalog.",
+    "A client session that never sends the extension handshake receives the patch stream from the 5 s fallback.",
+    "A bot session has no client, so neither the login stream nor an obtained item's row is sent to it.",
+    "SMSG_PATCH_LOADING_SCREENS (0x05F8) opens every stream; SMSG_PATCH_ITEM (0x0932) carries the item row.",
+    "Socketless packet construction does not establish live client timing or rendering."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "client",
+      "race": 1,
+      "class": 1,
+      "level": 32
+    },
+    {
+      "id": "bot",
+      "race": 1,
+      "class": 1,
+      "level": 32,
+      "bot": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The client session receives the fallback login stream once",
+      "actor": "client",
+      "metric": "server_packets",
+      "opcode": 1528,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The bot session receives no login stream",
+      "actor": "bot",
+      "metric": "server_packets",
+      "opcode": 1528,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "client",
+      "item": 9700001
+    },
+    {
+      "action": "add_item",
+      "actor": "bot",
+      "item": 9700001
+    },
+    {
+      "action": "assert",
+      "label": "The client session receives the obtained item's row",
+      "actor": "client",
+      "metric": "server_packets",
+      "opcode": 2354,
+      "row": 9700001,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The bot session receives no item rows",
+      "actor": "bot",
+      "metric": "server_packets",
+      "opcode": 2354,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "client",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 9720001,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bot",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 9720001,
+      "equals": 0
+    }
+  ]
+}

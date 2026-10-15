@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Barbarian audit: Cheers! redirects damage and reduces damage taken natively (#3573)",
+  "contract": "Cheers! (805810) is not a passive -- it is cast on a friendly target ('Designate an ally as your drinking partner'). Effect 0 is SPELL_AURA_SPLIT_DAMAGE_PCT (81, EffectBasePoints 10 DieSides 0 -> amount 10, MiscValue 127 = all schools), consumed generically in Unit::CalcAbsorbResist's caller (Unit.cpp ~2685-2733): when the ally (aura holder) takes damage, CalculatePct(damage, GetAmount()) is absorbed off the ally and dealt to (*itr)->GetCaster() -- the Barbarian who cast Cheers! -- exactly the tooltip's 'causing $s1% of all damage they take to be redirected to you'; needs no script. Effect 1 is SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN (87, EffectBasePoints -5 DieSides 0 -> amount -5, MiscValue 127), the same generic HandleNoImmediateEffect aura already proven native for #2549, read here through the melee_damage_taken metric -- the tooltip's 'reducing all damage they take by $s2%'. Effect 2 is SPELL_EFFECT_FORCE_CAST (140, EffectTriggerSpell 801652), handled generically by Spell::EffectForceCast; 801652 is itself SPELL_EFFECT_DUMMY (3, EffectBasePoints -1 DieSides 1 -> amount 0) with no SpellScript registered under src/server/scripts (grepped for 801652 and 805810, no matches), so it currently has no observable effect and is not asserted -- it appears to be inert DBC plumbing rather than part of the 'designate an ally'/'only 1 at a time' bookkeeping, which this scenario does not otherwise need since only one ally is designated. This scenario proves the damage-redirect and damage-reduction mechanics (what #3573 reports as unimplemented) already work through stock engine code. Removal is exercised with set_aura(stacks:0) on the ally, not unlearn: Cheers! is cast by b onto ally, so ally never has 805810 in its own spellbook (only b does) -- unlike #2549's Unrelenting, which is learned and self-applied by the same actor it is asserted on, so unlearning it there correctly strips the aura. Calling unlearn on ally for a spell only b ever learned is a spellbook no-op on the wrong actor and can never remove ally's active aura; the harness's own set_aura action (README: 'zero removes it') is the documented way to clear a fixture aura directly and observe HandleNoImmediateEffect's damage-taken-pct correctly recalculate to baseline once the aura is gone.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "b", "race": 1, "class": 12, "level": 80 },
+    { "id": "ally", "race": 1, "class": 12, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+
+    { "action": "snapshot", "label": "Baseline damage the ally takes from b", "actor": "ally", "metric": "melee_damage_taken", "target": "b", "save_as": "dmg_taken0" },
+
+    { "action": "learn", "actor": "b", "spell": 805810 },
+    { "action": "cast", "actor": "b", "spell": 805810, "target": "ally" },
+    { "action": "assert", "label": "Cheers! reaches the designated ally", "actor": "ally", "metric": "aura", "spell": 805810, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "Effect 0 (split damage pct) resolves to 10", "actor": "ally", "metric": "aura_amount", "spell": 805810, "effect": 0, "equals": 10 },
+    { "action": "assert", "label": "Effect 1 (damage taken pct) resolves to -5", "actor": "ally", "metric": "aura_amount", "spell": 805810, "effect": 1, "equals": -5 },
+    { "action": "assert", "label": "The ally now takes 5% less damage from b", "actor": "ally", "metric": "melee_damage_taken", "target": "b", "ratio_to": "dmg_taken0", "min": 0.93, "max": 0.97, "within_ms": 5000 },
+
+    { "action": "set_aura", "actor": "ally", "spell": 805810, "stacks": 0 },
+    { "action": "assert", "label": "Removing Cheers! restores the ally's baseline damage taken", "actor": "ally", "metric": "melee_damage_taken", "target": "b", "ratio_to": "dmg_taken0", "min": 0.99, "max": 1.01, "within_ms": 3000 }
+  ]
+}

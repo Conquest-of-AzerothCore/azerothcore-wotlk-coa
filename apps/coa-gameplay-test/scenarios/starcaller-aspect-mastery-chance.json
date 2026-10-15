@@ -1,0 +1,1692 @@
+{
+  "schema": 1,
+  "name": "Aspect Mastery raises the Aspects' chance to trigger (#974)",
+  "contract": "Aspect Mastery 572416 (rank 2; rank 1 704389 carries +5) has E2 SPELL_AURA_ADD_FLAT_MODIFIER (107) on SPELLMOD_CHANCE_OF_SUCCESS (18), EffectBasePoints 9 (+10), EffectSpellClassMask word2 0x800, and its description promises to raise the Aspects' chance to trigger by $s3%. Aspect of the Cosmos 801123 has SpellFamilyFlags word2 0x800, so the modifier applies to its record, whose ProcChance is 40 (starcaller warden-1 report, DBC read). 801123 procs through aura_ascension_starcaller_event -> Aspect() (AscensionStarcaller.cpp), which rolled Chance(player, 801123) on the raw ProcChance, ignoring SPELLMOD_CHANCE_OF_SUCCESS; only the native roll (Aura::CalcProcChance) saw the mask, so the effective chance was 0.5 (native, with the mod, once rev_20260919_20 clears spell_proc.Chance) x 0.4 (script) = 20% instead of 40+10 = 50%. Chance() now applies the modifier and rev_20260921_11 sets spell_proc.Chance to 100 so the script roll is the only roll. Aspect() casts Aspect of the Cosmos' helper 801124 on the target when it fires (unless talent 300772 is known, which this fixture does not have), and the new spell_cast_count metric counts casts of 801124 by the actor, triggered included. Trigger: Celestial Strike 800496, melee class, instant, no cooldown, with 10000 melee hit rating so every cast lands; Cosmos triggers on any non-periodic melee or ranged damage (Events.cpp). 100 casts at the fixed expectation 50%: the talented count reaches at least 33 (P(X<33 at 0.5) = 0.02% false failure) while the pre-fix 20% reaches 33 with P = 0.16%. Cosmos 801123 is not passive (Spell.dbc Attributes 0x81050000 has no 0x40, 10000 ms recovery), so learning it applies no aura and a first run failed the aura assertion (actual 0); the scenario applies the aura with set_aura, which AddAura's it on the player with the record's own duration index 21, and asserts it before casting. A second run passed the aura assertion but counted 20 of 100 casts: Celestial Strike 800496 costs 40 energy (Spell.dbc PowerType 3, ManaCost 40) and base energy regeneration is 10 per second (Player::Regenerate), so a cast every 1.7 s afforded only about 45 casts and the rest were dropped; 45 casts at 50% is about 22. Each cast is now preceded by set_power (power 3, value 50) so all 100 strikes land.",
+  "timeout_ms": 400000,
+  "players": [
+    {
+      "id": "star",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "melee_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "star",
+      "entry": 36,
+      "health": 100000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "star",
+      "spell": 800496
+    },
+    {
+      "action": "learn",
+      "actor": "star",
+      "spell": 801123
+    },
+    {
+      "action": "learn",
+      "actor": "star",
+      "spell": 572416
+    },
+    {
+      "action": "add_item",
+      "actor": "star",
+      "item": 42947
+    },
+    {
+      "action": "equip",
+      "actor": "star",
+      "item": 42947,
+      "slot": 15
+    },
+    {
+      "action": "wait",
+      "label": "Let equipment and passives settle",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "Aspect of the Cosmos is the active Aspect",
+      "actor": "star",
+      "spell": 801123,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of the Cosmos is active",
+      "actor": "star",
+      "metric": "aura",
+      "spell": 801123,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "star",
+      "power": 3,
+      "value": 50
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "spell": 800496,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "wait",
+      "label": "Let the last proc land",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "With Aspect Mastery rank 2 Cosmos fires about half of the time",
+      "actor": "star",
+      "metric": "spell_cast_count",
+      "spell": 801124,
+      "min": 33
+    }
+  ]
+}

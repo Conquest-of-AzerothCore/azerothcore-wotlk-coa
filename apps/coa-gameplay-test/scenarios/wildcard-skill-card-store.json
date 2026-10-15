@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "Silas Darkmoon's Skill Card stores sell cards for Darkmoon Tickets",
+  "contract": "On Darkmoon - Season 10 Wildcard Silas Darkmoon's Darkmoon Prizes tab opened custom stores (Enum.CustomStores: DarkmoonPrizes 4, SkillCards 5, GoldenSkillCards 6). 'Darkmoon Tickets can be redeemed at Silas Darkmoon to buy Normal, Uncommon, Rare, and Epic Skill Cards ... Normal Tickets grant Normal Skill Cards and Golden Tickets grant Golden Skill Cards' (Tutorial 'Wildcard: Darkmoon Tickets'). The client queries a store with CMSG 0x6B9 {u32 store} and gets SMSG 0x6BA QUERY_CUSTOM_STORE_OK with 64-byte records {id, store, item, money, 5 token items, 5 token counts, game event, achievement}; it buys with CMSG 0x6BB {u32 id, u32 count} and gets SMSG 0x6BC. The cards are sold as their Skill Card items (SkillCard.dbc item column) for 250 tickets each (S10 gameplay video: the common cards Ancestral Spirit to Drain Soul cost 250 Darkmoon Tickets; other rarities were not seen). Using a Skill Card item (spell 92657) adds the card to the account's collection and reveals it at once (SMSG 0x649 with the auto-reveal flag). The Darkmoon Prizes store sells the season's 37 prizes for Darkmoon Tickets: pets, hat, goggles and cloak for 250, Harlequin transmog and the Darkmoon Hammer for 500, mounts and the Portable Silas Darkmoon for 1000 (the user's prices; no price list survives).",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "wild", "race": 1, "class": 10, "level": 10},
+    {"id": "plain", "race": 1, "class": 10, "level": 10}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Harnessa"},
+    {"action": "console", "command": "coa gamemode WildCard off Harnessb"},
+
+    {"action": "snapshot", "actor": "wild", "metric": "server_packets", "opcode": 1722, "save_as": "stores"},
+    {"action": "client_packet", "label": "Open the Skill Cards store", "actor": "wild", "opcode": 1721, "fields": [{"u32": 5}]},
+    {"action": "client_packet", "label": "Open the Golden Skill Cards store", "actor": "wild", "opcode": 1721, "fields": [{"u32": 6}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "Both stores answer", "actor": "wild", "metric": "server_packets", "opcode": 1722, "relative_to": "stores", "equals": 2},
+    {"action": "assert", "label": "with their cards", "actor": "wild", "metric": "server_packet_contains", "opcode": 1722, "text": "QUERY_CUSTOM_STORE_OK", "equals": 1},
+
+    {"action": "client_packet", "label": "Buy Starsurge without tickets", "actor": "wild", "opcode": 1723, "fields": [{"u32": 133169}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "A common card costs tickets", "actor": "wild", "metric": "server_packet_contains", "opcode": 1724, "text": "PURCHASE_CUSTOM_STORE_ITEM_NOT_ENOUGH_ITEMS", "equals": 1},
+
+    {"action": "add_item", "actor": "wild", "item": 246190, "count": 300},
+    {"action": "client_packet", "label": "Buy Starsurge with 300 tickets", "actor": "wild", "opcode": 1723, "fields": [{"u32": 133169}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The card is sold", "actor": "wild", "metric": "server_packet_contains", "opcode": 1724, "text": "PURCHASE_CUSTOM_STORE_ITEM_OK", "equals": 1},
+    {"action": "assert", "label": "as its Skill Card item", "actor": "wild", "metric": "item_count", "item": 133169, "equals": 1},
+    {"action": "assert", "label": "for 250 tickets", "actor": "wild", "metric": "item_count", "item": 246190, "equals": 50},
+
+    {"action": "use_item", "label": "Use the Skill Card", "actor": "wild", "item": 133169, "spell": 92657},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The card joins the collection", "actor": "wild", "metric": "wildcard_cards_collected", "equals": 1},
+    {"action": "assert", "label": "revealed at once", "actor": "wild", "metric": "server_packets", "opcode": 1609, "equals": 1},
+    {"action": "assert", "label": "and the item is used up", "actor": "wild", "metric": "item_count", "item": 133169, "equals": 0},
+
+    {"action": "snapshot", "actor": "wild", "metric": "server_packets", "opcode": 1722, "save_as": "prizes"},
+    {"action": "client_packet", "label": "Open the Darkmoon Prizes store", "actor": "wild", "opcode": 1721, "fields": [{"u32": 4}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The prizes store answers too", "actor": "wild", "metric": "server_packets", "opcode": 1722, "relative_to": "prizes", "equals": 1},
+    {"action": "add_item", "actor": "wild", "item": 246190, "count": 250},
+    {"action": "client_packet", "label": "Buy the Darkmoon Monkey with 300 tickets", "actor": "wild", "opcode": 1723, "fields": [{"u32": 73764}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The prize is sold", "actor": "wild", "metric": "item_count", "item": 73764, "equals": 1},
+    {"action": "assert", "label": "for 250 tickets", "actor": "wild", "metric": "item_count", "item": 246190, "equals": 50},
+
+    {"action": "add_item", "actor": "plain", "item": 246190, "count": 30},
+    {"action": "client_packet", "label": "A Hero outside Wildcard buys a card", "actor": "plain", "opcode": 1723, "fields": [{"u32": 133169}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "Silas only sells to Wildcard Heroes", "actor": "plain", "metric": "server_packet_contains", "opcode": 1724, "text": "PURCHASE_CUSTOM_STORE_ITEM_CONDITIONS", "equals": 1},
+    {"action": "assert", "label": "who keep their tickets", "actor": "plain", "metric": "item_count", "item": 246190, "equals": 30}
+  ]
+}

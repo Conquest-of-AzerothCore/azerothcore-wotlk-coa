@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Arcane Brew (#3220)",
+  "contract": "Arcane Brew 801689 (SpellFamilyName 19, Witch Doctor) is a two-effect ally buff. Effect 0 applies SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT (345, EffectMiscValue 127 = every school) which Unit::SpellBaseDamageBonusDone consumes through GetTotalAuraModifier at Unit.cpp:9571 (AuraEffect::HandleModHealingDone at SpellAuraEffects.cpp:4496 only refreshes the client display; the real contribution is the GetTotalAuraModifier term, which runs for any unit). Effect 1 applies stock SPELL_AURA_MOD_STAT (29) with EffectMiscValue 4 = STAT_SPIRIT, a native 3.3.5 handler. Both effects share EffectBasePoints 29, EffectDieSides 1, EffectRealPointsPerLevel 1.5, BaseLevel/SpellLevel 31; SpellEffectInfo::CalcValue (SpellInfo.cpp:468-505) resolves this to 30 at level 31 and 103 at level 80 (29 + int32((80-31)*1.5=73.5 truncated to 73) + 1 from DieSides==1). DurationIndex 1 = SpellDuration.dbc 10000 ms; RecoveryTime 120000 ms. Every clause the tooltip promises (ally target, 40 yd range, instant cast, 2 min cooldown, 10 sec duration, +spell power, +Spirit, level scaling) is delivered by generic engine paths; nothing Witch-Doctor-specific needs to run. Regression scenario for behaviour that already works natively (#3220), not a handler fix.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "wd", "race": 8, "class": 13, "level": 80 },
+    { "id": "ally", "race": 8, "class": 13, "level": 80 },
+    { "id": "control", "race": 8, "class": 13, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "group", "label": "Group wd and ally so TARGET_UNIT_TARGET_ALLY resolves", "actor": "wd", "target": "ally" },
+    { "action": "learn", "actor": "wd", "spell": 801689 },
+    {
+      "action": "assert",
+      "label": "Effect 0's level-80 value resolves to the DBC-derived 103 (29 base + 73 from 1.5/level over 49 levels + 1 from DieSides)",
+      "actor": "wd",
+      "metric": "spell_effect_value",
+      "spell": 801689,
+      "effect": 0,
+      "equals": 103
+    },
+    {
+      "action": "assert",
+      "label": "Effect 1 resolves to the same 103, sharing base points/scaling with effect 0",
+      "actor": "wd",
+      "metric": "spell_effect_value",
+      "spell": 801689,
+      "effect": 1,
+      "equals": 103
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline shadow spell power on an unbuffed control",
+      "actor": "control",
+      "metric": "spell_power",
+      "school": 5,
+      "save_as": "sp_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline Spirit on an unbuffed control",
+      "actor": "control",
+      "metric": "stat",
+      "stat": 4,
+      "save_as": "spirit_base"
+    },
+    { "action": "cast", "label": "Throw Arcane Brew at ally", "actor": "wd", "spell": 801689, "target": "ally" },
+    {
+      "action": "assert",
+      "label": "Arcane Brew's own aura lands on the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 801689,
+      "caster": "wd",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Duration is the DBC's 10 seconds (SpellDuration.dbc id 1)",
+      "actor": "ally",
+      "metric": "aura_duration_ms",
+      "spell": 801689,
+      "caster": "wd",
+      "max": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Aura effect 0's resolved amount is 103",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 801689,
+      "caster": "wd",
+      "effect": 0,
+      "equals": 103
+    },
+    {
+      "action": "assert",
+      "label": "Aura effect 1's resolved amount is 103",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 801689,
+      "caster": "wd",
+      "effect": 1,
+      "equals": 103
+    },
+    {
+      "action": "assert",
+      "label": "Aura 345 actually raises the ally's shadow spell power by 103 over the unbuffed control (proves GetTotalAuraModifier consumes it, not just the display refresh)",
+      "actor": "ally",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "sp_base",
+      "equals": 103
+    },
+    {
+      "action": "assert",
+      "label": "Aura 29 (SPELL_AURA_MOD_STAT) raises the ally's Spirit by 103 over the unbuffed control",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 4,
+      "relative_to": "spirit_base",
+      "equals": 103
+    },
+    {
+      "action": "assert",
+      "label": "Arcane Brew goes on its DBC's 2 minute cooldown",
+      "actor": "wd",
+      "metric": "cooldown_ms",
+      "spell": 801689,
+      "min": 118000,
+      "max": 120000
+    }
+  ]
+}

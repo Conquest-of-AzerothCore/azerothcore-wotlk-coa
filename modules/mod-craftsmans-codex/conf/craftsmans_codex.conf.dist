@@ -1,0 +1,47 @@
+###################################################################################################
+#  mod-craftsmans-codex
+#
+#  Item 97871 "Craftsman's Codex" (and its soulbound variant 2200001) carries the on-use spell
+#  93292, whose one effect is a SPELL_EFFECT_DUMMY and whose own text reads "Unlocks a new
+#  primary profession slot. You can unlock all primary professions." A dummy effect does nothing
+#  by itself and the client ships no behaviour behind it, so this module supplies it: using a
+#  codex adds one to the character's primary profession allowance, permanently, on top of
+#  MaxPrimaryTradeSkill. The unlock is remembered per character in the `mod_craftsmans_codex`
+#  table of the characters database (data/sql/db-characters), and the spell is bound to the
+#  module's script by data/sql/db-world.
+#
+#  This code is part of the AzerothCore project. See AUTHORS file for Copyright information.
+###################################################################################################
+
+#    CraftsmansCodex.Enable
+#        Description: Whether a Craftsman's Codex unlocks a profession slot.
+#                     Disabled means the item is inert rather than wasted: the cast is refused,
+#                     so the item is not consumed.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+CraftsmansCodex.Enable = 1
+
+#    CraftsmansCodex.MaxSlots
+#        Description: The most primary professions a character may hold in total, base allowance
+#                     included - the point at which "You can unlock all primary professions" is
+#                     reached and further codexes are refused instead of consumed.
+#                     0 means everything the server's SkillLine.dbc files under
+#                     SKILL_CATEGORY_PROFESSION, which is what "all primary professions" means.
+#        Default:     0 - (every primary profession the server knows)
+CraftsmansCodex.MaxSlots = 0
+
+#    CraftsmansCodex.VerifyOnStartup
+#        Description: Check once at startup that the codex is complete - the spell exists with the
+#                     dummy effect this module answers, the database binds it to
+#                     'spell_craftsmans_codex', the items carry it, and the per-character table
+#                     exists; log an error naming what is missing when it does not.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+CraftsmansCodex.VerifyOnStartup = 1
+
+#    CraftsmansCodex.Command
+#        Description: Enable the `.codex` game master command (status / grant / reset), which
+#                     reports a character's allowance and can hand the slots out without an item.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+CraftsmansCodex.Command = 1

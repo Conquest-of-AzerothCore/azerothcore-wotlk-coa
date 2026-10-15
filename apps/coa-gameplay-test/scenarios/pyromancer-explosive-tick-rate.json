@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "name": "Pyromancer Explosive speeds up Blaze and Ignite ticks (#2412)",
+  "contract": "#2412 (ranks 704845 and 707787 only; 704833 is a dead record not covered): Explosive rank 1 / 2 effect 1 is aura 108 ADD_PCT_MODIFIER misc 19 (SPELLMOD_ACTIVATION_TIME) bp -11 / -21 (-10% / -20%) on mask (0x200,0x100,0) = Blaze (805500 ...) and Ignite (800791 ...), base amplitude 3000 ms. AuraEffect::CalculatePeriodic applies SPELLMOD_ACTIVATION_TIME to the amplitude, so the periodic interval becomes 2700 / 2400 ms. The scenario queries the native modifier through spell_modifier op 19 on base 3000 (no cast); the caveat that it takes effect only for DoTs applied after the talent is held is not asserted. Values from inv-group-8.md.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Blaze tick period unmodified",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "save_as": "blaze0",
+      "spell": 805500,
+      "op": 19,
+      "base": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Ignite tick period unmodified",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "save_as": "ignite0",
+      "spell": 800791,
+      "op": 19,
+      "base": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Without Explosive Blaze ticks every 3000 ms",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 805500,
+      "op": 19,
+      "base": 3000,
+      "equals": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 704845
+    },
+    {
+      "action": "assert",
+      "label": "Explosive rank 1 makes Blaze tick every 2700 ms",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 805500,
+      "op": 19,
+      "base": 3000,
+      "min": 2699,
+      "max": 2701,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Explosive rank 1 makes Ignite tick every 2700 ms",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 800791,
+      "op": 19,
+      "base": 3000,
+      "min": 2699,
+      "max": 2701,
+      "within_ms": 3000
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 704845
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 707787
+    },
+    {
+      "action": "assert",
+      "label": "Explosive rank 2 makes Blaze tick every 2400 ms",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 805500,
+      "op": 19,
+      "base": 3000,
+      "min": 2399,
+      "max": 2401,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Explosive rank 2 makes Ignite tick every 2400 ms",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 800791,
+      "op": 19,
+      "base": 3000,
+      "min": 2399,
+      "max": 2401,
+      "within_ms": 3000
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 707787
+    },
+    {
+      "action": "assert",
+      "label": "Without Explosive the tick period returns to 3000 ms",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 805500,
+      "op": 19,
+      "base": 3000,
+      "equals": 3000,
+      "within_ms": 3000
+    }
+  ]
+}

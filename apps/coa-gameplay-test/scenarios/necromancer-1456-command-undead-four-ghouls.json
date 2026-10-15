@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Command: Undead makes every one of four Ghouls cast Command: Ghouls (#1456)",
+  "contract": "Raise: Ghoul 500971 reads 'Command: Expels leeching plague that strikes up to $801514i nearby enemies, dealing ... Plague damage, and healing you for ... for each Ghoul.' Command: Undead 504868 (family 29 word 2 0x1000000, the Command flag) reads 'Command your Undead minions to perform a unique attack on your target. Refer to individual Raise spells for their Command effect.' Command: Ghouls 801514 is one cast per Ghoul: effect 0 SCHOOL_DAMAGE and effect 1 on TARGET_UNIT_SRC_AREA_ENEMY within SpellRadius 13 = 10 yd of that Ghoul (up to 5 enemies), effect 2 HEAL on TARGET_UNIT_MASTER, so each Ghoul's cast carries its own damage and its own heal. The report saw two damage and two heal events with four Ghouls; the ordinary Life Force of 2 allows only two, so a fourth Ghoul needs two +1 Life Force passives (Summoning Adept 92123 and Scourge Apprentice Training 680283, each SPELLMOD_MAX_AURA_STACKS +1 on Life Force 805011). With a Life Force of 4 and four raised Ghouls (50073) beside a golem 4 yd away, one Command: Undead must produce exactly four Command: Ghouls casts from Ghouls and no more. SMSG_SPELL_GO is sent for 801514 because it has SpellVisual 1000256. This is evidence for behaviour that already works on current code; how the reporter reached a fourth Ghoul is not recorded.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "n", "entry": 36, "level": 80, "health": 1000000, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 92123 },
+    { "action": "learn", "actor": "n", "spell": 680283 },
+    { "action": "learn", "actor": "n", "spell": 500971 },
+    { "action": "learn", "actor": "n", "spell": 504868 },
+    {
+      "action": "assert", "label": "SETUP: two Life Force passives raise the capacity to 4", "actor": "n",
+      "metric": "aura_stacks", "spell": 805011, "equals": 4, "within_ms": 3000
+    },
+    { "action": "set_power", "actor": "n", "power": 0, "value": 1500 },
+    { "action": "cast", "label": "Raise the first Ghoul", "actor": "n", "spell": 500971 },
+    {
+      "action": "assert", "label": "SETUP: one Ghoul", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50073, "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 500 },
+    { "action": "set_power", "actor": "n", "power": 0, "value": 1500 },
+    { "action": "cast", "label": "Raise the second Ghoul", "actor": "n", "spell": 500971 },
+    {
+      "action": "assert", "label": "SETUP: two Ghouls", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50073, "equals": 2, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 500 },
+    { "action": "set_power", "actor": "n", "power": 0, "value": 1500 },
+    { "action": "cast", "label": "Raise the third Ghoul", "actor": "n", "spell": 500971 },
+    {
+      "action": "assert", "label": "SETUP: three Ghouls", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50073, "equals": 3, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 500 },
+    { "action": "set_power", "actor": "n", "power": 0, "value": 1500 },
+    { "action": "cast", "label": "Raise the fourth Ghoul", "actor": "n", "spell": 500971 },
+    {
+      "action": "assert", "label": "SETUP: four Ghouls", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50073, "equals": 4, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let the Ghouls take their formation places", "ms": 2000 },
+    {
+      "action": "assert", "label": "CONTROL: no Ghoul has cast Command: Ghouls before the order", "actor": "n",
+      "metric": "spell_go_count", "spell": 801514, "entry": 50073, "equals": 0
+    },
+    { "action": "set_power", "actor": "n", "power": 6, "value": 1000 },
+    { "action": "cast", "label": "Command: Undead on the golem", "actor": "n", "spell": 504868, "target": "golem" },
+    {
+      "action": "assert", "label": "Every one of the four Ghouls casts Command: Ghouls", "actor": "n",
+      "metric": "spell_go_count", "spell": 801514, "entry": 50073, "equals": 4, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Allow any extra cast to arrive", "ms": 1500 },
+    {
+      "action": "assert", "label": "One order yields exactly one Command: Ghouls per Ghoul", "actor": "n",
+      "metric": "spell_go_count", "spell": 801514, "entry": 50073, "equals": 4
+    },
+    {
+      "action": "assert", "label": "All four Ghouls are still raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50073, "equals": 4
+    }
+  ]
+}

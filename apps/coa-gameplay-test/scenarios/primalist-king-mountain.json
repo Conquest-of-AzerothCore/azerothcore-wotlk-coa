@@ -1,0 +1,408 @@
+{
+  "schema": 1,
+  "name": "Primalist King of the Mountain native stat conversion",
+  "contract": "Strength supplies 15% dodge, parry and all haste ratings; the linked native aura supplies 30% Stamina as attack power. Stat buffs update the conversions and unlearning removes both effects.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 60
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 570183,
+      "all_specs": true
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "baseline_stat_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "baseline_stat_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 2,
+      "save_as": "baseline_rating_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 3,
+      "save_as": "baseline_rating_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 17,
+      "save_as": "baseline_rating_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 18,
+      "save_as": "baseline_rating_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 19,
+      "save_as": "baseline_rating_19"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 570270,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "save_as": "baseline_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 570270,
+      "save_as": "baseline_linked"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 570183
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "learned_stat_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "learned_stat_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 2,
+      "save_as": "learned_rating_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 3,
+      "save_as": "learned_rating_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 17,
+      "save_as": "learned_rating_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 18,
+      "save_as": "learned_rating_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 19,
+      "save_as": "learned_rating_19"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 570270,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "save_as": "learned_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 570270,
+      "save_as": "learned_linked"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 72586,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "strength_stat_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "strength_stat_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 2,
+      "save_as": "strength_rating_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 3,
+      "save_as": "strength_rating_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 17,
+      "save_as": "strength_rating_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 18,
+      "save_as": "strength_rating_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 19,
+      "save_as": "strength_rating_19"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 570270,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "save_as": "strength_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 570270,
+      "save_as": "strength_linked"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 48161,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "stamina_stat_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "stamina_stat_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 2,
+      "save_as": "stamina_rating_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 3,
+      "save_as": "stamina_rating_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 17,
+      "save_as": "stamina_rating_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 18,
+      "save_as": "stamina_rating_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 19,
+      "save_as": "stamina_rating_19"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 570270,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "save_as": "stamina_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 570270,
+      "save_as": "stamina_linked"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 570183,
+      "all_specs": true
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "removed_stat_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "removed_stat_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 2,
+      "save_as": "removed_rating_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 3,
+      "save_as": "removed_rating_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 17,
+      "save_as": "removed_rating_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 18,
+      "save_as": "removed_rating_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 19,
+      "save_as": "removed_rating_19"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 570270,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "save_as": "removed_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 570270,
+      "save_as": "removed_linked"
+    }
+  ]
+}

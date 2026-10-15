@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Brood Trap places the live Brood Egg model",
+  "contract": "Brood Trap (803525) is a Spider Form (800841) ability whose effect 0 summons creature 52121 in front of the caster. The live client creature cache, the Exiles DB and the db.exil.es dump all record 52121 as 'Brood Egg' with display 412059 (8bl_aqir_eggs01.m2), which the installed client and the server CreatureDisplayInfo both carry. The trap must place a creature 52121 whose template model is 412059, not the spider egg 23058 (G_EggSpider.mdx). The 412059 model's bounding box is 5.3 yards wide, and no live source records a scale; compared in game against live arena footage (2026-08-01), the placed egg is drawn at object scale 0.4.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "v", "spell": 800841 },
+    { "action": "learn", "actor": "v", "spell": 803525 },
+    { "action": "cast", "actor": "v", "spell": 800841 },
+    { "action": "assert", "label": "SETUP: Spider Form is active", "actor": "v", "metric": "aura", "spell": 800841,
+      "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: no Brood Egg is out yet", "actor": "v", "metric": "owned_creature_count",
+      "entry": 52121, "equals": 0 },
+    { "action": "wait", "label": "Let the Spider Form global cooldown pass", "ms": 2000 },
+    { "action": "cast", "actor": "v", "spell": 803525 },
+    { "action": "assert", "label": "Brood Trap places one Brood Egg", "actor": "v", "metric": "owned_creature_count",
+      "entry": 52121, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "DISCRIMINATING: the Brood Egg uses the live aqir egg display 412059, not 23058",
+      "actor": "v", "metric": "creature_model_display", "entry": 52121, "equals": 412059 },
+    { "action": "assert", "label": "DISCRIMINATING: the placed Brood Egg is drawn at 0.4, not the 5.3-yard model scale 1",
+      "actor": "v", "metric": "owned_creature_scale", "entry": 52121, "min": 0.399, "max": 0.401 }
+  ]
+}

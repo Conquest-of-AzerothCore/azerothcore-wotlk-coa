@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "name": "Hungering Scythe extends Deathwind and its Crow's Harvest damage aura (#1173)",
+  "contract": "Hungering Scythe 801335 adds 4 sec to Deathwind and 15% Crow's Harvest damage inside it.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 5,
+      "class": 30,
+      "level": 80
+    },
+    {
+      "id": "scythe",
+      "race": 5,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "scythe",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "control",
+      "spell": 801335
+    },
+    {
+      "action": "unlearn",
+      "actor": "scythe",
+      "spell": 801335
+    },
+    {
+      "action": "learn",
+      "actor": "scythe",
+      "spell": 801335
+    },
+    {
+      "action": "learn",
+      "actor": "scythe",
+      "spell": 800174
+    },
+    {
+      "action": "assert",
+      "label": "Control Deathwind duration modifier",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 800174,
+      "op": 1,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Hungering Scythe adds four seconds to Deathwind",
+      "actor": "scythe",
+      "metric": "spell_modifier",
+      "spell": 800174,
+      "op": 1,
+      "base": 0,
+      "equals": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Top Deathwind rank also receives four seconds",
+      "actor": "scythe",
+      "metric": "spell_modifier",
+      "spell": 502994,
+      "op": 1,
+      "base": 0,
+      "equals": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Control Deathwind damage aura has no bonus",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 800174,
+      "effect": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Hungering Scythe adds fifteen to Deathwind effect three",
+      "actor": "scythe",
+      "metric": "spell_effect_value",
+      "spell": 800174,
+      "effect": 2,
+      "equals": 15
+    },
+    {
+      "action": "snapshot",
+      "label": "Crow's Harvest damage taken before Deathwind",
+      "actor": "target",
+      "metric": "spell_damage_taken",
+      "target": "scythe",
+      "spell": 504011,
+      "save_as": "baseline_damage"
+    },
+    {
+      "action": "cast",
+      "label": "Place Deathwind on the target",
+      "actor": "scythe",
+      "spell": 800174,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "Target receives the Deathwind area aura",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 800174,
+      "caster": "scythe",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Deathwind's third aura effect is fifteen",
+      "actor": "target",
+      "metric": "aura_amount",
+      "spell": 800174,
+      "effect": 2,
+      "caster": "scythe",
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "Crow's Harvest gains fifteen percent against the target",
+      "actor": "target",
+      "metric": "spell_damage_taken",
+      "target": "scythe",
+      "spell": 504011,
+      "relative_to": "baseline_damage",
+      "min": 149,
+      "max": 151
+    }
+  ]
+}

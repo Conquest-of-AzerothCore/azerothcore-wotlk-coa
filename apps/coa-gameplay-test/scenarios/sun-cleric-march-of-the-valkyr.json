@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "name": "March of the Valkyr grants a raid-wide 3% damage aura and 5% parry (#756)",
+  "contract": "March of the Valkyr 560534 is family 33, Attributes 64 (SPELL_ATTR0_PASSIVE) with EquippedItemClass -1 and no Stances, so it self-applies on learn. Effect 0 is SPELL_EFFECT_APPLY_AREA_AURA_RAID (65) targeting TARGET_UNIT_CASTER (1) with EffectRadiusIndex 287 and ApplyAuraName SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79), EffectMiscValue 127 (all schools), EffectBasePoints 2 + DieSides 1 = 3; Spell::EffectApplyAreaAura is the native, generic handler for effect 65 and is already used by many other raid-wide buffs, spreading a linked aura instance of the same spell to every raid member within radius. Effect 1 is SPELL_AURA_MOD_PARRY_PERCENT (47) on the caster only (TARGET_UNIT_CASTER, it does not spread with the raid aura), EffectBasePoints 4 + DieSides 1 = 5, a plain native stat aura, confirmed independently of the stat gate by the aura_amount assertion below. Neither effect needs a script: this is not \"no server-side implementation\". The damage clause cannot be observed through melee_damage_done: that metric calls player->MeleeDamageBonusDone(target, 1000, BASE_ATTACK, nullptr) with the default damageSchoolMask SPELL_SCHOOL_MASK_NORMAL, and Unit::MeleeDamageBonusDone (Unit.cpp ~10719-10743) only folds SPELL_AURA_MOD_DAMAGE_PERCENT_DONE into DoneTotalMod when `!(damageSchoolMask & SPELL_SCHOOL_MASK_NORMAL)` -- i.e. never for a plain physical-school probe -- because, per its own comment, normal-school percent-done mods are already factored into the base melee damage calculation elsewhere, so folding them in here too would double them. That elsewhere is Unit::UpdateDamagePctDoneMods (Unit.cpp ~12713-12749), which multiplies SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (school-gated to SPELL_SCHOOL_MASK_NORMAL) into the UNIT_MOD_DAMAGE_MAINHAND TOTAL_PCT stat modifier; AuraEffect::HandleModDamagePercentDone (SpellAuraEffects.cpp ~5164) calls UpdateAllDamagePctDoneMods() synchronously on aura apply, which flows through Unit::SetStatPctModifier -> UpdateUnitMod -> Unit::UpdateDamagePhysical (StatSystem.cpp ~96), which writes the final UNIT_FIELD_MINDAMAGE/MAXDAMAGE fields immediately -- no extra tick needed beyond the existing 500ms wait. So weapon_damage_min (UNIT_FIELD_MINDAMAGE) is the correct, already-existing metric for this clause: it rises by exactly the aura's multiplier (DieSides 1 means EffectBasePoints 2 resolves deterministically to 3, no random roll), read as a ratio against a pre-learn snapshot so the assertion needs no assumed baseline. parry_chance is not a plain passthrough of the aura: Player::UpdateParryPercentage (StatSystem.cpp) only runs its nondiminishing/diminishing calculation when CanParry() is true, and that calculation always adds a nondiminishing 5.0f base term on top of any SPELL_AURA_MOD_PARRY_PERCENT amount. A fresh Sun Cleric never satisfies CanParry() (it starts false and nothing else in this scenario sets it), so 'control' reads exactly 0 -- not because the class is penalized, but because the whole calculation is gated off. AuraEffect::HandleAuraModParryPercent (SpellAuraEffects.cpp) flips CanParry() to true as a side effect of applying ANY SPELL_AURA_MOD_PARRY_PERCENT aura (stock, class-agnostic core behavior, not a Sun Cleric special case), so the instant 'talent' learns March of the Valkyr it both gains the aura's own +5 and un-gates the base +5 in the same recalculation, landing on 10, not 5. The 5-vs-10 split cannot be told apart by a delta against a 'control' that never reaches CanParry()==true; it is only provable by reading the aura's own resolved amount (aura_amount, unaffected by the stat gate) separately from the final gated stat, and by asserting the gated stat's absolute value as base + aura.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "parry_chance",
+      "save_as": "control_parry"
+    },
+    {
+      "action": "assert",
+      "label": "A Sun Cleric with no parry-granting aura never satisfies CanParry(), so the gated stat stays 0",
+      "actor": "control",
+      "metric": "parry_chance",
+      "equals": 0
+    },
+    {
+      "action": "group",
+      "actor": "talent",
+      "target": "ally"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "weapon_damage_min",
+      "save_as": "ally_damage_before"
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 560534
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Talent self-applies the raid aura",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 560534,
+      "caster": "talent",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The nearby grouped ally receives the same aura",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 560534,
+      "caster": "talent",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The aura's own parry effect resolves to 5 (EffectBasePoints 4 + DieSides 1), independent of the CanParry gate",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 560534,
+      "caster": "talent",
+      "effect": 1,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "Learning the talent flips CanParry() true, so the real parry stat becomes the 5.0 nondiminishing base plus the aura's 5, landing on 10",
+      "actor": "talent",
+      "metric": "parry_chance",
+      "min": 9.9,
+      "max": 10.1
+    },
+    {
+      "action": "assert",
+      "label": "The grouped ally's melee weapon damage rises by 3% from the spread aura",
+      "actor": "ally",
+      "metric": "weapon_damage_min",
+      "ratio_to": "ally_damage_before",
+      "min": 1.025,
+      "max": 1.035
+    }
+  ]
+}

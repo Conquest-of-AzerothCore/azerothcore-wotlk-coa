@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "Bloodbound Etchings raises Blood Shield's regeneration effects by 50% (#2161)",
+  "contract": "Bloodbound Etchings 570758 has both effects over EffectSpellClassMask (268435456, 0, 0) = word 0 bit 28 = Blood Shield 504296 and no other family-26 row. Effect 0 is aura 108 with MiscValue 12 (SPELLMOD_EFFECT2 -> effect index 1) and BasePoints 49 + DieSides 1 = +50%; Blood Shield's effect 1 is aura 88 MOD_HEALTH_REGEN_PERCENT with value 50, so it becomes 75. Effect 1 is aura 108 with MiscValue 23 (SPELLMOD_EFFECT3 -> effect index 2), +50%; Blood Shield's effect 2 is aura 116 MOD_REGEN_DURING_COMBAT with value 100, so it becomes 150. Tooltip: \"Your Blood Shield now increases your health regeneration by an additional $s1%.\" Both operations are percentage modifiers, so \"an additional 50%\" is 50 -> 75, which is what Spell.dbc authorises. Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Blood Shield's health regeneration effect unmodified before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 504296,
+      "op": 12,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Blood Shield's combat regeneration effect unmodified before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 504296,
+      "op": 23,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 570758
+    },
+    {
+      "action": "assert",
+      "label": "Bloodbound Etchings raises Blood Shield effect 1 by 50%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 504296,
+      "op": 12,
+      "base": 100,
+      "equals": 150
+    },
+    {
+      "action": "assert",
+      "label": "Bloodbound Etchings raises Blood Shield effect 2 by 50%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 504296,
+      "op": 23,
+      "base": 100,
+      "equals": 150
+    },
+    {
+      "action": "assert",
+      "label": "Bloodbound Etchings does not touch Bloodbolt",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 12,
+      "base": 100,
+      "equals": 100
+    }
+  ]
+}

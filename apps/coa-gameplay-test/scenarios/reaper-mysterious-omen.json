@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Mysterious Omen extends the range of Murder and Soul Shock",
+  "contract": "Mysterious Omen 561108 is a passive SpellMod: Effect0 (SPELLMOD_RANGE) carries SpellFamilyFlags[1] bits 6 and 27, overlapping both Murder 500376 (SpellFamilyFlags[1]=64, bit6) and Soul Shock 803989 (SpellFamilyFlags[1]=134217736, bit27), base points 4 (raw 5 yards). Effect1 carries SpellFamilyFlags[0]=4194304, matching Shudder Scythe 572382 exactly (the talent-805708 replacement for Murder), base points 1 (raw 2 yards). Both are native SPELLMOD_RANGE applications; issue #2036 reported no handler exists, which this proves false.",
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "Murder range unmodified before the talent", "actor": "reaper",
+      "metric": "spell_modifier", "spell": 500376, "op": 5, "base": 1000, "equals": 1000 },
+    { "action": "assert", "label": "Soul Shock range unmodified before the talent", "actor": "reaper",
+      "metric": "spell_modifier", "spell": 803989, "op": 5, "base": 1000, "equals": 1000 },
+    { "action": "assert", "label": "Shudder Scythe range unmodified before the talent", "actor": "reaper",
+      "metric": "spell_modifier", "spell": 572382, "op": 5, "base": 1000, "equals": 1000 },
+    { "action": "learn", "actor": "reaper", "spell": 561108 },
+    { "action": "assert", "label": "Mysterious Omen aura settles on the caster", "actor": "reaper",
+      "metric": "aura", "spell": 561108, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Murder range is increased by 5 yards", "actor": "reaper",
+      "metric": "spell_modifier", "spell": 500376, "op": 5, "base": 1000, "equals": 1005 },
+    { "action": "assert", "label": "Soul Shock range is increased by 5 yards", "actor": "reaper",
+      "metric": "spell_modifier", "spell": 803989, "op": 5, "base": 1000, "equals": 1005 },
+    { "action": "assert", "label": "Shudder Scythe range is increased by 2 yards", "actor": "reaper",
+      "metric": "spell_modifier", "spell": 572382, "op": 5, "base": 1000, "equals": 1002 }
+  ]
+}

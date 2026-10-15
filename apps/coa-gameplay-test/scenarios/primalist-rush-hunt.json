@@ -1,0 +1,260 @@
+{
+  "schema": 1,
+  "name": "Primalist Rush of the Hunt bleeding-target bonus",
+  "contract": "Wildclaw ranks and Rylak Bite gain 15% damage only against a bleeding target. Create bleeding with a normal Rend cast, compare native weapon damage, verify unrelated damage, talent removal and bleed expiry.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 500000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 196
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 772
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 300691,
+      "all_specs": true
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "spell": 800140,
+      "target": "target",
+      "save_as": "base_800140"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "spell": 520566,
+      "target": "target",
+      "save_as": "base_520566"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "spell": 706342,
+      "target": "target",
+      "save_as": "base_706342"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "unrelated"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 300691
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "spell": 800140,
+      "target": "target",
+      "relative_to": "base_800140",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "spell": 520566,
+      "target": "target",
+      "relative_to": "base_520566",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "spell": 706342,
+      "target": "target",
+      "relative_to": "base_706342",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 772,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 772,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "spell": 800140,
+      "target": "target",
+      "ratio_to": "base_800140",
+      "min": 1.149,
+      "max": 1.151
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "spell": 520566,
+      "target": "target",
+      "ratio_to": "base_520566",
+      "min": 1.149,
+      "max": 1.151
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "spell": 706342,
+      "target": "target",
+      "ratio_to": "base_706342",
+      "min": 1.149,
+      "max": 1.151
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "target",
+      "relative_to": "unrelated",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 300691,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "spell": 800140,
+      "target": "target",
+      "relative_to": "base_800140",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "spell": 520566,
+      "target": "target",
+      "relative_to": "base_520566",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "spell": 706342,
+      "target": "target",
+      "relative_to": "base_706342",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 300691
+    },
+    {
+      "action": "wait",
+      "ms": 16000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 772,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "spell": 800140,
+      "target": "target",
+      "relative_to": "base_800140",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "spell": 520566,
+      "target": "target",
+      "relative_to": "base_520566",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_spell_damage_done",
+      "spell": 706342,
+      "target": "target",
+      "relative_to": "base_706342",
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "name": "Explosive Moonlight converts Intellect into ranged attack power and hit rating (#664)",
+  "contract": "Explosive Moonlight 800474 (Spell.dbc, family 32) tooltip: \"Increases your ranged attack power by $s1% of your Intellect and your hit rating by $s2% of your Intellect.\" Effect 0 is SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT (212), EffectBasePoints 29 (+1 with DieSides 1 = 30), EffectMiscValue 3 (Intellect). Effect 1 is SPELL_AURA_MOD_RATING_FROM_STAT (220), EffectBasePoints 2 (=3), EffectMiscValue 192 (bits 6 and 7 = CR_HIT_RANGED and CR_HIT_SPELL), EffectMiscValueB 3 (Intellect). Native handlers: Player::UpdateAttackPowerAndDamage (StatSystem.cpp) adds CalculatePct(GetStat(misc), amount) to the ranged attack power for every class outside CLASSMASK_WAND_USERS (class 26 is not one); Player::UpdateRating (PlayerUpdates.cpp) adds int32(CalculatePct(GetStat(miscB), amount)) to each rating whose bit is set in the misc value. Exact proof: the differential against an untalented twin shows the talent is the source, then Arcane Intellect 36880 (SPELL_AURA_MOD_STAT 29, misc 3, EffectBasePoints 99, 30 minute duration) is applied to the talented fixture only, and the Intellect delta is asserted first so any other stat scaling would be visible; 30% of that delta must appear as ranged attack power. The rating gain is int truncation of 3% of the total Intellect, so the difference of two truncations of a 3.00-point step is 2 to 4. Values read 2026-09-21 from the shipped /srv/coa/server-data/dbc/Spell.dbc.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "label": "Ranged attack power without the talent",
+      "actor": "control",
+      "metric": "ranged_attack_power",
+      "save_as": "rap_ctl"
+    },
+    {
+      "action": "snapshot",
+      "label": "Ranged hit rating without the talent",
+      "actor": "control",
+      "metric": "combat_rating",
+      "save_as": "hit_ctl",
+      "rating": 6
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 800474
+    },
+    {
+      "action": "assert",
+      "label": "The talent adds ranged attack power",
+      "actor": "talent",
+      "metric": "ranged_attack_power",
+      "relative_to": "rap_ctl",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The talent adds ranged hit rating",
+      "actor": "talent",
+      "metric": "combat_rating",
+      "rating": 6,
+      "relative_to": "hit_ctl",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Intellect before the buff",
+      "actor": "talent",
+      "metric": "stat",
+      "save_as": "int0",
+      "stat": 3
+    },
+    {
+      "action": "snapshot",
+      "label": "Ranged attack power before the buff",
+      "actor": "talent",
+      "metric": "ranged_attack_power",
+      "save_as": "rap0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Ranged hit rating before the buff",
+      "actor": "talent",
+      "metric": "combat_rating",
+      "save_as": "rhit0",
+      "rating": 6
+    },
+    {
+      "action": "snapshot",
+      "label": "Spell hit rating before the buff",
+      "actor": "talent",
+      "metric": "combat_rating",
+      "save_as": "shit0",
+      "rating": 7
+    },
+    {
+      "action": "set_aura",
+      "label": "Arcane Intellect adds 100 Intellect",
+      "actor": "talent",
+      "spell": 36880,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Intellect rose by exactly the buff's 100",
+      "actor": "talent",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "int0",
+      "min": 99.99,
+      "max": 100.01
+    },
+    {
+      "action": "assert",
+      "label": "Ranged attack power rose by 30% of the 100 Intellect gained",
+      "actor": "talent",
+      "metric": "ranged_attack_power",
+      "relative_to": "rap0",
+      "min": 29.9,
+      "max": 30.1
+    },
+    {
+      "action": "assert",
+      "label": "Ranged hit rating rose by 3% of the 100 Intellect gained (rounded down)",
+      "actor": "talent",
+      "metric": "combat_rating",
+      "rating": 6,
+      "relative_to": "rhit0",
+      "min": 2,
+      "max": 4
+    },
+    {
+      "action": "assert",
+      "label": "Spell hit rating rose by 3% of the 100 Intellect gained (rounded down)",
+      "actor": "talent",
+      "metric": "combat_rating",
+      "rating": 7,
+      "relative_to": "shit0",
+      "min": 2,
+      "max": 4
+    }
+  ]
+}

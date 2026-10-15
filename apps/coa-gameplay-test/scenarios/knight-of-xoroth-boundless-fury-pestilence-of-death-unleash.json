@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Boundless Fury raises Pestilence of Death's unleash effectiveness by 30% (#1262)",
+  "contract": "Boundless Fury 704954 reads 'Increases the effectiveness of the unleash effect from Pestilence of Death by 30%' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z; matches the client's own moa_description). Its own baked effect is a native aura 108 (SPELL_AURA_ADD_PCT_MODIFIER) SPELLMOD_ALL_EFFECTS classmask (dword0 bit26, matching Unleash Death 801055 specifically) duplicated identically on two effect slots, but AscensionXoroth.cpp's Unleash() drives the unleash spells' damage entirely through the custom State(player).unleash multiplier (read in ModifySpellEffectBaseValue), which never consults that spellmod bucket. AscensionXorothContracts.cpp nulls both duplicate effects; Unleash() now multiplies its strength parameter by (1 + Amount(704954)/100) - i.e. 1.3x - specifically when the active unleash is Pestilence of Death's (spell == 801055) and the caster has aura 704954. Unleash Death is a DmgClass 1 Fire/Shadow spell cast on the dummy with its own hit and crit rolls, so a miss left the untalented hit at zero and a critical strike on only one of the two hits would move the ratio by about 1.5x. The knight therefore gets spell hit rating and spell crit rating 10000: both hits land and both crit, and the shared crit multiplier (including Pestilence of Death's crit damage bonus) cancels in the ratio.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "knight",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 801002 },
+    { "action": "set_aura", "actor": "knight", "spell": 801054, "stacks": 1, "label": "Force Pestilence of Death active" },
+    {
+      "action": "assert", "label": "SETUP: Pestilence of Death is active",
+      "actor": "knight", "metric": "aura", "spell": 801054, "equals": 1
+    },
+    { "action": "cast", "actor": "knight", "spell": 801002, "label": "Unleash Pestilence, without Boundless Fury" },
+    { "action": "wait", "label": "Let Unleash Death's hit resolve", "ms": 500 },
+    {
+      "action": "snapshot", "label": "Unleash Death's damage without the talent",
+      "actor": "knight", "metric": "spell_damage_total", "spell": 801055, "target": "dummy", "save_as": "total_before"
+    },
+    {
+      "action": "assert", "label": "SETUP: the untalented unleash actually hit the target",
+      "actor": "knight", "metric": "spell_damage_total", "spell": 801055, "target": "dummy", "min": 1
+    },
+    { "action": "reset_cooldown", "actor": "knight", "spell": 801002 },
+    { "action": "learn", "actor": "knight", "spell": 704954 },
+    { "action": "set_aura", "actor": "knight", "spell": 704954, "stacks": 1, "label": "Force the Boundless Fury passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Boundless Fury passive is active",
+      "actor": "knight", "metric": "aura", "spell": 704954, "equals": 1
+    },
+    { "action": "cast", "actor": "knight", "spell": 801002, "label": "Unleash Pestilence, with Boundless Fury" },
+    { "action": "wait", "label": "Let the second Unleash Death hit resolve", "ms": 500 },
+    {
+      "action": "assert", "label": "CONTRACT: the second unleash deals ~30% more damage than the first",
+      "actor": "knight", "metric": "spell_damage_total", "spell": 801055, "target": "dummy",
+      "relative_to": "total_before", "ratio_to": "total_before", "min": 1.2, "max": 1.4
+    }
+  ]
+}

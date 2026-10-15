@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Enveloping Winds echoes Gale on the Air Elemental (#483)",
+  "contract": "#483 Enveloping Winds (707546) promises two things: a raid armor aura and 'casting Gale now causes your Air Elemental to cast Gale'. The armor clause is native and is asserted as a baseline: effect 1 is a SPELL_AURA_PERIODIC_TRIGGER_SPELL with EffectAmplitude 5000 that casts 707547, a SPELL_EFFECT_APPLY_AREA_AURA_RAID / SPELL_AURA_MOD_RESISTANCE with EffectMiscValue[0] = 1 (armor) over SpellRadius index 12 (100 yd). Its amount is level-scaled: EffectBasePoints[0] = 389, EffectDieSides[0] = 1 (always +1, per SpellEffectInfo::CalcValue's DieSides == 1 case), and EffectRealPointsPerLevel[0] = 25.0 above BaseLevel/SpellLevel 30 (SpellInfo.cpp:468-505), so at the caster's level 80 the value is 389 + (80 - 30) * 25 + 1 = 1640 armor, not the flat 390 the DBC base row alone suggests. The echo clause has no delivery at all: effect 0 is a bare SPELL_AURA_DUMMY whose EffectTriggerSpell is the armor aura, 707546 ships ProcFlags = 0, and no Enveloping Winds record carries a SPELL_EFFECT_FORCE_CAST sibling. The fix adds a proc entry keyed on Gale's own identity (family 22, SpellFamilyFlags[0] = 0x4000) and aura_ascension_enveloping_winds, which makes the Air Elemental repeat the exact rank the Stormbringer cast.",
+  "timeout_ms": 240000,
+  "players": [
+    {
+      "id": "s",
+      "race": 1,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "a",
+      "race": 1,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "s",
+      "entry": 36,
+      "level": 80,
+      "health": 10000000,
+      "distance": 5
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn and level scaling settle", "ms": 5000 },
+    { "action": "group", "actor": "s", "target": "a" },
+    { "action": "learn", "actor": "s", "spell": 804019 },
+    { "action": "cast", "actor": "s", "spell": 804019 },
+    { "action": "assert", "label": "SETUP: the Air Elemental (creature 500941) is out",
+      "actor": "s", "metric": "pet_entry", "equals": 500941, "within_ms": 25000 },
+    { "action": "learn", "actor": "s", "spell": 804036 },
+    { "action": "snapshot", "label": "Ally armor before Enveloping Winds",
+      "actor": "a", "metric": "armor", "save_as": "ally_armor_base" },
+    { "action": "assert", "label": "BASELINE: the grouped ally carries no 707547 raid aura",
+      "actor": "a", "metric": "aura", "spell": 707547, "equals": 0 },
+    { "action": "cast", "actor": "s", "spell": 804036, "target": "e" },
+    { "action": "wait", "label": "Let the baseline Gale land and any echo resolve", "ms": 4000 },
+    { "action": "assert", "label": "BASELINE: without Enveloping Winds the Air Elemental casts no Gale",
+      "actor": "s", "metric": "spell_go_count", "spell": 804036, "pet": true, "equals": 0 },
+    { "action": "learn", "actor": "s", "spell": 707546 },
+    { "action": "assert", "label": "BASELINE CLAUSE A: the 5 s periodic tick puts 707547 on the grouped ally",
+      "actor": "a", "metric": "aura", "spell": 707547, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "BASELINE CLAUSE A: the ally gains exactly 1640 armor (707547 EffectBasePoints[0] = 389, EffectDieSides[0] = 1, EffectRealPointsPerLevel[0] = 25 above BaseLevel 30, at caster level 80)",
+      "actor": "a", "metric": "armor", "relative_to": "ally_armor_base", "equals": 1640, "within_ms": 10000 },
+    { "action": "wait", "label": "Global cooldown before the measured Gale", "ms": 2500 },
+    { "action": "cast", "actor": "s", "spell": 804036, "target": "e" },
+    { "action": "assert", "label": "DISCRIMINATING CLAUSE B: the Air Elemental repeats Gale once",
+      "actor": "s", "metric": "spell_go_count", "spell": 804036, "pet": true, "equals": 1, "within_ms": 6000 },
+    { "action": "assert", "label": "The raid armor aura is untouched by the echo",
+      "actor": "a", "metric": "armor", "relative_to": "ally_armor_base", "equals": 1640 }
+  ]
+}

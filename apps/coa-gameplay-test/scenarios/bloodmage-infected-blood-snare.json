@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "name": "Infected Blood snares enemies taking the Bloodmage's periodic damage (#1258)",
+  "contract": "Infected Blood 805035's single effect is SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on Infection 800983, a native aura 33 SPELL_AURA_MOD_DECREASE_SPEED with BasePoints -31, TargetA 6 (enemy) and effect mechanic 11 (snare). Spell.dbc gives 805035 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs generated no entry and the aura was inert. The tooltip is 'Periodic damage dealt now reduces the enemy's movement speed by $800983s1%' at ProcChance 100, so the very first Crimson Tide tick must apply the snare to the unit taking it. Crimson Tide is cast as rank 504134, the rank a level-80 character owns per AscensionSpellProgressionData.h. Its single effect is aura 3 SPELL_AURA_PERIODIC_DAMAGE with Amplitude 3000, DurationIndex 8 (15 s), so one cast on the single dummy produces five PROC_FLAG_DONE_PERIODIC events and the first one must already snare it. Nothing here depends on a proc roll: the record's own ProcChance is 100. Infection's effect 0 is BasePoints -31 + DieSides 1 = -30% and SPELL_AURA_MOD_DECREASE_SPEED scales the unit's run-speed rate, which is not 1.0 for a creature: creature_template entry 36 (Harvest Golem) carries speed_run 1.14286, so a fully applied snare gives 1.14286 * 0.7 = 0.8000020384788513. The speed assertion therefore divides by a pre-snare snapshot of the same metric instead of assuming a base of 1.0.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy1",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504134
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 805035
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "No snare before the damage over time starts",
+      "actor": "dummy1",
+      "metric": "aura",
+      "spell": 800983,
+      "caster": "bloodmage",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "The dummy's unsnared run-speed rate",
+      "actor": "dummy1",
+      "metric": "run_speed_rate",
+      "save_as": "speed_base"
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 504134,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "label": "One Crimson Tide tick",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the first periodic tick applies Infection",
+      "actor": "dummy1",
+      "metric": "aura",
+      "spell": 800983,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "And the snare is really slowing the target by 30% of its own base rate",
+      "actor": "dummy1",
+      "metric": "run_speed_rate",
+      "ratio_to": "speed_base",
+      "min": 0.69,
+      "max": 0.71
+    }
+  ]
+}

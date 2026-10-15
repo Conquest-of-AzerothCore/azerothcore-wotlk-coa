@@ -1,0 +1,540 @@
+{
+  "schema": 1,
+  "name": "ranger-barbed-quills-bleed-and-spread-5478",
+  "timeout_ms": 120000,
+  "contract": [
+    "Barbed Quills 800077 is a paid Dueling talent. Landed Wild Strike, Flank and Quills damage applies the",
+    "owner's 801472 bleed. Quills spreads owner periodic effects to at most five hostile enemies within ten",
+    "yards and extends existing owner periodics by 2000 ms. Purchase the actual talent, compare an untalented",
+    "Wild Strike, then observe both the bleed and a normally cast Serrated Shot spreading to an enemy outside",
+    "Quills' own eight-yard base radius and native leeway. A distant target and another caster are negative",
+    "controls; bleed damage must actually tick. Quills 561186 requires CasterAuraSpell 804329 (Advantage) in",
+    "the original DBC. The fixture supplies and asserts that prerequisite explicitly instead of depending on",
+    "a random earlier critical strike to generate it."
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "r",
+      "race": 1,
+      "class": 21,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "other",
+      "race": 1,
+      "class": 21,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "source",
+      "owner": "r",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 4
+    },
+    {
+      "id": "near",
+      "owner": "r",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 13
+    },
+    {
+      "id": "far",
+      "owner": "r",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 25
+    },
+    {
+      "id": "near2",
+      "owner": "r",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 13.2
+    },
+    {
+      "id": "near3",
+      "owner": "r",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 13.4
+    },
+    {
+      "id": "near4",
+      "owner": "r",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 13.6
+    },
+    {
+      "id": "near5",
+      "owner": "r",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 13.8
+    },
+    {
+      "id": "near6",
+      "owner": "r",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 14
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "r",
+      "id": 30
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "r",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "r",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "r",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "actor": "r",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 501724
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 561186
+    },
+    {
+      "action": "set_power",
+      "actor": "r",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 501724,
+      "target": "source"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 501724,
+      "target": "source",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "source",
+      "metric": "aura_stacks",
+      "spell": 801472,
+      "caster": "r",
+      "equals": 0
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "r",
+      "entry": 30462,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 800077,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "r",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 501724,
+      "target": "source"
+    },
+    {
+      "action": "assert",
+      "actor": "source",
+      "metric": "aura_stacks",
+      "spell": 801472,
+      "caster": "r",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "source",
+      "metric": "aura",
+      "spell": 801472,
+      "caster": "other",
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "r",
+      "map": 0,
+      "x": -8922.41,
+      "y": -115.853,
+      "z": 82.3711,
+      "o": 0
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 575836
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "r",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 575836,
+      "target": "source"
+    },
+    {
+      "action": "assert",
+      "actor": "source",
+      "metric": "aura",
+      "spell": 575836,
+      "caster": "r",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "other",
+      "map": 0,
+      "x": -8922.41,
+      "y": -115.853,
+      "z": 82.3711,
+      "o": 0
+    },
+    {
+      "action": "learn",
+      "actor": "other",
+      "spell": 500104
+    },
+    {
+      "action": "cast",
+      "actor": "other",
+      "spell": 500104,
+      "target": "source"
+    },
+    {
+      "action": "assert",
+      "actor": "source",
+      "metric": "aura",
+      "spell": 500104,
+      "caster": "other",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "global_cooldown_ms",
+      "spell": 561186,
+      "equals": 0,
+      "within_ms": 3000,
+      "label": "Quills is ready after the preceding ranged cast"
+    },
+    {
+      "action": "snapshot",
+      "actor": "source",
+      "metric": "aura_duration_ms",
+      "spell": 500104,
+      "caster": "other",
+      "save_as": "other_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "source",
+      "metric": "aura_duration_ms",
+      "spell": 575836,
+      "caster": "r",
+      "save_as": "poison_before"
+    },
+    {
+      "action": "teleport",
+      "actor": "r",
+      "map": 0,
+      "x": -8917.41,
+      "y": -115.853,
+      "z": 82.3711,
+      "o": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "r",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "r",
+      "spell": 804329,
+      "stacks": 1,
+      "label": "Supply the authored Advantage prerequisite for the Quills proc test"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 804329,
+      "equals": 1,
+      "label": "Quills has its required Advantage aura before the normal cast"
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 561186
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "cast_failure",
+      "spell": 561186,
+      "equals": 0,
+      "label": "The ordinary Quills submission is accepted with its native prerequisite"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 561186,
+      "target": "source",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 575836,
+      "caster": "r",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 801472,
+      "caster": "r",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "source",
+      "metric": "aura_duration_ms",
+      "spell": 575836,
+      "caster": "r",
+      "relative_to": "poison_before",
+      "min": 1300,
+      "max": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "far",
+      "metric": "aura",
+      "spell": 575836,
+      "caster": "r",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 500104,
+      "caster": "other",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "source",
+      "metric": "aura_duration_ms",
+      "spell": 500104,
+      "caster": "other",
+      "relative_to": "other_before",
+      "min": -700,
+      "max": 0
+    },
+    {
+      "action": "assert",
+      "actor": "near2",
+      "metric": "aura",
+      "spell": 575836,
+      "caster": "r",
+      "equals": 1,
+      "label": "Spread is capped at five additional enemies"
+    },
+    {
+      "action": "assert",
+      "actor": "near3",
+      "metric": "aura",
+      "spell": 575836,
+      "caster": "r",
+      "equals": 1,
+      "label": "Spread is capped at five additional enemies"
+    },
+    {
+      "action": "assert",
+      "actor": "near4",
+      "metric": "aura",
+      "spell": 575836,
+      "caster": "r",
+      "equals": 1,
+      "label": "Spread is capped at five additional enemies"
+    },
+    {
+      "action": "assert",
+      "actor": "near5",
+      "metric": "aura",
+      "spell": 575836,
+      "caster": "r",
+      "equals": 1,
+      "label": "Spread is capped at five additional enemies"
+    },
+    {
+      "action": "assert",
+      "actor": "near6",
+      "metric": "aura",
+      "spell": 575836,
+      "caster": "r",
+      "equals": 0,
+      "label": "Spread is capped at five additional enemies"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 801472,
+      "target": "near",
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 561186,
+      "target": "near",
+      "equals": 0,
+      "label": "Spread fixture receives no primary Quills hit: near"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 561186,
+      "target": "near2",
+      "equals": 0,
+      "label": "Spread fixture receives no primary Quills hit: near2"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 561186,
+      "target": "near3",
+      "equals": 0,
+      "label": "Spread fixture receives no primary Quills hit: near3"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 561186,
+      "target": "near4",
+      "equals": 0,
+      "label": "Spread fixture receives no primary Quills hit: near4"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 561186,
+      "target": "near5",
+      "equals": 0,
+      "label": "Spread fixture receives no primary Quills hit: near5"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 561186,
+      "target": "near6",
+      "equals": 0,
+      "label": "Spread fixture receives no primary Quills hit: near6"
+    }
+  ]
+}

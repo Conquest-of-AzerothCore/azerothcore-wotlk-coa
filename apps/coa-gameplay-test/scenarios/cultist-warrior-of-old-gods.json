@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "name": "Cultist: Warrior of the Old Gods raises Hammer of Twilight and Entropic Slam's weapon damage by 20% (#1330)",
+  "contract": "802047 effect 0 is ADD_PCT_MODIFIER (aura 108), EffectMiscValue 3 = SPELLMOD_EFFECT1, EffectBasePoints 19 + DieSides 1 = +20%, EffectSpellClassMask word2 bit14 (16384); effect 1 is the same aura, EffectMiscValue 12 = SPELLMOD_EFFECT2, EffectBasePoints 19 + DieSides 1 = +20%, EffectSpellClassMask word0 bit7 (128). Hammer of Twilight 805116 (SpellFamilyName 31, SpellFamilyFlags word2 bit14, exact match) has Effect 0 = SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, so SPELLMOD_EFFECT1 (which Unit::ApplyEffectModifiers, Unit.cpp:12149-12167, routes to effect index 0) lands exactly on its weapon-damage effect. Entropic Slam 804152 (SpellFamilyName 31, SpellFamilyFlags word0 bit7, exact match) has Effect 1 = SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, so SPELLMOD_EFFECT2 (effect index 1) lands exactly on its own weapon-damage effect - the two different ops were deliberately chosen per target spell. This is independently confirmed by the engine itself: SpellInfo::IsAffectedBySpellMod's family-31 collision table has an explicit case for this exact modifier (SpellInfo.cpp ~1502-1505): `case 680600: case 802047: return root == 805116 || root == 804152;`, naming this exact spell ID and its two intended roots (GetFirstSpellInChain), routing around a classmask collision the engine authors already found and fixed. Because routing uses GetFirstSpellInChain, any rank of either target spell is affected as long as its chain root is 805116 or 804152; the scenario queries the roots directly. spell_modifier applies the caster's real spell mods to a synthetic base of 1000 for each op/spell pair. 500712 (Ancient Curse, SpellFamilyFlags all zero) is the negative control, and 805116 queried with the *other* op (SPELLMOD_EFFECT2) is a same-spell cross-op control proving the routing lands on the correct effect index, not just the correct spell. Numbers read from Spell.dbc via coa-dbc-viewer; the collision-table entry was read directly from SpellInfo.cpp. No script or SQL references 802047. Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 25,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Hammer of Twilight's effect-0 (SPELLMOD_EFFECT1) base is unmodified",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 805116,
+      "op": 3,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Entropic Slam's effect-1 (SPELLMOD_EFFECT2) base is unmodified",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 804152,
+      "op": 12,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Hammer of Twilight's SPELLMOD_EFFECT2 base is unmodified (cross-op control)",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 805116,
+      "op": 12,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the unrelated control spell's SPELLMOD_EFFECT1 base is unmodified",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 500712,
+      "op": 3,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 802047
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "knows_spell",
+      "spell": 802047,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Warrior of the Old Gods raises Hammer of Twilight's weapon damage effect by 20% (#1330)",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 805116,
+      "op": 3,
+      "base": 1000,
+      "min": 1198,
+      "max": 1202
+    },
+    {
+      "action": "assert",
+      "label": "Warrior of the Old Gods raises Entropic Slam's weapon damage effect by 20% (#1330)",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 804152,
+      "op": 12,
+      "base": 1000,
+      "min": 1198,
+      "max": 1202
+    },
+    {
+      "action": "assert",
+      "label": "The talent does not add SPELLMOD_EFFECT2 to Hammer of Twilight (cross-op control)",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 805116,
+      "op": 12,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The talent does not leak onto an unrelated Cultist spell (negative control)",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 500712,
+      "op": 3,
+      "base": 1000,
+      "equals": 1000
+    }
+  ]
+}

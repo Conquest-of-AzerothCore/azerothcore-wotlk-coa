@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "name": "Soulstone Lure stays planted without replacing the Reaper pet",
+  "contract": "Soulstone Lure 561376 summons creature 557911 as an ordinary timed summon using property 64, not a guardian using property 61. Its scoped summon AI adopts the Reaper faction and supplies aura 561826. After the Reaper moves away the lure remains at the destination. The caster enters Underwalk 800797 to satisfy the required stance.",
+  "players": [
+    {
+      "id": "reaper",
+      "race": 1,
+      "class": 30,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 800797
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 800797
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 800797,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 561376
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 561376,
+      "destination": {
+        "x": -8917.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "owned_creature_count",
+      "entry": 557911,
+      "spell": 561826,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "pet_entry",
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "reaper",
+      "map": 0,
+      "x": -8897.41,
+      "y": -115.853,
+      "z": 82.3711
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "owned_creature_count",
+      "entry": 557911,
+      "min_distance": 15,
+      "equals": 1
+    }
+  ]
+}

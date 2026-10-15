@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Prestige removes the Books of Ascension ranks of Night Hunter's Howl (#5658)",
+  "contract": "Night Hunter's Howl ranks 6-8 (501684, 501685, 501686; Spell.dbc BaseLevel 51, 61, 71) are sold only through the Books of Ascension upgrade rows in modules/mod-spellbook/src/SpellbookRankData.h:43-45 and the class trainer 900020 rows that require rank 4 (501682). They are absent from AscensionCompatData::ClassSpells, LegacyGeneratedClassSpells and AscensionProgression::Ranks, so neither CoAPrestige ForgetRanksAbove (CoAPrestige.cpp:342) nor SynchronizeProgression (AscensionCompat.cpp:664) takes them back when Chromie returns a level-60 character to level 1. A prestiged character must not keep a rank above its level: after activation rank 6 (BaseLevel 51) is forgotten, the same as rank 4 (501682, BaseLevel 58), which AscensionProgression::Ranks already covers.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8816.5, "y": 627.0, "z": 94.1, "o": 3.8 },
+  "players": [
+    { "id": "prestiger", "race": 1, "class": 20, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "chromie", "owner": "prestiger", "entry": 178081, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixture settle", "ms": 3000 },
+    { "action": "specialization", "actor": "prestiger", "id": 25 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "learn", "actor": "prestiger", "spell": 500124 },
+    { "action": "learn", "actor": "prestiger", "spell": 501680 },
+    { "action": "learn", "actor": "prestiger", "spell": 501681 },
+    { "action": "learn", "actor": "prestiger", "spell": 501682 },
+    { "action": "learn", "actor": "prestiger", "spell": 501684 },
+    { "action": "assert", "label": "Rank 4 is known before prestige", "actor": "prestiger", "metric": "knows_spell", "spell": 501682, "equals": 1 },
+    { "action": "assert", "label": "Rank 6 is known before prestige", "actor": "prestiger", "metric": "knows_spell", "spell": 501684, "equals": 1 },
+
+    { "action": "gossip_hello", "actor": "prestiger", "target": "chromie", "label": "Speak to Chromie" },
+    { "action": "gossip_select", "actor": "prestiger", "option": 0, "label": "I would like to prestige!" },
+    { "action": "assert", "label": "Back to level 1", "actor": "prestiger", "metric": "level", "equals": 1, "within_ms": 5000 },
+
+    { "action": "assert", "label": "Control: rank 4 (level 58, in AscensionProgression::Ranks) is forgotten", "actor": "prestiger", "metric": "knows_spell", "spell": 501682, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: rank 6 (level 51, Books of Ascension upgrade row) is forgotten", "actor": "prestiger", "metric": "knows_spell", "spell": 501684, "equals": 0 }
+  ]
+}

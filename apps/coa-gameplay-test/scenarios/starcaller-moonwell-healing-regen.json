@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "name": "Moonwell grants allies 25% more healing and 100% more mana regeneration (#3720)",
+  "contract": "Moonwell 804739 (Spell.dbc, SpellFamilyName 32, cooldown 120000, cast time index 5, duration index 8 = 15 s) has effect 0 SPELL_EFFECT_PERSISTENT_AREA_AURA (27) with aura SPELL_AURA_MOD_HEALING_PCT (118), EffectBasePoints 24 resolving to 25, and effect 2 PERSISTENT_AREA_AURA with aura SPELL_AURA_MOD_POWER_REGEN_PERCENT (110), misc 0 (mana), EffectBasePoints 99 resolving to 100. Effect 1 is a plain SPELL_EFFECT_DUMMY with no aura and no script, so it delivers nothing and promises nothing. Both area effects target DEST_DEST plus UNIT_DEST_AREA_ALLY (radius index 13 / 45). The tooltip reads 'All allied players standing within the well receive $s1% more healing, and their mana regeneration is increased by $s3%.' Native consumers, all stock: Unit::SpellHealingBonusTaken reads GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT), and Player::UpdateManaRegen (StatSystem.cpp) multiplies the spirit-based regeneration by GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_POWER_REGEN_PERCENT, POWER_MANA). No module code or SQL references 804739 (only the stock-coefficient suppression list). The existing starcaller-ground-molten-core scenario proves the zone and the aura exist; this one pins the two amounts the consumers read to the tooltip's 25 and 100. COVERAGE LIMIT: the harness has no healing-taken or mana-regeneration metric, so the two stock consumers are quoted from code and not measured; the assertions stop at the resolved aura amounts. Fixture position and destination are copied from the ground-molten-core scenario, which is known to accept the cast.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 26,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 409,
+    "x": 1091.89,
+    "y": -466.985,
+    "z": -105.084,
+    "o": 3.14159,
+    "ignore_access": true
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 804739
+    },
+    {
+      "action": "cast",
+      "label": "Cast Moonwell on the caster's own position",
+      "actor": "caster",
+      "spell": 804739,
+      "destination": {
+        "x": 1091.89,
+        "y": -466.985,
+        "z": -105.084
+      }
+    },
+    {
+      "action": "assert",
+      "label": "Moonwell ground zone exists",
+      "actor": "caster",
+      "metric": "dynamic_object",
+      "spell": 804739,
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The caster standing in the well receives its aura",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 804739,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Effect 0 (SPELL_AURA_MOD_HEALING_PCT) resolves to 25, the tooltip's $s1%",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 804739,
+      "effect": 0,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "Effect 2 (SPELL_AURA_MOD_POWER_REGEN_PERCENT) resolves to 100, the tooltip's $s3%",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 804739,
+      "effect": 2,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "The zone lasts at most its 15 second duration",
+      "actor": "caster",
+      "metric": "dynamic_object_duration_ms",
+      "spell": 804739,
+      "min": 1,
+      "max": 15000
+    }
+  ]
+}

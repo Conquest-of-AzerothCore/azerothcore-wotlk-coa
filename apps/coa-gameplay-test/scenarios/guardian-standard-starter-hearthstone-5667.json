@@ -1,0 +1,235 @@
+{
+  "schema": 1,
+  "name": "Guardian: level-two Standard of Recovery uses the starter Hearthstone as its Water Totem (#5667)",
+  "contract": "Original authorized ascension-data PTR itemcache records Hearthstone6948 as TotemCategory21, description 'Counts as an Air, Earth, Fire, and Water totem.' Current world data already has category21. Current Spell.dbc Standard of Recovery500260 requires TotemCategory5, not an exact5175 item. TotemCategory.dbc21 is type1 mask15; category5 is type1 mask8, so the starter Hearthstone satisfies it. A normal level-two Guardian must buy Recovery through its normal Book of Ascension97930, then know it, carry its starter Hearthstone and cast a working standard without any5175\u20135178 totems. Removing the Hearthstone must refuse with130 (SPELL_FAILED_TOTEM_CATEGORY); restoring it must restore casting. Destination, Energy and low health are fixtures.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "g",
+      "race": 1,
+      "class": 18,
+      "level": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "money",
+      "actor": "g",
+      "copper": 10000
+    },
+    {
+      "action": "learn",
+      "actor": "g",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "g",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "g"
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "trainer_window_state",
+      "spell": 500260,
+      "equals": 0
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "g",
+      "spell": 500260
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "knows_spell",
+      "spell": 500260,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "item_count",
+      "item": 6948,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "item_count",
+      "item": 5175,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "item_count",
+      "item": 5176,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "item_count",
+      "item": 5177,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "item_count",
+      "item": 5178,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "g",
+      "value": 50
+    },
+    {
+      "action": "set_power",
+      "actor": "g",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "g",
+      "spell": 500260,
+      "destination": {
+        "x": -8915.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "owned_creature_count",
+      "entry": 50053,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "spell_effective_heal_total",
+      "spell": 500248,
+      "target": "g",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "destroy_item",
+      "actor": "g",
+      "item": 6948
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "g",
+      "spell": 500260
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "item_count",
+      "item": 6948,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "set_power",
+      "actor": "g",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "g",
+      "spell": 500260,
+      "destination": {
+        "x": -8915.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "cast_failure",
+      "spell": 500260,
+      "equals": 130,
+      "label": "Without a compatible totem category the native cast is refused"
+    },
+    {
+      "action": "add_item",
+      "actor": "g",
+      "item": 6948
+    },
+    {
+      "action": "set_power",
+      "actor": "g",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "g",
+      "spell": 500260,
+      "destination": {
+        "x": -8915.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "cast_failure",
+      "spell": 500260,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "spell_cast_count",
+      "spell": 500260,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "g",
+      "metric": "owned_creature_count",
+      "entry": 50053,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

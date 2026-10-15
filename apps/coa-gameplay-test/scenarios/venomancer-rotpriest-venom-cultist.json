@@ -1,0 +1,198 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Rotpriest critical damage and Venom Cultist Spirit-to-haste (#3032, #3033)",
+  "contract": "Issues #3032 (Rotpriest 706209/706210) and #3033 (Venom Cultist 706212), both classified works-natively; regression scenario. Spell.dbc: 706209 has effect 1 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS (163), EffectMiscValue 126 (every magic school), BasePoints 99 DieSides 1 = 100 (tooltip: 'Increases your spell critical damage by $s2%'); effect 0 is aura 216 with BasePoints -1 = 0, a no-op. Unit::SpellCriticalDamageBonus adds GetTotalAuraModifierByMiscMask(163, school mask) as a percentage of the whole critical amount: a Nature DmgClass-magic spell takes 1000 to 1500 without the aura and 3000 with +100%, so the ratio against the control is 2.0 whatever the base. Venom Fang 800880 is Nature (SchoolMask 8, DmgClass 1). 706210 (hidden haste aura, effect aura 216 BasePoints 14, no Passive flag, no tooltip) is not referenced by any table, module or script and is deliberately NOT asserted: its role is unknown, so this scenario proves only the 706209 half of #3032. 706212 has one SPELL_AURA_MOD_RATING_FROM_STAT (220) effect, EffectMiscValue 524288 (1 << 19 = CR_HASTE_SPELL), EffectMiscValueB 4 (Spirit), BasePoints 4 DieSides 1 = 5. Player::UpdateRating adds CalculatePct(Spirit, 5) to that rating and Unit::UpdateStats refreshes it when Spirit changes. Spell 486 'QA Test +1000 Spirit' (aura 29 misc 4, BasePoints 999 DieSides 1, one stack = +1000 Spirit) gives a controlled Spirit step: 5% of 1000 is 50, so the talent's rating rises by about 50 (window 48..55 covers integer truncation and any Spirit multiplier up to 10%), while the control's rating is unchanged. Acquisition is a separate question: 706212 is not in the advancement or spellbook tables, so the scenario grants it with learn as a fixture and does not prove a Venomancer can obtain it. Numbers read from /srv/coa/server-data/dbc Spell.dbc. The dummy creature only supplies a victim for the critical-damage calculation.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "rot",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "control",
+      "entry": 12142,
+      "level": 80,
+      "health": 100000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Venom Fang critical damage from a fixed 1000 base, control",
+      "actor": "control",
+      "metric": "spell_critical_damage",
+      "save_as": "crit_dmg_base",
+      "spell": 800880,
+      "target": "dummy"
+    },
+    {
+      "action": "learn",
+      "actor": "rot",
+      "spell": 706209
+    },
+    {
+      "action": "assert",
+      "label": "Rotpriest's critical-damage effect resolves to 100",
+      "actor": "rot",
+      "metric": "aura_amount",
+      "spell": 706209,
+      "caster": "rot",
+      "effect": 1,
+      "equals": 100,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rotpriest doubles the critical damage of a Nature spell against the control",
+      "actor": "rot",
+      "metric": "spell_critical_damage",
+      "spell": 800880,
+      "target": "dummy",
+      "ratio_to": "crit_dmg_base",
+      "min": 1.99,
+      "max": 2.01
+    },
+    {
+      "action": "assert",
+      "label": "The control's critical damage is unchanged",
+      "actor": "control",
+      "metric": "spell_critical_damage",
+      "spell": 800880,
+      "target": "dummy",
+      "ratio_to": "crit_dmg_base",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "snapshot",
+      "label": "Spell haste rating, control",
+      "actor": "control",
+      "metric": "combat_rating",
+      "save_as": "haste_ctl0",
+      "rating": 19
+    },
+    {
+      "action": "snapshot",
+      "label": "Spell haste rating, Venom Cultist",
+      "actor": "cultist",
+      "metric": "combat_rating",
+      "save_as": "haste_cult0",
+      "rating": 19
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 706212
+    },
+    {
+      "action": "assert",
+      "label": "Venom Cultist's effect resolves to 5",
+      "actor": "cultist",
+      "metric": "aura_amount",
+      "spell": 706212,
+      "caster": "cultist",
+      "effect": 0,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Spell haste rating exceeds the control's once Venom Cultist is known",
+      "actor": "cultist",
+      "metric": "combat_rating",
+      "rating": 19,
+      "relative_to": "haste_ctl0",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Spell haste rating of Venom Cultist before extra Spirit",
+      "actor": "cultist",
+      "metric": "combat_rating",
+      "save_as": "haste_cult1",
+      "rating": 19
+    },
+    {
+      "action": "snapshot",
+      "label": "Spirit of Venom Cultist before extra Spirit",
+      "actor": "cultist",
+      "metric": "stat",
+      "save_as": "spirit_cult0",
+      "stat": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Control gains 1000 Spirit",
+      "actor": "control",
+      "spell": 486,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Venom Cultist gains 1000 Spirit",
+      "actor": "cultist",
+      "spell": 486,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Venom Cultist's Spirit rose by about 1000",
+      "actor": "cultist",
+      "metric": "stat",
+      "stat": 4,
+      "relative_to": "spirit_cult0",
+      "min": 990,
+      "max": 1100,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The control's spell haste rating ignores Spirit",
+      "actor": "control",
+      "metric": "combat_rating",
+      "rating": 19,
+      "relative_to": "haste_ctl0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Venom Cultist converts 5% of the extra Spirit into spell haste rating",
+      "actor": "cultist",
+      "metric": "combat_rating",
+      "rating": 19,
+      "relative_to": "haste_cult1",
+      "min": 48,
+      "max": 55
+    }
+  ]
+}

@@ -1,0 +1,365 @@
+{
+  "schema": 1,
+  "name": "Temporal Convergence procs off Wand of Time (#1015)",
+  "contract": "Temporal Convergence 807588 reads \"Your Wand of Time now has a $h% chance to reset its own cooldown.\" Its effect 0 is aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) triggering 807756, whose single effect is 195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN with EffectMiscValue 520175 and EffectMiscValueB 0. Spell.dbc gives 807588's own record ProcFlags 0, so SpellMgr::LoadSpellProcs skipped it and Aura::GetProcEffectMask returned 0 for the missing proc entry: the roll never happened and 807756 could never be cast. The spell_proc row added with the fix rolls the record's own ProcChance 40 on the ranged class damage of the Wand of Time family mask (family 28, word1 0x100000), which 520175 and 524960 both carry. The reset itself is not observable here - Player::GetSpellCooldownDelay only sees 520175's own five-second entry, so a reset is indistinguishable from natural expiry outside the seeding cast's own window, which is why this scenario counts the procs instead with spell_proc_count. Nine rounds of one 520175 and one 524960 cast give 18 independent landed rolls, each five seconds and a global cooldown apart so neither spell's RecoveryTime 5000 can swallow a cast; 0.60^18 = 1.0e-4, a false failure of 0.010%. The record's 40% chance is not raised to make the test deterministic. The discriminating assertion is the final proc count: without the proc entry it stays at the zero the scenario asserts before the first cast. Mana is refilled to a fixed 1500 each round so that Wand of Time's 14%-of-base-mana cost cannot silently drop a roll, and the target's health loss is asserted so that a wand attack that never landed fails loudly rather than as a missing proc.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "chronomancer",
+      "item": 5069
+    },
+    {
+      "action": "equip",
+      "label": "Wand of Time needs a wand in the ranged slot",
+      "actor": "chronomancer",
+      "item": 5069,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "label": "Let the weapon swap cooldown expire",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 807588
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 520175
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 524960
+    },
+    {
+      "action": "assert",
+      "label": "The mana fixture below stays inside the character's own pool",
+      "actor": "chronomancer",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The talent has not procced before any Wand attack",
+      "actor": "chronomancer",
+      "metric": "spell_proc_count",
+      "spell": 807588,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Target health before the Wand attacks",
+      "actor": "dummy",
+      "metric": "health",
+      "save_as": "health_before"
+    },
+    {
+      "action": "set_power",
+      "label": "Keep mana out of the experiment",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 520175,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1800
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 524960,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let both five-second cooldowns expire",
+      "ms": 3600
+    },
+    {
+      "action": "set_power",
+      "label": "Keep mana out of the experiment",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 520175,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1800
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 524960,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let both five-second cooldowns expire",
+      "ms": 3600
+    },
+    {
+      "action": "set_power",
+      "label": "Keep mana out of the experiment",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 520175,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1800
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 524960,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let both five-second cooldowns expire",
+      "ms": 3600
+    },
+    {
+      "action": "set_power",
+      "label": "Keep mana out of the experiment",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 520175,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1800
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 524960,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let both five-second cooldowns expire",
+      "ms": 3600
+    },
+    {
+      "action": "set_power",
+      "label": "Keep mana out of the experiment",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 520175,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1800
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 524960,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let both five-second cooldowns expire",
+      "ms": 3600
+    },
+    {
+      "action": "set_power",
+      "label": "Keep mana out of the experiment",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 520175,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1800
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 524960,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let both five-second cooldowns expire",
+      "ms": 3600
+    },
+    {
+      "action": "set_power",
+      "label": "Keep mana out of the experiment",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 520175,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1800
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 524960,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let both five-second cooldowns expire",
+      "ms": 3600
+    },
+    {
+      "action": "set_power",
+      "label": "Keep mana out of the experiment",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 520175,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1800
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 524960,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let both five-second cooldowns expire",
+      "ms": 3600
+    },
+    {
+      "action": "set_power",
+      "label": "Keep mana out of the experiment",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 520175,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1800
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 524960,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let both five-second cooldowns expire",
+      "ms": 3600
+    },
+    {
+      "action": "assert",
+      "label": "The Wand attacks landed on the target at all",
+      "actor": "dummy",
+      "metric": "health",
+      "relative_to": "health_before",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "label": "The talent procced at least once over the 18 Wand attacks",
+      "actor": "chronomancer",
+      "metric": "spell_proc_count",
+      "spell": 807588,
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

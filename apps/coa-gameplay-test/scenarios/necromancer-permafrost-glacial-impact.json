@@ -1,14 +1,15 @@
 {
  "schema": 1,
  "name": "Necromancer: a Permafrost proc lets Glacial Impact hit an unfrozen target (#4181)",
- "contract": "While the Permafrost buff is active the target counts as frozen, so Glacial Impact can be cast and deals damage.",
+ "contract": "While the Permafrost buff is active the target counts as frozen, so Glacial Impact can be cast and deals damage. Glacial Impact 704355 and its damage spell 707592 are DmgClass 1 (magic) spells with their own hit rolls, so the level-60 caster gets spell hit rating: without it a same-level miss on either roll leaves the Permafrost cast with no damage, which is indistinguishable from a refused cast.",
  "timeout_ms": 90000,
  "players": [
   {
    "id": "n",
    "race": 5,
    "class": 23,
-   "level": 60
+   "level": 60,
+   "spell_hit_rating": 10000
   }
  ],
  "creatures": [

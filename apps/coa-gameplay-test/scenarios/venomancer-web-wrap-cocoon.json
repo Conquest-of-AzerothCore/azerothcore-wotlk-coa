@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Web Wrap wraps the target in a cocoon instead of a pig",
+  "contract": "Spell.dbc 504335 Web Wrap (server and client DBC agree) applies SPELL_AURA_MOD_STUN and SPELL_AURA_TRANSFORM with MiscValue 411372 for 5 seconds and requires caster aura 800841 Spider Form. Its tooltip reads 'Wrap your target in a cocoon, stunning them for 5 sec.' The client's CreatureDisplayInfo 411372 uses model 411372 creature\\cocoon\\cocoon.m2. Without creature template 411372 the engine falls back to pig display 16358. A Web Wrap cast from Spider Form on a hostile dummy must stun it, give it display 411372 while the aura lasts, and restore its original display when the aura expires. The scenario proves the server display selection, not client rendering.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "v", "entry": 36, "distance": 3, "health": 1000000 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn settle", "ms": 3000 },
+    { "action": "learn", "actor": "v", "spell": 800841 },
+    { "action": "learn", "actor": "v", "spell": 504335 },
+    { "action": "cast", "actor": "v", "spell": 800841 },
+    { "action": "assert", "label": "SETUP: Spider Form is active", "actor": "v", "metric": "aura", "spell": 800841, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Clear the GCD from entering Spider Form", "ms": 1500 },
+    { "action": "snapshot", "actor": "dummy", "metric": "display_id", "save_as": "dummy_display" },
+    { "action": "cast", "actor": "v", "spell": 504335, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: Web Wrap was cast", "actor": "v", "metric": "cast_failure", "spell": 504335, "equals": 0 },
+    { "action": "assert", "label": "Web Wrap is on the target", "actor": "dummy", "metric": "aura", "spell": 504335, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the target wears the cocoon display, not the pig", "actor": "dummy", "metric": "display_id", "equals": 411372, "within_ms": 1000 },
+    { "action": "assert", "label": "The wrap lasts the tooltip's 5 seconds", "actor": "dummy", "metric": "aura_duration_ms", "spell": 504335, "min": 3500, "max": 5000 },
+    { "action": "assert", "label": "Web Wrap expires", "actor": "dummy", "metric": "aura", "spell": 504335, "equals": 0, "within_ms": 7000 },
+    { "action": "assert", "label": "The target returns to its own display", "actor": "dummy", "metric": "display_id", "relative_to": "dummy_display", "equals": 0, "within_ms": 1000 }
+  ]
+}

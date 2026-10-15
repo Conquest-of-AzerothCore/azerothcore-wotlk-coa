@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Harnessed Leylines does not refresh on additional stacks",
+  "contract": [
+    "Captured helper804316 explicitly says additional applications do not refresh the effect. Its",
+    "duration is15000ms and parent704139 applies one stack each1000ms, +3% damage per stack up to10. The",
+    "remaining time must decrease while stacks rise, and the first15-second cycle must expire and restart",
+    "at one stack. The talent itself remains permanent."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 56
+    }
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 704139},
+    {"action": "assert", "actor": "rm", "metric": "aura_stacks", "spell": 804316, "equals": 1, "within_ms": 1800},
+    {"action": "snapshot", "actor": "rm", "metric": "aura_duration_ms", "spell": 804316, "save_as": "first_duration"},
+    {"action": "wait", "ms": 5000},
+    {"action": "assert", "actor": "rm", "metric": "aura_stacks", "spell": 804316, "min": 5, "max": 6},
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura_duration_ms",
+      "spell": 804316,
+      "relative_to": "first_duration",
+      "min": -5100,
+      "max": -4900
+    },
+    {"action": "wait", "ms": 11100},
+    {"action": "assert", "actor": "rm", "metric": "aura_stacks", "spell": 804316, "min": 1, "max": 3},
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_modifier",
+      "spell": 802202,
+      "op": 0,
+      "base": 1000,
+      "min": 1030,
+      "max": 1090
+    },
+    {"action": "assert", "actor": "rm", "metric": "aura_duration_ms", "spell": 704139, "equals": -1}
+  ]
+}

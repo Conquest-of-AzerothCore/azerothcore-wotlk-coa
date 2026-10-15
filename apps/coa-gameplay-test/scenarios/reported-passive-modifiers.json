@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Reported passive modifiers retain their current contracts (#87)",
-  "contract": "Current tooltips specify 5% banner haste/crit, an extra 10 percentage points of Mechsuit damage, 5% Dawn Blade damage per Pommel Smash stack, and Living Dead's 10/20% cost reductions plus 25/50% Blight refunds. Level-80 Necromancer base mana is 3856; Blight costs 28%, or 1079 mana, so refunds are 269/539. Refund comparisons subtract a matching untalented caster and allow an unequal regeneration tick.",
+  "contract": "Current tooltips specify 5% banner haste/crit, an extra 10 percentage points of Mechsuit damage, 10% Dawn Blade damage per Pommel Smash stack (Bulwark of Darkness 680496 effect 1: BasePoints 9 + DieSides 1 in the installed Spell.dbc, read 2026-09-22; the earlier 5 was the older value), and Living Dead's 10/20% cost reductions plus 25/50% Blight refunds. Level-80 Necromancer base mana is 3856; Blight costs 28%, or 1079 mana, so refunds are 269/539. Refund comparisons subtract a matching untalented caster and allow an unequal regeneration tick.",
   "players": [
     { "id": "guardian", "race": 1, "class": 18, "level": 80 },
     { "id": "mech", "race": 1, "class": 28, "level": 80 },
@@ -58,12 +58,12 @@
     { "action": "set_power", "actor": "hunter", "power": 1, "value": 200 },
     { "action": "cast", "actor": "hunter", "spell": 680515, "target": "pommelbonus" },
     { "action": "assert", "actor": "pommelbonus", "metric": "aura_amount", "spell": 582588, "effect": 1,
-      "caster": "hunter", "equals": 5, "within_ms": 3000 },
+      "caster": "hunter", "equals": 10, "within_ms": 3000 },
     { "action": "wait", "ms": 1500 },
     { "action": "set_power", "actor": "hunter", "power": 1, "value": 200 },
     { "action": "cast", "actor": "hunter", "spell": 680515, "target": "pommelbonus" },
     { "action": "assert", "actor": "pommelbonus", "metric": "aura_amount", "spell": 582588, "effect": 1,
-      "caster": "hunter", "equals": 10, "within_ms": 3000 },
+      "caster": "hunter", "equals": 20, "within_ms": 3000 },
     { "action": "snapshot", "actor": "necro", "metric": "spell_power_cost", "spell": 501969, "save_as": "lich_cost" },
     { "action": "snapshot", "actor": "necro", "metric": "spell_power_cost", "spell": 500965, "save_as": "crypt_cost" },
     { "action": "assert", "actor": "necro", "metric": "spell_power_cost", "spell": 500217, "equals": 1079 },

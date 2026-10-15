@@ -1,0 +1,664 @@
+{
+  "schema": 1,
+  "name": "Primalist Sharpened Claws: owner and pet armor penetration from direct critical hits",
+  "contract": "Direct owner critical hits grant owner and pet 5% armor penetration per stack, capped at three for ten seconds. Native damage probes verify both buffs affect armor, with expiry, unlearning, periodic-damage and wrong-caster pet controls.",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "spirit",
+      "owner": "primalist",
+      "entry": 1188,
+      "level": 19,
+      "health": 100000,
+      "distance": 5
+    },
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 196
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 574301
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 574301,
+      "target": "spirit"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 24000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 82888,
+      "stacks": 1,
+      "pet": false
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 82888,
+      "stacks": 1,
+      "pet": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 706342
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500940
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 23881
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "armor_reduced_damage",
+      "spell": 706342,
+      "target": "target",
+      "pet": false,
+      "save_as": "base_armor_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "armor_reduced_damage",
+      "spell": 706342,
+      "target": "target",
+      "pet": true,
+      "save_as": "base_armor_1"
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 23881,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 23881,
+      "target": "target",
+      "critical": true,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 504225,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 572125,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 504226
+    },
+    {
+      "action": "wait",
+      "ms": 4100
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 23881,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 23881,
+      "target": "target",
+      "critical": true,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 504225,
+      "caster": "primalist",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 572125,
+      "caster": "primalist",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 504225,
+      "effect": 0,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 572125,
+      "effect": 1,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor_reduced_damage",
+      "spell": 706342,
+      "target": "target",
+      "pet": false,
+      "relative_to": "base_armor_0",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor_reduced_damage",
+      "spell": 706342,
+      "target": "target",
+      "pet": true,
+      "relative_to": "base_armor_1",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "spell": 504225,
+      "min": 8500,
+      "max": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 4100
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 23881,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 23881,
+      "target": "target",
+      "critical": true,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 504225,
+      "caster": "primalist",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 572125,
+      "caster": "primalist",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 504225,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 572125,
+      "effect": 1,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor_reduced_damage",
+      "spell": 706342,
+      "target": "target",
+      "pet": false,
+      "relative_to": "base_armor_0",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor_reduced_damage",
+      "spell": 706342,
+      "target": "target",
+      "pet": true,
+      "relative_to": "base_armor_1",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "spell": 504225,
+      "min": 8500,
+      "max": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 4100
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 23881,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 23881,
+      "target": "target",
+      "critical": true,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 504225,
+      "caster": "primalist",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 572125,
+      "caster": "primalist",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 504225,
+      "effect": 0,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 572125,
+      "effect": 1,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor_reduced_damage",
+      "spell": 706342,
+      "target": "target",
+      "pet": false,
+      "relative_to": "base_armor_0",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor_reduced_damage",
+      "spell": 706342,
+      "target": "target",
+      "pet": true,
+      "relative_to": "base_armor_1",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "spell": 504225,
+      "min": 8500,
+      "max": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 4100
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 23881,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 23881,
+      "target": "target",
+      "critical": true,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 504225,
+      "caster": "primalist",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 572125,
+      "caster": "primalist",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 504225,
+      "effect": 0,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 572125,
+      "effect": 1,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor_reduced_damage",
+      "spell": 706342,
+      "target": "target",
+      "pet": false,
+      "relative_to": "base_armor_0",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor_reduced_damage",
+      "spell": 706342,
+      "target": "target",
+      "pet": true,
+      "relative_to": "base_armor_1",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "spell": 504225,
+      "min": 8500,
+      "max": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 4100
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor_reduced_damage",
+      "spell": 706342,
+      "target": "target",
+      "pet": false,
+      "relative_to": "base_armor_0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor_reduced_damage",
+      "spell": 706342,
+      "target": "target",
+      "pet": true,
+      "relative_to": "base_armor_1",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 172
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 172,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 172,
+      "target": "target",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 504225,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 572125,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504226
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 23881,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 23881,
+      "target": "target",
+      "critical": true,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 504225,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 572125,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 572125,
+      "pet": true,
+      "stacks": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 572125,
+      "caster": "primalist",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "armor_reduced_damage",
+      "spell": 706342,
+      "target": "target",
+      "pet": true,
+      "relative_to": "base_armor_1",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 572125,
+      "pet": true,
+      "stacks": 0
+    }
+  ]
+}

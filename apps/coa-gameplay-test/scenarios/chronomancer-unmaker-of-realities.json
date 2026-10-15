@@ -1,0 +1,467 @@
+{
+  "schema": 1,
+  "name": "Unmaker of Realities adds Hasten's extra strike (#513)",
+  "contract": "Unmaker of Realities 706107 is a single SPELL_AURA_DUMMY with no script, and the Hasten players learn (801304) carries auras 31/192/216 and no proc effect, so the promised extra strike never existed. The two numbers the tooltip interpolates come from the unobtainable Hasten variant 803382 (ProcChance 25; Effect[0] EffectBasePoints 29, die 1 => CalcValue 30), so with the talent known the Hasten holder must have a 25% chance on damage dealt to strike again for 30% of that damage via Hasty Strike 803706. Both players cast 'Damage test' 954294 exactly 25 times at an identical dummy: 954294 is SPELL_DAMAGE_CLASS_NONE (Unit::IsSpellCrit returns 0 for that class, so it can never crit), EffectBasePoints 99 with die 1, EffectBonusMultiplier 0 and no spell_bonus_data row, no cooldown, no GCD category and no mana cost - every cast deals the same amount to the same creature template at the same level. The two dummies therefore lose exactly the same health unless the extra strike fires. 25 casts at 25% leave a 0.075% chance of no proc at all, under the 0.1% false-failure budget; the harness has no per-spell damage or cast-count metric, so the comparison is between the two creatures' remaining health. The fixture creatures are critter templates (Dig Rat 3444, creature_template.type 8) rather than levelled mobs, and the scenario pins neither their level nor a maximum health it expects the server to produce. AscensionCompat's CanScaleCreature (AscensionCompat.cpp:6093-6099) excludes critters from local level scaling, so these fixtures keep the level and the maximum health CoAGameplayTest asked for at summon instead of having them rebuilt by Creature::SelectLevel, which on this tree leaves a levelled creature 36 at level 16 with 349 maximum health whatever the scenario requested - not enough to survive the volley, and not a number a scenario may depend on, since upstream retunes it. What the comparison needs from them is not an exact maximum but that the two are interchangeable, so the scenario snapshots the control dummy's maximum health and its starting health and asserts that the other dummy matches both, rather than asserting a number of its own.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "unmaker",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_control",
+      "owner": "control",
+      "entry": 3444,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "dummy_unmaker",
+      "owner": "unmaker",
+      "entry": 3444,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "label": "The maximum health the server gave the control's dummy",
+      "actor": "dummy_control",
+      "metric": "max_health",
+      "save_as": "shared_max"
+    },
+    {
+      "action": "assert",
+      "label": "Both dummies share one maximum health",
+      "actor": "dummy_unmaker",
+      "metric": "max_health",
+      "relative_to": "shared_max",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 954294
+    },
+    {
+      "action": "learn",
+      "actor": "unmaker",
+      "spell": 954294
+    },
+    {
+      "action": "learn",
+      "actor": "unmaker",
+      "spell": 706107
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 801304,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "unmaker",
+      "spell": 801304,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Hasten is up on the control",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 801304,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Hasten is up on the talented Chronomancer",
+      "actor": "unmaker",
+      "metric": "aura",
+      "spell": 801304,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "The control's dummy at full health before the volley",
+      "actor": "dummy_control",
+      "metric": "health",
+      "save_as": "control_start"
+    },
+    {
+      "action": "assert",
+      "label": "Both dummies start the volley at the same health",
+      "actor": "dummy_unmaker",
+      "metric": "health",
+      "relative_to": "control_start",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 954294,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "unmaker",
+      "spell": 954294,
+      "target": "dummy_unmaker"
+    },
+    {
+      "action": "assert",
+      "label": "Hasten never lapsed during the control's 25 casts",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 801304,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Hasten never lapsed during the talented Chronomancer's 25 casts",
+      "actor": "unmaker",
+      "metric": "aura",
+      "spell": 801304,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the last cast and any extra strike resolve",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The control's dummy survived its 25 casts",
+      "actor": "dummy_control",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The talented Chronomancer's dummy survived its 25 casts",
+      "actor": "dummy_unmaker",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy_unmaker",
+      "metric": "health",
+      "save_as": "boosted"
+    },
+    {
+      "action": "assert",
+      "label": "Unmaker of Realities costs its dummy extra health that the control's dummy keeps",
+      "actor": "dummy_control",
+      "metric": "health",
+      "relative_to": "boosted",
+      "min": 1
+    }
+  ]
+}

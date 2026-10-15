@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Infinity removes Infinite Shield's cooldown (#2990)",
+  "contract": "Infinity 706128 carries SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue SPELLMOD_COOLDOWN (11) and EffectSpellClassMask word0 bit 0x200; EffectBasePoints -15001 resolves to -15000 with DieSides 1. Infinite Shield 520457 has SpellFamilyFlags word0 512, RecoveryTime exactly 15000, CategoryRecoveryTime 0 and AttributesEx3 0, so the modifier cancels the whole cooldown, which is the tooltip \"Removes the cooldown of Infinite Shield.\" Native path only: AuraEffect::CalculateSpellMod and Player::AddSpellAndCategoryCooldowns, whose `if (rec < 0) rec = 0;` clamp keeps the result at zero rather than negative.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 22, "level": 80 },
+    { "id": "talent", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talent", "spell": 706128 },
+    {
+      "action": "assert",
+      "label": "Infinite Shield keeps its 15 sec cooldown without the talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 520457,
+      "op": 11,
+      "base": 15000,
+      "equals": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Infinite Shield has no cooldown left with the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 520457,
+      "op": 11,
+      "base": 15000,
+      "equals": 0
+    }
+  ]
+}

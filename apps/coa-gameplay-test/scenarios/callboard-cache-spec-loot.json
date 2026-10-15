@@ -1,0 +1,269 @@
+{
+  "schema": 1,
+  "name": "Callboard Caches prefer items for the opener's specialization",
+  "contract": "A Heroic Dungeon Callboard Cache (1615001) gives one reward from its own pool. The opener's active specialization names its primary stats in ChrSpecs.dbc fields 8-10, the same stats the specialization card shows: Venomancer Venom (54) lists Intellect and Fortitude (52) Agility and Stamina. Among the rewards the opener can use, the cache prefers an item whose strongest of Strength, Agility, Intellect and Spirit is one of those stats, so after six opens no reward may have a different strongest attribute. About four in five Intellect-fitting rewards carry Intellect, so the Venom Venomancer receives Intellect gear; the Fortitude Venomancer may also receive gear without a primary attribute (attack power, defense or stamina), which suits its Agility and Stamina.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "venom",
+      "race": 1,
+      "class": 29,
+      "level": 60
+    },
+    {
+      "id": "fortitude",
+      "race": 1,
+      "class": 29,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "venom",
+      "id": 54,
+      "label": "venom picks Venom (ChrSpecs 54, primary stat Intellect)"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "add_item",
+      "actor": "venom",
+      "item": 1615001,
+      "count": 6
+    },
+    {
+      "action": "open_item",
+      "actor": "venom",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "venom",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "venom",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 4,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "venom",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "venom",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "venom",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "venom",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "6 Heroic Dungeon Callboard Caches put their rewards in the bags",
+      "actor": "venom",
+      "metric": "carried_pool_item_count",
+      "cache": 1615001,
+      "table": "callboard",
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "No reward has a primary attribute stronger than Intellect",
+      "actor": "venom",
+      "metric": "carried_pool_item_count",
+      "cache": 1615001,
+      "table": "callboard",
+      "off_stat": 5,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The rewards include Intellect gear",
+      "actor": "venom",
+      "metric": "carried_pool_item_count",
+      "cache": 1615001,
+      "table": "callboard",
+      "dominant_stat": 5,
+      "min": 1
+    },
+    {
+      "action": "specialization",
+      "actor": "fortitude",
+      "id": 52,
+      "label": "fortitude picks Fortitude (ChrSpecs 52, primary stats Agility and Stamina)"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "add_item",
+      "actor": "fortitude",
+      "item": 1615001,
+      "count": 6
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 4,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "6 Heroic Dungeon Callboard Caches put their rewards in the bags",
+      "actor": "fortitude",
+      "metric": "carried_pool_item_count",
+      "cache": 1615001,
+      "table": "callboard",
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "No reward has a primary attribute stronger than Agility",
+      "actor": "fortitude",
+      "metric": "carried_pool_item_count",
+      "cache": 1615001,
+      "table": "callboard",
+      "off_stat": 3,
+      "equals": 0
+    }
+  ]
+}

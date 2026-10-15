@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Barbarian audit: Skull Smash's slow, disorient and force-cast all fire natively on cast (#1144)",
+  "contract": "Skull Smash (560532) is not a passive -- Attributes[0] 0x40110010 has SPELL_ATTR0_PASSIVE (0x40) unset, and grepping src/server/scripts/ for 560532 and its force-cast target 560554 finds no script, so it is a plain three-effect DBC ability with no per-spell code needed. Effect 0 is APPLY_AURA SPELL_AURA_MOD_DECREASE_SPEED (33, EffectBasePoints -60 DieSides 1 -> amount -60), a stock generic slow. Effect 1 is APPLY_AURA SPELL_AURA_MOD_CONFUSE (5, EffectBasePoints 0 DieSides 0 -> DBC-only amount 0), AuraEffect::HandleModConfuse's real crowd-control handler -- but AuraEffect::CalculateAmount (SpellAuraEffects.cpp) never uses that raw 0 as-is: its crowd-control branch (case SPELL_AURA_MOD_CONFUSE/MOD_FEAR/MOD_STUN/MOD_ROOT/TRANSFORM) unconditionally overrides the amount whenever the spell's own ProcFlags is nonzero and it has no SPELL_AURA_PROC_TRIGGER_SPELL effect. Skull Smash's ProcFlags (1572864 = PROC_FLAG_TAKEN_PERIODIC | PROC_FLAG_TAKEN_DAMAGE) matches that gate, so the override always fires: amount = sObjectMgr->GetCreatureBaseStats(casterLevel, CLASS_WARRIOR)->BaseHealth[EXPANSION_WRATH_OF_THE_LICH_KING] / 4.75f, generic damage-break-threshold logic shared by every proc-on-damage CC aura in the engine, unrelated to the DBC tooltip value and not something a per-spell script could or should change. For a level-80 caster this resolves via the immutable data/sql/base/db_world/creature_classlevelstats.sql row (80,1,5342,9215,12600,...) to int32(12600 / 4.75) = 2652 exactly. Effect 2 is SPELL_EFFECT_FORCE_CAST (140, EffectTriggerSpell 560554), handled generically by Spell::EffectForceCast; the triggered spell 560554 is itself SPELL_EFFECT_DISPEL_MECHANIC (108, MiscValue 15) which is the tooltip's 'Removes all bleed effects on the target' clause, handled generically by Spell::EffectDispelMechanic. That path is chance-based (Aura::CalcDispelChance) and only observable when the target already carries a bleed aura whose SpellInfo::GetAllEffectsMechanicMask() includes bit 15, so it is not exercised deterministically here -- only effects 0 and 1, which are what issue #1144 actually reports as unimplemented, are asserted.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    { "id": "d", "owner": "b", "entry": 36, "level": 80, "health": 500000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+
+    { "action": "learn", "actor": "b", "spell": 560532 },
+    { "action": "cast", "actor": "b", "spell": 560532, "target": "d" },
+    { "action": "assert", "label": "Skull Smash's aura reaches the target", "actor": "d", "metric": "aura", "spell": 560532, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "Effect 0 (decrease speed) resolves to -60", "actor": "d", "metric": "aura_amount", "spell": 560532, "effect": 0, "equals": -60 },
+    { "action": "assert", "label": "Effect 1 (confuse) resolves to the engine's damage-break threshold, 2652 (creature_classlevelstats level 80 warrior basehp2 12600 / 4.75), not the DBC's raw 0", "actor": "d", "metric": "aura_amount", "spell": 560532, "effect": 1, "equals": 2652 }
+  ]
+}

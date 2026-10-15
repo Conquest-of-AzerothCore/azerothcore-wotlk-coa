@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Argent Blade unleashes Scourgebane once and heals for the damage dealt (#4660)",
+  "contract": "Argent Blade 807268 triggers Scourgebane 801832 exactly once per cast (not twice) and heals the caster, via 807414, for an amount equal to the damage it dealt.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 19,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "t", "entry": 36, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "t", "spell": 807268 },
+    { "action": "add_item", "actor": "t", "item": 2495 },
+    { "action": "equip", "actor": "t", "item": 2495, "slot": 15 },
+    { "action": "set_health", "actor": "t", "value": 5000, "maximum": 10000 },
+    { "action": "set_power", "actor": "t", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "t", "spell": 807268, "target": "dummy" },
+    { "action": "wait", "label": "let hits land", "ms": 3000 },
+    { "action": "assert", "label": "Argent Blade cast once", "actor": "t", "metric": "spell_cast_count", "spell": 807268, "equals": 1 },
+    { "action": "assert", "label": "Argent Blade deals damage once", "actor": "t", "metric": "spell_damage_count", "spell": 807268, "equals": 1 },
+    { "action": "assert", "label": "Scourgebane triggers exactly once, not twice", "actor": "t", "metric": "spell_cast_count", "spell": 801832, "equals": 1 },
+    { "action": "assert", "label": "Scourgebane deals damage exactly once", "actor": "t", "metric": "spell_damage_count", "spell": 801832, "equals": 1 },
+    { "action": "assert", "label": "Argent Blade's own heal (807414) fires once", "actor": "t", "metric": "spell_heal_count", "spell": 807414, "equals": 1 },
+    { "action": "assert", "label": "Heal amount is positive", "actor": "t", "metric": "spell_heal_total", "spell": 807414, "min": 1 }
+  ]
+}

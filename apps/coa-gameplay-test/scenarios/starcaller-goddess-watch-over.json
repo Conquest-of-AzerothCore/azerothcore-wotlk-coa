@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Goddess Watch Over raises Aspect of the Goddess's effectiveness by 25% (#818)",
+  "contract": "Goddess Watch Over 500582 (SpellFamilyName 32) reads \"Increases the effectiveness of Aspect of the Goddess by $s1%\". Its effect 0 is SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue 8 = SPELLMOD_ALL_EFFECTS, EffectBasePoints 24 with DieSides 1 resolving to 25, and EffectSpellClassMask word0 0x4; the only SpellFamilyName 32 spell whose SpellFamilyFlags word0 has bit 0x4 is Aspect of the Goddess 802203 (flags 0x4, 0, 0x800). 802203 effect 0 is SPELL_AURA_MOD_HEALING_PCT (136) with EffectBasePoints 9 with DieSides 1 (10). Native path: SpellEffectInfo::CalcValue calls Unit::ApplyEffectModifiers, which applies SPELLMOD_ALL_EFFECTS through Player::ApplySpellMod; AuraEffect::CalculateAmount takes the amount from that same CalcValue, and a passive re-amounts an already active aura when a spell mod is added. The metric spell_effect_value returns SpellEffectInfo::CalcValue(player), so the talented value is 10 * 1.25 = 12.5 truncated to 12 (ratio 1.2, window 1.15..1.25). The module refers to 802203 only through HasAura checks in AscensionStarcaller.cpp and AscensionStarcallerAbilities.cpp, never rewriting its effect value. The Scattered Stars helper 801401 is a different spell (mask word2 0x8000000) that this mask does not select. Both fixtures are the same race, class and level.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 802203
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 802203
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 500582
+    },
+    {
+      "action": "assert",
+      "label": "The passive self-applies once learned",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 500582,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Aspect of the Goddess effect 0 without the talent",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 802203,
+      "effect": 0,
+      "save_as": "aspect_base"
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of the Goddess is 25% stronger with the talent",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 802203,
+      "effect": 0,
+      "ratio_to": "aspect_base",
+      "min": 1.15,
+      "max": 1.25
+    }
+  ]
+}

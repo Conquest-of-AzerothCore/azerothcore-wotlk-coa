@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "Guardian Spiked Reinforcement damages the attacker on every block (#156)",
+  "contract": "#156 (Guardian, level 4): Spiked Reinforcement 653131 is applied but blocks do not deal damage back. 653131 reads 'Reinforce your shield with spikes, causing your blocks to deal ${$803131m1+$803131ppl1+$AP*0.06+$STA*0.0375} High Threat Physical damage to the attacker. Lasts 1 hour.' - no chance is stated. It is SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY (shield only) with SpellItemEnchantment 1016, whose effect 0 is ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL 653386: a hidden passive PROC_TRIGGER_SPELL aura for Spiked Reinforcement damage 803131 (SCHOOL_DAMAGE 5..6 +0.495/level above 8, spell_bonus_data ap_bonus 0.06, stamina*0.0375 in guardian_scaling). Server proc data: spell_proc ProcFlags 40 (taken melee auto attack and taken melee spell), HitMask 8256 (block, full block); aura_ascension_guardian_event casts 803131 at the attacker. The chance came from 653386's Spell.dbc ProcChance 30 (rev_20260908_05 wrote 30, rev_20260919_20 cleared it to defer to the DBC), so 70% of blocks dealt nothing. 30 is not an authored chance here: every hidden passive of the current shield-reinforcement family carries 30, including Weighted 653409 (aura 166) and Magic 653304 (aura 87) that never proc; the one family member with a real chance, Jagged Reinforcement 653279, states it in its tooltip ('a $653281h% chance'); and the previous Spiked Reinforcement 280405 with the same unconditional wording used aura 280406 with ProcChance 100. Expected: every blocked incoming melee attack deals one Spiked Reinforcement hit to the attacker. The harness cannot cast a spell on an item target, so the equipped enchant's aura 653386 is applied as a fixture; QA Test 100% Block 10021 (MOD_BLOCK_PERCENT +130) makes every frontal swing a block, the attackers' hit and expertise ratings remove misses, dodges and parries, and the guardians' ratings keep 803131 from missing. A control phase without 653386 proves the damage comes only from Spiked Reinforcement. Both the reported level 4 and level 80 are measured; with a 30% chance the proc/swing ratio is about 0.3, so the 0.8 lower bound fails before the fix.",
+  "timeout_ms": 180000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "guardian", "race": 1, "class": 18, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000 },
+    { "id": "attacker", "race": 2, "class": 1, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000 },
+    { "id": "young", "race": 1, "class": 18, "level": 4, "melee_hit_rating": 10000, "expertise_rating": 10000 },
+    { "id": "young_attacker", "race": 2, "class": 1, "level": 4, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 3000 },
+    { "action": "pvp", "actor": "guardian", "enabled": true },
+    { "action": "pvp", "actor": "attacker", "enabled": true },
+    { "action": "pvp", "actor": "young", "enabled": true },
+    { "action": "pvp", "actor": "young_attacker", "enabled": true },
+    { "action": "learn", "label": "Block, needed for CanBlock", "actor": "guardian", "spell": 107 },
+    { "action": "learn", "label": "Shield proficiency", "actor": "guardian", "spell": 9116 },
+    { "action": "add_item", "actor": "guardian", "item": 2362 },
+    { "action": "equip", "label": "Equip a shield in the off hand", "actor": "guardian", "item": 2362, "slot": 16 },
+    { "action": "learn", "label": "Block, needed for CanBlock", "actor": "young", "spell": 107 },
+    { "action": "learn", "label": "Shield proficiency", "actor": "young", "spell": 9116 },
+    { "action": "add_item", "actor": "young", "item": 2362 },
+    { "action": "equip", "label": "Equip a shield in the off hand", "actor": "young", "item": 2362, "slot": 16 },
+    {
+      "action": "set_aura", "label": "Every frontal swing is blocked", "actor": "guardian", "spell": 10021, "stacks": 1
+    },
+    { "action": "set_aura", "label": "Every frontal swing is blocked", "actor": "young", "spell": 10021, "stacks": 1 },
+    { "action": "wait", "label": "Let the equipment update settle", "ms": 1000 },
+    {
+      "action": "assert", "label": "SETUP: level 80 guardian blocks every swing", "actor": "guardian",
+      "metric": "block_chance", "min": 90
+    },
+    {
+      "action": "assert", "label": "SETUP: level 4 guardian blocks every swing", "actor": "young",
+      "metric": "block_chance", "min": 90
+    },
+    { "action": "set_health", "actor": "guardian", "maximum": 100000, "value": 100000 },
+    { "action": "set_health", "actor": "attacker", "maximum": 100000, "value": 100000 },
+    { "action": "set_health", "actor": "young", "maximum": 100000, "value": 100000 },
+    { "action": "set_health", "actor": "young_attacker", "maximum": 100000, "value": 100000 },
+    { "action": "teleport", "actor": "guardian", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "attacker", "map": 0, "x": -9614.06, "y": -288.949, "z": 57.3053, "o": 3.14159 },
+    { "action": "teleport", "actor": "young", "map": 0, "x": -9617.06, "y": -278.949, "z": 57.3053, "o": 0 },
+    {
+      "action": "teleport", "actor": "young_attacker", "map": 0, "x": -9614.06, "y": -278.949, "z": 57.3053,
+      "o": 3.14159
+    },
+    { "action": "snapshot", "actor": "attacker", "metric": "melee_attack_count", "save_as": "control_swings_start" },
+    {
+      "action": "snapshot", "actor": "young_attacker", "metric": "melee_attack_count",
+      "save_as": "young_control_swings_start"
+    },
+    {
+      "action": "attack", "label": "Hostile level 80 player swings at the guardian", "actor": "attacker",
+      "target": "guardian"
+    },
+    {
+      "action": "attack", "label": "Hostile level 4 player swings at the level 4 guardian", "actor": "young_attacker",
+      "target": "young"
+    },
+    { "action": "wait", "label": "Control: blocked swings without Spiked Reinforcement", "ms": 6000 },
+    {
+      "action": "assert", "label": "SETUP: the control swings landed on the level 80 guardian", "actor": "attacker",
+      "metric": "melee_attack_count", "relative_to": "control_swings_start", "min": 2
+    },
+    {
+      "action": "assert", "label": "SETUP: the control swings landed on the level 4 guardian",
+      "actor": "young_attacker", "metric": "melee_attack_count", "relative_to": "young_control_swings_start", "min": 2
+    },
+    {
+      "action": "assert", "label": "CONTROL: no Spiked Reinforcement damage without its aura (level 80)",
+      "actor": "guardian", "metric": "spell_cast_count", "spell": 803131, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: no Spiked Reinforcement damage without its aura (level 4)",
+      "actor": "young", "metric": "spell_cast_count", "spell": 803131, "equals": 0
+    },
+    {
+      "action": "set_aura", "label": "The shield enchant's equip aura", "actor": "guardian", "spell": 653386,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura", "label": "The shield enchant's equip aura", "actor": "young", "spell": 653386, "stacks": 1
+    },
+    { "action": "assert", "actor": "guardian", "metric": "aura", "spell": 653386, "equals": 1 },
+    { "action": "assert", "actor": "young", "metric": "aura", "spell": 653386, "equals": 1 },
+    { "action": "snapshot", "actor": "attacker", "metric": "melee_attack_count", "save_as": "swings_start" },
+    {
+      "action": "snapshot", "actor": "guardian", "metric": "spell_proc_count", "spell": 653386,
+      "save_as": "procs_start"
+    },
+    {
+      "action": "snapshot", "actor": "guardian", "metric": "spell_damage_count", "spell": 803131, "target": "attacker",
+      "save_as": "hits_start"
+    },
+    {
+      "action": "snapshot", "actor": "young_attacker", "metric": "melee_attack_count", "save_as": "young_swings_start"
+    },
+    {
+      "action": "snapshot", "actor": "young", "metric": "spell_proc_count", "spell": 653386,
+      "save_as": "young_procs_start"
+    },
+    {
+      "action": "snapshot", "actor": "young", "metric": "spell_damage_count", "spell": 803131,
+      "target": "young_attacker", "save_as": "young_hits_start"
+    },
+    { "action": "wait", "label": "About twenty-five blocked swings per guardian", "ms": 50000 },
+    {
+      "action": "snapshot", "actor": "attacker", "metric": "melee_attack_count", "relative_to": "swings_start",
+      "save_as": "swings"
+    },
+    {
+      "action": "snapshot", "actor": "young_attacker", "metric": "melee_attack_count",
+      "relative_to": "young_swings_start", "save_as": "young_swings"
+    },
+    {
+      "action": "assert", "label": "SETUP: enough blocked swings for a rate (level 80)", "actor": "attacker",
+      "metric": "melee_attack_count", "relative_to": "swings_start", "min": 15
+    },
+    {
+      "action": "assert", "label": "SETUP: enough blocked swings for a rate (level 4)", "actor": "young_attacker",
+      "metric": "melee_attack_count", "relative_to": "young_swings_start", "min": 15
+    },
+    {
+      "action": "assert", "label": "CONTRACT: every block procs Spiked Reinforcement (level 80)", "actor": "guardian",
+      "metric": "spell_proc_count", "spell": 653386, "relative_to": "procs_start", "ratio_to": "swings", "min": 0.8,
+      "max": 1.05
+    },
+    {
+      "action": "assert", "label": "CONTRACT: every block damages the attacker (level 80)", "actor": "guardian",
+      "metric": "spell_damage_count", "spell": 803131, "target": "attacker", "relative_to": "hits_start",
+      "ratio_to": "swings", "min": 0.8, "max": 1.05
+    },
+    {
+      "action": "assert", "label": "CONTRACT: every block procs Spiked Reinforcement (level 4, as reported)",
+      "actor": "young", "metric": "spell_proc_count", "spell": 653386, "relative_to": "young_procs_start",
+      "ratio_to": "young_swings", "min": 0.8, "max": 1.05
+    },
+    {
+      "action": "assert", "label": "CONTRACT: every block damages the attacker (level 4, as reported)",
+      "actor": "young", "metric": "spell_damage_count", "spell": 803131, "target": "young_attacker",
+      "relative_to": "young_hits_start", "ratio_to": "young_swings", "min": 0.8, "max": 1.05
+    },
+    {
+      "action": "assert", "label": "The level 80 attacker survived the measurement", "actor": "attacker",
+      "metric": "alive", "equals": 1
+    },
+    {
+      "action": "assert", "label": "The level 4 attacker survived the measurement", "actor": "young_attacker",
+      "metric": "alive", "equals": 1
+    },
+    { "action": "stop_attack", "actor": "attacker" },
+    { "action": "stop_attack", "actor": "young_attacker" }
+  ]
+}

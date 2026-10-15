@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Storm Ascendance uses the original Storm Elemental model and restores the caster (#5568)",
+  "contract": "Current CharacterAdvancement7474 acquires Storm Ascendance681110 for one class point. Current native\nspell_linked_spell681110\u2192681187 type2 applies its transform aura, whose Spell.dbc effect0 TRANSFORM\nreferences creature161579. The main world is missing that template/model and the engine falls back to\npig16358. Authorized ascension-data cache\nsnapshot6399600c055a5532857bba199b1d3cfb65b088274217f837ed12f2884e4c373d, conquest-of-azeroth/enUS\ncreaturecache, records161579 named Storm Elemental with sole model101201, captured2026-09-04 from24\nsources. Local CreatureDisplayInfo101201 resolves model12849 with scale1.0. Normal purchased Ascendance\nmust select101201 for its authored15 seconds, and native cancellation and talent removal must restore the\noriginal caster display. The scenario proves server display selection, not client animations. Native\nremovals and resets retain their original prices; fixture actors have 100 gold to pay them.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "storm",
+      "race": 1,
+      "class": 16,
+      "level": 47
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_money",
+      "label": "Fund the original native removal and purge prices",
+      "actor": "storm",
+      "value": 1000000
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "storm",
+      "entry": 7474,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "storm",
+      "metric": "knows_spell",
+      "spell": 681110,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "storm",
+      "metric": "display_id",
+      "save_as": "original_display"
+    },
+    {
+      "action": "cast",
+      "actor": "storm",
+      "spell": 681110
+    },
+    {
+      "action": "assert",
+      "actor": "storm",
+      "metric": "aura",
+      "spell": 681110,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "storm",
+      "metric": "aura",
+      "spell": 681187,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "storm",
+      "metric": "display_id",
+      "equals": 101201,
+      "within_ms": 1000,
+      "label": "Storm Ascendance selects the independently captured Storm Elemental display"
+    },
+    {
+      "action": "assert",
+      "actor": "storm",
+      "metric": "aura_duration_ms",
+      "spell": 681187,
+      "min": 14000,
+      "max": 15000
+    },
+    {
+      "action": "assert",
+      "actor": "storm",
+      "metric": "cooldown_ms",
+      "spell": 681110,
+      "min": 118000,
+      "max": 120000
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "storm",
+      "spell": 681110
+    },
+    {
+      "action": "assert",
+      "actor": "storm",
+      "metric": "aura",
+      "spell": 681187,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "storm",
+      "metric": "display_id",
+      "relative_to": "original_display",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "storm",
+      "spell": 681110
+    },
+    {
+      "action": "cast",
+      "actor": "storm",
+      "spell": 681110
+    },
+    {
+      "action": "assert",
+      "actor": "storm",
+      "metric": "display_id",
+      "equals": 101201,
+      "within_ms": 2000
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "storm",
+      "entry": 7474,
+      "rank": 0
+    },
+    {
+      "action": "assert",
+      "actor": "storm",
+      "metric": "knows_spell",
+      "spell": 681110,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "storm",
+      "metric": "aura",
+      "spell": 681187,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "storm",
+      "metric": "display_id",
+      "relative_to": "original_display",
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}

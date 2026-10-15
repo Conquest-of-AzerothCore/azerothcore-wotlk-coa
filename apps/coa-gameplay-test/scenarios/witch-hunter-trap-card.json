@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "name": "Trap Card lengthens the duration of Traps by 50% (#2191)",
+  "contract": "Trap Card 680253 has E0 aura 108 (SPELL_AURA_ADD_PCT_MODIFIER) MiscValue 1 (SPELLMOD_DURATION), BasePoints 49 / DieSides 1 = +50%, class mask (0, 0, 0x40000); the description reads 'Increases the duration of your Traps by $s1%'. Shadow Trap 680238 (SpellFamilyFlags C 0x840000, duration index 9 = 30000 ms in SpellDuration.dbc) and the other Trap records (681445, 681450, 681455, 802015: C 0x40000) match the mask, so a 30000 ms base becomes 45000 ms; the summon script applies the same modifier itself. The trap's own stun 681179 and damage-over-time 681177 carry only C 0x800000 and keep their durations, as the tooltip says the Trap lasts longer, not its effects. Burrow Bolt 802269 is the control.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 680253,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "label": "Baseline Shadow Trap lasts 30000 ms",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 680238,
+      "op": 1,
+      "base": 30000,
+      "equals": 30000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 680253
+    },
+    {
+      "action": "assert",
+      "label": "The passive aura is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 680253,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Trap lasts 50% longer",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 680238,
+      "op": 1,
+      "base": 30000,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "Inquisitor's Trap lasts 50% longer",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 681445,
+      "op": 1,
+      "base": 30000,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "Death Trap lasts 50% longer",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 681450,
+      "op": 1,
+      "base": 30000,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "Scourge Trap lasts 50% longer",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 681455,
+      "op": 1,
+      "base": 30000,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "The trap's stun is not stretched",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 681179,
+      "op": 1,
+      "base": 4000,
+      "equals": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The trap's damage over time is not stretched",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 681177,
+      "op": 1,
+      "base": 8000,
+      "equals": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Burrow Bolt is unchanged",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 802269,
+      "op": 1,
+      "base": 30000,
+      "equals": 30000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 680253,
+      "all_specs": true,
+      "label": "Remove the passive"
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Trap returns to 30000 ms",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 680238,
+      "op": 1,
+      "base": 30000,
+      "equals": 30000
+    }
+  ]
+}

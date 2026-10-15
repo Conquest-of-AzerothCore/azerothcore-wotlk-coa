@@ -1,0 +1,315 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Pendo's Charm and Acute Senses work natively (#1272, #1711)",
+  "contract": "#1272, #1711: both are stock aura types. Acute Senses (300664 rank 1, 300665 rank 2) effects 0 and 2 are SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE on Intellect (misc 3) and Agility (misc 1) with bp 4/9 so 5/10 percent; its effect 1 is SPELL_EFFECT_DUMMY (3) carrying a Spirit misc value, so it applies no aura and Spirit must not move (the tooltip names only Intellect and Agility). Pendo's Charm (504400) is SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT (aura 213) of bp 14 so +15 percent, read in Unit::RewardRage. That function is reached only when HasActivePowerType(POWER_RAGE) holds; a Venomancer is a Mana class whose Rage pool exists in Beetle Form (Player::InitDataForForm sets POWER_RAGE for FORM_VENOMANCER_BEETLE), so the scenario asserts the aura amount and that melee in Beetle Form builds Rage. The exact 1.15 ratio has no deterministic metric (rage per hit follows the weapon damage roll), so it is asserted by amount, not by rate.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 29,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "v",
+      "entry": 36,
+      "health": 10000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Strength before Acute Senses",
+      "actor": "v",
+      "metric": "stat",
+      "save_as": "str0",
+      "stat": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Agility before Acute Senses",
+      "actor": "v",
+      "metric": "stat",
+      "save_as": "agi0",
+      "stat": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Stamina before Acute Senses",
+      "actor": "v",
+      "metric": "stat",
+      "save_as": "sta0",
+      "stat": 2
+    },
+    {
+      "action": "snapshot",
+      "label": "Intellect before Acute Senses",
+      "actor": "v",
+      "metric": "stat",
+      "save_as": "int0",
+      "stat": 3
+    },
+    {
+      "action": "snapshot",
+      "label": "Spirit before Acute Senses",
+      "actor": "v",
+      "metric": "stat",
+      "save_as": "spi0",
+      "stat": 4
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 300664
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: Intellect x1.05",
+      "actor": "v",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "int0",
+      "min": 1.04,
+      "max": 1.06,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: Agility x1.05",
+      "actor": "v",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "agi0",
+      "min": 1.04,
+      "max": 1.06
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: Strength unchanged",
+      "actor": "v",
+      "metric": "stat",
+      "stat": 0,
+      "relative_to": "str0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: Stamina unchanged",
+      "actor": "v",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "sta0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: Spirit unchanged, effect 1 is a dummy effect that applies no aura",
+      "actor": "v",
+      "metric": "stat",
+      "stat": 4,
+      "relative_to": "spi0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: Intellect percentage is 5",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 300664,
+      "effect": 0,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: Agility percentage is 5",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 300664,
+      "effect": 2,
+      "equals": 5
+    },
+    {
+      "action": "unlearn",
+      "actor": "v",
+      "spell": 300664
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning rank 1 restores Intellect",
+      "actor": "v",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "int0",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 300665
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: Intellect x1.1",
+      "actor": "v",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "int0",
+      "min": 1.09,
+      "max": 1.11,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: Agility x1.1",
+      "actor": "v",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "agi0",
+      "min": 1.09,
+      "max": 1.11
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: Strength unchanged",
+      "actor": "v",
+      "metric": "stat",
+      "stat": 0,
+      "relative_to": "str0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: Stamina unchanged",
+      "actor": "v",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "sta0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: Spirit unchanged, effect 1 is a dummy effect that applies no aura",
+      "actor": "v",
+      "metric": "stat",
+      "stat": 4,
+      "relative_to": "spi0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: Intellect percentage is 10",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 300665,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: Agility percentage is 10",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 300665,
+      "effect": 2,
+      "equals": 10
+    },
+    {
+      "action": "unlearn",
+      "actor": "v",
+      "spell": 300665
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 504400
+    },
+    {
+      "action": "assert",
+      "label": "Pendo's Charm is applied",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 504400,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Pendo's Charm carries +14+1 = 15 percent rage from damage dealt (aura 213)",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 504400,
+      "effect": 0,
+      "equals": 15
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 803183
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 803183
+    },
+    {
+      "action": "assert",
+      "label": "Beetle Form is active (Venomancer's Rage form)",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 803183,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "In Beetle Form the Venomancer has a Rage pool, so Unit::RewardRage can run",
+      "actor": "v",
+      "metric": "max_power",
+      "power": 1,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Rage before the melee",
+      "actor": "v",
+      "metric": "power",
+      "save_as": "rage0",
+      "power": 1
+    },
+    {
+      "action": "attack",
+      "actor": "v",
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Auto attacks in Beetle Form build Rage with Pendo's Charm learned (the +15 percent itself has no deterministic harness metric: rage per hit depends on the weapon damage roll)",
+      "actor": "v",
+      "metric": "power",
+      "power": 1,
+      "relative_to": "rage0",
+      "min": 1,
+      "within_ms": 20000
+    }
+  ]
+}

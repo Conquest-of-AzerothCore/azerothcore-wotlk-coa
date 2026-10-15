@@ -1,0 +1,138 @@
+{
+  "schema": 1,
+  "name": "Blackfathom Deeps via Dungeon Finder names Aku'mai as the objective and completes on his kill (#5614)",
+  "contract": "#5614: in a Dungeon Finder run of Blackfathom Deeps the objective tracker read 'Defeat: Unknown' and killing Aku'mai did not count. The tracker names GetLFGBoss(), which the client resolves from the current LFG dungeon id (SMSG 0x66D) through DungeonEncounterExtra.dbc; row 226 (Aku'mai 4829) is the final encounter of dungeon 10 in both the client and server DBC, and instance_encounters 226 has lastEncounterDungeon 10. Expected: on entering, p1 receives 0x66D carrying 10, and crediting Aku'mai completes the dungeon so the Classic Random reward of the 15-25 bracket is paid.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p1",
+      "race": 1,
+      "class": 1,
+      "level": 25
+    },
+    {
+      "id": "p2",
+      "race": 1,
+      "class": 1,
+      "level": 25
+    },
+    {
+      "id": "p3",
+      "race": 1,
+      "class": 1,
+      "level": 25
+    },
+    {
+      "id": "p4",
+      "race": 1,
+      "class": 1,
+      "level": 25
+    },
+    {
+      "id": "p5",
+      "race": 1,
+      "class": 1,
+      "level": 25
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p2"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p3"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p4"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p5"
+    },
+    {
+      "action": "lfg_dungeon",
+      "label": "The group is assigned Blackfathom Deeps",
+      "actor": "p1",
+      "dungeon": 10
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p1"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p2"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p3"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p4"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p5"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: p1 enters Blackfathom Deeps",
+      "actor": "p1",
+      "metric": "map_id",
+      "equals": 48,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the client is told its current LFG dungeon is 10 (SMSG 0x66D), the id DungeonEncounterExtra.dbc resolves to Aku'mai instead of 'Defeat: Unknown'",
+      "actor": "p1",
+      "metric": "server_packet_u32",
+      "opcode": 1645,
+      "index": 0,
+      "equals": 10,
+      "within_ms": 5000
+    },
+    {
+      "action": "encounter_credit",
+      "label": "Aku'mai, final boss of Blackfathom Deeps, is credited",
+      "actor": "p1",
+      "entry": 4829
+    },
+    {
+      "action": "assert",
+      "label": "p1 is rewarded Classic Random 15-25 (1st) 24882: the boss kill completed the dungeon",
+      "actor": "p1",
+      "metric": "quest_rewarded",
+      "quest": 24882,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p2 is rewarded Classic Random 15-25 (1st) 24882: the boss kill completed the dungeon",
+      "actor": "p2",
+      "metric": "quest_rewarded",
+      "quest": 24882,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

@@ -260,7 +260,15 @@ namespace lfg
             {
                 // Xinef: no longer valid sLFGMgr->TeleportPlayer(player, true);
                 if (!player->IsBeingTeleportedFar() && player->GetMapId() == sLFGMgr->GetDungeonMapId(gguid))
+                {
+                    if (!player->IsAlive())
+                    {
+                        player->ResurrectPlayer(0.5f);
+                        player->SpawnCorpseBones();
+                    }
+
                     player->TeleportToEntryPoint();
+                }
             }
         }
     }

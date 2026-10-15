@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Storm Clouds doubles Body of Lightning and self-casts it (#2797)",
+  "contract": "#2797: Storm Clouds 705686 reads 'Doubles the damage of Body of Lightning and it now automatically casts on you when you cast it on an ally.' Effect 1 is SPELL_AURA_ADD_PCT_MODIFIER with MiscValue 0 (SPELLMOD_DAMAGE) and amount EffectBasePoints 99 + EffectDieSides 1 = +100%, on a class mask of 4194304 in word 1, which is the SpellFamilyFlags[1] of 800406 Body of Lightning (damage); Unit::SpellDamageBonusDone applies that modifier natively, so a base of 100 must read 200 with the passive. Effect 0 is SPELL_AURA_PROC_TRIGGER_SPELL (42) on 520843 'Cloudy', whose SPELL_EFFECT_TRIGGER_SPELL casts 500041 Body of Lightning on TARGET_UNIT_CASTER: casting the ally buff must therefore leave the same buff on the caster. Spell.dbc gives 705686 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and Aura::GetProcEffectMask returned a zero mask: only the damage half worked. 500041 is TARGET_UNIT_TARGET_ALLY, costs 25 Static (AscensionCustomResourceData.h ResourceCostRules, class 16) and lasts 12000 ms, which is why the ally cast is fixtured with 80 Static and read back inside three seconds.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "storm", "race": 1, "class": 16, "level": 80 },
+    { "id": "ally", "race": 1, "class": 16, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn and level scaling settle", "ms": 5000 },
+    { "action": "group", "actor": "storm", "target": "ally" },
+    { "action": "learn", "actor": "storm", "spell": 500041 },
+    { "action": "assert", "label": "SETUP: Body of Lightning is known",
+      "actor": "storm", "metric": "knows_spell", "spell": 500041, "equals": 1 },
+    { "action": "assert", "label": "BASELINE: without Storm Clouds the Body of Lightning damage spell is unmodified",
+      "actor": "storm", "metric": "spell_modifier", "spell": 800406, "op": 0, "base": 100, "equals": 100 },
+    { "action": "learn", "actor": "storm", "spell": 705686 },
+    { "action": "assert", "label": "SETUP: the Storm Clouds passive is active",
+      "actor": "storm", "metric": "aura", "spell": 705686, "equals": 1 },
+    { "action": "assert", "label": "BASELINE: the damage half is native, +100% doubles a base of 100",
+      "actor": "storm", "metric": "spell_modifier", "spell": 800406, "op": 0, "base": 100, "equals": 200 },
+    { "action": "set_aura", "actor": "storm", "spell": 803102, "stacks": 80 },
+    { "action": "assert", "label": "SETUP: 80 Static, more than the 25 Body of Lightning spends",
+      "actor": "storm", "metric": "aura_stacks", "spell": 803102, "equals": 80 },
+    { "action": "cast", "actor": "storm", "spell": 500041, "target": "ally" },
+    { "action": "assert", "label": "SETUP: Body of Lightning lands on the ally it was cast on",
+      "actor": "ally", "metric": "aura", "spell": 500041, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: Storm Clouds also casts Body of Lightning on the caster",
+      "actor": "storm", "metric": "aura", "spell": 500041, "equals": 1, "within_ms": 3000 }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Mongoose Bite spends its charges without an 8 second category lockout (#6568)",
+  "contract": "Mongoose Bite 901004 is linked by SpellCharges.dbc to charge category 2: 3 charges with a 10 second recharge. Spell.dbc also gives it CategoryRecoveryTime 8000 and its tooltip names no cooldown, so the charges are the only intended limit. Player::AddSpellAndCategoryCooldowns kept applying the 8 second category cooldown after spending a charge, which blocked a second cast for 8 seconds. Two casts a global cooldown apart spend two charges.",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "hero", "race": 1, "class": 10, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "enemy", "owner": "hero", "entry": 36, "level": 60, "health": 500000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks and spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "hero", "spell": 901004},
+    {"action": "assert", "label": "Mongoose Bite starts with 3 charges", "actor": "hero", "metric": "spell_charges", "spell": 901004, "equals": 3},
+    {"action": "cast", "actor": "hero", "spell": 901004, "target": "enemy"},
+    {"action": "assert", "label": "One cast spends one charge", "actor": "hero", "metric": "spell_charges", "spell": 901004, "equals": 2, "within_ms": 4000},
+    {"action": "wait", "label": "Let the global cooldown lapse", "ms": 1600},
+    {"action": "cast", "actor": "hero", "spell": 901004, "target": "enemy"},
+    {"action": "assert", "label": "DISCRIMINATING: a second cast a global cooldown later spends the next charge", "actor": "hero", "metric": "spell_charges", "spell": 901004, "equals": 1, "within_ms": 4000}
+  ]
+}

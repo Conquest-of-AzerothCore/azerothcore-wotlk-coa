@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Blood Runs Cold fills Blood Pact's healing-received clause (#893)",
+  "contract": "Blood Runs Cold 560257's tooltip is \"Your Blood Pact now also increases your healing received by $s1%\", with $s1 = 20 (BasePoints 19 + DieSides 1). Its single effect is aura 107 with EffectSpellClassMask (0, 0, 65536) = word 2 bit 16 = Blood Pact 801955/801964, and MiscValue 3, which is SPELLMOD_EFFECT1 - the operation Unit::ApplyEffectModifiers maps to effect index 0. Blood Pact's effect 0 is aura 185 MOD_ATTACKER_RANGED_HIT_CHANCE with BasePoints -51 + DieSides 1 = -50, the value its own tooltip renders as $s3, so the talent was quietly weakening the ranged-miss clause to -30 while the healing clause stayed empty. The placeholder the tooltip fills is effect index 1: aura 118 SPELL_AURA_MOD_HEALING_PCT with MiscValue 127 (all schools) and amount 0, and Blood Pact's own Description carries the matching conditional \"$?s560257[, and increasing your healing received by $560257s1%][]\". SPELLMOD_EFFECT2 (12) is the operation that reaches index 1. Two discriminating assertions: with the talent learned, Blood Pact's effect 1 must read 20 (0 today) and its effect 0 must still read -50 (-30 today).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801955
+    },
+    {
+      "action": "assert",
+      "label": "No effect-index-0 modifier before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 801955,
+      "op": 3,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No effect-index-1 modifier before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 801955,
+      "op": 12,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 560257
+    },
+    {
+      "action": "assert",
+      "label": "Blood Runs Cold leaves Blood Pact's effect 0 alone",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 801955,
+      "op": 3,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Blood Runs Cold adds 20 to Blood Pact's effect 1",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 801955,
+      "op": 12,
+      "base": 0,
+      "equals": 20
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801955
+    },
+    {
+      "action": "assert",
+      "label": "Blood Pact is active",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 801955,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Blood Pact keeps its authored -50 ranged-miss value",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 801955,
+      "effect": 0,
+      "equals": -50
+    },
+    {
+      "action": "assert",
+      "label": "Blood Pact now grants 20% healing received",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 801955,
+      "effect": 1,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "Blood Pact keeps its authored dodge value",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 801955,
+      "effect": 2,
+      "equals": 50
+    }
+  ]
+}

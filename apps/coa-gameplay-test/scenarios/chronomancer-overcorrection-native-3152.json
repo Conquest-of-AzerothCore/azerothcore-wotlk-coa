@@ -1,0 +1,208 @@
+{
+  "schema": 1,
+  "name": "Overcorrection converts overhealing into its native five-second heal (#3152)",
+  "contract": [
+    "Overcorrection 707657 is already read by AscensionChronomancerTime. A normal Correct the Mistake 572360 on a full-health grouped ally must apply helper 561231 and heal over five one-second ticks for 30% of the overhealing, allowing integer rounding per tick.",
+    "The ally is lowered only after the parent overheals, so the helper has effective healing to do. Its resolved amount must not receive the caster's healing modifier again. Removing the talent prevents a new helper application."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "chrono",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 8,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "chrono",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "chrono",
+      "spell": 707657
+    },
+    {
+      "action": "learn",
+      "actor": "chrono",
+      "spell": 572360
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 20000,
+      "maximum": 20000
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "chrono",
+      "spell": 572360,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 561231,
+      "caster": "chrono",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono",
+      "metric": "spell_heal_total",
+      "save_as": "parent_overheal",
+      "spell": 572360,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "spell_effective_heal_total",
+      "spell": 572360,
+      "target": "ally",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 561231,
+      "caster": "chrono",
+      "effect": 0,
+      "save_as": "hot_tick"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "aura_duration_ms",
+      "spell": 561231,
+      "caster": "chrono",
+      "effect": 0,
+      "save_as": "hot_duration"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "aura_amplitude_ms",
+      "spell": 561231,
+      "caster": "chrono",
+      "effect": 0,
+      "save_as": "hot_amplitude"
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 10000,
+      "maximum": 20000
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "spell_heal_count",
+      "spell": 561231,
+      "target": "ally",
+      "equals": 5,
+      "label": "All five periodic ticks are delivered"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono",
+      "metric": "spell_heal_count",
+      "spell": 561231,
+      "target": "ally",
+      "save_as": "hot_count"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono",
+      "metric": "spell_heal_total",
+      "spell": 561231,
+      "target": "ally",
+      "save_as": "hot_total"
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "spell_heal_total",
+      "spell": 561231,
+      "target": "ally",
+      "ratio_to": "parent_overheal",
+      "min": 0.27,
+      "max": 0.31
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "spell_effective_heal_total",
+      "spell": 561231,
+      "target": "ally",
+      "min": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "chrono",
+      "spell": 707657
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 20000,
+      "maximum": 20000
+    },
+    {
+      "action": "set_power",
+      "actor": "chrono",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "chrono",
+      "spell": 572360
+    },
+    {
+      "action": "cast",
+      "actor": "chrono",
+      "spell": 572360,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 561231,
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,493 @@
+{
+  "schema": 1,
+  "name": "Native slot persistence retains complete builds with more than thirty-two purchased rows",
+  "contract": "The level-80 Bloodmage budget is 36 class points. This fixture initializes 34 distinct one-point class entries from CharacterAdvancement.dbc plus Eternal's one-point signature, then tests saving, native database reload and restoring those purchases across slot switches. Specialization slot storage must retain the complete set; the separate proposed named-loadout storage cap of 32 rows cannot be used for full builds. Learning actions configure the purchases; slot activation and restoration use ordinary casts.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "actor": "bloodmage",
+      "opcode": 618,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "bloodmage"
+        }
+      ],
+      "label": "Initialize native advancement after the local player is ready"
+    },
+    {
+      "action": "specialization",
+      "actor": "bloodmage",
+      "id": 99
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 806423
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 707371
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 560257
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 704621
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 561278
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 560254
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504088
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 805035
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 681304
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 807774
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 704635
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 706258
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 680657
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 804599
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504627
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 704649
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 570735
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 706617
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 681444
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 570758
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 804207
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 300226
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 804199
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 801952
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504285
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 801961
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 560074
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504292
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 804858
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 806310
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 806177
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 300986
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 705742
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 706656
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 979994
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 979994
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.0",
+      "index": 3,
+      "min": 33
+    },
+    {
+      "action": "relog",
+      "actor": "bloodmage"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 979993
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 806423,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 707371,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 560257,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 704621,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 561278,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 560254,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 504088,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 805035,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 681304,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 807774,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 704635,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 706258,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 680657,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 804599,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 504627,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 704649,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 570735,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 706617,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 681444,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 570758,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 804207,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 300226,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 804199,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 801952,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 504285,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 801961,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 560074,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 504292,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 804858,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 806310,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 806177,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 300986,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 705742,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 706656,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "bloodmage",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
+      "equals": 0
+    }
+  ]
+}

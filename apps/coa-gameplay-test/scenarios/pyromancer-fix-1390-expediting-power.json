@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Expediting Power adds 5% to Echo of Nozdormu's Aspect's Blessing cooldown reduction (#1390)",
+  "contract": "Expediting Power 704814 is aura 107 on SPELLMOD_EFFECT2 with base points 4 (+5), tooltip: Echo of Nozdormu reduces the cooldown of Aspect's Blessing by an additional 5%. Echo of Nozdormu 802174 takes 5% off the remaining cooldown of every known spell (AscensionPyromancerAbilities.cpp) and had no term for the talent. Aspect's Blessing 802168 has RecoveryTime 60000. A control Pyromancer without the talent casts the same two spells at the same moment; its Aspect's Blessing loses 5% of the remaining time, the talented one 10%, so the talented cooldown is about 5% of the remaining time (at most 3000 ms) below the control's.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_control",
+      "owner": "control",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "dummy_talent",
+      "owner": "talent",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 802174
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 802168
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 802174
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 802168
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 704814
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 802168
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 802168
+    },
+    {
+      "action": "assert",
+      "label": "Aspect's Blessing is on cooldown for the talented caster",
+      "actor": "talent",
+      "metric": "cooldown_ms",
+      "spell": 802168,
+      "min": 40000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown clear",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "value": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 807533,
+      "stacks": 2
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 802174,
+      "target": "dummy_control"
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "value": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "talent",
+      "spell": 807533,
+      "stacks": 2
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 802174,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 3000,
+      "label": "Let both Echo of Nozdormu casts complete"
+    },
+    {
+      "action": "assert",
+      "label": "control's Echo of Nozdormu was cast",
+      "actor": "control",
+      "metric": "spell_cast_count",
+      "spell": 802174,
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "talent's Echo of Nozdormu was cast",
+      "actor": "talent",
+      "metric": "spell_cast_count",
+      "spell": 802174,
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "snapshot",
+      "label": "Control's Aspect's Blessing cooldown after Echo (5% only)",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 802168,
+      "save_as": "control_cooldown"
+    },
+    {
+      "action": "assert",
+      "label": "The talented cooldown is about 5% of the remaining time lower than the control's",
+      "actor": "talent",
+      "metric": "cooldown_ms",
+      "spell": 802168,
+      "relative_to": "control_cooldown",
+      "min": -3400,
+      "max": -1800
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "name": "Impeccable Timing lets Chronomancer periodics critically strike natively (#2030)",
+  "contract": "Spell.dbc gives Impeccable Timing 560949 a single self-targeted APPLY_AURA effect: aura 286 SPELL_AURA_ABILITY_PERIODIC_CRIT, SpellFamilyName 28, EffectSpellClassMask [0, 319291904, 16777216] (word 1 bits 9, 19, 24, 25, 28). The tooltip reads 'Your periodic damage and healing effects can now critically strike'. The aura type has a real consumer: AuraEffect::CalculatePeriodicData calls AuraEffect::CalcPeriodicCritChance, which returns 0.0 unless the caster's spell-mod owner holds a SPELL_AURA_ABILITY_PERIODIC_CRIT effect whose IsAffectedOnSpell matches, in which case it returns Player::SpellDoneCritChance. The two fixtures are inside the mask: Timerend 801291 (SpellFamilyName 28, SpellFamilyFlags word 1 bit 24, aura 3 SPELL_AURA_PERIODIC_DAMAGE, ATTR2_ALLOW_WHILE_NOT_SHAPESHIFTED so its Stances field does not block the cast) covers the damage half, and Accelerated Recovery 800857 (SpellFamilyName 28, SpellFamilyFlags word 1 bit 28, aura 8 SPELL_AURA_PERIODIC_HEAL, TARGET_UNIT_TARGET_ALLY so a self-cast is valid) covers the healing half. Both players carry the same spell_crit_rating, so the talent is the only difference between them; the crit chance is snapshotted once at aura creation, which is why each talent is learned before its cast. No script or SQL is needed; this is a regression scenario for behaviour that already works.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    },
+    {
+      "id": "talented",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "dummy_control", "owner": "control", "entry": 36, "health": 1000000, "distance": 3 },
+    { "id": "dummy_talented", "owner": "talented", "entry": 36, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "control", "spell": 801291 },
+    { "action": "learn", "actor": "control", "spell": 800857 },
+    { "action": "learn", "actor": "talented", "spell": 801291 },
+    { "action": "learn", "actor": "talented", "spell": 800857 },
+    { "action": "learn", "actor": "talented", "spell": 560949 },
+    {
+      "action": "assert",
+      "label": "Learning the passive applies its aura",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 560949,
+      "equals": 1
+    },
+    { "action": "cast", "actor": "control", "spell": 801291, "target": "dummy_control" },
+    { "action": "cast", "actor": "talented", "spell": 801291, "target": "dummy_talented" },
+    {
+      "action": "assert",
+      "label": "The control's Timerend periodic landed",
+      "actor": "dummy_control",
+      "metric": "aura",
+      "spell": 801291,
+      "caster": "control",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The talented Chronomancer's Timerend periodic landed",
+      "actor": "dummy_talented",
+      "metric": "aura",
+      "spell": 801291,
+      "caster": "talented",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent, Timerend's ticks cannot crit",
+      "actor": "dummy_control",
+      "metric": "aura_crit_chance",
+      "spell": 801291,
+      "caster": "control",
+      "effect": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "With the talent, Timerend's ticks carry the caster's spell crit chance",
+      "actor": "dummy_talented",
+      "metric": "aura_crit_chance",
+      "spell": 801291,
+      "caster": "talented",
+      "effect": 0,
+      "min": 1
+    },
+    { "action": "wait", "label": "Let the global cooldown expire", "ms": 2000 },
+    { "action": "cast", "actor": "control", "spell": 800857 },
+    { "action": "cast", "actor": "talented", "spell": 800857 },
+    {
+      "action": "assert",
+      "label": "The control's periodic heal landed",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 800857,
+      "caster": "control",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The talented Chronomancer's periodic heal landed",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 800857,
+      "caster": "talented",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent, Accelerated Recovery's ticks cannot crit",
+      "actor": "control",
+      "metric": "aura_crit_chance",
+      "spell": 800857,
+      "caster": "control",
+      "effect": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "With the talent, Accelerated Recovery's ticks carry a crit chance",
+      "actor": "talented",
+      "metric": "aura_crit_chance",
+      "spell": 800857,
+      "caster": "talented",
+      "effect": 0,
+      "min": 1
+    }
+  ]
+}

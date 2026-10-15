@@ -1,0 +1,433 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Venomagus, Drown In Poison and Fang Blessing act natively (#1722, #1924, #1906)",
+  "contract": "#1722 Venomagus (300682/301364) is aura 108 SPELLMOD_DOT (op 22) of +20%/+40% with class mask (0,0,0x100) in family 35; the only family-35 spell carrying flag2 0x100 is Blight Venom 805896, whose tick reaches Unit::SpellDamageBonusDone as DOT, which applies SPELLMOD_DOT. #1924 Drown In Poison (504407) is aura 108 SPELLMOD_DAMAGE (op 0) of +30% with mask (0,0,0x800000) = every rank of Venomtip Poison (803195, 503156-503164), applied by the same function for direct damage. #1906 Fang Blessing (503970/504898) is SPELL_AURA_MOD_CRIT_PCT (290) of +3/+6, which Player::UpdateSpellCritChance and UpdateAllWeaponDependentCritAuras fold into every spell school and weapon crit. Each actor compares against its own snapshot taken before learning the passive, so the numbers are the server's own and the scenario fails if a passive stops working. No source or SQL change is involved; these are regression scenarios for behaviour that is already native. The damage probes use the native calculation at a fixed base of 1000 and do not include hit or crit rolls.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "v1",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "v2",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "dp",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "f1",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "f2",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "c",
+      "entry": 36,
+      "health": 10000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Blight Venom periodic damage without Venomagus (rank 1 player)",
+      "actor": "v1",
+      "metric": "spell_damage_done",
+      "save_as": "bv1_0",
+      "spell": 805896,
+      "target": "d",
+      "periodic": true
+    },
+    {
+      "action": "snapshot",
+      "label": "Blight Venom periodic damage without Venomagus (rank 2 player)",
+      "actor": "v2",
+      "metric": "spell_damage_done",
+      "save_as": "bv2_0",
+      "spell": 805896,
+      "target": "d",
+      "periodic": true
+    },
+    {
+      "action": "snapshot",
+      "label": "Venomtip Poison rank 1 direct damage without Drown In Poison",
+      "actor": "dp",
+      "metric": "spell_damage_done",
+      "save_as": "vt1_0",
+      "spell": 803195,
+      "target": "d"
+    },
+    {
+      "action": "snapshot",
+      "label": "Venomtip Poison rank 10 direct damage without Drown In Poison",
+      "actor": "dp",
+      "metric": "spell_damage_done",
+      "save_as": "vt10_0",
+      "spell": 503164,
+      "target": "d"
+    },
+    {
+      "action": "snapshot",
+      "label": "Melee crit chance before Fang Blessing (f1)",
+      "actor": "f1",
+      "metric": "melee_crit_chance",
+      "save_as": "f1_melee0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Shadow spell crit chance before Fang Blessing (f1)",
+      "actor": "f1",
+      "metric": "spell_crit_chance",
+      "save_as": "f1_shadow0",
+      "school": 5
+    },
+    {
+      "action": "snapshot",
+      "label": "Nature spell crit chance before Fang Blessing (f1)",
+      "actor": "f1",
+      "metric": "spell_crit_chance",
+      "save_as": "f1_nature0",
+      "school": 3
+    },
+    {
+      "action": "snapshot",
+      "label": "Melee crit chance before Fang Blessing (f2)",
+      "actor": "f2",
+      "metric": "melee_crit_chance",
+      "save_as": "f2_melee0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Shadow spell crit chance before Fang Blessing (f2)",
+      "actor": "f2",
+      "metric": "spell_crit_chance",
+      "save_as": "f2_shadow0",
+      "school": 5
+    },
+    {
+      "action": "snapshot",
+      "label": "Nature spell crit chance before Fang Blessing (f2)",
+      "actor": "f2",
+      "metric": "spell_crit_chance",
+      "save_as": "f2_nature0",
+      "school": 3
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Blight Venom has no DOT modifier without Venomagus",
+      "actor": "c",
+      "metric": "spell_modifier",
+      "spell": 805896,
+      "op": 22,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Venomtip Poison has no damage modifier without Drown In Poison",
+      "actor": "c",
+      "metric": "spell_modifier",
+      "spell": 803195,
+      "op": 0,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "learn",
+      "actor": "v1",
+      "spell": 300682
+    },
+    {
+      "action": "learn",
+      "actor": "v2",
+      "spell": 301364
+    },
+    {
+      "action": "learn",
+      "actor": "dp",
+      "spell": 504407
+    },
+    {
+      "action": "learn",
+      "actor": "f1",
+      "spell": 503970
+    },
+    {
+      "action": "learn",
+      "actor": "f2",
+      "spell": 504898
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Venomagus rank 1 is applied",
+      "actor": "v1",
+      "metric": "aura",
+      "spell": 300682,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Venomagus rank 2 is applied",
+      "actor": "v2",
+      "metric": "aura",
+      "spell": 301364,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Drown In Poison is applied",
+      "actor": "dp",
+      "metric": "aura",
+      "spell": 504407,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Fang Blessing rank 1 is applied",
+      "actor": "f1",
+      "metric": "aura",
+      "spell": 503970,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Fang Blessing rank 2 is applied",
+      "actor": "f2",
+      "metric": "aura",
+      "spell": 504898,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Venomagus rank 1 adds 20% to Blight Venom's DOT modifier",
+      "actor": "v1",
+      "metric": "spell_modifier",
+      "spell": 805896,
+      "op": 22,
+      "base": 100,
+      "min": 119.99,
+      "max": 120.01
+    },
+    {
+      "action": "assert",
+      "label": "Venomagus rank 2 adds 40% to Blight Venom's DOT modifier",
+      "actor": "v2",
+      "metric": "spell_modifier",
+      "spell": 805896,
+      "op": 22,
+      "base": 100,
+      "min": 139.99,
+      "max": 140.01
+    },
+    {
+      "action": "assert",
+      "label": "Venomagus leaves other Venom-family damage untouched (Adrenal 805894 has other class flags)",
+      "actor": "v1",
+      "metric": "spell_modifier",
+      "spell": 805894,
+      "op": 22,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Venomagus rank 1 raises Blight Venom's periodic damage by 20% against its own baseline",
+      "actor": "v1",
+      "metric": "spell_damage_done",
+      "spell": 805896,
+      "target": "d",
+      "periodic": true,
+      "ratio_to": "bv1_0",
+      "min": 1.19,
+      "max": 1.21
+    },
+    {
+      "action": "assert",
+      "label": "Venomagus rank 2 raises Blight Venom's periodic damage by 40% against its own baseline",
+      "actor": "v2",
+      "metric": "spell_damage_done",
+      "spell": 805896,
+      "target": "d",
+      "periodic": true,
+      "ratio_to": "bv2_0",
+      "min": 1.39,
+      "max": 1.41
+    },
+    {
+      "action": "assert",
+      "label": "Drown In Poison adds 30% to Venomtip Poison rank 1",
+      "actor": "dp",
+      "metric": "spell_modifier",
+      "spell": 803195,
+      "op": 0,
+      "base": 100,
+      "min": 129.99,
+      "max": 130.01
+    },
+    {
+      "action": "assert",
+      "label": "Drown In Poison adds 30% to Venomtip Poison rank 10",
+      "actor": "dp",
+      "metric": "spell_modifier",
+      "spell": 503164,
+      "op": 0,
+      "base": 100,
+      "min": 129.99,
+      "max": 130.01
+    },
+    {
+      "action": "assert",
+      "label": "Drown In Poison leaves Venom Fang's damage untouched",
+      "actor": "dp",
+      "metric": "spell_modifier",
+      "spell": 800880,
+      "op": 0,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Drown In Poison raises Venomtip Poison rank 1 damage by 30% against its own baseline",
+      "actor": "dp",
+      "metric": "spell_damage_done",
+      "spell": 803195,
+      "target": "d",
+      "ratio_to": "vt1_0",
+      "min": 1.29,
+      "max": 1.31
+    },
+    {
+      "action": "assert",
+      "label": "Drown In Poison raises Venomtip Poison rank 10 damage by 30% against its own baseline",
+      "actor": "dp",
+      "metric": "spell_damage_done",
+      "spell": 503164,
+      "target": "d",
+      "ratio_to": "vt10_0",
+      "min": 1.29,
+      "max": 1.31
+    },
+    {
+      "action": "assert",
+      "label": "Fang Blessing rank 1 applies +3 crit",
+      "actor": "f1",
+      "metric": "aura_amount",
+      "spell": 503970,
+      "effect": 0,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Fang Blessing rank 2 applies +6 crit",
+      "actor": "f2",
+      "metric": "aura_amount",
+      "spell": 504898,
+      "effect": 0,
+      "equals": 6
+    },
+    {
+      "action": "snapshot",
+      "label": "Melee crit chance of Fang Blessing rank 1 at assert time (f1)",
+      "actor": "f1",
+      "metric": "melee_crit_chance",
+      "save_as": "f1_melee_now"
+    },
+    {
+      "action": "assert",
+      "label": "Fang Blessing rank 1 melee crit is above the unrefreshed zero baseline (rank 1 alone has no clean baseline)",
+      "actor": "f1",
+      "metric": "melee_crit_chance",
+      "relative_to": "f1_melee0",
+      "min": 3.0
+    },
+    {
+      "action": "assert",
+      "label": "Fang Blessing rank 1 raises Shadow spell crit chance by 3 points",
+      "actor": "f1",
+      "metric": "spell_crit_chance",
+      "school": 5,
+      "relative_to": "f1_shadow0",
+      "min": 2.99,
+      "max": 3.01
+    },
+    {
+      "action": "assert",
+      "label": "Fang Blessing rank 1 raises Nature spell crit chance by 3 points",
+      "actor": "f1",
+      "metric": "spell_crit_chance",
+      "school": 3,
+      "relative_to": "f1_nature0",
+      "min": 2.99,
+      "max": 3.01
+    },
+    {
+      "action": "assert",
+      "label": "Fang Blessing rank 2 melee crit chance is 3 points above rank 1 (+6 vs +3)",
+      "actor": "f2",
+      "metric": "melee_crit_chance",
+      "relative_to": "f1_melee_now",
+      "min": 2.99,
+      "max": 3.01
+    },
+    {
+      "action": "assert",
+      "label": "Fang Blessing rank 2 raises Shadow spell crit chance by 6 points",
+      "actor": "f2",
+      "metric": "spell_crit_chance",
+      "school": 5,
+      "relative_to": "f2_shadow0",
+      "min": 5.99,
+      "max": 6.01
+    },
+    {
+      "action": "assert",
+      "label": "Fang Blessing rank 2 raises Nature spell crit chance by 6 points",
+      "actor": "f2",
+      "metric": "spell_crit_chance",
+      "school": 3,
+      "relative_to": "f2_nature0",
+      "min": 5.99,
+      "max": 6.01
+    }
+  ]
+}

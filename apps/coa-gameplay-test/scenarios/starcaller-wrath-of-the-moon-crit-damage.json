@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "name": "wrath-of-the-moon-crit-damage|Wrath of the Moon raises Arcane critical damage by 20% (#906)",
+  "contract": "Wrath of the Moon 680775 (Spell.dbc, SpellFamilyName 32, passive 0x1c0) has effect 0 = SPELL_AURA_MOD_CRIT_DAMAGE_BONUS (163) with EffectMiscValue 64 (Arcane school mask) and EffectBasePoints 19, resolving to 20 with DieSides 1, matching 'Increases your Arcane critical damage dealt by $s1%'. The aura needs no class mask: Unit::SpellCriticalDamageBonus sums GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, spellProto->GetSchoolMask()) and applies AddPct to the crit-inclusive damage. The spell_critical_damage metric calls that native function with a fixed base of 1000. Scattered Star 804995 is a pure Arcane (school mask 0x40) magic-class (DmgClass 1) damage spell, so a crit is 1000 + 50% = 1500 and with the talent AddPct(1500, 20) = 1800, a ratio of 1.20. Fireball 133 (school mask 0x4, Fire) does not match the aura's misc mask 64, so its crit damage must be identical for both fixtures. Both fixtures are the same race, class and level.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "control",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 680775
+    },
+    {
+      "action": "snapshot",
+      "label": "Arcane critical damage without the talent",
+      "actor": "control",
+      "metric": "spell_critical_damage",
+      "spell": 804995,
+      "target": "dummy",
+      "save_as": "arcane_crit"
+    },
+    {
+      "action": "snapshot",
+      "label": "Fire critical damage without the talent",
+      "actor": "control",
+      "metric": "spell_critical_damage",
+      "spell": 133,
+      "target": "dummy",
+      "save_as": "fire_crit"
+    },
+    {
+      "action": "assert",
+      "label": "Arcane critical damage is 20% higher with the talent",
+      "actor": "talent",
+      "metric": "spell_critical_damage",
+      "spell": 804995,
+      "target": "dummy",
+      "ratio_to": "arcane_crit",
+      "min": 1.19,
+      "max": 1.21
+    },
+    {
+      "action": "assert",
+      "label": "Fire critical damage is unchanged by the talent",
+      "actor": "talent",
+      "metric": "spell_critical_damage",
+      "spell": 133,
+      "target": "dummy",
+      "relative_to": "fire_crit",
+      "equals": 0
+    }
+  ]
+}

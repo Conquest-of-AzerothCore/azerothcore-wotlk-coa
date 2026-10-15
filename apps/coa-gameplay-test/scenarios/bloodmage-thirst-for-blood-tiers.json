@@ -1,0 +1,170 @@
+{
+  "schema": 1,
+  "name": "Thirst for Blood applies its two Thirst tiers (#512)",
+  "contract": "Thirst for Blood 570023: 'Between 1-5 stacks of Thirst: Spell haste increased by $570024s1%. Between 6-10 stacks of Thirst: The bonus damage dealt by spell critical strikes is increased by $570025s1%.' Both of its effects are aura 4 (SPELL_AURA_DUMMY) with Amplitude 500 and a TriggerSpell (570025 on effect 0, 570024 on effect 1). Aura 4 never ticks - only aura 226 SPELL_AURA_PERIODIC_DUMMY is wired into AuraEffect::PeriodicTick - and a TriggerSpell on a dummy aura is inert data, so neither tier was ever applied. 570024 'Sated' is aura 216 SPELL_AURA_HASTE_SPELLS with BasePoints 9 / DieSides 1 (10%); 570025 'Ravenous' is aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, MiscValue 126 (all magic schools), BasePoints 99 / DieSides 1 (100%) plus Effect 164 SPELL_EFFECT_REMOVE_AURA on 570024, which is what keeps the tiers exclusive. The Thirst resource itself is 706613 (AscensionResourceTalents.cpp:17). cast_speed_multiplier observes the native cast-time multiplier, so smaller is faster.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 706613,
+      "stacks": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 570023
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "snapshot",
+      "label": "Cast speed with no Thirst tier",
+      "actor": "caster",
+      "metric": "cast_speed_multiplier",
+      "save_as": "normal_speed"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 570023
+    },
+    {
+      "action": "wait",
+      "label": "Let the record's own 500 ms re-evaluation run",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "No tier applies at zero Thirst",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 570024,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No Ravenous at zero Thirst",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 570025,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Three stacks of Thirst",
+      "actor": "caster",
+      "spell": 706613,
+      "stacks": 3
+    },
+    {
+      "action": "assert",
+      "label": "One to five stacks apply Sated",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 570024,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Sated carries its own 10% spell haste",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 570024,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Sated speeds casts up",
+      "actor": "caster",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "normal_speed",
+      "min": 0.9089,
+      "max": 0.9093
+    },
+    {
+      "action": "assert",
+      "label": "Ravenous does not apply below six stacks",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 570025,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Eight stacks of Thirst",
+      "actor": "caster",
+      "spell": 706613,
+      "stacks": 8
+    },
+    {
+      "action": "assert",
+      "label": "Six to ten stacks apply Ravenous",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 570025,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Ravenous carries its own 100% critical damage bonus",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 570025,
+      "effect": 0,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Ravenous replaces Sated",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 570024,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Spend all Thirst",
+      "actor": "caster",
+      "spell": 706613,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "No tier survives at zero Thirst",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 570025,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Cast speed returns to normal",
+      "actor": "caster",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "normal_speed",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

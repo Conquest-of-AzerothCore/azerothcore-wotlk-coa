@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "name": "Falconstrike handing Quick Shot back draws no New Spell Learned toast (#5755, #6007)",
+  "contract": "SetTemporarySpellReplacement swaps the client's bars with SMSG_SUPERCEDED_SPELL, and the client announces the spell it swaps in as learned when that spell's SpellCustomAttr row carries the notable bit 0x400 (Extensions.dll, OnSupersededSpell -> OnSpellLearned -> NOTABLE_SPELL_LEARNED, which the 'New Spell Learned' toast answers). mod-spellbook sets that bit for every Book of Ascension spell. Falconstrike 806443 carries no row, but Quick Shot 500074 (row 17471) is notable, so every Falconstrike use announced Quick Shot as relearned (#5755, #6007). The swap notice now arrives with Quick Shot muted and its row restored right after.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login state settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 500074
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 573060
+    },
+    {
+      "action": "set_aura",
+      "label": "Falconstrike is ready",
+      "actor": "ranger",
+      "spell": 573338,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Quick Shot turns into Falconstrike",
+      "actor": "ranger",
+      "metric": "temporary_spell_replacement",
+      "spell": 500074,
+      "equals": 806443,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "ranger",
+      "metric": "spellbook_superseded_for",
+      "spell": 500074,
+      "save_as": "handed_back_before"
+    },
+    {
+      "action": "set_aura",
+      "label": "Falconstrike is used up",
+      "actor": "ranger",
+      "spell": 573338,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Falconstrike hands Quick Shot back",
+      "actor": "ranger",
+      "metric": "temporary_spell_replacement",
+      "spell": 500074,
+      "equals": 500074,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the client was told Quick Shot came back",
+      "actor": "ranger",
+      "metric": "spellbook_superseded_for",
+      "spell": 500074,
+      "relative_to": "handed_back_before",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Quick Shot came back muted, so no toast",
+      "actor": "ranger",
+      "metric": "spellbook_loud_supersedes_for",
+      "spell": 500074,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Quick Shot is notable again, so a genuine learn is still announced",
+      "actor": "ranger",
+      "metric": "spellbook_client_notable",
+      "spell": 500074,
+      "equals": 1
+    }
+  ]
+}

@@ -14,7 +14,7 @@ namespace CoAChallenges
             return;
 
         // One row per active challenge (multiple groups can be active).
-        CharacterDatabase.Execute(
+        CharacterDatabase.DirectExecute(
             "CREATE TABLE IF NOT EXISTS coa_character_challenge ("
             "guid INT UNSIGNED NOT NULL, "
             "challengeId INT UNSIGNED NOT NULL, "
@@ -68,7 +68,7 @@ namespace CoAChallenges
             "PRIMARY KEY (guid, challengeId, objective)) "
             "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
         // Completed challenges/trials (leaderboard source).
-        CharacterDatabase.Execute(
+        CharacterDatabase.DirectExecute(
             "CREATE TABLE IF NOT EXISTS coa_challenge_completion ("
             "guid INT UNSIGNED NOT NULL, "
             "challengeId INT UNSIGNED NOT NULL, "
@@ -109,9 +109,16 @@ namespace CoAChallenges
                 char alter[256];
                 snprintf(alter, sizeof(alter),
                     "ALTER TABLE %s ADD COLUMN startTime INT UNSIGNED NOT NULL DEFAULT 0", t.table);
-                CharacterDatabase.Execute(alter);
+                CharacterDatabase.DirectExecute(alter);
             }
         }
+        CharacterDatabase.DirectExecute(
+            "INSERT IGNORE INTO coa_account_challenge_completion "
+            "(account, challengeId, level, completeTime, startTime) "
+            "SELECT c.account, completion.challengeId, completion.level, completion.completeTime, completion.startTime "
+            "FROM coa_challenge_completion AS completion "
+            "INNER JOIN characters AS c ON c.guid = completion.guid "
+            "ORDER BY completion.completeTime, completion.guid");
         // The completion PK must include `level` (multi-level challenges
         // 211/425 store one completion per level; leaderboards filter by level).
         if (!CharacterDatabase.Query(
@@ -263,22 +270,15 @@ namespace CoAChallenges
         }
     }
 
-    void SendConfigBatch(Player* player)
+    void AppendClientConfig(AscensionClientConfig& config)
     {
         if (!ChallengesEnabled())
             return;
 
-        WorldSession* session = player->GetSession();
-        if (!session)
-            return;
-
-        NativeClientConfig& config = session->GetNativeClientConfig();
-
-        std::vector<std::pair<std::string, uint8>> bools;
-        bools.emplace_back("CONFIG_CHALLENGE_ENABLED",
-            sConfigMgr->GetOption<bool>("CoAChallenges.ChallengeEnabled", true) ? 1 : 0);
-        bools.emplace_back("CONFIG_CHALLENGE_CREATOR_ENABLED",
-            sConfigMgr->GetOption<bool>("CoAChallenges.ChallengeCreatorEnabled", true) ? 1 : 0);
+        config.Booleans.emplace_back("CONFIG_CHALLENGE_ENABLED",
+            sConfigMgr->GetOption<bool>("CoAChallenges.ChallengeEnabled", true));
+        config.Booleans.emplace_back("CONFIG_CHALLENGE_CREATOR_ENABLED",
+            sConfigMgr->GetOption<bool>("CoAChallenges.ChallengeCreatorEnabled", true));
         // Gamemodes are server-driven (a trial turns its mode on/off, see
         // RecomputeRequiredGameModes). Lock the rows by default so players
         // cannot toggle them; `GameModes.PlayerToggle` re-enables the UI.
@@ -288,19 +288,13 @@ namespace CoAChallenges
                 "CoAChallenges.GameModes.PlayerToggle", false);
             for (GameModeDef const& m : GameModes)
             {
-                bools.emplace_back(m.configKey, playerToggle ? uint8(1) : uint8(0));
+                config.Booleans.emplace_back(m.configKey, playerToggle);
                 // Presentation-only: hide modes with no server support yet
                 // (CoAChallenges.GameModes.Hidden). An ACTIVE mode still shows
                 // on the client regardless of this flag.
-                bools.emplace_back(m.hiddenKey, GameModeHidden(m.name) ? uint8(1) : uint8(0));
+                config.Booleans.emplace_back(m.hiddenKey, GameModeHidden(m.name));
             }
         }
-        for (auto const& [key, value] : bools)
-            config.SetBool(key, value != 0);
-
-        session->SendNativeClientConfig();
-        LOG_INFO("module.coa_challenges", "Sent SMSG_COA_CONFIG ({} bool flags) to {}",
-            bools.size(), player->GetName());
     }
 
     // Response packet shared by START (0x593) and STOP (0x595).

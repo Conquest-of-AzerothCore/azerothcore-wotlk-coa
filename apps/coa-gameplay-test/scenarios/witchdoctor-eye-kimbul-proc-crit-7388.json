@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Eye of Kimbul applied by its talent proc adds one percent crit per stack (#7388)",
+  "contract": [
+    "The Eye of Kimbul talent 503714 applies the debuff 802707 to enemies hit by a critical strike. Each stack of",
+    "802707 carries effect 1 aura 308 (MOD_CRIT_CHANCE_FOR_CASTER) with EffectBasePoints 0 / EffectDieSides 1 = 1%,",
+    "StackAmount 5, so five stacks laid down by the talent's own proc raise the Witch Doctor's ranged",
+    "critical chance against that target by five percent, not to 100. The direct-cast scenarios",
+    "(witchdoctor-eye-kimbul-ranged-auto-crit-6979, witchdoctor-eye-kimbul-one-percent-stacks-4093) skip the proc",
+    "path; this one stacks the debuff only through critical hits."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "w",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 100000,
+      "ranged_crit_rating": 0
+    }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "w", "entry": 36, "level": 60, "health": 1000000, "distance": 10 },
+    { "id": "other", "owner": "w", "entry": 36, "level": 60, "health": 1000000, "distance": 12 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "w", "spell": 133 },
+    { "action": "learn", "actor": "w", "spell": 503714 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "snapshot", "actor": "w", "metric": "ranged_taken_crit_chance", "target": "target", "save_as": "ranged" },
+    {
+      "action": "assert", "label": "SETUP: the unbuffed ranged crit chance is a normal value",
+      "actor": "w", "metric": "ranged_taken_crit_chance", "target": "target", "max": 30
+    },
+    { "action": "cast", "actor": "w", "spell": 133, "target": "target" },
+    {
+      "action": "assert", "label": "A critical hit applies Eye of Kimbul through the talent proc",
+      "actor": "target", "metric": "aura_stacks", "spell": 802707, "caster": "w", "equals": 1, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "One proc stack adds one percent ranged crit against the affected target",
+      "actor": "w", "metric": "ranged_taken_crit_chance", "target": "target", "relative_to": "ranged",
+      "min": 0.9, "max": 1.1
+    },
+    { "action": "wait", "ms": 500 },
+    { "action": "cast", "actor": "w", "spell": 133, "target": "target" },
+    { "action": "wait", "ms": 3000 },
+    { "action": "cast", "actor": "w", "spell": 133, "target": "target" },
+    { "action": "wait", "ms": 3000 },
+    { "action": "cast", "actor": "w", "spell": 133, "target": "target" },
+    { "action": "wait", "ms": 3000 },
+    { "action": "cast", "actor": "w", "spell": 133, "target": "target" },
+    {
+      "action": "assert", "label": "Five critical hits stack Eye of Kimbul to its cap",
+      "actor": "target", "metric": "aura_stacks", "spell": 802707, "caster": "w", "equals": 5, "within_ms": 6000
+    },
+    { "action": "wait", "ms": 3000 },
+    { "action": "cast", "actor": "w", "spell": 133, "target": "target" },
+    { "action": "wait", "ms": 3000 },
+    {
+      "action": "assert", "label": "A sixth critical hit keeps the cap",
+      "actor": "target", "metric": "aura_stacks", "spell": 802707, "caster": "w", "equals": 5
+    },
+    {
+      "action": "assert", "label": "Five proc stacks add five percent ranged crit, not 100",
+      "actor": "w", "metric": "ranged_taken_crit_chance", "target": "target", "relative_to": "ranged",
+      "min": 4.9, "max": 5.1
+    },
+    {
+      "action": "assert", "label": "Five proc stacks leave the absolute ranged crit chance sane",
+      "actor": "w", "metric": "ranged_taken_crit_chance", "target": "target", "max": 30
+    },
+    {
+      "action": "assert", "label": "The debuff adds nothing against another enemy",
+      "actor": "w", "metric": "ranged_taken_crit_chance", "target": "other", "relative_to": "ranged", "equals": 0
+    }
+  ]
+}

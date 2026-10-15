@@ -1,11 +1,17 @@
 {
  "schema": 1,
  "name": "Tinker: Mechano-Bear fights the Tinker's target",
- "contract": "A summoned Mechano-Bear (build 803405) must join the fight: it spawns defensive rather than passive, so while the Tinker attacks a dummy the pair deals clearly more damage than the level 80 Tinker alone (about 170 in ten seconds without the pet).",
+ "contract": "A summoned Mechano-Bear (build 803405) must join the fight: it spawns defensive rather than passive, so while the Tinker attacks a dummy the pair deals clearly more damage than a level 80 Tinker alone. A second Tinker without a pet attacks an identical dummy for the same ten seconds, and the bear owner's dummy must lose at least 150 more health. The bear hits for at least its Scale() weapon damage of 80 (level * 1.0) before armor, several times in ten seconds, while two pet-less Tinkers differ by at most a swing or two of unarmed damage. The dummies are level 80: a level 10 dummy is below the level 80 viewer's floor of 76 (DestinyWeaver.Scaling.Offset 4), so Destiny Weaver shows it at level 76 with a pool about 25 times its real one and moves only that share of every blow into the real health, which left the whole fight at about 40 health.",
  "timeout_ms": 90000,
  "players": [
   {
    "id": "t",
+   "race": 1,
+   "class": 28,
+   "level": 80
+  },
+  {
+   "id": "c",
    "race": 1,
    "class": 28,
    "level": 80
@@ -16,8 +22,15 @@
    "id": "d",
    "owner": "t",
    "entry": 299,
-   "level": 10,
+   "level": 80,
    "distance": 3
+  },
+  {
+   "id": "dc",
+   "owner": "c",
+   "entry": 299,
+   "level": 80,
+   "distance": 15
   }
  ],
  "location": {
@@ -31,6 +44,15 @@
   {
    "action": "wait",
    "ms": 3000
+  },
+  {
+   "action": "teleport",
+   "label": "The control Tinker stands 3 yd behind its own dummy, 12 yd clear of the bear's",
+   "actor": "c",
+   "map": 0,
+   "x": -8905.41,
+   "y": -115.853,
+   "z": 82.3711
   },
   {
    "action": "learn",
@@ -60,10 +82,31 @@
    "equals": 60671
   },
   {
+   "action": "assert",
+   "label": "The control Tinker has no pet",
+   "actor": "c",
+   "metric": "pet_entry",
+   "equals": 0
+  },
+  {
    "action": "snapshot",
    "actor": "d",
    "metric": "health",
    "save_as": "h0"
+  },
+  {
+   "action": "snapshot",
+   "actor": "dc",
+   "metric": "health",
+   "save_as": "hc0"
+  },
+  {
+   "action": "assert",
+   "label": "SETUP: both dummies start from the same health",
+   "actor": "dc",
+   "metric": "health",
+   "relative_to": "h0",
+   "equals": 0
   },
   {
    "action": "attack",
@@ -71,16 +114,35 @@
    "target": "d"
   },
   {
+   "action": "attack",
+   "actor": "c",
+   "target": "dc"
+  },
+  {
    "action": "wait",
    "ms": 10000
+  },
+  {
+   "action": "snapshot",
+   "actor": "dc",
+   "metric": "health",
+   "save_as": "control_after"
+  },
+  {
+   "action": "assert",
+   "label": "BASELINE: the Tinker alone damages its dummy",
+   "actor": "dc",
+   "metric": "health",
+   "relative_to": "hc0",
+   "max": -1
   },
   {
    "action": "assert",
    "label": "Pet contributes damage",
    "actor": "d",
    "metric": "health",
-   "relative_to": "h0",
-   "max": -450
+   "relative_to": "control_after",
+   "max": -150
   }
  ]
 }

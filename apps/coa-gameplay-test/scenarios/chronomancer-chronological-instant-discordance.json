@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Chronological makes Discordance instant every 20 sec (#2189)",
+  "contract": "Chronological 592008 is a permanent passive (duration index 21 = -1) whose single effect is aura 23 (SPELL_AURA_PERIODIC_TRIGGER_SPELL) with Amplitude 20000 on 542728, implicit target 1. This is not a proc and needs no spell_proc row: AuraEffect::CalculatePeriodic marks the effect periodic and the tick dispatcher calls AuraEffect::HandlePeriodicTriggerSpellAuraTick, so every 20 s the passive casts 542728 on its holder with no script. 542728 lasts 10000 ms (duration index 1) and its effect 0 is aura 108 (ADD_PCT_MODIFIER, MiscValue 10 = SPELLMOD_CASTING_TIME, BasePoints -101 = -100%) class-masked to Discordance's SpellFamilyFlags word0 33554432, and aura 107/108 are native in AuraEffect::CalculateSpellMod. Discordance 503875 has CastingTimeIndex 16 = 1500 ms, so the tooltip \"Every 20 sec, your next Discordance within 10 seconds is instant cast\" means SpellInfo::CalcCastTime must fall from a non-zero value to 0 once the buff lands. This scenario is a regression guard for behaviour that already works; it changes nothing.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 592008
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 503875
+    },
+    {
+      "action": "assert",
+      "label": "No Chronological buff in the first tick period",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 542728,
+      "caster": "chronomancer",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Discordance still has a real cast time",
+      "actor": "chronomancer",
+      "metric": "spell_cast_time_ms",
+      "spell": 503875,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "label": "Wait past the passive's 20 s period",
+      "ms": 21000
+    },
+    {
+      "action": "assert",
+      "label": "The passive's periodic tick casts Chronological on its holder",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 542728,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Discordance is instant while the buff is up",
+      "actor": "chronomancer",
+      "metric": "spell_cast_time_ms",
+      "spell": 503875,
+      "equals": 0
+    }
+  ]
+}

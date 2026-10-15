@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Cultist: Shadow Words boosts the Whispers family by 25% through a native SPELLMOD_ALL_EFFECTS spell mod (#3106)",
+  "contract": "706928 is SpellFamilyName 31, effect0 ADD_PCT_MODIFIER (108), MiscValue=8 (SPELLMOD_ALL_EFFECTS), BasePoints=24 -> CalcValue 25, SpellClassMask [0,0,16] (dword2 bit4). Every Whispers of N'Zoth/Y'shaarj/Yogg-Saron/C'thun rank (e.g. 561386, 561389, 572637, 572791) is SpellFamilyName 31 with SpellFamilyFlags[2]=16, an exact classmask match; the similarly-named 807512 (\"Whispers of C'Thun\", capitalized differently) carries SpellFamilyFlags[2]=0 and is not matched, used here as a same-family near-miss control. Player::ApplySpellMod resolves a percent SPELLMOD_ALL_EFFECTS mod as basevalue*(1+0.25) with zero custom C++ (Player.cpp ~10275). Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "c", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: Whispers of N'Zoth is unmodified before Shadow Words",
+      "actor": "c", "metric": "spell_modifier", "spell": 561386, "op": 8, "base": 1000, "min": 1000, "max": 1000
+    },
+    { "action": "learn", "actor": "c", "spell": 706928 },
+    {
+      "action": "assert", "label": "Shadow Words adds 25% to Whispers of N'Zoth (#3106)",
+      "actor": "c", "metric": "spell_modifier", "spell": 561386, "op": 8, "base": 1000, "min": 1249, "max": 1251
+    },
+    {
+      "action": "assert", "label": "Shadow Words adds 25% to Whispers of C'thun too (#3106)",
+      "actor": "c", "metric": "spell_modifier", "spell": 572791, "op": 8, "base": 1000, "min": 1249, "max": 1251
+    },
+    {
+      "action": "assert", "label": "Shadow Words adds 25% to Whispers of Yogg-Saron too (#3106)",
+      "actor": "c", "metric": "spell_modifier", "spell": 572637, "op": 8, "base": 1000, "min": 1249, "max": 1251
+    },
+    {
+      "action": "assert", "label": "Shadow Words leaves the differently-classmasked 'Whispers of C'Thun' (807512) alone (near-miss control)",
+      "actor": "c", "metric": "spell_modifier", "spell": 807512, "op": 8, "base": 1000, "min": 1000, "max": 1000
+    }
+  ]
+}

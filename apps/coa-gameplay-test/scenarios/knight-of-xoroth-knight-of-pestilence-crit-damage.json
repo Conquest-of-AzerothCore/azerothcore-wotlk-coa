@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Knight of Pestilence raises Pestilence critical damage via native SPELLMOD_CRIT_DAMAGE_BONUS (#811)",
+  "contract": "Knight of Pestilence 704981 reads 'Increases the critical damage of your Pestilences by $s1%.' (rank text: 50%). Effect 0 is native aura 108 (SPELL_AURA_ADD_PCT_MODIFIER), EffectMiscValue 15 -> SpellModOp::SPELLMOD_CRIT_DAMAGE_BONUS (src/server/game/Spells/SpellDefines.h:91), EffectBasePoints 99 with DieSides 1 -> 100, EffectSpellClassMask [0,0,512] (all verified directly in the installed Spell.dbc). SPELLMOD_CRIT_DAMAGE_BONUS is consumed generically and unconditionally by the native engine at src/server/game/Entities/Unit/Unit.cpp:1579, :9961 and :9996 (modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus)) -- the stock spell-mod system, applied to any spell whose family flags intersect the aura's classMask; nothing Xoroth-specific is required. The affected spell is Unleash Death 801055 (one of the class's per-spec 'Pestilence' unleash-damage spells, SPELL_EFFECT_SCHOOL_DAMAGE, DmgClass Magic, Fire school), whose own SpellFamilyFlags are {67108864,0,512} (verified directly in the installed Spell.dbc, a repo-wide scan for SpellFamilyName 23 spells carrying classMask dword2 bit 9), intersecting Knight of Pestilence's mask exactly. Unleash Pestilence 801002 (SpellFamilyFlags {0,65536,0}, the self-buff cast trigger, not a Pestilence-family damage spell) does not intersect the mask and serves as the regression control. spell_modifier submits no cast; it reads the player's live ApplySpellMod(spell, op, value) result, adding the aura's 100 percentage points onto a probe base.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: no crit-damage bonus on Unleash Death before Knight of Pestilence",
+      "actor": "knight", "metric": "spell_modifier", "spell": 801055, "op": 15, "base": 100, "equals": 100
+    },
+    { "action": "learn", "actor": "knight", "spell": 704981 },
+    { "action": "set_aura", "actor": "knight", "spell": 704981, "stacks": 1, "label": "Force the Knight of Pestilence passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Knight of Pestilence passive is active",
+      "actor": "knight", "metric": "aura", "spell": 704981, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Unleash Death's crit damage bonus doubles (adds 100 points)",
+      "actor": "knight", "metric": "spell_modifier", "spell": 801055, "op": 15, "base": 100, "equals": 200
+    },
+    {
+      "action": "assert", "label": "REGRESSION: Unleash Pestilence's own family mask is untouched",
+      "actor": "knight", "metric": "spell_modifier", "spell": 801002, "op": 15, "base": 100, "equals": 100
+    }
+  ]
+}

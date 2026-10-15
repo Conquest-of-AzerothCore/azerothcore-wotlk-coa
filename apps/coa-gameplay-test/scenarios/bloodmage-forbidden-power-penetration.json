@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Forbidden Power converts Armor Penetration Rating into Spell Penetration (#651)",
+  "contract": "Spell.dbc gives Forbidden Power 500445 effects 0 and 1 = aura 220 (SPELL_AURA_MOD_RATING_FROM_STAT) with MiscValue 1024 / 128 and MiscValueB 1 (Agility) and base 29 / 4 -> 30% and 5%, and effect 2 = aura 23 (SPELL_AURA_PERIODIC_TRIGGER_SPELL) at Amplitude 3000 triggering 500447. 500447 has DurationIndex 28 (5000 ms) and a single effect: aura 123 (SPELL_AURA_MOD_TARGET_RESISTANCE) with MiscValue 124 (SPELL_SCHOOL_MASK_SPELL) and raw base points -1 -> an amount of 0. The tooltip's third clause is 'you now gain Spell Penetration equal to your Armor Penetration Rating', so the amount must equal that rating. Spell penetration is negative on this aura: Unit::CalcAbsorbResist adds GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, schoolMask) to the victim's resistance, and stock Increased Spell Penetration 10 (25975) carries base points -11 -> -10. Shirt of Uber Rating Aura 63389 is the rating fixture: aura 189 (SPELL_AURA_MOD_RATING) with MiscValue -1 and base 129 -> +130 to every combat rating, CR_ARMOR_PENETRATION included. The 3 sec refresh re-runs AuraEffect::CalculateAmount through Aura::ModStackAmount, so the amount tracks the rating.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling and login settle", "ms": 5000 },
+    {
+      "action": "assert",
+      "label": "Fixture precondition: no Armor Penetration Rating yet",
+      "actor": "bloodmage",
+      "metric": "combat_rating",
+      "rating": 24,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Spell critical strike rating before the passive",
+      "actor": "bloodmage",
+      "metric": "combat_rating",
+      "rating": 10,
+      "save_as": "spell_crit_before"
+    },
+    { "action": "learn", "actor": "bloodmage", "spell": 500445 },
+    {
+      "action": "assert",
+      "label": "Regression guard: the native Agility to spell crit conversion applies",
+      "actor": "bloodmage",
+      "metric": "combat_rating",
+      "rating": 10,
+      "relative_to": "spell_crit_before",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The 3 sec trigger keeps the penetration helper up",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 500447,
+      "equals": 1,
+      "within_ms": 6000
+    },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 63389, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "The rating fixture granted Armor Penetration Rating",
+      "actor": "bloodmage",
+      "metric": "combat_rating",
+      "rating": 24,
+      "min": 130,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "At least one 3 sec refresh", "ms": 4000 },
+    {
+      "action": "assert",
+      "label": "Spell Penetration now matches the Armor Penetration Rating",
+      "actor": "bloodmage",
+      "metric": "aura_amount",
+      "spell": 500447,
+      "effect": 0,
+      "max": -100
+    }
+  ]
+}

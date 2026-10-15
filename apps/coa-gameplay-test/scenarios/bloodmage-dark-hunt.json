@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Dark Hunt boosts damage against bleeding targets and expertise (#2824)",
+  "contract": "Dark Hunt 705733: \"Increases your Shadow damage dealt by $s1% against bleeding targets. / Increases your expertise by $s2.\" Effect 0 is aura 303 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE, amount 10, MiscValue 18 = AURA_STATE_BLEEDING, read natively in Unit::SpellDamageBonusDone (Unit.cpp:8829) and Unit::MeleeDamageBonus (Unit.cpp:10736). Effect 1 is aura 240 SPELL_AURA_MOD_EXPERTISE, amount 10, handled by AuraEffect::HandleAuraModExpertise (SpellAuraEffects.cpp:305) and consumed in Player::UpdateExpertise (StatSystem.cpp:1029). Crimson Tide 504282 carries Mechanic 15 = MECHANIC_BLEED, so SpellInfo::GetAuraState returns AURA_STATE_BLEEDING for its victim (SpellInfo.cpp:2192). The damage probe is Bloodmoon Blast 500125, SchoolMask 32 = Shadow. No source or SQL change is involved; this is a regression scenario for behaviour that is already native.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "b",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 504282
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "expertise",
+      "save_as": "exp_base"
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 504282
+    },
+    {
+      "action": "assert",
+      "label": "The fixture enemy is bleeding",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 504282,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_damage_done",
+      "spell": 500125,
+      "target": "d",
+      "save_as": "shadow_base"
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 705733
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 705733,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Expertise rises by 10",
+      "actor": "b",
+      "metric": "expertise",
+      "relative_to": "exp_base",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Shadow damage against the bleeding target is 10% higher",
+      "actor": "b",
+      "metric": "spell_damage_done",
+      "spell": 500125,
+      "target": "d",
+      "ratio_to": "shadow_base",
+      "min": 1.09,
+      "max": 1.11
+    }
+  ]
+}

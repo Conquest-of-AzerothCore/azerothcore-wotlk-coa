@@ -1,0 +1,336 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth: Demonic Blade shows its two remaining Gores and Warbringer grants it (#5601, #5602)",
+  "contract": "Current Demonic Blade704957 promises two empowered Gores, and native Warbringer802586 is a Demonfire spender. Acquire War through its real specialization and buy entry29519 normally. Without the talent Warbringer grants no681184; with it a normal highest-rank cast grants two uses. Those uses must be sent as aura charges, remain unchanged by Sever and decrease once for each Gore805555, removing the aura after two. This preserves the independently authored25% damage/cost spell modifiers rather than multiplying them by a stack count. Weapons, hit ratings and Demonfire/Rage are fixtures; client icon rendering itself is not observed. Gore is acquired through class entries30668/4016 and War entry31166; the normally purchased base Gore805555 and active highest Sever501505 are used. The highest Flames of Xoroth573448 is granted as a class-ability fixture before the real War selection; an unowned original ability must not be assumed to provide its replacement. The paid Gore talent grants base805555; automatic rank training is disabled, so the normal purchased base rank is used for both native Gore casts.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "k",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "k",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "k",
+      "item": 629951
+    },
+    {
+      "action": "equip",
+      "actor": "k",
+      "item": 629951,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 573448,
+      "label": "Fixture: own the level60 Flames of Xoroth rank that War transforms"
+    },
+    {
+      "action": "specialization",
+      "actor": "k",
+      "id": 18
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "knows_spell",
+      "spell": 802586,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "k",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 802586,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 802586,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura",
+      "spell": 681184,
+      "equals": 0,
+      "label": "Warbringer without Demonic Blade grants no proc"
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "k",
+      "entry": 29519,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura",
+      "spell": 704957,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 802586
+    },
+    {
+      "action": "set_aura",
+      "actor": "k",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 802586,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura",
+      "spell": 681184,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_script_value",
+      "spell": 681184,
+      "key": 681184,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 681184,
+      "equals": 2,
+      "label": "The client-visible use count starts at two"
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "k",
+      "entry": 30668,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "k",
+      "entry": 4016,
+      "rank": 1,
+      "label": "Buy the second independently authored Gore prerequisite"
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "k",
+      "entry": 31166,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "knows_spell",
+      "spell": 805555,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 501505
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 501505,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 501505,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 681184,
+      "equals": 2,
+      "label": "Sever does not consume a Gore-only use"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 805555,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 805555,
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 681184,
+      "equals": 1,
+      "label": "Each Gore consumes exactly one visible use"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_script_value",
+      "spell": 681184,
+      "key": 681184,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 805555,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 805555,
+      "target": "enemy",
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 681184,
+      "equals": 0,
+      "label": "Each Gore consumes exactly one visible use"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_script_value",
+      "spell": 681184,
+      "key": 681184,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura",
+      "spell": 681184,
+      "equals": 0,
+      "label": "The second Gore exhausts the proc"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "name": "Tripping the Rift cuts Backtrack's cooldown when Clasp of Infinity is cast (#1945)",
+  "contract": "Tripping the Rift 520173 is aura 42 (proc trigger spell) on 521214, a single SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (165) with EffectMiscValue 706973 (Backtrack), EffectBasePoints -10001 (die 1 => -10000 ms) and implicit target 1 (caster). Effect 165 is implemented, but Spell.dbc gives 520173 ProcFlags 0 and no spell_proc row existed, so the proc never fired. Backtrack 706973 has RecoveryTime 40000; with a spell_proc row keyed on Clasp of Infinity 805847 (family 28, word0 0x800000), one Clasp cast must take a full 10 sec off it. The assertion window is 4 sec, so wall clock alone can never account for a 9 sec drop.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 520173
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 805847
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 706973
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 706973,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Backtrack is on its 40 second cooldown",
+      "actor": "chronomancer",
+      "metric": "cooldown_ms",
+      "spell": 706973,
+      "min": 30000,
+      "within_ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cooldown_ms",
+      "spell": 706973,
+      "save_as": "before"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 805847,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Clasp of Infinity takes 10 seconds off Backtrack",
+      "actor": "chronomancer",
+      "metric": "cooldown_ms",
+      "spell": 706973,
+      "relative_to": "before",
+      "max": -9000,
+      "within_ms": 4000
+    }
+  ]
+}

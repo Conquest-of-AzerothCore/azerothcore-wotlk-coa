@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "By The Light raises Valkyr's Calling's crit chance by 50% (#951)",
+  "contract": "By The Light 680620 (Spell.dbc, SpellFamilyName 33) carries SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue SPELLMOD_CRITICAL_CHANCE (7), EffectSpellClassMask word B = 16 (bit 4), EffectBasePoints 49 resolving to +50 with DieSides 1. Valkyr's Calling (Damage) 570034 carries SpellFamilyFlags word B = 16, the exact same bit, so SpellInfo::IsAffected(33, mask) admits it. Native path: Player::ApplySpellMod accumulates this SPELLMOD_FLAT modifier whenever the crit chance of spell 570034 is computed, with no script required. This scenario drives that call through the harness's spell_modifier metric.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "Valkyr's Calling crit chance modifier is zero before the talent",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 570034, "op": 7, "base": 0, "equals": 0
+    },
+    { "action": "learn", "actor": "cleric", "spell": 680620 },
+    {
+      "action": "assert", "label": "By The Light adds 50 to Valkyr's Calling's crit chance",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 570034, "op": 7, "base": 0, "equals": 50
+    }
+  ]
+}

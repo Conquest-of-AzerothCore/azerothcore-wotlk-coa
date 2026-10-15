@@ -1,0 +1,11 @@
+-- Cache of the Firelord (179703) was never actually lootable: GameObject::Use() has no
+-- GAMEOBJECT_TYPE_CHEST case (confirmed by reading the stock engine switch - it falls to
+-- default:, spellId stays 0, nothing happens), and a type-3 chest is normally opened only via
+-- Spell::EffectOpenLock, reached by the client auto-casting the spell matching its lock's
+-- LockType.dbc entry - a path nothing in this core ever drives for a bare chest GO. The lock
+-- itself (57) is not the defect: its populated case (LockType 5 "Open") resolves to SKILL_NONE,
+-- so CanOpenLock always succeeds trivially; confirmed live on slot 3 that neither CMSG_LOOT
+-- (guarded to creature/vehicle GUIDs only) nor plain CMSG_GAMEOBJ_USE ever opened the loot
+-- window. go_cache_of_the_firelord_coa (boss_majordomo_executus.cpp) opens the chest directly
+-- from GossipHello, the same idiom go_ragnaros_portal_coa already uses to short-circuit Use().
+UPDATE `gameobject_template` SET `ScriptName` = 'go_cache_of_the_firelord_coa' WHERE `entry` = 179703;

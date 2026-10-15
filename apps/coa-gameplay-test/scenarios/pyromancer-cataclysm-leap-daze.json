@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Cataclysm leaps, damages and dazes natively (#1946)",
+  "contract": "#1946: Cataclysm 520218 is an active spell that works through stock effects: E2 LEAP_BACK (SpellEffects.cpp:5391), E3 triggers Knockback 520220 (Fire school damage 10+2/level plus KNOCK_BACK, triggering Slow 520868) and E1 a periodic trigger at 2299 ms casting Charge Back Down 520219 (damage, knockback). The 520868 daze is scripted into Dazed 1604 lasting 6000 ms (AscensionPyromancerAbilities.cpp:371-380). Asserts that casting it damages the adjacent target, applies Dazed with a 6 s duration, and that the caster casts 520219 once after the leap. Not verified in game by the audit: a failure points at a stock handler or the DBC set.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "p",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "d",
+      "metric": "health",
+      "save_as": "h0"
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 520218
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 520218,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Takeoff damage lands on the target",
+      "actor": "d",
+      "metric": "health",
+      "relative_to": "h0",
+      "max": -1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Target is Dazed",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 1604,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Daze lasts 6 s",
+      "actor": "d",
+      "metric": "aura_duration_ms",
+      "spell": 1604,
+      "min": 4000,
+      "max": 6000,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Charge Back Down lands 2.3 s later",
+      "actor": "p",
+      "metric": "spell_cast_count",
+      "spell": 520219,
+      "min": 1,
+      "within_ms": 6000
+    }
+  ]
+}

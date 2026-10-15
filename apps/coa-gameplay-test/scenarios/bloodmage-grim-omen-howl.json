@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "name": "Grim Omen calls the Darkwing when a Howl is used (#3174)",
+  "contract": "Grim Omen 800154 reads 'Critical strikes with Ravenous Strike or Bloodfang Bite, or using Howl spells, now triggers Call of the Darkwing'. Its single effect is aura 42 (proc trigger spell) on Call of the Darkwing 801958, a stock SPELL_EFFECT_SUMMON of creature 50069. Spell.dbc gives 800154 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and nothing was ever summoned. The tooltip carries two proc conditions - one requiring a critical strike, one not - which one spell_proc entry cannot express, so the row admits both families in both phases and aura_ascension_bloodmage_grim_omen narrows it. This scenario exercises the Howl clause, which is deterministic; the critical-strike clause is not testable here because the harness can set spell crit rating but no melee crit rating, so an auto-attack-class critical strike cannot be forced. The Howl cast is Night Hunter's Howl 501682 (top of the spell_ranks chain 500124-501682, SpellFamilyFlags (0, 0, 2048), CasterAuraSpell 524861, fixtured with set_aura).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 800154
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 501682
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture the Cursed Form marker Night Hunter's Howl requires",
+      "actor": "bloodmage",
+      "spell": 524861,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Grim Omen passive is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 800154,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Shadow Bats owned before the Howl",
+      "actor": "bloodmage",
+      "metric": "owned_creature_count",
+      "entry": 50069,
+      "save_as": "bats_before"
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 501682,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: using a Howl calls the Darkwing",
+      "actor": "bloodmage",
+      "metric": "owned_creature_count",
+      "entry": 50069,
+      "relative_to": "bats_before",
+      "min": 1,
+      "within_ms": 5000
+    }
+  ]
+}

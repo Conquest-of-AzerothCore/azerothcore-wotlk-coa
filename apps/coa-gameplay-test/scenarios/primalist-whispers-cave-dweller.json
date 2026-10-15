@@ -1,0 +1,783 @@
+{
+  "schema": 1,
+  "name": "Primalist Whispers of the Earth and Cave Dweller native modifiers",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "base",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "rank1",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "rank2",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "removed",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "enemy0",
+      "race": 5,
+      "class": 8,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "enemy1",
+      "race": 5,
+      "class": 8,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "enemy2",
+      "race": 5,
+      "class": 8,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "enemy3",
+      "race": 5,
+      "class": 8,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "snapshot",
+      "actor": "base",
+      "metric": "spell_cast_time_ms",
+      "spell": 500402,
+      "save_as": "cast_500402"
+    },
+    {
+      "action": "snapshot",
+      "actor": "base",
+      "metric": "spell_cast_time_ms",
+      "spell": 502777,
+      "save_as": "cast_502777"
+    },
+    {
+      "action": "snapshot",
+      "actor": "base",
+      "metric": "spell_cast_time_ms",
+      "spell": 680448,
+      "save_as": "cast_680448"
+    },
+    {
+      "action": "snapshot",
+      "actor": "base",
+      "metric": "spell_cast_time_ms",
+      "spell": 681536,
+      "save_as": "cast_681536"
+    },
+    {
+      "action": "snapshot",
+      "actor": "base",
+      "metric": "spell_cast_time_ms",
+      "spell": 116,
+      "save_as": "cast_116"
+    },
+    {
+      "action": "learn",
+      "actor": "base",
+      "spell": 681494
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_cast_time_ms",
+      "spell": 500402,
+      "relative_to": "cast_500402",
+      "equals": -300
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_cast_time_ms",
+      "spell": 502777,
+      "relative_to": "cast_502777",
+      "equals": -300
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_cast_time_ms",
+      "spell": 680448,
+      "relative_to": "cast_680448",
+      "equals": -300
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_cast_time_ms",
+      "spell": 681536,
+      "relative_to": "cast_681536",
+      "equals": -300
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_cast_time_ms",
+      "spell": 116,
+      "relative_to": "cast_116",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "base",
+      "spell": 681494
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_cast_time_ms",
+      "spell": 500402,
+      "relative_to": "cast_500402",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_cast_time_ms",
+      "spell": 502777,
+      "relative_to": "cast_502777",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_cast_time_ms",
+      "spell": 680448,
+      "relative_to": "cast_680448",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_cast_time_ms",
+      "spell": 681536,
+      "relative_to": "cast_681536",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_cast_time_ms",
+      "spell": 116,
+      "relative_to": "cast_116",
+      "equals": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "base",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy0",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "base",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy0",
+      "map": 0,
+      "x": -9612.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159265
+    },
+    {
+      "action": "specialization",
+      "actor": "base",
+      "id": 95
+    },
+    {
+      "action": "learn",
+      "actor": "base",
+      "spell": 681536
+    },
+    {
+      "action": "learn",
+      "actor": "base",
+      "spell": 800094
+    },
+    {
+      "action": "learn",
+      "actor": "enemy0",
+      "spell": 2136
+    },
+    {
+      "action": "snapshot",
+      "actor": "base",
+      "metric": "max_power",
+      "power": 1,
+      "save_as": "base_rage"
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "max_power",
+      "power": 1,
+      "relative_to": "base_rage",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "base",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "base",
+      "spell": 800094
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "base",
+      "spell": 681536,
+      "target": "enemy0"
+    },
+    {
+      "action": "wait",
+      "ms": 750
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "cast_remaining_ms",
+      "spell": 681536,
+      "min": 800
+    },
+    {
+      "action": "snapshot",
+      "actor": "base",
+      "metric": "cast_pushback_ms",
+      "save_as": "base_pushback"
+    },
+    {
+      "action": "cast",
+      "actor": "enemy0",
+      "spell": 2136,
+      "target": "base"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy0",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "base",
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "cast_pushback_ms",
+      "relative_to": "base_pushback",
+      "equals": 500
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_damage_count",
+      "spell": 681536,
+      "target": "enemy0",
+      "equals": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "rank1",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy1",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "rank1",
+      "map": 0,
+      "x": -9597.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy1",
+      "map": 0,
+      "x": -9592.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159265
+    },
+    {
+      "action": "specialization",
+      "actor": "rank1",
+      "id": 95
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 681536
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 800094
+    },
+    {
+      "action": "learn",
+      "actor": "enemy1",
+      "spell": 2136
+    },
+    {
+      "action": "snapshot",
+      "actor": "rank1",
+      "metric": "max_power",
+      "power": 1,
+      "save_as": "rank1_rage"
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 574314
+    },
+    {
+      "action": "assert",
+      "actor": "rank1",
+      "metric": "max_power",
+      "power": 1,
+      "relative_to": "rank1_rage",
+      "equals": 150
+    },
+    {
+      "action": "set_power",
+      "actor": "rank1",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "rank1",
+      "spell": 800094
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "rank1",
+      "spell": 681536,
+      "target": "enemy1"
+    },
+    {
+      "action": "wait",
+      "ms": 750
+    },
+    {
+      "action": "assert",
+      "actor": "rank1",
+      "metric": "cast_remaining_ms",
+      "spell": 681536,
+      "min": 800
+    },
+    {
+      "action": "snapshot",
+      "actor": "rank1",
+      "metric": "cast_pushback_ms",
+      "save_as": "rank1_pushback"
+    },
+    {
+      "action": "cast",
+      "actor": "enemy1",
+      "spell": 2136,
+      "target": "rank1"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy1",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "rank1",
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "rank1",
+      "metric": "cast_pushback_ms",
+      "relative_to": "rank1_pushback",
+      "equals": 250
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "rank1",
+      "metric": "spell_damage_count",
+      "spell": 681536,
+      "target": "enemy1",
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "rank1",
+      "spell": 574314
+    },
+    {
+      "action": "assert",
+      "actor": "rank1",
+      "metric": "max_power",
+      "power": 1,
+      "relative_to": "rank1_rage",
+      "equals": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "rank2",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy2",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "rank2",
+      "map": 0,
+      "x": -9577.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy2",
+      "map": 0,
+      "x": -9572.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159265
+    },
+    {
+      "action": "specialization",
+      "actor": "rank2",
+      "id": 95
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 681536
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 800094
+    },
+    {
+      "action": "learn",
+      "actor": "enemy2",
+      "spell": 2136
+    },
+    {
+      "action": "snapshot",
+      "actor": "rank2",
+      "metric": "max_power",
+      "power": 1,
+      "save_as": "rank2_rage"
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 574361
+    },
+    {
+      "action": "assert",
+      "actor": "rank2",
+      "metric": "max_power",
+      "power": 1,
+      "relative_to": "rank2_rage",
+      "equals": 300
+    },
+    {
+      "action": "set_power",
+      "actor": "rank2",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "rank2",
+      "spell": 800094
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "rank2",
+      "spell": 681536,
+      "target": "enemy2"
+    },
+    {
+      "action": "wait",
+      "ms": 750
+    },
+    {
+      "action": "assert",
+      "actor": "rank2",
+      "metric": "cast_remaining_ms",
+      "spell": 681536,
+      "min": 800
+    },
+    {
+      "action": "snapshot",
+      "actor": "rank2",
+      "metric": "cast_pushback_ms",
+      "save_as": "rank2_pushback"
+    },
+    {
+      "action": "cast",
+      "actor": "enemy2",
+      "spell": 2136,
+      "target": "rank2"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy2",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "rank2",
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "rank2",
+      "metric": "cast_pushback_ms",
+      "relative_to": "rank2_pushback",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "rank2",
+      "metric": "spell_damage_count",
+      "spell": 681536,
+      "target": "enemy2",
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "rank2",
+      "spell": 574361
+    },
+    {
+      "action": "assert",
+      "actor": "rank2",
+      "metric": "max_power",
+      "power": 1,
+      "relative_to": "rank2_rage",
+      "equals": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "removed",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy3",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "removed",
+      "map": 0,
+      "x": -9557.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy3",
+      "map": 0,
+      "x": -9552.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159265
+    },
+    {
+      "action": "specialization",
+      "actor": "removed",
+      "id": 95
+    },
+    {
+      "action": "learn",
+      "actor": "removed",
+      "spell": 681536
+    },
+    {
+      "action": "learn",
+      "actor": "removed",
+      "spell": 800094
+    },
+    {
+      "action": "learn",
+      "actor": "enemy3",
+      "spell": 2136
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "max_power",
+      "power": 1,
+      "save_as": "removed_rage"
+    },
+    {
+      "action": "learn",
+      "actor": "removed",
+      "spell": 574361
+    },
+    {
+      "action": "unlearn",
+      "actor": "removed",
+      "spell": 574361
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "max_power",
+      "power": 1,
+      "relative_to": "removed_rage",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "removed",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "removed",
+      "spell": 800094
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "removed",
+      "spell": 681536,
+      "target": "enemy3"
+    },
+    {
+      "action": "wait",
+      "ms": 750
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "cast_remaining_ms",
+      "spell": 681536,
+      "min": 800
+    },
+    {
+      "action": "snapshot",
+      "actor": "removed",
+      "metric": "cast_pushback_ms",
+      "save_as": "removed_pushback"
+    },
+    {
+      "action": "cast",
+      "actor": "enemy3",
+      "spell": 2136,
+      "target": "removed"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy3",
+      "metric": "spell_damage_count",
+      "spell": 2136,
+      "target": "removed",
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "cast_pushback_ms",
+      "relative_to": "removed_pushback",
+      "equals": 500
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "spell_damage_count",
+      "spell": 681536,
+      "target": "enemy3",
+      "equals": 1
+    }
+  ]
+}

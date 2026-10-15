@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Runemaster audit #2755: Volcanic Etching raises Fire and Earth Engraving proc chance",
+  "contract": [
+    "Volcanic Etching 705615: 'Increases the chance to trigger Weapon Engraving: Fire and Weapon Engraving: Earth",
+    "by $s1%.' Re-verified in Spell.dbc: single Effect0 SPELL_AURA_ADD_FLAT_MODIFIER (107), MiscValue 18 =",
+    "SPELLMOD_CHANCE_OF_SUCCESS, EffectBasePoints0 4 with DieSides 1 = +5%, EffectSpellClassMask mask1 2 (0x2)",
+    "and mask2 33554432 (0x2000000) on family 38. Fire Engraving 653211 carries SpellFamilyName 38,",
+    "SpellFamilyFlags[1] 2 (base ProcChance 30) - an exact match on mask1. Earth Engraving 653221 carries",
+    "SpellFamilyFlags[2] 33554432 (base ProcChance 15) - an exact match on mask2, and its own proc chain is fixed",
+    "by the already-merged data/sql/updates/pending_db_world/rev_20260927_91_runemaster_earth_engraving.sql. This",
+    "spell_modifier probe exercises Volcanic Etching's own classmask match independently of whether either",
+    "engraving actually procs at runtime. Expected: before the talent both base chances read unmodified (30% and",
+    "15%); with the talent both rise by 5 points (35% and 20%); unlearning restores Fire Engraving's base chance."
+  ],
+  "timeout_ms": 60000,
+  "players": [{"id": "rm", "race": 1, "class": 32, "level": 80}],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 3000},
+    {"action": "assert", "label": "SETUP: Fire Engraving rolls 30% before the talent", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653211, "op": 18, "base": 30, "min": 29.99, "max": 30.01},
+    {"action": "assert", "label": "SETUP: Earth Engraving rolls 15% before the talent", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653221, "op": 18, "base": 15, "min": 14.99, "max": 15.01},
+    {"action": "learn", "actor": "rm", "spell": 705615},
+    {"action": "assert", "label": "CONTRACT: Volcanic Etching is active", "actor": "rm", "metric": "aura",
+      "spell": 705615, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "CONTRACT: Fire Engraving chance rises to 35%", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653211, "op": 18, "base": 30, "min": 34.99, "max": 35.01},
+    {"action": "assert", "label": "CONTRACT: Earth Engraving chance rises to 20%", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653221, "op": 18, "base": 15, "min": 19.99, "max": 20.01},
+    {"action": "unlearn", "actor": "rm", "spell": 705615},
+    {"action": "assert", "label": "CONTRACT: unlearning restores Fire Engraving's 30% base chance", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653211, "op": 18, "base": 30, "min": 29.99, "max": 30.01,
+      "within_ms": 2000}
+  ]
+}

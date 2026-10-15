@@ -39,6 +39,11 @@ void WhoListCacheMgr::Update()
         if (!player->FindMap() || player->GetSession()->PlayerLoading())
             continue;
 
+        // The Who list is the only reader of this cache, so a realm that fills itself with bots
+        // can keep them out of it and leave the list to the players who are actually there.
+        if (player->GetSession()->IsBot() && !sWorld->getBoolConfig(CONFIG_WHO_LIST_SHOW_BOTS))
+            continue;
+
         std::string playerName = player->GetName();
         std::wstring widePlayerName;
 

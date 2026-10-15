@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Power the Elements native pet and Nature damage percent (#2817)",
+  "contract": "#2817: Power the Elements rank 1 (705721) and rank 2 (707799) are passives with two self-targeted aura effects each. Effect 0 is aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 0 (SPELLMOD_DAMAGE), class mask dword2 = 16384, SpellFamilyName 22, EffectBasePoints 9/19 -> amount 10/20 (%). Effect 1 is aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 8 (Nature school), no class mask, EffectBasePoints 1/3 -> amount 2/4 (%). The Air Elemental pet (entry 500941, summoned by 804019 and forced into SUMMON_PET by stormbringer_pet_lifecycle in AscensionStormbringerPet.cpp) casts Windpelt (806016), which is SpellFamilyName 22 with SpellFamilyFlags dword2 = 16384, an exact bitwise match to effect 0's class mask. Unit::GetSpellModOwner (Unit.cpp:13642) walks a non-player caster to its Pet::GetOwner(), so when the Air Elemental computes its own damage in Unit::SpellDamageBonusDone (Unit.cpp:9368-9369) it resolves the mod owner to the Stormbringer player and applies the player's own classmask spellmod exactly as it would for the player's own cast, with no pet-aware module code required. Effect 1's Nature-damage-percent aura is the standard class-agnostic SPELL_AURA_MOD_DAMAGE_PERCENT_DONE path (Unit.cpp:8836-8848), filtered only by school-mask overlap; Volt (500928) is SpellFamilyName 22 with SchoolMask Nature and SpellFamilyFlags dword2 = 32, which does not overlap effect 0's class mask (16384), so it isolates effect 1's percentage cleanly. The Windpelt probe uses the harness's fixed synthetic base of 1000 exactly (pet:true; Windpelt's own Effect0 is SPELL_EFFECT_SCHOOL_DAMAGE with zero coefficient and the pet carries no PvE tuning aura, confirmed by the observed 1000/1100/1200 baseline/rank1/rank2 sequence). Volt's own Effect0 is SPELL_AURA_PERIODIC_DAMAGE (a DOT, EffectApplyAuraName[0]=3), not a direct-damage effect, so its probe passes periodic:true to match Unit::SpellDamageBonusDone's DOT path; the player caster also carries the class's native PvE damage-tuning multiplier (AscensionClassTuning.h entry {887004, ClassId 16, Spec 0}, consumed by Unit::GetAscensionNormalTuningDamageMultiplier against a non-player-owned target such as the dummy) which is a structurally separate multiplicative factor from effect1's MOD_DAMAGE_PERCENT_DONE aura (Unit::SpellPctDamageModsDone multiplies GetAscensionNormalTuningDamageMultiplier(...) by GetTotalAuraMultiplier(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, ...) as two distinct factors), so Volt's absolute damage is stat/tuning-dependent (observed baseline 1460, not 1000) while the ratio contributed by Power the Elements' effect1 (2%/4%) stays exactly isolated; the Volt assertions therefore snapshot the pre-talent value and assert ratio_to it instead of a fixed absolute number. Each rank is learned and asserted in isolation (unlearning rank 1 before learning rank 2) because whether both ranks can be simultaneously known, and if so whether their percentages stack additively or the higher rank alone applies, was not verified during investigation; asserting only the single-rank case avoids inventing an unverified combined number. Zero hits for 705721/707799 under modules/ or src/server/ (matching the issue's own grep) is correct: neither term needs module code, and this closes as a regression scenario only.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "sb",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "sb",
+      "entry": 36,
+      "level": 80,
+      "distance": 10
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "label": "Learn Summon Air Elemental", "actor": "sb", "spell": 804019 },
+    { "action": "cast", "label": "Summon the Air Elemental pet", "actor": "sb", "spell": 804019 },
+    { "action": "assert", "label": "The Air Elemental pet is summoned",
+      "actor": "sb", "metric": "pet_entry", "equals": 500941, "within_ms": 24000 },
+    { "action": "learn", "label": "Learn Volt", "actor": "sb", "spell": 500928 },
+    { "action": "assert", "label": "BASELINE: no pet damage-percent modifier on Windpelt before Power the Elements",
+      "actor": "sb", "metric": "spell_damage_done", "spell": 806016, "pet": true, "target": "d", "equals": 1000 },
+    { "action": "snapshot", "label": "BASELINE: record pre-talent Volt periodic damage (stat/tuning-dependent absolute value: Volt's Effect0 is SPELL_AURA_PERIODIC_DAMAGE, and the player carries the class's native PvE damage-tuning multiplier AscensionClassTuning 887004, so this is not the harness's flat 1000)",
+      "actor": "sb", "metric": "spell_damage_done", "spell": 500928, "periodic": true, "target": "d", "save_as": "volt_base" },
+    { "action": "learn", "label": "Learn Power the Elements rank 1", "actor": "sb", "spell": 705721 },
+    { "action": "assert", "label": "DISCRIMINATING: Power the Elements rank 1 adds 10% to the Air Elemental's Windpelt damage",
+      "actor": "sb", "metric": "spell_damage_done", "spell": 806016, "pet": true, "target": "d", "equals": 1100 },
+    { "action": "assert", "label": "DISCRIMINATING: Power the Elements rank 1 adds 2% Nature damage to the owner's Volt (ratio to pre-talent baseline, since the PvE tuning multiplier is a separate multiplicative factor from effect1's Nature damage-percent aura)",
+      "actor": "sb", "metric": "spell_damage_done", "spell": 500928, "periodic": true, "target": "d", "ratio_to": "volt_base", "min": 1.015, "max": 1.025 },
+    { "action": "unlearn", "label": "Unlearn Power the Elements rank 1", "actor": "sb", "spell": 705721 },
+    { "action": "assert", "label": "Removing rank 1 restores the unmodified pet Windpelt damage",
+      "actor": "sb", "metric": "spell_damage_done", "spell": 806016, "pet": true, "target": "d", "equals": 1000 },
+    { "action": "assert", "label": "Removing rank 1 restores the unmodified owner Volt damage (ratio to pre-talent baseline)",
+      "actor": "sb", "metric": "spell_damage_done", "spell": 500928, "periodic": true, "target": "d", "ratio_to": "volt_base", "equals": 1 },
+    { "action": "learn", "label": "Learn Power the Elements rank 2", "actor": "sb", "spell": 707799 },
+    { "action": "assert", "label": "DISCRIMINATING: Power the Elements rank 2 adds 20% to the Air Elemental's Windpelt damage",
+      "actor": "sb", "metric": "spell_damage_done", "spell": 806016, "pet": true, "target": "d", "equals": 1200 },
+    { "action": "assert", "label": "DISCRIMINATING: Power the Elements rank 2 adds 4% Nature damage to the owner's Volt (ratio to pre-talent baseline)",
+      "actor": "sb", "metric": "spell_damage_done", "spell": 500928, "periodic": true, "target": "d", "ratio_to": "volt_base", "min": 1.035, "max": 1.045 }
+  ]
+}

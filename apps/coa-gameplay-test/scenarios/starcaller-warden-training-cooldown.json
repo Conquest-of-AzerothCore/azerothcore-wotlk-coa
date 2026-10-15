@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "warden-training-cooldown|Warden Training cuts Warden's Blade cooldown by 25% (#731)",
+  "contract": "Warden Training 704790 (Spell.dbc, SpellFamilyName 32, passive 0x1c0) carries SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue SPELLMOD_COOLDOWN (11), EffectSpellClassMask word1 0x04000000 and EffectBasePoints -26 which resolves to -25 with DieSides 1, matching 'Reduces the cooldown of Warden's Blade by $s1%'. Warden's Blade rank 1 805508 and rank 6 806816 carry SpellFamilyFlags word1 0x04000000 and RecoveryTime 20000 (CategoryRecoveryTime 20000). Native path only: Player::AddSpellAndCategoryCooldowns applies SPELLMOD_COOLDOWN through Player::ApplySpellMod and SpellInfo::IsAffectedBySpellMod admits the modifier on the shared family and mask; neither spell carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (0x20000000). The spell_modifier metric runs that same ApplySpellMod on the shipped RecoveryTime: 20000 x 0.75 = 15000. Astral Blade 805563 (word2 0x200000, RecoveryTime 20000) has a different class mask and must stay at 20000, so the modifier is not a blanket cooldown cut. Both fixtures are the same race, class and level.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 704790
+    },
+    {
+      "action": "assert",
+      "label": "Warden's Blade rank 1 cooldown is unmodified without the talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 805508,
+      "op": 11,
+      "base": 20000,
+      "equals": 20000
+    },
+    {
+      "action": "assert",
+      "label": "Warden's Blade rank 1 cooldown drops to 15 sec with the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 805508,
+      "op": 11,
+      "base": 20000,
+      "min": 14999,
+      "max": 15001
+    },
+    {
+      "action": "assert",
+      "label": "Warden's Blade rank 6 cooldown drops to 15 sec with the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 806816,
+      "op": 11,
+      "base": 20000,
+      "min": 14999,
+      "max": 15001
+    },
+    {
+      "action": "assert",
+      "label": "Astral Blade cooldown is not touched by the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 805563,
+      "op": 11,
+      "base": 20000,
+      "equals": 20000
+    }
+  ]
+}

@@ -16,6 +16,7 @@
  */
 
 #include "Creature.h"
+#include "DungeonHealth.h"
 #include "BattlegroundMgr.h"
 #include "CellImpl.h"
 #include "Common.h"
@@ -30,6 +31,7 @@
 #include "GridNotifiers.h"
 #include "Group.h"
 #include "GroupMgr.h"
+#include "LocalLevelScaling.h"
 #include "Log.h"
 #include "LootMgr.h"
 #include "ObjectMgr.h"
@@ -56,6 +58,38 @@
 //  there is probably some underlying problem with imports which should properly addressed
 //  see: https://github.com/azerothcore/azerothcore-wotlk/issues/9766
 #include "GridNotifiersImpl.h"
+
+namespace
+{
+    DungeonHealth::Values dungeonHealthOverrides;
+}
+
+void Creature::LoadDungeonHealthOverrides()
+{
+    dungeonHealthOverrides.clear();
+    auto* statement = WorldDatabase.GetPreparedStatement(WORLD_SEL_COA_DUNGEON_HEALTH);
+    if (PreparedQueryResult result = WorldDatabase.Query(statement))
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+            uint32 const map = fields[0].Get<uint16>();
+            uint8 const difficulty = fields[1].Get<uint8>();
+            uint32 const entry = fields[2].Get<uint32>();
+            uint32 const health = fields[3].Get<uint32>();
+            if (!DungeonHealth::IsVanillaDungeon(map) || (difficulty != 1 && difficulty != 2)
+                || !sObjectMgr->GetCreatureTemplate(entry) || !health)
+            {
+                LOG_ERROR("sql.sql", "Invalid dungeon health override: map {}, mode {}, entry {}, HP {}",
+                    map, difficulty, entry, health);
+                continue;
+            }
+            dungeonHealthOverrides[{map, difficulty, entry}] = health;
+        } while (result->NextRow());
+    }
+    LOG_INFO("server.loading", ">> Loaded {} reconstructed dungeon health targets; fallback values are provisional",
+        dungeonHealthOverrides.size());
+}
 
 CreatureMovementData::CreatureMovementData() : Ground(CreatureGroundMovementType::Run), Flight(CreatureFlightMovementType::None),
                                                Swim(true), Rooted(false), Chase(CreatureChaseMovementType::Run),
@@ -433,7 +467,7 @@ void Creature::RemoveCorpse(bool setSpawnTime, bool skipVisibility)
             AI()->CorpseRemoved(respawnDelay);
 
         // Should get removed later, just keep "compatibility" with scripts
-        if (setSpawnTime)
+        if (setSpawnTime && !CreatureRespawnClock::KeepsRespawnTime(m_respawnTime, IsRespawnTimerFromDeath()))
         {
             m_respawnTime = GameTime::GetGameTime().count() + respawnDelay;
             //SaveRespawnTime();
@@ -463,7 +497,7 @@ void Creature::RemoveCorpse(bool setSpawnTime, bool skipVisibility)
         // Always save respawn time in non-compat mode since the creature is being
         // destroyed — ProcessRespawns() needs the entry to know when to recreate it.
         // m_respawnTime was already set in setDeathState(JustDied).
-        if (setSpawnTime)
+        if (setSpawnTime && !CreatureRespawnClock::KeepsRespawnTime(m_respawnTime, IsRespawnTimerFromDeath()))
             m_respawnTime = std::max<time_t>(GameTime::GetGameTime().count() + respawnDelay, m_respawnTime);
         SaveRespawnTime();
 
@@ -524,11 +558,10 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data)
 
     CreatureModel model = *ObjectMgr::ChooseDisplayId(cinfo, data);
     CreatureModelInfo const* mInfo = sObjectMgr->GetCreatureModelRandomGender(&model, cinfo);
-    if (!mInfo)                                             // Cancel load if no model defined
-    {
-        LOG_ERROR("sql.sql", "Creature (Entry: {}) has no model {} defined in table `creature_template_model`, can't load. ", Entry, model.CreatureDisplayID);
-        return false;
-    }
+    if (!mInfo)
+        LOG_DEBUG("sql.sql",
+                  "No model info for creature (Entry: {}) display {}; loading anyway.",
+                  Entry, model.CreatureDisplayID);
 
     SetDisplayId(model.CreatureDisplayID, model.DisplayScale);
     SetNativeDisplayId(model.CreatureDisplayID);
@@ -757,9 +790,17 @@ void Creature::Update(uint32 diff)
                 else
                 {
                     m_groupLootTimer -= diff;
+                    time_t const rollEnd = GameTime::GetGameTime().count() + m_groupLootTimer / IN_MILLISECONDS + 1;
+                    if (CreatureRespawnClock::KeepsRespawnTime(m_respawnTime, IsRespawnTimerFromDeath()) &&
+                        m_respawnTime < rollEnd)
+                    {
+                        m_respawnTime = rollEnd;
+                        SaveRespawnTime();
+                    }
                 }
             }
-            else if (m_corpseRemoveTime <= GameTime::GetGameTime().count())
+            else if (CreatureRespawnClock::IsCorpseDue(GameTime::GetGameTime().count(), m_corpseRemoveTime,
+                m_respawnTime, IsRespawnTimerFromDeath()))
             {
                 RemoveCorpse(false);
                 LOG_DEBUG("entities.unit", "Removing corpse... {} ", GetUInt32Value(OBJECT_FIELD_ENTRY));
@@ -1006,7 +1047,8 @@ void Creature::Regenerate(Powers power)
                 // Combat and any controlled creature
                 if (IsInCombat() || GetCharmerOrOwnerGUID())
                 {
-                    if (GetEntry() == NPC_IMP || GetEntry() == NPC_WATER_ELEMENTAL_TEMP || GetEntry() == NPC_WATER_ELEMENTAL_PERM)
+                    if (uint32 const stock = GetStockPetEntry(GetEntry());
+                        stock == NPC_IMP || stock == NPC_WATER_ELEMENTAL_TEMP || stock == NPC_WATER_ELEMENTAL_PERM)
                     {
                         addvalue = uint32((GetStat(STAT_SPIRIT) / (IsUnderLastManaUseEffect() ? 8.0f : 5.0f) + 17.0f));
                     }
@@ -1288,7 +1330,8 @@ bool Creature::CanResetTalents(Player* player) const
     if (!trainer)
         return false;
 
-    return player->GetLevel() >= 10 && trainer->IsTrainerValidForPlayer(player);
+    // A Wildcard Hero trains its ranks at any class trainer, but its talents are its rolls.
+    return player->GetLevel() >= 10 && trainer->IsTrainerValidForPlayer(player) && player->getClass() != CLASS_HERO;
 }
 
 Player* Creature::GetLootRecipient() const
@@ -1313,6 +1356,7 @@ void Creature::SetLootRecipient(Unit* unit, bool withGroup)
 
     if (!unit)
     {
+        m_sharedQuestParticipants.clear();
         m_lootRecipient.Clear();
         m_lootRecipientGroup = 0;
         RemoveDynamicFlag(UNIT_DYNFLAG_LOOTABLE | UNIT_DYNFLAG_TAPPED);
@@ -1363,6 +1407,74 @@ void Creature::SetLootRecipient(Unit* unit, bool withGroup)
         m_lootRecipientGroup = 0;
 
     SetDynamicFlag(UNIT_DYNFLAG_TAPPED);
+}
+
+bool Creature::IsSharedQuestTarget() const
+{
+    CreatureTemplate const* creatureTemplate = GetCreatureTemplate();
+    Map const* map = FindMap();
+    return creatureTemplate && (creatureTemplate->type_flags & CREATURE_TYPE_FLAG_QUEST_BOSS)
+        && map && map->IsWorldMap() && !IsControlledByPlayer();
+}
+
+void Creature::RegisterSharedQuestContributor(Unit* attacker)
+{
+    if (!attacker || !IsSharedQuestTarget())
+        return;
+
+    if (Player* player = attacker->GetCharmerOrOwnerPlayerOrPlayerItself())
+        if (m_sharedQuestParticipants.insert(player->GetGUID()).second)
+            ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);
+}
+
+bool Creature::IsSharedQuestParticipant(Player const* player) const
+{
+    return m_sharedQuestParticipants.contains(player->GetGUID());
+}
+
+bool Creature::IsSharedQuestItem(uint32 itemId) const
+{
+    if (ItemTemplate const* item = sObjectMgr->GetItemTemplate(itemId))
+        if (item->StartQuest)
+            return true;
+
+    for (ObjectGuid const& guid : m_sharedQuestParticipants)
+        if (Player* player = ObjectAccessor::FindPlayer(guid))
+            if (player->HasQuestForItem(itemId))
+                return true;
+    return false;
+}
+
+void Creature::FinalizeSharedQuestParticipants()
+{
+    GuidSet eligible;
+    for (ObjectGuid const& guid : m_sharedQuestParticipants)
+        if (Player* player = ObjectAccessor::FindPlayer(guid))
+        {
+            if (!player->IsAlive() || !player->IsAtLootRewardDistance(this) || !player->InSamePhase(this))
+                continue;
+            eligible.insert(guid);
+            if (Group* group = player->GetGroup())
+                for (GroupReference* member = group->GetFirstMember(); member; member = member->next())
+                    if (Player* other = member->GetSource())
+                        if (other->IsAlive() && other->IsAtLootRewardDistance(this) && other->InSamePhase(this))
+                            eligible.insert(other->GetGUID());
+        }
+    m_sharedQuestParticipants = std::move(eligible);
+}
+
+void Creature::RewardSharedQuestParticipants(ObjectGuid rewardedPlayer, ObjectGuid rewardedGroup)
+{
+    for (ObjectGuid const& guid : m_sharedQuestParticipants)
+        if (Player* player = ObjectAccessor::FindPlayer(guid))
+        {
+            if (guid == rewardedPlayer)
+                continue;
+            if (Group* group = player->GetGroup())
+                if (group->GetGUID() == rewardedGroup)
+                    continue;
+            player->KilledMonster(GetCreatureTemplate(), GetGUID());
+        }
 }
 
 // return true if this creature is tapped by the player or by a member of his group.
@@ -1506,6 +1618,13 @@ void Creature::SelectLevel(bool changelevel)
 
     sScriptMgr->OnBeforeCreatureSelectLevel(cInfo, this, level);
 
+    // Vanilla dungeons on Heroic/Mythic are level 60 content. A creature without its own difficulty
+    // template would keep its Normal level there (Defias Miner: 17), and a level-17 creature is then
+    // scaled up again by per-character views on top of the health from coa_dungeon_health.
+    if (!IsPet() && cInfo->Entry == GetEntry() && DungeonHealth::IsVanillaDungeon(GetMapId())
+        && (GetMap()->GetSpawnMode() == 1 || GetMap()->GetSpawnMode() == 2))
+        level = std::max<uint8>(level, rank == CREATURE_ELITE_WORLDBOSS ? 62 : 60);
+
     if (changelevel)
         SetLevel(level);
 
@@ -1516,6 +1635,20 @@ void Creature::SelectLevel(bool changelevel)
 
     uint32 basehp = std::max<uint32>(1, stats->GenerateHealth(cInfo));
     uint32 health = uint32(basehp * healthmod);
+    uint32 heroicHealth = health;
+    if (!IsPet() && GetMap()->GetSpawnMode() == 2 && DungeonHealth::IsVanillaDungeon(GetMapId()))
+    {
+        CreatureTemplate const* normalInfo = sObjectMgr->GetCreatureTemplate(GetEntry());
+        if (normalInfo && normalInfo->DifficultyEntry[0])
+            if (CreatureTemplate const* heroicInfo = sObjectMgr->GetCreatureTemplate(normalInfo->DifficultyEntry[0]))
+            {
+                CreatureBaseStats const* heroicStats = sObjectMgr->GetCreatureBaseStats(level, heroicInfo->unit_class);
+                heroicHealth = uint32(std::max<uint32>(1, heroicStats->GenerateHealth(heroicInfo))
+                    * _GetHealthMod(heroicInfo->rank));
+            }
+    }
+    health = DungeonHealth::Resolve(dungeonHealthOverrides, GetMapId(), uint8(GetMap()->GetSpawnMode()),
+        GetEntry(), health, heroicHealth, cInfo->Entry != GetEntry(), IsPet(), cInfo->rank == CREATURE_ELITE_WORLDBOSS);
 
     SetCreateHealth(health);
     SetMaxHealth(health);
@@ -1753,7 +1886,14 @@ bool Creature::LoadCreatureFromDB(ObjectGuid::LowType spawnId, Map* map, bool ad
 
     uint32 curhealth;
 
-    if (!m_regenHealth)
+    // CoA: a fixed spawn health is the vanilla value; on Heroic/Mythic the creature has far more health
+    // (coa_dungeon_health), so it started fights at 5-20% (Zul'Farrak stair event). Full health there instead.
+    if (!m_regenHealth && GetMap() && DungeonHealth::IsVanillaDungeon(GetMapId()) && GetMap()->GetSpawnMode() != 0)
+    {
+        curhealth = GetMaxHealth();
+        SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
+    }
+    else if (!m_regenHealth)
     {
         curhealth = data->curhealth;
         if (curhealth)
@@ -1961,8 +2101,13 @@ void Creature::setDeathState(DeathState state, bool despawn)
     if (state == DeathState::JustDied)
     {
         m_corpseRemoveTime = GameTime::GetGameTime().count() + m_corpseDelay;
-        uint32 dynamicRespawnDelay = GetMap()->ApplyDynamicModeRespawnScaling(this, m_respawnDelay);
-        m_respawnTime = GameTime::GetGameTime().count() + dynamicRespawnDelay + m_corpseDelay;
+        bool const respawnTimerFromDeath = IsRespawnTimerFromDeath();
+        uint32 dynamicRespawnDelay = GetMap()->ApplyDynamicModeRespawnScaling(this,
+            CreatureRespawnClock::DelayAtDeath(m_respawnDelay, respawnTimerFromDeath));
+        if (IsSharedQuestTarget() && !isWorldBoss())
+            dynamicRespawnDelay = std::min<uint32>(dynamicRespawnDelay, 30);
+        m_respawnTime = CreatureRespawnClock::RespawnTimeAtDeath(GameTime::GetGameTime().count(), dynamicRespawnDelay,
+            m_corpseDelay, respawnTimerFromDeath);
 
         // always save boss respawn time at death to prevent crash cheating
         if (GetMap()->IsDungeon() || isWorldBoss() || GetCreatureTemplate()->rank >= CREATURE_ELITE_ELITE)
@@ -2284,6 +2429,22 @@ void Creature::LoadTemplateImmunities(int32 creatureImmunitiesId)
         _creatureImmunitiesId = 0;
 }
 
+// CoA: Ascension bosses cannot be stunned on any difficulty (#7287), so a class stun cannot cut a boss mechanic
+// short. Stuns the boss puts on itself or gets from its allies still land.
+static bool IsStunImmuneBoss(Creature const* creature, Unit const* caster)
+{
+    if (creature->GetOwnerGUID().IsPlayer() || (caster && (caster == creature || creature->IsFriendlyTo(caster))))
+        return false;
+    return creature->IsDungeonBoss() || creature->isWorldBoss() || creature->GetCreatureTemplate()->rank == CREATURE_ELITE_WORLDBOSS;
+}
+
+// CoA: poisons that count as bleeds still hit bleed-immune NPCs.
+static bool IsIgnoredTemplateMechanicImmunity(Creature const* creature, SpellInfo const* spellInfo, uint32 mechanic)
+{
+    return mechanic == MECHANIC_BLEED && spellInfo->Dispel == DISPEL_POISON &&
+        !creature->IsCharmedOwnedByPlayerOrPlayer();
+}
+
 bool Creature::IsImmunedToSpell(SpellInfo const* spellInfo, Spell const* spell)
 {
     if (!spellInfo)
@@ -2296,7 +2457,12 @@ bool Creature::IsImmunedToSpell(SpellInfo const* spellInfo, Spell const* spell)
 
     // Xinef: this should exclude self casts...
     // Spells that don't have effectMechanics.
-    if (spellInfo->Mechanic > MECHANIC_NONE && HasMechanicTemplateImmunity(1ULL << spellInfo->Mechanic))
+    if (spellInfo->Mechanic > MECHANIC_NONE && HasMechanicTemplateImmunity(1ULL << spellInfo->Mechanic) &&
+        !IsIgnoredTemplateMechanicImmunity(this, spellInfo, spellInfo->Mechanic))
+        return true;
+
+    Unit const* caster = spell ? spell->GetCaster() : nullptr;
+    if (spellInfo->Mechanic == MECHANIC_STUN && IsStunImmuneBoss(this, caster))
         return true;
 
     // The above helper uses the creature_immunities table rather than a
@@ -2305,7 +2471,7 @@ bool Creature::IsImmunedToSpell(SpellInfo const* spellInfo, Spell const* spell)
     // match the runtime immunity set stored in m_spellImmune.
     bool immunedToAllEffects = true;
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-        if (spellInfo->Effects[i].IsEffect() && !IsImmunedToSpellEffect(spellInfo, i))
+        if (spellInfo->Effects[i].IsEffect() && !IsImmunedToSpellEffect(spellInfo, i, caster))
         {
             immunedToAllEffects = false;
             break;
@@ -2319,10 +2485,18 @@ bool Creature::IsImmunedToSpell(SpellInfo const* spellInfo, Spell const* spell)
 bool Creature::IsImmunedToSpellEffect(SpellInfo const* spellInfo, uint32 index, Unit const* caster /*= nullptr*/) const
 {
     // Xinef: this should exclude self casts...
-    if (spellInfo->Effects[index].Mechanic > MECHANIC_NONE && HasMechanicTemplateImmunity(1ULL << spellInfo->Effects[index].Mechanic))
+    uint32 mechanic = spellInfo->Effects[index].Mechanic;
+    if (mechanic > MECHANIC_NONE && HasMechanicTemplateImmunity(1ULL << mechanic) &&
+        !IsIgnoredTemplateMechanicImmunity(this, spellInfo, mechanic))
         return true;
 
-    if (GetCreatureTemplate()->type == CREATURE_TYPE_MECHANICAL && spellInfo->Effects[index].Effect == SPELL_EFFECT_HEAL)
+    if ((mechanic == MECHANIC_STUN || spellInfo->Effects[index].ApplyAuraName == SPELL_AURA_MOD_STUN) &&
+        IsStunImmuneBoss(this, caster))
+        return true;
+
+    // Tinker heals are designed to repair player-owned mechanical pets and devices
+    if (GetCreatureTemplate()->type == CREATURE_TYPE_MECHANICAL && spellInfo->Effects[index].Effect == SPELL_EFFECT_HEAL &&
+        !(spellInfo->SpellFamilyName == 34 && GetOwnerGUID().IsPlayer()))
         return true;
 
     return Unit::IsImmunedToSpellEffect(spellInfo, index, caster);
@@ -2664,6 +2838,12 @@ void Creature::SaveRespawnTime()
         return;
 
     GetMap()->SaveCreatureRespawnTime(m_spawnId, m_respawnTime);
+}
+
+bool Creature::IsRespawnTimerFromDeath() const
+{
+    return m_spawnId && !IsSummon() && (!m_creatureData || m_creatureData->dbData)
+        && ((IsSharedQuestTarget() && !isWorldBoss()) || sWorld->getBoolConfig(CONFIG_RESPAWN_TIMER_STARTS_AT_DEATH));
 }
 
 bool Creature::CanCreatureAttack(Unit const* victim, bool skipDistCheck) const
@@ -3149,7 +3329,7 @@ void Creature::AllLootRemovedFromCorpse()
     float decayRate = sWorld->getRate(RATE_CORPSE_DECAY_LOOTED);
     uint32 diff = uint32((m_corpseRemoveTime - now) * decayRate);
 
-    m_respawnTime -= diff;
+    m_respawnTime = CreatureRespawnClock::RespawnTimeAfterLoot(m_respawnTime, diff, IsRespawnTimerFromDeath());
 
     // corpse skinnable, but without skinning flag, and then skinned, corpse will despawn next update
     if (loot.loot_type == LOOT_SKINNING)
@@ -3162,10 +3342,31 @@ void Creature::AllLootRemovedFromCorpse()
     }
 }
 
+uint8 Creature::GetLootSkillLevelFor(Player const* looter) const
+{
+    // The client derives a corpse's skinning requirement from the level it was sent, which a per-viewer view can
+    // lower inside a dungeon. A lifted view keeps the authored level: the skinning loot is the authored creature's.
+    uint8 const view = LocalLevelScaling::ViewLevelFor(looter, this);
+    return view ? std::min(view, GetLevel()) : GetLevel();
+}
+
 uint8 Creature::getLevelForTarget(WorldObject const* target) const
 {
-    if (!isWorldBoss() || !target->ToUnit())
+    if (!isWorldBoss() || !target || !target->ToUnit())
+    {
+        // A character with open-world scaling on fights *their* version of this creature, and the
+        // whole core asks this function for the level a fight is rolled at. Answering with the
+        // level they are shown is what keeps one definition of that version: spell hit and
+        // resistance tables, weapon and defence skill, the glancing and crushing tables, detection,
+        // aggro radius and kill experience all follow from here.
+        if (target)
+            if (Unit const* opponent = target->ToUnit())
+                if (Player const* viewer = opponent->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    if (uint8 const view = LocalLevelScaling::ViewLevelFor(viewer, this))
+                        return view;
+
         return Unit::getLevelForTarget(target);
+    }
 
     uint16 level = target->ToUnit()->GetLevel() + sWorld->getIntConfig(CONFIG_WORLD_BOSS_LEVEL_DIFF);
     if (level < 1)

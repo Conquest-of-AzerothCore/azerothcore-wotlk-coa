@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Barbarian audit: Bellowing Voice spell modifier reaches its target spells (#2048)",
+  "contract": "Audit report #2048 asked for a script for a passive whose effects are native spell-mod auras (107 flat, 108 percent). The effect BasePoints and EffectSpellClassMask in Spell.dbc name the spell-mod operation, amount and affected Barbarian spells; Player::ApplySpellMod, which the spell_modifier metric calls, must deliver base+flat or base*(100+pct)/100. Expected values are computed from the DBC amount, not from the implementation.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "before: 300857 has no modifier for op 8",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 300857,
+      "op": 8,
+      "base": 100000,
+      "min": 99998,
+      "max": 100002
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 561322
+    },
+    {
+      "action": "assert",
+      "label": "Bellowing Voice (561322) is active",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 561322,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "561322 op 8 percent +20 reaches 300857 (mask selects 11 Barbarian spell(s))",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 300857,
+      "op": 8,
+      "base": 100000,
+      "min": 119998,
+      "max": 120002
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Everglow adds 2 bounces to Radiant Cascade (#2310)",
+  "contract": "Everglow 704565 (SpellFamilyName 33) has one live effect: SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 17 (SPELLMOD_JUMP_TARGETS) and EffectBasePoints 1 -> real 2, and EffectSpellClassMask word 1 bit 0x8000 (32768). Radiant Cascade's base spell (500141) carries SpellFamilyFlags_1 32768 -- the same bit -- and its own EffectChainTarget_1 is 4 (its own tooltip: 'jumps to up to 4 additional allies'), so SpellInfo::IsAffectedBySpellMod admits it. Spell::SelectImplicitChainTargets reads maxTargets = Effects[i].ChainTarget then calls modOwner->ApplySpellMod(id, SPELLMOD_JUMP_TARGETS, maxTargets) before searching secondary targets, so the talent's own contribution is added straight onto Radiant Cascade's own chain count: 4 -> 6, exactly the tooltip's '2 additional allies'. The 'spell_modifier' query metric calls this same native path directly. Native handlers only; regression scenario for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 27, "level": 80 },
+    { "id": "talent", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talent", "spell": 704565 },
+    {
+      "action": "assert",
+      "label": "Without Everglow, Radiant Cascade keeps its own 4 chain targets",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 500141,
+      "op": 17,
+      "base": 4,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "Everglow adds 2 more, for 6 chain targets total",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 500141,
+      "op": 17,
+      "base": 4,
+      "equals": 6
+    }
+  ]
+}

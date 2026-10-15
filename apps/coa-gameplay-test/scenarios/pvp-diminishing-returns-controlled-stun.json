@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "PvP: repeated controlled stuns on a player diminish to 50%, 25%, then immune",
+  "contract": "Hammer of Justice 10308 applies SPELL_AURA_MOD_STUN with mechanic stun for DurationIndex 27 = 3000 ms, which falls into DIMINISHING_CONTROLLED_STUN (DRTYPE_ALL, SpellMgr.cpp GetDiminishingReturnsGroupForSpell). A player casting it on a hostile player raises the target's level on every hit; each level halves the duration (Unit::ApplyDiminishingToDuration) until the fourth application within 15 s of the previous one ending is resisted as immune.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 24, "level": 80, "spell_hit_rating": 10000 },
+    { "id": "enemy", "race": 2, "class": 24, "level": 80 }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "caster", "spell": 10308 },
+    { "action": "teleport", "actor": "enemy", "map": 0, "x": -9614.06, "y": -288.949, "z": 57.3053, "o": 3.141593 },
+    { "action": "teleport", "actor": "caster", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "pvp", "actor": "caster", "enabled": true },
+    { "action": "pvp", "actor": "enemy", "enabled": true },
+    { "action": "cast", "actor": "caster", "spell": 10308, "target": "enemy" },
+    { "action": "assert", "label": "First stun lands", "actor": "enemy", "metric": "aura", "spell": 10308, "equals": 1, "within_ms": 3500 },
+    { "action": "assert", "label": "First stun has its full duration", "actor": "enemy", "metric": "aura_duration_ms", "spell": 10308, "min": 2000, "max": 3000 },
+    { "action": "assert", "actor": "enemy", "metric": "aura", "spell": 10308, "equals": 0, "within_ms": 4000 },
+    { "action": "reset_cooldown", "actor": "caster", "spell": 10308 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "cast", "actor": "caster", "spell": 10308, "target": "enemy" },
+    { "action": "assert", "label": "Second stun lands", "actor": "enemy", "metric": "aura", "spell": 10308, "equals": 1, "within_ms": 3500 },
+    { "action": "assert", "label": "Second stun is diminished to half", "actor": "enemy", "metric": "aura_duration_ms", "spell": 10308, "min": 900, "max": 1500 },
+    { "action": "assert", "actor": "enemy", "metric": "aura", "spell": 10308, "equals": 0, "within_ms": 2500 },
+    { "action": "reset_cooldown", "actor": "caster", "spell": 10308 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "cast", "actor": "caster", "spell": 10308, "target": "enemy" },
+    { "action": "assert", "label": "Third stun lands", "actor": "enemy", "metric": "aura", "spell": 10308, "equals": 1, "within_ms": 3500 },
+    { "action": "assert", "label": "Third stun is diminished to a quarter", "actor": "enemy", "metric": "aura_duration_ms", "spell": 10308, "min": 300, "max": 750 },
+    { "action": "assert", "actor": "enemy", "metric": "aura", "spell": 10308, "equals": 0, "within_ms": 2000 },
+    { "action": "reset_cooldown", "actor": "caster", "spell": 10308 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "cast", "actor": "caster", "spell": 10308, "target": "enemy" },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "label": "Fourth stun is resisted as immune", "actor": "enemy", "metric": "aura", "spell": 10308, "equals": 0 }
+  ]
+}

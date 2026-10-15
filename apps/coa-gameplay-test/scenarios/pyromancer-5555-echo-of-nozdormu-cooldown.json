@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Echo of Nozdormu reduces known spell cooldowns on cast (#5555)",
+  "contract": "#5555: Echo of Nozdormu 802174's Description reads 'reducing all spell and ability cooldowns by $802804s1%' (802804 effect 0..2 are the custom effect 192 -- BasePoints 4, DieSides 1, value 5 -- targeting caster with EffectMiscValue 504380/500135/806611). 802804 itself has no spell_script_names binding and effect 192 has no core handler ('safe null handler' per SharedDefines.h), so that specific 3-spell path is dead. But pyromancer_spells::OnSpellCast (AscensionPyromancerAbilities.cpp) already has an unconditional block for Named(info, 802174) that iterates the caster's whole spellbook and reduces every known spell's remaining cooldown by the same 5% (percent = 5, matching 802804's calculated value; +extra with 802168 Aspect's Blessing, not used here) via ModifySpellCooldown -- literally 'all spell and ability cooldowns', which is broader than 802804's 3-spell list. Adding the 802804/effect-192 wiring on top would double-reduce those 3 spells, so no code change is made here; this scenario proves the already-shipped mechanism delivers the tooltip's reduction using Draconic Invocation (802119, RecoveryTime 180000 ms, no SpellFamily overlap with the 3 listed spells) as an unrelated long-cooldown probe.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "pyro",
+      "race": 1,
+      "class": 24,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "pyro",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "pyro", "spell": 802119 },
+    { "action": "learn", "actor": "pyro", "spell": 802174 },
+    { "action": "cast", "label": "Put Draconic Invocation on its 180 s cooldown", "actor": "pyro", "spell": 802119 },
+    { "action": "assert", "label": "Draconic Invocation cast succeeded", "actor": "pyro", "metric": "cast_failure", "spell": 802119, "equals": 0, "within_ms": 2000 },
+    { "action": "wait", "label": "Let the shared GCD from Draconic Invocation clear", "ms": 1700 },
+    { "action": "snapshot", "actor": "pyro", "metric": "cooldown_ms", "spell": 802119, "save_as": "cd_before" },
+    { "action": "assert", "label": "control: Draconic Invocation is on cooldown", "actor": "pyro", "metric": "cooldown_ms", "spell": 802119, "min": 170000 },
+    { "action": "cast", "label": "Echo of Nozdormu", "actor": "pyro", "spell": 802174, "target": "target" },
+    { "action": "assert", "label": "Echo of Nozdormu cast succeeded", "actor": "pyro", "metric": "cast_failure", "spell": 802174, "equals": 0, "within_ms": 5000 },
+    { "action": "assert", "label": "Draconic Invocation's cooldown drops by about 5%, not by natural decay alone", "actor": "pyro", "metric": "cooldown_ms", "spell": 802119, "ratio_to": "cd_before", "min": 0.90, "max": 0.96, "within_ms": 5000 }
+  ]
+}

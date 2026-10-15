@@ -1,0 +1,1782 @@
+{
+  "schema": 1,
+  "name": "Guardian passive weapon requirements at learning and equipment changes",
+  "contract": "Weapon passives require matching equipment, preserve rank bonuses, and deactivate on swaps.",
+  "players": [
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 80
+    },
+    {
+      "id": "warrior",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "guardian",
+      "entry": 36,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "guardian",
+      "item": 25
+    },
+    {
+      "action": "add_item",
+      "actor": "guardian",
+      "item": 2490
+    },
+    {
+      "action": "add_item",
+      "actor": "guardian",
+      "item": 2492
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "snapshot",
+      "actor": "guardian",
+      "save_as": "s704515_crit",
+      "metric": "melee_crit_chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "guardian",
+      "save_as": "s704515_critical",
+      "metric": "spell_critical_damage",
+      "spell": 800311,
+      "target": "enemy"
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 704515
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 704515: aura 0",
+      "metric": "aura",
+      "spell": 704515,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Sword receives no axe crit chance",
+      "metric": "melee_crit_chance",
+      "relative_to": "s704515_crit",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Sword receives no axe critical damage",
+      "metric": "spell_critical_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "ratio_to": "s704515_critical",
+      "equals": 1
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 2490,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 704515: aura 1",
+      "metric": "aura",
+      "spell": 704515,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe crit chance follows equipment",
+      "metric": "melee_crit_chance",
+      "relative_to": "s704515_crit",
+      "min": 1.99,
+      "max": 2.01
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe critical damage follows equipment",
+      "metric": "spell_critical_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "ratio_to": "s704515_critical",
+      "equals": 1.05
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 704515: aura 0",
+      "metric": "aura",
+      "spell": 704515,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe crit chance follows equipment",
+      "metric": "melee_crit_chance",
+      "relative_to": "s704515_crit",
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe critical damage follows equipment",
+      "metric": "spell_critical_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "ratio_to": "s704515_critical",
+      "equals": 1.0
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 2490,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 704515: aura 1",
+      "metric": "aura",
+      "spell": 704515,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe crit chance follows equipment",
+      "metric": "melee_crit_chance",
+      "relative_to": "s704515_crit",
+      "min": 1.99,
+      "max": 2.01
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe critical damage follows equipment",
+      "metric": "spell_critical_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "ratio_to": "s704515_critical",
+      "equals": 1.05
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 704515
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 704515: aura 0",
+      "metric": "aura",
+      "spell": 704515,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Removing Axe Training removes crit chance",
+      "metric": "melee_crit_chance",
+      "relative_to": "s704515_crit",
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Removing Axe Training removes critical damage",
+      "metric": "spell_critical_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "ratio_to": "s704515_critical",
+      "equals": 1
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "snapshot",
+      "actor": "guardian",
+      "save_as": "s707818_crit",
+      "metric": "melee_crit_chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "guardian",
+      "save_as": "s707818_critical",
+      "metric": "spell_critical_damage",
+      "spell": 800311,
+      "target": "enemy"
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 707818
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 707818: aura 0",
+      "metric": "aura",
+      "spell": 707818,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Sword receives no axe crit chance",
+      "metric": "melee_crit_chance",
+      "relative_to": "s707818_crit",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Sword receives no axe critical damage",
+      "metric": "spell_critical_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "ratio_to": "s707818_critical",
+      "equals": 1
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 2490,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 707818: aura 1",
+      "metric": "aura",
+      "spell": 707818,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe crit chance follows equipment",
+      "metric": "melee_crit_chance",
+      "relative_to": "s707818_crit",
+      "min": 3.99,
+      "max": 4.01
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe critical damage follows equipment",
+      "metric": "spell_critical_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "ratio_to": "s707818_critical",
+      "equals": 1.1
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 707818: aura 0",
+      "metric": "aura",
+      "spell": 707818,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe crit chance follows equipment",
+      "metric": "melee_crit_chance",
+      "relative_to": "s707818_crit",
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe critical damage follows equipment",
+      "metric": "spell_critical_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "ratio_to": "s707818_critical",
+      "equals": 1.0
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 2490,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 707818: aura 1",
+      "metric": "aura",
+      "spell": 707818,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe crit chance follows equipment",
+      "metric": "melee_crit_chance",
+      "relative_to": "s707818_crit",
+      "min": 3.99,
+      "max": 4.01
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe critical damage follows equipment",
+      "metric": "spell_critical_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "ratio_to": "s707818_critical",
+      "equals": 1.1
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 707818
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 707818: aura 0",
+      "metric": "aura",
+      "spell": 707818,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Removing Axe Training removes crit chance",
+      "metric": "melee_crit_chance",
+      "relative_to": "s707818_crit",
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Removing Axe Training removes critical damage",
+      "metric": "spell_critical_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "ratio_to": "s707818_critical",
+      "equals": 1
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "snapshot",
+      "actor": "guardian",
+      "save_as": "s712474_crit",
+      "metric": "melee_crit_chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "guardian",
+      "save_as": "s712474_critical",
+      "metric": "spell_critical_damage",
+      "spell": 800311,
+      "target": "enemy"
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 712474
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 712474: aura 0",
+      "metric": "aura",
+      "spell": 712474,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Sword receives no axe crit chance",
+      "metric": "melee_crit_chance",
+      "relative_to": "s712474_crit",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Sword receives no axe critical damage",
+      "metric": "spell_critical_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "ratio_to": "s712474_critical",
+      "equals": 1
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 2490,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 712474: aura 1",
+      "metric": "aura",
+      "spell": 712474,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe crit chance follows equipment",
+      "metric": "melee_crit_chance",
+      "relative_to": "s712474_crit",
+      "min": 5.99,
+      "max": 6.01
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe critical damage follows equipment",
+      "metric": "spell_critical_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "ratio_to": "s712474_critical",
+      "equals": 1.15
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 712474: aura 0",
+      "metric": "aura",
+      "spell": 712474,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe crit chance follows equipment",
+      "metric": "melee_crit_chance",
+      "relative_to": "s712474_crit",
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe critical damage follows equipment",
+      "metric": "spell_critical_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "ratio_to": "s712474_critical",
+      "equals": 1.0
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 2490,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 712474: aura 1",
+      "metric": "aura",
+      "spell": 712474,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe crit chance follows equipment",
+      "metric": "melee_crit_chance",
+      "relative_to": "s712474_crit",
+      "min": 5.99,
+      "max": 6.01
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe critical damage follows equipment",
+      "metric": "spell_critical_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "ratio_to": "s712474_critical",
+      "equals": 1.15
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 712474
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 712474: aura 0",
+      "metric": "aura",
+      "spell": 712474,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Removing Axe Training removes crit chance",
+      "metric": "melee_crit_chance",
+      "relative_to": "s712474_crit",
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Removing Axe Training removes critical damage",
+      "metric": "spell_critical_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "ratio_to": "s712474_critical",
+      "equals": 1
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "snapshot",
+      "actor": "guardian",
+      "save_as": "s802297_sword_time",
+      "metric": "attack_time_ms"
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 2490,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "snapshot",
+      "actor": "guardian",
+      "save_as": "s802297_axe_time",
+      "metric": "attack_time_ms"
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 802297
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 802297: aura 0",
+      "metric": "aura",
+      "spell": 802297,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe receives no sword haste",
+      "metric": "attack_time_ms",
+      "relative_to": "s802297_axe_time",
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 802297: aura 1",
+      "metric": "aura",
+      "spell": 802297,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Sword haste follows equipment",
+      "metric": "attack_time_ms",
+      "ratio_to": "s802297_sword_time",
+      "min": 0.9080909090909091,
+      "max": 0.9100909090909091
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 2490,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 802297: aura 0",
+      "metric": "aura",
+      "spell": 802297,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Sword haste follows equipment",
+      "metric": "attack_time_ms",
+      "ratio_to": "s802297_axe_time",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 802297: aura 1",
+      "metric": "aura",
+      "spell": 802297,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Sword haste follows equipment",
+      "metric": "attack_time_ms",
+      "ratio_to": "s802297_sword_time",
+      "min": 0.9080909090909091,
+      "max": 0.9100909090909091
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 802297
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 802297: aura 0",
+      "metric": "aura",
+      "spell": 802297,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Removing Sword Training removes haste",
+      "metric": "attack_time_ms",
+      "relative_to": "s802297_sword_time",
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "snapshot",
+      "actor": "guardian",
+      "save_as": "s803831_sword_time",
+      "metric": "attack_time_ms"
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 2490,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "snapshot",
+      "actor": "guardian",
+      "save_as": "s803831_axe_time",
+      "metric": "attack_time_ms"
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 803831
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 803831: aura 0",
+      "metric": "aura",
+      "spell": 803831,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe receives no sword haste",
+      "metric": "attack_time_ms",
+      "relative_to": "s803831_axe_time",
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 803831: aura 1",
+      "metric": "aura",
+      "spell": 803831,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Sword haste follows equipment",
+      "metric": "attack_time_ms",
+      "ratio_to": "s803831_sword_time",
+      "min": 0.8323333333333334,
+      "max": 0.8343333333333334
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 2490,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 803831: aura 0",
+      "metric": "aura",
+      "spell": 803831,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Sword haste follows equipment",
+      "metric": "attack_time_ms",
+      "ratio_to": "s803831_axe_time",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 803831: aura 1",
+      "metric": "aura",
+      "spell": 803831,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Sword haste follows equipment",
+      "metric": "attack_time_ms",
+      "ratio_to": "s803831_sword_time",
+      "min": 0.8323333333333334,
+      "max": 0.8343333333333334
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 803831
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 803831: aura 0",
+      "metric": "aura",
+      "spell": 803831,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Removing Sword Training removes haste",
+      "metric": "attack_time_ms",
+      "relative_to": "s803831_sword_time",
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "snapshot",
+      "actor": "guardian",
+      "save_as": "s807891_sword_time",
+      "metric": "attack_time_ms"
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 2490,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "snapshot",
+      "actor": "guardian",
+      "save_as": "s807891_axe_time",
+      "metric": "attack_time_ms"
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 807891
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 807891: aura 0",
+      "metric": "aura",
+      "spell": 807891,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Axe receives no sword haste",
+      "metric": "attack_time_ms",
+      "relative_to": "s807891_axe_time",
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 807891: aura 1",
+      "metric": "aura",
+      "spell": 807891,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Sword haste follows equipment",
+      "metric": "attack_time_ms",
+      "ratio_to": "s807891_sword_time",
+      "min": 0.7682307692307692,
+      "max": 0.7702307692307692
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 2490,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 807891: aura 0",
+      "metric": "aura",
+      "spell": 807891,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Sword haste follows equipment",
+      "metric": "attack_time_ms",
+      "ratio_to": "s807891_axe_time",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 807891: aura 1",
+      "metric": "aura",
+      "spell": 807891,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Sword haste follows equipment",
+      "metric": "attack_time_ms",
+      "ratio_to": "s807891_sword_time",
+      "min": 0.7682307692307692,
+      "max": 0.7702307692307692
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 807891
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 807891: aura 0",
+      "metric": "aura",
+      "spell": 807891,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Removing Sword Training removes haste",
+      "metric": "attack_time_ms",
+      "relative_to": "s807891_sword_time",
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "snapshot",
+      "actor": "guardian",
+      "save_as": "s705336_mitigated",
+      "metric": "armor_reduced_damage",
+      "spell": 800311,
+      "target": "enemy"
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 705336
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 705336: aura 0",
+      "metric": "aura",
+      "spell": 705336,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Sword receives no mace penetration",
+      "metric": "armor_reduced_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "relative_to": "s705336_mitigated",
+      "equals": 0
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 2492,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 705336: aura 1",
+      "metric": "aura",
+      "spell": 705336,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Mace Training retains its rank amount",
+      "metric": "aura_amount",
+      "spell": 705336,
+      "effect": 0,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Mace Training increases damage through armor",
+      "metric": "armor_reduced_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "relative_to": "s705336_mitigated",
+      "min": 1
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 705336: aura 0",
+      "metric": "aura",
+      "spell": 705336,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Swapping out the mace removes penetration",
+      "metric": "armor_reduced_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "relative_to": "s705336_mitigated",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 705336
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 705336: aura 0",
+      "metric": "aura",
+      "spell": 705336,
+      "equals": 0
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "snapshot",
+      "actor": "guardian",
+      "save_as": "s707819_mitigated",
+      "metric": "armor_reduced_damage",
+      "spell": 800311,
+      "target": "enemy"
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 707819
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 707819: aura 0",
+      "metric": "aura",
+      "spell": 707819,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Sword receives no mace penetration",
+      "metric": "armor_reduced_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "relative_to": "s707819_mitigated",
+      "equals": 0
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 2492,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 707819: aura 1",
+      "metric": "aura",
+      "spell": 707819,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Mace Training retains its rank amount",
+      "metric": "aura_amount",
+      "spell": 707819,
+      "effect": 0,
+      "equals": 16
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Mace Training increases damage through armor",
+      "metric": "armor_reduced_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "relative_to": "s707819_mitigated",
+      "min": 1
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 707819: aura 0",
+      "metric": "aura",
+      "spell": 707819,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Swapping out the mace removes penetration",
+      "metric": "armor_reduced_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "relative_to": "s707819_mitigated",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 707819
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 707819: aura 0",
+      "metric": "aura",
+      "spell": 707819,
+      "equals": 0
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "snapshot",
+      "actor": "guardian",
+      "save_as": "s712475_mitigated",
+      "metric": "armor_reduced_damage",
+      "spell": 800311,
+      "target": "enemy"
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 712475
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 712475: aura 0",
+      "metric": "aura",
+      "spell": 712475,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Sword receives no mace penetration",
+      "metric": "armor_reduced_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "relative_to": "s712475_mitigated",
+      "equals": 0
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 2492,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 712475: aura 1",
+      "metric": "aura",
+      "spell": 712475,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Mace Training retains its rank amount",
+      "metric": "aura_amount",
+      "spell": 712475,
+      "effect": 0,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Mace Training increases damage through armor",
+      "metric": "armor_reduced_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "relative_to": "s712475_mitigated",
+      "min": 1
+    },
+    {
+      "action": "equip",
+      "actor": "guardian",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 706333
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 712475: aura 0",
+      "metric": "aura",
+      "spell": 712475,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Swapping out the mace removes penetration",
+      "metric": "armor_reduced_damage",
+      "spell": 800311,
+      "target": "enemy",
+      "relative_to": "s712475_mitigated",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "guardian",
+      "spell": 712475
+    },
+    {
+      "action": "assert",
+      "actor": "guardian",
+      "label": "Weapon requirement for 712475: aura 0",
+      "metric": "aura",
+      "spell": 712475,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "warrior",
+      "item": 25
+    },
+    {
+      "action": "add_item",
+      "actor": "warrior",
+      "item": 2492
+    },
+    {
+      "action": "add_item",
+      "actor": "warrior",
+      "item": 2362
+    },
+    {
+      "action": "add_item",
+      "actor": "warrior",
+      "item": 2417
+    },
+    {
+      "action": "learn",
+      "actor": "warrior",
+      "spell": 198
+    },
+    {
+      "action": "learn",
+      "actor": "warrior",
+      "spell": 8737
+    },
+    {
+      "action": "learn",
+      "actor": "warrior",
+      "spell": 9116
+    },
+    {
+      "action": "equip",
+      "actor": "warrior",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "equip",
+      "actor": "warrior",
+      "item": 2362,
+      "slot": 16
+    },
+    {
+      "action": "equip",
+      "actor": "warrior",
+      "item": 2417,
+      "slot": 4
+    },
+    {
+      "action": "learn",
+      "actor": "warrior",
+      "spell": 12704
+    },
+    {
+      "action": "assert",
+      "label": "Native mace passive stays inactive with a sword",
+      "actor": "warrior",
+      "metric": "aura",
+      "spell": 12704,
+      "equals": 0
+    },
+    {
+      "action": "equip",
+      "actor": "warrior",
+      "item": 2492,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "Native mace passive activates on equip",
+      "actor": "warrior",
+      "metric": "aura",
+      "spell": 12704,
+      "equals": 1
+    },
+    {
+      "action": "equip",
+      "actor": "warrior",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "Native mace passive deactivates on swap",
+      "actor": "warrior",
+      "metric": "aura",
+      "spell": 12704,
+      "equals": 0
+    }
+  ],
+  "timeout_ms": 180000
+}

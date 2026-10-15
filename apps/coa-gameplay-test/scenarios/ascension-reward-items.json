@@ -1,0 +1,2099 @@
+{
+  "schema": 1,
+  "name": "Rune of Ascension Pouch payout and cache reward delivery (#4506, #4509)",
+  "contract": "A Rune of Ascension Pouch is consumed once and pays the amount its own name states into the Currency tab (Rune of Ascension, item 375250). A Prestigious Cache is consumed once at max level and replaces itself in the bags with exactly one reward its content pool offers the opener; below max level it is refused and stays in the bags. A Callboard Cache carries ITEM_FLAG_HAS_LOOT, so it is right-clicked into CMSG_OPEN_ITEM rather than used: the open has to spend it once and replace it with exactly one reward, and no loot window may be left behind. A cache only ever pays from its own content: a Heroic Dungeon Cache pays heroic dungeon gear and no mythic or raid gear, a Zul'Gurub Cache pays Zul'Gurub gear, and a Burning Crusade raid cache pays that raid's own loot. A generic Callboard Cache names no content of its own and has to resolve to a released tier from the opener's own average item level, and a generic Prestigious Cache grants the most recent released one. No pool may hold a Heroic, Mythic or Ascended copy of an item, and no reward a cache pays may be one: a raid cache pays the normal row of its own raid's loot, so a Zul'Gurub Cache never pays a Naxxramas item and no cache pays a difficulty copy of the gear it names. No pool may hold an item Ascension retired either, because a cache that pays one hands over an item whose own text says it is no longer a reward. A raid cache carries the raid's own loot table, so the bracers Blackwing Lair drops, the Zul'Gurub weapons, the Eye of Divinity and the Arcanite Ripper are all in the pools the raid caches own.",
+  "players": [
+    {
+      "id": "opener",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "tester",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "lowbie",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "stuffed",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "opener",
+      "item": 509896
+    },
+    {
+      "action": "assert",
+      "actor": "opener",
+      "metric": "item_count",
+      "item": 509896,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "opener",
+      "metric": "token_count",
+      "item": 375250,
+      "equals": 0
+    },
+    {
+      "action": "open_item",
+      "actor": "opener",
+      "item": 509896
+    },
+    {
+      "action": "assert",
+      "label": "the pouch is spent",
+      "actor": "opener",
+      "metric": "item_count",
+      "item": 509896,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "52,000 runes reach the Currency tab",
+      "actor": "opener",
+      "metric": "token_count",
+      "item": 375250,
+      "equals": 52000,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "opener",
+      "item": 509872
+    },
+    {
+      "action": "open_item",
+      "actor": "opener",
+      "item": 509872
+    },
+    {
+      "action": "assert",
+      "label": "the amounts add up",
+      "actor": "opener",
+      "metric": "token_count",
+      "item": 375250,
+      "equals": 64500,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "lowbie",
+      "item": 1287311
+    },
+    {
+      "action": "add_item",
+      "actor": "lowbie",
+      "item": 1287304
+    },
+    {
+      "action": "use_item",
+      "actor": "lowbie",
+      "item": 1287311,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "below max level a Prestigious Cache is kept",
+      "actor": "lowbie",
+      "metric": "item_count",
+      "item": 1287311,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "opener",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "opener",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_item_count",
+      "save_as": "heroic_held"
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615001,
+      "save_as": "heroic_pool"
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615002,
+      "save_as": "heroic_foreign"
+    },
+    {
+      "action": "open_item",
+      "actor": "opener",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "label": "opening a Heroic Dungeon Callboard Cache spends it",
+      "actor": "opener",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and replaces it with exactly one reward",
+      "actor": "opener",
+      "metric": "carried_item_count",
+      "relative_to": "heroic_held",
+      "min": 0,
+      "max": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the reward is heroic dungeon gear",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615001,
+      "relative_to": "heroic_pool",
+      "min": 1,
+      "max": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and no mythic dungeon gear came with it",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615002,
+      "relative_to": "heroic_foreign",
+      "min": 0,
+      "max": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "no loot window is left open behind it",
+      "actor": "opener",
+      "metric": "loot_count",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "opener",
+      "item": 1615002
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_item_count",
+      "save_as": "mythic_held"
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615002,
+      "save_as": "mythic_pool"
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615001,
+      "save_as": "mythic_foreign"
+    },
+    {
+      "action": "open_item",
+      "actor": "opener",
+      "item": 1615002
+    },
+    {
+      "action": "assert",
+      "label": "a Mythic Dungeon Callboard Cache is spent",
+      "actor": "opener",
+      "metric": "item_count",
+      "item": 1615002,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "exactly one reward replaced it",
+      "actor": "opener",
+      "metric": "carried_item_count",
+      "relative_to": "mythic_held",
+      "min": 0,
+      "max": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the reward is mythic dungeon gear",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615002,
+      "relative_to": "mythic_pool",
+      "min": 1,
+      "max": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and no heroic dungeon gear came with it",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615001,
+      "relative_to": "mythic_foreign",
+      "min": 0,
+      "max": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "opener",
+      "item": 1615003
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_item_count",
+      "save_as": "zg_held"
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615003,
+      "save_as": "zg_pool"
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615009,
+      "save_as": "zg_foreign"
+    },
+    {
+      "action": "open_item",
+      "actor": "opener",
+      "item": 1615003
+    },
+    {
+      "action": "assert",
+      "label": "a Zul'Gurub Callboard Cache is spent",
+      "actor": "opener",
+      "metric": "item_count",
+      "item": 1615003,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the reward is Zul'Gurub gear",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615003,
+      "relative_to": "zg_pool",
+      "min": 1,
+      "max": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and no Naxxramas gear came with it",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615009,
+      "relative_to": "zg_foreign",
+      "min": 0,
+      "max": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "opener",
+      "item": 1615004
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_item_count",
+      "save_as": "mc_held"
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615004,
+      "save_as": "mc_pool"
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615005,
+      "save_as": "mc_foreign"
+    },
+    {
+      "action": "open_item",
+      "actor": "opener",
+      "item": 1615004
+    },
+    {
+      "action": "assert",
+      "label": "a Molten Core Callboard Cache is spent",
+      "actor": "opener",
+      "metric": "item_count",
+      "item": 1615004,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the reward is Molten Core gear",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615004,
+      "relative_to": "mc_pool",
+      "min": 1,
+      "max": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and no Onyxia gear came with it",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615005,
+      "relative_to": "mc_foreign",
+      "min": 0,
+      "max": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "opener",
+      "item": 1615005
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_item_count",
+      "save_as": "ony_held"
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615005,
+      "save_as": "ony_pool"
+    },
+    {
+      "action": "open_item",
+      "actor": "opener",
+      "item": 1615005
+    },
+    {
+      "action": "assert",
+      "label": "an Onyxia Callboard Cache is spent",
+      "actor": "opener",
+      "metric": "item_count",
+      "item": 1615005,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the reward is Onyxia gear",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615005,
+      "relative_to": "ony_pool",
+      "min": 1,
+      "max": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "tester",
+      "item": 1615006
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "carried_item_count",
+      "save_as": "bwl_held"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615006,
+      "save_as": "bwl_pool"
+    },
+    {
+      "action": "open_item",
+      "actor": "tester",
+      "item": 1615006
+    },
+    {
+      "action": "assert",
+      "label": "a Blackwing Lair Callboard Cache is spent",
+      "actor": "tester",
+      "metric": "item_count",
+      "item": 1615006,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the reward is Blackwing Lair gear",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615006,
+      "relative_to": "bwl_pool",
+      "min": 1,
+      "max": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "tester",
+      "item": 1615007
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "carried_item_count",
+      "save_as": "aq20_held"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615007,
+      "save_as": "aq20_pool"
+    },
+    {
+      "action": "open_item",
+      "actor": "tester",
+      "item": 1615007
+    },
+    {
+      "action": "assert",
+      "label": "a Ruins of Ahn'Qiraj Callboard Cache is spent",
+      "actor": "tester",
+      "metric": "item_count",
+      "item": 1615007,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the reward is Ruins of Ahn'Qiraj gear",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615007,
+      "relative_to": "aq20_pool",
+      "min": 1,
+      "max": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "tester",
+      "item": 1615008
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "carried_item_count",
+      "save_as": "aq40_held"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615008,
+      "save_as": "aq40_pool"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615007,
+      "save_as": "aq40_foreign"
+    },
+    {
+      "action": "open_item",
+      "actor": "tester",
+      "item": 1615008
+    },
+    {
+      "action": "assert",
+      "label": "a Temple of Ahn'Qiraj Callboard Cache is spent",
+      "actor": "tester",
+      "metric": "item_count",
+      "item": 1615008,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the reward is Temple of Ahn'Qiraj gear",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615008,
+      "relative_to": "aq40_pool",
+      "min": 1,
+      "max": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and no Ruins of Ahn'Qiraj gear came with it",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615007,
+      "relative_to": "aq40_foreign",
+      "min": 0,
+      "max": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "tester",
+      "item": 1615009
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "carried_item_count",
+      "save_as": "naxx_held"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615009,
+      "save_as": "naxx_pool"
+    },
+    {
+      "action": "open_item",
+      "actor": "tester",
+      "item": 1615009
+    },
+    {
+      "action": "assert",
+      "label": "the newest raid cache pays too, and is spent",
+      "actor": "tester",
+      "metric": "item_count",
+      "item": 1615009,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the reward is Naxxramas gear",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "callboard",
+      "cache": 1615009,
+      "relative_to": "naxx_pool",
+      "min": 1,
+      "max": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "tester",
+      "item": 978050
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "carried_item_count",
+      "save_as": "generic_held"
+    },
+    {
+      "action": "open_item",
+      "actor": "tester",
+      "item": 978050
+    },
+    {
+      "action": "assert",
+      "label": "a generic Callboard Cache resolves a tier and pays it",
+      "actor": "tester",
+      "metric": "item_count",
+      "item": 978050,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "replaced by exactly one reward",
+      "actor": "tester",
+      "metric": "carried_item_count",
+      "relative_to": "generic_held",
+      "min": 0,
+      "max": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "opener",
+      "item": 1287304
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_item_count",
+      "save_as": "prest_heroic_held"
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "prestigious",
+      "cache": 1287304,
+      "save_as": "prest_heroic_pool"
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "prestigious",
+      "cache": 1287305,
+      "save_as": "prest_heroic_foreign"
+    },
+    {
+      "action": "use_item",
+      "actor": "opener",
+      "item": 1287304,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "the heroic Prestigious Cache is spent",
+      "actor": "opener",
+      "metric": "item_count",
+      "item": 1287304,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "one reward arrives and no tier token, because no heroic dungeon token exists",
+      "actor": "opener",
+      "metric": "carried_item_count",
+      "relative_to": "prest_heroic_held",
+      "min": 0,
+      "max": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the reward is heroic dungeon gear",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "prestigious",
+      "cache": 1287304,
+      "relative_to": "prest_heroic_pool",
+      "min": 1,
+      "max": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and no Zul'Gurub gear came with it",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "prestigious",
+      "cache": 1287305,
+      "relative_to": "prest_heroic_foreign",
+      "min": 0,
+      "max": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "opener",
+      "item": 1287305
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_item_count",
+      "save_as": "prest_zg_held"
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "prestigious",
+      "cache": 1287305,
+      "save_as": "prest_zg_pool"
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "prestigious",
+      "cache": 1287311,
+      "save_as": "prest_zg_foreign"
+    },
+    {
+      "action": "use_item",
+      "actor": "opener",
+      "item": 1287305,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "a Zul'Gurub Prestigious Cache is spent",
+      "actor": "opener",
+      "metric": "item_count",
+      "item": 1287305,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the reward is Zul'Gurub gear",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "prestigious",
+      "cache": 1287305,
+      "relative_to": "prest_zg_pool",
+      "min": 1,
+      "max": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and no Naxxramas gear came with it",
+      "actor": "opener",
+      "metric": "carried_pool_item_count",
+      "table": "prestigious",
+      "cache": 1287311,
+      "relative_to": "prest_zg_foreign",
+      "min": 0,
+      "max": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and no tier token either, because no Zul'Gurub token exists",
+      "actor": "opener",
+      "metric": "carried_item_count",
+      "relative_to": "prest_zg_held",
+      "min": 0,
+      "max": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "opener",
+      "item": 1287330
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "carried_item_count",
+      "save_as": "prest_generic_held"
+    },
+    {
+      "action": "snapshot",
+      "actor": "opener",
+      "metric": "item_count",
+      "item": 1287311,
+      "save_as": "prest_generic_naxx_held"
+    },
+    {
+      "action": "open_item",
+      "actor": "opener",
+      "item": 1287330
+    },
+    {
+      "action": "assert",
+      "label": "the generic Prestigious Cache opens from the right click too",
+      "actor": "opener",
+      "metric": "item_count",
+      "item": 1287330,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "it grants the newest released Prestigious Cache (Naxxramas 1287311) rather than gear (#6011)",
+      "actor": "opener",
+      "metric": "item_count",
+      "item": 1287311,
+      "relative_to": "prest_generic_naxx_held",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and nothing else arrives",
+      "actor": "opener",
+      "metric": "carried_item_count",
+      "relative_to": "prest_generic_held",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "destroy_item",
+      "actor": "opener",
+      "item": 1287311
+    },
+    {
+      "action": "assert",
+      "label": "the granted cache is discarded before the paid rewards are classified",
+      "actor": "opener",
+      "metric": "item_count",
+      "item": 1287311,
+      "relative_to": "prest_generic_naxx_held",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "tester",
+      "item": 1287311
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "carried_item_count",
+      "save_as": "prest_naxx_held"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "prestigious",
+      "cache": 1287311,
+      "save_as": "prest_naxx_pool"
+    },
+    {
+      "action": "use_item",
+      "actor": "tester",
+      "item": 1287311,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "a Naxxramas Prestigious Cache is spent",
+      "actor": "tester",
+      "metric": "item_count",
+      "item": 1287311,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the reward is Naxxramas gear",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "prestigious",
+      "cache": 1287311,
+      "relative_to": "prest_naxx_pool",
+      "min": 1,
+      "max": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "tester",
+      "item": 1297310
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "carried_item_count",
+      "save_as": "kara_held"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "prestigious",
+      "cache": 1297310,
+      "save_as": "kara_pool"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "prestigious",
+      "cache": 1297318,
+      "save_as": "kara_foreign"
+    },
+    {
+      "action": "use_item",
+      "actor": "tester",
+      "item": 1297310,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "a Karazhan Prestigious Cache is spent",
+      "actor": "tester",
+      "metric": "item_count",
+      "item": 1297310,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the reward is Karazhan's own loot, plus at most the two tier tokens that drop there",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "prestigious",
+      "cache": 1297310,
+      "relative_to": "kara_pool",
+      "min": 1,
+      "max": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and no Sunwell loot came with it",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "prestigious",
+      "cache": 1297318,
+      "relative_to": "kara_foreign",
+      "min": 0,
+      "max": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "tester",
+      "item": 1297312
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "carried_item_count",
+      "save_as": "mag_held"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "prestigious",
+      "cache": 1297312,
+      "save_as": "mag_pool"
+    },
+    {
+      "action": "use_item",
+      "actor": "tester",
+      "item": 1297312,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "a Magtheridon's Lair Prestigious Cache is spent",
+      "actor": "tester",
+      "metric": "item_count",
+      "item": 1297312,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the reward is Magtheridon's Lair loot, plus at most the tier token that drops there",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "prestigious",
+      "cache": 1297312,
+      "relative_to": "mag_pool",
+      "min": 1,
+      "max": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "tester",
+      "item": 1297318
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "carried_item_count",
+      "save_as": "sunwell_held"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "prestigious",
+      "cache": 1297318,
+      "save_as": "sunwell_pool"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "prestigious",
+      "cache": 1297310,
+      "save_as": "sunwell_foreign"
+    },
+    {
+      "action": "use_item",
+      "actor": "tester",
+      "item": 1297318,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "a Sunwell Prestigious Cache is spent",
+      "actor": "tester",
+      "metric": "item_count",
+      "item": 1297318,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the reward is Sunwell loot, plus at most the tier tokens its own tier pays",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "prestigious",
+      "cache": 1297318,
+      "relative_to": "sunwell_pool",
+      "min": 1,
+      "max": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and no Karazhan loot came with it",
+      "actor": "tester",
+      "metric": "carried_pool_item_count",
+      "table": "prestigious",
+      "cache": 1297310,
+      "relative_to": "sunwell_foreign",
+      "min": 0,
+      "max": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the Heroic Dungeon pool holds no difficulty copy",
+      "actor": "opener",
+      "metric": "pool_variant_count",
+      "table": "callboard",
+      "cache": 1615001,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Mythic Dungeon pool holds no difficulty copy",
+      "actor": "opener",
+      "metric": "pool_variant_count",
+      "table": "callboard",
+      "cache": 1615002,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Zul'Gurub pool holds no difficulty copy",
+      "actor": "opener",
+      "metric": "pool_variant_count",
+      "table": "callboard",
+      "cache": 1615003,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Molten Core pool holds no difficulty copy",
+      "actor": "opener",
+      "metric": "pool_variant_count",
+      "table": "callboard",
+      "cache": 1615004,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Onyxia pool holds no difficulty copy",
+      "actor": "opener",
+      "metric": "pool_variant_count",
+      "table": "callboard",
+      "cache": 1615005,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Blackwing Lair pool holds no difficulty copy",
+      "actor": "opener",
+      "metric": "pool_variant_count",
+      "table": "callboard",
+      "cache": 1615006,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Ruins of Ahn'Qiraj pool holds no difficulty copy",
+      "actor": "opener",
+      "metric": "pool_variant_count",
+      "table": "callboard",
+      "cache": 1615007,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Temple of Ahn'Qiraj pool holds no difficulty copy",
+      "actor": "opener",
+      "metric": "pool_variant_count",
+      "table": "callboard",
+      "cache": 1615008,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Naxxramas pool holds no difficulty copy",
+      "actor": "opener",
+      "metric": "pool_variant_count",
+      "table": "callboard",
+      "cache": 1615009,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Prestigious Karazhan pool holds no difficulty copy",
+      "actor": "opener",
+      "metric": "pool_variant_count",
+      "table": "prestigious",
+      "cache": 1297310,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Prestigious Sunwell pool holds no difficulty copy",
+      "actor": "opener",
+      "metric": "pool_variant_count",
+      "table": "prestigious",
+      "cache": 1297318,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Prestigious Naxxramas pool holds no difficulty copy",
+      "actor": "opener",
+      "metric": "pool_variant_count",
+      "table": "prestigious",
+      "cache": 1287311,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Prestigious Zul'Gurub pool holds no difficulty copy",
+      "actor": "opener",
+      "metric": "pool_variant_count",
+      "table": "prestigious",
+      "cache": 1287305,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Heroic Dungeon Callboard pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "callboard",
+      "cache": 1615001,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Mythic Dungeon Callboard pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "callboard",
+      "cache": 1615002,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Zul'Gurub Callboard pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "callboard",
+      "cache": 1615003,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Molten Core Callboard pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "callboard",
+      "cache": 1615004,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Onyxia Callboard pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "callboard",
+      "cache": 1615005,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Blackwing Lair Callboard pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "callboard",
+      "cache": 1615006,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Ruins of Ahn'Qiraj Callboard pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "callboard",
+      "cache": 1615007,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Temple of Ahn'Qiraj Callboard pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "callboard",
+      "cache": 1615008,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Naxxramas Callboard pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "callboard",
+      "cache": 1615009,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Heroic Dungeon Prestigious pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "prestigious",
+      "cache": 1287304,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Zul'Gurub Prestigious pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "prestigious",
+      "cache": 1287305,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Molten Core Prestigious pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "prestigious",
+      "cache": 1287306,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Onyxia Prestigious pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "prestigious",
+      "cache": 1287307,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Blackwing Lair Prestigious pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "prestigious",
+      "cache": 1287308,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Ruins of Ahn'Qiraj Prestigious pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "prestigious",
+      "cache": 1287309,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Temple of Ahn'Qiraj Prestigious pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "prestigious",
+      "cache": 1287310,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Naxxramas Prestigious pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "prestigious",
+      "cache": 1287311,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Karazhan Prestigious pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "prestigious",
+      "cache": 1297310,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Gruul's Lair Prestigious pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "prestigious",
+      "cache": 1297311,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Magtheridon's Lair Prestigious pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "prestigious",
+      "cache": 1297312,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Serpentshrine Caverns Prestigious pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "prestigious",
+      "cache": 1297313,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Tempest Keep Prestigious pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "prestigious",
+      "cache": 1297314,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Zul'Aman Prestigious pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "prestigious",
+      "cache": 1297315,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Mount Hyjal Prestigious pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "prestigious",
+      "cache": 1297316,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Black Temple Prestigious pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "prestigious",
+      "cache": 1297317,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Sunwell Prestigious pool holds no retired item",
+      "actor": "opener",
+      "metric": "pool_retired_item_count",
+      "table": "prestigious",
+      "cache": 1297318,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Zul'Gurub pool carries the Zul'Gurub weapons the raid itself drops",
+      "actor": "opener",
+      "metric": "pool_item_present",
+      "table": "callboard",
+      "cache": 1615003,
+      "item": 19866,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and its Zulian Hacker",
+      "actor": "opener",
+      "metric": "pool_item_present",
+      "table": "callboard",
+      "cache": 1615003,
+      "item": 19921,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Molten Core pool carries the Eye of Divinity",
+      "actor": "opener",
+      "metric": "pool_item_present",
+      "table": "callboard",
+      "cache": 1615004,
+      "item": 18646,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Blackwing Lair pool carries the class bracers the raid itself drops",
+      "actor": "opener",
+      "metric": "pool_item_present",
+      "table": "callboard",
+      "cache": 1615006,
+      "item": 16904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and all nine of them",
+      "actor": "opener",
+      "metric": "pool_item_present",
+      "table": "callboard",
+      "cache": 1615006,
+      "item": 16959,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Ruins of Ahn'Qiraj pool carries the Silithid Husked Launcher",
+      "actor": "opener",
+      "metric": "pool_item_present",
+      "table": "callboard",
+      "cache": 1615007,
+      "item": 21800,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Temple of Ahn'Qiraj pool carries the Gloves of the Fallen Prophet",
+      "actor": "opener",
+      "metric": "pool_item_present",
+      "table": "callboard",
+      "cache": 1615008,
+      "item": 21890,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Karazhan pool carries the Arcanite Ripper",
+      "actor": "opener",
+      "metric": "pool_item_present",
+      "table": "prestigious",
+      "cache": 1297310,
+      "item": 39769,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Prestigious Zul'Gurub pool carries them too",
+      "actor": "opener",
+      "metric": "pool_item_present",
+      "table": "prestigious",
+      "cache": 1287305,
+      "item": 19866,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Zul'Gurub pool holds the whole raid",
+      "actor": "opener",
+      "metric": "pool_row_count",
+      "table": "callboard",
+      "cache": 1615003,
+      "min": 138
+    },
+    {
+      "action": "assert",
+      "label": "the Molten Core pool holds the whole raid",
+      "actor": "opener",
+      "metric": "pool_row_count",
+      "table": "callboard",
+      "cache": 1615004,
+      "min": 282
+    },
+    {
+      "action": "assert",
+      "label": "the Onyxia pool holds the whole raid",
+      "actor": "opener",
+      "metric": "pool_row_count",
+      "table": "callboard",
+      "cache": 1615005,
+      "min": 50
+    },
+    {
+      "action": "assert",
+      "label": "the Blackwing Lair pool holds the whole raid",
+      "actor": "opener",
+      "metric": "pool_row_count",
+      "table": "callboard",
+      "cache": 1615006,
+      "min": 195
+    },
+    {
+      "action": "assert",
+      "label": "the Ruins of Ahn'Qiraj pool holds the whole raid",
+      "actor": "opener",
+      "metric": "pool_row_count",
+      "table": "callboard",
+      "cache": 1615007,
+      "min": 124
+    },
+    {
+      "action": "assert",
+      "label": "the Temple of Ahn'Qiraj pool holds the whole raid",
+      "actor": "opener",
+      "metric": "pool_row_count",
+      "table": "callboard",
+      "cache": 1615008,
+      "min": 209
+    },
+    {
+      "action": "assert",
+      "label": "the Naxxramas pool holds the whole raid",
+      "actor": "opener",
+      "metric": "pool_row_count",
+      "table": "callboard",
+      "cache": 1615009,
+      "min": 261
+    },
+    {
+      "action": "assert",
+      "label": "the Sunwell pool holds the whole raid",
+      "actor": "opener",
+      "metric": "pool_row_count",
+      "table": "prestigious",
+      "cache": 1297318,
+      "min": 36
+    },
+    {
+      "action": "assert",
+      "label": "no cache pays a legendary: the Black Temple pool holds no Warglaive of Azzinoth",
+      "actor": "opener",
+      "metric": "pool_item_present",
+      "table": "prestigious",
+      "cache": 1297317,
+      "item": 32837,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "nor its off-hand Warglaive",
+      "actor": "opener",
+      "metric": "pool_item_present",
+      "table": "prestigious",
+      "cache": 1297317,
+      "item": 32838,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Cache of the Fire Lord holds no Talisman of Binding Shard",
+      "actor": "opener",
+      "metric": "pool_item_present",
+      "table": "fire_lord",
+      "cache": 2400040,
+      "item": 17782,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "nor its raid difficulty 1 copy",
+      "actor": "opener",
+      "metric": "pool_item_present",
+      "table": "fire_lord",
+      "cache": 2400040,
+      "item": 317782,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "nor its raid difficulty 2 copy",
+      "actor": "opener",
+      "metric": "pool_item_present",
+      "table": "fire_lord",
+      "cache": 2400040,
+      "item": 1317782,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "nor its raid difficulty 3 copy",
+      "actor": "opener",
+      "metric": "pool_item_present",
+      "table": "fire_lord",
+      "cache": 2400040,
+      "item": 217782,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Cache of the Fire Lord keeps the rest of its pool",
+      "actor": "opener",
+      "metric": "pool_row_count",
+      "table": "fire_lord",
+      "cache": 2400040,
+      "min": 280
+    },
+    {
+      "action": "assert",
+      "label": "every reward the first opener was paid is a normal row",
+      "actor": "opener",
+      "metric": "carried_variant_item_count",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "every reward the second opener was paid is a normal row",
+      "actor": "tester",
+      "metric": "carried_variant_item_count",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "a token belongs to the content its reward comes from, so the Heroic Dungeon Cache pays none",
+      "actor": "opener",
+      "metric": "cache_token_count",
+      "cache": 1287304,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Mythic Dungeon Cache pays none",
+      "actor": "opener",
+      "metric": "cache_token_count",
+      "cache": 1615002,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Zul'Gurub Cache pays none",
+      "actor": "opener",
+      "metric": "cache_token_count",
+      "cache": 1287305,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Zul'Aman Cache pays none",
+      "actor": "opener",
+      "metric": "cache_token_count",
+      "cache": 1297315,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Molten Core Cache pays its eight Molten tokens",
+      "actor": "opener",
+      "metric": "cache_token_count",
+      "cache": 1287306,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "the Molten Headpiece is one of them",
+      "actor": "opener",
+      "metric": "cache_token_present",
+      "cache": 1287306,
+      "item": 2522360,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and never a tier above its own, so no Tier 5 or Tier 6 token",
+      "actor": "opener",
+      "metric": "cache_token_stage",
+      "cache": 1287306,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "the Tier 6 Helm of the Forgotten Conqueror is not a Molten Core token, whatever tag it carries",
+      "actor": "opener",
+      "metric": "cache_token_present",
+      "cache": 1287306,
+      "item": 31097,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "it is a Hyjal token, where its own drop is",
+      "actor": "opener",
+      "metric": "cache_token_present",
+      "cache": 1297316,
+      "item": 31097,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Onyxia Cache pays the Chromatic Headpiece alone",
+      "actor": "opener",
+      "metric": "cache_token_count",
+      "cache": 1287307,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "at Tier 2",
+      "actor": "opener",
+      "metric": "cache_token_stage",
+      "cache": 1287307,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "the Blackwing Lair Cache pays the seven Chromatic tokens",
+      "actor": "opener",
+      "metric": "cache_token_count",
+      "cache": 1287308,
+      "equals": 7
+    },
+    {
+      "action": "assert",
+      "label": "the Ruins of Ahn'Qiraj Cache pays the three Ceremonial Qiraji tokens",
+      "actor": "opener",
+      "metric": "cache_token_count",
+      "cache": 1287309,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "with the Ceremonial Qiraji Drape among them",
+      "actor": "opener",
+      "metric": "cache_token_present",
+      "cache": 1287309,
+      "item": 1506051,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Temple of Ahn'Qiraj Cache pays its eight set tokens",
+      "actor": "opener",
+      "metric": "cache_token_count",
+      "cache": 1287310,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "the Naxxramas Cache pays the nine Desecrated tokens",
+      "actor": "opener",
+      "metric": "cache_token_count",
+      "cache": 1287311,
+      "equals": 9
+    },
+    {
+      "action": "assert",
+      "label": "the Karazhan Cache sits at Tier 4",
+      "actor": "opener",
+      "metric": "cache_token_stage",
+      "cache": 1297310,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "the Sunwell Cache sits at Tier 6",
+      "actor": "opener",
+      "metric": "cache_token_stage",
+      "cache": 1297318,
+      "equals": 12
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "mail_count",
+      "save_as": "bystander_mail"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "mail_item_count",
+      "save_as": "bystander_items"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tester",
+      "metric": "notifications",
+      "save_as": "bystander_notices"
+    },
+    {
+      "action": "add_item",
+      "actor": "stuffed",
+      "item": 1287304
+    },
+    {
+      "action": "fill_bags",
+      "actor": "stuffed"
+    },
+    {
+      "action": "assert",
+      "label": "the fixture really has no bag slot left",
+      "actor": "stuffed",
+      "metric": "free_inventory_slots",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "stuffed",
+      "metric": "mail_count",
+      "save_as": "stuffed_mail"
+    },
+    {
+      "action": "snapshot",
+      "actor": "stuffed",
+      "metric": "mail_item_count",
+      "save_as": "stuffed_mail_items"
+    },
+    {
+      "action": "snapshot",
+      "actor": "stuffed",
+      "metric": "carried_item_count",
+      "save_as": "stuffed_held"
+    },
+    {
+      "action": "snapshot",
+      "actor": "stuffed",
+      "metric": "mail_pool_item_count",
+      "table": "prestigious",
+      "cache": 1287304,
+      "save_as": "stuffed_mail_pool"
+    },
+    {
+      "action": "use_item",
+      "actor": "stuffed",
+      "item": 1287304,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "a cache opened with full bags is still spent",
+      "actor": "stuffed",
+      "metric": "item_count",
+      "item": 1287304,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the only thing to leave the bags was the cache itself",
+      "actor": "stuffed",
+      "metric": "carried_item_count",
+      "relative_to": "stuffed_held",
+      "equals": -1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the reward was posted instead of being lost",
+      "actor": "stuffed",
+      "metric": "mail_count",
+      "relative_to": "stuffed_mail",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and the mail carries exactly the one reward",
+      "actor": "stuffed",
+      "metric": "mail_item_count",
+      "relative_to": "stuffed_mail_items",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and it is this cache's own loot that went to the mail",
+      "actor": "stuffed",
+      "metric": "mail_pool_item_count",
+      "table": "prestigious",
+      "cache": 1287304,
+      "relative_to": "stuffed_mail_pool",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the player is told in chat where the reward went",
+      "actor": "stuffed",
+      "metric": "system_message_contains",
+      "text": "sent to your mailbox",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and told on screen, not only in chat",
+      "actor": "stuffed",
+      "metric": "notification_contains",
+      "text": "sent to your mailbox",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the other player is never mailed the reward",
+      "actor": "tester",
+      "metric": "mail_item_count",
+      "relative_to": "bystander_items",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and never gets the notice either",
+      "actor": "tester",
+      "metric": "notifications",
+      "relative_to": "bystander_notices",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "stuffed",
+      "metric": "mail_item_count",
+      "save_as": "stuffed_second_items"
+    },
+    {
+      "action": "add_item",
+      "actor": "stuffed",
+      "item": 1287306
+    },
+    {
+      "action": "assert",
+      "label": "the empty slot the cache just left is filled again",
+      "actor": "stuffed",
+      "metric": "free_inventory_slots",
+      "equals": 0
+    },
+    {
+      "action": "use_item",
+      "actor": "stuffed",
+      "item": 1287306,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "a Molten Core Cache opened with full bags is still spent",
+      "actor": "stuffed",
+      "metric": "item_count",
+      "item": 1287306,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "its reward and any Molten token it rolled were all posted",
+      "actor": "stuffed",
+      "metric": "mail_item_count",
+      "relative_to": "stuffed_second_items",
+      "min": 1,
+      "max": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the second cache's reward went to the mail too",
+      "actor": "stuffed",
+      "metric": "mail_pool_item_count",
+      "table": "prestigious",
+      "cache": 1287306,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "two full-bag opens left the other player with no mail at all",
+      "actor": "tester",
+      "metric": "mail_count",
+      "relative_to": "bystander_mail",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "console",
+      "command": "server info"
+    }
+  ]
+}

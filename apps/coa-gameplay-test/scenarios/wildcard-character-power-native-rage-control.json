@@ -1,0 +1,182 @@
+{
+  "schema": 1,
+  "name": "Wildcard character override enables native Rage from ordinary weapon hits",
+  "contract": [
+    "A Hero on this normal realm uses Mana until its per-character Wildcard override is enabled. Original",
+    "Wildcard power hooks also admit Rage and Energy for that Hero. Ordinary direct weapon damage must generate",
+    "Rage only while that character mode is enabled. Compare two actual native melee-hit windows with no",
+    "resource-granting spell or aura; disable regeneration to keep the observations exact.",
+    "A passive stationary mechanical target and native melee accuracy keep both damage windows eligible. The Hero",
+    "has no learned rage-generating abilities. This exercises the HasActivePowerType gate in Unit::DealDamage,",
+    "independently of spell-cost fixtures.",
+    "Use original Well-used Sword 1008, whose effective base damage is 7.245\u201312.075, with ordinary Sword",
+    "proficiency 201 and level-12 skill 60. Observe the equipped weapon minimum and skill before attacking.",
+    "An unarmed minimum can round to zero after native armor reduction, which provides no Rage event.",
+    "Retain actual positive-damage weapon hits in both windows and the same disabled/enabled power checks."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 12,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 100000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 12,
+      "health": 100000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 201
+    },
+    {
+      "action": "set_skill",
+      "actor": "hero",
+      "skill": 43,
+      "value": 60,
+      "maximum": 60
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 1008
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 1008,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "weapon_damage_min",
+      "hand": 0,
+      "min": 7,
+      "label": "The ordinary equipped sword supplies positive native weapon damage"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "skill_value",
+      "skill": 43,
+      "equals": 60
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard off Harnessa"
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "melee_damage_count",
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "power",
+      "power": 1,
+      "equals": 0,
+      "label": "A Mana Hero does not gain Rage from its verified weapon hit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "melee_damage_count",
+      "target": "enemy",
+      "save_as": "before_wildcard_hits"
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "melee_damage_count",
+      "target": "enemy",
+      "relative_to": "before_wildcard_hits",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "power",
+      "power": 1,
+      "min": 1,
+      "label": "The Wildcard Hero gains native Rage from its verified weapon hit",
+      "within_ms": 6000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "alive",
+      "equals": 1
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  }
+}

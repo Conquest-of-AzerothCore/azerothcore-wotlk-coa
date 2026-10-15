@@ -145,6 +145,26 @@ public:
         return *this;
     }
 
+    TestSpellEntryHelper& WithAttributesEx2(uint32 attr)
+    {
+        _entry.AttributesEx2 = attr;
+        return *this;
+    }
+
+    TestSpellEntryHelper& WithStances(uint32 low, uint32 high = 0)
+    {
+        _entry.Stances = low;
+        _entry.StancesHigh = high;
+        return *this;
+    }
+
+    TestSpellEntryHelper& WithStancesNot(uint32 low, uint32 high = 0)
+    {
+        _entry.StancesNot = low;
+        _entry.StancesNotHigh = high;
+        return *this;
+    }
+
     SpellEntry const* Get() const
     {
         return &_entry;
@@ -252,6 +272,24 @@ public:
     SpellInfoBuilder& WithAttributes(uint32 attr)
     {
         _entryHelper.WithAttributes(attr);
+        return *this;
+    }
+
+    SpellInfoBuilder& WithAttributesEx2(uint32 attr)
+    {
+        _entryHelper.WithAttributesEx2(attr);
+        return *this;
+    }
+
+    SpellInfoBuilder& WithStances(uint32 low, uint32 high = 0)
+    {
+        _entryHelper.WithStances(low, high);
+        return *this;
+    }
+
+    SpellInfoBuilder& WithStancesNot(uint32 low, uint32 high = 0)
+    {
+        _entryHelper.WithStancesNot(low, high);
         return *this;
     }
 

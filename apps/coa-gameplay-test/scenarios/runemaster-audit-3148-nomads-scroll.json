@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Runemaster Nomad's Scroll clears a movement slow when swapping to Runic Tattoos: Air (#3148)",
+  "contract": [
+    "Nomad's Scroll 707653 Effect0 is SPELL_AURA_PROC_TRIGGER_SPELL, ProcChance 100, trigger 712452",
+    "(SPELL_EFFECT_DISPEL_MECHANIC, MiscValue 11 = MECHANIC_SNARE, matching 'movement slowing effect'). Spell.dbc's",
+    "own ProcFlags (4, PROC_FLAG_KILL) is unrelated to the tooltip and, before the fix, no spell_proc row existed,",
+    "so swapping to Runic Tattoos: Air never cleared a snare. Runic Tattoos: Air 802630 is family 38,",
+    "SpellFamilyFlags2 32, a positive self-buff, DmgClass magic: at cast phase Spell.cpp sets",
+    "PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS (0x4000), so the fix scopes the row to that ProcFlags, cast phase,",
+    "family 38 mask2 32. Infection 800983 (SPELL_AURA_MOD_DECREASE_SPEED, effect mechanic 11 snare, from",
+    "bloodmage-infected-blood-snare.json) is used as the movement-slowing fixture, applied directly so the test",
+    "does not depend on any other spell's own proc chain."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 802630},
+    {"action": "set_aura", "label": "Movement-slowing fixture (mechanic 11 snare)", "actor": "rm", "spell": 800983,
+      "stacks": 1},
+    {"action": "assert", "label": "SETUP: the snare fixture is applied", "actor": "rm", "metric": "aura",
+      "spell": 800983, "equals": 1},
+
+    {"action": "cast", "actor": "rm", "spell": 802630},
+    {"action": "assert", "label": "SETUP: Runic Tattoos: Air is active", "actor": "rm", "metric": "aura",
+      "spell": 802630, "equals": 1, "within_ms": 1500},
+    {"action": "assert", "label": "SETUP: without the talent, swapping tattoos leaves the snare in place",
+      "actor": "rm", "metric": "aura", "spell": 800983, "equals": 1},
+
+    {"action": "set_aura", "actor": "rm", "spell": 800983, "stacks": 0},
+    {"action": "set_aura", "label": "Reapply the snare fixture", "actor": "rm", "spell": 800983, "stacks": 1},
+    {"action": "learn", "actor": "rm", "spell": 707653},
+    {"action": "assert", "label": "SETUP: Nomad's Scroll is active", "actor": "rm", "metric": "aura",
+      "spell": 707653, "equals": 1, "within_ms": 1500},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 802630},
+    {"action": "cast", "actor": "rm", "spell": 802630},
+    {"action": "assert", "label": "CONTRACT: swapping to Runic Tattoos: Air clears the snare", "actor": "rm",
+      "metric": "aura", "spell": 800983, "equals": 0, "within_ms": 1000}
+  ]
+}

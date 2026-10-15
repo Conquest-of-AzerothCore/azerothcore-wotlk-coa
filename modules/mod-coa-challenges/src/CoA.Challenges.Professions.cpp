@@ -37,10 +37,7 @@ namespace CoAChallenges
         if (!perLevel)
             perLevel = 50;
         uint32 xp = sObjectMgr->GetXPForLevel(member->GetLevel()) / perLevel * rarityMult;
-        if (xp)
-            // Direct grant: profession skill-ups never flow through GiveXP
-            // call sites, so script XP filters (including our own
-            // NO_EXPERIENCE_EXCEPT_PROFESSIONS zeroing) must not apply here.
-            member->GiveXP(xp, nullptr);
+        sScriptMgr->OnPlayerGiveXP(member, xp, nullptr, XPSOURCE_PROFESSION_SKILL);
+        member->GiveXP(xp, nullptr);
     }
 } // namespace CoAChallenges

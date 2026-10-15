@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Gaze of Ysera sleeps players for 8 seconds and creatures for 40 (#880)",
+  "contract": "Spell.dbc gives Gaze of Ysera 806148 DurationIndex 64 = 40000 ms; the tooltip reads 'putting them to sleep for 8 sec vs players'. The core capped every PvP diminishing-duration spell without an explicit entry at 10 s (SpellMgr.cpp GetDiminishingReturnsLimitDuration), so the player sleep lasted 10 s. A creature target is not limited and keeps 40 s.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "pyro", "race": 1, "class": 24, "level": 80, "spell_hit_rating": 10000 },
+    { "id": "enemy", "race": 2, "class": 24, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "pyro", "entry": 28168, "health": 500000, "level": 80, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "pyro", "spell": 806148 },
+    { "action": "pvp", "actor": "pyro", "enabled": true },
+    { "action": "pvp", "actor": "enemy", "enabled": true },
+    { "action": "teleport", "actor": "enemy", "map": 0, "x": -9614.06, "y": -288.949, "z": 57.3053, "o": 3.141593 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "cast", "actor": "pyro", "spell": 806148, "target": "target" },
+    { "action": "assert", "actor": "target", "metric": "aura", "spell": 806148, "equals": 1, "within_ms": 3500 },
+    { "action": "assert", "actor": "target", "metric": "aura_duration_ms", "spell": 806148, "min": 39000, "max": 40000 },
+    { "action": "reset_cooldown", "actor": "pyro", "spell": 806148 },
+    { "action": "teleport", "actor": "pyro", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "pvp", "actor": "pyro", "enabled": true },
+    { "action": "pvp", "actor": "enemy", "enabled": true },
+    { "action": "cast", "actor": "pyro", "spell": 806148, "target": "enemy" },
+    { "action": "assert", "actor": "enemy", "metric": "aura", "spell": 806148, "equals": 1, "within_ms": 3500 },
+    { "action": "assert", "actor": "enemy", "metric": "aura_duration_ms", "spell": 806148, "min": 7500, "max": 8000 }
+  ]
+}

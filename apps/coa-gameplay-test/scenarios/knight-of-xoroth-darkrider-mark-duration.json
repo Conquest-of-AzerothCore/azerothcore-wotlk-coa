@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Darkrider extends the duration of Mark spells by 50% (#2466)",
+  "contract": "Darkrider 704980 reads 'Increases the duration of your Mark spells by 50% and increases your spell penetration by 75, scaling with level' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z; matches the client's own moa_description). Mark(SpellInfo const*) (promoted from AscensionXorothAuras.cpp to the shared AscensionXoroth.h/.cpp) identifies a family-23 spell by SpellFamilyFlags[1] bit 2147483648, which every Mark of Korth'azz/Blaumeux/Rivendare/Zeliek rank and its Greater form carries. Darkrider's own baked EFFECT_1 (SPELLMOD_DURATION, correctly classmasked to that same bit, BasePoints 49/DieSides 1 -> 50) relies on Aura::CalcMaxDuration's native modOwner->ApplySpellMod pass, but this module's own triggered Mark applications do not reliably reach that native path, so it is nulled in ApplyContracts; xoroth_casts::OnCalcMaxDuration (AscensionXorothAbilities.cpp) now multiplies the duration by 1 + Amount(704980, 1)/100 directly whenever the caster knows the talent and the aura being created is a Mark. Effect 2 (spell penetration) is out of this issue's reported scope and is untouched. At level 60 the owned Mark of Korth'azz rank is 707345 (AscensionSpellProgressionData.h). HARNESS NOTE: Mark of Korth'azz is TARGET_FLAG_UNIT_ENEMY-only and this harness has no reliable way to make one player a valid open-world attack target of another for an arbitrary custom-class spell (pvp-flagging two opposite-faction actors and placing them in a shared coordinate still yields SPELL_FAILED_BAD_TARGETS for this particular spell's target check, even though a plain melee attack between the same two actors is accepted as a valid attack target). OnCalcMaxDuration's gate is purely on the aura's caster (Owner(aura->GetCaster())->HasAura(704980)), not on who carries the aura, so the fix is exercised just as faithfully by forcing the Mark onto the knight itself with set_aura (which creates the Aura directly via Unit::AddAura, bypassing spell-cast target validation entirely while still running the native CalcMaxDuration -> OnCalcMaxDuration pipeline).",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 707345 },
+    { "action": "set_aura", "actor": "knight", "spell": 707345, "stacks": 1, "label": "Force the Mark onto the knight, without Darkrider" },
+    {
+      "action": "assert", "label": "SETUP: the Mark is active without Darkrider",
+      "actor": "knight", "metric": "aura", "spell": 707345, "caster": "knight", "equals": 1
+    },
+    {
+      "action": "snapshot", "label": "Untalented Mark duration",
+      "actor": "knight", "metric": "aura_duration_ms", "spell": 707345, "caster": "knight", "save_as": "duration_before"
+    },
+    {
+      "action": "assert", "label": "SETUP: the untalented Mark actually has a positive duration",
+      "actor": "knight", "metric": "aura_duration_ms", "spell": 707345, "caster": "knight", "min": 1
+    },
+    { "action": "set_aura", "actor": "knight", "spell": 707345, "stacks": 0, "label": "Clear the Mark so the next application recalculates its duration from scratch" },
+    { "action": "learn", "actor": "knight", "spell": 704980 },
+    {
+      "action": "assert", "label": "SETUP: Darkrider is learned",
+      "actor": "knight", "metric": "knows_spell", "spell": 704980, "equals": 1
+    },
+    { "action": "set_aura", "actor": "knight", "spell": 707345, "stacks": 1, "label": "Force the Mark onto the knight again, now with Darkrider known" },
+    {
+      "action": "assert", "label": "SETUP: the Mark is active with Darkrider known",
+      "actor": "knight", "metric": "aura", "spell": 707345, "caster": "knight", "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the talented Mark's duration is ~50% longer",
+      "actor": "knight", "metric": "aura_duration_ms", "spell": 707345, "caster": "knight",
+      "ratio_to": "duration_before", "min": 1.45, "max": 1.55
+    }
+  ]
+}

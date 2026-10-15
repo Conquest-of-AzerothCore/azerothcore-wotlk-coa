@@ -1,0 +1,6243 @@
+{
+  "schema": 1,
+  "name": "Primalist Lithic Lance generation, replacement and resource contract",
+  "contract": "One hundred real Earthshaping gains sample 20% readiness; capped and blocked attempts do not proc. Readiness temporarily replaces first/highest Geode, survives an out-of-range attempt, consumes on a successful cast, expires and clears on talent removal while preserving a separately learned beam. A beam grants two Earthshaping stacks and twenty Rage.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 95
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681251,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502777,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502776,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502775,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502774,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502773,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502772,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502771,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502770,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502769,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500402,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 355467,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502777
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706159
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "baseline_0"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "baseline_1"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 706159
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_0"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_1"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_2"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_3"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_4"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_5"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_6"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_7"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_8"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_9"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_10"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_11"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_12"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_13"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_14"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_15"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_16"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_17"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_18"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_19"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_20"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_21"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_22"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_23"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_24"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_25"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_26"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_27"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_28"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_29"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_30"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_31"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_32"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_33"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_34"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_35"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_36"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_37"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_38"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_39"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_40"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_41"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_42"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_43"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_44"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_45"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_46"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_47"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_48"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_49"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_50"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_51"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_52"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_53"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_54"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_55"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_56"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_57"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_58"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_59"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_60"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_61"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_62"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_63"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_64"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_65"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_66"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_67"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_68"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_69"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_70"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_71"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_72"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_73"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_74"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_75"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_76"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_77"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_78"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_79"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_80"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_81"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_82"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_83"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_84"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_85"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_86"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_87"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_88"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_89"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_90"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_91"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_92"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_93"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_94"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_95"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_96"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_97"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_98"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "talented_99"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706159
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "removed_0"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "save_as": "removed_1"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 706159
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560142,
+      "stacks": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502777,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502776,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502775,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502774,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502773,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502772,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502771,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502770,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502769,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500402,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 355467,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500402
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "knows_spell",
+      "spell": 681251,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681251,
+      "target": "target",
+      "save_as": "r500402_before"
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9517.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500402,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681251,
+      "target": "target",
+      "relative_to": "r500402_before",
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 681251,
+      "power": 1,
+      "save_as": "r500402_rage"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500402,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681251,
+      "target": "target",
+      "relative_to": "r500402_before",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "knows_spell",
+      "spell": 681251,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 681251,
+      "power": 1,
+      "relative_to": "r500402_rage",
+      "equals": 200
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502777,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502776,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502775,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502774,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502773,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502772,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502771,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502770,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502769,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500402,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 355467,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502777
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "knows_spell",
+      "spell": 681251,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681251,
+      "target": "target",
+      "save_as": "r502777_before"
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9517.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502777,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681251,
+      "target": "target",
+      "relative_to": "r502777_before",
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 681251,
+      "power": 1,
+      "save_as": "r502777_rage"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502777,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681251,
+      "target": "target",
+      "relative_to": "r502777_before",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "knows_spell",
+      "spell": 681251,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 681251,
+      "power": 1,
+      "relative_to": "r502777_rage",
+      "equals": 200
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 8200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "knows_spell",
+      "spell": 681251,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706159,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807048,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "knows_spell",
+      "spell": 681251,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 681251
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 706159
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 807048,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "knows_spell",
+      "spell": 681251,
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706159,
+      "all_specs": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681251,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "power",
+      "power": 1,
+      "equals": 200,
+      "within_ms": 1500,
+      "label": "Rage arrives with the damaging missile, after immediate Earthshaping"
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

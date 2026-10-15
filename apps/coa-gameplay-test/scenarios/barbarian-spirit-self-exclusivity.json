@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Switching Spirits removes the previous Spirit's self marker (#4341, #4252)",
+  "contract": "All five Spirits (707763 Hunt, 707764 Conflict, 707775 Savagery, 712467 War, 712468 Bloodshed) share the tooltip contract 'You may only have 1 Spirit spell active at a time.' aura_ascension_barbarian_lifecycle::Apply already removes every other Spirit id when a Spirit's self-targeted marker effect applies, but the whole function returned early unless effect->GetEffIndex() == EFFECT_0. Spirit of the Hunt's self marker is effect index 2 and Spirit of Savagery's is effect index 1 (effect 0 on both is SPELL_EFFECT_APPLY_AREA_AURA_ENEMY, which targets nearby enemies, not the caster), so the exclusivity block was unreachable for these two and both auras stacked on the caster. Only Bloodshed (whose self effect sits at index 0) worked before the fix. Moving the exclusivity check above the EFFECT_0 guard makes it run for every effect application, including index 1 and 2, so casting Savagery after Hunt must now remove Hunt's own aura from the caster.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "b", "race": 1, "class": 12, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+
+    { "action": "learn", "actor": "b", "spell": 707763 },
+    { "action": "learn", "actor": "b", "spell": 707775 },
+
+    { "action": "cast", "actor": "b", "spell": 707763 },
+    { "action": "assert", "label": "Spirit of the Hunt applies its own aura to the caster", "actor": "b", "metric": "aura", "spell": 707763, "equals": 1, "within_ms": 3000 },
+
+    { "action": "cast", "actor": "b", "spell": 707775 },
+    { "action": "assert", "label": "Spirit of Savagery applies its own aura to the caster", "actor": "b", "metric": "aura", "spell": 707775, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Spirit of the Hunt's own aura is removed: only one Spirit stays active", "actor": "b", "metric": "aura", "spell": 707763, "equals": 0 }
+  ]
+}

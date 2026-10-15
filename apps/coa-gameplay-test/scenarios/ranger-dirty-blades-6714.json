@@ -1,0 +1,462 @@
+{
+  "schema": 1,
+  "name": "Dirty Blades adds Nature damage and a stacking healing reduction (#6714)",
+  "contract": "Dirty Blades (680276) promises Nature damage equal to 70% of each landed melee autoattack, rounded down per hit, and its helper (520571) reduces healing received by 20% per stack up to two stacks. A level-28 Ranger attacks a stunned, lower-level opposing player without Nature resistance outside the protected starting zone. Observe actual white and Nature damage, native two-stack healing reduction and expiry. Pilfering (705087) raises the share to 80% and heals for 50% of actual Nature damage; a Nature-only absorb shield must prevent healing while leaving white swings intact, then removal restores the heal. Each normal Dirty Blades cast starts with the required Advantage aura and 100 Focus; the resource prerequisite is a fixture, not the reported defect. The copied Nature helper preserves the resolved white amount without a second outgoing or target multiplier; independent Nature resists and absorbs still apply. A +400 AP fixture in the final phase makes each swing large enough to distinguish the 80% share despite integer rounding. Apply the existing +400 AP fixture before the 70% sample too. Require at least 40 total white damage for its two-hit sample: less than two points of per-hit truncation then leaves the 70% share above 65%. Keep the original percentage, absorption, healing and expiry assertions.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "r",
+      "race": 1,
+      "class": 21,
+      "level": 28,
+      "allow_regeneration": false,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "enemy",
+      "race": 2,
+      "class": 1,
+      "level": 20,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "pvp",
+      "actor": "r",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.141592653589793
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 680276
+    },
+    {
+      "action": "set_aura",
+      "actor": "enemy",
+      "spell": 23775,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_healing_taken",
+      "target": "r",
+      "spell": 2061,
+      "equals": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "r",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "melee_damage_count",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "r"
+    },
+    {
+      "action": "assert",
+      "label": "Without Dirty Blades a white swing has no Nature follow-up",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 520571,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 520571,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "r",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "r",
+      "spell": 804329,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 680276
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 680276,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The target has no Nature resistance",
+      "actor": "enemy",
+      "metric": "resistance",
+      "school": 3,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The copied Nature value receives no second outgoing multiplier",
+      "actor": "r",
+      "metric": "spell_damage_done",
+      "spell": 520571,
+      "target": "enemy",
+      "equals": 1000
+    },
+    {
+      "action": "set_aura",
+      "label": "Use enough white damage for the existing 70% per-hit rounding bound",
+      "actor": "r",
+      "spell": 67391,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "melee_damage_count",
+      "save_as": "white_count_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "melee_damage_total",
+      "save_as": "white_before"
+    },
+    {
+      "action": "attack",
+      "actor": "r",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Two native melee swings land with Dirty Blades active",
+      "actor": "r",
+      "metric": "melee_damage_count",
+      "relative_to": "white_count_before",
+      "min": 2,
+      "within_ms": 3500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "r"
+    },
+    {
+      "action": "assert",
+      "label": "Every landed white swing gains a Nature hit",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 520571,
+      "equals": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "melee_damage_total",
+      "relative_to": "white_before",
+      "save_as": "blades_white"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: two white hits give less than five percentage points of rounding loss",
+      "actor": "r",
+      "metric": "melee_damage_total",
+      "relative_to": "white_before",
+      "min": 40
+    },
+    {
+      "action": "assert",
+      "label": "Nature damage is 70% of landed white damage, rounded per hit",
+      "actor": "r",
+      "metric": "spell_damage_total",
+      "spell": 520571,
+      "ratio_to": "blades_white",
+      "min": 0.65,
+      "max": 0.701
+    },
+    {
+      "action": "assert",
+      "label": "The healing debuff stacks twice",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 520571,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Two stacks reduce incoming healing by 40%",
+      "actor": "enemy",
+      "metric": "spell_healing_taken",
+      "target": "r",
+      "spell": 2061,
+      "equals": 600
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "label": "Healing reduction expires normally",
+      "actor": "enemy",
+      "metric": "spell_healing_taken",
+      "target": "r",
+      "spell": 2061,
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 705087
+    },
+    {
+      "action": "set_health",
+      "actor": "r",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "enemy",
+      "spell": 17546,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 17546,
+      "effect": 0,
+      "min": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "r",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "r",
+      "spell": 680276
+    },
+    {
+      "action": "set_aura",
+      "actor": "r",
+      "spell": 804329,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 680276
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura_amount",
+      "spell": 680276,
+      "effect": 0,
+      "equals": 80,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "melee_damage_count",
+      "save_as": "absorbed_white_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_damage_total",
+      "spell": 520571,
+      "save_as": "nature_before_absorb"
+    },
+    {
+      "action": "attack",
+      "actor": "r",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "melee_damage_count",
+      "relative_to": "absorbed_white_before",
+      "min": 2,
+      "within_ms": 3500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "r"
+    },
+    {
+      "action": "assert",
+      "label": "The Nature-only shield fully absorbs Dirty Blades",
+      "actor": "r",
+      "metric": "spell_damage_total",
+      "spell": 520571,
+      "relative_to": "nature_before_absorb",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Pilfering heals nothing when its Nature damage is fully absorbed",
+      "actor": "r",
+      "metric": "spell_heal_count",
+      "spell": 520880,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "enemy",
+      "spell": 17546,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "r",
+      "spell": 680276,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "r",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "r",
+      "spell": 680276
+    },
+    {
+      "action": "set_aura",
+      "actor": "r",
+      "spell": 804329,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 680276
+    },
+    {
+      "action": "set_aura",
+      "label": "Use a larger final swing so integer rounding can distinguish 80% from 70%",
+      "actor": "r",
+      "spell": 67391,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "melee_damage_total",
+      "save_as": "pilfering_white_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_damage_total",
+      "spell": 520571,
+      "save_as": "pilfering_damage_before"
+    },
+    {
+      "action": "attack",
+      "actor": "r",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_heal_count",
+      "spell": 520880,
+      "min": 1,
+      "within_ms": 3500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "r"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "melee_damage_total",
+      "relative_to": "pilfering_white_before",
+      "save_as": "pilfering_white"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_damage_total",
+      "spell": 520571,
+      "relative_to": "pilfering_damage_before",
+      "save_as": "pilfering_nature_damage"
+    },
+    {
+      "action": "assert",
+      "label": "Pilfering raises the Nature damage share to 80%, rounded per hit",
+      "actor": "r",
+      "metric": "spell_damage_total",
+      "spell": 520571,
+      "relative_to": "pilfering_damage_before",
+      "ratio_to": "pilfering_white",
+      "min": 0.75,
+      "max": 0.801
+    },
+    {
+      "action": "assert",
+      "label": "Pilfering heals for 50% of actual Nature damage, rounded per hit",
+      "actor": "r",
+      "metric": "spell_heal_total",
+      "spell": 520880,
+      "ratio_to": "pilfering_nature_damage",
+      "min": 0.45,
+      "max": 0.501
+    }
+  ]
+}

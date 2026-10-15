@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "Leeching Tome raises Bloodbolt's leech and Rage cost (#3676)",
+  "contract": "Leeching Tome 807489 is SpellFamilyName 26 with two effects over EffectSpellClassMask (0, 131072, 0), which is word 1 bit 17 - the eight Bloodbolt records (578304, 578305, 804685, 806928-806932) and no other family-26 row. Effect 0 is aura 108 SPELL_AURA_ADD_PCT_MODIFIER with MiscValue 27 (SPELLMOD_VALUE_MULTIPLIER) and BasePoints 49 + DieSides 1 = +50%; Bloodbolt 578304's effect 0 is SPELL_EFFECT_HEALTH_LEECH with EffectValueMultiplier 1.0, and SpellEffectInfo::CalcValueMultiplier applies SPELLMOD_VALUE_MULTIPLIER, so 1.0 becomes 1.5 = \"leeches 50% more health\". Effect 1 is aura 107 with MiscValue 14 (SPELLMOD_COST) and +50 flat; Bloodbolt is PowerType 1 (Rage) with ManaCost 300, i.e. 30 Rage, so 300 -> 350 = \"costs 5 additional Rage\" ($/10;s2). Tooltip: \"Your Bloodbolt now leeches $s1% more health, but it now costs $/10;s2 additional Rage.\" spell_modifier applies the player's live modifiers to a supplied base without a cast, so no rank has to be owned. This is a regression guard for behaviour that is already native; no fix accompanies it.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "No leech multiplier on Bloodbolt before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 27,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Bloodbolt costs its authored 300 before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 14,
+      "base": 300,
+      "equals": 300
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807489
+    },
+    {
+      "action": "assert",
+      "label": "Leeching Tome raises Bloodbolt's leech multiplier by 50%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 27,
+      "base": 100,
+      "equals": 150
+    },
+    {
+      "action": "assert",
+      "label": "Leeching Tome adds 50 (5 Rage) to Bloodbolt's cost",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 14,
+      "base": 300,
+      "equals": 350
+    },
+    {
+      "action": "assert",
+      "label": "Leeching Tome does not touch Bloodmoon Blast",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 501614,
+      "op": 27,
+      "base": 100,
+      "equals": 100
+    }
+  ]
+}

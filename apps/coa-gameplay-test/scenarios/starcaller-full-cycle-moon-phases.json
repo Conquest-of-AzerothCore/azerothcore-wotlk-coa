@@ -1,0 +1,140 @@
+{
+  "schema": 1,
+  "name": "Full Cycle raises Hand of Elune's Full Moon healing and cuts its New Moon cost by 10% (#2269)",
+  "contract": "Full Cycle 704343 (Spell.dbc, SpellFamilyName 32) carries three SPELL_AURA_ADD_FLAT_MODIFIER (107) effects that never address Hand of Elune 801990 directly: effect 0 op SPELLMOD_EFFECT3 (23) +10 on mask word1 0x200, which is the family flag of Full Moon Hidden 800391, whose effect 2 is SPELL_AURA_ADD_PCT_MODIFIER (108) SPELLMOD_DAMAGE with base -1 (value 0) on mask word1 0x40000 (Hand of Elune); effect 2 op SPELLMOD_EFFECT2 (12) -10 on mask word0 0x400000, the family flag of New Moon 800394, whose effect 1 is aura 108 with base -1 (value 0). The tooltip reads 'Full Moon: Healing increased by $s1%. New Moon: Cost reduced by $s3%.' Before the fix nothing applied 800391 (no trigger, learn or module reference; Full Moon 800393 has only its crit aura and the phase trigger), and 800394's effect 1 aimed its percent mod at the client cost helper 704518 (family flag word2 0x8000) that this core never applies, since Hand of Elune's cost is the StarcallerCosts contract (20% of maximum mana, UsesMaxManaForCost). Fix: the lifecycle aura script casts 800391 on Full Moon apply and removes it on remove, and the load-time contract retargets 800394 effect 1 to SPELLMOD_COST on Hand of Elune's mask; both amounts are then computed by the native Unit::ApplyEffectModifiers (SpellInfo.cpp CalcValue) and the native SPELLMOD_COST path in SpellInfo::CalcPowerCost, which the module cost contract keeps. Both fixtures share race, class and level, so max mana, spell power and coefficients are identical and only the talent moves the ratio: healing ratio 1.10 (SPELLMOD_DAMAGE pct on the final heal, Unit::SpellHealingBonusDone), cost ratio 0.90 (20% of max mana times 0.9, truncated to int, hence the 0.89-0.91 window). Fixtures learn 500206 back to back, so both start Full Moon within milliseconds; each phase lasts 10000 ms (SpellDuration 1). The snapshot and the assert follow each other within milliseconds, well inside a phase.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 801990,
+      "label": "Control learns Hand of Elune"
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 801990,
+      "label": "Talent fixture learns Hand of Elune"
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 704343,
+      "label": "Talent fixture learns Full Cycle before the phases start"
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 500206,
+      "label": "Control starts the Cycle of the Moon"
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 500206,
+      "label": "Talent fixture starts the Cycle of the Moon"
+    },
+    {
+      "action": "assert",
+      "label": "Control is in Full Moon",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 800393,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Talent fixture is in Full Moon",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 800393,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Full Moon applies its hidden helper 800391",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 800391,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Hand of Elune healing in Full Moon without Full Cycle",
+      "actor": "control",
+      "metric": "spell_healing_done",
+      "spell": 801990,
+      "target": "control",
+      "save_as": "heal_base"
+    },
+    {
+      "action": "assert",
+      "label": "Full Moon heals 10% harder with Full Cycle",
+      "actor": "talent",
+      "metric": "spell_healing_done",
+      "spell": 801990,
+      "target": "talent",
+      "ratio_to": "heal_base",
+      "min": 1.09,
+      "max": 1.11
+    },
+    {
+      "action": "assert",
+      "label": "Control reaches New Moon",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 800394,
+      "equals": 1,
+      "within_ms": 14000
+    },
+    {
+      "action": "assert",
+      "label": "Talent fixture reaches New Moon",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 800394,
+      "equals": 1,
+      "within_ms": 14000
+    },
+    {
+      "action": "snapshot",
+      "label": "Hand of Elune cost in New Moon without Full Cycle",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 801990,
+      "save_as": "cost_base"
+    },
+    {
+      "action": "assert",
+      "label": "New Moon cuts the cost by 10% with Full Cycle",
+      "actor": "talent",
+      "metric": "spell_power_cost",
+      "spell": 801990,
+      "ratio_to": "cost_base",
+      "min": 0.89,
+      "max": 0.91
+    }
+  ]
+}

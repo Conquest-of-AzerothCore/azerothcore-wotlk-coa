@@ -1,0 +1,1111 @@
+{
+  "schema": 1,
+  "name": "ranger-woodland-arrow-bounded-horn-cooldowns-1-6180",
+  "contract": [
+    "Woodland Arrow promises two seconds of Horn cooldown reduction plus two seconds per consumed Advantage. Hidden modifier 520614 supplies the per-stack amount on both helper spells, and their base native adjustment must be minus 2000ms rather than the zero reset sentinel.",
+    "Each of the four native Horns is cast normally and starts a sixty-second cooldown. One or five Advantage gives a four- or twelve-second reduction, alongside the two-second Arrow cast and bounded step time. The modifier must clear after consumption."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "r",
+      "race": 1,
+      "class": 21,
+      "level": 60,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 806368
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 800088
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 800086
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 806359
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 806360
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 800088
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "cast_failure",
+      "spell": 800088,
+      "equals": 0,
+      "label": "r: cast_failure 800088 0"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "cooldown_ms",
+      "spell": 800088,
+      "min": 57000,
+      "max": 60000,
+      "label": "r: cooldown_ms 800088 57000 60000"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "r",
+      "spell": 804329,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_modifier",
+      "spell": 681459,
+      "equals": 1000,
+      "label": "The Horn companion excludes the unrelated Rusty Shiv and Deepwood Poison modifier",
+      "op": 3,
+      "base": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "aura_stacks",
+      "spell": 520614,
+      "save_as": "advantage_before_1",
+      "label": "r: aura_stacks 520614"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 0,
+      "save_as": "helper_1_807001_0",
+      "label": "r: spell_effect_value 807001 0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 1,
+      "save_as": "helper_1_807001_1",
+      "label": "r: spell_effect_value 807001 1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 2,
+      "save_as": "helper_1_807001_2",
+      "label": "r: spell_effect_value 807001 2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 520640,
+      "effect": 0,
+      "save_as": "helper_1_520640_0",
+      "label": "r: spell_effect_value 520640 0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "cooldown_ms",
+      "save_as": "horn_800088_before",
+      "spell": 800088,
+      "label": "r: cooldown_ms 800088"
+    },
+    {
+      "action": "set_power",
+      "actor": "r",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 806368,
+      "target": "enemy",
+      "save_as": "arrow_before_1",
+      "label": "r: spell_damage_count 806368 enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 806368,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 806368,
+      "target": "enemy",
+      "within_ms": 4000,
+      "relative_to": "arrow_before_1",
+      "equals": 1,
+      "label": "r: spell_damage_count 806368 enemy 1"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "cooldown_ms",
+      "spell": 800088,
+      "relative_to": "horn_800088_before",
+      "min": -8000,
+      "max": -5800,
+      "label": "r: cooldown_ms 800088 -8000 -5800"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "cooldown_ms",
+      "spell": 800088,
+      "min": 40000,
+      "label": "r: cooldown_ms 800088 40000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 520614,
+      "equals": 0,
+      "label": "r: aura 520614 0"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura_stacks",
+      "spell": 520614,
+      "relative_to": "advantage_before_1",
+      "equals": -1,
+      "label": "r: aura_stacks 520614 -1"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 0,
+      "equals": -2000,
+      "label": "r: spell_effect_value 807001 0 -2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 0,
+      "relative_to": "helper_1_807001_0",
+      "equals": 2000,
+      "label": "r: spell_effect_value 807001 0 2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 1,
+      "equals": -2000,
+      "label": "r: spell_effect_value 807001 1 -2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 1,
+      "relative_to": "helper_1_807001_1",
+      "equals": 2000,
+      "label": "r: spell_effect_value 807001 1 2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 2,
+      "equals": -2000,
+      "label": "r: spell_effect_value 807001 2 -2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 2,
+      "relative_to": "helper_1_807001_2",
+      "equals": 2000,
+      "label": "r: spell_effect_value 807001 2 2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 520640,
+      "effect": 0,
+      "equals": -2000,
+      "label": "r: spell_effect_value 520640 0 -2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 520640,
+      "effect": 0,
+      "relative_to": "helper_1_520640_0",
+      "equals": 2000,
+      "label": "r: spell_effect_value 520640 0 2000"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "r",
+      "spell": 800088
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "r",
+      "spell": 800086
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "r",
+      "spell": 806359
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "r",
+      "spell": 806360
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 800086
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "cast_failure",
+      "spell": 800086,
+      "equals": 0,
+      "label": "r: cast_failure 800086 0"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "cooldown_ms",
+      "spell": 800086,
+      "min": 57000,
+      "max": 60000,
+      "label": "r: cooldown_ms 800086 57000 60000"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "r",
+      "spell": 804329,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_modifier",
+      "spell": 681459,
+      "equals": 1000,
+      "label": "The Horn companion excludes the unrelated Rusty Shiv and Deepwood Poison modifier",
+      "op": 3,
+      "base": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "aura_stacks",
+      "spell": 520614,
+      "save_as": "advantage_before_2",
+      "label": "r: aura_stacks 520614"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 0,
+      "save_as": "helper_2_807001_0",
+      "label": "r: spell_effect_value 807001 0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 1,
+      "save_as": "helper_2_807001_1",
+      "label": "r: spell_effect_value 807001 1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 2,
+      "save_as": "helper_2_807001_2",
+      "label": "r: spell_effect_value 807001 2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 520640,
+      "effect": 0,
+      "save_as": "helper_2_520640_0",
+      "label": "r: spell_effect_value 520640 0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "cooldown_ms",
+      "save_as": "horn_800086_before",
+      "spell": 800086,
+      "label": "r: cooldown_ms 800086"
+    },
+    {
+      "action": "set_power",
+      "actor": "r",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 806368,
+      "target": "enemy",
+      "save_as": "arrow_before_2",
+      "label": "r: spell_damage_count 806368 enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 806368,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 806368,
+      "target": "enemy",
+      "within_ms": 4000,
+      "relative_to": "arrow_before_2",
+      "equals": 1,
+      "label": "r: spell_damage_count 806368 enemy 1"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "cooldown_ms",
+      "spell": 800086,
+      "relative_to": "horn_800086_before",
+      "min": -8000,
+      "max": -5800,
+      "label": "r: cooldown_ms 800086 -8000 -5800"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "cooldown_ms",
+      "spell": 800086,
+      "min": 40000,
+      "label": "r: cooldown_ms 800086 40000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 520614,
+      "equals": 0,
+      "label": "r: aura 520614 0"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura_stacks",
+      "spell": 520614,
+      "relative_to": "advantage_before_2",
+      "equals": -1,
+      "label": "r: aura_stacks 520614 -1"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 0,
+      "equals": -2000,
+      "label": "r: spell_effect_value 807001 0 -2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 0,
+      "relative_to": "helper_2_807001_0",
+      "equals": 2000,
+      "label": "r: spell_effect_value 807001 0 2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 1,
+      "equals": -2000,
+      "label": "r: spell_effect_value 807001 1 -2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 1,
+      "relative_to": "helper_2_807001_1",
+      "equals": 2000,
+      "label": "r: spell_effect_value 807001 1 2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 2,
+      "equals": -2000,
+      "label": "r: spell_effect_value 807001 2 -2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 2,
+      "relative_to": "helper_2_807001_2",
+      "equals": 2000,
+      "label": "r: spell_effect_value 807001 2 2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 520640,
+      "effect": 0,
+      "equals": -2000,
+      "label": "r: spell_effect_value 520640 0 -2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 520640,
+      "effect": 0,
+      "relative_to": "helper_2_520640_0",
+      "equals": 2000,
+      "label": "r: spell_effect_value 520640 0 2000"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "r",
+      "spell": 800088
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "r",
+      "spell": 800086
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "r",
+      "spell": 806359
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "r",
+      "spell": 806360
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 806359
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "cast_failure",
+      "spell": 806359,
+      "equals": 0,
+      "label": "r: cast_failure 806359 0"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "cooldown_ms",
+      "spell": 806359,
+      "min": 57000,
+      "max": 60000,
+      "label": "r: cooldown_ms 806359 57000 60000"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "r",
+      "spell": 804329,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_modifier",
+      "spell": 681459,
+      "equals": 1000,
+      "label": "The Horn companion excludes the unrelated Rusty Shiv and Deepwood Poison modifier",
+      "op": 3,
+      "base": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "aura_stacks",
+      "spell": 520614,
+      "save_as": "advantage_before_3",
+      "label": "r: aura_stacks 520614"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 0,
+      "save_as": "helper_3_807001_0",
+      "label": "r: spell_effect_value 807001 0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 1,
+      "save_as": "helper_3_807001_1",
+      "label": "r: spell_effect_value 807001 1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 2,
+      "save_as": "helper_3_807001_2",
+      "label": "r: spell_effect_value 807001 2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 520640,
+      "effect": 0,
+      "save_as": "helper_3_520640_0",
+      "label": "r: spell_effect_value 520640 0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "cooldown_ms",
+      "save_as": "horn_806359_before",
+      "spell": 806359,
+      "label": "r: cooldown_ms 806359"
+    },
+    {
+      "action": "set_power",
+      "actor": "r",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 806368,
+      "target": "enemy",
+      "save_as": "arrow_before_3",
+      "label": "r: spell_damage_count 806368 enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 806368,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 806368,
+      "target": "enemy",
+      "within_ms": 4000,
+      "relative_to": "arrow_before_3",
+      "equals": 1,
+      "label": "r: spell_damage_count 806368 enemy 1"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "cooldown_ms",
+      "spell": 806359,
+      "relative_to": "horn_806359_before",
+      "min": -8000,
+      "max": -5800,
+      "label": "r: cooldown_ms 806359 -8000 -5800"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "cooldown_ms",
+      "spell": 806359,
+      "min": 40000,
+      "label": "r: cooldown_ms 806359 40000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 520614,
+      "equals": 0,
+      "label": "r: aura 520614 0"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura_stacks",
+      "spell": 520614,
+      "relative_to": "advantage_before_3",
+      "equals": -1,
+      "label": "r: aura_stacks 520614 -1"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 0,
+      "equals": -2000,
+      "label": "r: spell_effect_value 807001 0 -2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 0,
+      "relative_to": "helper_3_807001_0",
+      "equals": 2000,
+      "label": "r: spell_effect_value 807001 0 2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 1,
+      "equals": -2000,
+      "label": "r: spell_effect_value 807001 1 -2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 1,
+      "relative_to": "helper_3_807001_1",
+      "equals": 2000,
+      "label": "r: spell_effect_value 807001 1 2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 2,
+      "equals": -2000,
+      "label": "r: spell_effect_value 807001 2 -2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 2,
+      "relative_to": "helper_3_807001_2",
+      "equals": 2000,
+      "label": "r: spell_effect_value 807001 2 2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 520640,
+      "effect": 0,
+      "equals": -2000,
+      "label": "r: spell_effect_value 520640 0 -2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 520640,
+      "effect": 0,
+      "relative_to": "helper_3_520640_0",
+      "equals": 2000,
+      "label": "r: spell_effect_value 520640 0 2000"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "r",
+      "spell": 800088
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "r",
+      "spell": 800086
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "r",
+      "spell": 806359
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "r",
+      "spell": 806360
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 806360
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "cast_failure",
+      "spell": 806360,
+      "equals": 0,
+      "label": "r: cast_failure 806360 0"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "cooldown_ms",
+      "spell": 806360,
+      "min": 57000,
+      "max": 60000,
+      "label": "r: cooldown_ms 806360 57000 60000"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "r",
+      "spell": 804329,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_modifier",
+      "spell": 681459,
+      "equals": 1000,
+      "label": "The Horn companion excludes the unrelated Rusty Shiv and Deepwood Poison modifier",
+      "op": 3,
+      "base": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "aura_stacks",
+      "spell": 520614,
+      "save_as": "advantage_before_4",
+      "label": "r: aura_stacks 520614"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 0,
+      "save_as": "helper_4_807001_0",
+      "label": "r: spell_effect_value 807001 0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 1,
+      "save_as": "helper_4_807001_1",
+      "label": "r: spell_effect_value 807001 1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 2,
+      "save_as": "helper_4_807001_2",
+      "label": "r: spell_effect_value 807001 2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 520640,
+      "effect": 0,
+      "save_as": "helper_4_520640_0",
+      "label": "r: spell_effect_value 520640 0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "cooldown_ms",
+      "save_as": "horn_806360_before",
+      "spell": 806360,
+      "label": "r: cooldown_ms 806360"
+    },
+    {
+      "action": "set_power",
+      "actor": "r",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 806368,
+      "target": "enemy",
+      "save_as": "arrow_before_4",
+      "label": "r: spell_damage_count 806368 enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "r",
+      "spell": 806368,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 806368,
+      "target": "enemy",
+      "within_ms": 4000,
+      "relative_to": "arrow_before_4",
+      "equals": 1,
+      "label": "r: spell_damage_count 806368 enemy 1"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "cooldown_ms",
+      "spell": 806360,
+      "relative_to": "horn_806360_before",
+      "min": -8000,
+      "max": -5800,
+      "label": "r: cooldown_ms 806360 -8000 -5800"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "cooldown_ms",
+      "spell": 806360,
+      "min": 40000,
+      "label": "r: cooldown_ms 806360 40000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 520614,
+      "equals": 0,
+      "label": "r: aura 520614 0"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "aura_stacks",
+      "spell": 520614,
+      "relative_to": "advantage_before_4",
+      "equals": -1,
+      "label": "r: aura_stacks 520614 -1"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 0,
+      "equals": -2000,
+      "label": "r: spell_effect_value 807001 0 -2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 0,
+      "relative_to": "helper_4_807001_0",
+      "equals": 2000,
+      "label": "r: spell_effect_value 807001 0 2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 1,
+      "equals": -2000,
+      "label": "r: spell_effect_value 807001 1 -2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 1,
+      "relative_to": "helper_4_807001_1",
+      "equals": 2000,
+      "label": "r: spell_effect_value 807001 1 2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 2,
+      "equals": -2000,
+      "label": "r: spell_effect_value 807001 2 -2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 807001,
+      "effect": 2,
+      "relative_to": "helper_4_807001_2",
+      "equals": 2000,
+      "label": "r: spell_effect_value 807001 2 2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 520640,
+      "effect": 0,
+      "equals": -2000,
+      "label": "r: spell_effect_value 520640 0 -2000"
+    },
+    {
+      "action": "assert",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 520640,
+      "effect": 0,
+      "relative_to": "helper_4_520640_0",
+      "equals": 2000,
+      "label": "r: spell_effect_value 520640 0 2000"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "r",
+      "spell": 800088
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "r",
+      "spell": 800086
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "r",
+      "spell": 806359
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "r",
+      "spell": 806360
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "r",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 15
+    }
+  ]
+}

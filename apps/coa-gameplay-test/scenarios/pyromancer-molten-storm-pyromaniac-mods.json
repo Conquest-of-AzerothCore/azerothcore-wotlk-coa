@@ -1,0 +1,182 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Molten Storm and Pyromaniac modify their spenders (#1355, #793)",
+  "contract": "#1355, #793: Molten Storm 805483 is family 30 with e1 ADD_FLAT_MODIFIER misc 7 (SPELLMOD_CRITICAL_CHANCE) value 9+1 = +10 and e2 ADD_PCT_MODIFIER misc 0 (SPELLMOD_DAMAGE) value +10%, both class mask A 0x10 = Lava Shard (803950). Pyromaniac 500166 e1 is ADD_FLAT_MODIFIER misc 7 value 4+1 = +5 with masks A 0x200000 (Explode 800792), B 0x8000 (Flames of Neltharion 801915), C 0x800000; e2 is ADD_PCT_MODIFIER misc 22 (SPELLMOD_DOT) +10% with mask A 0x200 (Blaze 805500). The core applies them natively in Unit::SpellDoneCritChance (Unit.cpp:9694) and Unit::SpellDamageBonusDone (Unit.cpp:9367); no module code touches either passive. Asserts the native spell modifiers per spell are nil before and the recorded value after learning, and that Pyromaniac does not touch Lava Shard (its mask is A 0x10, not in Pyromaniac's masks).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "p",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Lava Shard crit modifier starts at 0",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 803950,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Lava Shard damage modifier starts neutral",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 803950,
+      "op": 0,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Explode crit modifier starts at 0",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 800792,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Flames of Neltharion crit modifier starts at 0",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 801915,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Blaze periodic modifier starts neutral",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 805500,
+      "op": 22,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 805483
+    },
+    {
+      "action": "assert",
+      "label": "Molten Storm adds 10 crit to Lava Shard",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 803950,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Molten Storm adds 10% damage to Lava Shard",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 803950,
+      "op": 0,
+      "base": 100,
+      "min": 109,
+      "max": 111
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 500166
+    },
+    {
+      "action": "assert",
+      "label": "Pyromaniac adds 5 crit to Explode",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 800792,
+      "op": 7,
+      "base": 0,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "Pyromaniac adds 5 crit to Flames of Neltharion",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 801915,
+      "op": 7,
+      "base": 0,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "Pyromaniac adds 10% periodic damage to Blaze",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 805500,
+      "op": 22,
+      "base": 100,
+      "min": 109,
+      "max": 111
+    },
+    {
+      "action": "assert",
+      "label": "Pyromaniac leaves Lava Shard crit at Molten Storm's 10",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 803950,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 500166
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning Pyromaniac removes the Explode crit",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 800792,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 805483
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning Molten Storm removes the Lava Shard crit",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 803950,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    }
+  ]
+}

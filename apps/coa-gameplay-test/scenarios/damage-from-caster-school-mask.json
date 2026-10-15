@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Damage from caster auras respect a nonzero school mask and preserve a zero mask",
+  "contract": "Aura 271 selects the original caster and its nonzero EffectMiscValue school mask. Shadow Cleave 892266 has mask 32 and amount 25%, so Shadow damage rises while Frost does not. Contagious Spell Proc Damage Mask 281500 has a zero mask and amount 6%, so its class-family-matched Holy and Shadow probes both rise.",
+  "players": [
+    { "id": "caster", "race": 2, "class": 30, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_damage_taken", "spell": 686, "target": "caster", "save_as": "shadow_baseline" },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_damage_taken", "spell": 116, "target": "caster", "save_as": "frost_baseline" },
+    { "action": "set_aura", "actor": "caster", "spell": 892266, "stacks": 1 },
+    { "action": "assert", "actor": "caster", "metric": "aura", "spell": 892266, "caster": "caster", "equals": 1 },
+    { "action": "assert", "actor": "caster", "metric": "aura_amount", "spell": 892266, "caster": "caster", "equals": 25 },
+    { "action": "assert", "actor": "caster", "metric": "spell_damage_taken", "spell": 686, "target": "caster", "ratio_to": "shadow_baseline", "min": 1.245, "max": 1.255, "label": "Shadow school receives the 25 percent bonus" },
+    { "action": "assert", "actor": "caster", "metric": "spell_damage_taken", "spell": 116, "target": "caster", "ratio_to": "frost_baseline", "min": 0.995, "max": 1.005, "label": "Frost school is excluded by mask 32" },
+    { "action": "set_aura", "actor": "caster", "spell": 892266, "stacks": 0 },
+    { "action": "assert", "actor": "caster", "metric": "aura", "spell": 892266, "equals": 0 },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_damage_taken", "spell": 585, "target": "caster", "save_as": "holy_baseline" },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_damage_taken", "spell": 8092, "target": "caster", "save_as": "priest_shadow_baseline" },
+    { "action": "set_aura", "actor": "caster", "spell": 281500, "stacks": 1 },
+    { "action": "assert", "actor": "caster", "metric": "aura", "spell": 281500, "caster": "caster", "equals": 1 },
+    { "action": "assert", "actor": "caster", "metric": "aura_amount", "spell": 281500, "caster": "caster", "equals": 6 },
+    { "action": "assert", "actor": "caster", "metric": "spell_damage_taken", "spell": 585, "target": "caster", "ratio_to": "holy_baseline", "min": 1.055, "max": 1.065, "label": "Zero mask keeps the Holy family match" },
+    { "action": "assert", "actor": "caster", "metric": "spell_damage_taken", "spell": 8092, "target": "caster", "ratio_to": "priest_shadow_baseline", "min": 1.055, "max": 1.065, "label": "Zero mask keeps the Shadow family match" }
+  ]
+}

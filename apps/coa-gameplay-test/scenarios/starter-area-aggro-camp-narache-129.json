@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Starter area aggression: camp-narache (#129)",
+  "contract": "Issue #129 identifies these starter-area creatures as attack-on-sight on Ascension. The faction restoration in rev_20260920_02_starter_area_mob_aggression.sql is already on main. This case uses the native summon action, which retains each template faction and AI reaction, instead of the creatures fixture that defaults to faction 14 and passive reaction. A level-5 player waits three yards away without attacking, casting, taunting or entering a challenge; every reported creature must independently select that player as its victim. The adjacent Young Nightsaber (2031), excluded from the restoration, must stay out of combat before and after the hostile creatures appear. The large player health pool only prevents fixture death. This covers native faction/AI behavior for the zone's player race; it does not inspect spawn placement or client nameplate colors.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "visitor",
+      "race": 6,
+      "class": 1,
+      "level": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "visitor",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "summon",
+      "actor": "visitor",
+      "entry": 2031,
+      "as": "neutral",
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "A Young Nightsaber does not attack an idle player",
+      "actor": "neutral",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "visitor",
+      "entry": 2952,
+      "as": "mob2952",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "Bristleback Quilboar attacks without being hit or taunted",
+      "actor": "mob2952",
+      "metric": "victim",
+      "target": "visitor",
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "summon",
+      "actor": "visitor",
+      "entry": 2953,
+      "as": "mob2953",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "Bristleback Shaman attacks without being hit or taunted",
+      "actor": "mob2953",
+      "metric": "victim",
+      "target": "visitor",
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "summon",
+      "actor": "visitor",
+      "entry": 8554,
+      "as": "mob8554",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "Chief Sharptusk Thornmantle attacks without being hit or taunted",
+      "actor": "mob8554",
+      "metric": "victim",
+      "target": "visitor",
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The neutral control still does not join combat",
+      "actor": "neutral",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The player remains alive throughout the aggro checks",
+      "actor": "visitor",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

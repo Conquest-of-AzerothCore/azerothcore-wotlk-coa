@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Issue 3563: Wind Surge's chain-target modifier on Weapon Engraving: Air is wired and native",
+  "contract": [
+    "Wind Surge 805750 promises two additional enemies for Weapon Engraving: Air. Its native flat",
+    "SPELLMOD_JUMP_TARGETS modifier has base points 2, die sides 1 and class mask (0, 0x40000, 0), yielding three",
+    "total chain targets on 653226.",
+    "Air copy damage inherits the resolved source amount and ignores caster amount modifiers. The exact Wind Surge",
+    "target modifier must still apply through ordinary family, mask and script checks; disabling amount modifiers",
+    "must not remove the two additional targets.",
+    "Alternate helper 653257 carries the same family mask but ignores caster modifiers without the Wind Surge",
+    "exemption, so its target modifier remains zero. Native enchant activation and actual chained copy damage are",
+    "covered by the Air Engraving 6003 regressions."
+  ],
+  "timeout_ms": 60000,
+  "players": [{"id": "rm", "race": 1, "class": 32, "level": 60}],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "SETUP: no chain-target bonus on Weapon Engraving: Air before learning Wind Surge",
+     "actor": "rm", "metric": "spell_modifier", "spell": 653226, "op": 17, "base": 0, "equals": 0},
+    {"action": "learn", "actor": "rm", "spell": 805750},
+    {"action": "assert", "label": "CONTRACT: Wind Surge's SpellMod adds 3 chain targets to 653226 (2 base + 1 die-roll)",
+     "actor": "rm", "metric": "spell_modifier", "spell": 653226, "op": 17, "base": 0, "equals": 3},
+    {"action": "assert",
+     "label": "SETUP: 653257 shares the classmask but is exempt via SPELL_ATTR3_IGNORE_CASTER_MODIFIERS",
+     "actor": "rm", "metric": "spell_modifier", "spell": 653257, "op": 17, "base": 0, "equals": 0}
+  ]
+}

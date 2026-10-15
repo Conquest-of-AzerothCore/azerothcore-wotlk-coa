@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Eternity gives Clasp of Infinity its 15% damage-taken effect (#938)",
+  "contract": "Clasp of Infinity 805847's tooltip reads \"$?s805844[While rooted, targets take $s2% increased damage.][]\". In Spell.dbc, Clasp's Effect[1] is SPELL_AURA_MOD_DAMAGE_FROM_CASTER (271) with EffectMiscValue 127 (all schools), EffectBasePoints -1 and DieSides 1, so it resolves to 0 on its own. Eternity 805844's Effect[0] is SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 12 (SPELLMOD_EFFECT2), EffectBasePoints 14 and DieSides 1 (+15), EffectSpellClassMask [8388608,0,0], which inside SpellFamilyName 28 selects 805847 and nothing else. SpellEffectInfo::CalcValue calls Unit::ApplyEffectModifiers, which routes SPELLMOD_EFFECT2 to effect index 1 (Unit.cpp), so the aura's amount becomes 15; Unit::SpellDamageBonusTaken and Unit::MeleeDamageBonusTaken consume aura 271 filtered by the aura caster's GUID, which is the tooltip's \"damage dealt to the target by you\". Generic core machinery, no Chronomancer-specific code. This scenario is a regression guard for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Clasp's damage-taken effect before the talent",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 805847,
+      "effect": 1,
+      "save_as": "clasp_base"
+    },
+    {
+      "action": "assert",
+      "label": "Without Eternity the effect resolves to zero",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 805847,
+      "effect": 1,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 805844
+    },
+    {
+      "action": "assert",
+      "label": "Eternity self-applies its passive",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 805844,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Clasp's damage-taken effect resolves to 15 with Eternity",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 805847,
+      "effect": 1,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "Eternity adds exactly 15 to that effect",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 805847,
+      "effect": 1,
+      "relative_to": "clasp_base",
+      "equals": 15
+    }
+  ]
+}

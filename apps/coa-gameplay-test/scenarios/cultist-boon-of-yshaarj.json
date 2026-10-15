@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "Boon of Y'shaarj grants max health from Intellect at both ranks (#965)",
+  "contract": "Spell.dbc 560080 (rank 1) and 561335 (rank 2) each carry two SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT (328) effects on STAT_INTELLECT (EffectMiscValueB=3): effect 0 with EffectMiscValue=POWER_MANA (0) and effect 1 with EffectMiscValue=POWER_HEALTH (-2), both EffectBasePoints 199/399 resolving (DieSides=1) to 200/400, matching the tooltip \"Increases the amount of mana and now health per point of Intellect by 200%/400%.\" AuraEffect::HandleAscensionModMaxManaFromStat (SpellAuraEffects.cpp) only recognized POWER_MANA and silently dropped the POWER_HEALTH effect, so max_health never moved on either rank while max_power already did. Since both effects share identical EffectBasePoints/DieSides/source stat, once the POWER_HEALTH branch is wired the same way as POWER_MANA, rank 2's max_health gain over baseline must be exactly double rank 1's (400% vs 200%), independent of the fixture's actual Intellect value.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "rank_one", "race": 1, "class": 25, "level": 40 },
+    { "id": "rank_two", "race": 1, "class": 25, "level": 40 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    {
+      "action": "snapshot", "actor": "rank_one", "metric": "max_power", "power": 0,
+      "save_as": "power_before_r1"
+    },
+    {
+      "action": "snapshot", "actor": "rank_one", "metric": "max_health",
+      "save_as": "health_before_r1"
+    },
+    {
+      "action": "snapshot", "actor": "rank_two", "metric": "max_health",
+      "save_as": "health_before_r2"
+    },
+    { "action": "learn", "actor": "rank_one", "spell": 560080 },
+    { "action": "learn", "actor": "rank_two", "spell": 561335 },
+    {
+      "action": "assert", "label": "Rank 1's mana-from-Intellect half still works (regression guard)",
+      "actor": "rank_one", "metric": "max_power", "power": 0,
+      "relative_to": "power_before_r1", "min": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Rank 1's health-from-Intellect half now grants max health (was 0 before the fix)",
+      "actor": "rank_one", "metric": "max_health",
+      "relative_to": "health_before_r1", "min": 1, "within_ms": 1000
+    },
+    {
+      "action": "snapshot", "actor": "rank_one", "metric": "max_health",
+      "relative_to": "health_before_r1", "save_as": "health_delta_r1"
+    },
+    {
+      "action": "assert", "label": "Rank 2's health-from-Intellect half also grants max health",
+      "actor": "rank_two", "metric": "max_health",
+      "relative_to": "health_before_r2", "min": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Rank 2 (400%) grants exactly twice rank 1's (200%) max health bonus",
+      "actor": "rank_two", "metric": "max_health",
+      "relative_to": "health_before_r2", "ratio_to": "health_delta_r1", "min": 1.9, "max": 2.1
+    }
+  ]
+}

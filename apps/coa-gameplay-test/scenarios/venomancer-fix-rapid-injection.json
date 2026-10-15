@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Beetle Poison adds a Wicked Poison stack and Rapid Injection speeds its ticks (#2876, #2922)",
+  "contract": "#2876 and #2922: Beetle Poison (705876) is a flat SPELLMOD_MAX_AURA_STACKS (31) +1 on Wicked Poison (705985, family 35 word2 0x20000, StackAmount 1), read by SpellInfo::CalcMaxAuraStacks. Rapid Injection (705989) is a PCT SPELLMOD_ACTIVATION_TIME (19) -30% on word2 0x820000 (Wicked Poison and Venomtip Poison), read by AuraEffect::CalculatePeriodic on the 1500 ms Wicked Poison amplitude. Native modifier queries only: no Wicked Poison application is submitted, so the applied stack count and tick timing are not exercised here.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "v",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Wicked Poison stacks once without Beetle Poison",
+      "actor": "v",
+      "metric": "spell_max_stacks",
+      "spell": 705985,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Wicked Poison ticks every 1500 ms without Rapid Injection",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 705985,
+      "op": 19,
+      "base": 1500,
+      "equals": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Expulsion (outside Rapid Injection's mask) keeps its period",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 805094,
+      "op": 19,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 705876
+    },
+    {
+      "action": "assert",
+      "label": "Beetle Poison lets Wicked Poison stack twice",
+      "actor": "v",
+      "metric": "spell_max_stacks",
+      "spell": 705985,
+      "equals": 2
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 705989
+    },
+    {
+      "action": "assert",
+      "label": "DIAGNOSTIC: Rapid Injection is applied as a passive aura after learn",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 705989,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rapid Injection shortens the Wicked Poison tick to 1050 ms",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 705985,
+      "op": 19,
+      "base": 1500,
+      "min": 1049.9,
+      "max": 1050.1
+    },
+    {
+      "action": "assert",
+      "label": "Rapid Injection does not touch Expulsion's period",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 805094,
+      "op": 19,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Beetle Poison still gives exactly two Wicked Poison stacks",
+      "actor": "v",
+      "metric": "spell_max_stacks",
+      "spell": 705985,
+      "equals": 2
+    }
+  ]
+}

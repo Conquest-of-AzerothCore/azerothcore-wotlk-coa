@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Improved Forked Lightning and Electric Energy work natively (#1675, #3371)",
+  "contract": "#1675: Improved Forked Lightning (300597) is a flat SPELLMOD_JUMP_TARGETS (17) of +1, class mask (256,0,0), which matches only Forked Lightning's own SpellFamilyFlags (256,0,32); Spell::SelectImplicitChainTargets reads EffectChainTarget[0] (4 in the DBC) and applies the mod through the generic spell-mod path, with no family-22 override in SpellInfo::IsAffectedBySpellMod, so 4 becomes 5 on every rank including the top rank 582304. Call Lightning (500040, flags (0,16,32)) is outside the mask and stays at 4, proving the restriction. #3371: Electric Energy (804278) is a flat SPELLMOD_DAMAGE (0) PCT modifier, EffectBasePoints 19 + DieSides 1 = +20%, class mask (2048,18,0) matching exactly Shock (503326, flags (2048,0,0)), Call Lightning (500040, flags (0,16,32)) and Arm of Thorim (501433, flags (0,2,32)); Forked Lightning (501438, flags (256,0,32)) is outside the mask and is the negative control for this half. Both modifiers are read with spell_modifier, which applies the player's real spell mods on top of the DBC base value (apps/coa-gameplay-test/README.md). Arm of Thorim is not a clean 1000 baseline: every Stormbringer permanently carries 887004 'CoA Aura - Stormbringer Class' (AscensionClassTuning::Synchronize applies it class-wide, independent of spec or talents), whose own Effect[2] is an ADD_PCT_MODIFIER on op 0 with class mask (0,2,0) - the same dword1 bit as Arm of Thorim and only Arm of Thorim among this scenario's probes (Shock/Call Lightning/Forked Lightning masks do not overlap it). Its EffectBasePoints 9 + DieSides 1 = +10% always applies first, so Arm of Thorim's op-0 baseline is 1100, and Electric Energy's own +20% then compounds multiplicatively (Player::ApplySpellMod multiplies per-mod factors for SPELLMOD_DAMAGE) to 1000*1.10*1.20 = 1320, not 1200.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "s", "spell": 501438 },
+    { "action": "learn", "actor": "s", "spell": 582304 },
+    { "action": "learn", "actor": "s", "spell": 500040 },
+    { "action": "learn", "actor": "s", "spell": 503326 },
+    { "action": "learn", "actor": "s", "spell": 501433 },
+    { "action": "assert", "label": "BASELINE: Forked Lightning chain targets are the DBC's 4 without Improved Forked Lightning",
+      "actor": "s", "metric": "spell_modifier", "spell": 501438, "op": 17, "base": 4, "equals": 4 },
+    { "action": "assert", "label": "BASELINE: top-rank Forked Lightning 582304 also chains 4 targets",
+      "actor": "s", "metric": "spell_modifier", "spell": 582304, "op": 17, "base": 4, "equals": 4 },
+    { "action": "assert", "label": "NEGATIVE CONTROL: Call Lightning's chain-target query is unaffected by the Forked Lightning mask",
+      "actor": "s", "metric": "spell_modifier", "spell": 500040, "op": 17, "base": 4, "equals": 4 },
+    { "action": "assert", "label": "BASELINE: Shock damage is unmodified without Electric Energy",
+      "actor": "s", "metric": "spell_modifier", "spell": 503326, "op": 0, "base": 1000, "equals": 1000 },
+    { "action": "assert", "label": "BASELINE: Call Lightning damage is unmodified without Electric Energy",
+      "actor": "s", "metric": "spell_modifier", "spell": 500040, "op": 0, "base": 1000, "equals": 1000 },
+    { "action": "assert", "label": "BASELINE: Arm of Thorim damage carries only the class-kit's own +10% (887004) before Electric Energy is learned",
+      "actor": "s", "metric": "spell_modifier", "spell": 501433, "op": 0, "base": 1000, "equals": 1100 },
+    { "action": "assert", "label": "NEGATIVE CONTROL: Forked Lightning damage query is unaffected by the Electric Energy mask",
+      "actor": "s", "metric": "spell_modifier", "spell": 501438, "op": 0, "base": 1000, "equals": 1000 },
+    { "action": "learn", "actor": "s", "spell": 300597 },
+    { "action": "assert", "label": "DISCRIMINATING: Improved Forked Lightning raises the chain to 5 targets",
+      "actor": "s", "metric": "spell_modifier", "spell": 501438, "op": 17, "base": 4, "equals": 5 },
+    { "action": "assert", "label": "DISCRIMINATING: the bonus target also applies to the top rank",
+      "actor": "s", "metric": "spell_modifier", "spell": 582304, "op": 17, "base": 4, "equals": 5 },
+    { "action": "assert", "label": "NEGATIVE CONTROL: Call Lightning's chain-target query stays 4 after learning Improved Forked Lightning",
+      "actor": "s", "metric": "spell_modifier", "spell": 500040, "op": 17, "base": 4, "equals": 4 },
+    { "action": "learn", "actor": "s", "spell": 804278 },
+    { "action": "assert", "label": "DISCRIMINATING: Electric Energy raises Shock damage by 20%",
+      "actor": "s", "metric": "spell_modifier", "spell": 503326, "op": 0, "base": 1000, "equals": 1200 },
+    { "action": "assert", "label": "DISCRIMINATING: Electric Energy raises Call Lightning damage by 20%",
+      "actor": "s", "metric": "spell_modifier", "spell": 500040, "op": 0, "base": 1000, "equals": 1200 },
+    { "action": "assert", "label": "DISCRIMINATING: Electric Energy's +20% compounds on top of the class-kit's own +10% (887004): 1000*1.10*1.20",
+      "actor": "s", "metric": "spell_modifier", "spell": 501433, "op": 0, "base": 1000, "equals": 1320 },
+    { "action": "assert", "label": "NEGATIVE CONTROL: Forked Lightning damage query stays 1000 after learning Electric Energy",
+      "actor": "s", "metric": "spell_modifier", "spell": 501438, "op": 0, "base": 1000, "equals": 1000 }
+  ]
+}

@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "name": "Aortic Aegis spreads Blood Veil to the party (#602)",
+  "contract": "Aortic Aegis 806274's single effect is SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on Aortic Aegis 806275, a single SPELL_EFFECT_TRIGGER_SPELL on Blood Veil 504263 with TargetA 33 (caster area party) and radius index 11. Spell.dbc gives 806274 ProcFlags 0 and no spell_proc row existed, so the aura was inert. The tooltip is 'Your Blood Veil now applies to the party members of the target' at ProcChance 101, i.e. always. Blood Veil is cast as rank 572279, the rank a level-80 character owns per AscensionSpellProgressionData.h; every rank carries SpellFamilyFlags (0, 536870912, 0), the bit the row's SpellFamilyMask1 names, and is DmgClass 1 with two beneficial aura 69 absorb effects, which is the PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS event the row carries. 806275 casts rank 1 (504263), so the party member receives 504263 while the direct target keeps rank 572279. The row deliberately leaves AttributesMask 0: without PROC_ATTR_TRIGGERED_CAN_PROC, Aura::GetProcEffectMask refuses to proc from the triggered re-cast, which is what stops the fan-out looping. The last assertion pins that: the third party member must receive Blood Veil exactly once.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "third",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "bloodmage",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "bloodmage",
+      "target": "third"
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 572279
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572279,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The direct target is shielded",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572279,
+      "caster": "bloodmage",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent the party member gets nothing",
+      "actor": "third",
+      "metric": "aura",
+      "spell": 504263,
+      "caster": "bloodmage",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Blood Veil's 30 s cooldown",
+      "ms": 31000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 806274
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 572279,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the third party member now receives Blood Veil",
+      "actor": "third",
+      "metric": "aura",
+      "spell": 504263,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "exactly once - no party fan-out loop",
+      "actor": "third",
+      "metric": "aura_stacks",
+      "spell": 504263,
+      "caster": "bloodmage",
+      "max": 1
+    }
+  ]
+}

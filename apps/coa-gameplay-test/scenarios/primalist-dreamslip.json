@@ -1,0 +1,438 @@
+{
+  "schema": 1,
+  "name": "Primalist Dreamslip party phase, action lock and recovery",
+  "contract": "A normal two-second cast phases a party member for fifteen seconds, prevents an ordinary self-heal, grants damage immunity and restores two percent maximum health and Mana thirty times. Self and nonparty casts fail. Visibility, spellcasting and vulnerability return after expiry.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "outsider",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 100000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 58
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 100602,
+      "stacks": 1,
+      "label": "Set the ordinary phase with the native Normal Mode aura"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 100602,
+      "stacks": 0,
+      "label": "Set the ordinary phase with the native Normal Mode aura"
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 100602,
+      "stacks": 1,
+      "label": "Set the ordinary phase with the native Normal Mode aura"
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 100602,
+      "stacks": 0,
+      "label": "Set the ordinary phase with the native Normal Mode aura"
+    },
+    {
+      "action": "set_aura",
+      "actor": "outsider",
+      "spell": 100602,
+      "stacks": 1,
+      "label": "Set the ordinary phase with the native Normal Mode aura"
+    },
+    {
+      "action": "set_aura",
+      "actor": "outsider",
+      "spell": 100602,
+      "stacks": 0,
+      "label": "Set the ordinary phase with the native Normal Mode aura"
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9617.06,
+      "y": -285.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 805867
+    },
+    {
+      "action": "learn",
+      "actor": "ally",
+      "spell": 800135
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 805867,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 805867,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 805867,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 805867,
+      "target": "outsider"
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "aura",
+      "spell": 805867,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 805867,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 10000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "can_detect",
+      "target": "ally",
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 804315,
+      "save_as": "recoveries",
+      "target": "ally",
+      "label": "Healing keeps the original Dreamslip caster credit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 804315,
+      "save_as": "recovery_health",
+      "target": "ally",
+      "label": "Healing keeps the original Dreamslip caster credit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "max_power",
+      "power": 0,
+      "save_as": "max_mana"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "spell_energize_total",
+      "spell": 804315,
+      "power": 0,
+      "save_as": "recovery_mana"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 805867,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 805867,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amplitude_ms",
+      "spell": 805867,
+      "effect": 1,
+      "equals": 500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "can_detect",
+      "target": "ally",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 403,
+      "target": "target",
+      "equals": 1,
+      "label": "Hostile caster immunity; native friendly spells bypass friendly immunity"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 804315,
+      "relative_to": "recoveries",
+      "min": 1,
+      "within_ms": 1000,
+      "target": "ally",
+      "label": "Healing keeps the original Dreamslip caster credit"
+    },
+    {
+      "action": "cast",
+      "actor": "ally",
+      "spell": 800135
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_heal_count",
+      "spell": 800135,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_go_count",
+      "spell": 800135,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 15500
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 805867,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "can_detect",
+      "target": "ally",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 403,
+      "target": "target",
+      "equals": 0,
+      "label": "Hostile caster immunity; native friendly spells bypass friendly immunity"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 804315,
+      "relative_to": "recoveries",
+      "equals": 30,
+      "target": "ally",
+      "label": "Healing keeps the original Dreamslip caster credit"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 804315,
+      "relative_to": "recovery_health",
+      "equals": 6000,
+      "target": "ally",
+      "label": "Healing keeps the original Dreamslip caster credit"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_energize_total",
+      "spell": 804315,
+      "power": 0,
+      "relative_to": "recovery_mana",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "spell_energize_total",
+      "spell": 804315,
+      "power": 0,
+      "save_as": "total_mana_recovery"
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "ally",
+      "spell": 800135
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_heal_count",
+      "spell": 800135,
+      "within_ms": 3000,
+      "min": 1
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

@@ -1,0 +1,184 @@
+{
+  "schema": 1,
+  "name": "Path to Ascension: reaching level 10 verifies tutorial 74, whose reward is claimed once",
+  "contract": "Tutorial 74 (\"Reach Level 10!\", Tutorial.dbc) is open to every race and class on every realm type and pays 250 Runes of Ascension (item 375250, TutorialRewards.dbc). A level-9 Human Warrior has not completed it: the client's claim (0x6A8) is answered with the refusal on 0x6AF and pays nothing. Reaching level 10 marks the tutorial verified in core.ascension.tutorial_verified and completes its achievement. A claim then pays exactly 250 runes, records the claim in core.ascension.tutorial_rewards and answers CLAIM_TUTORIAL_OK; a second claim is refused as already collected and pays nothing more. The book's Start Quest button (an accept packet with an empty quest giver) puts tutorial 51's tracking quest 1903512 in the log, while tutorial 2's quest 81000 stays out because its prerequisites 57 and 58 are not complete.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "initiate",
+      "race": 1,
+      "class": 1,
+      "level": 9
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8833.38,
+    "y": 628.628,
+    "z": 94.0066,
+    "o": 1.06535
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login rewards and the tutorial state settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "At level 9 tutorial 74 is not verified",
+      "actor": "initiate",
+      "metric": "player_setting",
+      "source": "core.ascension.tutorial_verified",
+      "index": 74,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Runes before any claim",
+      "actor": "initiate",
+      "metric": "item_count",
+      "item": 375250,
+      "save_as": "runes"
+    },
+    {
+      "action": "client_packet",
+      "label": "Claim tutorial 74 before completing it",
+      "actor": "initiate",
+      "opcode": 1704,
+      "fields": [{"u32": 74}]
+    },
+    {
+      "action": "assert",
+      "label": "The early claim is refused",
+      "actor": "initiate",
+      "metric": "server_packet_contains",
+      "opcode": 1711,
+      "text": "not available for your character",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and pays nothing",
+      "actor": "initiate",
+      "metric": "item_count",
+      "item": 375250,
+      "relative_to": "runes",
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "label": "Reach level 10",
+      "actor": "initiate",
+      "value": 10
+    },
+    {
+      "action": "assert",
+      "label": "Level 10 verifies tutorial 74",
+      "actor": "initiate",
+      "metric": "player_setting",
+      "source": "core.ascension.tutorial_verified",
+      "index": 74,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "label": "Claim tutorial 74",
+      "actor": "initiate",
+      "opcode": 1704,
+      "fields": [{"u32": 74}]
+    },
+    {
+      "action": "assert",
+      "label": "The claim is accepted",
+      "actor": "initiate",
+      "metric": "server_packet_contains",
+      "opcode": 1711,
+      "text": "CLAIM_TUTORIAL_OK",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "It pays exactly the 250 runes of TutorialRewards.dbc",
+      "actor": "initiate",
+      "metric": "item_count",
+      "item": 375250,
+      "relative_to": "runes",
+      "equals": 250
+    },
+    {
+      "action": "assert",
+      "label": "and records the claim",
+      "actor": "initiate",
+      "metric": "player_setting",
+      "source": "core.ascension.tutorial_rewards",
+      "index": 74,
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "Claim tutorial 74 a second time",
+      "actor": "initiate",
+      "opcode": 1704,
+      "fields": [{"u32": 74}]
+    },
+    {
+      "action": "assert",
+      "label": "The repeat is refused as already collected",
+      "actor": "initiate",
+      "metric": "server_packet_contains",
+      "opcode": 1711,
+      "text": "already been collected",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and pays nothing more",
+      "actor": "initiate",
+      "metric": "item_count",
+      "item": 375250,
+      "relative_to": "runes",
+      "equals": 250
+    },
+    {
+      "action": "client_packet",
+      "label": "Start tutorial 51's tracking quest from the book",
+      "actor": "initiate",
+      "opcode": 393,
+      "fields": [{"u64": 0}, {"u32": 1903512}, {"u32": 0}]
+    },
+    {
+      "action": "assert",
+      "label": "The tracking quest is in the log, incomplete",
+      "actor": "initiate",
+      "metric": "quest_status",
+      "quest": 1903512,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "label": "Try to start tutorial 2's tracking quest without its prerequisites",
+      "actor": "initiate",
+      "opcode": 393,
+      "fields": [{"u64": 0}, {"u32": 81000}, {"u32": 0}]
+    },
+    {
+      "action": "wait",
+      "label": "Give the request a player update",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The ineligible tracking quest stays out of the log",
+      "actor": "initiate",
+      "metric": "quest_status",
+      "quest": 81000,
+      "equals": 0
+    }
+  ]
+}

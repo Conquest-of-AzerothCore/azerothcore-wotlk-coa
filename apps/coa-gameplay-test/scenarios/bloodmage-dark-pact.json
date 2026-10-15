@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Dark Pact raises maximum Rage and regenerates Rage (#1997)",
+  "contract": "Dark Pact 560256: \"Increases your maximum Rage by $/10;s1 and you now regenerate $/10;s2 Rage every $t2 sec.\" Effect 0 is aura 35 SPELL_AURA_MOD_INCREASE_ENERGY, MiscValue 1 = POWER_RAGE, amount 200 internal = 20 Rage, handled by AuraEffect::HandleAuraModIncreaseEnergy (SpellAuraEffects.cpp:100), which deliberately does not check the power type. Effect 1 is aura 24 SPELL_AURA_PERIODIC_ENERGIZE, MiscValue 1, amount 40 internal = 4 Rage, Amplitude 5000, delivered by AuraEffect::HandlePeriodicEnergizeAuraTick. That tick is gated on Unit::CanReceivePowerFromSpell (Unit.cpp:13077-13086), which for class 20 reduces to HasActivePowerType(POWER_RAGE): ChrClasses.dbc gives class 20 DisplayPower 1, the same value Warrior (class 1) carries, so the Bloodmage's displayed power is Rage and the tick runs. Rage decays out of combat, so the measurement is taken in combat, where Player::Regenerate applies no decay, and the Bloodmage never swings a weapon, so the energize tick is the only Rage income. Two ticks over 12 sec are worth 80 internal Rage.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "b",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "max_power",
+      "power": 1,
+      "save_as": "maxrage_base"
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 560256
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 560256,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Maximum Rage rises by 20 (200 internal)",
+      "actor": "b",
+      "metric": "max_power",
+      "power": 1,
+      "relative_to": "maxrage_base",
+      "equals": 200
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 504282
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Enter combat without a weapon swing",
+      "actor": "b",
+      "spell": 504282
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 1,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "power",
+      "power": 1,
+      "save_as": "rage_before"
+    },
+    {
+      "action": "wait",
+      "label": "At least two 5 sec energize ticks",
+      "ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "Still in combat, so no Rage decay ran",
+      "actor": "b",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rage regenerates 4 (40 internal) every 5 sec",
+      "actor": "b",
+      "metric": "power",
+      "power": 1,
+      "relative_to": "rage_before",
+      "min": 40
+    }
+  ]
+}

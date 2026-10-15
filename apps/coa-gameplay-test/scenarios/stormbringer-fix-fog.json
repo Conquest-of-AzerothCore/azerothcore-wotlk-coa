@@ -1,0 +1,249 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Fog refuses hostile casts that cross its edge (#3742)",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "storm",
+      "race": 2,
+      "class": 16,
+      "level": 80
+    },
+    {
+      "id": "enemy",
+      "race": 1,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "outsider",
+      "owner": "storm",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 12
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "storm",
+      "spell": 806100,
+      "label": "Learn Fog"
+    },
+    {
+      "action": "learn",
+      "actor": "enemy",
+      "spell": 503326,
+      "label": "Learn Shock, the probe (SpellRange 35 = 35 yd)"
+    },
+    {
+      "action": "pvp",
+      "actor": "storm",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "label": "Put the hostile caster 15 yd away, outside the 8 yd Fog radius",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9602.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the caster stands outside the 8.0 yd radius of SpellRadius 14",
+      "actor": "enemy",
+      "metric": "distance",
+      "target": "storm",
+      "min": 9
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the control victim also stands outside the 8.0 yd radius",
+      "actor": "storm",
+      "metric": "distance",
+      "target": "outsider",
+      "min": 9
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the control victim is next to the hostile caster",
+      "actor": "enemy",
+      "metric": "distance",
+      "target": "outsider",
+      "max": 6
+    },
+    {
+      "action": "cast",
+      "label": "BASELINE: Shock the Stormbringer with no Fog up",
+      "actor": "enemy",
+      "spell": 503326,
+      "target": "storm"
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the pair can reach each other, so the cast lands",
+      "actor": "enemy",
+      "metric": "spell_damage_count",
+      "spell": 503326,
+      "target": "storm",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: nothing refused that cast",
+      "actor": "enemy",
+      "metric": "cast_failure",
+      "spell": 503326,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_damage_count",
+      "spell": 503326,
+      "target": "storm",
+      "save_as": "reached"
+    },
+    {
+      "action": "cast",
+      "label": "SETUP: the Stormbringer casts Fog at its feet",
+      "actor": "storm",
+      "spell": 806100
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Fog leaves its ground area (effect 2 SPELL_EFFECT_PERSISTENT_AREA_AURA)",
+      "actor": "storm",
+      "metric": "dynamic_object",
+      "spell": 806100,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the area lasts 8000 ms (SpellDuration 31), minus the polling above",
+      "actor": "storm",
+      "metric": "dynamic_object_duration_ms",
+      "spell": 806100,
+      "min": 6000,
+      "max": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Let the hostile caster's global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "DISCRIMINATING: the same cast now crosses the edge of the Fog",
+      "actor": "enemy",
+      "spell": 503326,
+      "target": "storm"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: refused with SPELL_FAILED_LINE_OF_SIGHT = 47 (SharedDefines.h:1071)",
+      "actor": "enemy",
+      "metric": "cast_failure",
+      "spell": 503326,
+      "equals": 47,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no damage crossed the edge",
+      "actor": "enemy",
+      "metric": "spell_damage_count",
+      "spell": 503326,
+      "target": "storm",
+      "relative_to": "reached",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: the same caster Shocks a victim that is also outside the Fog",
+      "actor": "enemy",
+      "spell": 503326,
+      "target": "outsider"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a cast crossing no edge still lands",
+      "actor": "enemy",
+      "metric": "spell_damage_count",
+      "spell": 503326,
+      "target": "outsider",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: that cast was not refused",
+      "actor": "enemy",
+      "metric": "cast_failure",
+      "spell": 503326,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the 8000 ms Fog expire",
+      "ms": 9000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the ground area is gone after SpellDuration 31",
+      "actor": "storm",
+      "metric": "dynamic_object",
+      "spell": 806100,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: the hostile caster Shocks the Stormbringer once the Fog has expired",
+      "actor": "enemy",
+      "spell": 503326,
+      "target": "storm"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the block lifts with the area, so it is not permanent",
+      "actor": "enemy",
+      "metric": "spell_damage_count",
+      "spell": 503326,
+      "target": "storm",
+      "relative_to": "reached",
+      "min": 1,
+      "within_ms": 5000
+    }
+  ],
+  "contract": "#3742: Fog (806100) reads in Spell.dbc as effect 0 SPELL_EFFECT_APPLY_AREA_AURA_RAID (aura 336), effect 1 SPELL_EFFECT_TRIGGER_SPELL on 300831 and effect 2 SPELL_EFFECT_PERSISTENT_AREA_AURA (aura 336), all on EffectRadiusIndex 14 (SpellRadius 14 = 8.0 yd) with DurationIndex 31 (SpellDuration 31 = 8000 ms). Its enUS description promises 'Concentrate elemental magic to create an $a1 yd wide cloudy barrier at your feet for $d. Enemies are unable to target into or out of the Fog.', where $a1 is the 8.0 yd radius and $d the 8000 ms duration. Aura 336 is unnamed in SpellAuraDefines.h and its handler-table slot is 'nullptr, //336 unknown Ascension aura' (SpellAuraEffects.cpp:401), and no core or module code reads it, so the geometry and duration were right while the targeting clause did nothing. Effect 0 pairs a raid area aura with an enemy area target, so hostile units never carry the 806100 aura and the block must be measured against the ground area, not against aura presence. The fix records the DynamicObject the cast creates and refuses a non-triggered hostile cast when exactly one of caster and explicit unit target stands inside it, reporting SPELL_FAILED_LINE_OF_SIGHT (47). The scenario first shows in the same run that the pair reach each other with no Fog up, then that the identical cast is refused across the edge while a cast between two units on the same side still lands, and finally that the refusal ends with the 8000 ms area."
+}

@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Northshire: a ghost released in Echo Ridge Mine reaches the Northshire Spirit Healer (#7648)",
+  "contract": "A player who dies inside Echo Ridge Mine (zone 10130, at the Kobold Laborer spawn (-8616.27,-143.334,87.4937)) releases at the Northshire graveyard 105 (-8935.33,-188.646,80.4165), the graveyard of the Northshire Valley zone the mine belongs to, instead of the default Westfall graveyard. Its Spirit Healer 6491 stands about 11 yards from it. Death and spirit release use the native handlers.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8616.27,
+    "y": -143.334,
+    "z": 87.4937,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 11
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "die",
+      "actor": "cleric"
+    },
+    {
+      "action": "release_spirit",
+      "actor": "cleric"
+    },
+    {
+      "action": "assert",
+      "label": "The released player is a ghost",
+      "actor": "cleric",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ghost lands at the Northshire graveyard",
+      "actor": "cleric",
+      "metric": "position_x",
+      "min": -8950,
+      "max": -8920,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "position_y",
+      "min": -205,
+      "max": -175
+    },
+    {
+      "action": "assert",
+      "label": "A Spirit Healer stands at the ghost's graveyard",
+      "actor": "cleric",
+      "metric": "nearby_creature_template",
+      "entry": 6491,
+      "equals": 6491
+    }
+  ]
+}

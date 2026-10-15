@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Netherborne raises Netherstrike's critical damage by 25 percent (#3213)",
+  "contract": "Netherborne 801539 (Spell.dbc, passive, family 31) is a single SPELL_AURA_ADD_PCT_MODIFIER (108) on SPELLMOD_CRIT_DAMAGE_BONUS (misc 15), EffectBasePoints 24 + DieSides(1)-derived +1 = +25, class mask dword A bit18 (262144), exactly the SpellFamilyFlags of Netherstrike (806222, family 31). Netherstrike's own DmgClass is SPELL_DAMAGE_CLASS_MELEE (2), so in Unit::SpellCriticalDamageBonus (Unit.cpp ~9926) the melee branch sets crit_bonus = damage + damage = 2000 on a base of 1000, then the function isolates the bonus-only portion (crit_bonus -= damage -> 1000), runs it through Player::ApplySpellMod(SPELLMOD_CRIT_DAMAGE_BONUS) -- the exact native call site Netherborne's aura feeds -- which adds 25% of that 1000 (=250), then adds damage back: 1000*1.25 + 1000 = 2250. So a talented cast must read 250 higher than the untalented 2000 baseline on a fixed base of 1000. No CoA script or dummy handler exists for 801539 anywhere in src/server/coa or src/server/game/Spells. spell_critical_damage (Unit::SpellCriticalDamageBonus with no hit roll or mitigation) reads this directly. A control target unaffected by the mask (Explode-style unrelated family-31 spell) is out of scope here; the negative control instead confirms the delta appears only after learning the talent. Regression guard for behaviour that already works natively; no code change.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "caster", "race": 1, "class": 25, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "caster", "entry": 36, "level": 80, "health": 100000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000, "label": "Let spawn AI and level scaling settle" },
+    {
+      "action": "assert", "label": "SETUP: Netherstrike's untalented crit damage is the melee baseline (1000 direct + 1000 bonus = 2000)",
+      "actor": "caster", "metric": "spell_critical_damage", "spell": 806222, "target": "target", "equals": 2000
+    },
+    { "action": "learn", "actor": "caster", "spell": 801539 },
+    {
+      "action": "assert", "label": "Netherborne adds 25 percent of the melee crit bonus: 2000 -> 2250 on a base of 1000 (#3213)",
+      "actor": "caster", "metric": "spell_critical_damage", "spell": 806222, "target": "target", "min": 2249, "max": 2251
+    }
+  ]
+}

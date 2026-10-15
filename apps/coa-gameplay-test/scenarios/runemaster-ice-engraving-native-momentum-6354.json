@@ -1,0 +1,364 @@
+{
+  "schema": 1,
+  "name": "Normal Ice Engraving triggers stack Icebound Momentum and its extra Frost hit (#6354)",
+  "contract": "Native Ice Engraving hits apply the owner-specific twelve-second Icebound Momentum debuff, capped at eight stacks. Normal Primordial Blast then copies eight percent of its resolved damage as Frost once, without a second crit. Another Runemaster cannot use that owner\u2019s debuff. Expiry stops the copies.",
+  "timeout_ms": 480000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 32,
+      "level": 60,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "q",
+      "race": 1,
+      "class": 32,
+      "level": 60,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "p",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 800732
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 705605
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 10040,
+      "stacks": 3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "max_power",
+      "power": 0,
+      "min": 20000,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 712490,
+      "caster": "p",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 712491,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 653266,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 653217,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 40000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 712490,
+      "caster": "p",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 712490,
+      "caster": "p",
+      "equals": 8,
+      "within_ms": 180000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 653217,
+      "target": "enemy",
+      "min": 9,
+      "within_ms": 40000
+    },
+    {
+      "action": "assert",
+      "label": "Eight active stacks before the eight-percent copy",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 712490,
+      "caster": "p",
+      "equals": 8,
+      "within_ms": 180000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "p"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 712490,
+      "caster": "p",
+      "equals": 8
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 653266,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spell_damage_total",
+      "save_as": "copies_before_blast",
+      "spell": 712491,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 800732,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 712491,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spell_damage_total",
+      "save_as": "blast_damage",
+      "spell": 800732,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_total",
+      "spell": 712491,
+      "target": "enemy",
+      "relative_to": "copies_before_blast",
+      "ratio_to": "blast_damage",
+      "min": 0.075,
+      "max": 0.08
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 712491,
+      "target": "enemy",
+      "critical": true,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "q",
+      "spell": 800732
+    },
+    {
+      "action": "set_aura",
+      "actor": "q",
+      "spell": 10040,
+      "stacks": 3
+    },
+    {
+      "action": "set_power",
+      "actor": "q",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "save_as": "copies_before_foreign_blast",
+      "spell": 712491,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "q",
+      "spell": 800732,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "q",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "q",
+      "metric": "spell_damage_count",
+      "spell": 712491,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 712491,
+      "target": "enemy",
+      "relative_to": "copies_before_foreign_blast",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 13000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 712490,
+      "caster": "p",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 712491,
+      "target": "enemy",
+      "save_as": "frost_copies"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 800732,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "enemy",
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 712491,
+      "target": "enemy",
+      "relative_to": "frost_copies",
+      "equals": 0
+    }
+  ]
+}

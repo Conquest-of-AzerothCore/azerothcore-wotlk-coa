@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "name": "Fire Safety raises Fire damage and healing per rank (#1782)",
+  "contract": "#1782: Fire Safety rank 1 300970 = aura 79 (MOD_DAMAGE_PERCENT_DONE, MiscValue 4 Fire) base 1 -> +2% and aura 136 (MOD_HEALING_DONE_PERCENT) base 1 -> +2%; rank 2 301350 = +4% and +4%. Rank 2 replaces rank 1 (SetTalentRank removes every rank spell of the entry). Probes are Cleansing Flames Damage 681142 (school mask 4, Fire) and Cleansing Flames Heal 681141, both read from Spell.dbc. spell_damage_done and spell_healing_done query the native outgoing bonus calculations at a base of 1000 and are compared to a snapshot taken before the passive is learned. The threat half (aura 10, -10% / -20%) has no harness metric and is not asserted.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Fire damage before Fire Safety",
+      "actor": "caster",
+      "metric": "spell_damage_done",
+      "save_as": "dmg0",
+      "spell": 681142,
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "label": "Fire healing before Fire Safety",
+      "actor": "caster",
+      "metric": "spell_healing_done",
+      "save_as": "heal0",
+      "spell": 681141,
+      "target": "caster"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 300970
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds 2% Fire damage",
+      "actor": "caster",
+      "metric": "spell_damage_done",
+      "ratio_to": "dmg0",
+      "min": 1.018,
+      "max": 1.022,
+      "spell": 681142,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds 2% healing",
+      "actor": "caster",
+      "metric": "spell_healing_done",
+      "ratio_to": "heal0",
+      "min": 1.018,
+      "max": 1.022,
+      "spell": 681141,
+      "target": "caster"
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 300970
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 301350
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 replaces rank 1: Fire damage is +4%, not +6%",
+      "actor": "caster",
+      "metric": "spell_damage_done",
+      "ratio_to": "dmg0",
+      "min": 1.038,
+      "max": 1.042,
+      "spell": 681142,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 replaces rank 1: healing is +4%, not +6%",
+      "actor": "caster",
+      "metric": "spell_healing_done",
+      "ratio_to": "heal0",
+      "min": 1.038,
+      "max": 1.042,
+      "spell": 681141,
+      "target": "caster"
+    }
+  ]
+}

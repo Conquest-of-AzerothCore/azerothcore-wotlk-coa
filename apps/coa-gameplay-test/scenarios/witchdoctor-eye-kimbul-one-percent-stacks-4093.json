@@ -1,0 +1,232 @@
+{
+  "schema": 1,
+  "name": "Eye of Kimbul grants one percent critical chance per stack on its affected target (#4093)",
+  "contract": [
+    "The active Eye of Kimbul debuff 802707 has E1 SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER (308), BasePoints 0 plus",
+    "DieSides 1 = 1%, and StackAmount 5. Parent 503714 promises critical strikes apply that target debuff.",
+    "Learning the parent must not grant global critical chance; one through five actual debuff applications must",
+    "grant 1 through 5 percentage points against that target alone."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "w",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "w",
+      "metric": "spell_taken_crit_chance",
+      "spell": 133,
+      "target": "target",
+      "save_as": "crit"
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 503714
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "spell_taken_crit_chance",
+      "label": "Learning Eye does not add global critical chance",
+      "spell": 133,
+      "target": "target",
+      "relative_to": "crit",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 802707
+    },
+    {
+      "action": "cast",
+      "actor": "w",
+      "spell": 802707,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "label": "Eye stacks on the affected enemy",
+      "spell": 802707,
+      "caster": "w",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "spell_taken_crit_chance",
+      "label": "Eye grants one percent critical chance per stack",
+      "spell": 133,
+      "target": "target",
+      "relative_to": "crit",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "w",
+      "spell": 802707,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "label": "Eye stacks on the affected enemy",
+      "spell": 802707,
+      "caster": "w",
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "spell_taken_crit_chance",
+      "label": "Eye grants one percent critical chance per stack",
+      "spell": 133,
+      "target": "target",
+      "relative_to": "crit",
+      "equals": 2
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "w",
+      "spell": 802707,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "label": "Eye stacks on the affected enemy",
+      "spell": 802707,
+      "caster": "w",
+      "equals": 3,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "spell_taken_crit_chance",
+      "label": "Eye grants one percent critical chance per stack",
+      "spell": 133,
+      "target": "target",
+      "relative_to": "crit",
+      "equals": 3
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "w",
+      "spell": 802707,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "label": "Eye stacks on the affected enemy",
+      "spell": 802707,
+      "caster": "w",
+      "equals": 4,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "spell_taken_crit_chance",
+      "label": "Eye grants one percent critical chance per stack",
+      "spell": 133,
+      "target": "target",
+      "relative_to": "crit",
+      "equals": 4
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "w",
+      "spell": 802707,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "label": "Eye stacks on the affected enemy",
+      "spell": 802707,
+      "caster": "w",
+      "equals": 5,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "spell_taken_crit_chance",
+      "label": "Eye grants one percent critical chance per stack",
+      "spell": 133,
+      "target": "target",
+      "relative_to": "crit",
+      "equals": 5
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "spell_taken_crit_chance",
+      "label": "The debuff does not increase critical chance against another enemy",
+      "spell": 133,
+      "target": "other",
+      "relative_to": "crit",
+      "equals": 0
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "w",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 5
+    },
+    {
+      "id": "other",
+      "owner": "w",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10
+    }
+  ]
+}

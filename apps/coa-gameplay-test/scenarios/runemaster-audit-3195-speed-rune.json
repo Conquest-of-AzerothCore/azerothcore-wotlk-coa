@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Issue 3195: Speed Rune buffs allies inside its runic path with a native movement speed aura",
+  "contract": [
+    "Speed Rune 801103 (APPLY_AURA/PERIODIC_TRIGGER_SPELL, amplitude 10ms, duration 100ms) periodically triggers",
+    "572134, whose two TRIGGER_SPELL effects fire 572136 at TARGET_DEST_CASTER_FRONT (3 yd spread) and 572135 on",
+    "the caster (TARGET_UNIT_CASTER, a self-only flat modifier). 572136 is a native PERSISTENT_AREA_AURA",
+    "(radius 4 yd, duration 10000ms, matching the tooltip's 10 sec) whose own PERIODIC_TRIGGER_SPELL (amplitude",
+    "250ms) casts 802725 on TARGET_UNIT_TARGET_ALLY inside it: 802725 applies SPELL_AURA_MOD_INCREASE_SPEED with",
+    "EffectBasePoints[0]=69 (displayed 70%, matching the tooltip's 70% ally speed bonus). 572135 only reaches the",
+    "caster, not allies. All effect/aura types (TRIGGER_SPELL, PERSISTENT_AREA_AURA, PERIODIC_TRIGGER_SPELL,",
+    "MOD_INCREASE_SPEED) are stock native AzerothCore dispatch; no CoA code runs at 801103, 572134, 572136 or",
+    "802725."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 60},
+    {"id": "ally", "race": 1, "class": 32, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"action": "snapshot", "actor": "ally", "metric": "run_speed_rate", "save_as": "speed_base"},
+    {"action": "assert", "label": "SETUP: ally starts without the movement speed aura", "actor": "ally",
+     "metric": "aura", "spell": 802725, "equals": 0},
+    {"action": "learn", "actor": "rm", "spell": 801103},
+    {"action": "cast", "actor": "rm", "spell": 801103},
+    {"action": "assert", "label": "CONTRACT: ally inside the runic path gains the native movement speed aura",
+     "actor": "ally", "metric": "aura", "spell": 802725, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "CONTRACT: ally run speed rises toward the tooltip's 70% bonus", "actor": "ally",
+     "metric": "run_speed_rate", "relative_to": "speed_base", "min": 0.5, "within_ms": 500}
+  ]
+}

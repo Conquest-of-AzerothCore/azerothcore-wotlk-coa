@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Ragefist raises maximum Rage and shortens disarm duration (#1584)",
+  "contract": "Ragefist has two ranks, 300384 and 301356; rank 2's tooltip reads 'Increases your maximum Rage by 20 and reduces the duration of disarm effects against you by $s2%' (installed moa_description: '+20 Rage, -30% disarm duration'). Effect 0 is native aura 35 (SPELL_AURA_MOD_INCREASE_ENERGY), MiscValue 1 (POWER_RAGE), EffectBasePoints 199 with DieSides 1 -> resolved 200 (the displayed '+20' is the raw value /10, matching the description's '$/10;s1' formula), handler AuraEffect::HandleAuraModIncreaseEnergy (SpellAuraEffects.cpp:100 dispatch, defined at :4673) -- a fully native generic max-power aura. Effect 1 is native aura 232 (SPELL_AURA_MECHANIC_DURATION_MOD), MiscValue 3 (MECHANIC_DISARM, SharedDefines.h:1405), EffectBasePoints -31 with DieSides 1 -> resolved -30, both effects verified directly via csv.DictReader against /home/fab/CoaServer/reference/snapshots/ascension-data/tables/spell.csv.gz. VERIFIED LINE CITATION: the aura-232 consumer is Unit::ModSpellDuration's per-mechanic loop at Unit.cpp:12224 (target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD, i)), not Unit.cpp:12165 as an earlier pass cited -- that line is inside the unrelated Unit::ApplyEffectModifiers/CalculateSpellDamage pair; :12224 is the same consumer already proven for Infernal Pursuit's identical aura type (apps/coa-gameplay-test/scenarios/knight-of-xoroth-infernal-pursuit-haste-and-root.json). HARNESS LIMIT: ModSpellDuration's reduction can only be observed on a debuff actually cast on the Knight (Unit::AddAura, used by set_aura, never calls it). Following the same established precedent, this scenario asserts the resolved aura_amount for effect 1 (the value ModSpellDuration would apply) rather than fabricating a self-cast disarm fixture; the duration reduction on a real incoming disarm needs a Ghost e2e encounter.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "knight", "metric": "max_power", "power": 1, "save_as": "max_rage_before" },
+    {
+      "action": "assert", "label": "SETUP: the Knight of Xoroth has a Rage pool",
+      "actor": "knight", "metric": "max_power", "power": 1, "min": 1
+    },
+    { "action": "learn", "actor": "knight", "spell": 301356 },
+    { "action": "set_aura", "actor": "knight", "spell": 301356, "stacks": 1, "label": "Force rank 2 of the Ragefist passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: rank 2 of Ragefist is active",
+      "actor": "knight", "metric": "aura", "spell": 301356, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: maximum Rage rises by exactly 200 raw units (+20 displayed)",
+      "actor": "knight", "metric": "max_power", "power": 1, "relative_to": "max_rage_before", "equals": 200
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the disarm-duration-mod effect resolves to -30 percent",
+      "actor": "knight", "metric": "aura_amount", "spell": 301356, "effect": 1, "equals": -30
+    }
+  ]
+}

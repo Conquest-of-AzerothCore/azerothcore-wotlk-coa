@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Soulforged Weaponry's free-Murder proc requires an off-hand weapon (#1024)",
+  "contract": [
+    "Soulforged Weaponry rank 2 (561340): 'While dual-wielding, your auto attacks have a chance to make your next",
+    "Murder free of cost' (705964). Its spell_proc row (ProcFlags 4, done melee auto attack, Chance 15) does not",
+    "tell main hand from off hand, so without a dual-wield check a main-hand-only Reaper still gets the proc.",
+    "With only a main-hand weapon, 40 counted swings at 15% leave a 0.85^40 (about 0.15%) chance of no proc if",
+    "the proc were ungated, so zero procs after 40 swings discriminates the gate. With an off-hand weapon the",
+    "proc must still fire."
+  ],
+  "timeout_ms": 420000,
+  "players": [
+    { "id": "reaper", "race": 1, "class": 30, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "reaper", "entry": 36, "level": 80, "health": 5000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "reaper", "spell": 674 },
+    { "action": "learn", "actor": "reaper", "spell": 201 },
+    { "action": "learn", "actor": "reaper", "spell": 1180 },
+    { "action": "learn", "actor": "reaper", "spell": 561340 },
+    { "action": "add_item", "actor": "reaper", "item": 25 },
+    { "action": "equip", "label": "Worn Shortsword in the main hand, off hand empty", "actor": "reaper", "item": 25, "slot": 15 },
+    { "action": "attack", "actor": "reaper", "target": "dummy" },
+    { "action": "assert", "label": "SETUP: 40 main-hand swings", "actor": "reaper", "metric": "melee_attack_count", "hand": 0, "min": 40, "within_ms": 120000 },
+    { "action": "assert", "label": "SETUP: no off-hand swing", "actor": "reaper", "metric": "melee_attack_count", "hand": 1, "equals": 0 },
+    { "action": "assert", "label": "Main hand only: Soulforged Weaponry never procs", "actor": "reaper", "metric": "spell_proc_count", "spell": 561340, "equals": 0 },
+    { "action": "assert", "label": "Main hand only: no free Murder", "actor": "reaper", "metric": "aura", "spell": 705964, "equals": 0 },
+    { "action": "stop_attack", "actor": "reaper" },
+    { "action": "add_item", "actor": "reaper", "item": 2092 },
+    { "action": "equip", "label": "Worn Dagger in the off hand", "actor": "reaper", "item": 2092, "slot": 16 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "attack", "actor": "reaper", "target": "dummy" },
+    { "action": "assert", "label": "SETUP: off-hand swings happen", "actor": "reaper", "metric": "melee_attack_count", "hand": 1, "min": 3, "within_ms": 20000 },
+    { "action": "assert", "label": "Dual-wielding: Soulforged Weaponry procs", "actor": "reaper", "metric": "spell_proc_count", "spell": 561340, "min": 1, "within_ms": 240000 },
+    { "action": "assert", "label": "Dual-wielding: free Murder is granted", "actor": "reaper", "metric": "aura", "spell": 705964, "min": 1, "within_ms": 30000 }
+  ]
+}

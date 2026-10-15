@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Radiant Power turns each Sunwalker stack into 15% crit chance on Shine (#1065)",
+  "contract": "Radiant Power 707613 is ADD_FLAT_MODIFIER (aura 107), MiscValue 12 (SPELLMOD_EFFECT2), classmask (128,0,0) in family 33, EffectBasePoints 14 -> CalcValue 15. That classmask matches exactly Sunwalker (800601, SpellFamilyFlags_1 128) and the Gavel of Grace ranks (800614+, same flag); it is unaffected by any Sun Cleric override in SpellInfo::IsAffectedBySpellMod (707613 is absent from the family-33 switch at SpellInfo.cpp:1500), so plain classmask matching applies. Sunwalker's own second effect (index 1, StackAmount 5) is itself ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), classmask (0,262144,0), EffectBasePoints -1 -> CalcValue 0 -- a placeholder Radiant Power is meant to fill. SpellEffectInfo::CalcValue (SpellInfo.cpp:464-516) calls caster->ApplyEffectModifiers(SunwalkerInfo, 1, value) on every recompute of that effect (Unit.cpp:12070-12084), which applies Radiant Power's SPELLMOD_EFFECT2 (0 -> 15); AuraEffect::CalculateAmount then multiplies by GetBase()->GetStackAmount() (SpellAuraEffects.cpp:652), and AuraEffect::CalculateSpellMod (SpellAuraEffects.cpp:793) copies that per-stack value into Sunwalker's own SpellModifier. SpellInfo::IsAffectedBySpellMod has an explicit Sun Cleric override, 'case 800601: return root == 800357;' (SpellInfo.cpp:1509), which routes that modifier to any spell in the Shine rank chain (root 800357) regardless of classmask -- confirming Shine, not Gavel of Grace, is the intended target, matching the tooltip. The whole chain is native SpellMod machinery; the harness's spell_modifier metric (Player::ApplySpellMod) proves it without an actual cast of Shine.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "control", "race": 1, "class": 27, "level": 80 },
+    { "id": "test", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "test", "spell": 707613 },
+    { "action": "set_aura", "label": "Give control 3 stacks of Sunwalker", "actor": "control", "spell": 800601, "stacks": 3 },
+    { "action": "set_aura", "label": "Give test 3 stacks of Sunwalker, with Radiant Power already known", "actor": "test", "spell": 800601, "stacks": 3 },
+    {
+      "action": "assert",
+      "label": "3 stacks of Sunwalker add no crit chance to Shine without Radiant Power",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 800357,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "3 stacks of Sunwalker add 45 crit percentage points to Shine with Radiant Power (15 per stack)",
+      "actor": "test",
+      "metric": "spell_modifier",
+      "spell": 800357,
+      "op": 7,
+      "base": 0,
+      "equals": 45
+    }
+  ]
+}

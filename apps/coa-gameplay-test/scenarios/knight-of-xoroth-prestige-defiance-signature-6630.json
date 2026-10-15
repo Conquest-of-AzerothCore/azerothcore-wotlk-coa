@@ -1,0 +1,487 @@
+{
+  "schema": 1,
+  "name": "Defiance restores its Suffuse signature after prestige (#6630)",
+  "contract": [
+    "ChrSpecs 17 names Suffuse 801063 as its signature at native field 24. Entry 7099 costs one class point.",
+    "An ordinary Defiance choice includes its identity and signature. Actual Chromie prestige clears purchases at one.",
+    "When the identity becomes eligible again at ten, prestige restores the authored signature and charges its point.",
+    "Another class purchase at ten is refused. Paid Speed Demon stays removed until a real purchase at fourteen,",
+    "whose complete known-entry upload must succeed. Relog preserves the signature and repairs the old missing state",
+    "without duplicate rows or repeat announcements. A second prestige cycle restores it again. Ordinary manual",
+    "unlearning on a non-prestiged character stays removed. Native packets and purchases check the requirement;",
+    "this harness does not render the graphical talent Save button."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8816.5,
+    "y": 627.0,
+    "z": 94.1,
+    "o": 3.8
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 17,
+      "level": 14
+    }
+  ],
+  "creatures": [
+    {
+      "id": "chromie",
+      "owner": "p",
+      "entry": 178081,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "actor": "p",
+      "opcode": 618,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "p"
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "control",
+      "opcode": 618,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "control"
+        }
+      ]
+    },
+    {
+      "action": "specialization",
+      "actor": "control",
+      "id": 17
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "knows_spell",
+      "spell": 801063,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "unlearn",
+      "actor": "control",
+      "spell": 801063,
+      "all_specs": true
+    },
+    {
+      "action": "set_level",
+      "actor": "control",
+      "value": 15
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "knows_spell",
+      "spell": 801063,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "p",
+      "id": 17
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 801063,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 7099,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "p",
+      "entry": 31086,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 707232,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "p",
+      "target": "chromie"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "p",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 801063,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 707232,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "p",
+      "value": 9
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 801063,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "p",
+      "value": 10
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 4018,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 801063,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "Defiance restores its authored Suffuse signature at level ten"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 7099,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 707232,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "p",
+      "entry": 34075,
+      "rank": 1,
+      "refused": true
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 706566,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 801063,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "p",
+      "id": 18,
+      "refused": true
+    },
+    {
+      "action": "set_level",
+      "actor": "p",
+      "value": 14
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "p",
+      "entry": 31086,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 707232,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 31086,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 7099,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "relog",
+      "actor": "p"
+    },
+    {
+      "action": "client_packet",
+      "actor": "p",
+      "opcode": 618,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "p"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 801063,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 707232,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 7099,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 801063,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 801063,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "relog",
+      "actor": "p"
+    },
+    {
+      "action": "client_packet",
+      "actor": "p",
+      "opcode": 618,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "p"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 801063,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 7099,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 707232,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "client_spellbook_copies",
+      "spell": 801063,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spellbook_learned_alerts",
+      "spell": 801063,
+      "save_as": "signature_alerts"
+    },
+    {
+      "action": "set_level",
+      "actor": "p",
+      "value": 15
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spellbook_learned_alerts",
+      "spell": 801063,
+      "relative_to": "signature_alerts",
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "p",
+      "value": 60
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -8816.5,
+      "y": 627.0,
+      "z": 94.1,
+      "o": 3.8
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "p",
+      "target": "chromie"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "p",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 801063,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 707232,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "p",
+      "value": 10
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 801063,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "entry": 7099,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 707232,
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

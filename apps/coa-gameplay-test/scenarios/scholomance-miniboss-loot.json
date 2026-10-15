@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Scholomance bosses drop their shared rare pool on most kills (#5352)",
+  "contract": "Lady Illucia Barov, Lord Alexei Barov, Instructor Malicia, The Ravenian, Lorekeeper Polkelt and Doctor Theolen Krastinov roll the shared Scholomance rare pool at 75%, so at least 70% of their kills yield a rare or better item, as Classic era observations (77-93%) show. Vectus keeps its unchanged rare chance.",
+  "players": [
+    { "id": "scholar", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "actor": "scholar", "metric": "creature_loot_quality_rate", "entry": 10502, "min": 70, "max": 95 },
+    { "action": "assert", "actor": "scholar", "metric": "creature_loot_quality_rate", "entry": 10504, "min": 70, "max": 95 },
+    { "action": "assert", "actor": "scholar", "metric": "creature_loot_quality_rate", "entry": 10505, "min": 70, "max": 95 },
+    { "action": "assert", "actor": "scholar", "metric": "creature_loot_quality_rate", "entry": 10507, "min": 70, "max": 95 },
+    { "action": "assert", "actor": "scholar", "metric": "creature_loot_quality_rate", "entry": 10901, "min": 70, "max": 95 },
+    { "action": "assert", "actor": "scholar", "metric": "creature_loot_quality_rate", "entry": 11261, "min": 70, "max": 95 },
+    { "action": "assert", "actor": "scholar", "metric": "creature_loot_quality_rate", "entry": 10432, "min": 8, "max": 22 }
+  ]
+}

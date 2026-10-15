@@ -1,0 +1,220 @@
+{
+  "schema": 1,
+  "name": "Crimson Scion makes the next Sanguine Mend instant after direct damage (#606)",
+  "contract": "Crimson Scion 806424's single effect is SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on Crimson Scion 806425, a native aura 108 SPELL_AURA_ADD_PCT_MODIFIER with MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -101 and EffectSpellClassMask (524288, 0, 0) - the nine Sanguine Mend ranks, of which 504086 is the one this scenario measures. Spell.dbc gives 806424 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and the aura was inert. The tooltip is 'Direct damage dealt now has a $h% chance to make your next Sanguine Mend within $806425d instant cast' and the record's own ProcChance is 10, which this scenario does not change. The spell_proc row the fix adds carries ProcFlags 69908, which includes PROC_FLAG_DONE_MELEE_AUTO_ATTACK, so an ordinary melee swing is one of the direct-damage events the tooltip promises. TRIAL COUNT, PINNED BEFORE IT IS RELIED ON: a 10% chance needs 66 events for a false failure under 0.1% (0.9^66 = 0.00096). The events are counted, not assumed. Step 'PIN' asserts at least nine melee swings inside a 26 s window with melee_attack_count, which fixes a floor of 0.346 swings per second (a level-80 Bloodmage fixture swings every 2600 ms), so the 195 s polling window of the discriminating assertion contains at least 67 auto-attack events on its own: 0.9^67 = 0.00088. melee_hit_rating and expertise_rating 10000 remove misses, dodges and parries, so every swing melee_attack_count records is a landed hit and therefore a real trial. Everything else is margin, not premise. The margin is the Aortic Assault channel: 807785 effect 0 is aura 227 with Amplitude 500 over DurationIndex 27, six ticks of Aortic Assault 806502, a direct SPELL_EFFECT_SCHOOL_DAMAGE with DmgClass 2, TargetA 54 (TARGET_UNIT_CONE_ENEMY_54) at radius index 14 = 8 yards and MaxAffectedTargets 12; the four 'PIN' health assertions prove the cone reached dummy2 to dummy5 at 4-7 yards, and since nothing moves between ticks the same selection repeats six times. The location block fixes the caster's facing at orientation 0, the direction the harness spawns fixture creatures in (CoAGameplayTest.cpp adds 'distance' to the caster's X), because Spell.cpp:3883 only turns creatures towards their target - a player's orientation is never set by casting, which is why the cone's target count could not be pinned before. 807785 carries CasterAuraSpell 524861, one of the two Cursed Form markers AscensionBloodmageTalents.cpp mirrors onto the real form state, so the caster is given that marker as a fixture; without it CheckCast rejects the channel outright. 806425's Description field ('Generates $s1% of your Maximum Rage') contradicts its own AuraDescription and its single effect; it is client-side text and is not what this scenario holds the spell to.",
+  "timeout_ms": 260000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy1",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "dummy2",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 4
+    },
+    {
+      "id": "dummy3",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 5
+    },
+    {
+      "id": "dummy4",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 6
+    },
+    {
+      "id": "dummy5",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 7
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 807785
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504086
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 806424
+    },
+    {
+      "action": "set_aura",
+      "label": "Cursed Form marker 524861, Aortic Assault's CasterAuraSpell",
+      "actor": "bloodmage",
+      "spell": 524861,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Crimson Scion passive is applied",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 806424,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Sanguine Mend has its normal cast time",
+      "actor": "bloodmage",
+      "metric": "spell_cast_time_ms",
+      "spell": 504086,
+      "min": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy2",
+      "metric": "health",
+      "save_as": "dummy2_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy3",
+      "metric": "health",
+      "save_as": "dummy3_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy4",
+      "metric": "health",
+      "save_as": "dummy4_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy5",
+      "metric": "health",
+      "save_as": "dummy5_health"
+    },
+    {
+      "action": "attack",
+      "actor": "bloodmage",
+      "target": "dummy1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "melee_attack_count",
+      "save_as": "swings_before"
+    },
+    {
+      "action": "wait",
+      "label": "Measure the auto-attack cadence the trial count is derived from",
+      "ms": 26000
+    },
+    {
+      "action": "assert",
+      "label": "PIN: at least nine melee swings land inside 26 s",
+      "actor": "bloodmage",
+      "metric": "melee_attack_count",
+      "relative_to": "swings_before",
+      "min": 9
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 807785,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "label": "Let the three-second channel finish",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "PIN: the Aortic Assault cone reached dummy2",
+      "actor": "dummy2",
+      "metric": "health",
+      "relative_to": "dummy2_health",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "label": "PIN: the Aortic Assault cone reached dummy3",
+      "actor": "dummy3",
+      "metric": "health",
+      "relative_to": "dummy3_health",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "label": "PIN: the Aortic Assault cone reached dummy4",
+      "actor": "dummy4",
+      "metric": "health",
+      "relative_to": "dummy4_health",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "label": "PIN: the Aortic Assault cone reached dummy5",
+      "actor": "dummy5",
+      "metric": "health",
+      "relative_to": "dummy5_health",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: direct damage dealt grants the instant-cast buff",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 806425,
+      "equals": 1,
+      "within_ms": 195000
+    },
+    {
+      "action": "assert",
+      "label": "and the buffed Sanguine Mend is instant",
+      "actor": "bloodmage",
+      "metric": "spell_cast_time_ms",
+      "spell": 504086,
+      "equals": 0
+    }
+  ]
+}

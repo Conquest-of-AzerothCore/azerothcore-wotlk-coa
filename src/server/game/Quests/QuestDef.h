@@ -216,7 +216,10 @@ public:
     void LoadQuestOfferReward(Field* fields);
     void LoadQuestTemplateAddon(Field* fields);
 
-    [[nodiscard]] uint32 XPValue(uint8 playerLevel = 0) const;
+    /// levelScaling is the caller's per-character answer, from LocalLevelScaling::QuestScalingEnabled;
+    /// it is only consulted while the realm-wide quest scaling is on, and only for a quest with a
+    /// QuestTemplateScaling curve, which then pays the experience of the level the curve plays it at.
+    [[nodiscard]] uint32 XPValue(uint8 playerLevel = 0, bool levelScaling = true) const;
 
     [[nodiscard]] bool HasFlag(uint32 flag) const { return (Flags & flag) != 0; }
     void SetFlag(uint32 flag) { Flags |= flag; }
@@ -266,10 +269,12 @@ public:
     [[nodiscard]] std::string const& GetRequestItemsText() const { return RequestItemsText; }
     [[nodiscard]] std::string const& GetAreaDescription() const { return AreaDescription; }
     [[nodiscard]] std::string const& GetCompletedText() const { return CompletedText; }
-    [[nodiscard]] int32  GetRewOrReqMoney(uint8 playerLevel = 0) const;
+    /// levelScaling is the caller's per-character answer, from LocalLevelScaling::QuestScalingEnabled:
+    /// a quest on its curve pays its money tier's ratio between that level and its own, never less.
+    [[nodiscard]] int32  GetRewOrReqMoney(uint8 playerLevel = 0, bool levelScaling = true) const;
     [[nodiscard]] uint32 GetRewHonorAddition() const { return RewardHonor; }
     [[nodiscard]] float GetRewHonorMultiplier() const { return RewardKillHonor; }
-    [[nodiscard]] uint32 GetRewMoneyMaxLevel() const; // use in XP calculation at client
+    [[nodiscard]] uint32 GetRewMoneyMaxLevel(bool levelScaling = true) const; // use in XP calculation at client
     [[nodiscard]] uint32 GetRewSpell() const { return RewardDisplaySpell; }
     [[nodiscard]] int32  GetRewSpellCast() const { return RewardSpell; }
     [[nodiscard]] uint32 GetRewMailTemplateId() const { return RewardMailTemplateId; }
@@ -338,6 +343,10 @@ private:
     uint32 _reqCreatureOrGOcount;
     uint32 _rewChoiceItemsCount;
     uint32 _rewItemsCount;
+
+    /// The tier of the realm's per-level quest money table this quest's reward was authored from,
+    /// or -1 when the quest pays nothing or has no matching tier. See the definition.
+    [[nodiscard]] int8 FindMoneyTier() const;
 
     uint16 _eventIdForQuest; // pussywizard
 

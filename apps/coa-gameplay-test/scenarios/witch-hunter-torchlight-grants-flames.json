@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Witch Hunter: attacks against a Torchlight target grant Flames of Sin",
+  "contract": [
+    "Torchlight 503662 reads 'Throw a torch at an enemy, dealing ... Fire damage, and causing up to $N of the next",
+    "attacks you make against them to grant you Flames of Sin and increasing the duration by",
+    "$/1000;504779s2 sec.' Effect 0 is a dummy aura on the enemy (TARGET_UNIT_TARGET_ENEMY, 5 proc charges) naming",
+    "504779, whose effects grant Flames of Sin 803422 to the caster and extend it by 1999 + 1 = 2000 ms. So the",
+    "hunter's first auto attack against the marked enemy must give the hunter Flames of Sin, and its auto attacks",
+    "are then followed by Flames of Sin Fire hits 802850. The mark's owner is the enemy, which must not gain Flames",
+    "of Sin itself. spell_ascension_witch_hunter_torchlight_mark casts 504779 from the hunter for the hunter's own",
+    "attacks, but its Load read GetTarget(), which is null outside effect hooks (AuraScript::GetTarget), so the",
+    "script never attached: the native dummy proc made the marked enemy cast 504779 on itself for any attacker, and",
+    "the hunter never gained Flames of Sin. The fixture dual-wields, so its swings are at most 1.6 s apart and each",
+    "one lands inside the 2 s the previous grant or extension left. Ratings remove melee misses, dodges and parries."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter", "race": 1, "class": 15, "level": 60, "melee_hit_rating": 10000,
+      "expertise_rating": 10000, "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "hunter", "entry": 36, "level": 60, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "hunter", "spell": 201 },
+    { "action": "learn", "actor": "hunter", "spell": 1180 },
+    { "action": "learn", "actor": "hunter", "spell": 674 },
+    { "action": "learn", "actor": "hunter", "spell": 503662 },
+    { "action": "add_item", "actor": "hunter", "item": 25 },
+    { "action": "equip", "actor": "hunter", "item": 25, "slot": 15 },
+    { "action": "add_item", "actor": "hunter", "item": 2092 },
+    { "action": "equip", "actor": "hunter", "item": 2092, "slot": 16 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "SETUP: the off hand holds a weapon", "actor": "hunter",
+      "metric": "weapon_damage_min", "hand": 1, "min": 1
+    },
+    { "action": "attack", "actor": "hunter", "target": "enemy" },
+    {
+      "action": "assert", "label": "SETUP: auto attacks land", "actor": "hunter",
+      "metric": "melee_damage_count", "min": 1, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "Control: auto attacks without the mark grant no Flames of Sin", "actor": "hunter",
+      "metric": "aura", "spell": 803422, "equals": 0
+    },
+    { "action": "cast", "label": "Torchlight", "actor": "hunter", "spell": 503662, "target": "enemy" },
+    {
+      "action": "assert", "label": "Torchlight marks the enemy", "actor": "enemy", "metric": "aura",
+      "spell": 503662, "caster": "hunter", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: an auto attack against the marked enemy grants Flames of Sin",
+      "actor": "hunter", "metric": "aura", "spell": 803422, "caster": "hunter", "equals": 1, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "Auto attacks under the granted Flames of Sin are followed by its Fire hits",
+      "actor": "hunter", "metric": "spell_damage_count", "spell": 802850, "target": "enemy", "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "The marked enemy does not gain Flames of Sin itself", "actor": "enemy",
+      "metric": "aura", "spell": 803422, "equals": 0
+    },
+    { "action": "stop_attack", "actor": "hunter" },
+    { "action": "assert", "actor": "hunter", "metric": "alive", "equals": 1 }
+  ]
+}

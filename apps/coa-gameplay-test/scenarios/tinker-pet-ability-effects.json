@@ -1,0 +1,421 @@
+{
+  "schema": 1,
+  "name": "Tinker pet abilities: Gear Toss, Revitalizing Aura, Recalibrate and Arcanoreflector (#4741, #5412)",
+  "contract": [
+    "Spell.dbc descriptions of the Tinker pet abilities taught by #5412. Gear Toss 520368 (ZIGGI-6K) deals",
+    "Nature damage and heals the lowest health nearby ally equal to the damage dealt: DeviceEvent copies",
+    "ZIGGI-6K's damage as 561267 onto the most wounded ally within 10 yd while the Tinker has Build: ZIGGI-6K",
+    "92140. Revitalizing Aura 524839 triggers Revitalise 524838 (heal, 40 yd) every 3 s and drains mana:",
+    "ManaPerSecond 1 plus 1 per level, which Aura::Update takes from the caster each second. Recalibrate",
+    "578270 (Mechano-Bear) force-casts 578275 (SPELL_AURA_DEFLECT_SPELLS 100%, 3 s) on its master, the",
+    "Tinker. Arcanoreflector 578339 absorbs the next spell on the bear and force-casts 653129 on the Tinker;",
+    "absorbing a damaging spell explodes for 150% of the absorbed damage (DUMMY 150) on nearby enemies",
+    "through 578346 (SCHOOL_DAMAGE, TARGET_UNIT_DEST_AREA_ENEMY), and the shield is spent on that spell, well",
+    "before its 3 s duration. The original accuracy fixture aura 984948 contains only +1000 melee/ranged hit",
+    "and +100000 expertise. Supply and assert it on the pets whose ordinary physical casts must land while",
+    "checking their ability effects; preserve their damage, healing, mana, cooldown, stun and channel",
+    "contracts. Owner ratings are not substituted for pet hit.",
+    "Recalibrate 578270 is an original three-second native channel. Its owner aura can expire before the pet",
+    "clears UNIT_STATE_CASTING; CheckPetCast then rejects Arcanoreflector with SPELL_IN_PROGRESS (105).",
+    "Require actual pet casting during Recalibrate, then observe native channel completion before the next",
+    "ordinary pet cast. Keep the original three-second aura expiry and all shield, heal and damage checks."
+  ],
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "ziggi",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    },
+    {
+      "id": "bear",
+      "race": 1,
+      "class": 28,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "golem",
+      "owner": "ziggi",
+      "entry": 36,
+      "level": 70,
+      "distance": 5,
+      "health": 1000000
+    },
+    {
+      "id": "bruiser",
+      "owner": "bear",
+      "entry": 36,
+      "level": 90,
+      "distance": 5,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Build: ZIGGI-6K passive",
+      "actor": "ziggi",
+      "spell": 92140
+    },
+    {
+      "action": "learn",
+      "label": "Build: ZIGGI-6K",
+      "actor": "ziggi",
+      "spell": 524840
+    },
+    {
+      "action": "cast",
+      "label": "Build: ZIGGI-6K",
+      "actor": "ziggi",
+      "spell": 524840
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: ZIGGI-6K is built",
+      "actor": "ziggi",
+      "metric": "pet_entry",
+      "equals": 500481,
+      "within_ms": 9000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ziggi",
+      "spell": 984948,
+      "pet": true,
+      "stacks": 1,
+      "label": "Supply the original pet hit and expertise fixture"
+    },
+    {
+      "action": "assert",
+      "actor": "ziggi",
+      "metric": "pet_aura_amount",
+      "spell": 984948,
+      "effect": 0,
+      "equals": 1000,
+      "label": "The pet has the original melee and ranged hit prerequisite"
+    },
+    {
+      "action": "assert",
+      "actor": "ziggi",
+      "metric": "pet_aura_amount",
+      "spell": 984948,
+      "effect": 1,
+      "equals": 100000,
+      "label": "The pet has the original expertise prerequisite"
+    },
+    {
+      "action": "wait",
+      "label": "ZIGGI-6K settles beside the Tinker",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Tinker carries Build: ZIGGI-6K",
+      "actor": "ziggi",
+      "metric": "aura",
+      "spell": 92140,
+      "equals": 1
+    },
+    {
+      "action": "set_health",
+      "label": "The Tinker is the most wounded ally near ZIGGI-6K",
+      "actor": "ziggi",
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: ZIGGI-6K knows Gear Toss",
+      "actor": "ziggi",
+      "metric": "pet_knows_spell",
+      "spell": 520368,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast_charm",
+      "label": "ZIGGI-6K casts Gear Toss",
+      "actor": "ziggi",
+      "spell": 520368,
+      "target": "golem",
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "label": "The pet cast is accepted",
+      "actor": "ziggi",
+      "metric": "cast_failure",
+      "spell": 520368,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Gear Toss hits the enemy",
+      "actor": "ziggi",
+      "metric": "spell_damage_total",
+      "spell": 520368,
+      "target": "golem",
+      "pet": true,
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "save_as": "toss",
+      "actor": "ziggi",
+      "metric": "spell_damage_total",
+      "spell": 520368,
+      "target": "golem",
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "label": "Gear Toss heals the lowest health ally, the Tinker, for the damage dealt",
+      "actor": "ziggi",
+      "metric": "spell_heal_total",
+      "spell": 561267,
+      "target": "ziggi",
+      "within_ms": 3000,
+      "ratio_to": "toss",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: ZIGGI-6K knows Revitalizing Aura",
+      "actor": "ziggi",
+      "metric": "pet_knows_spell",
+      "spell": 524839,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast_charm",
+      "label": "ZIGGI-6K casts Revitalizing Aura",
+      "actor": "ziggi",
+      "spell": 524839,
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "label": "The pet cast is accepted",
+      "actor": "ziggi",
+      "metric": "cast_failure",
+      "spell": 524839,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Revitalizing Aura is up on ZIGGI-6K",
+      "actor": "ziggi",
+      "metric": "pet_aura_stacks",
+      "spell": 524839,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "save_as": "mana0",
+      "actor": "ziggi",
+      "metric": "pet_power"
+    },
+    {
+      "action": "assert",
+      "label": "Revitalizing Aura heals allies every 3 seconds",
+      "actor": "ziggi",
+      "metric": "spell_heal_count",
+      "spell": 524838,
+      "pet": true,
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Revitalizing Aura drains ZIGGI-6K's mana",
+      "actor": "ziggi",
+      "metric": "pet_power",
+      "ratio_to": "mana0",
+      "max": 0.99,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Build: Mechano-Bear",
+      "actor": "bear",
+      "spell": 803405
+    },
+    {
+      "action": "cast",
+      "label": "Build: Mechano-Bear",
+      "actor": "bear",
+      "spell": 803405
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Mechano-Bear is built",
+      "actor": "bear",
+      "metric": "pet_entry",
+      "equals": 60671,
+      "within_ms": 9000
+    },
+    {
+      "action": "wait",
+      "label": "Mechano-Bear settles beside the Tinker",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Mechano-Bear knows Recalibrate",
+      "actor": "bear",
+      "metric": "pet_knows_spell",
+      "spell": 578270,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast_charm",
+      "label": "Mechano-Bear channels Recalibrate",
+      "actor": "bear",
+      "spell": 578270,
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "label": "The pet cast is accepted",
+      "actor": "bear",
+      "metric": "cast_failure",
+      "spell": 578270,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Recalibrate deflects spells on the Tinker",
+      "actor": "bear",
+      "metric": "aura",
+      "spell": 578275,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "bear",
+      "metric": "pet_casting",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "The native pet is actually channeling Recalibrate"
+    },
+    {
+      "action": "assert",
+      "label": "Recalibrate does not land on the Mechano-Bear",
+      "actor": "bear",
+      "metric": "pet_aura_stacks",
+      "spell": 578275,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Recalibrate ends after its 3 seconds",
+      "actor": "bear",
+      "metric": "aura",
+      "spell": 578275,
+      "equals": 0,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Mechano-Bear knows Arcanoreflector",
+      "actor": "bear",
+      "metric": "pet_knows_spell",
+      "spell": 578339,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "bear",
+      "metric": "pet_casting",
+      "save_as": "pet_cast_at_aura_end"
+    },
+    {
+      "action": "assert",
+      "actor": "bear",
+      "metric": "pet_casting",
+      "equals": 0,
+      "within_ms": 1000,
+      "label": "Wait for the native pet channel to finish before Arcanoreflector"
+    },
+    {
+      "action": "cast_charm",
+      "label": "Mechano-Bear casts Arcanoreflector",
+      "actor": "bear",
+      "spell": 578339,
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "label": "The pet cast is accepted",
+      "actor": "bear",
+      "metric": "cast_failure",
+      "spell": 578339,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Arcanoreflector shields the Mechano-Bear",
+      "actor": "bear",
+      "metric": "pet_aura_stacks",
+      "spell": 578339,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Arcanoreflector shields the Tinker",
+      "actor": "bear",
+      "metric": "aura",
+      "spell": 653129,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "An enemy casts a damaging spell on the Tinker",
+      "actor": "bruiser",
+      "spell": 686,
+      "target": "bear"
+    },
+    {
+      "action": "assert",
+      "label": "The absorbed spell explodes on nearby enemies",
+      "actor": "bear",
+      "metric": "spell_damage_total",
+      "spell": 578346,
+      "target": "bruiser",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Tinker's shield is spent on that spell",
+      "actor": "bear",
+      "metric": "aura",
+      "spell": 653129,
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Tyrande's Guidance raises Starfire Shot and Lunar Lance crit damage by 15% (#3071)",
+  "contract": "Tyrande's Guidance 706572 (Spell.dbc, family 32) tooltip: \"Increases the critical damage dealt by Starfire Shot and Lunar Lance by $s1%.\" Effect 0 is SPELL_AURA_ADD_PCT_MODIFIER (108), EffectMiscValue SPELLMOD_CRIT_DAMAGE_BONUS (15), EffectBasePoints 14 with DieSides 1 (=15), EffectSpellClassMask (0x800, 0x02000000, 0), matching Starfire Shot ranks and Starfire Barrage (word0 0x800) and Lunar Lance ranks (word1 0x02000000). Native path: Unit::SpellCriticalDamageBonus starts from crit_bonus = damage and, for SPELL_DAMAGE_CLASS_RANGED (both spells are DmgClass 3), adds another `damage` so a crit is 200%; with no other crit modifiers it subtracts `damage`, calls modOwner->ApplySpellMod(spell, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus) on the bonus part only (1000), then adds `damage` back. So on the harness's fixed 1000 base a crit is 2000 without the talent and 1000 + 1000 * 1.15 = 2150 with it, a difference of 150, and both fixtures share race, class, level and gear so any other crit-damage term cancels. Scattered Star 804995 is outside the mask and must not change. Values read 2026-09-21 from the shipped /srv/coa/server-data/dbc/Spell.dbc.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "control",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 706572
+    },
+    {
+      "action": "snapshot",
+      "label": "Starfire Shot critical hit damage without the talent",
+      "actor": "control",
+      "metric": "spell_critical_damage",
+      "save_as": "ss_base",
+      "spell": 804469,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Starfire Shot's critical bonus grows 15% (150 on the 1000 base)",
+      "actor": "talent",
+      "metric": "spell_critical_damage",
+      "spell": 804469,
+      "target": "dummy",
+      "relative_to": "ss_base",
+      "min": 149,
+      "max": 151
+    },
+    {
+      "action": "snapshot",
+      "label": "Lunar Lance critical hit damage without the talent",
+      "actor": "control",
+      "metric": "spell_critical_damage",
+      "save_as": "ll_base",
+      "spell": 502340,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Lunar Lance's critical bonus grows 15% (150 on the 1000 base)",
+      "actor": "talent",
+      "metric": "spell_critical_damage",
+      "spell": 502340,
+      "target": "dummy",
+      "relative_to": "ll_base",
+      "min": 149,
+      "max": 151
+    },
+    {
+      "action": "snapshot",
+      "label": "Scattered Star critical hit damage without the talent",
+      "actor": "control",
+      "metric": "spell_critical_damage",
+      "save_as": "sc_base",
+      "spell": 804995,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Scattered Star (outside the mask) crits unchanged",
+      "actor": "talent",
+      "metric": "spell_critical_damage",
+      "spell": 804995,
+      "target": "dummy",
+      "relative_to": "sc_base",
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "assert",
+      "label": "The crit bonus modifier is +15% on Starfire Barrage",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 802682,
+      "op": 15,
+      "base": 1000,
+      "min": 1149.99,
+      "max": 1150.01
+    }
+  ]
+}

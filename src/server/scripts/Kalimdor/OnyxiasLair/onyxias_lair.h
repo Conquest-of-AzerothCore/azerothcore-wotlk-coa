@@ -38,6 +38,14 @@ enum eCreatures
     NPC_ONYXIAN_WHELP           = 11262,
     NPC_ONYXIA_TRIGGER          = 12758,
     NPC_ONYXIAN_LAIR_GUARD      = 36561,
+    // Basalthane (custom boss, see spell_basalthane.cpp) and his 3 pillars - not a
+    // tracked SetBossNumber() boss (pure SmartAI, no C++ BossAI class), so his kill is
+    // picked up via the generic ZoneScript::OnUnitDeath hook instead - see
+    // instance_onyxias_lair.cpp's basalthanePillarsShattered persistent flag.
+    NPC_BASALTHANE               = 10189,
+    NPC_BASALTHANE_PILLAR_1      = 10186, // Volatile Pillar
+    NPC_BASALTHANE_PILLAR_2      = 10187, // Crumbling Pillar
+    NPC_BASALTHANE_PILLAR_3      = 10188, // Searing Pillar
 };
 
 enum eActions

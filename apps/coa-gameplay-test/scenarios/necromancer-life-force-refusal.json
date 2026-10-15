@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Necromancer: a raise without free Life Force is refused without 'Not enough mana' (#387)",
+  "contract": "Raise spells occupy Life Force (805011, a stacked aura whose stack count is the capacity: Spell.dbc StackAmount 2, raised only by SPELLMOD_MAX_AURA_STACKS passives such as Scourge Apprentice Training 680283 that this fixture does not learn) instead of the Necromancer's power bar: Raise: Abomination 500335 occupies 3 and Raise: Lesser Skeletal Warrior 500970 occupies 1 (their tooltips: 'occupying 3 Life Force', 'occupying 1 Life Force'). Both have PowerType 0 (mana) with a ManaCostPercentage, so the client renders SPELL_FAILED_NO_POWER (85) for them as ERR_OUT_OF_MANA 'Not enough mana', the reported message. The live client string table (GlobalStrings.dbc from patch-M.MPQ, 14357 strings) has no Life Force error: none of SPELL_FAILED_CUSTOM_ERROR_1..104 names it, PowerDisplay.dbc holds only vehicle powers (Pyrite, Steam, Heat, Ooze, Blood Power) and SpellAlternativePowerType.dbc only Shadow Orbs and Holy Power. The nearest native reason the client can show is SPELL_FAILED_ALREADY_HAVE_SUMMON (7), 'You already control a summoned creature', which a9f716557 (#1489) sends from necromancer_casts::OnSpellCheckCast before the native power check. A level-8 Necromancer (the reporter's level) with full mana is refused Raise: Abomination with reason 7 and raises nothing, raises two Lesser Skeletal Warriors (50065) to fill its Life Force, and is then refused a third with reason 7 while the two stay up.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 8 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the Life Force aura synchronize", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 500970 },
+    { "action": "learn", "actor": "n", "spell": 500335 },
+    {
+      "action": "assert", "label": "PRECONDITION: Life Force capacity is 2 without Life Force talents", "actor": "n",
+      "metric": "aura_stacks", "spell": 805011, "equals": 2, "within_ms": 3000
+    },
+    { "action": "snapshot", "actor": "n", "metric": "power", "power": 0, "save_as": "mana_full" },
+    { "action": "cast", "label": "Raise an Abomination (3 Life Force) with only 2", "actor": "n", "spell": 500335 },
+    {
+      "action": "assert",
+      "label": "Refused as SPELL_FAILED_ALREADY_HAVE_SUMMON (7), not SPELL_FAILED_NO_POWER (85, 'Not enough mana')",
+      "actor": "n", "metric": "cast_failure", "spell": 500335, "equals": 7, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The refused raise spends no mana", "actor": "n",
+      "metric": "power", "power": 0, "relative_to": "mana_full", "min": 0
+    },
+    { "action": "wait", "label": "Outlast the 3 s cast time", "ms": 3500 },
+    {
+      "action": "assert", "label": "No Abomination was raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50068, "equals": 0
+    },
+    { "action": "cast", "label": "Raise the first Lesser Skeletal Warrior", "actor": "n", "spell": 500970 },
+    {
+      "action": "assert", "label": "One Lesser Skeletal Warrior occupies 1 Life Force", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 500 },
+    { "action": "cast", "label": "Raise the second Lesser Skeletal Warrior", "actor": "n", "spell": 500970 },
+    {
+      "action": "assert", "label": "Two Lesser Skeletal Warriors fill the Life Force", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 2, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 500 },
+    { "action": "cast", "label": "Raise a third with no free Life Force", "actor": "n", "spell": 500970 },
+    {
+      "action": "assert",
+      "label": "Refused as SPELL_FAILED_ALREADY_HAVE_SUMMON (7), not SPELL_FAILED_NO_POWER (85, 'Not enough mana')",
+      "actor": "n", "metric": "cast_failure", "spell": 500970, "equals": 7, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Outlast the 2 s cast time", "ms": 2500 },
+    {
+      "action": "assert", "label": "The two raised warriors stay and no third appears", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 2
+    }
+  ]
+}

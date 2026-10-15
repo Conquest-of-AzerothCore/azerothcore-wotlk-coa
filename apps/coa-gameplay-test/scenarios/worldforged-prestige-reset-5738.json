@@ -1,0 +1,1141 @@
+{
+  "schema": 1,
+  "name": "Prestige reopens Worldforged pickups only for the prestiging character (#5738)",
+  "contract": [
+    "CoA players explicitly describe collecting Worldforged items again after prestige: https://www.reddit.com/r/ProjectAscension/comments/1vyu132/coa_worldforged_recovery/ . The user authorized restoration if external evidence supported it.",
+    "The reported Stormbringer class 16 and an ordinary Warrior control each open the real phase-1 Mossy Bag spawn 6941971 (90626, item 450672) and Bundle of Dried Corn 6941623 (515443, item 450993). Each pickup pays once per character before prestige, including after relog.",
+    "Changing the Stormbringer's level to 1 without prestige must not reopen its spent bag. Normal Chromie prestige from level 60 / Lightning specialization 15 must preserve both existing items and reopen both pickups after relog. The bag is collected at level 1 and the corn after leveling to its item equip requirement of 3; that equip requirement does not gate looting.",
+    "Collecting both again leaves them spent after another relog, while the control character's ledger stays spent. Rewards and ledger outcomes are produced by native opening, looting, prestige and relog; none are seeded.",
+    " A second actual Chromie prestige is followed by an immediate Bag claim before relogging. After relogging that Bag must stay spent, while the Corn not yet claimed in the new cycle must still be reclaimable; both third items survive another relog.",
+    "Mossy Bag has MaxCount 1. Prestige preserves the old bag; duplicate native loot remains rejected, then removing the old bag permits recovery from the reset pickup. Corn copies are retained across both cycles."
+  ],
+  "timeout_ms": 240000,
+  "location": {
+    "map": 1,
+    "x": 10299.7,
+    "y": 969.7,
+    "z": 1336.5,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "prestiger",
+      "race": 1,
+      "class": 16,
+      "level": 60
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "chromie",
+      "owner": "prestiger",
+      "entry": 178081,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_phase",
+      "actor": "prestiger",
+      "value": 1
+    },
+    {
+      "action": "learn",
+      "actor": "prestiger",
+      "spell": 3365
+    },
+    {
+      "action": "set_phase",
+      "actor": "control",
+      "value": 1
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 3365
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 10299.7,
+      "y": 969.7,
+      "z": 1336.5,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "nearby_gameobject_count",
+      "entry": 90626,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "prestiger",
+      "spell": 3365,
+      "target_gameobject": 90626
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "loot_entry",
+      "item": 450672,
+      "equals": 450672,
+      "within_ms": 6000
+    },
+    {
+      "action": "loot_slot",
+      "actor": "prestiger",
+      "item": 450672
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450672,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "close_loot",
+      "actor": "prestiger"
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 10309.4,
+      "y": 955.2,
+      "z": 1332.78,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "nearby_gameobject_count",
+      "entry": 515443,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "prestiger",
+      "spell": 3365,
+      "target_gameobject": 515443
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "loot_entry",
+      "item": 450993,
+      "equals": 450993,
+      "within_ms": 6000
+    },
+    {
+      "action": "loot_slot",
+      "actor": "prestiger",
+      "item": 450993
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450993,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "close_loot",
+      "actor": "prestiger"
+    },
+    {
+      "action": "teleport",
+      "actor": "control",
+      "map": 1,
+      "x": 10299.7,
+      "y": 969.7,
+      "z": 1336.5,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "nearby_gameobject_count",
+      "entry": 90626,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 3365,
+      "target_gameobject": 90626
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "loot_entry",
+      "item": 450672,
+      "equals": 450672,
+      "within_ms": 6000
+    },
+    {
+      "action": "loot_slot",
+      "actor": "control",
+      "item": 450672
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "item_count",
+      "item": 450672,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "close_loot",
+      "actor": "control"
+    },
+    {
+      "action": "teleport",
+      "actor": "control",
+      "map": 1,
+      "x": 10309.4,
+      "y": 955.2,
+      "z": 1332.78,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "nearby_gameobject_count",
+      "entry": 515443,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 3365,
+      "target_gameobject": 515443
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "loot_entry",
+      "item": 450993,
+      "equals": 450993,
+      "within_ms": 6000
+    },
+    {
+      "action": "loot_slot",
+      "actor": "control",
+      "item": 450993
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "item_count",
+      "item": 450993,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "close_loot",
+      "actor": "control"
+    },
+    {
+      "action": "relog",
+      "actor": "prestiger"
+    },
+    {
+      "action": "set_phase",
+      "actor": "prestiger",
+      "value": 1
+    },
+    {
+      "action": "learn",
+      "actor": "prestiger",
+      "spell": 3365
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 10299.7,
+      "y": 969.7,
+      "z": 1336.5,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "nearby_gameobject_count",
+      "entry": 90626,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "prestiger",
+      "spell": 3365,
+      "target_gameobject": 90626
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "loot_count",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450672,
+      "equals": 1
+    },
+    {
+      "action": "close_loot",
+      "actor": "prestiger"
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 10309.4,
+      "y": 955.2,
+      "z": 1332.78,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "nearby_gameobject_count",
+      "entry": 515443,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "prestiger",
+      "spell": 3365,
+      "target_gameobject": 515443
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "loot_count",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450993,
+      "equals": 1
+    },
+    {
+      "action": "close_loot",
+      "actor": "prestiger"
+    },
+    {
+      "action": "set_level",
+      "actor": "prestiger",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 10299.7,
+      "y": 969.7,
+      "z": 1336.5,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "nearby_gameobject_count",
+      "entry": 90626,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "prestiger",
+      "spell": 3365,
+      "target_gameobject": 90626
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "loot_count",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450672,
+      "equals": 1
+    },
+    {
+      "action": "close_loot",
+      "actor": "prestiger"
+    },
+    {
+      "action": "set_level",
+      "actor": "prestiger",
+      "value": 60
+    },
+    {
+      "action": "specialization",
+      "actor": "prestiger",
+      "id": 15
+    },
+    {
+      "action": "learn",
+      "actor": "prestiger",
+      "spell": 802354
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 10299.7,
+      "y": 969.7,
+      "z": 1336.5,
+      "o": 0
+    },
+    {
+      "action": "set_phase",
+      "actor": "prestiger"
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "relog",
+      "actor": "prestiger"
+    },
+    {
+      "action": "set_phase",
+      "actor": "prestiger",
+      "value": 1
+    },
+    {
+      "action": "learn",
+      "actor": "prestiger",
+      "spell": 3365
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450672,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450993,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 10299.7,
+      "y": 969.7,
+      "z": 1336.5,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "nearby_gameobject_count",
+      "entry": 90626,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "prestiger",
+      "spell": 3365,
+      "target_gameobject": 90626
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "loot_entry",
+      "item": 450672,
+      "equals": 450672,
+      "within_ms": 6000
+    },
+    {
+      "action": "loot_slot",
+      "actor": "prestiger",
+      "item": 450672
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450672,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "The unique Mossy Bag limit still rejects a duplicate claim"
+    },
+    {
+      "action": "destroy_item",
+      "actor": "prestiger",
+      "item": 450672
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450672,
+      "equals": 0,
+      "label": "Remove the old unique bag before recovering it"
+    },
+    {
+      "action": "loot_slot",
+      "actor": "prestiger",
+      "item": 450672
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450672,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Recover the bag through native loot after prestige"
+    },
+    {
+      "action": "close_loot",
+      "actor": "prestiger"
+    },
+    {
+      "action": "set_level",
+      "actor": "prestiger",
+      "value": 3
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 10309.4,
+      "y": 955.2,
+      "z": 1332.78,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "nearby_gameobject_count",
+      "entry": 515443,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "prestiger",
+      "spell": 3365,
+      "target_gameobject": 515443
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "loot_entry",
+      "item": 450993,
+      "equals": 450993,
+      "within_ms": 6000
+    },
+    {
+      "action": "loot_slot",
+      "actor": "prestiger",
+      "item": 450993
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450993,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "close_loot",
+      "actor": "prestiger"
+    },
+    {
+      "action": "relog",
+      "actor": "prestiger"
+    },
+    {
+      "action": "set_phase",
+      "actor": "prestiger",
+      "value": 1
+    },
+    {
+      "action": "learn",
+      "actor": "prestiger",
+      "spell": 3365
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 10299.7,
+      "y": 969.7,
+      "z": 1336.5,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "nearby_gameobject_count",
+      "entry": 90626,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "prestiger",
+      "spell": 3365,
+      "target_gameobject": 90626
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "loot_count",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450672,
+      "equals": 1
+    },
+    {
+      "action": "close_loot",
+      "actor": "prestiger"
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 10309.4,
+      "y": 955.2,
+      "z": 1332.78,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "nearby_gameobject_count",
+      "entry": 515443,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "prestiger",
+      "spell": 3365,
+      "target_gameobject": 515443
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "loot_count",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450993,
+      "equals": 2
+    },
+    {
+      "action": "close_loot",
+      "actor": "prestiger"
+    },
+    {
+      "action": "teleport",
+      "actor": "control",
+      "map": 1,
+      "x": 10299.7,
+      "y": 969.7,
+      "z": 1336.5,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "nearby_gameobject_count",
+      "entry": 90626,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 3365,
+      "target_gameobject": 90626
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "loot_count",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "item_count",
+      "item": 450672,
+      "equals": 1
+    },
+    {
+      "action": "close_loot",
+      "actor": "control"
+    },
+    {
+      "action": "teleport",
+      "actor": "control",
+      "map": 1,
+      "x": 10309.4,
+      "y": 955.2,
+      "z": 1332.78,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "nearby_gameobject_count",
+      "entry": 515443,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 3365,
+      "target_gameobject": 515443
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "loot_count",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "item_count",
+      "item": 450993,
+      "equals": 1
+    },
+    {
+      "action": "close_loot",
+      "actor": "control"
+    },
+    {
+      "action": "set_level",
+      "actor": "prestiger",
+      "value": 60
+    },
+    {
+      "action": "specialization",
+      "actor": "prestiger",
+      "id": 15
+    },
+    {
+      "action": "learn",
+      "actor": "prestiger",
+      "spell": 802354
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 10299.7,
+      "y": 969.7,
+      "z": 1336.5,
+      "o": 0
+    },
+    {
+      "action": "set_phase",
+      "actor": "prestiger"
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_phase",
+      "actor": "prestiger",
+      "value": 1
+    },
+    {
+      "action": "learn",
+      "actor": "prestiger",
+      "spell": 3365
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 10299.7,
+      "y": 969.7,
+      "z": 1336.5,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "prestiger",
+      "spell": 3365,
+      "target_gameobject": 90626
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "loot_entry",
+      "item": 450672,
+      "equals": 450672,
+      "within_ms": 6000
+    },
+    {
+      "action": "loot_slot",
+      "actor": "prestiger",
+      "item": 450672
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450672,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "The unique Mossy Bag limit still rejects a duplicate claim"
+    },
+    {
+      "action": "destroy_item",
+      "actor": "prestiger",
+      "item": 450672
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450672,
+      "equals": 0,
+      "label": "Remove the old unique bag before recovering it"
+    },
+    {
+      "action": "loot_slot",
+      "actor": "prestiger",
+      "item": 450672
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450672,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Recover the bag through native loot after prestige"
+    },
+    {
+      "action": "close_loot",
+      "actor": "prestiger"
+    },
+    {
+      "action": "relog",
+      "actor": "prestiger"
+    },
+    {
+      "action": "set_phase",
+      "actor": "prestiger",
+      "value": 1
+    },
+    {
+      "action": "learn",
+      "actor": "prestiger",
+      "spell": 3365
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450672,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450993,
+      "equals": 2
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 10299.7,
+      "y": 969.7,
+      "z": 1336.5,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "prestiger",
+      "spell": 3365,
+      "target_gameobject": 90626
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "loot_count",
+      "equals": 0,
+      "label": "The immediate claim remains spent after relogging"
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450672,
+      "equals": 1
+    },
+    {
+      "action": "close_loot",
+      "actor": "prestiger"
+    },
+    {
+      "action": "set_level",
+      "actor": "prestiger",
+      "value": 3
+    },
+    {
+      "action": "teleport",
+      "actor": "prestiger",
+      "map": 1,
+      "x": 10309.4,
+      "y": 955.2,
+      "z": 1332.78,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "prestiger",
+      "spell": 3365,
+      "target_gameobject": 515443
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "loot_entry",
+      "item": 450993,
+      "equals": 450993,
+      "within_ms": 6000
+    },
+    {
+      "action": "loot_slot",
+      "actor": "prestiger",
+      "item": 450993
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450993,
+      "equals": 3,
+      "within_ms": 2000,
+      "label": "A still-unclaimed pickup remains reset after relogging"
+    },
+    {
+      "action": "close_loot",
+      "actor": "prestiger"
+    },
+    {
+      "action": "relog",
+      "actor": "prestiger"
+    },
+    {
+      "action": "set_phase",
+      "actor": "prestiger",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450672,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 450993,
+      "equals": 3
+    }
+  ]
+}

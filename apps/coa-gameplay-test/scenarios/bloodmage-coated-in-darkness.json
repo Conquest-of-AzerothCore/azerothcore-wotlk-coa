@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "name": "Coated In Darkness shortens Blood Pact when Bloodbolt is cast (#2324)",
+  "contract": "Coated In Darkness 704625 reads 'Casting Bloodbolt or Bloodfang Bite now reduces the cooldown of your Blood Pact by $/1000;804205S1 sec'. Its single effect is aura 42 (proc trigger spell) on Coated in Darkness 804205, one SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN with BasePoints -501 (-500 ms) and MiscValue 801955 (Blood Pact). Spell.dbc gives 704625 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and Blood Pact's cooldown never moved. Blood Pact 801955 has RecoveryTime 120000. The cut is only 500 ms, less than a cooldown can decay on its own while the scenario runs, so a control pair of adjacent steps first proves that an idle step pair decays the cooldown by less than 400 ms; only then is a 400 ms drop across the Bloodbolt cast attributable to the proc. Bloodbolt is cast as rank 578305 (the rank a level-80 character owns; 578304 is only granted up to level 52 and gets no server response), SpellFamilyFlags (0, 131072, 0).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 704625
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 801955
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 578305
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Coated In Darkness passive is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 704625,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 801955
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Blood Pact is on its 120 sec cooldown",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 801955,
+      "min": 100000,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "CONTROL: cooldown before an idle step pair",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 801955,
+      "save_as": "cd_control"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: adjacent steps decay the cooldown by less than 400 ms",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 801955,
+      "relative_to": "cd_control",
+      "min": -400
+    },
+    {
+      "action": "snapshot",
+      "label": "Blood Pact cooldown before Bloodbolt",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 801955,
+      "save_as": "cd_before"
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 578305,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bloodbolt cuts Blood Pact's cooldown by at least 400 ms",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 801955,
+      "relative_to": "cd_before",
+      "max": -400
+    }
+  ]
+}

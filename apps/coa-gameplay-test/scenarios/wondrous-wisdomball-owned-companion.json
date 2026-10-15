@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "name": "Wondrous Wisdomball is learned with the other owned companions",
+  "timeout_ms": 30000,
+  "players": [{ "id": "p", "race": 1, "class": 1, "level": 20 }],
+  "steps": [
+    { "action": "assert", "actor": "p", "metric": "knows_spell", "spell": 83050, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "actor": "p", "metric": "knows_spell", "spell": 92981, "equals": 1, "within_ms": 5000 }
+  ]
+}

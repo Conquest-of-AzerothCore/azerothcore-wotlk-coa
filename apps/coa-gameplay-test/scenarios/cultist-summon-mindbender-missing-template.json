@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Summon: Mindbender reaches the native summon path but has no creature to spawn (#3774)",
+  "contract": "Spell 803062's only effect is SPELL_EFFECT_SUMMON_PET targeting MiscValue 50328 (Spell.dbc, verified via coa-dbc-viewer), CastingTimeIndex 16 = 1500 ms (SpellCastTimes.dbc), RecoveryTime/CategoryRecoveryTime 0 (no cooldown, matching the tooltip's silence on one) and ManaCostPercentage 40. Player::SummonPet -> Pet::Create resolves the MiscValue against creature_template.entry; grepping data/sql/{base,archive,updates/pending_db_world} and modules/mod-ascension plus src/server/coa for entry 50328 or the string \"Mindbender\" finds no creature_template row, and none of the ~/CoaServer/reference/snapshots sources capture creature_template data at all (they cover only spell/talent tables). So the cast, cost and cast-time reach the server and the effect handler correctly, and then Spell::EffectSummonPet's `if (!pet) return;` silently drops the summon. The scenario cannot use `owned_creature_count` for entry 50328 to observe that absence: CoAGameplayTest.cpp Requires `sObjectMgr->GetCreatureTemplate(entry) != nullptr` before counting, and entry 50328 has no creature_template row at all, so the metric hard-fails the native run instead of reading zero. `pet_entry` reads the player's current guardian/companion pet directly with no such lookup, so it is used instead to prove no pet occupies the slot, before and after the cast. This scenario locks in that native config and the absence of any pet; it does not fix the spell, because the creature's display, stats and periodic-heal behavior are not derivable from any installed source. Refs #3774, not Fixes."
+  ,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 40 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "cultist", "spell": 803062 },
+    { "action": "assert", "actor": "cultist", "metric": "knows_spell", "spell": 803062, "equals": 1 },
+    {
+      "action": "assert", "label": "Baseline: no pet occupies the guardian slot before casting",
+      "actor": "cultist", "metric": "pet_entry", "equals": 0
+    },
+    {
+      "action": "assert", "label": "The spell has a resource cost per its DBC ManaCostPercentage",
+      "actor": "cultist", "metric": "spell_power_cost", "spell": 803062, "min": 1
+    },
+    { "action": "cast", "actor": "cultist", "spell": 803062 },
+    {
+      "action": "assert", "label": "The native cast handler accepts the cast (metadata/effect wiring is correct)",
+      "actor": "cultist", "metric": "cast_failure", "spell": 803062, "equals": 0
+    },
+    { "action": "wait", "ms": 1700 },
+    {
+      "action": "assert", "label": "No cooldown is applied, matching the tooltip's silence on one",
+      "actor": "cultist", "metric": "cooldown_ms", "spell": 803062, "equals": 0
+    },
+    {
+      "action": "assert", "label": "No Mindbender is summoned: EffectSummonPet returns early because creature_template 50328 does not exist in this repository's SQL or its reference snapshots, so no pet occupies the guardian slot",
+      "actor": "cultist", "metric": "pet_entry", "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Cloudsurfer raises Shock as well as Brine (#3639)",
+  "contract": "#3639: Cloudsurfer (806414) is a passive SPELL_AURA_ADD_PCT_MODIFIER with MiscValue 0 (SPELLMOD_DAMAGE), EffectBasePoints 14 and EffectDieSides 1, so its amount is +15%. Its tooltip reads \"Increases the damage of $?s560020[Brine][Shock] by $s1%\": Brine for a Stormbringer who took Tempest Sovereign (560020), which replaces Shock with Brine, and Shock for everyone else. The shipped EffectSpellClassMask is (0, 128, 0), and in Spell.dbc bit 128 of family word 1 belongs to the Brine ranks (807105-807111), while every Shock rank (503326-503332, 504634, 804020) carries family word 0 bit 2048 instead. SpellInfo::IsAffected therefore returns false for Shock, so a Stormbringer without Tempest Sovereign gets no bonus at all. The mask must cover both spells: (2048, 128, 0). Family word 0 bit 2048 is held by the nine Shock ranks alone, so the added bit reaches nothing else. 1000 is the harness's fixed probe base, and 1150 is that base with the +15% modifier applied.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "s",
+      "race": 1,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "s",
+      "entry": 28168,
+      "level": 80,
+      "health": 500000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 804020
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Shock damage is unmodified before Cloudsurfer",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 804020,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "snapshot",
+      "label": "Shock damage before Cloudsurfer",
+      "actor": "s",
+      "metric": "spell_damage_done",
+      "spell": 804020,
+      "target": "dummy",
+      "save_as": "shock_base"
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 806414
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Cloudsurfer adds 15% to Shock rank 9 (804020)",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 804020,
+      "op": 0,
+      "base": 1000,
+      "min": 1149.9,
+      "max": 1150.1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Cloudsurfer adds 15% to Shock rank 1 (503326)",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 503326,
+      "op": 0,
+      "base": 1000,
+      "min": 1149.9,
+      "max": 1150.1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Cloudsurfer adds 15% to Shock rank 8 (504634)",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 504634,
+      "op": 0,
+      "base": 1000,
+      "min": 1149.9,
+      "max": 1150.1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Shock deals 15% more damage in the native calculation",
+      "actor": "s",
+      "metric": "spell_damage_done",
+      "spell": 804020,
+      "target": "dummy",
+      "ratio_to": "shock_base",
+      "min": 1.1499,
+      "max": 1.1501
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Cloudsurfer still adds 15% to Brine rank 1 (807105)",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 807105,
+      "op": 0,
+      "base": 1000,
+      "min": 1149.9,
+      "max": 1150.1
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Cloudsurfer still adds 15% to Brine rank 7 (807111)",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 807111,
+      "op": 0,
+      "base": 1000,
+      "min": 1149.9,
+      "max": 1150.1
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Cloudsurfer leaves Call Lightning untouched",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 500040,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    }
+  ]
+}

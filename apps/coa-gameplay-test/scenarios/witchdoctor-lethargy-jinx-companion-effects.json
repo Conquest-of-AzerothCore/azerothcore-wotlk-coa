@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Will of the Serpent and Jinx of Decay raise Lethargy Jinx's own zeroed effects (#1710, #2243)",
+  "contract": "Lethargy Jinx (802065) ships its effect1 (SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER, aura 308) and effect2 (SPELL_AURA_MOD_HOT_PCT, aura 259) with BasePoints -1 + DieSides 1 = 0, i.e. present but inert until a companion talent raises them. Will of the Serpent (300663): one effect, aura 107 (ADD_FLAT_MODIFIER), MiscValue 12 (SPELLMOD_EFFECT2), BasePoints 9 + DieSides 1 = 10, class mask (262144, 0, 0) matching exactly Lethargy Jinx's own SpellFamilyFlags word0 (262144). Jinx of Decay (681465): one effect, aura 107, MiscValue 23 (SPELLMOD_EFFECT3), BasePoints -31 + DieSides 1 = -30, same class mask word0. Unit::ApplyEffectModifiers (Unit.cpp) consumes SPELLMOD_EFFECT2 for effect_index 1 (Lethargy Jinx's crit-chance effect) and SPELLMOD_EFFECT3 for effect_index 2 (its periodic-healing-received effect) specifically, so each passive raises exactly the effect its tooltip names, from 0 to the tooltip's own number, independently of the other. Hex of Malice (501153, word0 = 0) is the negative control: neither passive's class mask reaches it. spell_modifier reads each mod against a fixed synthetic base of 0 (matching the DBC's own zeroed base value) without casting. Regression guard for behaviour that already works natively; no module code touches either spell id, and whether aura 259/308 are themselves fully implemented is out of scope for these two issues, which only ask whether the modifier is delivered.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 13, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+
+    { "action": "assert", "label": "BASELINE: Lethargy Jinx's crit-chance-vs-target base is zero before Will of the Serpent",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 12, "base": 0, "equals": 0 },
+    { "action": "assert", "label": "BASELINE: Lethargy Jinx's periodic-healing-received base is zero before Jinx of Decay",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 23, "base": 0, "equals": 0 },
+    { "action": "assert", "label": "CONTROL: Hex of Malice's effect2 base is untouched (not Lethargy Jinx)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 501153, "op": 12, "base": 0, "equals": 0 },
+
+    { "action": "learn", "actor": "caster", "spell": 300663 },
+
+    { "action": "assert", "label": "Will of the Serpent raises Lethargy Jinx's crit-chance-vs-target base from 0 to 10 (#1710)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 12, "base": 0, "equals": 10 },
+    { "action": "assert", "label": "Jinx of Decay's effect is still absent, so the periodic-healing base stays zero",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 23, "base": 0, "equals": 0 },
+    { "action": "assert", "label": "CONTROL: Hex of Malice's effect2 base still untouched",
+      "actor": "caster", "metric": "spell_modifier", "spell": 501153, "op": 12, "base": 0, "equals": 0 },
+
+    { "action": "learn", "actor": "caster", "spell": 681465 },
+
+    { "action": "assert", "label": "Jinx of Decay lowers Lethargy Jinx's periodic-healing-received base from 0 to -30 (#2243)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 23, "base": 0, "equals": -30 },
+    { "action": "assert", "label": "Will of the Serpent's crit-chance base is unaffected by Jinx of Decay (independent SpellModOp)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 12, "base": 0, "equals": 10 },
+    { "action": "assert", "label": "CONTROL: Hex of Malice's effect3 base untouched by Jinx of Decay (not Lethargy Jinx)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 501153, "op": 23, "base": 0, "equals": 0 }
+  ]
+}

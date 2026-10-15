@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Temporal Dissonance slows Chronostasis by a further 10% (#1968)",
+  "contract": "Temporal Dissonance 520922 carries SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue SPELLMOD_EFFECT1 (3) and EffectSpellClassMask word0 bit 0x40000; EffectBasePoints -11 resolves to -10 with DieSides 1, matching the tooltip \"Chronostasis now slows your target's movement speed by an additional $s1%.\" Chronostasis 706969 has SpellFamilyFlags word0 262144 and effect 0 SPELL_AURA_MOD_DECREASE_SPEED (33) with EffectBasePoints -61, i.e. a -60% slow, so the talent takes it to -70%. Native path only: SpellEffectInfo::CalcValue calls Unit::ApplyEffectModifiers, which applies SPELLMOD_ALL_EFFECTS and then SPELLMOD_EFFECT1 for effect index 0. The assertion is relative to the control's own computed value so a module base-value hook on the slow cannot mask the modifier.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 22, "level": 80 },
+    { "id": "talent", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talent", "spell": 520922 },
+    {
+      "action": "snapshot",
+      "label": "Chronostasis slow without the talent",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 706969,
+      "effect": 0,
+      "save_as": "slow_base"
+    },
+    {
+      "action": "assert",
+      "label": "Chronostasis slows 10 percentage points harder with the talent",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 706969,
+      "effect": 0,
+      "relative_to": "slow_base",
+      "equals": -10
+    },
+    {
+      "action": "assert",
+      "label": "The shipped record still gives the control a 60% slow",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 706969,
+      "effect": 0,
+      "equals": -60
+    }
+  ]
+}

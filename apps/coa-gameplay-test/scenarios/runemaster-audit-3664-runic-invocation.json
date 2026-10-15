@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Runemaster audit: Runic Invocation lets Hoarfrost's periodic damage critically strike (#3664)",
+  "contract": "Runic Invocation 807204 effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 7 (SPELLMOD_CRITICAL_CHANCE), EffectBasePoints 9 + DieSides 1 = +10, EffectSpellClassMask word 0 = 8388608, matching Hoarfrost 801104's SpellFamilyFlags word 0 bit 23 (8388608) exactly. Effect 1 is SPELL_AURA_ABILITY_PERIODIC_CRIT (286) on the same classmask. Verification note: the spell_done_crit_chance metric (Unit::SpellDoneCritChance, skipEffectCheck=false) is the wrong probe here - it gates on SpellInfo::IsCritCapable(), which only recognizes a direct SPELL_EFFECT_SCHOOL_DAMAGE/HEAL/... effect TYPE, not an APPLY_AURA effect whose aura subtype is SPELL_AURA_PERIODIC_DAMAGE; Hoarfrost's own damage is delivered entirely through such a periodic aura (effect 1), so IsCritCapable() is false for it and that metric always reads 0, with or without the talent. The real periodic-tick crit computation is AuraEffect::CalcPeriodicCritChance (SpellAuraEffects.cpp:1175), called from CalculatePeriodicData on aura (re)application: it only computes a nonzero crit chance at all if the caster carries a SPELL_AURA_ABILITY_PERIODIC_CRIT aura matching the ticking spell's classmask (exactly Runic Invocation's effect 1) - without that match critChance stays 0 regardless of crit rating, and with it SpellDoneCritChance is called with skipEffectCheck=true, picking up Runic Invocation's own SPELLMOD_CRITICAL_CHANCE bonus. This follows the established house pattern from apps/coa-gameplay-test/scenarios/runemaster-leyfrost.json: maximize melee_crit_rating and observe spell_damage_count with critical:true across a fresh Hoarfrost application, before and after learning the talent.",
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000,
+      "melee_crit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 80, "health": 2000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 197},
+    {"action": "add_item", "actor": "rm", "item": 12784},
+    {"action": "equip", "label": "Hoarfrost requires a two-handed weapon", "actor": "rm", "item": 12784, "slot": 15},
+    {"action": "learn", "actor": "rm", "spell": 801104},
+
+    {"action": "snapshot", "label": "Baseline crit count", "actor": "rm", "metric": "spell_damage_count",
+      "spell": 801104, "target": "dummy", "critical": true, "save_as": "crits_before"},
+    {"action": "cast", "actor": "rm", "spell": 801104, "target": "dummy"},
+    {"action": "wait", "ms": 1500},
+    {"action": "assert", "label": "SETUP: even with max crit rating, Hoarfrost cannot crit without the talent",
+      "actor": "rm", "metric": "spell_damage_count", "spell": 801104, "target": "dummy", "critical": true,
+      "relative_to": "crits_before", "equals": 0},
+    {"action": "assert", "label": "SETUP: the first Hoarfrost expires, so the next one ticks on a fresh application",
+      "actor": "dummy", "metric": "aura", "spell": 801104, "caster": "rm", "equals": 0, "within_ms": 22000},
+
+    {"action": "learn", "actor": "rm", "spell": 807204},
+    {"action": "assert", "label": "CONTRACT: Runic Invocation is active", "actor": "rm", "metric": "aura",
+      "spell": 807204, "equals": 1, "within_ms": 2000},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 801104},
+    {"action": "wait", "label": "Let the global cooldown pass", "ms": 1200},
+    {"action": "snapshot", "label": "Crit count with the talent", "actor": "rm", "metric": "spell_damage_count",
+      "spell": 801104, "target": "dummy", "critical": true, "save_as": "crits_after"},
+    {"action": "cast", "actor": "rm", "spell": 801104, "target": "dummy"},
+    {"action": "wait", "ms": 1500},
+    {"action": "assert", "label": "CONTRACT: with Runic Invocation, Hoarfrost's periodic damage critically strikes",
+      "actor": "rm", "metric": "spell_damage_count", "spell": 801104, "target": "dummy", "critical": true,
+      "relative_to": "crits_after", "min": 1}
+  ]
+}

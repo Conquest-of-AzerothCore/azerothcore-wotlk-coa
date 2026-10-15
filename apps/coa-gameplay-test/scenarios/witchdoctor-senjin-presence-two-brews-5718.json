@@ -1,0 +1,232 @@
+{
+  "schema": 1,
+  "name": "Sen'jin's Presence accelerates two consecutive Loa's Brews (#5718)",
+  "contract": "Sen'jin's Presence 560544 explicitly grants two accelerated Loa's Brews after Spirit in a Bottle or Potion Toss. Spell 561017 effect 0 resolves to a 20% casting-time reduction for the Loa's Brew family. Brew 801670 uses SpellCastTimes 5 (2000 ms), so each of the next two completed Brews must take 1600 ms and consume one charge; the third takes 2000 ms. Ordinary Spirit in a Bottle casts establish the buff, an untalented Bottle and an unrelated ally buff are controls, and positive healing events prove cast completion before charge assertions.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "wd",
+      "race": 1,
+      "class": 13,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "wd",
+      "spell": 801670
+    },
+    {
+      "action": "learn",
+      "actor": "wd",
+      "spell": 801696
+    },
+    {
+      "action": "learn",
+      "actor": "wd",
+      "spell": 801689
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "spell_cast_time_ms",
+      "spell": 801670,
+      "equals": 2000,
+      "label": "Unbuffed Loa's Brew takes two seconds"
+    },
+    {
+      "action": "set_health",
+      "actor": "wd",
+      "value": 1000,
+      "maximum": 1000000
+    },
+    {
+      "action": "cast",
+      "actor": "wd",
+      "spell": 801696,
+      "target": "wd"
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "spell_heal_count",
+      "spell": 801696,
+      "target": "wd",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "aura",
+      "spell": 561017,
+      "equals": 0,
+      "label": "Spirit in a Bottle requires the talent to grant Senjin Presence"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "wd",
+      "spell": 560544
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "aura",
+      "spell": 560544,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "wd",
+      "spell": 801696,
+      "target": "wd"
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "spell_heal_count",
+      "spell": 801696,
+      "target": "wd",
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "aura_charges",
+      "spell": 561017,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "spell_cast_time_ms",
+      "spell": 801670,
+      "equals": 1600
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "wd",
+      "spell": 801689,
+      "target": "wd"
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "aura",
+      "spell": 801689,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "aura_charges",
+      "spell": 561017,
+      "equals": 2,
+      "label": "An unrelated ally buff preserves both Brew charges"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "wd",
+      "spell": 801670,
+      "target": "wd"
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "spell_heal_count",
+      "spell": 801670,
+      "target": "wd",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "aura_charges",
+      "spell": 561017,
+      "equals": 1,
+      "label": "One completed Brew consumes exactly one charge"
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "spell_cast_time_ms",
+      "spell": 801670,
+      "equals": 1600,
+      "label": "The second consecutive Brew remains accelerated"
+    },
+    {
+      "action": "cast",
+      "actor": "wd",
+      "spell": 801670,
+      "target": "wd"
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "spell_heal_count",
+      "spell": 801670,
+      "target": "wd",
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "aura",
+      "spell": 561017,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "spell_cast_time_ms",
+      "spell": 801670,
+      "equals": 2000,
+      "label": "The third Brew returns to the normal cast time"
+    },
+    {
+      "action": "cast",
+      "actor": "wd",
+      "spell": 801670,
+      "target": "wd"
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "spell_heal_count",
+      "spell": 801670,
+      "target": "wd",
+      "equals": 3,
+      "within_ms": 3000
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Spirit Link Idol equalizes nearby party members' health every 2 sec (#1891)",
+  "contract": [
+    "#1891 filed Spirit Link Idol 500993 under the Necromancer, but 500993 is SpellFamilyName 19 with no",
+    "description: it is the EffectTriggerSpell of 500992 'Spirit Link Idol' (PERIODIC_TRIGGER_SPELL,",
+    "amplitude 2000 ms, 14 s), the timer of the Witch Doctor talent Spirit Link Idol 706369",
+    "(CharacterAdvancement 13133, ClassType 15 = class 13, level 50). 706369 summons creature 522106 and reads",
+    "'Drop a Spirit Link Idol for $500992d. The idol redistributes the health of all party and raid members",
+    "every 2 sec, such that each player ends up with the same percentage of their maximum health.'",
+    "The server implements the pulse in the idol's creature AI (npc_ascension_witch_doctor, entry 522106),",
+    "not through 500993, so the audit's 'id not in source' premise does not show a missing mechanic.",
+    "Two grouped level-60 Human Witch Doctors with equal maximum health M and regeneration disabled: the caster",
+    "at full health and the ally at 1 health. The first pulse leaves both at (M + 1) / 2, about 50%; after the",
+    "ally is dropped to 1 health again, a later pulse leaves both at about 25%."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "doctor", "race": 1, "class": 13, "level": 60, "allow_regeneration": false },
+    { "id": "ally", "race": 1, "class": 13, "level": 60, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the world settle", "ms": 5000 },
+    { "action": "group", "actor": "doctor", "target": "ally" },
+    { "action": "learn", "label": "Learn Spirit Link Idol", "actor": "doctor", "spell": 706369 },
+    { "action": "snapshot", "actor": "ally", "metric": "max_health", "save_as": "ally_max_health" },
+    {
+      "action": "assert", "label": "PRECONDITION: both players have the same maximum health", "actor": "doctor",
+      "metric": "max_health", "relative_to": "ally_max_health", "equals": 0
+    },
+    { "action": "set_health", "actor": "ally", "value": 1 },
+    {
+      "action": "assert", "label": "PRECONDITION: the caster is at full health", "actor": "doctor",
+      "metric": "health_pct", "min": 99.9
+    },
+    {
+      "action": "assert", "label": "PRECONDITION: the ally is nearly dead", "actor": "ally",
+      "metric": "health_pct", "max": 1
+    },
+    { "action": "cast", "label": "Drop the Spirit Link Idol", "actor": "doctor", "spell": 706369 },
+    {
+      "action": "assert", "label": "The Spirit Link Idol is summoned", "actor": "doctor",
+      "metric": "owned_creature_count", "entry": 522106, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: a pulse raises the ally to the shared 50%", "actor": "ally",
+      "metric": "health_pct", "min": 49, "max": 51, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the same pulse lowers the caster to the shared 50%",
+      "actor": "doctor", "metric": "health_pct", "min": 49, "max": 51
+    },
+    { "action": "set_health", "label": "Wound the ally again", "actor": "ally", "value": 1 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: a later pulse raises the ally to the shared 25%", "actor": "ally",
+      "metric": "health_pct", "min": 24, "max": 26, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the later pulse lowers the caster to the shared 25%",
+      "actor": "doctor", "metric": "health_pct", "min": 24, "max": 26
+    }
+  ]
+}

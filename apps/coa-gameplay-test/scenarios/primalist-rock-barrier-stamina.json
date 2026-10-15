@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Rock Barrier's armor scales with Stamina",
+  "contract": "Rock Barrier's DBC description reads 'increasing your Armor by ${$m1+$STA*3}, scaling with your Stamina.' A 100-point Stamina gain must raise the effect's computed value by 300, on top of whatever the level-scaled base contributes.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "timeout_ms": 15000,
+  "steps": [
+    { "action": "learn", "actor": "primalist", "spell": 503630 },
+    {
+      "action": "snapshot", "actor": "primalist", "metric": "spell_effect_value", "spell": 503630,
+      "effect": 0, "save_as": "base_effect"
+    },
+    {
+      "action": "snapshot", "actor": "primalist", "metric": "stat", "stat": 2, "save_as": "base_stamina"
+    },
+    { "action": "set_aura", "actor": "primalist", "spell": 706305, "stacks": 1 },
+    {
+      "action": "assert", "label": "Fixture grants exactly 100 Stamina",
+      "actor": "primalist", "metric": "stat", "stat": 2, "relative_to": "base_stamina", "equals": 100
+    },
+    {
+      "action": "assert", "label": "100 Stamina raises the armor effect by roughly 3x100 = 300",
+      "actor": "primalist", "metric": "spell_effect_value", "spell": 503630, "effect": 0,
+      "relative_to": "base_effect", "min": 295, "max": 305
+    }
+  ]
+}

@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "name": "Starcrash raises Scattered Star's damage by 15% and 30% (#2017)",
+  "contract": "Starcrash 560721 (rank 1) and 704766 (rank 2) (Spell.dbc, family 32) tooltip: \"Increases the damage dealt by consuming Scattered Stars by $s1%.\" Both carry SPELL_AURA_ADD_PCT_MODIFIER (108), EffectMiscValue SPELLMOD_DAMAGE (0), EffectBasePoints 14 and 29 with DieSides 1 (=15 and 30), EffectSpellClassMask word1 0x800, which matches Scattered Star 804995 (family 32, flags word0 0x800000, word1 0x800, DmgClass 1, Effect 0 SPELL_EFFECT_SCHOOL_DAMAGE). 804995 has Attributes Ex3 0x40000000 (SPELL_ATTR3_DO_NOT_DISPLAY_RANGE), not SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (0x20000000), so Unit::SpellDamageBonusDone reaches ApplySpellMod(SPELLMOD_DAMAGE). The Character Advancement entry has two ranks (560721, 704766); the third id 704767 (+50%) is not obtainable per the audit's classification (no CA row, absent from the calibrated live capture) and is deliberately not tested. Rank fixtures learn one rank each so their modifiers are not summed. The control shares race, class and level and owns no passive, so damage ratios must be 1.15 and 1.30 on the harness's fixed 1000 base; spell_modifier gives the pure 1150 and 1300. Values read 2026-09-21 from the shipped /srv/coa/server-data/dbc/Spell.dbc.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "r1",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "r2",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "control",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "r1",
+      "spell": 560721
+    },
+    {
+      "action": "learn",
+      "actor": "r2",
+      "spell": 704766
+    },
+    {
+      "action": "snapshot",
+      "label": "Scattered Star damage without Starcrash",
+      "actor": "control",
+      "metric": "spell_damage_done",
+      "save_as": "ss_base",
+      "spell": 804995,
+      "effect": 0,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises Scattered Star's damage by 15%",
+      "actor": "r1",
+      "metric": "spell_damage_done",
+      "spell": 804995,
+      "effect": 0,
+      "target": "dummy",
+      "ratio_to": "ss_base",
+      "min": 1.149,
+      "max": 1.151
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises Scattered Star's damage by 30%",
+      "actor": "r2",
+      "metric": "spell_damage_done",
+      "spell": 804995,
+      "effect": 0,
+      "target": "dummy",
+      "ratio_to": "ss_base",
+      "min": 1.299,
+      "max": 1.301
+    },
+    {
+      "action": "assert",
+      "label": "Scattered Star has no damage modifier without Starcrash",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 804995,
+      "op": 0,
+      "base": 1000,
+      "min": 999.99,
+      "max": 1000.01
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 modifier is +15%",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 804995,
+      "op": 0,
+      "base": 1000,
+      "min": 1149.99,
+      "max": 1150.01
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 modifier is +30%",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 804995,
+      "op": 0,
+      "base": 1000,
+      "min": 1299.99,
+      "max": 1300.01
+    },
+    {
+      "action": "assert",
+      "label": "Starcrash does not touch Lunar Lance",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 502340,
+      "op": 0,
+      "base": 1000,
+      "min": 999.99,
+      "max": 1000.01
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Unrelenting Winds and Wicked Storms native modifiers (#732, #1322)",
+  "contract": "#732: Unrelenting Winds (704211) is a single SPELL_AURA_ADD_FLAT_MODIFIER (107) effect, EffectMiscValue 7 = SPELLMOD_CRITICAL_CHANCE (SpellDefines.h:83), EffectBasePoints 14 + DieSides 1 = +15, EffectSpellClassMask [0, 131072, 0] (dword1 bit17, 0x20000). All checked Gale ranks (570138-570141, 804036) carry SpellFamilyFlags [16384, 537001984, 136]; 537001984 = 0x20020000 has bit17 set, so 0x20000 & 0x20020000 != 0 and SpellInfo::IsAffected (SpellInfo.cpp:1437-1448, no family-22 override block) matches. Aura 107/108 route through AuraEffect::CalculateSpellMod (SpellAuraEffects.cpp:110), the stock flat-spellmod path consumed by Player::ApplySpellMod wherever a spell reads its own SPELLMOD_CRITICAL_CHANCE, which is exactly what the harness's spell_modifier metric queries directly with op 7. #1322: Wicked Storms (705650) is a single SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79) effect, EffectMiscValue 8 = SPELL_SCHOOL_MASK_NATURE, EffectBasePoints 4 + DieSides 1 = +5, no class mask (school-wide). AuraEffect::HandleModDamagePercentDone (SpellAuraEffects.cpp:5183) is the standard +X% school-damage aura, read back by spell_damage_done's own native damage calculation on any Nature spell (Call Lightning 500040, SchoolMask 8). Neither passive has any module code; both close as regression scenarios only.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "sb",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "sb",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "label": "Learn Gale", "actor": "sb", "spell": 804036 },
+    { "action": "assert", "label": "BASELINE: no crit-chance modifier on Gale before Unrelenting Winds",
+      "actor": "sb", "metric": "spell_modifier", "spell": 804036, "op": 7, "base": 20, "equals": 20 },
+    { "action": "learn", "label": "Learn Unrelenting Winds", "actor": "sb", "spell": 704211 },
+    { "action": "assert", "label": "DISCRIMINATING: Unrelenting Winds adds +15 to Gale's crit-chance modifier",
+      "actor": "sb", "metric": "spell_modifier", "spell": 804036, "op": 7, "base": 20, "equals": 35 },
+    { "action": "learn", "label": "Learn Call Lightning", "actor": "sb", "spell": 500040 },
+    { "action": "snapshot", "label": "BASELINE: Call Lightning damage on the fixture target before Wicked Storms",
+      "actor": "sb", "metric": "spell_damage_done", "spell": 500040, "target": "d", "save_as": "nature0" },
+    { "action": "learn", "label": "Learn Wicked Storms", "actor": "sb", "spell": 705650 },
+    { "action": "assert", "label": "DISCRIMINATING: Wicked Storms raises Call Lightning's damage by 5%",
+      "actor": "sb", "metric": "spell_damage_done", "spell": 500040, "target": "d",
+      "ratio_to": "nature0", "min": 1.049, "max": 1.051 }
+  ]
+}

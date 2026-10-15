@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "name": "Starbarian increases haste by 4% and 6% (#2393)",
+  "contract": "Starbarian rank 1 704778 and rank 2 706229 (Spell.dbc, SpellFamilyName 32, passive, no class mask) each carry two self-targeted APPLY_AURA effects: effect 0 SPELL_AURA_MOD_MELEE_RANGED_HASTE (192) and effect 1 SPELL_AURA_HASTE_SPELLS (216), both with DieSides 1 and EffectBasePoints 3 (rank 1) or 5 (rank 2), resolving to 4 and 6. The tooltip of both ranks reads 'Increases your haste by $s1%.' Native path only: AuraEffect::HandleModMeleeRangedSpeedPct (192) calls Unit::ApplyAttackTimePercentMod and AuraEffect::HandleModCastingSpeed (216) calls Unit::ApplyCastTimePercentMod, dividing the swing timer and UNIT_MOD_CAST_SPEED by 1.04 or 1.06. Neither id appears in module source. Fixtures: an untalented control, one fixture that learns only rank 1 and one that learns only rank 2, all the same race, class and level with no ratings. Each rank is therefore measured on its own; how a rank-2 purchase replaces rank 1 in the spellbook is talent-window behaviour and is outside this scenario. Bands are the exact ratio 1/1.04 = 0.9615 and 1/1.06 = 0.9434 widened for float rounding (same shape as the merged Chronomancer haste scenarios).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "rank1",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "rank2",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Cast speed multiplier of the control",
+      "actor": "control",
+      "metric": "cast_speed_multiplier",
+      "save_as": "cast_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Main-hand swing time of the control",
+      "actor": "control",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "save_as": "swing_base"
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 704778
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 706229
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 applies its aura",
+      "actor": "rank1",
+      "metric": "aura",
+      "spell": 704778,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 effect 0 (melee/ranged haste) resolves to 4",
+      "actor": "rank1",
+      "metric": "aura_amount",
+      "spell": 704778,
+      "effect": 0,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 effect 1 (spell haste) resolves to 4",
+      "actor": "rank1",
+      "metric": "aura_amount",
+      "spell": 704778,
+      "effect": 1,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 casts are 4% faster (1/1.04 = 0.962)",
+      "actor": "rank1",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "cast_base",
+      "min": 0.95,
+      "max": 0.975
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 swings are 4% faster",
+      "actor": "rank1",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "ratio_to": "swing_base",
+      "min": 0.95,
+      "max": 0.975
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 applies its aura",
+      "actor": "rank2",
+      "metric": "aura",
+      "spell": 706229,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 effect 0 (melee/ranged haste) resolves to 6",
+      "actor": "rank2",
+      "metric": "aura_amount",
+      "spell": 706229,
+      "effect": 0,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 effect 1 (spell haste) resolves to 6",
+      "actor": "rank2",
+      "metric": "aura_amount",
+      "spell": 706229,
+      "effect": 1,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 casts are 6% faster (1/1.06 = 0.943)",
+      "actor": "rank2",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "cast_base",
+      "min": 0.93,
+      "max": 0.955
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 swings are 6% faster",
+      "actor": "rank2",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "ratio_to": "swing_base",
+      "min": 0.93,
+      "max": 0.955
+    },
+    {
+      "action": "assert",
+      "label": "The control is unchanged",
+      "actor": "control",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "cast_base",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

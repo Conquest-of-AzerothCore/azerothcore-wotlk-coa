@@ -1,0 +1,217 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Blightcap Ingestion, Fury of Anub'Rekhan and Reinforced Exoskeleton apply their auras",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "v",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Precondition: Venomancer has a nonzero maximum mana pool",
+      "actor": "v",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "v",
+      "metric": "max_power",
+      "power": 0,
+      "save_as": "mana0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "v",
+      "metric": "max_power",
+      "power": 1,
+      "save_as": "rage0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "v",
+      "metric": "max_power",
+      "power": 3,
+      "save_as": "energy0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "v",
+      "metric": "max_health",
+      "save_as": "health0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "v",
+      "metric": "dodge_chance",
+      "save_as": "dodge0"
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 560282
+    },
+    {
+      "action": "assert",
+      "label": "Blightcap Ingestion is applied",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 560282,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Blightcap Ingestion poison resistance effect is 30",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 560282,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Blightcap Ingestion disease resistance effect is 30",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 560282,
+      "effect": 1,
+      "equals": 30
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 800894
+    },
+    {
+      "action": "assert",
+      "label": "Fury of Anub'Rekhan is applied",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 800894,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Fury of Anub'Rekhan has no expiry",
+      "actor": "v",
+      "metric": "aura_duration_ms",
+      "spell": 800894,
+      "equals": -1
+    },
+    {
+      "action": "assert",
+      "label": "Fury of Anub'Rekhan mana effect is 10",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 800894,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Fury of Anub'Rekhan rage effect is 10",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 800894,
+      "effect": 1,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Fury of Anub'Rekhan energy effect is 10",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 800894,
+      "effect": 2,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Maximum mana rises by 10%",
+      "actor": "v",
+      "metric": "max_power",
+      "power": 0,
+      "ratio_to": "mana0",
+      "min": 1.099,
+      "max": 1.101,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Maximum rage rises by 10%",
+      "actor": "v",
+      "metric": "max_power",
+      "power": 1,
+      "ratio_to": "rage0",
+      "min": 1.099,
+      "max": 1.101,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Maximum energy rises by 10%",
+      "actor": "v",
+      "metric": "max_power",
+      "power": 3,
+      "ratio_to": "energy0",
+      "min": 1.099,
+      "max": 1.101,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 706002
+    },
+    {
+      "action": "assert",
+      "label": "Reinforced Exoskeleton is applied",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 706002,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Reinforced Exoskeleton raises maximum health by 3%",
+      "actor": "v",
+      "metric": "max_health",
+      "ratio_to": "health0",
+      "min": 1.029,
+      "max": 1.031,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Reinforced Exoskeleton adds 3 points of dodge",
+      "actor": "v",
+      "metric": "dodge_chance",
+      "relative_to": "dodge0",
+      "min": 2.9,
+      "max": 3.1,
+      "within_ms": 3000
+    }
+  ],
+  "contract": "#781, #823, #846 report these three passives as unimplemented; each is a set of native auras. Blightcap Ingestion (560282): two aura 178 MOD_DEBUFF_RESISTANCE, BasePoints 29 DieSides 1 (+30), misc 4 (poison) and 3 (disease); the resist roll in Unit::MagicSpellHitResult is statistical and the harness has no deterministic resist metric, so only the applied aura effects are asserted. Fury of Anub'Rekhan (800894): three aura 132 MOD_INCREASE_ENERGY_PERCENT, BasePoints 9 DieSides 1 (+10), misc 0 mana, 1 rage, 3 energy; it has PASSIVE (Attributes 448 includes 64) and DurationIndex 0, so Aura::CalcMaxDuration makes it permanent, and the aura is asserted first. Reinforced Exoskeleton (706002): aura 133 MOD_INCREASE_HEALTH_PERCENT and aura 49 MOD_DODGE_PERCENT, BasePoints 2 DieSides 1 (+3 each). Each metric is compared with the same actor's baseline taken before the spell is learned."
+}

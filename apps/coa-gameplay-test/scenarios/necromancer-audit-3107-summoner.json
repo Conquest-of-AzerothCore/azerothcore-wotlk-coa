@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Necromancer audit: Summoner reduces Sacrifice Undead cost and cooldown by 20% (#3107)",
+  "contract": "Summoner 706953 (CharacterAdvancement 30487, ClassType 25 = class 23) reads 'Reduces the mana cost and cooldown of Sacrifice Undead by 20%.' Spell.dbc: effect 0 is SPELL_AURA_ADD_PCT_MODIFIER (108) MiscValue 11 (SPELLMOD_COOLDOWN) and effect 1 is the same aura MiscValue 14 (SPELLMOD_COST), each EffectBasePoints -21 + DieSides 1 = -20, both with EffectSpellClassMask word 2 = 0x4000000 in SpellFamilyName 29 -- exactly Sacrifice Undead's family flags (805027, 807938-807941; RecoveryTime 30000 ms, PowerType 0 mana, ManaCostPercentage 20). SpellInfo::CalcPowerCost (SpellInfo.cpp:3091) applies `modOwner->ApplySpellMod(Id, SPELLMOD_COST, powerCost, spell)` unconditionally after computing the percentage-derived mana cost, and cooldown application applies SPELLMOD_COOLDOWN the same way; both are generic native spellmod paths, no CoA script needed. The issue's 'zero occurrences in source' is true but irrelevant: this is the class of false positive the audit brief warns about. No code change; this scenario proves the tooltip contract by reading the resolved spell_modifier value directly, with and without the passive.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [ { "id": "n", "race": 5, "class": 23, "level": 80 } ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "CONTROL: cooldown basis is unmodified", "actor": "n",
+      "metric": "spell_modifier", "spell": 805027, "op": 11, "base": 30000, "min": 29999, "max": 30001
+    },
+    {
+      "action": "assert", "label": "CONTROL: cost basis is unmodified", "actor": "n",
+      "metric": "spell_modifier", "spell": 805027, "op": 14, "base": 1000, "min": 999, "max": 1001
+    },
+    { "action": "learn", "label": "Learn Summoner", "actor": "n", "spell": 706953 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Summoner cuts the cooldown basis by 20%", "actor": "n",
+      "metric": "spell_modifier", "spell": 805027, "op": 11, "base": 30000, "min": 23999, "max": 24001
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Summoner cuts the cost basis by 20%", "actor": "n",
+      "metric": "spell_modifier", "spell": 805027, "op": 14, "base": 1000, "min": 799, "max": 801
+    }
+  ]
+}

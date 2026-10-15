@@ -1,0 +1,422 @@
+{
+  "schema": 1,
+  "name": "Vanilla dungeons: observed and estimated health across difficulties",
+  "contract": "Real database creatures retain Normal HP and use the exported coa_dungeon_health targets on HC/Mythic. Creature class and damage are not changed. Mythic selection uses the actual one-byte client request. The test does not establish the original Ascension HP formula.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "normal",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "normal",
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "set_health",
+      "actor": "normal",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "normal",
+      "value": 1
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "set_health",
+      "actor": "heroic",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "set_health",
+      "actor": "mythic",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "mythic",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "normal",
+      "map": 429,
+      "x": 550.38,
+      "y": 533.725,
+      "z": -24.3185
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "normal",
+      "metric": "nearby_creature_max_health",
+      "entry": 14323,
+      "equals": 61589,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 429,
+      "x": 550.38,
+      "y": 533.725,
+      "z": -24.3185
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "nearby_creature_max_health",
+      "entry": 14323,
+      "equals": 582692,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 429,
+      "x": 356.795,
+      "y": 258.306,
+      "z": 12.6538
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "nearby_creature_max_health",
+      "entry": 14321,
+      "equals": 582692,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 429,
+      "x": 402.45,
+      "y": 333.237,
+      "z": 3.9312
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "nearby_creature_max_health",
+      "entry": 11441,
+      "equals": 54866,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 429,
+      "x": 379.625,
+      "y": 466.833,
+      "z": -6.14894
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "nearby_creature_max_health",
+      "entry": 11448,
+      "equals": 35116,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 429,
+      "x": 387.409,
+      "y": 462.772,
+      "z": -6.14894
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "nearby_creature_max_health",
+      "entry": 11450,
+      "equals": 54866,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 329,
+      "x": 3670.07,
+      "y": -3264.18,
+      "z": 128.886
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "nearby_creature_max_health",
+      "entry": 10385,
+      "equals": 48308,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 329,
+      "x": 3683.18,
+      "y": -3176.32,
+      "z": 127.596
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "nearby_creature_max_health",
+      "entry": 10419,
+      "equals": 33761,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 289,
+      "x": -25.1079,
+      "y": 141.284,
+      "z": 84.9083
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "heroic",
+      "metric": "nearby_creature_max_health",
+      "entry": 10508,
+      "equals": 372385,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 429,
+      "x": 550.38,
+      "y": 533.725,
+      "z": -24.3185
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "nearby_creature_max_health",
+      "entry": 14323,
+      "equals": 757500,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 429,
+      "x": 402.45,
+      "y": 333.237,
+      "z": 3.9312
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "nearby_creature_max_health",
+      "entry": 11441,
+      "equals": 71326,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 429,
+      "x": 379.625,
+      "y": 466.833,
+      "z": -6.14894
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "mythic",
+      "metric": "nearby_creature_max_health",
+      "entry": 11448,
+      "equals": 45651,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_phase",
+      "actor": "normal"
+    },
+    {
+      "action": "set_phase",
+      "actor": "heroic"
+    },
+    {
+      "action": "set_phase",
+      "actor": "mythic"
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "schema": 1,
+  "name": "Flow of Mana raises Intellect and Strength by 5% then 10% (#1116)",
+  "contract": "Flow of Mana rank 1 704604 and rank 2 680758 (Spell.dbc, SpellFamilyName 32, passives) each carry two SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (137) effects: effect 0 EffectMiscValue 3 (Intellect) and effect 1 EffectMiscValue 0 (Strength), EffectBasePoints 4 (rank 1) and 9 (rank 2) with DieSides 1 -> +5% and +10%, matching the tooltips 'Increases your Intellect and Strength by 5%.' and '... by 10%.'. Nothing in the module or SQL touches either id. Native path: AuraEffect::HandleModTotalPercentStat (SpellAuraEffects.cpp:4491) sets the stat's TOTAL_PCT modifier to the product of all 137 effects and calls UpdateStatBuffMod, and the stat is stored as an integer. The stat metric returns Unit::GetStat, an integer field, so every reading truncates. To keep truncation from swallowing the percentage, the Intellect check first adds a known +100 with Arcane Intellect 36880 (SPELL_AURA_MOD_STAT Intellect, EffectBasePoints 99 -> +100, self-target, 30 minutes) and the Strength check adds +100 with TEST 100 STR DND 24653 (aura 29 Strength, EffectBasePoints 99, permanent), both to all three fixtures via set_aura; the stat is then at least 100, so truncation moves the ratio by less than 0.01. The three fixtures are the same race, class and level; the control has neither rank, 'rank1' knows 704604 and 'rank2' knows 680758 (a rank replacement: one talent row with two spell ids). Expected ratios to the control: 1.05 and 1.10 on both stats, asserted in bands 1.04-1.06 and 1.09-1.11.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "rank1",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "rank2",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 704604
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 680758
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 applies its passive aura",
+      "actor": "rank1",
+      "metric": "aura",
+      "spell": 704604,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 applies its passive aura",
+      "actor": "rank2",
+      "metric": "aura",
+      "spell": 680758,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Add a known +100 Intellect to the control",
+      "actor": "control",
+      "spell": 36880,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Add a known +100 Intellect to rank 1",
+      "actor": "rank1",
+      "spell": 36880,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Add a known +100 Intellect to rank 2",
+      "actor": "rank2",
+      "spell": 36880,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Add a known +100 Strength to the control",
+      "actor": "control",
+      "spell": 24653,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Add a known +100 Strength to rank 1",
+      "actor": "rank1",
+      "spell": 24653,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Add a known +100 Strength to rank 2",
+      "actor": "rank2",
+      "spell": 24653,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the stat recalculation settle",
+      "ms": 1500
+    },
+    {
+      "action": "snapshot",
+      "label": "Control Intellect",
+      "actor": "control",
+      "metric": "stat",
+      "save_as": "int_base",
+      "stat": 3
+    },
+    {
+      "action": "snapshot",
+      "label": "Control Strength",
+      "actor": "control",
+      "metric": "stat",
+      "save_as": "str_base",
+      "stat": 0
+    },
+    {
+      "action": "assert",
+      "label": "Control Intellect includes the +100 fixture buff",
+      "actor": "control",
+      "metric": "stat",
+      "stat": 3,
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 Intellect is 5% higher",
+      "actor": "rank1",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "int_base",
+      "min": 1.04,
+      "max": 1.06,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 Intellect is 10% higher",
+      "actor": "rank2",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "int_base",
+      "min": 1.09,
+      "max": 1.11,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 Strength is 5% higher",
+      "actor": "rank1",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "str_base",
+      "min": 1.04,
+      "max": 1.06,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 Strength is 10% higher",
+      "actor": "rank2",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "str_base",
+      "min": 1.09,
+      "max": 1.11,
+      "within_ms": 3000
+    }
+  ]
+}

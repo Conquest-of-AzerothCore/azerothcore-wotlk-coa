@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Night Hunter cuts Huntress Saber's cooldown by 60 seconds (#3198)",
+  "contract": "Night Hunter 801146 (Spell.dbc, SpellFamilyName 32) carries SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue SPELLMOD_COOLDOWN (11), EffectBasePoints -60001 with DieSides 1 (-60000 ms) and EffectSpellClassMask (0, 0x40, 0). Huntress Saber 524643 (Spell.dbc, SpellFamilyName 32) has RecoveryTime and CategoryRecoveryTime 180000 (category 111) but SpellFamilyFlags (0, 0, 0), so SpellInfo::IsAffectedBySpellMod never matched the mask and the cooldown stayed 180 s; the shipped fix sets SpellFamilyFlags word1 bit 0x40 on 524643 in AscensionStarcaller::ApplyContracts. Native path: Player::AddSpellAndCategoryCooldowns runs ApplySpellMod SPELLMOD_COOLDOWN on the recovery time, and the cooldown_ms metric reads Player::GetSpellCooldownDelay. Both fixtures are the same race, class and level, so the only difference is the flat modifier: the control must show the full 180 s and the talented fixture 120 s (the windows allow a few seconds of elapsed time after the cast). If the cast is refused the cooldown stays 0 and the control assertion fails visibly. Not run by the author.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 60
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 524643
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 524643
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 801146
+    },
+    {
+      "action": "cast",
+      "label": "Control casts Huntress Saber",
+      "actor": "control",
+      "spell": 524643
+    },
+    {
+      "action": "assert",
+      "label": "Control cooldown starts at the full 180 s",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 524643,
+      "min": 170000,
+      "max": 180000,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast",
+      "label": "Talented fixture casts Huntress Saber",
+      "actor": "talent",
+      "spell": 524643
+    },
+    {
+      "action": "assert",
+      "label": "Talented cooldown is 60 s shorter (120 s), within a few seconds of elapsed time",
+      "actor": "talent",
+      "metric": "cooldown_ms",
+      "spell": 524643,
+      "min": 110000,
+      "max": 120000,
+      "within_ms": 5000
+    }
+  ]
+}

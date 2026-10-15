@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "Perfect Timing (rank 520164) grants 4% haste natively (#1384)",
+  "contract": "Spell.dbc gives Perfect Timing 520164, the level-12 rank of the same talent as 520874, three self-targeted APPLY_AURA effects: aura 216 SPELL_AURA_HASTE_SPELLS (EffectBasePoints 3, DieSides 1 -> 4), aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE (3 -> 4) and aura 149 SPELL_AURA_REDUCE_PUSHBACK (34 -> 35). The bindmysoul talent snapshot renders it verbatim as 'Increases your haste by 4% and reduces your spell pushback suffered from damaging attacks by 35%'. Native handlers: AuraEffect::HandleModCastingSpeed -> Unit::ApplyCastTimePercentMod divides UNIT_MOD_CAST_SPEED by 1.04, AuraEffect::HandleModMeleeRangedSpeedPct -> Unit::ApplyAttackTimePercentMod divides UNIT_FIELD_BASEATTACKTIME by 1.04, and aura 149 is read by Spell::Delayed/Spell::DelayedChannel. No script or SQL is needed; this is a regression scenario for behaviour that already works. COVERAGE LIMIT: as for 520874, the pushback half of the tooltip is NOT covered behaviourally - the harness has no pushback metric and cannot interrupt a cast in progress. Only the aura's presence and its effect-2 amount of 35 are asserted for that half.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 22, "level": 80 },
+    { "id": "talented", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "snapshot",
+      "label": "Cast speed multiplier of an untalented Chronomancer",
+      "actor": "control",
+      "metric": "cast_speed_multiplier",
+      "save_as": "cast_speed_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Main-hand swing time of an untalented Chronomancer",
+      "actor": "control",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "save_as": "attack_time_base"
+    },
+    { "action": "learn", "actor": "talented", "spell": 520164 },
+    {
+      "action": "assert",
+      "label": "Learning the passive applies its aura",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 520164,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Spell haste effect resolves to 4",
+      "actor": "talented",
+      "metric": "aura_amount",
+      "spell": 520164,
+      "effect": 0,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "Melee/ranged haste effect resolves to 4",
+      "actor": "talented",
+      "metric": "aura_amount",
+      "spell": 520164,
+      "effect": 1,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "Pushback reduction effect resolves to 35 (data only, see contract)",
+      "actor": "talented",
+      "metric": "aura_amount",
+      "spell": 520164,
+      "effect": 2,
+      "equals": 35
+    },
+    {
+      "action": "assert",
+      "label": "Casts are 4% faster than the untalented control (1/1.04 = 0.962)",
+      "actor": "talented",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "cast_speed_base",
+      "min": 0.95,
+      "max": 0.975
+    },
+    {
+      "action": "assert",
+      "label": "Main-hand swings are 4% faster than the untalented control",
+      "actor": "talented",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "ratio_to": "attack_time_base",
+      "min": 0.95,
+      "max": 0.975
+    }
+  ]
+}

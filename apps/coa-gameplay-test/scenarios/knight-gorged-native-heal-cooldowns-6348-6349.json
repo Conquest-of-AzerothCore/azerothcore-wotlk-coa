@@ -1,0 +1,327 @@
+{
+  "schema": 1,
+  "name": "Gorged heals and stacks from Gore while Bludgeon cooldown stays isolated (#6348,#6349)",
+  "contract": "Current Gorged680199 promises three ticks totaling50percent resolved Gore damage and one stack per normal Gore. BrimstoneBludgeon520005 gains12sec own cooldown and exactly one delayed native hit; a normal InfernalStrike and another Gore remain usable after GCD. Untalented Gore gives no Gorged stack. Paid Brimstone acquisition7891 and original Sever button501505 are used.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "p",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 629951
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 629951,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 500904
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 501505
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 680944
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 801016
+    },
+    {
+      "action": "specialization",
+      "actor": "p",
+      "id": 18
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "p",
+      "entry": 7891,
+      "rank": 1
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 680199
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 1000,
+      "maximum": 1000000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spell_damage_total",
+      "spell": 680944,
+      "target": "enemy",
+      "save_as": "gore_before"
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 680944,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 680944,
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spell_damage_total",
+      "spell": 680944,
+      "target": "enemy",
+      "relative_to": "gore_before",
+      "save_as": "gore_damage"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "spell": 680203,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_heal_count",
+      "spell": 681206,
+      "target": "p",
+      "min": 3,
+      "within_ms": 4500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_heal_total",
+      "spell": 681206,
+      "target": "p",
+      "ratio_to": "gore_damage",
+      "min": 0.48,
+      "max": 0.51
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 501505,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "cooldown_ms",
+      "spell": 520005,
+      "min": 26000,
+      "max": 28000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 801016,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 801016,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 801016,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "enemy",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "cooldown_ms",
+      "spell": 520005,
+      "min": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "restore_charges",
+      "actor": "p",
+      "spell": 680944
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 680944,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 680944,
+      "target": "enemy",
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "spell": 680203,
+      "equals": 2
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 680199,
+      "all_specs": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 680203,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 681206,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "restore_charges",
+      "actor": "p",
+      "spell": 680944
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 680944,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 680944,
+      "target": "enemy",
+      "equals": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 680203,
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Transfer Life keeps channelling and heals only the Raised minions (#1442)",
+  "contract": "Transfer Life 801530 (SkillLineAbility 760265, granted at level 18) reads 'Channel life into your Raised minions within $a1 yds for $d, healing them for $801545s1% of their maximum health plus ... every $t2 sec.' Spell.dbc: SPELL_ATTR1_IS_CHANNELED | IS_SELF_CHANNELED | EXCLUDE_CASTER, SpellDuration 1 = 10000 ms, both effects APPLY_AURA on TARGET_UNIT_SRC_AREA_ALLY within SpellRadius 9 = 20 yd (MaxAffectedTargets 5); effect 1 is SPELL_AURA_PERIODIC_TRIGGER_SPELL every 1000 ms on 801545 (HEAL_PCT 5% plus HEAL on TARGET_UNIT_TARGET_ALLY). 801545 carries TargetAuraSpell 807177 'Raise Marker' ('Dummy aura for necro minions'), which no server path applies, so the first tick's 801545 fails SPELL_FAILED_TARGET_AURASTATE and Spell::prepare then ends the triggering periodic aura and sends a channel update of 0: the reported channel that stops before its first tick and heals nothing. Two Raised Lesser Skeletal Warriors (Raise 500970, 1 Life Force each) must both carry the channel aura 3.5 s into the 10 s channel, the channel must still be running, and each of the three 1 s ticks must heal both minions (six 801545 heals, at least four asserted). A party member (an Undead Mage) standing beside the caster is a friendly unit inside the 20 yd area but not a Raised minion, so it must neither carry the channel aura nor be healed.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 80 },
+    { "id": "ally", "race": 5, "class": 8, "level": 80, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 500970 },
+    { "action": "learn", "actor": "n", "spell": 801530 },
+    { "action": "group", "label": "Put a second player in the caster's party", "actor": "n", "target": "ally" },
+    { "action": "cast", "label": "Raise the first Lesser Skeletal Warrior", "actor": "n", "spell": 500970 },
+    {
+      "action": "assert", "label": "SETUP: one Lesser Skeletal Warrior is raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 500 },
+    { "action": "cast", "label": "Raise the second Lesser Skeletal Warrior", "actor": "n", "spell": 500970 },
+    {
+      "action": "assert", "label": "SETUP: two Lesser Skeletal Warriors are raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 2, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let the minions take their formation places", "ms": 1500 },
+    { "action": "set_health", "label": "Wound the party member so a heal would show", "actor": "ally", "value": 1000 },
+    { "action": "cast", "label": "Channel Transfer Life", "actor": "n", "spell": 801530 },
+    {
+      "action": "assert", "label": "SETUP: the Transfer Life channel starts", "actor": "n",
+      "metric": "cast_remaining_ms", "spell": 801530, "min": 9000, "within_ms": 500
+    },
+    { "action": "wait", "label": "Let three 1 s ticks pass", "ms": 3500 },
+    {
+      "action": "assert", "label": "The channel is still running 3.5 s into its 10 s duration", "actor": "n",
+      "metric": "cast_remaining_ms", "spell": 801530, "min": 5000, "max": 7000
+    },
+    {
+      "action": "assert", "label": "Both Raised minions still carry the caster's Transfer Life aura", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "spell": 801530, "caster": "n", "equals": 2
+    },
+    {
+      "action": "assert", "label": "Every tick heals the Raised minions (2 minions x 3 ticks)", "actor": "n",
+      "metric": "spell_heal_count", "spell": 801545, "min": 4
+    },
+    {
+      "action": "assert", "label": "CONTROL: the party member is not a Transfer Life target", "actor": "ally",
+      "metric": "aura", "spell": 801530, "caster": "n", "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: the party member is never healed by Transfer Life", "actor": "n",
+      "metric": "spell_heal_count", "spell": 801545, "target": "ally", "equals": 0
+    }
+  ]
+}

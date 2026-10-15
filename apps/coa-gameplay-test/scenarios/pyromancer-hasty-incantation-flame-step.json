@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "name": "Pyromancer Hasty Incantation lengthens Flame Step (#970)",
+  "contract": "#970: Hasty Incantation (802169) is already native: ADD_FLAT_MODIFIER op 6 (RADIUS) bp 9 die 1 = +10, mask (0,0x40,0) on Flame Step 801911/801929/803459. The module reads the dash length from 801929 effect 1 CalcRadius (20 yd base), which applies SPELLMOD_RADIUS, so the dash is 30 yd. Asserted as the native radius modifier on the 20 yd base; the travelled distance itself is not measured.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801911
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801929
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803459
+    },
+    {
+      "action": "assert",
+      "label": "Flame Step 801911 radius is unmodified before Hasty Incantation",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 801911,
+      "op": 6,
+      "base": 20,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "Flame Step 801929 radius is unmodified before Hasty Incantation",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 801929,
+      "op": 6,
+      "base": 20,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "Flame Step 803459 radius is unmodified before Hasty Incantation",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 803459,
+      "op": 6,
+      "base": 20,
+      "equals": 20
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 802169
+    },
+    {
+      "action": "assert",
+      "label": "Hasty Incantation adds 10 yd to Flame Step 801911 radius",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 801911,
+      "op": 6,
+      "base": 20,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Hasty Incantation adds 10 yd to Flame Step 801929 radius",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 801929,
+      "op": 6,
+      "base": 20,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Hasty Incantation adds 10 yd to Flame Step 803459 radius",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 803459,
+      "op": 6,
+      "base": 20,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Hasty Incantation leaves an unrelated spell (Cindergrip) radius alone",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 805476,
+      "op": 6,
+      "base": 20,
+      "equals": 20
+    }
+  ]
+}

@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "name": "Sculptor of Doom grants an instant Ruin after 3 direct crits (#4758)",
+  "contract": "Sculptor of Doom 801235 reads 'Landing 3 direct critical strikes now grants Sculptor of Doom (555277)'. 801235 is a FelswornCastDrivers entry (pure HasAura() check, no spell_proc row by design) read in felsworn_casts::OnSpellHitResult (AscensionFelswornAbilities.cpp): on a direct, family-20 crit it casts 555276 (Fel Energy, StackAmount 3, native aura stacking, triggered=true) and, once GetStackAmount() reaches 3, removes it and casts 555277. 555277's two effects carry EffectSpellClassMask dword1 = 2, matching Ruin (801895) SpellFamilyFlags[1] = 2, and MiscValue[0] = 10 = SPELLMOD_CASTING_TIME with BasePoints -101/DieSides 1 = -100% (AscensionFelswornContracts.cpp explicitly sets MiscValue to SPELLMOD_CASTING_TIME, confirmed a no-op against the DBC's own value). Ruin's CastingTimeIndex 19 (2500ms) is well under the 10000ms floor Player.cpp's SPELLMOD_CASTING_TIME guard checks, so the -100% modifier is not suppressed. Sargeron Smite (802060, family 20, SPELL_EFFECT_SCHOOL_DAMAGE, mana cost 0, instant cast, no cooldown) is used as the repeatable direct-crit source; spell_crit_rating 100000 plus spell_hit_rating 10000 make each cast a deterministic crit-hit against a hostile dummy (entry 36). Source review found every link in this chain intact (verdict: ALREADY_WORKS); this scenario proves it end to end, live, rather than by source inspection alone.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "felsworn",
+      "race": 1,
+      "class": 14,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 100000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "felsworn",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 801235
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 802060
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 801895
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Sculptor of Doom talent is active",
+      "actor": "felsworn",
+      "metric": "aura",
+      "spell": 801235,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "No Fel Energy stacks before any cast",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 555276,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No Sculptor of Doom buff before any cast",
+      "actor": "felsworn",
+      "metric": "aura",
+      "spell": 555277,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "SETUP: 802060's Felfury cost (2, ResourceCostRules)",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 2
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 802060,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DIAGNOSTIC: the first crit registers one Fel Energy stack",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 555276,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "label": "SETUP: 802060's Felfury cost (2, ResourceCostRules)",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 2
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 802060,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DIAGNOSTIC: the second crit registers two Fel Energy stacks",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 555276,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "label": "SETUP: 802060's Felfury cost (2, ResourceCostRules)",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 2
+    },
+    {
+      "action": "cast",
+      "actor": "felsworn",
+      "spell": 802060,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the third direct crit consumes Fel Energy and grants Sculptor of Doom",
+      "actor": "felsworn",
+      "metric": "aura",
+      "spell": 555277,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Fel Energy is fully consumed",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 555276,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Sculptor of Doom makes the next Ruin instant (SPELLMOD_CASTING_TIME -100%)",
+      "actor": "felsworn",
+      "metric": "spell_cast_time_ms",
+      "spell": 801895,
+      "equals": 0
+    }
+  ]
+}

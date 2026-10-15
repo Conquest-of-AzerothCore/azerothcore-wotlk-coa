@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Endure the Curse survives the first hit and heals at 10% health (#599)",
+  "contract": "Endure the Curse 681190: \"Reduce all damage taken by $s2% for $d. While active, taking damage that would reduce your health below 10% will instantly heal you for $681189s1% of your maximum health. Can only occur once.\" Effect 1 is aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127 (all schools), amount -30, read natively by Unit::SpellDamageBonusTaken. Effect 0 is a SPELL_AURA_SCHOOL_ABSORB over the same mask whose Spell.dbc amount is 0 (BasePoints -1, DieSides 1); with no script Unit::CalcAbsorbResist subtracts the nothing it absorbed and removes the whole aura, effect 1 included, on the first point of damage (Unit.cpp:2515-2523). 681189 is a real SPELL_EFFECT_HEAL_PCT record for 30% of maximum health that nothing in src/, modules/ or data/sql/ referenced. DurationIndex 1 = 10000 ms and RecoveryTime 60000, so the whole run happens inside one cast. Corruption rank 8 (27216) self-applied gives a controlled 150 damage tick every 3 sec; melee combat with the fixture dummy keeps the Bloodmage in combat so no health regeneration runs. The 300 HP fixture is below 10% of maximum health as long as maximum health is above 3000, which is asserted first.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "b",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Fixture assumption: 300 HP is below 10% of maximum health",
+      "actor": "b",
+      "metric": "max_health",
+      "min": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 681190
+    },
+    {
+      "action": "set_aura",
+      "label": "Cursed Form marker 524861, the record's CasterAuraSpell",
+      "actor": "b",
+      "spell": 524861,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_damage_taken",
+      "target": "d",
+      "spell": 500125,
+      "save_as": "taken_base"
+    },
+    {
+      "action": "attack",
+      "label": "Stay in combat so health regeneration does not interfere",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "set_aura",
+      "label": "Self Corruption rank 8: a 150 damage tick every 3 sec",
+      "actor": "b",
+      "spell": 27216,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 681190
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 681190,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Incoming damage is reduced by 30%",
+      "actor": "b",
+      "metric": "spell_damage_taken",
+      "target": "d",
+      "spell": 500125,
+      "ratio_to": "taken_base",
+      "min": 0.69,
+      "max": 0.71
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "health",
+      "save_as": "hp_before_tick"
+    },
+    {
+      "action": "wait",
+      "label": "First Corruption tick",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "A tick really landed while Endure the Curse was active",
+      "actor": "b",
+      "metric": "health",
+      "relative_to": "hp_before_tick",
+      "max": -1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the buff survives the first point of damage",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 681190,
+      "equals": 1
+    },
+    {
+      "action": "set_health",
+      "label": "Next tick crosses below 10% of maximum health",
+      "actor": "b",
+      "value": 300
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: crossing 10% health heals for 30% of maximum health",
+      "actor": "b",
+      "metric": "health_pct",
+      "min": 25,
+      "within_ms": 2500
+    },
+    {
+      "action": "set_health",
+      "label": "Force a second crossing inside the same application",
+      "actor": "b",
+      "value": 300
+    },
+    {
+      "action": "wait",
+      "ms": 2800
+    },
+    {
+      "action": "assert",
+      "label": "Can only occur once: the second crossing is not healed",
+      "actor": "b",
+      "metric": "health_pct",
+      "max": 15
+    }
+  ]
+}

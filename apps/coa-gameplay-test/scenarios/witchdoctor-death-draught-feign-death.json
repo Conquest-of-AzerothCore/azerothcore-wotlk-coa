@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Death Draught feigns death natively",
+  "contract": "Issue #2190: Death Draught 602220 ships Effect[0]=6 APPLY_AURA aura 66 SPELL_AURA_FEIGN_DEATH (target caster), Effect[1]=93 SPELL_EFFECT_FORCE_DESELECT, Effect[2]=64 SPELL_EFFECT_TRIGGER_SPELL -> 985329 (SPELL_EFFECT_MODIFY_THREAT_PERCENT -100 on TARGET_UNIT_SRC_AREA_ENEMY), DurationIndex 5 (SpellDuration.dbc = 300000 ms), RecoveryTime 30000, CastingTimeIndex 1 (instant), AuraInterruptFlags 15420 (CAST|MOVE|TURNING|JUMP|TALK|USE|MELEE_ATTACK|SPELL_ATTACK) - byte-identical in shape to the stock Hunter Feign Death 5384 (same three effects, same AuraInterruptFlags), all confirmed against Spell.dbc/SpellDuration.dbc/SpellCastTimes.dbc directly (the issue body's own DBC quote for this spell is garbled and was not used). Every effect is handled by generic, class-agnostic engine code with no CLASS_HUNTER or SpellFamilyName guard: AuraEffect::HandleFeignDeath (src/server/game/Spells/Auras/SpellAuraEffects.cpp:3039) only checks target->IsPlayer(), scales threat to 0 on everyone threatening the target, calls Unit::CombatStop(false, false) (src/server/game/Entities/Unit/Unit.cpp:7873, ends the CombatManager's PvE combat references immediately rather than waiting on the natural combat timer at Unit.cpp:556-566), sets UNIT_FLAG2_FEIGN_DEATH/UNIT_DYNFLAG_DEAD/UNIT_STATE_DIED without touching health; Spell::EffectForceDeselect (src/server/game/Spells/SpellEffects.cpp:5128) and Spell::EffectModifyThreatPercent (SpellEffects.cpp:5718) are likewise unconditional. No module code, spell_script_names row, spell_proc or spell_bonus_data entry references 602220 or 985329 anywhere in modules/ or src/ (verified by grep); the class only supplies acquisition via modules/mod-spellbook/src/SpellbookTreeSpellData.h:255 ({13, 602220}). This scenario proves the tooltip's promises land through that native path: entering melee combat, casting Death Draught, then observing combat end (CombatStop), the Feign Death aura present at its full ~300000 ms duration, the caster still alive (the ability never deals damage), and the aura clearing itself on movement (the AURA_INTERRUPT_FLAG_MOVE bit of 15420, src/server/game/Spells/SpellDefines.h:46) rather than staying stuck. It is a regression guard for behavior that already works, not a fix. The unused rank 801695 (Description[enUS] literally 'UNUSED', absent from CharacterAdvancement.dbc and the live capture) has the identical effect layout and is not separately exercised.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "enemy0",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "distance": 3,
+      "health": 100000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 602220
+    },
+    {
+      "action": "attack",
+      "actor": "caster",
+      "target": "enemy0"
+    },
+    {
+      "action": "assert",
+      "label": "caster enters native melee combat (baseline before Death Draught)",
+      "actor": "caster",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 602220
+    },
+    {
+      "action": "assert",
+      "label": "Death Draught applies its Feign Death aura (SPELL_AURA_FEIGN_DEATH)",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 602220,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Death Draught's near-5-minute duration lands (SpellDuration.dbc idx 5 = 300000 ms)",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 602220,
+      "min": 295000,
+      "max": 300000
+    },
+    {
+      "action": "assert",
+      "label": "Feign Death does not actually kill the caster",
+      "actor": "caster",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Feign Death forces the caster out of combat (Unit::CombatStop from HandleFeignDeath, distinct from the natural combat timer)",
+      "actor": "caster",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "teleport",
+      "label": "Real native relocation (set_moving only fixtures the movement-flag bit for cast-restriction checks; it never calls Unit::UpdatePosition, so it cannot exercise AURA_INTERRUPT_FLAG_MOVE. A same-map teleport is ack'd next tick via WorldSession::HandleMoveTeleportAck -> Unit::UpdatePosition(dest, true), which unconditionally treats teleport as relocation and calls RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MOVE) - the same native path a client's WASD movement takes.)",
+      "actor": "caster",
+      "map": 0,
+      "x": -8917.41,
+      "y": -115.853,
+      "z": 82.3711,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "label": "Native relocation clears the Feign Death aura (AuraInterruptFlags 15420 includes AURA_INTERRUPT_FLAG_MOVE), proving it is a live, wired aura rather than stuck",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 602220,
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

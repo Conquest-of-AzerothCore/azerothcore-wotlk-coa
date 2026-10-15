@@ -1395,6 +1395,34 @@ enum Opcodes : uint16
     SMSG_COA_GAME_MODE_TOGGLE_RESULT                = 0x5A5,
     SMSG_COA_GAME_MODE_STATE                        = 0x90B,
     SMSG_COA_CHALLENGE_RULE_BROKEN                  = 0x5BB,
+    // Area POI: the client's map-pin database (Interface/FrameXML/Data/
+    // MapPOI.lua, DB_MapPOI), rebuilt from what the server sends. Payload is
+    // { u32 id, cstring json }, one POI per packet, and the JSON holds the pin's
+    // own key as its ID, its Name / Description / ZoneId / X / Y / Z, its
+    // TextureId (a minimap-tracking atlas) and its Scale, POIFlags and Apply.
+    // Apply false removes the pin with that ID, so a POI sent under the same ID
+    // as one of the client's static pins replaces it. The client keeps the
+    // payloads in a cache keyed by that id and replays them on every world
+    // entry, so sending one once per login is enough. Outbound-only (above
+    // NUM_MSG_TYPES); the client hash-dispatches it (Extensions.dll 0x77C,
+    // AscJson.cpp).
+    SMSG_COA_AREA_POI_PAYLOAD                       = 0x77C,
+    // Portrait menu "Reset all Dungeons" (Lua ResetDungeons(), empty payload).
+    CMSG_RESET_DUNGEONS                             = 0x61F,
+    // Ghost frame "Return to graveyard" (Lua PortGraveyard(), empty payload).
+    CMSG_PORT_GRAVEYARD                             = 0x544,
+    // Action bar leave button during a flight (Lua TaxiRequestEarlyLanding(), empty payload).
+    CMSG_TAXI_REQUEST_EARLY_LANDING                 = 0x5F2,
+    // Stable window delete button (Lua DeleteStablePet(petNumber), u32 pet number).
+    CMSG_STABLE_DELETE_PET                          = 0x67C,
+    // Instance binds for the portrait menu's instance reset list (C_LootLockout.QueryInstanceBinds(), empty
+    // payload), answered with a result C string, then on QUERY_INSTANCE_BINDS_OK u32 count and count x
+    // { u32 instance id, u32 map, u32 difficulty }.
+    CMSG_QUERY_INSTANCE_BINDS                       = 0x6FD,
+    SMSG_QUERY_INSTANCE_BINDS_RESULT                = 0x6FE,
+    // Reset Instances list entry (C_LootLockout.ResetInstanceDifficulty(), u32 map, u8 difficulty).
+    CMSG_RESET_INSTANCE                             = 0x58C,
+    CMSG_COA_SET_DUNGEON_DIFFICULTY                  = 0x773,
     // Spell Activation Overlay (the "proc glow" the client paints on the
     // action button of the marked spell). Client handlers: 0x9B1 -> 0x10235A90
     // (fires Lua SPELL_ACTIVATION_SHOW), 0x9B2 -> 0x10235840 (SPELL_ACTIVATION_HIDE).

@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "name": "PvP Power raises periodic healing",
+  "contract": "Requires PvpPower.Enable = 1. A High-Risk level 60 priest wearing two PvP Power +42 pieces (84 x 0.02% = 1.68%) heals more with Renew than the same gear does with PvP Power disabled: 129/105 of the naked total against 127/105 without the script (measured with PvpPower.Enable = 0). Each tick is floored, so the gain shows as about 2 of 105 rather than the full 1.68%.",
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 5,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 25222
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "maximum": 100000,
+      "value": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "health",
+      "save_as": "h0"
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 25222,
+      "target": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 17000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "health",
+      "relative_to": "h0",
+      "save_as": "heal_base"
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "maximum": 100000,
+      "value": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 16443,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 16443,
+      "slot": 4
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 16441,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 16441,
+      "slot": 0
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "maximum": 100000,
+      "value": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "health",
+      "save_as": "h1"
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 25222,
+      "target": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 17000
+    },
+    {
+      "action": "assert",
+      "label": "PvP Power adds to the gear's own spell power on Renew ticks",
+      "actor": "p",
+      "metric": "health",
+      "relative_to": "h1",
+      "ratio_to": "heal_base",
+      "min": 1.222,
+      "max": 1.235
+    }
+  ]
+}

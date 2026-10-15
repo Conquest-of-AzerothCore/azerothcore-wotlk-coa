@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Skeletal Rogue attacks apply Decaying Poison up to 3 stacks (#6515, #6670)",
+  "contract": "Raise: Skeletal Rogue 500969 summons creature 50078, whose passive 805023 gives its melee attacks a 40% chance to apply Decaying Poison 805024, stacking 3 times. Commanded onto a durable enemy, the rogue must poison it within half a minute. The poison lasts 6 seconds, so the test reads it while present rather than after the fight.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "players": [
+    {
+      "id": "n", "race": 5, "class": 23, "level": 60, "allow_regeneration": false,
+      "melee_hit_rating": 10000, "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "n", "entry": 36, "level": 60, "health": 1000000, "distance": 6 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 500969 },
+    { "action": "learn", "actor": "n", "spell": 500991 },
+    { "action": "cast", "label": "Raise: Skeletal Rogue", "actor": "n", "spell": 500969 },
+    {
+      "action": "assert", "label": "SETUP: the rogue is out", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50078, "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "ms": 1600 },
+    {
+      "action": "assert", "label": "CONTROL: the enemy is not poisoned yet", "actor": "enemy",
+      "metric": "aura", "spell": 805024, "equals": 0
+    },
+    { "action": "cast", "label": "Grave March", "actor": "n", "spell": 500991, "target": "enemy" },
+    { "action": "attack", "label": "Fight the enemy too, so the rogue joins its owner's target", "actor": "n", "target": "enemy" },
+    {
+      "action": "assert", "label": "The rogue's attacks apply Decaying Poison, at most 3 stacks", "actor": "enemy",
+      "metric": "aura_stacks", "spell": 805024, "min": 1, "max": 3, "within_ms": 30000
+    }
+  ]
+}

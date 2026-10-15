@@ -1,0 +1,148 @@
+{
+  "schema": 1,
+  "name": "A low-level WildCard Hero Cat Form supplies a usable Claw (#6302)",
+  "contract": "Cat Form 768 grants the level-four Claw 1082 entry spell. Normal Cat Form and Claw must deal damage and generate a combo point. Real relog retains Claw. Under an explicitly enabled WildCard mode, unlearning Cat Form removes the entry child.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 10,
+      "level": 4,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "p",
+      "entry": 36,
+      "level": 4,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 768
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 1082,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 768
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 768,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 1082,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 1082,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "combo_points",
+      "equals": 1
+    },
+    {
+      "action": "relog",
+      "actor": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 1082,
+      "equals": 1
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "game_mode_mask",
+      "equals": 64
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 768,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 768,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 1082,
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

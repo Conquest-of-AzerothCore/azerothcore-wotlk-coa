@@ -1,0 +1,130 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Arterial Bind silences enemies and puts a healing pool on allies (#648)",
+  "contract": "Arterial Bind 681077: \"Place a pool of blood on the ground, instantly silencing all enemies for $d and healing allies for ${$681082m1+$681082ppl1+$BH*.33} every $681082t1 sec for $d.\" DurationIndex 35 = 4000 ms, Mechanic 9 = MECHANIC_SILENCE. Effect 0 is aura 27 SPELL_AURA_MOD_SILENCE with TargetA 16 = TARGET_UNIT_DEST_AREA_ENEMY over radius index 14 = 8 yd, handled by AuraEffect::HandleAuraModSilence (SpellAuraEffects.cpp:92). Effect 1 is SPELL_EFFECT_TRIGGER_SPELL on 681082 with TargetA 31 = TARGET_UNIT_DEST_AREA_ALLY over the same 8 yd and no target cap; 681082 is aura 8 SPELL_AURA_PERIODIC_HEAL with Amplitude 1000 and DurationIndex 35 = 4000 ms, i.e. four one-second ticks. The spell carries no explicit destination, and Spell::InitExplicitTargets sets it to the caster when a record needs TARGET_FLAG_DEST_LOCATION and none was supplied, so both fixture actors stand inside the pool. Both legs are native today; this is a contract-proof scenario, not a regression discriminator. The tooltip's $BH*.33 bonus-healing coefficient has no backing record (681082's EffectBonusMultiplier is 0 and there is no spell_bonus_data row) and is a separate coefficient question, so it is not asserted.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "b",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 681077
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_health",
+      "label": "Room for the healing pool to show",
+      "actor": "ally",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "b",
+      "spell": 681077
+    },
+    {
+      "action": "assert",
+      "label": "The enemy inside the pool is silenced",
+      "actor": "e",
+      "metric": "aura",
+      "spell": 681077,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The silence lasts 4 sec",
+      "actor": "e",
+      "metric": "aura_duration_ms",
+      "spell": 681077,
+      "min": 2000,
+      "max": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The ally inside the pool gets the heal over time",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 681082,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The heal over time ticks every second",
+      "actor": "ally",
+      "metric": "aura_amplitude_ms",
+      "spell": 681082,
+      "effect": 0,
+      "equals": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "health",
+      "save_as": "ally_hp"
+    },
+    {
+      "action": "wait",
+      "label": "Let all four ticks land and both auras expire",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The ally was healed",
+      "actor": "ally",
+      "metric": "health",
+      "relative_to": "ally_hp",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The pool is not persistent: the heal over time is gone after 4 sec",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 681082,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The silence expired",
+      "actor": "e",
+      "metric": "aura",
+      "spell": 681077,
+      "equals": 0
+    }
+  ]
+}

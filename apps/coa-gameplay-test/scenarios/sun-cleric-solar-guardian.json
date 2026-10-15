@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Solar Guardian cuts stun duration on the Sun Cleric by 20% (#502)",
+  "contract": "Solar Guardian 704581 (SpellFamilyName 33) carries two effects: effect 0 is SPELL_AURA_DUMMY (4, EffectMiscValue 5, EffectBasePoints -26 -> real -25) with no matching handler anywhere in this repo, an inert leftover the quoted tooltip does not describe. Effect 1 is SPELL_AURA_MECHANIC_DURATION_MOD (232, comment in SpellAuraEffects.cpp: 'implement in Unit::CalculateSpellDuration') with EffectMiscValue 12 (MECHANIC_STUN) and EffectBasePoints -21, resolving to -20 with DieSides 1 -- exactly the tooltip's 'by 20%'. Unit::ModSpellDuration consumes this natively: inside its 'if (!positive)' branch (cut duration only of negative effects), for every mechanic bit the incoming spell carries it takes target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD, MECHANIC_STUN) and AddPct(duration, durationMod); 'target' is the unit receiving the aura, matching the tooltip's 'on you'. The fixture debuff is the generic 'Stun' spell 46441 (Mechanic 12, effect 0 SPELL_AURA_MOD_STUN, EffectImplicitTargetA_1 TARGET_UNIT_CASTER, DurationIndex 39 = 2000 ms flat, no per-level scaling): a self-cast stun is always negative (SPELL_AURA_MOD_STUN auras are never positive), so Unit::ModSpellDuration reaches the mechanic-duration branch on the self-cast the same way it would on an enemy's stun. 2000 ms becomes 1600 ms with the talent. Native handlers only; regression scenario for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 27, "level": 80 },
+    { "id": "talent", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talent", "spell": 704581 },
+    { "action": "learn", "actor": "control", "spell": 46441 },
+    { "action": "learn", "actor": "talent", "spell": 46441 },
+    { "action": "cast", "label": "Control stuns itself with the fixture spell", "actor": "control", "spell": 46441 },
+    { "action": "cast", "label": "The Solar Guardian talent stuns itself with the same fixture spell", "actor": "talent", "spell": 46441 },
+    {
+      "action": "assert",
+      "label": "The stun lands on the control",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 46441,
+      "caster": "control",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The stun lands on the talented Sun Cleric",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 46441,
+      "caster": "talent",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent the stun keeps its full 2 second duration",
+      "actor": "control",
+      "metric": "aura_duration_ms",
+      "spell": 46441,
+      "caster": "control",
+      "min": 1900,
+      "max": 2000
+    },
+    {
+      "action": "assert",
+      "label": "With Solar Guardian the same stun is cut by 20% to 1.6 seconds",
+      "actor": "talent",
+      "metric": "aura_duration_ms",
+      "spell": 46441,
+      "caster": "talent",
+      "min": 1500,
+      "max": 1650
+    }
+  ]
+}

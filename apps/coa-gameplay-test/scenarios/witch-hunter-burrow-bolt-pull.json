@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Burrow Bolt pulls its target to the caster (#454)",
+  "contract": "Burrow Bolt 802269 reads 'Shoot a bolt with a rope attached to it at an enemy dealing ... Physical damage and pulling them to you.' In the installed Spell.dbc (server DBC 2026-09-17) it has SpellRange index 3 = 20 yd, a 40000 ms cooldown, ranged weapon class 2, effect 0 school damage and effect 1 = APPLY_AURA SPELL_AURA_PERIODIC_TRIGGER_SPELL (23) on the enemy with amplitude 200 ms, SpellDuration index 574 = 200 ms and trigger 802270. Spell 802270 ('Pulls the target to the caster') has effect 1 = SPELL_EFFECT_PULL_TOWARDS_DEST (145) with targets ENEMY / DEST_CASTER_FRONT at SpellRadius index 7 = 2.0 yd and misc 210 (speed 21). The core handles it natively: the periodic aura fires the trigger once, Spell::EffectPullTowards (SpellEffects.cpp:5476) sends the target on a MoveJump to the destination in front of the caster. No module code names 802269 or 802270 besides the damage coefficient. The scenario starts the target 15 yd away and expects it within 4 yd (2.0 yd destination plus margin) a moment after the cast. Hit rating is fixture-maxed so a miss cannot mask the pull.",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 60, "spell_hit_rating": 10000, "ranged_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "enemy", "owner": "hunter", "entry": 36, "level": 60, "distance": 15, "health": 1000000}
+  ],
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Crossbows skill, as in shadowblast-shadow-rage.json", "actor": "hunter", "spell": 5011},
+    {"action": "add_item", "actor": "hunter", "item": 15807},
+    {"action": "equip", "actor": "hunter", "item": 15807, "slot": 17},
+    {"action": "wait", "label": "Let the weapon swap cooldown expire", "ms": 2000},
+    {"action": "learn", "label": "Burrow Bolt", "actor": "hunter", "spell": 802269},
+    {"action": "snapshot", "label": "Distance before the cast", "actor": "hunter", "metric": "distance", "target": "enemy", "save_as": "distance_before"},
+    {"action": "assert", "label": "The target starts far away", "actor": "hunter", "metric": "distance", "target": "enemy", "min": 12},
+    {"action": "cast", "label": "Cast Burrow Bolt", "actor": "hunter", "spell": 802269, "target": "enemy"},
+    {"action": "assert", "label": "The target is pulled to within 4 yd of the caster", "actor": "hunter", "metric": "distance", "target": "enemy", "max": 4, "within_ms": 4000},
+    {"action": "assert", "label": "The pull covered at least 8 yd", "actor": "hunter", "metric": "distance", "target": "enemy", "relative_to": "distance_before", "max": -8}
+  ]
+}

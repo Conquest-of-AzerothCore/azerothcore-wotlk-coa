@@ -1,0 +1,462 @@
+{
+  "schema": 1,
+  "name": "Smash Lock and Melt Lock retain level bonuses and train Lockpicking (#6730, #6689, #6734)",
+  "contract": "Smash Lock 570122 has EffectBasePoints 4 + DieSides 1, RealPointsPerLevel 5, BaseLevel 1 and SpellLevel 16: its native bonus is 5 + 5*(level-16), not an invented level*5 rule. Learning it also grants Lockpicking 633. A level-38 Barbarian starts with skill 1 and bonus 115, opens Iron Lockbox 4634 (Lock 24, requires 70), trains Lockpicking and cannot open Strong Iron Lockbox 4636 (Lock 60, requires 125). At level 45 its bonus is 150, safely above the random orange-lock failure band for the 125 lock. Melt Lock 804662 has EffectBasePoints 14 + DieSides 1, RealPointsPerLevel 5, BaseLevel 11 and SpellLevel 0: its native bonus is 15 + 5*(level-11). A level-38 Pyromancer starts with skill 1 and bonus 150, opens the 125 lock, trains Lockpicking and refuses Mithril Lockbox 4638 (requires 225). Actual native container opening exposes loot after unlocking. Ordinary Rogue Pick Lock still uses trained Lockpicking 100, opening the 70 lock and refusing the 125 lock. A native Truesilver Skeleton Key item keeps its constant 200 skill bonus, consumes one key when opening the 125 lock and refuses the 225 lock without consuming another.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "barbarian",
+      "race": 1,
+      "class": 12,
+      "level": 38
+    },
+    {
+      "id": "veteran",
+      "race": 1,
+      "class": 12,
+      "level": 45
+    },
+    {
+      "id": "rogue",
+      "race": 1,
+      "class": 4,
+      "level": 38
+    },
+    {
+      "id": "smith",
+      "race": 1,
+      "class": 1,
+      "level": 38
+    },
+    {
+      "id": "pyro",
+      "race": 1,
+      "class": 24,
+      "level": 38
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "barbarian",
+      "spell": 570122
+    },
+    {
+      "action": "assert",
+      "actor": "barbarian",
+      "metric": "skill_value",
+      "skill": 633,
+      "equals": 1,
+      "label": "Smash Lock teaches Lockpicking alongside its level bonus"
+    },
+    {
+      "action": "assert",
+      "label": "Authored bonus includes caster level",
+      "actor": "barbarian",
+      "metric": "spell_effect_value",
+      "spell": 570122,
+      "effect": 0,
+      "equals": 115
+    },
+    {
+      "action": "add_item",
+      "actor": "barbarian",
+      "item": 4634
+    },
+    {
+      "action": "cast",
+      "actor": "barbarian",
+      "spell": 570122,
+      "target_item": 4634
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "A lock within the native limit is accepted",
+      "actor": "barbarian",
+      "metric": "cast_failure",
+      "spell": 570122,
+      "equals": 0
+    },
+    {
+      "action": "open_item",
+      "actor": "barbarian",
+      "item": 4634
+    },
+    {
+      "action": "assert",
+      "label": "Actual unlocked container exposes loot",
+      "actor": "barbarian",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "close_loot",
+      "actor": "barbarian"
+    },
+    {
+      "action": "add_item",
+      "actor": "barbarian",
+      "item": 4636
+    },
+    {
+      "action": "cast",
+      "actor": "barbarian",
+      "spell": 570122,
+      "target_item": 4636
+    },
+    {
+      "action": "assert",
+      "label": "The stronger lock stays outside the supported limit",
+      "actor": "barbarian",
+      "metric": "cast_failure",
+      "spell": 570122,
+      "equals": 49,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Opening a native lock trains the acquired Lockpicking skill",
+      "actor": "barbarian",
+      "metric": "skill_value",
+      "skill": 633,
+      "min": 2
+    },
+    {
+      "action": "learn",
+      "actor": "veteran",
+      "spell": 570122
+    },
+    {
+      "action": "assert",
+      "actor": "veteran",
+      "metric": "skill_value",
+      "skill": 633,
+      "equals": 1,
+      "label": "Smash Lock teaches Lockpicking alongside its level bonus"
+    },
+    {
+      "action": "assert",
+      "label": "Authored bonus includes caster level",
+      "actor": "veteran",
+      "metric": "spell_effect_value",
+      "spell": 570122,
+      "effect": 0,
+      "equals": 150
+    },
+    {
+      "action": "add_item",
+      "actor": "veteran",
+      "item": 4636
+    },
+    {
+      "action": "cast",
+      "actor": "veteran",
+      "spell": 570122,
+      "target_item": 4636
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "A lock within the native limit is accepted",
+      "actor": "veteran",
+      "metric": "cast_failure",
+      "spell": 570122,
+      "equals": 0
+    },
+    {
+      "action": "open_item",
+      "actor": "veteran",
+      "item": 4636
+    },
+    {
+      "action": "assert",
+      "label": "Actual unlocked container exposes loot",
+      "actor": "veteran",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "close_loot",
+      "actor": "veteran"
+    },
+    {
+      "action": "assert",
+      "label": "Opening a native lock trains the acquired Lockpicking skill",
+      "actor": "veteran",
+      "metric": "skill_value",
+      "skill": 633,
+      "min": 2
+    },
+    {
+      "action": "learn",
+      "actor": "pyro",
+      "spell": 804662
+    },
+    {
+      "action": "assert",
+      "label": "Melt Lock teaches Lockpicking alongside its level bonus",
+      "actor": "pyro",
+      "metric": "skill_value",
+      "skill": 633,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Melt Lock retains its authored level bonus",
+      "actor": "pyro",
+      "metric": "spell_effect_value",
+      "spell": 804662,
+      "effect": 0,
+      "equals": 150
+    },
+    {
+      "action": "add_item",
+      "actor": "pyro",
+      "item": 4636
+    },
+    {
+      "action": "cast",
+      "actor": "pyro",
+      "spell": 804662,
+      "target_item": 4636
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Melt Lock opens a lock within its native limit",
+      "actor": "pyro",
+      "metric": "cast_failure",
+      "spell": 804662,
+      "equals": 0
+    },
+    {
+      "action": "open_item",
+      "actor": "pyro",
+      "item": 4636
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "close_loot",
+      "actor": "pyro"
+    },
+    {
+      "action": "assert",
+      "label": "Melting a lock trains the acquired Lockpicking skill",
+      "actor": "pyro",
+      "metric": "skill_value",
+      "skill": 633,
+      "min": 2
+    },
+    {
+      "action": "add_item",
+      "actor": "pyro",
+      "item": 4638
+    },
+    {
+      "action": "cast",
+      "actor": "pyro",
+      "spell": 804662,
+      "target_item": 4638
+    },
+    {
+      "action": "assert",
+      "label": "Melt Lock refuses locks above its combined skill and bonus",
+      "actor": "pyro",
+      "metric": "cast_failure",
+      "spell": 804662,
+      "equals": 49,
+      "within_ms": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "rogue",
+      "spell": 1804
+    },
+    {
+      "action": "set_skill",
+      "actor": "rogue",
+      "skill": 633,
+      "value": 100,
+      "maximum": 190
+    },
+    {
+      "action": "add_item",
+      "actor": "rogue",
+      "item": 4634
+    },
+    {
+      "action": "cast",
+      "actor": "rogue",
+      "spell": 1804,
+      "target_item": 4634
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "A lock within the native limit is accepted",
+      "actor": "rogue",
+      "metric": "cast_failure",
+      "spell": 1804,
+      "equals": 0
+    },
+    {
+      "action": "open_item",
+      "actor": "rogue",
+      "item": 4634
+    },
+    {
+      "action": "assert",
+      "label": "Actual unlocked container exposes loot",
+      "actor": "rogue",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "close_loot",
+      "actor": "rogue"
+    },
+    {
+      "action": "add_item",
+      "actor": "rogue",
+      "item": 4636
+    },
+    {
+      "action": "cast",
+      "actor": "rogue",
+      "spell": 1804,
+      "target_item": 4636
+    },
+    {
+      "action": "assert",
+      "label": "The stronger lock stays outside the supported limit",
+      "actor": "rogue",
+      "metric": "cast_failure",
+      "spell": 1804,
+      "equals": 49,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "actor": "smith",
+      "skill": 164,
+      "value": 200,
+      "maximum": 225
+    },
+    {
+      "action": "assert",
+      "actor": "smith",
+      "metric": "skill_value",
+      "skill": 633,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "smith",
+      "item": 15871,
+      "count": 2
+    },
+    {
+      "action": "add_item",
+      "actor": "smith",
+      "item": 4636
+    },
+    {
+      "action": "use_item",
+      "actor": "smith",
+      "item": 15871,
+      "spell": 19651,
+      "target_item": 4636
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Constant key bonus still opens supported locks",
+      "actor": "smith",
+      "metric": "cast_failure",
+      "spell": 19651,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "One successful key is consumed",
+      "actor": "smith",
+      "metric": "item_count",
+      "item": 15871,
+      "equals": 1
+    },
+    {
+      "action": "open_item",
+      "actor": "smith",
+      "item": 4636
+    },
+    {
+      "action": "assert",
+      "actor": "smith",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "close_loot",
+      "actor": "smith"
+    },
+    {
+      "action": "add_item",
+      "actor": "smith",
+      "item": 4638
+    },
+    {
+      "action": "use_item",
+      "actor": "smith",
+      "item": 15871,
+      "spell": 19651,
+      "target_item": 4638
+    },
+    {
+      "action": "assert",
+      "label": "A key cannot open the stronger lock",
+      "actor": "smith",
+      "metric": "cast_failure",
+      "spell": 19651,
+      "equals": 49,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "A rejected key is retained",
+      "actor": "smith",
+      "metric": "item_count",
+      "item": 15871,
+      "equals": 1
+    }
+  ]
+}

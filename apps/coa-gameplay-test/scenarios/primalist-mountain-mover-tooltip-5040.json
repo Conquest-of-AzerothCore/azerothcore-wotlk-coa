@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Mountain Mover streams percentage units for its stacked buff tooltip (#5040)",
+  "contract": [
+    "Mountain Mover 805643 promises that each 805644 stack reduces Wildclaw's Rage cost by ten percent and increases its damage by five percent. The helper uses ADD_PCT_MODIFIER effects, resolving to -10 and +5 per stack. Its original aura tooltip, 'Your next Wildclaw costs ${$w1} less Rage and deals ${$w3} more damage.', omits both percentage units. Publish the same stack-aware expressions with percent signs through coa_client_spell_description's ToolTip override. A captured native SMSG_PATCH_SPELL row must carry the corrected text, while live one-stack and three-stack cost/damage modifiers preserve the authored percentages. The existing primalist-mountain-mover scenario covers avoided-attack acquisition and stack consumption. This verifies server packet construction and modifiers; rendered client text is outside the harness."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "primalist", "race": 1, "class": 31, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 7000 },
+    { "action": "assert", "label": "The existing description stream is captured", "actor": "primalist", "metric": "server_packet_contains", "opcode": 2346, "row": 500639, "text": "Requires Runeshroud", "equals": 1, "within_ms": 5000 },
+    { "action": "learn", "actor": "primalist", "spell": 520566 },
+    { "action": "snapshot", "actor": "primalist", "metric": "spell_modifier", "spell": 520566, "op": 14, "base": 1000, "save_as": "unmodified_cost" },
+    { "action": "snapshot", "actor": "primalist", "metric": "spell_modifier", "spell": 520566, "op": 0, "base": 1000, "save_as": "unmodified_damage" },
+    { "action": "set_aura", "actor": "primalist", "spell": 805644, "stacks": 1 },
+    { "action": "assert", "label": "One stack reduces cost by ten percent", "actor": "primalist", "metric": "spell_modifier", "spell": 520566, "op": 14, "base": 1000, "ratio_to": "unmodified_cost", "min": 0.899, "max": 0.901 },
+    { "action": "assert", "label": "One stack increases damage by five percent", "actor": "primalist", "metric": "spell_modifier", "spell": 520566, "op": 0, "base": 1000, "ratio_to": "unmodified_damage", "min": 1.049, "max": 1.051 },
+    { "action": "set_aura", "actor": "primalist", "spell": 805644, "stacks": 3 },
+    { "action": "assert", "label": "Three stacks reduce cost by thirty percent", "actor": "primalist", "metric": "spell_modifier", "spell": 520566, "op": 14, "base": 1000, "ratio_to": "unmodified_cost", "min": 0.699, "max": 0.701 },
+    { "action": "assert", "label": "Three stacks increase damage by fifteen percent", "actor": "primalist", "metric": "spell_modifier", "spell": 520566, "op": 0, "base": 1000, "ratio_to": "unmodified_damage", "min": 1.149, "max": 1.151 },
+    { "action": "assert", "label": "The buff tooltip row is emitted", "actor": "primalist", "metric": "server_packets", "opcode": 2346, "row": 805644, "min": 1 },
+    { "action": "assert", "label": "The tooltip retains the stack-aware Rage expression and its percentage unit", "actor": "primalist", "metric": "server_packet_contains", "opcode": 2346, "row": 805644, "text": "costs ${$w1}% less Rage", "equals": 1 },
+    { "action": "assert", "label": "The tooltip retains the stack-aware damage expression and its percentage unit", "actor": "primalist", "metric": "server_packet_contains", "opcode": 2346, "row": 805644, "text": "deals ${$w3}% more damage", "equals": 1 },
+    { "action": "set_aura", "actor": "primalist", "spell": 805644, "stacks": 0 },
+    { "action": "assert", "label": "Removing the buff restores cost", "actor": "primalist", "metric": "spell_modifier", "spell": 520566, "op": 14, "base": 1000, "ratio_to": "unmodified_cost", "equals": 1 },
+    { "action": "assert", "label": "Removing the buff restores damage", "actor": "primalist", "metric": "spell_modifier", "spell": 520566, "op": 0, "base": 1000, "ratio_to": "unmodified_damage", "equals": 1 }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Necromancer Unstoppable Frenzy shortens Unholy Frenzy's cooldown by 60 sec (#1335)",
+  "contract": "Unstoppable Frenzy 573426 is an Animation talent (CharacterAdvancement 33773, ClassType 25 = class 23, Tab Animation, TalentEssenceCost 1, SpellFamilyName 29) whose description reads 'Reduces the cooldown of your Unholy Frenzy by $/1000;s1 sec.' Its only effect is SPELL_AURA_ADD_FLAT_MODIFIER (107) MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -60001 + DieSides 1 = -60000 ms, EffectSpellClassMask (0, 0, 0x100000) in family 29, which matches Unholy Frenzy 805029 (family flags 0, 0, 0x100000; RecoveryTime 180000, no category cooldown, no SpellCharges row, description 'Enrage your Undead minions for $d ...'). It is not aura 42/354, so the Necromancer load contract leaves it intact, and Player::AddSpellAndCategoryCooldowns applies the caster's SPELLMOD_COOLDOWN to RecoveryTime. Expected: an Unholy Frenzy cast starts a 180 sec cooldown without the talent and a 120 sec cooldown with it.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "learn", "actor": "necro", "spell": 805029 },
+    {
+      "action": "assert", "label": "SETUP: Unholy Frenzy is ready", "actor": "necro",
+      "metric": "cooldown_ms", "spell": 805029, "equals": 0
+    },
+    { "action": "cast", "label": "Unholy Frenzy without the talent", "actor": "necro", "spell": 805029 },
+    {
+      "action": "assert", "label": "CONTROL: the untalented cooldown is 180 sec", "actor": "necro",
+      "metric": "cooldown_ms", "spell": 805029, "min": 175000, "max": 180000, "within_ms": 3000
+    },
+    { "action": "learn", "actor": "necro", "spell": 573426 },
+    {
+      "action": "assert", "label": "The talent aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 573426, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The native cooldown modifier removes 60 sec", "actor": "necro",
+      "metric": "spell_modifier", "spell": 805029, "op": 11, "base": 180000, "min": 119999.99, "max": 120000.01
+    },
+    { "action": "reset_cooldown", "actor": "necro", "spell": 805029 },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    {
+      "action": "assert", "label": "SETUP: Unholy Frenzy is ready again", "actor": "necro",
+      "metric": "cooldown_ms", "spell": 805029, "equals": 0
+    },
+    { "action": "cast", "label": "Unholy Frenzy with the talent", "actor": "necro", "spell": 805029 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the talented cooldown is 120 sec", "actor": "necro",
+      "metric": "cooldown_ms", "spell": 805029, "min": 115000, "max": 120000, "within_ms": 3000
+    }
+  ]
+}

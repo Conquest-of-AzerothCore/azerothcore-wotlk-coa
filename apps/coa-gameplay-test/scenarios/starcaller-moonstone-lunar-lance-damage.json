@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "name": "Moonstone raises Lunar Lance's direct and periodic damage by 20% (#3526)",
+  "contract": "Moonstone 805503 (Spell.dbc, SpellFamilyName 32) tooltip: \"Increases the damage of Lunar Lance by $s1%.\" Effect 0 and Effect 1 are both SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectBasePoints 19 and EffectDieSides 1, so $s1 = 20; Effect 0 EffectMiscValue is SPELLMOD_DAMAGE (0) and Effect 1 is SPELLMOD_DOT (22); both carry EffectSpellClassMask word1 0x02000000, which is the SpellFamilyFlags word1 of Lunar Lance ranks 502333-502340 and 801132 (502340 and 801132 read: family 32, word1 0x02000000, DmgClass 3, Effect 0 SPELL_EFFECT_SCHOOL_DAMAGE, Effect 1 SPELL_AURA_PERIODIC_DAMAGE (3) with 3000 ms amplitude). Neither carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (Attributes Ex3 is 0x80). Native path only: AuraEffect::CalculateSpellMod and AuraEffect::ApplySpellMod build the SpellModifier, Unit::SpellDamageBonusDone ends with modOwner->ApplySpellMod(..., damagetype == DOT ? SPELLMOD_DOT : SPELLMOD_DAMAGE, ...), so the direct hit is scaled through SPELLMOD_DAMAGE and the Burning ticks through SPELLMOD_DOT. The harness spell_damage_done metric calls SpellDamageBonusDone with a fixed 1000 base and SPELL_DIRECT_DAMAGE; the fixtures share race, class, level and gear (none), so the only difference is the passive and the ratio must be 1.2. spell_modifier reads the SPELLMOD_DOT operation directly, which spell_damage_done cannot (it never passes DOT). Scattered Star 804995 (family flags word1 0x800) is outside the mask and must stay at 1000. The tooltip's spell ids are read, not assumed. Values read 2026-09-21 from the shipped /srv/coa/server-data/dbc/Spell.dbc.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "control",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 805503
+    },
+    {
+      "action": "snapshot",
+      "label": "Lunar Lance rank 8 direct damage without the talent",
+      "actor": "control",
+      "metric": "spell_damage_done",
+      "save_as": "lance_base",
+      "spell": 502340,
+      "effect": 0,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Lunar Lance rank 8 direct damage is 20% higher with the talent",
+      "actor": "talent",
+      "metric": "spell_damage_done",
+      "spell": 502340,
+      "effect": 0,
+      "target": "dummy",
+      "ratio_to": "lance_base",
+      "min": 1.199,
+      "max": 1.201
+    },
+    {
+      "action": "snapshot",
+      "label": "Lunar Lance rank 1 direct damage without the talent",
+      "actor": "control",
+      "metric": "spell_damage_done",
+      "save_as": "lance1_base",
+      "spell": 801132,
+      "effect": 0,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Lunar Lance rank 1 direct damage is 20% higher with the talent",
+      "actor": "talent",
+      "metric": "spell_damage_done",
+      "spell": 801132,
+      "effect": 0,
+      "target": "dummy",
+      "ratio_to": "lance1_base",
+      "min": 1.199,
+      "max": 1.201
+    },
+    {
+      "action": "assert",
+      "label": "No damage modifier on Lunar Lance without the talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 502340,
+      "op": 0,
+      "base": 1000,
+      "min": 999.99,
+      "max": 1000.01
+    },
+    {
+      "action": "assert",
+      "label": "The talent raises Lunar Lance's damage modifier by 20%",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 502340,
+      "op": 0,
+      "base": 1000,
+      "min": 1199.99,
+      "max": 1200.01
+    },
+    {
+      "action": "assert",
+      "label": "No periodic modifier on Lunar Lance's Burning without the talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 502340,
+      "op": 22,
+      "base": 1000,
+      "min": 999.99,
+      "max": 1000.01
+    },
+    {
+      "action": "assert",
+      "label": "The talent raises Lunar Lance's periodic damage by 20%",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 502340,
+      "op": 22,
+      "base": 1000,
+      "min": 1199.99,
+      "max": 1200.01
+    },
+    {
+      "action": "assert",
+      "label": "The talent does not touch an unrelated Starcaller spell (Scattered Star)",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 804995,
+      "op": 0,
+      "base": 1000,
+      "min": 999.99,
+      "max": 1000.01
+    }
+  ]
+}

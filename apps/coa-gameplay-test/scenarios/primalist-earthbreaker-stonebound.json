@@ -1,0 +1,316 @@
+{
+  "schema": 1,
+  "name": "Primalist Earthbreaker and Stonebound: native bonuses and removal",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "save_as": "no_breaker_haste"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 560147
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "ratio_to": "no_breaker_haste",
+      "min": 0.908,
+      "max": 0.911
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 803138,
+      "op": 2,
+      "base": 1000,
+      "equals": 1250
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 804002,
+      "op": 2,
+      "base": 1000,
+      "equals": 1250
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 803140,
+      "op": 2,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 560147
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "relative_to": "no_breaker_haste",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 680415
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 500935,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 500935,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 806068,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 806068,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 547212,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 547212,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 500935,
+      "effect": 1,
+      "equals": 60
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 500935,
+      "effect": 2,
+      "equals": -10
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 806068,
+      "effect": 0,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 806068,
+      "effect": 1,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 547212,
+      "effect": 0,
+      "equals": 2
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 680415
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 500935,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 500935,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 806068,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 806068,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 547212,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 547212,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 500935,
+      "effect": 1,
+      "equals": 90
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 500935,
+      "effect": 2,
+      "equals": -15
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 806068,
+      "effect": 0,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 806068,
+      "effect": 1,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 547212,
+      "effect": 0,
+      "equals": 3
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 680415
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 500935,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 500935,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 806068,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 806068,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 547212,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 547212,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 500935,
+      "effect": 1,
+      "equals": 60
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 500935,
+      "effect": 2,
+      "equals": -10
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 806068,
+      "effect": 0,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 806068,
+      "effect": 1,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 547212,
+      "effect": 0,
+      "equals": 2
+    }
+  ]
+}

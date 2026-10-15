@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "name": "Gaze of C'Thun requires Eyes of Eternity for stealth reveal (#4497)",
+  "contract": "Gaze's reveal requires the caster's Eyes of Eternity. Preserve the existing positive-heal hook.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 43 },
+    { "id": "ally", "race": 1, "class": 25, "level": 43 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "cultist", "spell": 502138 },
+    { "action": "assert", "actor": "cultist", "metric": "aura", "spell": 706188, "equals": 0 },
+    { "action": "assert", "actor": "cultist", "metric": "aura", "spell": 807344, "equals": 0 },
+    { "action": "cast", "actor": "cultist", "spell": 502138 },
+    {
+      "action": "assert", "label": "The reported rank-5 self cast completes its healing effect",
+      "actor": "cultist", "metric": "spell_heal_count", "spell": 520333, "target": "cultist",
+      "min": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Gaze does not reveal stealth without Eyes of Eternity",
+      "actor": "cultist", "metric": "aura", "spell": 807344, "equals": 0
+    },
+    { "action": "assert", "actor": "cultist", "metric": "aura", "spell": 804095, "equals": 0 },
+    { "action": "reset_cooldown", "actor": "cultist", "spell": 502138 },
+    { "action": "wait", "ms": 1100 },
+    { "action": "set_health", "actor": "cultist", "value": 100 },
+    {
+      "action": "snapshot", "actor": "cultist", "metric": "spell_effective_heal_total",
+      "spell": 520333, "target": "cultist", "save_as": "untalented_healing"
+    },
+    { "action": "cast", "actor": "cultist", "spell": 502138 },
+    {
+      "action": "assert", "label": "Gaze still heals an injured caster without the talent",
+      "actor": "cultist", "metric": "spell_effective_heal_total", "spell": 520333, "target": "cultist",
+      "relative_to": "untalented_healing", "min": 1, "within_ms": 1000
+    },
+    { "action": "assert", "actor": "cultist", "metric": "aura", "spell": 807344, "equals": 0 },
+    { "action": "assert", "actor": "cultist", "metric": "spell_cast_count", "spell": 807344, "equals": 0 },
+    { "action": "learn", "actor": "cultist", "spell": 706188 },
+    { "action": "assert", "actor": "cultist", "metric": "aura", "spell": 706188, "equals": 1 },
+    { "action": "reset_cooldown", "actor": "cultist", "spell": 502138 },
+    { "action": "wait", "ms": 1100 },
+    { "action": "set_health", "actor": "cultist", "value": 100 },
+    {
+      "action": "snapshot", "actor": "cultist", "metric": "spell_effective_heal_total",
+      "spell": 520333, "target": "cultist", "save_as": "talented_healing"
+    },
+    { "action": "cast", "actor": "cultist", "spell": 502138 },
+    {
+      "action": "assert", "actor": "cultist", "metric": "spell_effective_heal_total",
+      "spell": 520333, "target": "cultist", "relative_to": "talented_healing", "min": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The existing talented healing hook still grants reveal",
+      "actor": "cultist", "metric": "aura", "spell": 807344, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Only the guarded hook casts the reveal helper",
+      "actor": "cultist", "metric": "spell_cast_count", "spell": 807344, "equals": 1
+    },
+    { "action": "assert", "actor": "cultist", "metric": "aura", "spell": 804095, "equals": 0 },
+    { "action": "wait", "ms": 8500 },
+    { "action": "assert", "actor": "cultist", "metric": "aura", "spell": 807344, "equals": 0 },
+    { "action": "unlearn", "actor": "cultist", "spell": 706188 },
+    { "action": "assert", "actor": "cultist", "metric": "aura", "spell": 706188, "equals": 0 },
+    { "action": "learn", "actor": "ally", "spell": 706188 },
+    { "action": "assert", "actor": "ally", "metric": "aura", "spell": 706188, "equals": 1 },
+    { "action": "reset_cooldown", "actor": "cultist", "spell": 502138 },
+    { "action": "set_health", "actor": "ally", "value": 100 },
+    {
+      "action": "snapshot", "actor": "cultist", "metric": "spell_effective_heal_total",
+      "spell": 520333, "target": "ally", "save_as": "ally_healing"
+    },
+    { "action": "cast", "actor": "cultist", "spell": 502138, "target": "ally" },
+    {
+      "action": "assert", "label": "Unlearning the talent does not prevent healing an ally",
+      "actor": "cultist", "metric": "spell_effective_heal_total", "spell": 520333, "target": "ally",
+      "relative_to": "ally_healing", "min": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The recipient's talent cannot grant the caster a reveal",
+      "actor": "cultist", "metric": "aura", "spell": 807344, "equals": 0
+    },
+    { "action": "assert", "actor": "ally", "metric": "aura", "spell": 807344, "equals": 0 },
+    { "action": "assert", "actor": "cultist", "metric": "spell_cast_count", "spell": 807344, "equals": 1 },
+    { "action": "unlearn", "actor": "ally", "spell": 500110, "all_specs": true },
+    { "action": "learn", "actor": "ally", "spell": 500110 },
+    { "action": "set_health", "actor": "ally", "value": 100 },
+    { "action": "cast", "actor": "ally", "spell": 500110 },
+    {
+      "action": "assert", "label": "Rank 1 retains the existing talented reveal path too",
+      "actor": "ally", "metric": "aura", "spell": 807344, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The rank-1 chain can heal up to two injured players",
+      "actor": "ally", "metric": "spell_cast_count", "spell": 807344, "min": 1, "max": 2
+    }
+  ]
+}

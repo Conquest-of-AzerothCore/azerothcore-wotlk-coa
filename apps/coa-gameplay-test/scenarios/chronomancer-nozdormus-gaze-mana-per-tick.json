@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Nozdormu's Gaze reduces Time Out!'s mana per tick, not its damage reduction (#3690)",
+  "contract": "Nozdormu's Gaze 807691's tooltip is \"Your Time Out! now regenerates $s1% less mana per tick, but casting it now instantly restores an additional $504838s1% of your maximum mana\". Time Out!'s own description is \"Enter a stasis for $802228d, instantly restoring $s3% of your maximum mana and regenerating $s2% of your maximum mana every $/1000;T2 sec. While active, your damage taken is reduced by $s1%\", so the mana per tick is Time Out!'s $s2, effect index 1 (Aura=24 SPELL_AURA_PERIODIC_ENERGIZE, EffectAmplitude 500), while $s1 is effect index 0 (the damage reduction, -50/-75/-90 across ranks 802229/803896/803897). 807691's effect 0 is Aura=107 (SPELL_AURA_ADD_FLAT_MODIFIER) with EffectBasePoints -3 and EffectDieSides 1, so a flat -2, EffectSpellClassMask [32768,0,0] which selects exactly the three Time Out! ranks, and EffectMiscValue 3 = SPELLMOD_EFFECT1. Unit::ApplyEffectModifiers (Unit.cpp:12072-12083) maps SPELLMOD_EFFECT1 to effect index 0, SPELLMOD_EFFECT2 (12) to index 1 and SPELLMOD_EFFECT3 (23) to index 2, so the record as shipped moves the damage reduction instead of the mana regeneration. The spell_modifier metric applies the player's native modifiers without submitting a cast and without spending charges, so the two ops can be read separately. The talented reading must be -2 on op 12 and 0 on op 3; the untalented control must be 0 on both.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 22, "level": 80 },
+    { "id": "talent", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "control", "spell": 803897 },
+    { "action": "learn", "actor": "talent", "spell": 803897 },
+    { "action": "learn", "actor": "talent", "spell": 807691 },
+    {
+      "action": "assert",
+      "label": "Without the talent Time Out!'s damage reduction carries no flat modifier",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 803897,
+      "op": 3,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent Time Out!'s mana per tick carries no flat modifier",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 803897,
+      "op": 12,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Nozdormu's Gaze adds -2 to Time Out!'s mana regenerated per tick",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 803897,
+      "op": 12,
+      "base": 0,
+      "equals": -2
+    },
+    {
+      "action": "assert",
+      "label": "Nozdormu's Gaze leaves Time Out!'s damage reduction untouched",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 803897,
+      "op": 3,
+      "base": 0,
+      "equals": 0
+    }
+  ]
+}

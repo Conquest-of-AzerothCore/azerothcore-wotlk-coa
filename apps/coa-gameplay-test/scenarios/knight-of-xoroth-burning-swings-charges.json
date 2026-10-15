@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Burning Swings adds 4 additional attacks to Burning Blade (#1019)",
+  "contract": "Burning Swings 707632 reads 'Your Burning Blade now affects $s1 additional attacks.' Effect 0 is native aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER), EffectMiscValue 4 -> SpellModOp::SPELLMOD_CHARGES (src/server/game/Spells/SpellDefines.h:80), EffectBasePoints 3 with DieSides 1 -> 4, EffectSpellClassMask [256,0,0] (all verified directly in the installed Spell.dbc). Its handler comment at src/server/game/Spells/Auras/SpellAuraEffects.cpp:172 reads '107 SPELL_AURA_ADD_FLAT_MODIFIER implemented in AuraEffect::CalculateSpellMod()' -- the native generic spellmod engine, no per-spell script needed. The affected spell is Burning Blade 524920 (the weapon-imbue buff with native ProcCharges 6, SPELL_AURA_PROC_TRIGGER_SPELL triggering the damage spell 524919, 'Lasts for $n attacks'): its own SpellFamilyFlags are {256,0,0}, confirmed directly in the installed Spell.dbc, which intersects Burning Swings' classMask exactly on dword0 bit 8. No script anywhere references 707632 or 524920 (repo-wide grep), consistent with a purely native spellmod passive. spell_modifier submits no cast; it reads the player's live ApplySpellMod(spell, op, value) result.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: no charge bonus on Burning Blade before Burning Swings",
+      "actor": "knight", "metric": "spell_modifier", "spell": 524920, "op": 4, "base": 0, "equals": 0
+    },
+    { "action": "learn", "actor": "knight", "spell": 707632 },
+    { "action": "set_aura", "actor": "knight", "spell": 707632, "stacks": 1, "label": "Force the Burning Swings passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Burning Swings passive is active",
+      "actor": "knight", "metric": "aura", "spell": 707632, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Burning Blade gains 4 additional charges",
+      "actor": "knight", "metric": "spell_modifier", "spell": 524920, "op": 4, "base": 0, "equals": 4
+    },
+    {
+      "action": "assert", "label": "REGRESSION: an unrelated family spell is untouched",
+      "actor": "knight", "metric": "spell_modifier", "spell": 524919, "op": 4, "base": 0, "equals": 0
+    }
+  ]
+}

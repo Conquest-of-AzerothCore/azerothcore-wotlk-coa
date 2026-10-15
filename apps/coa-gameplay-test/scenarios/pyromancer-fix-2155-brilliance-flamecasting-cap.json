@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "name": "Pyromancer Brilliance raises the Flamecasting stack cap (#2155)",
+  "contract": "Brilliance 570207 reads \"Flamecasting can now stack $s1 additional times.\" Its effect 0 is aura 107 ADD_FLAT_MODIFIER, MiscValue 31 SPELLMOD_MAX_AURA_STACKS, BasePoints 1 (value +2) on class mask 0x2000 (Flamecasting 804301, DBC StackAmount 5), so Flamecasting stacks to 7. Two Emberheart 680378 casts (5 stacks each, per its description) overflow the cap; before the fix AscensionPyromancer::Flames capped the count at the literal 5 (10 with Invocation of Flames) through Aura::SetStackAmount and ignored the modifier, leaving 5 stacks.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 680378
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 570207
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 680378
+    },
+    {
+      "action": "assert",
+      "label": "Emberheart grants its five Flamecasting stacks",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "spell": 804301,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "p",
+      "spell": 680378
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown expire",
+      "ms": 2500
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 680378
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Flamecasting reaches 7 stacks with Brilliance (5 + 2)",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "spell": 804301,
+      "equals": 7,
+      "within_ms": 3000
+    }
+  ]
+}

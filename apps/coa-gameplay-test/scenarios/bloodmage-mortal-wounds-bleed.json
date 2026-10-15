@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "name": "Mortal Wounds makes direct critical strikes bleed the target (#1921)",
+  "contract": "Mortal Wounds 504292's single effect is SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on Mortal Wounds 504291, a bleed (aura 3 SPELL_AURA_PERIODIC_DAMAGE, BasePoints 50, Amplitude 1000, DurationIndex 32, Mechanic 15, TargetA 6 = enemy). Spell.dbc gives 504292 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs generated no entry, Aura::GetProcEffectMask returned 0 and the aura was inert. The tooltip is 'Your direct harmful critical strikes with spells and abilities now cause the target to bleed', ProcChance 100, so one guaranteed critical strike must apply 504291. Bloodbolt is cast as rank 578305, the only rank a level-80 character owns per AscensionSpellProgressionData.h; it is DmgClass 1 (magic) and harmful, which is the PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG bit the row carries. The critical strike is fixtured with Crit Test Buff 503747, whose single effect is aura 290 SPELL_AURA_MOD_CRIT_PCT with BasePoints 99 + DieSides 1 = +100 percentage points, so no proc chance is estimated statistically.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 578305
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "bloodmage",
+      "spell": 503747,
+      "stacks": 1,
+      "label": "Crit Test Buff 503747 (aura 290 MOD_CRIT_PCT +100) forces every strike to crit"
+    },
+    {
+      "action": "assert",
+      "label": "The crit fixture is in effect",
+      "actor": "bloodmage",
+      "metric": "spell_crit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "The bleed is absent before the talent is learned",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 504291,
+      "caster": "bloodmage",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 578305,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Without Mortal Wounds a crit leaves no bleed",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 504291,
+      "caster": "bloodmage",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504292
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 578305,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a critical Bloodbolt applies Mortal Wounds' bleed",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 504291,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

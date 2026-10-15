@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Warrior level 10: melee critical strike and dodge from agility",
+  "contract": "A level-10 Human Warrior has 26 base agility, like levels 9 (26) and 11 (27). Stock 3.3.5 rates it at 0.2012% critical strike per agility point for all three levels, so agility adds about 5% critical strike and 4% dodge on top of the class bases; the vanilla curve gives about 4% for each. The CoA client gtChanceToMeleeCrit row for Warrior level 10 is 0.009811 instead of 0.002012, which would give about 27% critical strike and 22.5% dodge at level 10 only. Every level must stay between 2% and 9% critical strike and between 2% and 11% dodge.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "level9", "race": 1, "class": 1, "level": 9 },
+    { "id": "level10", "race": 1, "class": 1, "level": 10 },
+    { "id": "level11", "race": 1, "class": 1, "level": 11 }
+  ],
+  "creatures": [],
+  "steps": [
+    { "action": "wait", "label": "Let login stat updates settle", "ms": 2000 },
+    { "action": "assert", "actor": "level9", "metric": "stat", "stat": 1, "equals": 26 },
+    { "action": "assert", "actor": "level10", "metric": "stat", "stat": 1, "equals": 26 },
+    { "action": "assert", "actor": "level11", "metric": "stat", "stat": 1, "equals": 27 },
+    {
+      "action": "assert", "label": "Level 9 critical strike from 26 agility", "actor": "level9",
+      "metric": "melee_crit_chance", "min": 2, "max": 9
+    },
+    {
+      "action": "assert", "label": "Level 10 critical strike from 26 agility", "actor": "level10",
+      "metric": "melee_crit_chance", "min": 2, "max": 9
+    },
+    {
+      "action": "assert", "label": "Level 11 critical strike from 27 agility", "actor": "level11",
+      "metric": "melee_crit_chance", "min": 2, "max": 9
+    },
+    {
+      "action": "assert", "label": "Level 9 dodge from 26 agility", "actor": "level9",
+      "metric": "dodge_chance", "min": 2, "max": 11
+    },
+    {
+      "action": "assert", "label": "Level 10 dodge from 26 agility", "actor": "level10",
+      "metric": "dodge_chance", "min": 2, "max": 11
+    },
+    {
+      "action": "assert", "label": "Level 11 dodge from 27 agility", "actor": "level11",
+      "metric": "dodge_chance", "min": 2, "max": 11
+    }
+  ]
+}

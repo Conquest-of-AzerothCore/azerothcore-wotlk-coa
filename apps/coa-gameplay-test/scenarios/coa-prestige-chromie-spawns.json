@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Prestige Mode: Chromie stands in Stormwind and Orgrimmar",
+  "contract": "The client's tutorials send players to Chromie in their faction's capital. The world data spawns creature 178081 once in Stormwind's Trade District and once in Orgrimmar's Valley of Strength, each beside the Worldforged guardian, so a character standing there in the world phase finds exactly one Chromie within 60 yards. The Orc travels to Orgrimmar in the scenario's own phase and each character joins the world phase only in its own capital, so neither is ever visible in the other faction's city.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8820.0, "y": 629.0, "z": 94.1, "o": 3.8 },
+  "players": [
+    { "id": "human", "race": 1, "class": 1, "level": 60 },
+    { "id": "orc", "race": 2, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "teleport", "actor": "orc", "map": 1, "x": 1579.0, "y": -4416.0, "z": 8.1, "o": 3.4 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_phase", "actor": "human", "value": 1 },
+    { "action": "set_phase", "actor": "orc", "value": 1 },
+    { "action": "assert", "label": "Chromie in Stormwind", "actor": "human", "metric": "nearby_creature_count", "entry": 178081, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "Chromie in Orgrimmar", "actor": "orc", "metric": "nearby_creature_count", "entry": 178081, "equals": 1, "within_ms": 10000 }
+  ]
+}

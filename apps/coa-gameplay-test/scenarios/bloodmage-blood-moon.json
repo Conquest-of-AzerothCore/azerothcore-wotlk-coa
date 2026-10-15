@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "Blood Moon leeches 3% of damage below 75% health and adds an amalgam (#3142)",
+  "contract": "The issue names two unrelated records that share the name Blood Moon. 804199 is SPELL_EFFECT_APPLY_AURA with aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 3 = SPELLMOD_EFFECT1, BasePoints 0 + DieSides 1 = +1 and SpellClassMask (1, 0, 0), which matches the three Animated Blood ranks (573299, 573356, 573357, all family 26 with SpellFamilyFlags (1, 0, 0)). Each is a SPELL_EFFECT_SUMMON with MiscValueB 61, and Spell::EffectSummonType takes the summon count from the effect value for that SummonProperties id, so +1 on 573357 (MiscValue 315301, BasePoints 0 + DieSides 1 = 1 amalgam) is literally \"an additional amalgam\". spell_effect_value queries SpellEffectInfo::CalcValue directly, which is the number EffectSummonType reads, and avoids 573357's 30-second category cooldown. That half works natively. 707623 is the broken half: its single effect is SPELL_EFFECT_APPLY_AURA with aura 354, BasePoints 2 + DieSides 1 = the 3% of \"While below 75% health, you now heal for 3% of all damage you deal\", and TriggerSpell Blood Moon 572786, a SPELL_EFFECT_HEAL with BasePoints 0. Aura 354 has no AuraEffectHandler entry, no AuraEffect::HandleProc case and is not an isTriggerAura, and 707623's own ProcFlags are 0, so SpellMgr generated no SpellProcEntry at all and the talent did nothing. Valanar's Vengeance 572795 is the probe - the rank a level-80 character owns, a pure SPELL_EFFECT_SCHOOL_DAMAGE with no leech of its own - and the caster is in combat throughout, so Player::RegenerateHealth contributes nothing and a health gain can only come from the proc; every combat precondition is asserted rather than assumed. TIMING: 572795 has CastingTimeIndex 171 and SpellCastTimes.dbc row 171 is 6000 ms, while combat only starts when the spell launches on its target (Spell.cpp:8475), so every window that has to see a cast land is 9000 ms, not 5000. COST: 572795 is PowerType -2 (POWER_HEALTH) with ManaCost 50 and ManaCostPercentage 30, so SpellInfo::CalcPowerCost (SpellInfo.cpp:3021) charges 50 plus 30% of GetCreateHealth and Spell::CheckPower (Spell.cpp:7282) refuses the cast unless current health is strictly above that. The fixture health is therefore 4000, not 1000, and the scenario asserts spell_power_cost stays under it instead of assuming a number. Because the cast itself spends far more health than the 3% leech returns, a health reading taken before the cast can never show the leech; the measurement is differential instead. Both legs start from exactly 4000 and pay the same cost, so the health left after the untalented cast (after_control) is the zero point, and what the talented leg has above it is the heal. The 75% suppression is not asserted: set_health takes an absolute value and the fixture's maximum health is not known to the scenario, so only the below-threshold side is observable here; health_pct is asserted to record that the precondition held.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "caster", "entry": 36, "level": 1, "health": 1000000, "distance": 25 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "Animated Blood rank 3 summons one amalgam before the talent",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 573357, "effect": 0, "equals": 1
+    },
+    { "action": "learn", "actor": "caster", "spell": 804199 },
+    {
+      "action": "assert", "label": "804199 adds the additional amalgam",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 573357, "effect": 0, "equals": 2
+    },
+    { "action": "learn", "actor": "caster", "spell": 572795 },
+    {
+      "action": "assert", "label": "SETUP: the probe's health cost fits inside the 4000 fixture health",
+      "actor": "caster", "metric": "spell_power_cost", "spell": 572795, "max": 3999
+    },
+    { "action": "set_power", "actor": "caster", "power": 1, "value": 1000 },
+    { "action": "cast", "actor": "caster", "spell": 572795, "target": "dummy" },
+    {
+      "action": "assert", "label": "The caster is in combat, so health regeneration is off",
+      "actor": "caster", "metric": "combat", "equals": 1, "within_ms": 9000
+    },
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_health", "actor": "caster", "value": 4000 },
+    { "action": "snapshot", "actor": "caster", "metric": "health", "save_as": "control_health" },
+    { "action": "set_power", "actor": "caster", "power": 1, "value": 1000 },
+    { "action": "cast", "actor": "caster", "spell": 572795, "target": "dummy" },
+    { "action": "wait", "label": "Let the 6 sec cast, its health cost and its damage resolve", "ms": 9000 },
+    {
+      "action": "assert", "label": "SETUP: combat still holds, so no regeneration enters the measurement",
+      "actor": "caster", "metric": "combat", "equals": 1
+    },
+    {
+      "action": "assert", "label": "Control: without the talent the cast only spends health, it heals nothing",
+      "actor": "caster", "metric": "health", "relative_to": "control_health", "max": -1
+    },
+    {
+      "action": "snapshot", "label": "Zero point: 4000 minus the cast's health cost, with no leech",
+      "actor": "caster", "metric": "health", "save_as": "after_control"
+    },
+    { "action": "learn", "actor": "caster", "spell": 707623 },
+    { "action": "set_health", "actor": "caster", "value": 4000 },
+    {
+      "action": "assert", "label": "The caster is below the talent's 75% threshold",
+      "actor": "caster", "metric": "health_pct", "min": 1, "max": 74
+    },
+    { "action": "set_power", "actor": "caster", "power": 1, "value": 1000 },
+    { "action": "cast", "actor": "caster", "spell": 572795, "target": "dummy" },
+    { "action": "wait", "label": "Let the 6 sec cast, its health cost and its damage resolve", "ms": 9000 },
+    {
+      "action": "assert", "label": "SETUP: combat still holds, so no regeneration enters the measurement",
+      "actor": "caster", "metric": "combat", "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Blood Moon heals the wounded caster from the damage dealt",
+      "actor": "caster", "metric": "health", "relative_to": "after_control", "min": 1
+    }
+  ]
+}

@@ -1,0 +1,170 @@
+{
+  "schema": 1,
+  "name": "Infinite Guard doubles the Temporal spells and halves their cost (#2182)",
+  "contract": "Infinite Guard 574312's tooltip reads \"Increases the effectiveness of your Temporal Resilience, Temporal Swiftness, and Temporal Restoration spells by $s1% and reduces their mana costs by $s2%.\" In Spell.dbc both effects are SPELL_AURA_ADD_PCT_MODIFIER (108) on EffectSpellClassMask [0,0,67108864], which inside SpellFamilyName 28 selects Temporal Resilience (536258-536263, 680389), Temporal Swiftness (680390) and Temporal Restoration (680456): Effect[0] EffectMiscValue 8 (SPELLMOD_ALL_EFFECTS) with EffectBasePoints 99 + DieSides 1 = +100%, Effect[1] EffectMiscValue 14 (SPELLMOD_COST) with EffectBasePoints -51 + DieSides 1 = -50%. The authored effect values are Temporal Resilience armor 49+1=50, Temporal Swiftness haste-from-Spirit 9+1=10 and magic-duration -26+1=-25, Temporal Restoration mana-regen-from-Spirit 24+1=25 and in-combat share 24+1=25; SPELLMOD_ALL_EFFECTS doubles each through Unit::ApplyEffectModifiers (Unit.cpp). All three carry ManaCostPercentage 24, and SpellInfo::CalcPowerCost applies SPELLMOD_COST after resolving that percentage into an absolute number (SpellInfo.cpp), so the cost halves. Generic core machinery. This scenario is a regression guard for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Temporal Resilience armor before the talent",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 680389,
+      "effect": 0,
+      "save_as": "resilience_armor"
+    },
+    {
+      "action": "snapshot",
+      "label": "Temporal Resilience mana cost before the talent",
+      "actor": "talent",
+      "metric": "spell_power_cost",
+      "spell": 680389,
+      "save_as": "resilience_cost"
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, Temporal Resilience grants 50 armor",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 680389,
+      "effect": 0,
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, Temporal Swiftness gives 10% of Spirit as haste",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 680390,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, Temporal Swiftness cuts magic duration by 25%",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 680390,
+      "effect": 1,
+      "equals": -25
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, Temporal Restoration gives 25% of Spirit as regen",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 680456,
+      "effect": 0,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, Temporal Restoration keeps 25% of regen in combat",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 680456,
+      "effect": 1,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "Temporal Resilience's cost is nonzero to begin with",
+      "actor": "talent",
+      "metric": "spell_power_cost",
+      "spell": 680389,
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 574312
+    },
+    {
+      "action": "assert",
+      "label": "Infinite Guard self-applies its passive",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 574312,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Temporal Resilience's armor doubles to 100",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 680389,
+      "effect": 0,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "That is exactly +50 armor against the baseline",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 680389,
+      "effect": 0,
+      "relative_to": "resilience_armor",
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "label": "Temporal Swiftness's haste share doubles to 20%",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 680390,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "Temporal Swiftness's magic-duration cut doubles to 50%",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 680390,
+      "effect": 1,
+      "equals": -50
+    },
+    {
+      "action": "assert",
+      "label": "Temporal Restoration's Spirit share doubles to 50%",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 680456,
+      "effect": 0,
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "label": "Temporal Restoration's in-combat share doubles to 50%",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 680456,
+      "effect": 1,
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "label": "Temporal Resilience costs half as much mana",
+      "actor": "talent",
+      "metric": "spell_power_cost",
+      "spell": 680389,
+      "ratio_to": "resilience_cost",
+      "min": 0.49,
+      "max": 0.51
+    }
+  ]
+}

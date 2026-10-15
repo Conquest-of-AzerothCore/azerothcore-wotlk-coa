@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "name": "Blood Plague raises critical damage against Diseased targets (#2185)",
+  "contract": [
+    "Blood Plague 575335 has two effects, both aura 112 (SPELL_AURA_OVERRIDE_CLASS_SCRIPTS) with MiscValueB 31,",
+    "BasePoints 9 / DieSides 1 (i.e. 10) and class mask (0, 8388609, 0): effect 0 carries MiscValue 20000",
+    "(masked critical strike chance) and effect 1 MiscValue 20001 (masked critical damage). Both are raw",
+    "private selectors, which SpellAuraDefines.h states are not implicitly enabled, so",
+    "Unit::GetAscensionConditionalCombatModifier fell through to its default and returned 0. Condition 31 is",
+    "the reviewed disease selector: the core already honoured it for the Necromancer's Fiend contract by",
+    "scanning the victim for a caster-owned aura of the caster's own SpellFamilyName with Dispel =",
+    "DISPEL_DISEASE, and it now does the same for the Bloodmage (family 26). Rotclaw 503486, the rank a",
+    "level-80 character owns per AscensionSpellProgressionData.h, is SpellFamilyName 26 with Dispel 3",
+    "(DISPEL_DISEASE) and applies its aura to nearby enemies, so it supplies the caster-owned disease.",
+    "spell_critical_damage calculates a critical hit from a fixed base of 1000 through",
+    "Unit::SpellCriticalDamageBonus, which is where ASCENSION_CONDITIONAL_CRIT_DAMAGE is added; Ravenous Strike",
+    "501679 is DmgClass 2, so its critical bonus is the full 1000 and a 10-point critical damage modifier moves",
+    "the result by exactly 200. The critical strike chance half of the same record shares the identical",
+    "selector and condition evaluation but is added inside Unit::SpellTakenCritChance, which no harness metric",
+    "reaches."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 575335
+    },
+    {
+      "action": "set_aura",
+      "label": "Enter Accursed Form so the Cursed Form kit is castable",
+      "actor": "caster",
+      "spell": 562572,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 503486
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 575335
+    },
+    {
+      "action": "snapshot",
+      "label": "Ravenous Strike critical damage against a clean target",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "spell": 501679,
+      "target": "enemy",
+      "save_as": "clean_crit"
+    },
+    {
+      "action": "cast",
+      "label": "Rotclaw infects the nearby enemy",
+      "actor": "caster",
+      "spell": 503486
+    },
+    {
+      "action": "assert",
+      "label": "The enemy now carries a caster-owned family 26 disease",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 503486,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Blood Plague adds its own 10 critical damage points",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "spell": 501679,
+      "target": "enemy",
+      "relative_to": "clean_crit",
+      "min": 199,
+      "max": 201
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 575335
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning removes the conditional bonus",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "spell": 501679,
+      "target": "enemy",
+      "relative_to": "clean_crit",
+      "min": -1,
+      "max": 1
+    }
+  ]
+}

@@ -1,0 +1,382 @@
+{
+  "schema": 1,
+  "name": "Bright Flames raises Inferno Barrier's retaliation damage (#1764)",
+  "contract": "#1764: Bright Flames 300759 (rank 1) and 301351 (rank 2): effect 2 is ADD_PCT_MODIFIER (aura 108) on SPELLMOD_DAMAGE (misc 0), base 14 -> +15% and 29 -> +30%, class mask {0, 0, 0x400} = Inferno Barrier (504380, 535650, 535651, 582762-582764; SpellFamilyFlags {0, 0, 1024}); tooltip: increases the damage it deals by $s2% (Spell.dbc served file). Inferno Barrier reads 'attackers take ${$m2+0+$spi*0.1} Fire damage each time they deal damage to them'. The module turns the barrier's PROC_TRIGGER_DAMAGE into a dummy and deals the retaliation itself as Lucifron's Rage 524623 (family 30, empty flags) with the amount R = effect 2 of 504380 (Spell.dbc base 3, die sides 1, value 4) + Spirit * 0.1, truncated to an integer, so the SPELLMOD_DAMAGE modifier matched neither 524623 nor that amount; the fix runs the caster's SPELLMOD_DAMAGE modifiers for the barrier rank on R. Lucifron's Rage adds a fixed part F that Bright Flames does not touch (its RealPointsPerLevel; 14 was measured for a player target with no tuning), and the caster's class tuning multiplies the whole hit: against a player the PvP twin 887112 (-30% at level 80) applies, against a creature the normal aura 887012 (-20%). The retaliation used to land on a second, PvP-flagged Pyromancer, so #250's PvP tuning shrank the three samples to 25, 27 and 29 and put rank 2 (1.16) next to its 1.15 bound. The barrier now takes Void Spike 638089 (37 Shadow damage, SPELL_ATTR7_NO_ATTACK_MISS, so the creature's spell cannot miss the Pyromancer) from a Harvest Golem, so the retaliation lands on a creature, and the Pyromancer wears Maghia's Misguided Quill 49686 (+1000 Spirit, base item_template), so R is about 122 and the fixed part and integer truncation hardly move the ratios: with Spirit 1186, R = 122.6, rank 1 = 140.99 -> 140, rank 2 = 159.38 -> 159, so rank 1 = (140 + F) / (122 + F) and rank 2 = (159 + F) / (122 + F), 1.139 and 1.278 with F = 14 and the -20% creature tuning. For any Spirit from 1050 to 1450, F from 8 to 23 and a tuning multiplier from 0.5 to 1.2, each total truncated, rank 1 stays within 1.108..1.160 and rank 2 within 1.233..1.303, hence the bounds 1.09..1.18 and 1.21..1.33; unfixed is 1.0 and rank 2 scaled like rank 1 stays below 1.17. Lucifron's Rage can critically hit, so the golem casts Blessed Resilience 33143 (SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, -1000) on itself before each hit: Unit::SpellTakenCritChance adds it for every negative spell, so each stage yields its one noncritical sample without changing any amount. The barrier absorbs the Void Spike; the retaliation fires on damage or absorb. Not covered: the absorb half (aura 317), which already worked.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "pyro",
+      "race": 1,
+      "class": 24,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "attacker",
+      "owner": "pyro",
+      "entry": 36,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "pyro",
+      "spell": 504380
+    },
+    {
+      "action": "add_item",
+      "actor": "pyro",
+      "item": 49686
+    },
+    {
+      "action": "equip",
+      "label": "Maghia's Misguided Quill: +1000 Spirit",
+      "actor": "pyro",
+      "item": 49686,
+      "slot": 12
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Spirit is high enough for the barrier's amount to dominate the fixed part",
+      "actor": "pyro",
+      "metric": "stat",
+      "stat": 4,
+      "min": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "pyro",
+      "spell": 504380,
+      "stacks": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "pyro",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "set_power",
+      "actor": "pyro",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "pyro",
+      "spell": 504380
+    },
+    {
+      "action": "cast",
+      "actor": "pyro",
+      "spell": 504380
+    },
+    {
+      "action": "assert",
+      "label": "control: Inferno Barrier is up",
+      "actor": "pyro",
+      "metric": "aura",
+      "spell": 504380,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "spell_damage_total",
+      "spell": 524623,
+      "target": "attacker",
+      "save_as": "b_control",
+      "critical": false
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 524623,
+      "target": "attacker",
+      "save_as": "c_control"
+    },
+    {
+      "action": "cast",
+      "label": "Blessed Resilience (33143, aura 197 at -1000) keeps the single retaliation sample non-critical",
+      "actor": "attacker",
+      "spell": 33143
+    },
+    {
+      "action": "cast",
+      "label": "Control: the golem hits the barriered Pyromancer",
+      "actor": "attacker",
+      "spell": 638089,
+      "target": "pyro"
+    },
+    {
+      "action": "assert",
+      "label": "control: the barrier retaliates exactly once through Lucifron's Rage",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 524623,
+      "target": "attacker",
+      "relative_to": "c_control",
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "label": "control: Retaliation damage without Bright Flames",
+      "actor": "pyro",
+      "metric": "spell_damage_total",
+      "spell": 524623,
+      "target": "attacker",
+      "relative_to": "b_control",
+      "save_as": "ctrl",
+      "critical": false
+    },
+    {
+      "action": "learn",
+      "actor": "pyro",
+      "spell": 300759
+    },
+    {
+      "action": "set_aura",
+      "actor": "pyro",
+      "spell": 504380,
+      "stacks": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "pyro",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "set_power",
+      "actor": "pyro",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown from the previous barrier pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "pyro",
+      "spell": 504380
+    },
+    {
+      "action": "cast",
+      "actor": "pyro",
+      "spell": 504380
+    },
+    {
+      "action": "assert",
+      "label": "rank1: Inferno Barrier is up",
+      "actor": "pyro",
+      "metric": "aura",
+      "spell": 504380,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "spell_damage_total",
+      "spell": 524623,
+      "target": "attacker",
+      "save_as": "b_rank1",
+      "critical": false
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 524623,
+      "target": "attacker",
+      "save_as": "c_rank1"
+    },
+    {
+      "action": "cast",
+      "label": "Blessed Resilience (33143, aura 197 at -1000) keeps the single retaliation sample non-critical",
+      "actor": "attacker",
+      "spell": 33143
+    },
+    {
+      "action": "cast",
+      "label": "Rank 1: the golem hits the barriered Pyromancer",
+      "actor": "attacker",
+      "spell": 638089,
+      "target": "pyro"
+    },
+    {
+      "action": "assert",
+      "label": "rank1: the barrier retaliates exactly once through Lucifron's Rage",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 524623,
+      "target": "attacker",
+      "relative_to": "c_rank1",
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "rank1: Retaliation damage against the control",
+      "actor": "pyro",
+      "metric": "spell_damage_total",
+      "spell": 524623,
+      "target": "attacker",
+      "relative_to": "b_rank1",
+      "ratio_to": "ctrl",
+      "min": 1.09,
+      "max": 1.18,
+      "critical": false
+    },
+    {
+      "action": "unlearn",
+      "actor": "pyro",
+      "spell": 300759
+    },
+    {
+      "action": "learn",
+      "actor": "pyro",
+      "spell": 301351
+    },
+    {
+      "action": "set_aura",
+      "actor": "pyro",
+      "spell": 504380,
+      "stacks": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "pyro",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "set_power",
+      "actor": "pyro",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown from the previous barrier pass",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "pyro",
+      "spell": 504380
+    },
+    {
+      "action": "cast",
+      "actor": "pyro",
+      "spell": 504380
+    },
+    {
+      "action": "assert",
+      "label": "rank2: Inferno Barrier is up",
+      "actor": "pyro",
+      "metric": "aura",
+      "spell": 504380,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "spell_damage_total",
+      "spell": 524623,
+      "target": "attacker",
+      "save_as": "b_rank2",
+      "critical": false
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 524623,
+      "target": "attacker",
+      "save_as": "c_rank2"
+    },
+    {
+      "action": "cast",
+      "label": "Blessed Resilience (33143, aura 197 at -1000) keeps the single retaliation sample non-critical",
+      "actor": "attacker",
+      "spell": 33143
+    },
+    {
+      "action": "cast",
+      "label": "Rank 2: the golem hits the barriered Pyromancer",
+      "actor": "attacker",
+      "spell": 638089,
+      "target": "pyro"
+    },
+    {
+      "action": "assert",
+      "label": "rank2: the barrier retaliates exactly once through Lucifron's Rage",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 524623,
+      "target": "attacker",
+      "relative_to": "c_rank2",
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "rank2: Retaliation damage against the control",
+      "actor": "pyro",
+      "metric": "spell_damage_total",
+      "spell": 524623,
+      "target": "attacker",
+      "relative_to": "b_rank2",
+      "ratio_to": "ctrl",
+      "min": 1.21,
+      "max": 1.33,
+      "critical": false
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

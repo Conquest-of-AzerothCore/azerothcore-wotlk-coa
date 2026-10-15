@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Cultist: Dreadnought suppresses Total Madness at 100 Insanity (#4929)",
+  "contract": "AscensionTaughtAbilityData.h:35 { 25, 96, 10, 680750, 567524 } confirms 680750 'Dreadnought' is the class-25 spec-96 level-10 identity spell, the counterpart of { 25, 40, 10, 92131, 520326 } for Herald of the Depths (spec 40). Both spec tooltips read 'Reaching 100 Insanity no longer causes Total Madness'. AscensionCultist.cpp Resource() only checked HasSpell(92131)/HasSpell(805120) (Herald ranks) before applying Total Madness (803061) at the 100 Insanity threshold, never HasSpell(680750), so a Dreadnought-spec Cultist still entered Total Madness exactly like an unspecced one. Companion existing regression cultist-total-madness.json (#4216) proves Madness still applies with no spec learned.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "c", "race": 1, "class": 25, "level": 16, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "c", "entry": 36, "health": 1000000, "distance": 8 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "spell": 500706, "actor": "c" },
+    { "action": "learn", "spell": 500712, "actor": "c" },
+    { "action": "learn", "spell": 680750, "actor": "c", "label": "Dreadnought identity passive" },
+    { "action": "wait", "ms": 1500 },
+    { "action": "set_aura", "spell": 500706, "stacks": 90, "actor": "c" },
+    { "action": "cast", "actor": "c", "spell": 500712, "target": "dummy" },
+    {
+      "action": "assert", "label": "Insanity reaches 100",
+      "actor": "c", "metric": "aura_stacks", "spell": 500706, "min": 100, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Total Madness suppressed by Dreadnought (#4929)",
+      "actor": "c", "metric": "aura", "spell": 803061, "equals": 0, "within_ms": 3000
+    }
+  ]
+}

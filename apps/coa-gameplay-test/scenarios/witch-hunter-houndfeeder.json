@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Houndfeeder adds 4% critical strike chance to the player and the Shadowhound (#804)",
+  "contract": "Houndfeeder 705477 reads 'Increases the critical strike chance of you and your Shadow Hound by $s1%.' In the installed Spell.dbc it is passive with effect 0 = self SPELL_AURA_MOD_CRIT_PCT (290), BasePoints 3 (DieSides 1, so 4%), and effect 1 = 190 (SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS) carrying the same aura and amount at 100 yd. The player side is stock: AuraEffect::HandleAuraModCritPct feeds Player::UpdateWeaponDependentCritAuras (Player.cpp) for melee/ranged and PlayerStats/StatSystem.cpp:981 for spell crit, so both crit percentages rise by exactly 4 whatever the class base is; that is why the assertions are relative to a snapshot. The hound side is the same effect-190 area delivery as Dark Ranger. No script or SQL names 705477. The stale aura-tooltip text noted in the audit is client-only and not asserted. A fresh character's melee crit field reads 0 until a crit aura first recomputes it (measured on slot 3: Houndfeeder gave 4.664 from a 0 baseline, and exactly 4.000 after a learn and unlearn of the same passive, the primed baseline being 0.664), so the baseline is snapshotted after a priming learn and unlearn.",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Prime the crit fields with a learn", "actor": "hunter", "spell": 705477},
+    {"action": "unlearn", "label": "Prime the crit fields with an unlearn", "actor": "hunter", "spell": 705477},
+    {"action": "wait", "label": "Let the recomputed fields settle", "ms": 1000},
+    {"action": "snapshot", "actor": "hunter", "metric": "melee_crit_chance", "save_as": "melee_before"},
+    {"action": "snapshot", "actor": "hunter", "metric": "spell_crit_chance", "save_as": "spell_before"},
+    {"action": "learn", "label": "Houndfeeder", "actor": "hunter", "spell": 705477},
+    {"action": "assert", "label": "The passive is active", "actor": "hunter", "metric": "aura", "spell": 705477, "equals": 1},
+    {"action": "assert", "label": "Melee crit rises by 4 points", "actor": "hunter", "metric": "melee_crit_chance", "relative_to": "melee_before", "min": 3.99, "max": 4.01, "within_ms": 3000},
+    {"action": "assert", "label": "Spell crit rises by 4 points", "actor": "hunter", "metric": "spell_crit_chance", "relative_to": "spell_before", "min": 3.99, "max": 4.01, "within_ms": 3000},
+    {"action": "learn", "label": "Houndmaster's Whistle", "actor": "hunter", "spell": 801343},
+    {"action": "cast", "actor": "hunter", "spell": 801343},
+    {"action": "assert", "label": "The Shadowhound is out", "actor": "hunter", "metric": "pet_entry", "equals": 50124, "within_ms": 15000},
+    {"action": "assert", "label": "The hound carries the aura", "actor": "hunter", "metric": "owned_creature_count", "entry": 50124, "spell": 705477, "caster": "hunter", "equals": 1, "within_ms": 10000},
+    {"action": "assert", "label": "The hound's aura grants 4% (BasePoints 3 + 1)", "actor": "hunter", "metric": "pet_aura_amount", "spell": 705477, "effect": 1, "equals": 4},
+    {"action": "unlearn", "label": "Drop Houndfeeder", "actor": "hunter", "spell": 705477},
+    {"action": "assert", "label": "Melee crit returns to its baseline", "actor": "hunter", "metric": "melee_crit_chance", "relative_to": "melee_before", "min": -0.01, "max": 0.01, "within_ms": 3000},
+    {"action": "assert", "label": "The hound loses the aura", "actor": "hunter", "metric": "pet_aura_stacks", "spell": 705477, "equals": 0, "within_ms": 10000}
+  ]
+}

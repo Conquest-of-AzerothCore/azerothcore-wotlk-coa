@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Correct the Mistake grants two stacks of Endless Sands (#3666)",
+  "contract": "Bronze Timeways 807309's tooltip is \"Casting Correct the Mistake now grants 2 stacks of Endless Sands\". Both of its effects are aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) on the same buff 806728 (Endless Sands, StackAmount 5, 15 sec), which is how two stacks are produced - one per effect. Spell.dbc gives 807309 ProcFlags 0x0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and Aura::GetProcEffectMask returned 0: no stack was ever granted. Correct the Mistake 572360 is SpellFamilyName 28, SpellFamilyFlags word1 2048, DmgClass 1, effect 0 SPELL_EFFECT_HEAL. The caster's health is lowered first so the heal has real healing to do. Asserting exactly two stacks, not one or more, is what proves both proc effects fired (DisableEffectsMask 0 in the row).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "chronomancer", "spell": 807309 },
+    { "action": "learn", "actor": "chronomancer", "spell": 572360 },
+    {
+      "action": "assert",
+      "label": "No Endless Sands before any cast",
+      "actor": "chronomancer",
+      "metric": "aura_stacks",
+      "spell": 806728,
+      "caster": "chronomancer",
+      "equals": 0
+    },
+    { "action": "set_health", "actor": "chronomancer", "value": 2000 },
+    { "action": "cast", "actor": "chronomancer", "spell": 572360 },
+    {
+      "action": "assert",
+      "label": "Correct the Mistake's heal grants exactly two stacks of Endless Sands",
+      "actor": "chronomancer",
+      "metric": "aura_stacks",
+      "spell": 806728,
+      "caster": "chronomancer",
+      "equals": 2,
+      "within_ms": 8000
+    }
+  ]
+}

@@ -1125,7 +1125,8 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                         if (achievIdByArenaSlot[j] == achievement->ID)
                         {
                             Battleground* bg = GetPlayer()->GetBattleground();
-                            if (!bg || !bg->isArena() || ArenaTeam::GetSlotByType(bg->GetArenaType()) != j)
+                            if (!bg || !bg->isArena() || !bg->GetArenaType()
+                                || ArenaTeam::GetSlotByType(bg->GetArenaType()) != j)
                                 notfit = true;
 
                             break;
@@ -2548,6 +2549,9 @@ AchievementGlobalMgr* AchievementGlobalMgr::instance()
 
 bool AchievementGlobalMgr::IsStatisticCriteria(AchievementCriteriaEntry const* achievementCriteria) const
 {
+    if (!achievementCriteria)
+        return false;
+
     return IsStatisticAchievement(sAchievementStore.LookupEntry(achievementCriteria->referredAchievement));
 }
 
@@ -2557,7 +2561,7 @@ bool AchievementGlobalMgr::IsStatisticAchievement(AchievementEntry const* achiev
         return false;
 
     AchievementCategoryEntry const* cat = sAchievementCategoryStore.LookupEntry(achievement->categoryId);
-    do
+    while (cat)
     {
         switch (cat->ID)
         {
@@ -2569,7 +2573,7 @@ bool AchievementGlobalMgr::IsStatisticAchievement(AchievementEntry const* achiev
                 cat = sAchievementCategoryStore.LookupEntry(cat->parentCategory);
                 break;
         }
-    } while (cat);
+    }
 
     return false;
 }

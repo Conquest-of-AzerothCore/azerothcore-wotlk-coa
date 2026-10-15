@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "name": "Trapper cuts the cooldown of trap spells by 25% (#1050)",
+  "contract": "Trapper 681180 (installed Spell.dbc) is a passive family-21 spell with one effect: SPELL_AURA_ADD_PCT_MODIFIER (108), misc 11 = SPELLMOD_COOLDOWN, base -26 die 1 -> -25, SpellClassMask[2] 0x40000. Inquisitor's Trap 681445 and Death Trap 681450 both carry SpellFamilyFlags[2] 0x40000 and a 60000 ms cooldown; Player::AddSpellAndCategoryCooldowns runs the recovery time through ApplySpellMod(SPELLMOD_COOLDOWN). The Description reads 'Reduces the cooldown of your Trap spells by 25%.' 60000 * 0.75 = 45000. The native modifier query is checked on Death Trap (45000) and on Guard Strike 804432 (family flag [1] 0x2000, not a trap, 18000 unchanged); the real casts then confirm the running cooldown is 45 s for the holder against a full minute for an untalented control. The cooldown is read within 2 s of the cast, so the band's lower edge is 2 s below the ideal value.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ctl",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    },
+    {
+      "id": "tr",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "ctl",
+      "spell": 681445,
+      "label": "Learn Inquisitor's Trap"
+    },
+    {
+      "action": "learn",
+      "actor": "ctl",
+      "spell": 681450,
+      "label": "Learn Death Trap"
+    },
+    {
+      "action": "learn",
+      "actor": "tr",
+      "spell": 681445,
+      "label": "Learn Inquisitor's Trap"
+    },
+    {
+      "action": "learn",
+      "actor": "tr",
+      "spell": 681450,
+      "label": "Learn Death Trap"
+    },
+    {
+      "action": "learn",
+      "actor": "tr",
+      "spell": 681180,
+      "label": "Learn Trapper"
+    },
+    {
+      "action": "assert",
+      "label": "Control: a trap's 60 s cooldown is untouched",
+      "actor": "ctl",
+      "metric": "spell_modifier",
+      "spell": 681450,
+      "op": 11,
+      "base": 60000,
+      "equals": 60000
+    },
+    {
+      "action": "assert",
+      "label": "Trapper: a trap's 60 s cooldown becomes 45 s",
+      "actor": "tr",
+      "metric": "spell_modifier",
+      "spell": 681450,
+      "op": 11,
+      "base": 60000,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "Trapper: a non-trap 18 s cooldown (Guard Strike) is untouched",
+      "actor": "tr",
+      "metric": "spell_modifier",
+      "spell": 804432,
+      "op": 11,
+      "base": 18000,
+      "equals": 18000
+    },
+    {
+      "action": "cast",
+      "actor": "ctl",
+      "spell": 681445,
+      "label": "Control drops Inquisitor's Trap"
+    },
+    {
+      "action": "cast",
+      "actor": "tr",
+      "spell": 681445,
+      "label": "Trapper drops Inquisitor's Trap"
+    },
+    {
+      "action": "assert",
+      "label": "Control's Inquisitor's Trap cooldown is the full minute",
+      "actor": "ctl",
+      "metric": "cooldown_ms",
+      "spell": 681445,
+      "min": 58000,
+      "max": 60000,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Trapper's Inquisitor's Trap cooldown is 45 seconds",
+      "actor": "tr",
+      "metric": "cooldown_ms",
+      "spell": 681445,
+      "min": 43000,
+      "max": 45000,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "ctl",
+      "spell": 681450,
+      "label": "Control drops Death Trap"
+    },
+    {
+      "action": "cast",
+      "actor": "tr",
+      "spell": 681450,
+      "label": "Trapper drops Death Trap"
+    },
+    {
+      "action": "assert",
+      "label": "Control's Death Trap cooldown is the full minute",
+      "actor": "ctl",
+      "metric": "cooldown_ms",
+      "spell": 681450,
+      "min": 58000,
+      "max": 60000,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Trapper's Death Trap cooldown is 45 seconds",
+      "actor": "tr",
+      "metric": "cooldown_ms",
+      "spell": 681450,
+      "min": 43000,
+      "max": 45000,
+      "within_ms": 2000
+    }
+  ]
+}

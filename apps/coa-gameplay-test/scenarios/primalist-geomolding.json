@@ -1,0 +1,470 @@
+{
+  "schema": 1,
+  "name": "Primalist Geomolding: Tremor ticks and next Terrasurge consumption",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "enemy",
+      "race": 5,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "primalist",
+      "entry": 36,
+      "level": 80,
+      "distance": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "pvp",
+      "actor": "primalist",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9612.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 95
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 300697,
+      "all_specs": true,
+      "label": "Remove the automatic Geomancy Crushing the Earth spell power, which refreshes after the baselines"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 681114
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 574162
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 803138
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "save_as": "base_cost",
+      "label": "base_cost",
+      "spell": 574162,
+      "op": 14,
+      "base": 450
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "save_as": "base_damage",
+      "label": "base_damage",
+      "spell": 574162,
+      "target": "dummy"
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_damage_start",
+      "label": "baseline_damage_start",
+      "spell": 681114,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681114,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681114,
+      "target": "enemy",
+      "relative_to": "baseline_damage_start",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 560170,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 9300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681114,
+      "target": "enemy",
+      "relative_to": "baseline_damage_start",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 560170,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "enemy",
+      "spell": 681114,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 560169
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_damage_start",
+      "label": "talented_damage_start",
+      "spell": 681114,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681114,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681114,
+      "target": "enemy",
+      "relative_to": "talented_damage_start",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 560170,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 9300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681114,
+      "target": "enemy",
+      "relative_to": "talented_damage_start",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 560170,
+      "equals": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "enemy",
+      "spell": 681114,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0,
+      "label": "Drop Earthshaping from the Tremor casts, which expires exactly now and adds its own Terrasurge bonus"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 574162,
+      "op": 14,
+      "base": 450,
+      "relative_to": "base_cost",
+      "equals": 90
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 574162,
+      "target": "dummy",
+      "ratio_to": "base_damage",
+      "min": 1.299,
+      "max": 1.301
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 560170,
+      "equals": 3
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 574162,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 574162,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 560170,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 574162,
+      "op": 14,
+      "base": 450,
+      "relative_to": "base_cost",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 574162,
+      "target": "dummy",
+      "ratio_to": "base_damage",
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 560170,
+      "stacks": 10
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_max_stacks",
+      "spell": 560170,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 560170,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 574162,
+      "op": 14,
+      "base": 450,
+      "relative_to": "base_cost",
+      "equals": 300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 574162,
+      "target": "dummy",
+      "ratio_to": "base_damage",
+      "min": 1.999,
+      "max": 2.001
+    },
+    {
+      "action": "wait",
+      "ms": 30500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 560170,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 560169
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_damage_start",
+      "label": "removed_damage_start",
+      "spell": 681114,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681114,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681114,
+      "target": "enemy",
+      "relative_to": "removed_damage_start",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 560170,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 9300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681114,
+      "target": "enemy",
+      "relative_to": "removed_damage_start",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 560170,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "enemy",
+      "spell": 681114,
+      "stacks": 0
+    }
+  ],
+  "contract": "Only periodic Tremor damage grants Geomolding: one stack per tick, 3 additional Rage and 10% Terrasurge damage per stack, up to ten. The next Terrasurge consumes all stacks; direct damage, unlearning, unrelated spells and expiry are controls. Specialization 95 (Geomancy) grants Crushing the Earth (300697) automatically; its two-second refresh adds spell power after the baselines are taken, so the scenario removes it and keeps spell power constant. Terrasurge damage probes query a creature: normal class 887019 (-15%) and Geomancy 887086 (+23%) tuning scale the 1000 base to 1045, so ten stacks read 2091/1045 after truncation and the doubled damage uses a 1.999-2.001 window. Tremor and Terrasurge casts still target the enemy player."
+}

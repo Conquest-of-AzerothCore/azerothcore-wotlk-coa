@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Runemaster audit #2743: Freezing Codex reshapes Ice Rune's cooldown, range and cost",
+  "contract": [
+    "Freezing Codex 705577: 'Reduces the cooldown of Ice Rune by $/1000;s1 sec and increases the mana cost by",
+    "$s3%, but reduces its range by $s2 yds.' Re-verified in Spell.dbc: three SPELL_AURA_ADD_FLAT_MODIFIER /",
+    "SPELL_AURA_ADD_PCT_MODIFIER effects share EffectSpellClassMask mask0 2 on family 38: Effect0 MiscValue 11 =",
+    "SPELLMOD_COOLDOWN, EffectBasePoints0 -20001 with DieSides 1 = -20000ms; Effect1 MiscValue 5 = SPELLMOD_RANGE,",
+    "EffectBasePoints1 -11 with DieSides 1 = -10; Effect2 MiscValue 14 = SPELLMOD_COST, EffectBasePoints2 49 with",
+    "DieSides 1 = +50%. Ice Rune 524930 carries SpellFamilyName 38, SpellFamilyFlags[0] 16777218 (0x1000002),",
+    "which includes bit1 (mask 2) - a confirmed match; its own RecoveryTime is 60000ms, ManaCostPercentage 12,",
+    "RangeIndex 3. All three are the native AzerothCore spellmod system; no occurrence of 705577 exists in",
+    "src/server/coa/. Expected: with the talent, Ice Rune's cooldown modifier drops from a 60000ms base to",
+    "40000ms, its cost modifier on a 100 base rises by 50 points, its range modifier on a 0 base drops by 10;",
+    "unlearning restores the cooldown."
+  ],
+  "timeout_ms": 60000,
+  "players": [{"id": "rm", "race": 1, "class": 32, "level": 80}],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 3000},
+    {"action": "assert", "label": "SETUP: Ice Rune cooldown modifier starts at 60000ms", "actor": "rm",
+      "metric": "spell_modifier", "spell": 524930, "op": 11, "base": 60000, "equals": 60000},
+    {"action": "learn", "actor": "rm", "spell": 705577},
+    {"action": "assert", "label": "CONTRACT: Freezing Codex is active", "actor": "rm", "metric": "aura",
+      "spell": 705577, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "CONTRACT: Ice Rune cooldown drops to 40000ms", "actor": "rm",
+      "metric": "spell_modifier", "spell": 524930, "op": 11, "base": 60000, "equals": 40000},
+    {"action": "assert", "label": "CONTRACT: Ice Rune mana cost modifier rises 50 points", "actor": "rm",
+      "metric": "spell_modifier", "spell": 524930, "op": 14, "base": 100, "min": 149.9, "max": 150.1},
+    {"action": "assert", "label": "CONTRACT: Ice Rune range modifier drops by 10", "actor": "rm",
+      "metric": "spell_modifier", "spell": 524930, "op": 5, "base": 0, "min": -10.1, "max": -9.9},
+    {"action": "unlearn", "actor": "rm", "spell": 705577},
+    {"action": "assert", "label": "CONTRACT: unlearning restores the 60000ms cooldown", "actor": "rm",
+      "metric": "spell_modifier", "spell": 524930, "op": 11, "base": 60000, "equals": 60000, "within_ms": 2000}
+  ]
+}

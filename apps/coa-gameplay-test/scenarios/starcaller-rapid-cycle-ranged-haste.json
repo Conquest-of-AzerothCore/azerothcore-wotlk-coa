@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "name": "Rapid Cycle turns Lunar Phase stacks into 4% ranged haste each (#1527)",
+  "contract": "Rapid Cycle 300249 (Spell.dbc, family 32) carries SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 12 (SPELLMOD_EFFECT2), EffectBasePoints 3 with DieSides 1 (+4) and EffectSpellClassMask word1 0x1, which is Lunar Phase 802985's SpellFamilyFlags word1. 802985 effect index 1 is SPELL_AURA_MOD_RANGED_HASTE (140) with EffectBasePoints 0 and DieSides 0, a base of 0, so the modifier is the only source of the tooltip's 'increases your ranged haste by 4% per stack'; aura amounts are multiplied by the stack count. AscensionStarcallerContracts.cpp used to call dummy(1) on 802985, which turned that effect into SPELL_AURA_DUMMY, so HandleAuraModRangedHaste never ran whatever the talent did. The assertion reads the native result, the hasted ranged swing time in UNIT_FIELD_RANGEDATTACKTIME (attack_time_ms hand 2): Player::InitStatsForLevel (Player.cpp:2762) leaves it at the 2000 ms base without a ranged weapon and Unit::ApplyAttackTimePercentMod divides it by (100+amount)/100, so four stacks at 4% give 2000/1.16 = 0.862 of the control's value. Both fixtures are the same race, class and level, receive 802985 by set_aura at 4 stacks (its StackAmount after the contract), and the talent is learned before the aura so the modifier is in place when the aura amount is calculated. aura_amount is not asserted because a dummy effect keeps the same amount and would not fail before the fix. The control must stay at ratio 1.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Rapid Cycle before the aura exists",
+      "actor": "talent",
+      "spell": 300249
+    },
+    {
+      "action": "snapshot",
+      "label": "Ranged swing time without Lunar Phase",
+      "actor": "control",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "save_as": "ranged_base_control"
+    },
+    {
+      "action": "snapshot",
+      "label": "Ranged swing time of the talent fixture without Lunar Phase",
+      "actor": "talent",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "save_as": "ranged_base_talent"
+    },
+    {
+      "action": "set_aura",
+      "label": "Four Lunar Phase stacks on the control",
+      "actor": "control",
+      "spell": 802985,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Four Lunar Phase stacks on the talent fixture",
+      "actor": "talent",
+      "spell": 802985,
+      "stacks": 4
+    },
+    {
+      "action": "assert",
+      "label": "Talent fixture holds four stacks",
+      "actor": "talent",
+      "metric": "aura_stacks",
+      "spell": 802985,
+      "equals": 4,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Control keeps the base ranged swing time",
+      "actor": "control",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "ratio_to": "ranged_base_control",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "label": "Four stacks of Rapid Cycle give 16% ranged haste",
+      "actor": "talent",
+      "metric": "attack_time_ms",
+      "hand": 2,
+      "ratio_to": "ranged_base_talent",
+      "min": 0.858,
+      "max": 0.866
+    }
+  ]
+}

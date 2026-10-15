@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "name": "Sovereignty stacks from Crimson Tide's damage (#603)",
+  "contract": "Sovereignty 806049's single effect is SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on Sovereignty 504272, a native pair of modifiers (aura 108 MiscValue 14 SPELLMOD_COST BasePoints -11 and aura 107 MiscValue 17 SPELLMOD_JUMP_TARGETS DieSides 1) whose EffectSpellClassMask (0, 131072, 0) is exactly the eight Bloodbolt ranks, StackAmount 5. Spell.dbc gives 806049 ProcFlags 0 and no spell_proc row existed, so the aura was inert. The tooltip is 'Damage dealt by Crimson Tide now grants you Sovereignty' at ProcChance 100. Crimson Tide has no direct-damage effect at all, so the only event it can ever raise is PROC_FLAG_DONE_PERIODIC, which is what the row carries. Crimson Tide is cast as rank 504134, the rank a level-80 character owns per AscensionSpellProgressionData.h. Its single effect is aura 3 SPELL_AURA_PERIODIC_DAMAGE with Amplitude 3000, DurationIndex 8 (15 s) and MaxAffectedTargets 10, so one cast against eight dummies produces 5 ticks x 8 targets = 40 separate PROC_FLAG_DONE_PERIODIC events, and two casts 15 s apart produce about 80. The first tick must therefore grant one stack, with no proc roll involved.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy1",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504134
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 578305
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 806049
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "No stacks before the damage over time starts",
+      "actor": "bloodmage",
+      "metric": "aura_stacks",
+      "spell": 504272,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 504134,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "label": "One Crimson Tide tick",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the first periodic tick grants Sovereignty",
+      "actor": "bloodmage",
+      "metric": "aura_stacks",
+      "spell": 504272,
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "And Bloodbolt's Rage cost is reduced while it is up",
+      "actor": "bloodmage",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 14,
+      "base": 100,
+      "max": 95
+    }
+  ]
+}

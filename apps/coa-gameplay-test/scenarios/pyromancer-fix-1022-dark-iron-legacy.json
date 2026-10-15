@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "name": "Meteor applies the disorient that carries Dark Iron Legacy (#1022)",
+  "contract": "#1022: Dark Iron Legacy 680970 is two ADD_FLAT_MODIFIER auras (aura 107): effect 1 on SPELLMOD_EFFECT2 (misc 12), base 39 -> +40, class mask {0, 0x20000, 0} = Meteor Slam 300985; effect 2 on SPELLMOD_EFFECT1, +20, mask {0x100000, 0, 0} = Melt Weapon 301285 (Spell.dbc served file). Meteor Slam is a 4 s disorient (duration index 35 = 4000 ms): effect 1 CONFUSE, effect 2 aura 271 MOD_DAMAGE_FROM_CASTER with base -1 -> 0 and mask {0x200010, 0, 0} = Explode and Lava Shard, so +40 on effect 2 is the 40% the tooltip promises. Nothing in the server ever applied 300985 (Meteor ranks only trigger 804076, a single damage effect, and both descriptions say they disorient for $300985d), so the modifier had nothing to raise. The fix casts 300985 on the target when Meteor's damage spell 804076 hits. The scenario hits the dummy with 804076 directly (the ground-targeted rank spells 500135 etc. trigger it; casting it on a unit avoids needing a destination), asserts the aura is applied by the caster, that its effect 2 amount is 0 without the passive and 40 with it. Fails before the fix (the aura never appears). Melt Weapon 301285 (effect 2's carrier) is not applied by anything either and is not covered.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 804076
+    },
+    {
+      "action": "assert",
+      "label": "No disorient before the hit",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 300985,
+      "caster": "caster",
+      "equals": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 804076
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 804076,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Control: Meteor's hit applies the Meteor Slam disorient to the target",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 300985,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Control: without Dark Iron Legacy the damage taken bonus in Meteor Slam is 0",
+      "actor": "dummy",
+      "metric": "aura_amount",
+      "spell": 300985,
+      "caster": "caster",
+      "effect": 1,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the 4 second disorient expire",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The disorient has expired",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 300985,
+      "caster": "caster",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680970
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 804076
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 804076,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Dark Iron Legacy: Meteor's hit applies the Meteor Slam disorient to the target",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 300985,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Dark Iron Legacy makes Meteor Slam's damage taken bonus 40% (effect 2, base -1 -> 0, +40)",
+      "actor": "dummy",
+      "metric": "aura_amount",
+      "spell": 300985,
+      "caster": "caster",
+      "effect": 1,
+      "equals": 40
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Issue 3652: Elemental Strikes raises Fire/Frost/Nature spell crit chance and expertise",
+  "contract": [
+    "806704 eff0 is native SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL",
+    "(AuraEffect::HandleModSpellCritChanceShool, SpellAuraEffects.cpp:136), EffectBasePoints[0]=2 (displayed 3%,",
+    "matching the tooltip), misc=28 (school mask Fire|Nature|Frost = 4+8+16). eff1 is native",
+    "SPELL_AURA_MOD_EXPERTISE (AuraEffect::HandleAuraModExpertise, SpellAuraEffects.cpp:305),",
+    "EffectBasePoints[1]=3 (displayed 4, matching the tooltip). No CoA code runs at 806704."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [{"id": "rm", "race": 1, "class": 32, "level": 60}],
+  "steps": [
+    {"action": "wait", "ms": 500},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_crit_chance", "school": 2, "save_as": "fire_crit_base"},
+    {"action": "snapshot", "actor": "rm", "metric": "expertise", "save_as": "expertise_base"},
+    {"action": "learn", "actor": "rm", "spell": 806704},
+    {"action": "assert", "label": "CONTRACT: Fire spell crit chance rises 3 percentage points", "actor": "rm",
+     "metric": "spell_crit_chance", "school": 2, "relative_to": "fire_crit_base", "min": 2.5, "max": 3.5,
+     "within_ms": 1000},
+    {"action": "assert", "label": "CONTRACT: expertise rises by 4", "actor": "rm", "metric": "expertise",
+     "relative_to": "expertise_base", "min": 3.5, "max": 4.5, "within_ms": 1000}
+  ]
+}

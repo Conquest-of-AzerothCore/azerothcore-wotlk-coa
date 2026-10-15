@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Saronite Mind grants Eldritch Eye 1 or 2 additional charges per rank (#3624)",
+  "contract": "Saronite Mind rank1 806266 and rank2 807879 (Spell.dbc, passive, family 31) each have a single SPELLMOD_FLAT (107) aura on SPELLMOD_CHARGES (misc 4): rank1 BasePoints 0+1=+1, rank2 BasePoints 1+1=+2, class mask dword B bit26 (67108864) -- the exact SpellFamilyFlags of Eldritch Eye (802049, [0,67108864,0], independently confirmed in cultist-eldritch-eye.json/#3262). SPELLMOD_CHARGES is consumed at the exact native call site Player::ApplySpellMod -> Aura::CalcMaxCharges reading `modOwner->ApplySpellMod(GetId(), SPELLMOD_CHARGES, maxProcCharges)` (SpellAuras.cpp:917), the generic mechanism any class's 'gain N more charges of X' talent uses; no CoA script or dummy handler exists for either spell ID anywhere in the source. Eldritch Eye's own DBC ProcCharges is 3, so a rank1 Saronite Mind caster's buff must carry 4 charges and a rank2 caster's must carry 5, proven directly with aura_charges after casting -- the same technique already used for the shipped Flames of Fate fix (pyromancer-fix-945-flames-of-fate-charges.json). Two independent player fixtures isolate each rank so they cannot stack with each other. Regression guard for behaviour that already works natively; no code change.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "rank1", "race": 1, "class": 25, "level": 80 },
+    { "id": "rank2", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: Eldritch Eye's charge mod is untouched before Saronite Mind (rank1 fixture)",
+      "actor": "rank1", "metric": "spell_modifier", "spell": 802049, "op": 4, "base": 3, "equals": 3
+    },
+    {
+      "action": "assert", "label": "SETUP: Eldritch Eye's charge mod is untouched before Saronite Mind (rank2 fixture)",
+      "actor": "rank2", "metric": "spell_modifier", "spell": 802049, "op": 4, "base": 3, "equals": 3
+    },
+    { "action": "learn", "actor": "rank1", "spell": 806266 },
+    { "action": "learn", "actor": "rank1", "spell": 802049 },
+    { "action": "cast", "actor": "rank1", "spell": 802049 },
+    {
+      "action": "assert", "label": "Rank 1 grants exactly 1 additional charge: 3 -> 4 (#3624)",
+      "actor": "rank1", "metric": "aura_charges", "spell": 802049, "equals": 4, "within_ms": 2000
+    },
+    { "action": "learn", "actor": "rank2", "spell": 807879 },
+    { "action": "learn", "actor": "rank2", "spell": 802049 },
+    { "action": "cast", "actor": "rank2", "spell": 802049 },
+    {
+      "action": "assert", "label": "Rank 2 grants exactly 2 additional charges: 3 -> 5 (#3624)",
+      "actor": "rank2", "metric": "aura_charges", "spell": 802049, "equals": 5, "within_ms": 2000
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Atone, Or Else adds 3 stacks to Fervor of the Sun (#2203)",
+  "contract": "Atone, Or Else 680619 (Spell.dbc, SpellFamilyName 33) carries SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue SPELLMOD_MAX_AURA_STACKS (31, 'Ascension: maximum stacks of an already stackable aura'), EffectSpellClassMask word A = 524288 (bit 19), EffectBasePoints 2 resolving to +3. Fervor of the Sun (Proc) 680623 carries SpellFamilyFlags word A = 524288, the same bit, and its own native StackAmount = 5. SpellInfo::CalcMaxAuraStacks (SpellInfo.cpp) calls modOwner->ApplySpellMod(Id, SPELLMOD_MAX_AURA_STACKS, maximum) using the aura's own spell id, so the talent raises Fervor of the Sun's cap from 5 to 8 stacks with no script needed. This scenario calls that exact function through the harness's spell_max_stacks metric.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "Fervor of the Sun caps at 5 stacks before the talent",
+      "actor": "cleric", "metric": "spell_max_stacks", "spell": 680623, "equals": 5
+    },
+    { "action": "learn", "actor": "cleric", "spell": 680619 },
+    {
+      "action": "assert", "label": "Atone, Or Else raises Fervor of the Sun's cap to 8 stacks",
+      "actor": "cleric", "metric": "spell_max_stacks", "spell": 680623, "equals": 8
+    }
+  ]
+}

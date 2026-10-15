@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Sunstorm channels Justice every second and locks out other abilities (#976)",
+  "contract": "Sunstorm 760379 has three engine-native aura effects, no custom handler needed. Effect 0 is SPELL_AURA_PERIODIC_TRIGGER_SPELL (23), EffectTriggerSpell 572848 (Justice), EffectAmplitude 1000 ms, DurationIndex 32 (SpellDuration.dbc row 32 = 6000 ms, matching 'for the next 6 sec'); AttributesEx5 512 = SPELL_ATTR5_EXTRA_INITIAL_PERIOD ('Immediately do periodic tick on apply', SharedDefines.h:632), so the first Justice cast fires immediately and AuraEffect::HandlePeriodicTriggerSpellAuraTick (SpellAuraEffects.cpp) repeats it every 1000 ms for 6000 ms (6 casts). Effect 2 is SPELL_AURA_ALLOW_ONLY_ABILITY (263, AuraEffect::HandleAuraAllowOnlyAbility), which sets PLAYER_ALLOW_ONLY_ABILITY; Spell::CheckCast (Spell.cpp:5754) then fails any further non-triggered, non-melee-swing player cast with SPELL_FAILED_SPELL_IN_PROGRESS, while HandlePeriodicTriggerSpellAuraTick casts Justice with TRIGGERED_FULL_MASK (includes TRIGGERED_IGNORE_CASTER_AURASTATE), which bypasses that same check -- matching 'you can move but cannot perform any other abilities'. Effect 1 (SPELL_AURA_MECHANIC_IMMUNITY_MASK, 147, MiscValue 1733) is likewise handled natively by AuraEffect::HandleModStateImmunityMask and is not separately asserted here. This scenario proves the two clearly testable clauses: the periodic self-cast and the ability lockout, both delivered with zero script/SQL.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "control", "race": 1, "class": 27, "level": 80 },
+    { "id": "test", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "control", "spell": 800601 },
+    { "action": "learn", "actor": "test", "spell": 760379 },
+    { "action": "learn", "actor": "test", "spell": 800601 },
+    { "action": "cast", "label": "Control casts Sunwalker on itself outside Sunstorm", "actor": "control", "spell": 800601, "target": "control" },
+    {
+      "action": "assert",
+      "label": "Sunwalker applies normally without Sunstorm active",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 800601,
+      "equals": 1
+    },
+    { "action": "cast", "label": "Test casts Sunstorm on itself", "actor": "test", "spell": 760379, "target": "test" },
+    {
+      "action": "wait",
+      "label": "Clear Sunstorm's own GCD so the next rejection is attributable to PLAYER_ALLOW_ONLY_ABILITY, not the GCD",
+      "ms": 1600
+    },
+    { "action": "cast", "label": "Test tries to cast Sunwalker while Sunstorm is still active", "actor": "test", "spell": 800601, "target": "test" },
+    {
+      "action": "assert",
+      "label": "Sunwalker is rejected while PLAYER_ALLOW_ONLY_ABILITY is set",
+      "actor": "test",
+      "metric": "aura",
+      "spell": 800601,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let Sunstorm's 6 second duration and its periodic ticks finish",
+      "ms": 6500
+    },
+    {
+      "action": "assert",
+      "label": "Justice fired at cast time plus five more ticks over the 6 second duration",
+      "actor": "test",
+      "metric": "spell_proc_count",
+      "spell": 760379,
+      "min": 6
+    }
+  ]
+}

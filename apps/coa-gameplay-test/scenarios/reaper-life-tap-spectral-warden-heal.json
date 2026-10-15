@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Life Tap heals the Reaper for damage the Spectral Warden guardian deals (#495)",
+  "contract": [
+    "Life Tap 706788 promises: 'Reduces the cooldown of Spectral Warden by $/1000;s2 sec and it now heals you",
+    "equal to $s1% of the damage it deals.' Effect 0 is a bare SPELL_AURA_DUMMY (BasePoints 199, so 200%) with",
+    "no trigger spell, so nothing in Spell.dbc executes the heal on its own; it must come from the summoned",
+    "guardian (creature_template 100481) dealing damage. npc_ascension_reaper_spectral_warden hooks that",
+    "guardian's DamageDealt and heals the owning Reaper for 200% of it while Life Tap is known."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "reaper", "race": 5, "class": 30, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "reaper", "entry": 1601, "level": 80, "health": 2000000 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "reaper", "spell": 805716 },
+    { "action": "learn", "actor": "reaper", "spell": 706788 },
+    { "action": "assert", "label": "Life Tap is known", "actor": "reaper", "metric": "knows_spell", "spell": 706788, "equals": 1 },
+    { "action": "set_health", "actor": "reaper", "value": 10000, "maximum": 100000 },
+    { "action": "assert", "actor": "reaper", "metric": "health", "equals": 10000 },
+    { "action": "assert", "actor": "reaper", "metric": "owned_creature_count", "entry": 100481, "equals": 0 },
+    { "action": "cast", "actor": "reaper", "spell": 805716 },
+    { "action": "assert", "actor": "reaper", "metric": "cast_failure", "spell": 805716, "equals": 0 },
+    { "action": "assert", "label": "The guardian is summoned", "actor": "reaper", "metric": "owned_creature_count", "entry": 100481, "min": 1, "within_ms": 3000 },
+    { "action": "attack", "actor": "reaper", "target": "enemy" },
+    { "action": "assert", "label": "The Reaper is engaged, drawing the guardian into the fight", "actor": "reaper", "metric": "combat", "equals": 1, "within_ms": 4000 },
+    { "action": "snapshot", "actor": "reaper", "metric": "health", "save_as": "reaper_health_before" },
+    { "action": "wait", "label": "Let the guardian land melee swings on the enemy", "ms": 20000 },
+    { "action": "assert", "label": "The guardian's damage healed the Reaper through Life Tap", "actor": "reaper", "metric": "health", "relative_to": "reaper_health_before", "min": 1, "within_ms": 4000 }
+  ]
+}

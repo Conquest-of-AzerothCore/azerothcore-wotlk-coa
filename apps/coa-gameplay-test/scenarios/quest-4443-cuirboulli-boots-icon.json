@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "name": "Cuirboulli Boots streams its client item row with display 664 (INV_Boots_07) (#4443)",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1.",
+    "The client Item.dbc has no row for Cuirboulli Boots 2143, and its item_template display 2355 is",
+    "the INV_Stone_09 icon in Ascension ItemDisplayInfo. Display 664 is the installed client INV_Boots_07, as on",
+    "Wowhead and Descension.",
+    "Obtaining the item streams its SMSG_PATCH_ITEM (0x0932) row with DisplayInfoID 664 (sixth field), and",
+    "the item query response (0x0058) names display 664.",
+    "Expected before: no row is streamed and the query names display 2355."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the first world entry and its patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 2143
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: obtaining Cuirboulli Boots streams its item row",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2354,
+      "row": 2143,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The streamed row carries display 664",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 2354,
+      "row": 2143,
+      "index": 5,
+      "equals": 664
+    },
+    {
+      "action": "client_packet",
+      "actor": "hero",
+      "opcode": 86,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 2143
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The item query response names display 664",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 88,
+      "row": 2143,
+      "offset": 16,
+      "skip_strings": 4,
+      "index": 0,
+      "equals": 664,
+      "within_ms": 2000
+    }
+  ]
+}

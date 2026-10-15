@@ -1,0 +1,225 @@
+{
+  "schema": 1,
+  "name": "witch-hunter-torchlight-consumes-stacks-3934",
+  "contract": [
+    "Original Spell.dbc 680544 promises that main-hand attacks apply Purity 681413 and off-hand attacks apply",
+    "Wickedness 681523, up to six stacks. Torchlight 503662 consumes both stacks and deals additional",
+    "Holyflame 681415 / Shadowstrike 681524 damage per stack. Original helpers have base points 1027 and 13",
+    "die sides before level/AP/Holy-SP scaling. Normal dual-wield attacks must build both auras, a normal",
+    "Torchlight must remove them and deal substantial bonus damage, and a second Torchlight without more auto",
+    "attacks must produce neither helper. This checks the reported consumption and absent damage without",
+    "inventing a damage coefficient."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 201
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 680544
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 503662
+    },
+    {
+      "action": "add_item",
+      "actor": "hunter",
+      "item": 25,
+      "count": 2
+    },
+    {
+      "action": "equip",
+      "actor": "hunter",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "equip",
+      "actor": "hunter",
+      "item": 25,
+      "slot": 16
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "hunter",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Main-hand attacks build Purity",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 681413,
+      "min": 2,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "Off-hand attacks build Wickedness",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 681523,
+      "min": 2,
+      "within_ms": 12000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hunter"
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 503662,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Torchlight lands",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 503662,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Torchlight consumes Purity",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 681413,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Torchlight consumes Wickedness",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 681523,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Consumed Purity causes Holyflame damage beyond one point",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 681415,
+      "min": 500,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Consumed Wickedness causes Shadowstrike damage beyond one point",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 681524,
+      "min": 500,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 681415,
+      "save_as": "holy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 681524,
+      "save_as": "shadow"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hunter",
+      "spell": 503662
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 503662,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "A second Torchlight lands without rebuilding stacks",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 503662,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "No repeated bonus damage after holy stacks were consumed",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 681415,
+      "relative_to": "holy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No repeated bonus damage after shadow stacks were consumed",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 681524,
+      "relative_to": "shadow",
+      "equals": 0
+    }
+  ]
+}

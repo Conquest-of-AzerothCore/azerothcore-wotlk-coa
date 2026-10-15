@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "name": "Tinker heals repair the Tinker's mechanical pets (#4747)",
+  "contract": "#4747 reports that Tinker pets are immune to Repair Shot, Emergency Heal and Zap!. All five Tinker build pets are CREATURE_TYPE_MECHANICAL, and Creature::IsImmunedToSpellEffect makes every mechanical creature immune to SPELL_EFFECT_HEAL. Repair Shot, Emergency Heal and Zap! are SPELL_EFFECT_HEAL spells at TARGET_UNIT_TARGET_ALLY (family 34), whose tooltips heal an ally, so a player-owned mechanical pet must take the heal. A level 80 Tinker builds Mechano-Bear 803405 (SUMMON_PET 60671), sets it to 1 health, and casts the ranks it owns at level 80, Repair Shot 574152, Emergency Heal 802691 and Zap! 681298, at the pet. Each cast must produce a native heal log with effective healing on the pet; an immune pet produces none.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Build: Mechano-Bear",
+      "actor": "tinker",
+      "spell": 803405
+    },
+    {
+      "action": "learn",
+      "label": "Repair Shot",
+      "actor": "tinker",
+      "spell": 574152
+    },
+    {
+      "action": "learn",
+      "label": "Emergency Heal",
+      "actor": "tinker",
+      "spell": 802691
+    },
+    {
+      "action": "learn",
+      "label": "Zap!",
+      "actor": "tinker",
+      "spell": 681298
+    },
+    {
+      "action": "cast",
+      "label": "Build: Mechano-Bear",
+      "actor": "tinker",
+      "spell": 803405
+    },
+    {
+      "action": "assert",
+      "label": "Mechano-Bear is built",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 60671,
+      "within_ms": 9000
+    },
+    {
+      "action": "wait",
+      "label": "Mechano-Bear settles beside the Tinker",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "label": "Mechano-Bear is wounded",
+      "actor": "tinker",
+      "pet": true,
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "label": "Repair Shot at Mechano-Bear",
+      "actor": "tinker",
+      "spell": 574152,
+      "target_pet": true
+    },
+    {
+      "action": "assert",
+      "label": "#4747: Repair Shot heals Mechano-Bear",
+      "actor": "tinker",
+      "metric": "spell_effective_heal_total",
+      "spell": 574152,
+      "target": "tinker",
+      "target_pet": true,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "label": "Mechano-Bear is wounded again",
+      "actor": "tinker",
+      "pet": true,
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "label": "Emergency Heal at Mechano-Bear",
+      "actor": "tinker",
+      "spell": 802691,
+      "target_pet": true
+    },
+    {
+      "action": "assert",
+      "label": "#4747: Emergency Heal heals Mechano-Bear",
+      "actor": "tinker",
+      "metric": "spell_effective_heal_total",
+      "spell": 802691,
+      "target": "tinker",
+      "target_pet": true,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "label": "Mechano-Bear is wounded once more",
+      "actor": "tinker",
+      "pet": true,
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "label": "Zap! at Mechano-Bear",
+      "actor": "tinker",
+      "spell": 681298,
+      "target_pet": true
+    },
+    {
+      "action": "assert",
+      "label": "#4747: Zap! heals Mechano-Bear",
+      "actor": "tinker",
+      "metric": "spell_effective_heal_total",
+      "spell": 681298,
+      "target": "tinker",
+      "target_pet": true,
+      "min": 1,
+      "within_ms": 5000
+    }
+  ]
+}

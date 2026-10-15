@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "name": "Warden of Hellfire raises Skulltaker, Flames of Xoroth and Meatsaw damage by 30% (#1037)",
+  "contract": "#1037 claims Warden of Hellfire 704986 has no server handler. Live client Spell.dbc: 704986 (family 23, passive, CharacterAdvancement 29329, class 17 Defiance tab) reads 'Increases the damage dealt by Skulltaker, Flames of Xoroth, and Meatsaw by $s1%'. Its only effect is the native aura 108 (SPELL_AURA_ADD_PCT_MODIFIER), MiscValue 0 (SPELLMOD_DAMAGE), BasePoints 29 + DieSides 1 = 30, class mask (0, 0x00800003, 0). Family 23's flags: Skulltaker 800168/802416-802421/803899-803900 carry (0, 0x1, 0), Flames of Xoroth 801059/802411-802415/573448 carry (0, 0x2, 0), Meatsaw 800340/501508-501510/578119 carry (0, 0x800000, 0); Hellmaw 806965 (0x40, 0, 0) is outside the mask. Nothing in AscensionXorothContracts.cpp touches 704986, so the modifier is applied by the engine: Unit::MeleeDamageBonusDone (the weapon strikes Skulltaker and Meatsaw) and Unit::SpellDamageBonusDone (the Fire hit of Flames of Xoroth) both run ApplySpellMod(SPELLMOD_DAMAGE). Expected: spell_modifier op 0 on base 100 reads 130 for every named rank and 100 for Hellmaw; the native damage-done bonus on a fixed base of 1000 rises by exactly 30% for the three abilities and stays unchanged for Hellmaw. No gameplay change: this is evidence that the report's premise (id absent from source means missing) does not hold for a pure spell modifier.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "knight", "entry": 36, "level": 60, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "snapshot", "label": "Skulltaker weapon-strike bonus before the talent",
+      "actor": "knight", "metric": "melee_spell_damage_done", "spell": 800168, "target": "dummy", "save_as": "skulltaker_before"
+    },
+    {
+      "action": "snapshot", "label": "Meatsaw weapon-strike bonus before the talent",
+      "actor": "knight", "metric": "melee_spell_damage_done", "spell": 800340, "target": "dummy", "save_as": "meatsaw_before"
+    },
+    {
+      "action": "snapshot", "label": "Flames of Xoroth spell-damage bonus before the talent",
+      "actor": "knight", "metric": "spell_damage_done", "spell": 801059, "target": "dummy", "save_as": "flames_before"
+    },
+    {
+      "action": "snapshot", "label": "Hellmaw spell-damage bonus before the talent (control)",
+      "actor": "knight", "metric": "spell_damage_done", "spell": 806965, "effect": 2, "target": "dummy", "save_as": "hellmaw_before"
+    },
+    {
+      "action": "assert", "label": "SETUP: no damage modifier on Skulltaker before the talent",
+      "actor": "knight", "metric": "spell_modifier", "spell": 800168, "op": 0, "base": 100, "min": 99.99, "max": 100.01
+    },
+    { "action": "learn", "actor": "knight", "spell": 704986 },
+    { "action": "set_aura", "actor": "knight", "spell": 704986, "stacks": 1, "label": "Force the Warden of Hellfire passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Warden of Hellfire passive is active",
+      "actor": "knight", "metric": "aura", "spell": 704986, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Skulltaker rank 1 damage modifier is +30%",
+      "actor": "knight", "metric": "spell_modifier", "spell": 800168, "op": 0, "base": 100, "min": 129.99, "max": 130.01
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Skulltaker rank 9 damage modifier is +30%",
+      "actor": "knight", "metric": "spell_modifier", "spell": 803900, "op": 0, "base": 100, "min": 129.99, "max": 130.01
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Flames of Xoroth rank 1 damage modifier is +30%",
+      "actor": "knight", "metric": "spell_modifier", "spell": 801059, "op": 0, "base": 100, "min": 129.99, "max": 130.01
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Flames of Xoroth rank 7 damage modifier is +30%",
+      "actor": "knight", "metric": "spell_modifier", "spell": 573448, "op": 0, "base": 100, "min": 129.99, "max": 130.01
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Meatsaw rank 1 damage modifier is +30%",
+      "actor": "knight", "metric": "spell_modifier", "spell": 800340, "op": 0, "base": 100, "min": 129.99, "max": 130.01
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Meatsaw rank 5 damage modifier is +30%",
+      "actor": "knight", "metric": "spell_modifier", "spell": 578119, "op": 0, "base": 100, "min": 129.99, "max": 130.01
+    },
+    {
+      "action": "assert", "label": "CONTROL: Hellmaw, outside the mask, keeps no damage modifier",
+      "actor": "knight", "metric": "spell_modifier", "spell": 806965, "op": 0, "base": 100, "min": 99.99, "max": 100.01
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Skulltaker's native weapon-strike damage bonus rises by 30%",
+      "actor": "knight", "metric": "melee_spell_damage_done", "spell": 800168, "target": "dummy",
+      "ratio_to": "skulltaker_before", "min": 1.295, "max": 1.305
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Meatsaw's native weapon-strike damage bonus rises by 30%",
+      "actor": "knight", "metric": "melee_spell_damage_done", "spell": 800340, "target": "dummy",
+      "ratio_to": "meatsaw_before", "min": 1.295, "max": 1.305
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Flames of Xoroth's native spell-damage bonus rises by 30%",
+      "actor": "knight", "metric": "spell_damage_done", "spell": 801059, "target": "dummy",
+      "ratio_to": "flames_before", "min": 1.295, "max": 1.305
+    },
+    {
+      "action": "assert", "label": "CONTROL: Hellmaw's native spell-damage bonus is unchanged",
+      "actor": "knight", "metric": "spell_damage_done", "spell": 806965, "effect": 2, "target": "dummy",
+      "ratio_to": "hellmaw_before", "min": 0.999, "max": 1.001
+    }
+  ]
+}

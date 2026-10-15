@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Justice deals off-hand damage when dual-wielding two-handers (#5769, #5775)",
+  "contract": "Justice 520747 (Spell.dbc: AttributesEx3 SPELL_ATTR3_REQUIRES_MAIN_HAND_WEAPON, EquippedItemSubClassMask 1378 = two-handed axe/mace/sword/polearm/staff only) has two direct SPELL_EFFECT_TRIGGER_SPELL effects: index 0 triggers 525006 (main-hand strike) and index 1 triggers 572042 (off-hand strike). 572042 has AttributesEx3 SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON set (verified via coa-dbc-viewer), so Spell::CheckItems requires Player::GetWeaponForAttack(OFF_ATTACK) to be non-null and Item::IsFitToSpellRequirements to accept it. 572042 also carries EquippedItemInventoryTypeMask 4194304 (INVTYPE_WEAPONOFFHAND) with subclass mask 354 (two-handed axe/mace/polearm/sword), so a two-handed weapon (INVTYPE_2HWEAPON) held in the off-hand slot by Valkyr's Grip must be accepted for it, and Spell::EffectWeaponDmg (SpellEffects.cpp) uses m_attackType == OFF_ATTACK (set from that same attribute in Spell::Spell) to compute off-hand weapon damage. AscensionSunClericContracts.cpp's idIsJustice() whitelist includes 572042 for its fire-school coefficient bump on effect index 1, confirming the OH trigger is the intended effect-bearing spell. Justice's own weapon mask only admits two-handers, so its off-hand strike depends on the Valkyr's Grip (707072) dual-2H-wield mechanic (already covered by sun-cleric-valkyr-grip-dual-polearms.json): with Valkyr's Grip learned and two 2H weapons equipped, the off-hand weapon check passes and 572042 must land real damage alongside the main-hand strike 525006, not stay silent.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "cleric", "entry": 36, "level": 80, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "cleric", "spell": 707072 },
+    { "action": "add_item", "actor": "cleric", "item": 4901 },
+    { "action": "equip", "label": "Test Polearm in the main hand", "actor": "cleric", "item": 4901, "slot": 15 },
+    { "action": "add_item", "actor": "cleric", "item": 5545 },
+    { "action": "equip", "label": "Fast Test Polearm in the off hand", "actor": "cleric", "item": 5545, "slot": 16 },
+    { "action": "learn", "actor": "cleric", "spell": 520747 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "Off-hand polearm carries real weapon damage (fixture sanity)",
+      "actor": "cleric", "metric": "weapon_damage_min", "hand": 1, "min": 1
+    },
+    { "action": "cast", "actor": "cleric", "spell": 520747, "target": "dummy" },
+    {
+      "action": "assert", "label": "Justice is accepted with two 2H weapons equipped",
+      "actor": "cleric", "metric": "cast_failure", "spell": 520747, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The main-hand strike deals damage",
+      "actor": "cleric", "metric": "spell_damage_count", "spell": 525006, "target": "dummy", "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The off-hand strike deals damage",
+      "actor": "cleric", "metric": "spell_damage_count", "spell": 572042, "target": "dummy", "min": 1, "within_ms": 3000
+    }
+  ]
+}

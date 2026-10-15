@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Who lists custom classes and preserves filters (#86)",
-  "contract": "Native Who responses include allied custom-class players and obey explicit name/class/race filters.",
+  "name": "Who lists custom classes of both factions and preserves filters (#86)",
+  "contract": "Native Who responses include custom-class players of both factions and obey explicit name/class/race filters.",
   "players": [
     { "id": "guardian", "race": 1, "class": 18, "level": 20 },
     { "id": "venom", "race": 1, "class": 29, "level": 20 },
@@ -12,12 +12,12 @@
   "steps": [
     { "action": "wait", "ms": 5000 },
     { "action": "who", "actor": "guardian" },
-    { "action": "assert", "actor": "guardian", "metric": "who_count", "equals": 4 },
+    { "action": "assert", "actor": "guardian", "metric": "who_count", "equals": 5 },
     { "action": "assert", "actor": "guardian", "metric": "who_class", "target": "guardian", "equals": 18 },
     { "action": "assert", "actor": "guardian", "metric": "who_class", "target": "venom", "equals": 29 },
     { "action": "assert", "actor": "guardian", "metric": "who_class", "target": "primalist", "equals": 31 },
     { "action": "assert", "actor": "guardian", "metric": "who_class", "target": "runemaster", "equals": 32 },
-    { "action": "assert", "actor": "guardian", "metric": "who_class", "target": "horde", "equals": 0 },
+    { "action": "assert", "actor": "guardian", "metric": "who_class", "target": "horde", "equals": 12 },
     { "action": "who", "actor": "guardian", "target": "runemaster" },
     { "action": "assert", "actor": "guardian", "metric": "who_count", "equals": 1 },
     { "action": "assert", "actor": "guardian", "metric": "who_class", "target": "runemaster", "equals": 32 },
@@ -29,15 +29,16 @@
     { "action": "assert", "actor": "guardian", "metric": "who_count", "equals": 1 },
     { "action": "assert", "actor": "guardian", "metric": "who_class", "target": "primalist", "equals": 31 },
     { "action": "who", "actor": "guardian", "race_mask": 4 },
-    { "action": "assert", "actor": "guardian", "metric": "who_count", "equals": 0 },
+    { "action": "assert", "actor": "guardian", "metric": "who_count", "equals": 1 },
+    { "action": "assert", "actor": "guardian", "metric": "who_class", "target": "horde", "equals": 12 },
     { "action": "who", "actor": "guardian", "class_mask": 1 },
     { "action": "assert", "actor": "guardian", "metric": "who_count", "equals": 1 },
     { "action": "assert", "actor": "guardian", "metric": "who_class", "target": "runemaster", "equals": 32 },
     { "action": "who", "actor": "guardian", "class_mask": 0 },
     { "action": "assert", "actor": "guardian", "metric": "who_count", "equals": 0 },
     { "action": "who", "actor": "horde" },
-    { "action": "assert", "actor": "horde", "metric": "who_count", "equals": 1 },
+    { "action": "assert", "actor": "horde", "metric": "who_count", "equals": 5 },
     { "action": "assert", "actor": "horde", "metric": "who_class", "target": "horde", "equals": 12 },
-    { "action": "assert", "actor": "horde", "metric": "who_class", "target": "guardian", "equals": 0 }
+    { "action": "assert", "actor": "horde", "metric": "who_class", "target": "guardian", "equals": 18 }
   ]
 }

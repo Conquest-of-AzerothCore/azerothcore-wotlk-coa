@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Clear Skies grants raid hit chance natively (#3704)",
+  "contract": "#3704 Clear Skies 500069 (SpellFamilyName 22): Spell.dbc Effect[0] is SPELL_EFFECT_APPLY_AREA_AURA_RAID (65), TargetA 1 TARGET_UNIT_CASTER, RadiusIndex 12 (100 yd), ApplyAuraName 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, EffectBasePoints 0 with EffectDieSides 1 so the delivered amount is 1 (SpellInfo.cpp:337 plus the DieSides==1 -> +1 branch). Aura 333 is a CoA-defined type (src/server/game/Spells/Auras/SpellAuraDefines.h:388) with a real handler, AuraEffect::HandleAscensionModHitChanceAll (dispatch src/server/game/Spells/Auras/SpellAuraEffects.cpp:398, body :4845), which calls HandleModHitChance and HandleModSpellHitChance; both chains are pure sums (aura modifier plus a rating bonus with no other recomputed term) in Player::UpdateMeleeHitChances and Player::UpdateSpellHitChances (src/server/game/Entities/Unit/StatSystem.cpp:996-1010), so a before/after delta on melee_hit_chance and spell_hit_chance is safe here, unlike the crit-percentage field documented as unsafe in stormbringer-raid-buff-auras-electrifying-aura.json. Non-stacking is native: spell_group 2000183 carries (2000183, 500069) at data/sql/updates/pending_db_world/rev_20260908_05_guardian_completion.sql:369, its aura-type set {SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, SPELL_AURA_MOD_HIT_CHANCE, SPELL_AURA_MOD_SPELL_HIT_CHANCE} at src/server/game/Spells/SpellMgr.cpp:1876, stack_rule 3 = SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT. The same group also holds stock 6562 (Heroic Presence), a party aura whose Effect[0]/[1] apply aura 54 SPELL_AURA_MOD_HIT_CHANCE and aura 55 SPELL_AURA_MOD_SPELL_HIT_CHANCE with EffectBasePoints 0 + DieSides 1 = 1, read directly from Spell.dbc for this file; both aura types are in the same 2000183 set, so learning it on the ally that already carries Clear Skies from the caster proves the exclusivity rule keeps the ally's hit chance at +1, not +2.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "caster", "race": 8, "class": 16, "level": 80 },
+    { "id": "ally", "race": 8, "class": 16, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+
+    { "action": "group", "label": "Group the ally with the caster", "actor": "caster", "target": "ally" },
+
+    { "action": "snapshot", "label": "BASELINE #3704: ally spell hit chance before Clear Skies", "actor": "ally", "metric": "spell_hit_chance", "save_as": "hit_base" },
+    { "action": "snapshot", "label": "BASELINE #3704: ally melee hit chance before Clear Skies", "actor": "ally", "metric": "melee_hit_chance", "save_as": "mhit_base" },
+
+    { "action": "learn", "label": "Caster learns Clear Skies (passive, applies on learn)", "actor": "caster", "spell": 500069 },
+
+    { "action": "assert", "label": "BASELINE #3704: the grouped ally receives Clear Skies from the caster", "actor": "ally", "metric": "aura", "spell": 500069, "caster": "caster", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "BASELINE #3704: the delivered amount is EffectBasePoints 0 + DieSides 1 = 1", "actor": "ally", "metric": "aura_amount", "spell": 500069, "caster": "caster", "effect": 0, "equals": 1 },
+    { "action": "assert", "label": "BASELINE #3704: the ally's spell hit chance rises by exactly 1", "actor": "ally", "metric": "spell_hit_chance", "relative_to": "hit_base", "min": 0.99, "max": 1.01, "within_ms": 3000 },
+    { "action": "assert", "label": "BASELINE #3704: the ally's melee hit chance rises by exactly 1", "actor": "ally", "metric": "melee_hit_chance", "relative_to": "mhit_base", "min": 0.99, "max": 1.01 },
+
+    { "action": "learn", "label": "DISCRIMINATING #3704: the ally also learns Heroic Presence, another group 2000183 member with the same +1 hit amount", "actor": "ally", "spell": 6562 },
+
+    { "action": "assert", "label": "DISCRIMINATING #3704: the ally now also carries Heroic Presence", "actor": "ally", "metric": "aura", "spell": 6562, "caster": "ally", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING #3704: the group's exclusive-same-effect rule keeps the ally's spell hit chance at +1, not +2", "actor": "ally", "metric": "spell_hit_chance", "relative_to": "hit_base", "min": 0.99, "max": 1.01 },
+    { "action": "assert", "label": "DISCRIMINATING #3704: the group's exclusive-same-effect rule keeps the ally's melee hit chance at +1, not +2", "actor": "ally", "metric": "melee_hit_chance", "relative_to": "mhit_base", "min": 0.99, "max": 1.01 }
+  ]
+}

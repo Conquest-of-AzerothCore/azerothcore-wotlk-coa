@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Entry point of the ac-gameplay-test Compose service.
 set -euo pipefail
 
 runner=/azerothcore-src/apps/coa-gameplay-test/run.py
@@ -15,15 +14,14 @@ if [[ ! -w /results ]]; then
   exit 1
 fi
 
-# The container file system is discarded with the container (--rm).
-secrets="$(mktemp -d)"
-escaped="${MYSQL_ROOT_PASSWORD//\\/\\\\}"
+container_credentials_dir="$(mktemp -d)"
+mysql_escaped_password="${MYSQL_ROOT_PASSWORD//\\/\\\\}"
 (
   umask 077
-  printf '[client]\nhost=127.0.0.1\nport=3306\nuser=root\npassword="%s"\n' "$escaped" \
-    > "$secrets/admin-client.ini"
+  printf '[client]\nhost=127.0.0.1\nport=3306\nuser=root\npassword="%s"\n' "$mysql_escaped_password" \
+    > "$container_credentials_dir/admin-client.ini"
 )
-unset MYSQL_ROOT_PASSWORD escaped
+unset MYSQL_ROOT_PASSWORD mysql_escaped_password
 
 exec python3 "$runner" run "$@" \
   --worldserver /azerothcore/env/dist/bin/worldserver \
@@ -32,6 +30,6 @@ exec python3 "$runner" run "$@" \
   --server-modules-dir /azerothcore/env/dist/etc/modules \
   --mysql /usr/bin/mysql \
   --mysqldump /usr/bin/mysqldump \
-  --database-client-config "$secrets/admin-client.ini" \
+  --database-client-config "$container_credentials_dir/admin-client.ini" \
   --world-cache-dir /results/world-cache \
   --output "/results/$(date -u +%Y%m%dT%H%M%S%NZ)"

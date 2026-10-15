@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "name": "Crimson Feast only shortens Bloodsurge while a Cursed Form is active (#3413)",
+  "contract": "Spell.dbc gives Crimson Feast 804602 Attributes 0x1c0 (SPELL_ATTR0_PASSIVE), DurationIndex 21 (infinite), Stances 0x0 and effect 0 = aura 23 (SPELL_AURA_PERIODIC_TRIGGER_SPELL) with Amplitude 5000 and TriggerSpell 804603. 804603 is effect 165 (SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN), MiscValue 553267 (Bloodsurge, RecoveryTime 180000), raw base points -5001, i.e. -5000 ms; Spell::EffectAscensionModifyCooldown applies that natively. The tooltip scopes the tick to 'every 5 second you remain in a Cursed Form', but Stances is 0 and nothing else gated the tick, so Bloodsurge's cooldown fell 5 sec every 5 sec permanently. Out of form the remaining cooldown must therefore fall by exactly the elapsed time; in form it must fall faster. Bloodsurge carries ExcludeCasterAuraSpell 802877, which the module grants while shapeshifted, so it is cast before the form is applied.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling and login settle", "ms": 5000 },
+    { "action": "learn", "actor": "bloodmage", "spell": 804602 },
+    { "action": "learn", "actor": "bloodmage", "spell": 553267 },
+    {
+      "action": "assert",
+      "label": "No Cursed Form is active yet",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 562720,
+      "equals": 0
+    },
+    { "action": "cast", "actor": "bloodmage", "spell": 553267 },
+    {
+      "action": "assert",
+      "label": "Bloodsurge is on its 180 sec cooldown",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 553267,
+      "min": 150000,
+      "within_ms": 3000
+    },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "snapshot",
+      "label": "Bloodsurge cooldown before the out-of-form window",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 553267,
+      "save_as": "cd_no_form"
+    },
+    { "action": "wait", "label": "Two Crimson Feast ticks would land here", "ms": 11000 },
+    {
+      "action": "assert",
+      "label": "Out of Cursed Form the cooldown only falls by the elapsed time",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 553267,
+      "relative_to": "cd_no_form",
+      "min": -12500,
+      "max": -9500
+    },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 562720, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "The Cursed Form marker is mirrored",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 524861,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "label": "Bloodsurge cooldown before the in-form window",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 553267,
+      "save_as": "cd_in_form"
+    },
+    { "action": "wait", "label": "At least two Crimson Feast ticks", "ms": 11000 },
+    {
+      "action": "assert",
+      "label": "In Cursed Form the cooldown falls faster than the elapsed time",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 553267,
+      "relative_to": "cd_in_form",
+      "max": -15000
+    }
+  ]
+}

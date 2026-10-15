@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "name": "Final Embrace counts as a Cursed Form and grants its markers (#1976, partial)",
+  "contract": "Spell.dbc describes Final Embrace 524865 as 'entering a dramatically improved Cursed Form for 20 sec, transforming your Bloodfang Bite into Crimson Maw'. Its effects are aura 56 (SPELL_AURA_TRANSFORM, MiscValue 38508), aura 31 (SPELL_AURA_MOD_INCREASE_SPEED, +15%) and aura 23 (SPELL_AURA_PERIODIC_TRIGGER_SPELL) at Amplitude 1000 with RadiusIndex 14 (8 yds) triggering Hematoma 803392, and it carries ExcludeCasterAuraSpell 562572. The Crimson Maw it advertises (803388 and its ranks) carries CasterAuraSpell 524861, one of the two 'Cursed Form' markers the module mirrors, and 524865 was absent from the module's CursedForms[] list, so the markers were actively removed while Final Embrace was up and Crimson Maw stayed uncastable. This scenario covers only that half. The tooltip's other clause, 'draining your health over time', has no effect in the record and no number anywhere in Spell.dbc, the world DB or the source, so it is not implemented and not asserted here.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling and login settle", "ms": 5000 },
+    { "action": "learn", "actor": "bloodmage", "spell": 524865 },
+    {
+      "action": "assert",
+      "label": "Fixture precondition: the excluding Accursed Form aura is absent",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 562572,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Fixture precondition: no Cursed Form marker yet",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 524861,
+      "equals": 0
+    },
+    { "action": "cast", "actor": "bloodmage", "spell": 524865 },
+    {
+      "action": "assert",
+      "label": "Final Embrace is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 524865,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Crimson Maw's CasterAuraSpell marker is granted",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 524861,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The second Cursed Form marker is granted",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 525031,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The shapeshift marker the kit blocks casts with is granted",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 802877,
+      "equals": 1
+    },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 524865, "stacks": 0 },
+    {
+      "action": "assert",
+      "label": "Dropping the form removes the marker again",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 524861,
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

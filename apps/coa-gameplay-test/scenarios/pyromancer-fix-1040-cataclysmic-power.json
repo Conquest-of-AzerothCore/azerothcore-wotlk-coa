@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "Cataclysmic Power raises Flare Bolt per periodic effect (#1040)",
+  "contract": "#1040: Cataclysmic Power 804617 / 807882 / 807912 is ADD_FLAT_MODIFIER (aura 107) on SPELLMOD_EFFECT2 (misc 12), base 2 / 5 / 8 -> +3 / +6 / +9, class mask {0x200, 0x100, 0x41000000} = Blaze, Ignite, Scorched, Infernus (Spell.dbc served file). Tooltip: increases the damage of Flare Bolt by $s1% for each periodic effect you have on the target. The DBC carrier is each DoT's second effect (aura 271 MOD_DAMAGE_FROM_CASTER, base -1 -> 0, mask {0, 2, 0} = Flare Bolt), which the module overwrites with dummy bookkeeping, so the bonus never existed. The fix multiplies Flare Bolt's damage taken by (1 + rank%) for each of the caster's Blaze 805500, Ignite 800791, Scorched 680962 and Infernus 706874 on the target, the way the native 271 auras would stack (multiplicatively; a two-DoT bound accepts the additive and the compounded reading since the tooltip does not say). script_spell_damage_taken runs the module damage-taken hooks on a base of 1000 with the actor as the damaged unit and target as the attacker; the fixture applies the DoT auras to the caster itself with set_aura (caster and target are the same player, so the auras are owned by the caster). Fails before the fix (always 1000). Float rounding of 1.03 x 1000 allows a 1029..1031 bound.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Flare Bolt is unchanged with no periodic effect and no talent",
+      "actor": "caster",
+      "metric": "script_spell_damage_taken",
+      "spell": 800790,
+      "target": "caster",
+      "min": 1000,
+      "max": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 800791,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Ignite is on the caster's own target (fixture: the caster)",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 800791,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "One DoT without the talent leaves Flare Bolt unchanged",
+      "actor": "caster",
+      "metric": "script_spell_damage_taken",
+      "spell": 800790,
+      "target": "caster",
+      "min": 1000,
+      "max": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 804617
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: one DoT adds 3% to Flare Bolt",
+      "actor": "caster",
+      "metric": "script_spell_damage_taken",
+      "spell": 800790,
+      "target": "caster",
+      "min": 1029,
+      "max": 1031
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: a spell outside Flare Bolt is unchanged",
+      "actor": "caster",
+      "metric": "script_spell_damage_taken",
+      "spell": 800792,
+      "target": "caster",
+      "min": 1000,
+      "max": 1000
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 804617
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807882
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: one DoT adds 6% to Flare Bolt",
+      "actor": "caster",
+      "metric": "script_spell_damage_taken",
+      "spell": 800790,
+      "target": "caster",
+      "min": 1059,
+      "max": 1061
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 807882
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807912
+    },
+    {
+      "action": "assert",
+      "label": "Rank 3: one DoT adds 9% to Flare Bolt",
+      "actor": "caster",
+      "metric": "script_spell_damage_taken",
+      "spell": 800790,
+      "target": "caster",
+      "min": 1089,
+      "max": 1091
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 805500,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 3: two DoTs add 9% each (additive 18%, compounded 18.81%)",
+      "actor": "caster",
+      "metric": "script_spell_damage_taken",
+      "spell": 800790,
+      "target": "caster",
+      "min": 1179,
+      "max": 1189
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 800791,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 805500,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Rank 3: with no DoT Flare Bolt is unchanged again",
+      "actor": "caster",
+      "metric": "script_spell_damage_taken",
+      "spell": 800790,
+      "target": "caster",
+      "min": 1000,
+      "max": 1000
+    }
+  ]
+}

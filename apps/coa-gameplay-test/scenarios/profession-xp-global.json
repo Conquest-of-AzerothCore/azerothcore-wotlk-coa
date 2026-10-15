@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "name": "Profession XP: global rate stacks with dynamic XP",
+  "contract": "Run with Rate.XP.Global=2 and default profession rates. Yellow mining awards floor(floor(next-level XP * 0.02 * 0.4 * 2.11) * 2), followed by dynamic XP. This checks the configured world multiplier and player multiplier compose once each. Effective player_xp_for_level at level 20 is 23200: base mining truncates to 391; Global=2 yields exactly 782.",
+  "players": [
+    {
+      "id": "miner",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_skill",
+      "actor": "miner",
+      "skill": 186,
+      "value": 75,
+      "maximum": 75
+    },
+    {
+      "action": "assert",
+      "actor": "miner",
+      "metric": "next_level_xp",
+      "equals": 23200
+    },
+    {
+      "action": "command",
+      "actor": "miner",
+      "command": ".xp 1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "miner",
+      "metric": "xp",
+      "save_as": "before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "miner",
+      "skill": 186,
+      "required": 50
+    },
+    {
+      "action": "assert",
+      "actor": "miner",
+      "metric": "xp",
+      "relative_to": "before",
+      "equals": 782
+    },
+    {
+      "action": "snapshot",
+      "actor": "miner",
+      "metric": "xp",
+      "relative_to": "before",
+      "save_as": "global_award"
+    },
+    {
+      "action": "command",
+      "actor": "miner",
+      "command": ".xp 3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "miner",
+      "metric": "xp",
+      "save_as": "triple_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "miner",
+      "skill": 186,
+      "required": 50
+    },
+    {
+      "action": "assert",
+      "actor": "miner",
+      "metric": "xp",
+      "relative_to": "triple_before",
+      "ratio_to": "global_award",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "miner",
+      "metric": "level",
+      "equals": 20
+    }
+  ]
+}

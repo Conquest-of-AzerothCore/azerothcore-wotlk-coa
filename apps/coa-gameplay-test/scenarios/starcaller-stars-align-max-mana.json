@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "The Stars Align raises maximum mana by 10% (#1529)",
+  "contract": "The Stars Align 300251 (Spell.dbc, passive) has one effect: aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT (the issue's 'Aura_132'), EffectMiscValue 0 (POWER_MANA), EffectBasePoints 9 with DieSides 1 -> +10%, matching the tooltip 'Increases your maximum mana by 10%.'. Nothing in the module or SQL touches 300251. Native path: AuraEffect::HandleAuraModIncreaseEnergyPercent (SpellAuraEffects.cpp:4674) applies the amount to the mana TOTAL_PCT modifier that Player::UpdateMaxPower (StatSystem.cpp:418) folds into the maximum; the max_power metric (power 0 by default) reads Unit::GetMaxPower. The fixtures are the same race, class and level and the control never learns the talent. Mana is in the thousands at level 80, so integer rounding moves the ratio by far less than the band; expected ratio 1.10, asserted in the band 1.098-1.102.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 300251
+    },
+    {
+      "action": "assert",
+      "label": "Learning the talent applies its passive aura",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 300251,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The aura resolves to +10 percent",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 300251,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "snapshot",
+      "label": "Maximum mana without the talent",
+      "actor": "control",
+      "metric": "max_power",
+      "save_as": "mana_base"
+    },
+    {
+      "action": "assert",
+      "label": "Maximum mana is 10% higher",
+      "actor": "talent",
+      "metric": "max_power",
+      "ratio_to": "mana_base",
+      "min": 1.098,
+      "max": 1.102,
+      "within_ms": 3000
+    }
+  ]
+}

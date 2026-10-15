@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Thirst stack gain energizes Rage (#5434)",
+  "contract": "Thirst (706613) description: 'Generates $/10;681202s1 Rage and then increases the health costs of your spells...'. All three of 706613's own effects are aura 108 SPELL_AURA_ADD_PCT_MODIFIER (cost/crit/damage); none energizes Rage and EffectTriggerSpell is 0 on every effect, so 681202 Thirst SLS2 (SPELL_EFFECT_ENERGIZE, EffectBasePoints 49 + DieSides 1 = 50, MiscValue 1 = POWER_RAGE) was never cast when a stack was granted. Rage is stored at 10x displayed value, so 50 internal per new stack is the tooltip's 5 displayed Rage. The fix (aura_ascension_bloodmage_thirst_rage) hooks 706613's own AfterEffectApply (AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK), which SetStackAmount also triggers, so driving stacks directly with set_aura exercises the same Apply() path a live health-cost-cast proc would, without the confound of casting an actual health-cost spell: Bloodmoon Blast's own EffectTriggerSpell[1] (804092, SPELL_EFFECT_ENERGIZE, EffectBasePoints 39 + DieSides 61 -> a random 40-100 internal Rage) energizes Rage on every cast regardless of Thirst, which would make a cast-based Rage-delta assertion non-deterministic and unable to reliably discriminate a working fix from a missing one. Rage must rise by exactly 50 per new stack and not on any later refresh at the same stack count.",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "caster", "race": 1, "class": 20, "level": 12}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "set_aura", "actor": "caster", "spell": 706613, "stacks": 0},
+    {"action": "set_power", "actor": "caster", "power": 1, "value": 0},
+    {"action": "snapshot", "label": "Rage before any stack", "actor": "caster", "metric": "power", "power": 1, "save_as": "rage_start"},
+    {"action": "set_aura", "label": "Grant the first Thirst stack", "actor": "caster", "spell": 706613, "stacks": 1},
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the first stack pays exactly 50 internal Rage (5 displayed)",
+      "actor": "caster",
+      "metric": "power",
+      "power": 1,
+      "relative_to": "rage_start",
+      "equals": 50,
+      "within_ms": 3000
+    },
+    {"action": "set_aura", "label": "Grant a second Thirst stack", "actor": "caster", "spell": 706613, "stacks": 2},
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: two stacks pay exactly 100 internal Rage total",
+      "actor": "caster",
+      "metric": "power",
+      "power": 1,
+      "relative_to": "rage_start",
+      "equals": 100,
+      "within_ms": 3000
+    },
+    {"action": "set_aura", "label": "Refresh at the same stack count", "actor": "caster", "spell": 706613, "stacks": 2},
+    {
+      "action": "assert",
+      "label": "A refresh at an unchanged stack count does not pay Rage again",
+      "actor": "caster",
+      "metric": "power",
+      "power": 1,
+      "relative_to": "rage_start",
+      "equals": 100
+    }
+  ]
+}

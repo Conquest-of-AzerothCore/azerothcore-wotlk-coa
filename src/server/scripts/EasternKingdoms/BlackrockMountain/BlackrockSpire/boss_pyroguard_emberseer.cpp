@@ -39,9 +39,14 @@ enum Spells
     SPELL_EMBERSEER_GROWING         = 16048, // Self on event start
     SPELL_EMBERSEER_GROWING_TRIGGER = 16049, // Triggered by SPELL_EMBERSEER_GROWING
     SPELL_EMBERSEER_FULL_STRENGTH   = 16047, // Emberseer Full Strength
-    SPELL_FIRENOVA                  = 23462, // Combat
-    SPELL_FLAMEBUFFET               = 23341, // Combat
-    SPELL_PYROBLAST                 = 17274, // Combat
+    // Ascension's kit (db.exil.es/npc/9816), which records no timers
+    SPELL_FIRENOVA                  = 2102830,
+    SPELL_FLAMEBUFFET               = 2102188,
+    SPELL_PYROBLAST                 = 2102834,
+    SPELL_IMMOLATION                = 2102825,
+    SPELL_GATHERING_HEAT            = 2102189, // Triggers SPELL_RISING_HEAT every 6 sec
+    SPELL_RISING_HEAT               = 2102190,
+    SPELL_FIERCE_BLOW               = 975011,
     // Blackhand Incarcerator Spells
     SPELL_ENCAGE_EMBERSEER          = 15281, // Emberseer on spawn
     SPELL_STRIKE                    = 15580, // Combat
@@ -65,7 +70,9 @@ enum Events
     EVENT_FIRE_SHIELD               = 7,
     EVENT_PRE_ENTER_COMBAT_1        = 8,
     EVENT_PRE_ENTER_COMBAT_2        = 9,
-    EVENT_ENTER_COMBAT              = 10
+    EVENT_ENTER_COMBAT              = 10,
+    EVENT_IMMOLATION                = 11,
+    EVENT_FIERCE_BLOW               = 12
 };
 
 struct boss_pyroguard_emberseer : public BossAI
@@ -82,6 +89,8 @@ struct boss_pyroguard_emberseer : public BossAI
         me->RemoveAura(SPELL_EMBERSEER_FULL_STRENGTH);
         me->RemoveAura(SPELL_EMBERSEER_GROWING);
         me->RemoveAura(SPELL_EMBERSEER_GROWING_TRIGGER);
+        me->RemoveAura(SPELL_GATHERING_HEAT);
+        me->RemoveAura(SPELL_RISING_HEAT);
         events.ScheduleEvent(EVENT_RESPAWN, 5s);
         // Hack for missing trigger spell
         events.ScheduleEvent(EVENT_FIRE_SHIELD, 3s);
@@ -119,9 +128,19 @@ struct boss_pyroguard_emberseer : public BossAI
     void JustEngagedWith(Unit* /*who*/) override
     {
         // ### TODO Check combat timing ###
+        DoCastSelf(SPELL_GATHERING_HEAT, true);
         events.ScheduleEvent(EVENT_FIRENOVA,    6s);
         events.ScheduleEvent(EVENT_FLAMEBUFFET, 3s);
         events.ScheduleEvent(EVENT_PYROBLAST,  14s);
+        events.ScheduleEvent(EVENT_IMMOLATION,  3s);
+        events.ScheduleEvent(EVENT_FIERCE_BLOW, 8s, 10s);
+    }
+
+    void OnSpellFailed(SpellInfo const* spell) override
+    {
+        BossAI::OnSpellFailed(spell);
+        if (spell->Id == SPELL_FIERCE_BLOW)
+            events.RescheduleEvent(EVENT_FIERCE_BLOW, 1s);
     }
 
     void JustDied(Unit* /*killer*/) override
@@ -263,29 +282,39 @@ struct boss_pyroguard_emberseer : public BossAI
 
         events.Update(diff);
 
+        if (me->HasUnitState(UNIT_STATE_CASTING))
+            return;
+
         while (uint32 eventId = events.ExecuteEvent())
         {
             switch (eventId)
             {
-                case EVENT_FIRE_SHIELD:
-                    DoCast(me, SPELL_FIRE_SHIELD);
-                    events.ScheduleEvent(EVENT_FIRE_SHIELD, 3s);
-                    break;
                 case EVENT_FIRENOVA:
-                    DoCast(me, SPELL_FIRENOVA);
-                    events.ScheduleEvent(EVENT_FIRENOVA, 6s);
+                    DoCastAOE(SPELL_FIRENOVA);
+                    events.ScheduleEvent(EVENT_FIRENOVA, 8s, 10s);
                     break;
                 case EVENT_FLAMEBUFFET:
-                    DoCast(me, SPELL_FLAMEBUFFET);
+                    DoCastVictim(SPELL_FLAMEBUFFET);
                     events.ScheduleEvent(EVENT_FLAMEBUFFET, 14s);
                     break;
                 case EVENT_PYROBLAST:
                     DoCastRandomTarget(SPELL_PYROBLAST, 0, 100.0f);
                     events.ScheduleEvent(EVENT_PYROBLAST, 15s);
                     break;
+                case EVENT_IMMOLATION:
+                    DoCastAOE(SPELL_IMMOLATION, true);
+                    events.ScheduleEvent(EVENT_IMMOLATION, 3s);
+                    break;
+                case EVENT_FIERCE_BLOW:
+                    DoCastVictim(SPELL_FIERCE_BLOW);
+                    events.ScheduleEvent(EVENT_FIERCE_BLOW, 8s, 9s);
+                    break;
                 default:
                     break;
             }
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
         }
         DoMeleeAttackIfReady();
     }

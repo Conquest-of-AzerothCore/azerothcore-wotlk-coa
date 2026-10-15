@@ -1,0 +1,147 @@
+{
+  "schema": 1,
+  "name": "Saturating Sutures makes periodic damage refund the next Sanguine Mend (#1912)",
+  "contract": "Saturating Sutures 504098's single effect is SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on Saturating Sutures 504137, a native aura 108 SPELL_AURA_ADD_PCT_MODIFIER with MiscValue 14 (SPELLMOD_COST), BasePoints -101 and EffectSpellClassMask (524288, 0, 0) - exactly the nine Sanguine Mend ranks. Spell.dbc gives 504098 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs generated no entry and the aura was inert. The tooltip is 'Your periodic damage and healing has a $h% chance to reduce the cost of your next Sanguine Mend by $504137s1%' and the record's own ProcChance is 15, which is left untouched. STATISTICAL BUDGET: 504137 lasts only 8000 ms (DurationIndex 31), so the assertion can be satisfied only by a proc that happens while its polling window is open or in the 8 s before it; events that fire earlier are worthless. The window is therefore placed over live ticks. Crimson Tide is cast as rank 504134, the rank a level-80 character owns per AscensionSpellProgressionData.h; its single effect is aura 3 SPELL_AURA_PERIODIC_DAMAGE with Amplitude 3000 and DurationIndex 8 (15000 ms), so five tick rounds fall inside the 16000 ms poll. Its EffectRadiusIndex is 13 = 10.0 yards (SpellRadius.dbc) around the caster and MaxAffectedTargets is 10, so all eight dummies stand at 2-9 yards and every one of them is inside the radius: 5 x 8 = 40 periodic-damage events. Two heal-over-time auras are fixtured on the Bloodmage for the same window, because the tooltip covers healing too and SpellTypeMask 3 in the row is PROC_SPELL_TYPE_DAMAGE | PROC_SPELL_TYPE_HEAL: Sacrificial Rite 800786 effect 1 and Purified Blood 704121 effect 1 are both aura 8 SPELL_AURA_PERIODIC_HEAL with Amplitude 1500 and DurationIndex 8, and AuraEffect::HandlePeriodicHealAurasTick raises PROC_FLAG_DONE_PERIODIC on the caster for each tick, adding 2 x 10 = 20 events. The Bloodmage's health is lowered first so the ticks are real heals. That is about 60 events at 15%: P(no proc) = 0.85^60, under one in seventeen thousand, and under one in three thousand even if only one of the two heal auras applies. NOT covered: the size of the discount - this asserts that 504137 is granted, and its -101% SPELLMOD_COST amount is native data, not the fix.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy1",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 2
+    },
+    {
+      "id": "dummy2",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "dummy3",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 4
+    },
+    {
+      "id": "dummy4",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 5
+    },
+    {
+      "id": "dummy5",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 6
+    },
+    {
+      "id": "dummy6",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 7
+    },
+    {
+      "id": "dummy7",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 8
+    },
+    {
+      "id": "dummy8",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 9
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504134
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504086
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504098
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "No cost reduction before any tick",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 504137,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "label": "Leave room for the fixtured heal-over-time ticks to land",
+      "actor": "bloodmage",
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture: a 1500 ms periodic heal (Sacrificial Rite 800786 effect 1)",
+      "actor": "bloodmage",
+      "spell": 800786,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture: a second 1500 ms periodic heal (Purified Blood 704121 effect 1)",
+      "actor": "bloodmage",
+      "spell": 704121,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "label": "Crimson Tide, immediately before the polling window",
+      "actor": "bloodmage",
+      "spell": 504134,
+      "target": "dummy1"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: periodic damage and healing granted the Sanguine Mend discount",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 504137,
+      "equals": 1,
+      "within_ms": 16000
+    }
+  ]
+}

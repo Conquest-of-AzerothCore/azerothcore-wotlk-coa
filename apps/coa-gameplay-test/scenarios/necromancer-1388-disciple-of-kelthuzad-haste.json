@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Disciple of Kel'thuzad grants 4% and 8% spell haste natively (#1388)",
+  "contract": "Disciple of Kel'thuzad (CharacterAdvancement 33784, Class tab, class 23; Talent 35767) has two ranks whose description reads 'Increases your spell haste by $s1%.' Spell.dbc: 560615 (rank 1) and 560616 (rank 2) are passive family-29 spells whose only effect is APPLY_AURA SPELL_AURA_HASTE_SPELLS (216) on the caster, EffectBasePoints 3 and 7 with DieSides 1, so 4% and 8%. The audit's 'no handler' finding does not apply: aura 216 is handled natively by AuraEffect::HandleModCastingSpeed, which divides UNIT_MOD_CAST_SPEED by 1 + amount/100, and Unit::ModSpellCastTime multiplies family-29 cast times by that field. The Necromancer contract only turns aura 42/354 effects into dummies and does not touch these ranks. Against an untalented Necromancer, rank 1 must give a cast speed multiplier of 1/1.04 = 0.962 and cut Raise: Lesser Skeletal Warrior 500970 (SpellCastTimes 5 = 2000 ms) to 1923 ms; rank 2 must give 1/1.08 = 0.926 and 1852 ms. This is evidence for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 5, "class": 23, "level": 80 },
+    { "id": "rank1", "race": 5, "class": 23, "level": 80 },
+    { "id": "rank2", "race": 5, "class": 23, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "learn", "actor": "control", "spell": 500970 },
+    { "action": "learn", "actor": "rank1", "spell": 500970 },
+    { "action": "learn", "actor": "rank2", "spell": 500970 },
+    {
+      "action": "snapshot", "label": "Cast speed multiplier of an untalented Necromancer", "actor": "control",
+      "metric": "cast_speed_multiplier", "save_as": "cast_speed_base"
+    },
+    {
+      "action": "assert", "label": "CONTROL: Raise: Lesser Skeletal Warrior is a 2.0 s cast", "actor": "control",
+      "metric": "spell_cast_time_ms", "spell": 500970, "min": 1999, "max": 2001
+    },
+    { "action": "learn", "actor": "rank1", "spell": 560615 },
+    { "action": "learn", "actor": "rank2", "spell": 560616 },
+    {
+      "action": "assert", "label": "Rank 1 applies its passive aura", "actor": "rank1",
+      "metric": "aura", "spell": 560615, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Rank 2 applies its passive aura", "actor": "rank2",
+      "metric": "aura", "spell": 560616, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Rank 1 spell haste resolves to 4", "actor": "rank1",
+      "metric": "aura_amount", "spell": 560615, "effect": 0, "equals": 4
+    },
+    {
+      "action": "assert", "label": "Rank 2 spell haste resolves to 8", "actor": "rank2",
+      "metric": "aura_amount", "spell": 560616, "effect": 0, "equals": 8
+    },
+    {
+      "action": "assert", "label": "Rank 1 casts 4% faster than the control (1/1.04 = 0.962)", "actor": "rank1",
+      "metric": "cast_speed_multiplier", "ratio_to": "cast_speed_base", "min": 0.955, "max": 0.968
+    },
+    {
+      "action": "assert", "label": "Rank 2 casts 8% faster than the control (1/1.08 = 0.926)", "actor": "rank2",
+      "metric": "cast_speed_multiplier", "ratio_to": "cast_speed_base", "min": 0.92, "max": 0.932
+    },
+    {
+      "action": "assert", "label": "Rank 1 shortens the 2.0 s Raise to about 1.92 s", "actor": "rank1",
+      "metric": "spell_cast_time_ms", "spell": 500970, "min": 1915, "max": 1930
+    },
+    {
+      "action": "assert", "label": "Rank 2 shortens the 2.0 s Raise to about 1.85 s", "actor": "rank2",
+      "metric": "spell_cast_time_ms", "spell": 500970, "min": 1845, "max": 1860
+    }
+  ]
+}

@@ -1,0 +1,338 @@
+{
+  "schema": 1,
+  "name": "Primalist Earthmother Roar missing-health healing",
+  "contract": "Protective Roar heals party allies for 20% of missing health with native critical healing retained. Preapply the health aura, then measure deficit immediately before refresh. An independent checker verifies each exact amount and removal.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 58
+    },
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 802782
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 301306,
+      "all_specs": true
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 802782
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 802782,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301307,
+      "target": "ally",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 301306
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "max_health",
+      "save_as": "normal_max"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "health",
+      "save_as": "normal_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 301307,
+      "target": "ally",
+      "save_as": "normal_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301307,
+      "target": "ally",
+      "critical": true,
+      "save_as": "normal_crits_before"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 802782
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 802782
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 301307,
+      "target": "ally",
+      "relative_to": "normal_before",
+      "save_as": "normal_heal"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301307,
+      "target": "ally",
+      "critical": true,
+      "relative_to": "normal_crits_before",
+      "save_as": "normal_crits"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 301307,
+      "target": "ally",
+      "relative_to": "normal_before",
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 82888,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "max_health",
+      "save_as": "critical_max"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "health",
+      "save_as": "critical_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 301307,
+      "target": "ally",
+      "save_as": "critical_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301307,
+      "target": "ally",
+      "critical": true,
+      "save_as": "critical_crits_before"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 802782
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 802782
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 301307,
+      "target": "ally",
+      "relative_to": "critical_before",
+      "save_as": "critical_heal"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301307,
+      "target": "ally",
+      "critical": true,
+      "relative_to": "critical_crits_before",
+      "save_as": "critical_crits"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 301307,
+      "target": "ally",
+      "relative_to": "critical_before",
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 301306,
+      "all_specs": true
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "max_health",
+      "save_as": "removed_max"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "health",
+      "save_as": "removed_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 301307,
+      "target": "ally",
+      "save_as": "removed_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301307,
+      "target": "ally",
+      "critical": true,
+      "save_as": "removed_crits_before"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 802782
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 802782
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 301307,
+      "target": "ally",
+      "relative_to": "removed_before",
+      "save_as": "removed_heal"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 301307,
+      "target": "ally",
+      "critical": true,
+      "relative_to": "removed_crits_before",
+      "save_as": "removed_crits"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 301307,
+      "target": "ally",
+      "relative_to": "removed_before",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    }
+  ]
+}

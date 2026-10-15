@@ -15,7 +15,6 @@
 #include <algorithm>
 #include <string>
 
-
 using namespace Acore::ChatCommands;
 
 namespace
@@ -933,9 +932,12 @@ public:
             bool const enabled =
                 fields[1].Get<uint8>() != 0;
 
-            if (enabled &&
-                (flags &
-                    ManastormSegmentSpawnFlags::ChaoticLinkEligible))
+            uint32 const requiredFlags =
+                ManastormSegmentSpawnFlags::RouteCreature |
+                ManastormSegmentSpawnFlags::ChaoticLinkEligible |
+                ManastormSegmentSpawnFlags::AffixEligible;
+
+            if (enabled && (flags & requiredFlags) == requiredFlags)
             {
                 handler->PSendSysMessage(
                     "Manastorm: spawn {} is already a Chaotic Link "
@@ -949,7 +951,8 @@ public:
 
         uint32 const addFlags =
             ManastormSegmentSpawnFlags::RouteCreature |
-            ManastormSegmentSpawnFlags::ChaoticLinkEligible;
+            ManastormSegmentSpawnFlags::ChaoticLinkEligible |
+            ManastormSegmentSpawnFlags::AffixEligible;
 
         WorldDatabase.DirectExecute(
             "INSERT INTO `manastorm_segment_spawn` "
@@ -961,7 +964,6 @@ public:
             segmentId,
             spawnId,
             addFlags);
-
 
         if (!ReloadAfterAuthoring(handler))
             return false;
@@ -1556,7 +1558,6 @@ public:
 
         return true;
     }
-
 
     static bool HandleSegmentRuntimeObjectiveCommand(
         ChatHandler* handler,

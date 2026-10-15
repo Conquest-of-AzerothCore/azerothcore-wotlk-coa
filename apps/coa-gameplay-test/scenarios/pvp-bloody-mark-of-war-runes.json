@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Bloody Mark of War pays 1000 Runes of Ascension",
+  "contract": [
+    "Bloody Mark of War 1235070, sold by the Season 1 PvP vendors for 1000 honor, reads \"Use: Awards 1000 Runes of",
+    "Ascension.\" Its own spell 413117 is a dummy that pays nothing. Expected: using one mark from a stack of two",
+    "spends exactly that mark and adds 1000 Rune of Ascension (item 375250) to the Currency tab; using the second",
+    "brings the total to 2000 and leaves no mark."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 2000},
+    {"action": "add_item", "actor": "hero", "item": 1235070, "count": 2},
+    {"action": "assert", "actor": "hero", "metric": "item_count", "item": 1235070, "equals": 2},
+    {"action": "assert", "actor": "hero", "metric": "token_count", "item": 375250, "equals": 0},
+    {"action": "use_item", "actor": "hero", "item": 1235070, "spell": 413117},
+    {"action": "assert", "label": "one mark is spent", "actor": "hero", "metric": "item_count", "item": 1235070,
+     "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "1000 runes reach the Currency tab", "actor": "hero", "metric": "token_count",
+     "item": 375250, "equals": 1000, "within_ms": 2000},
+    {"action": "use_item", "actor": "hero", "item": 1235070, "spell": 413117},
+    {"action": "assert", "label": "the second mark is spent", "actor": "hero", "metric": "item_count",
+     "item": 1235070, "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "the runes add up to 2000", "actor": "hero", "metric": "token_count",
+     "item": 375250, "equals": 2000, "within_ms": 2000}
+  ]
+}

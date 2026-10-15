@@ -191,6 +191,8 @@ public:
         return m_resetTimeByMapDifficulty;
     }
 
+    [[nodiscard]] static uint32 GetResetDelayFor(uint32 mapid, Difficulty d);
+
     void ScheduleReset(time_t time, InstResetEvent event);
 
     void Update();

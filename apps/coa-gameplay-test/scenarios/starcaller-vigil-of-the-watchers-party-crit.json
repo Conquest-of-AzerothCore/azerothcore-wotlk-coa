@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "name": "Vigil of the Watchers grants 3% crit to party members (#3733)",
+  "contract": "Vigil of the Watchers 680709 (Spell.dbc, family 32) tooltip: \"Increases critical strike chance of all party and raid members by $s1%. Does not stack with similar effects.\" Effect 0 is SPELL_EFFECT_APPLY_AREA_AURA_RAID (65) applying SPELL_AURA_MOD_CRIT_PCT (290) with EffectBasePoints 2 and EffectDieSides 1, so $s1 = 3, TargetA 1. Native path: AuraEffect::HandleAuraModCritPct calls Player::UpdateAllWeaponDependentCritAuras and UpdateAllSpellCritChances; Player::UpdateWeaponDependentCritAuras (Player.cpp) adds GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT) to the melee/ranged crit base-mod groups and Player::UpdateSpellCritChance (StatSystem.cpp) adds it to every spell school field. The area aura is delivered by the caster's passive to grouped players in range, so the ally must be grouped before the assertion and the polls use within_ms (area auras are applied on the aura update tick). All four fixtures are the same race, class and level, so their base crit values are identical and the differential must be exactly 3; the fourth, ungrouped player proves the aura is party-scoped. The 'does not stack with similar effects' clause is the spell_group 2000181 stack rule (rule 3, EXCLUSIVE_SAME_EFFECT, SpellMgr.cpp maps it to the crit aura types) created by rev_20260908_05_guardian_completion.sql; this scenario does not exercise it, because it would need a second, different caster of a group member and its result depends on rule semantics not read here. Values read 2026-09-21 from the shipped /srv/coa/server-data/dbc/Spell.dbc. Result 20260921T093704168987684Z showed the melee before/after delta is not measurable: the control's PLAYER_CRIT_PERCENTAGE read 0 (field never recomputed on a fresh character) while the grouped ally read 6.7048 = 3 flat + agility and weapon-skill terms that Player::UpdateCritPercentage (StatSystem.cpp) rewrites in the same pass. The melee clauses therefore assert effect 0's resolved aura amount (AuraEffect::GetAmount, 3) owned by the caster, as starcaller-eye-of-elune-crit does; the stranger must hold no such aura (missing auras yield zero). The spell-school deltas stay because Player::UpdateSpellCritChance is a pure sum whose baseline (3.4708 arcane) was populated; they were not reached in that run.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "stranger",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "group",
+      "label": "Put caster and ally in one party",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "snapshot",
+      "label": "Spell crit baseline (school 6)",
+      "actor": "control",
+      "metric": "spell_crit_chance",
+      "save_as": "spell_base",
+      "school": 6
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680709
+    },
+    {
+      "action": "assert",
+      "label": "Party member's Vigil aura effect 0 resolves to 3 (EffectBasePoints 2 + 1)",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 680709,
+      "caster": "caster",
+      "effect": 0,
+      "equals": 3,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Party member gains 3% spell crit from the caster's passive",
+      "actor": "ally",
+      "metric": "spell_crit_chance",
+      "school": 6,
+      "relative_to": "spell_base",
+      "min": 2.99,
+      "max": 3.01,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "The caster is also a party member: Vigil effect 0 resolves to 3",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 680709,
+      "caster": "caster",
+      "effect": 0,
+      "equals": 3,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "A player outside the group has no Vigil aura",
+      "actor": "stranger",
+      "metric": "aura_amount",
+      "spell": 680709,
+      "caster": "caster",
+      "effect": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "A player outside the group gets nothing (spell)",
+      "actor": "stranger",
+      "metric": "spell_crit_chance",
+      "school": 6,
+      "relative_to": "spell_base",
+      "min": -0.01,
+      "max": 0.01
+    }
+  ]
+}

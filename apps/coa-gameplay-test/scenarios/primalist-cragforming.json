@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "name": "Primalist Cragforming: Earth's Embrace duration and removal",
+  "contract": "Earth's Embrace lasts eight seconds normally and twelve with Cragforming. Verify duration, persistence beyond the original expiry, expiry and talent removal.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 806143
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 806143
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 806143
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "spell": 806143,
+      "min": 7500,
+      "max": 8000
+    },
+    {
+      "action": "wait",
+      "ms": 8100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 806143,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 560481
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 806143
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 806143
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "spell": 806143,
+      "min": 11500,
+      "max": 12000
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 806143,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3700
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 806143,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 560481
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 806143
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 806143
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "spell": 806143,
+      "min": 7500,
+      "max": 8000
+    },
+    {
+      "action": "wait",
+      "ms": 8100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 806143,
+      "equals": 0
+    }
+  ]
+}

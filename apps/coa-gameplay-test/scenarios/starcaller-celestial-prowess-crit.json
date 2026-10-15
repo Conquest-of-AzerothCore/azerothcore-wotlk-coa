@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "name": "Celestial Prowess adds 5/10% crit to Lunar Lance and Starfire Shot (#2043)",
+  "contract": "Celestial Prowess 561206 (rank 1) and 561344 (rank 2) (Spell.dbc, family 32) tooltip: \"Increases the critical strike chance of Lunar Lance and Starfire Shot by $s1%.\" Effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107), EffectMiscValue SPELLMOD_CRITICAL_CHANCE (7), EffectBasePoints 4 and 9 with DieSides 1 (=5 and 10), EffectSpellClassMask (0x800, 0x02000000, 0x100), which matches Starfire Shot ranks (word0 0x800), Starfire Barrage 802682 (word0 0x800) and Lunar Lance ranks (word1 0x02000000). Native path: Unit::SpellDoneCritChance ends with modOwner->ApplySpellMod(spell, SPELLMOD_CRITICAL_CHANCE, crit_chance) for every damage class. Lunar Lance 502340 has Effect 0 SPELL_EFFECT_SCHOOL_DAMAGE, so IsCritCapable is true and the harness spell_done_crit_chance metric (SpellDoneCritChance with the spell's school) returns crit% including the modifier; the control shares race, class and level, so the difference must be exactly 5 for rank 1 and 10 for rank 2 (one rank learned per fixture). spell_modifier op 7 on base 0 gives the raw modifier for Starfire Shot and Starfire Barrage, whose Effect 0 is SPELL_EFFECT_NORMALIZED_WEAPON_DMG (121), while Scattered Star (word0 0x800000, word1 0x800) is the negative control. Values read 2026-09-21 from the shipped /srv/coa/server-data/dbc/Spell.dbc.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "r1",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "r2",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "control",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "r1",
+      "spell": 561206
+    },
+    {
+      "action": "learn",
+      "actor": "r2",
+      "spell": 561344
+    },
+    {
+      "action": "snapshot",
+      "label": "Lunar Lance crit chance without the talent",
+      "actor": "control",
+      "metric": "spell_done_crit_chance",
+      "save_as": "ll_base",
+      "spell": 502340,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds 5 crit points to Lunar Lance",
+      "actor": "r1",
+      "metric": "spell_done_crit_chance",
+      "spell": 502340,
+      "target": "dummy",
+      "relative_to": "ll_base",
+      "min": 4.99,
+      "max": 5.01
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 adds 10 crit points to Lunar Lance",
+      "actor": "r2",
+      "metric": "spell_done_crit_chance",
+      "spell": 502340,
+      "target": "dummy",
+      "relative_to": "ll_base",
+      "min": 9.99,
+      "max": 10.01
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 crit modifier on Lunar Lance is +5",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 502340,
+      "op": 7,
+      "base": 0,
+      "min": 4.99,
+      "max": 5.01
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 crit modifier on Starfire Shot rank 8 is +5",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 804469,
+      "op": 7,
+      "base": 0,
+      "min": 4.99,
+      "max": 5.01
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 crit modifier on Starfire Barrage is +5",
+      "actor": "r1",
+      "metric": "spell_modifier",
+      "spell": 802682,
+      "op": 7,
+      "base": 0,
+      "min": 4.99,
+      "max": 5.01
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 crit modifier on Lunar Lance is +10",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 502340,
+      "op": 7,
+      "base": 0,
+      "min": 9.99,
+      "max": 10.01
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 crit modifier on Starfire Shot rank 8 is +10",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 804469,
+      "op": 7,
+      "base": 0,
+      "min": 9.99,
+      "max": 10.01
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 crit modifier on Starfire Barrage is +10",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 802682,
+      "op": 7,
+      "base": 0,
+      "min": 9.99,
+      "max": 10.01
+    },
+    {
+      "action": "assert",
+      "label": "No crit modifier without the talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 804469,
+      "op": 7,
+      "base": 0,
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "assert",
+      "label": "Scattered Star is outside the mask",
+      "actor": "r2",
+      "metric": "spell_modifier",
+      "spell": 804995,
+      "op": 7,
+      "base": 0,
+      "min": -0.01,
+      "max": 0.01
+    }
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "name": "Reaper Harvester heals for 15% of damage dealt",
+  "contract": "Harvester (92145, Level 10 Passive) heals the Reaper for 15% of all damage dealt, through Blood Harvest (504565).",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "r",
+      "race": 5,
+      "class": 30,
+      "level": 12,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "r",
+      "entry": 299,
+      "level": 10,
+      "distance": 2,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "r",
+      "id": 56
+    },
+    {
+      "action": "command",
+      "actor": "r",
+      "command": ".localclassrepair"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Harvester is known",
+      "actor": "r",
+      "metric": "knows_spell",
+      "spell": 92145,
+      "equals": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "r",
+      "value": 1
+    },
+    {
+      "action": "attack",
+      "actor": "r",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Melee hit landed",
+      "actor": "r",
+      "metric": "melee_damage_count",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Blood Harvest healed the Reaper",
+      "actor": "r",
+      "metric": "spell_heal_count",
+      "spell": 504565,
+      "min": 1
+    }
+  ]
+}

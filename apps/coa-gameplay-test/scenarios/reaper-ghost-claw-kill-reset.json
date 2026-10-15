@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "name": "Ghost Claw's cooldown resets on any kill (#4244)",
+  "contract": [
+    "Ghost Claw 803985 resets when the Reaper kills an enemy (live tooltip; the report: 'The cooldown of the ability",
+    "doesnt reset when I kill an enemy'). The reset does not depend on the Ghost Claw debuff: the kill here is a",
+    "second creature that Ghost Claw never touched. Without a kill the cooldown keeps running."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "location": { "map": 530, "x": 10349.6, "y": -6357.29, "z": 33.4026, "o": 5.31605 },
+  "creatures": [
+    {
+      "id": "clawed",
+      "owner": "reaper",
+      "entry": 299,
+      "level": 80,
+      "health": 1000000,
+      "distance": 2
+    },
+    {
+      "id": "victim",
+      "owner": "reaper",
+      "entry": 299,
+      "level": 1,
+      "health": 100,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 803985
+    },
+    {
+      "action": "set_aura",
+      "label": "Supply Soul Infusion for spells that require it",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 803985,
+      "target": "clawed"
+    },
+    {
+      "action": "assert",
+      "label": "Ghost Claw cast was accepted",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 803985,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Ghost Claw is cooling down",
+      "actor": "reaper",
+      "metric": "cooldown_ms",
+      "spell": 803985,
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "No kill yet",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Without a kill the cooldown keeps running",
+      "actor": "reaper",
+      "metric": "cooldown_ms",
+      "spell": 803985,
+      "min": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "victim",
+      "value": 1,
+      "label": "Prepare a separate enemy that dies to one normal auto attack"
+    },
+    {
+      "action": "attack",
+      "actor": "reaper",
+      "target": "victim"
+    },
+    {
+      "action": "assert",
+      "label": "The untouched creature dies",
+      "actor": "victim",
+      "metric": "health",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Killing any enemy clears Ghost Claw's cooldown",
+      "actor": "reaper",
+      "metric": "cooldown_ms",
+      "spell": 803985,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "reaper"
+    }
+  ]
+}

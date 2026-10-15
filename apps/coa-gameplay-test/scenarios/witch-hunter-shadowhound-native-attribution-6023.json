@@ -1,0 +1,251 @@
+{
+  "schema": 1,
+  "name": "witch-hunter-shadowhound-native-attribution-6023",
+  "contract": [
+    "Houndmaster Call 802273 makes the Shadowhound leap and deliver two 706332 strikes. The native AI also repeats the leap after twenty seconds. Both sources must credit positive landed damage to the pet, retaining the explicitly computed owner ranged-attack-power scaling.",
+    "Quickdraw 804193 and Slayer of Darkness 804024 listen to direct ability events from the player. Both owner ratings and the pet Crit Test Buff 503747 guarantee criticals; 984948 fixtures only pet hit/expertise. Landed manual and autonomous critical pet strikes must not become player events or proc those owner talents."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "melee_crit_rating": 100000,
+      "ranged_crit_rating": 100000,
+      "spell_crit_rating": 100000,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 801343
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 802273
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 804193
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 804024
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 801343
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_entry",
+      "equals": 50124,
+      "within_ms": 5000,
+      "label": "hunter: pet_entry 50124"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hunter",
+      "pet": true,
+      "spell": 984948,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "hunter",
+      "pet": true,
+      "spell": 503747,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 802273,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_go_count",
+      "pet": true,
+      "spell": 706332,
+      "min": 2,
+      "within_ms": 6000,
+      "label": "hunter: spell_go_count 706332 True 2"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "pet": true,
+      "spell": 706332,
+      "target": "enemy",
+      "min": 2,
+      "within_ms": 2000,
+      "critical": true,
+      "label": "hunter: spell_damage_count 706332 enemy True 2"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 706332,
+      "target": "enemy",
+      "equals": 0,
+      "label": "hunter: spell_damage_count 706332 enemy 0"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 680244,
+      "equals": 0,
+      "label": "hunter: aura 680244 0"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_cast_count",
+      "spell": 804025,
+      "equals": 0,
+      "label": "hunter: spell_cast_count 804025 0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "save_as": "manual_pet_hits",
+      "pet": true,
+      "spell": 706332,
+      "target": "enemy",
+      "critical": true,
+      "label": "hunter: spell_damage_count 706332 enemy True"
+    },
+    {
+      "action": "attack",
+      "actor": "hunter",
+      "target": "enemy",
+      "pet": true
+    },
+    {
+      "action": "wait",
+      "ms": 25000
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "pet": true,
+      "spell": 706332,
+      "target": "enemy",
+      "relative_to": "manual_pet_hits",
+      "min": 2,
+      "within_ms": 5000,
+      "critical": true,
+      "label": "hunter: spell_damage_count 706332 enemy True 2"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 706332,
+      "target": "enemy",
+      "equals": 0,
+      "label": "hunter: spell_damage_count 706332 enemy 0"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 680244,
+      "equals": 0,
+      "label": "hunter: aura 680244 0"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_cast_count",
+      "spell": 804025,
+      "equals": 0,
+      "label": "hunter: spell_cast_count 804025 0"
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 680264
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680264,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 680264,
+      "target": "enemy",
+      "critical": true,
+      "min": 1,
+      "within_ms": 3000,
+      "label": "hunter: spell_damage_count 680264 enemy 1"
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 680244,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "hunter: aura 680244 1"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 5
+    }
+  ]
+}

@@ -1,0 +1,376 @@
+{
+  "schema": 1,
+  "name": "CoA Legendary Items: powers",
+  "contract": "Requires CoALegendaryItems.Enable=1, DropChance=100, StopDropLevel=60, DestinyWeaver.Enable=1, LevelScaling=1, offset=5, CoA.SendDisplayPatches=1. Equipped native auras change actual AP/RAP/SP, speed and armor. Healthy, wounded and after-kill conditions, unequip via the destroy handler, death cleanup, eight-second expiry and strongest-copy stacking are checked.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "physical",
+      "race": 1,
+      "class": 12,
+      "level": 32
+    },
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 13,
+      "level": 32
+    },
+    {
+      "id": "hybrid",
+      "race": 1,
+      "class": 14,
+      "level": 32
+    }
+  ],
+  "creatures": [
+    {
+      "id": "wolf",
+      "owner": "physical",
+      "entry": 1501,
+      "level": 10,
+      "health": 1000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_xp_enabled",
+      "actor": "physical",
+      "enabled": false
+    },
+    {
+      "action": "set_xp_enabled",
+      "actor": "caster",
+      "enabled": false
+    },
+    {
+      "action": "set_xp_enabled",
+      "actor": "hybrid",
+      "enabled": false
+    },
+    {
+      "action": "add_item",
+      "actor": "physical",
+      "item": 9700029
+    },
+    {
+      "action": "equip",
+      "actor": "physical",
+      "item": 9700029,
+      "slot": 10
+    },
+    {
+      "action": "add_item",
+      "actor": "physical",
+      "item": 9700010
+    },
+    {
+      "action": "equip",
+      "actor": "physical",
+      "item": 9700010,
+      "slot": 11
+    },
+    {
+      "action": "add_item",
+      "actor": "physical",
+      "item": 9700129
+    },
+    {
+      "action": "equip",
+      "actor": "physical",
+      "item": 9700129,
+      "slot": 7
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 9700329
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 9700329,
+      "slot": 10
+    },
+    {
+      "action": "add_item",
+      "actor": "hybrid",
+      "item": 9700629
+    },
+    {
+      "action": "equip",
+      "actor": "hybrid",
+      "item": 9700629,
+      "slot": 10
+    },
+    {
+      "action": "add_item",
+      "actor": "hybrid",
+      "item": 9700729
+    },
+    {
+      "action": "equip",
+      "actor": "hybrid",
+      "item": 9700729,
+      "slot": 7
+    },
+    {
+      "action": "add_item",
+      "actor": "hybrid",
+      "item": 9706329
+    },
+    {
+      "action": "equip",
+      "actor": "hybrid",
+      "item": 9706329,
+      "slot": 14
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "physical",
+      "metric": "aura",
+      "spell": 9710000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "physical",
+      "metric": "run_speed_rate",
+      "min": 1.1499899999999998,
+      "max": 1.15001
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 9710003,
+      "effect": 0,
+      "equals": 41
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 9710003,
+      "effect": 1,
+      "equals": 41
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_power",
+      "save_as": "healthy_sp",
+      "school": 2
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 5000,
+      "maximum": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 9710003,
+      "within_ms": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_power",
+      "school": 2,
+      "relative_to": "healthy_sp",
+      "equals": -41
+    },
+    {
+      "action": "assert",
+      "actor": "hybrid",
+      "metric": "aura",
+      "spell": 9710006,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "hybrid",
+      "metric": "armor",
+      "save_as": "armor_healthy"
+    },
+    {
+      "action": "set_health",
+      "actor": "hybrid",
+      "value": 1000,
+      "maximum": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "hybrid",
+      "metric": "aura_amount",
+      "spell": 9710006,
+      "effect": 0,
+      "within_ms": 1000,
+      "equals": 82
+    },
+    {
+      "action": "assert",
+      "actor": "hybrid",
+      "metric": "aura_amount",
+      "spell": 9710006,
+      "effect": 1,
+      "equals": 41
+    },
+    {
+      "action": "assert",
+      "actor": "hybrid",
+      "metric": "aura_amount",
+      "spell": 9710006,
+      "effect": 2,
+      "equals": 41
+    },
+    {
+      "action": "assert",
+      "actor": "hybrid",
+      "metric": "run_speed_rate",
+      "min": 1.19999,
+      "max": 1.20001
+    },
+    {
+      "action": "assert",
+      "actor": "hybrid",
+      "metric": "aura_amount",
+      "spell": 9710063,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "hybrid",
+      "metric": "armor",
+      "ratio_to": "armor_healthy",
+      "min": 1.19,
+      "max": 1.21
+    },
+    {
+      "action": "destroy_item",
+      "actor": "hybrid",
+      "item": 9700729
+    },
+    {
+      "action": "assert",
+      "actor": "hybrid",
+      "metric": "aura",
+      "spell": 9710007,
+      "within_ms": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hybrid",
+      "metric": "run_speed_rate",
+      "min": 0.99999,
+      "max": 1.00001
+    },
+    {
+      "action": "snapshot",
+      "actor": "physical",
+      "metric": "attack_power",
+      "save_as": "ap_before_kill"
+    },
+    {
+      "action": "snapshot",
+      "actor": "physical",
+      "metric": "ranged_attack_power",
+      "save_as": "rap_before_kill"
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "physical",
+      "entry": 1501,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "physical",
+      "metric": "aura_amount",
+      "spell": 9710000,
+      "within_ms": 1000,
+      "equals": 82
+    },
+    {
+      "action": "assert",
+      "actor": "physical",
+      "metric": "attack_power",
+      "relative_to": "ap_before_kill",
+      "equals": 82
+    },
+    {
+      "action": "assert",
+      "actor": "physical",
+      "metric": "ranged_attack_power",
+      "relative_to": "rap_before_kill",
+      "equals": 82
+    },
+    {
+      "action": "destroy_item",
+      "actor": "physical",
+      "item": 9700029
+    },
+    {
+      "action": "assert",
+      "actor": "physical",
+      "metric": "aura_amount",
+      "spell": 9710000,
+      "within_ms": 1000,
+      "equals": 44
+    },
+    {
+      "action": "wait",
+      "ms": 8500
+    },
+    {
+      "action": "assert",
+      "actor": "physical",
+      "metric": "aura",
+      "spell": 9710000,
+      "equals": 0
+    },
+    {
+      "action": "die",
+      "actor": "hybrid"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "hybrid",
+      "metric": "aura",
+      "spell": 9710006,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hybrid",
+      "metric": "aura",
+      "spell": 9710063,
+      "equals": 0
+    }
+  ]
+}

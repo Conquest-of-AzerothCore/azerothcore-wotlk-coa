@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Calm Under Pressure shortens Stoicism by 30 s and Burrow Bolt by 10 s (#1235)",
+  "contract": "Calm Under Pressure 705519 reads 'Reduces the cooldown of Stoicism by $/1000;s2 sec and Burrow Bolt by $/1000;s1 sec.' In the installed Spell.dbc (server DBC 2026-09-17; the older dbc_clientset copy differs) it is passive, family 21, effect 0 = SPELL_AURA_ADD_FLAT_MODIFIER misc 11 = SPELLMOD_COOLDOWN, BasePoints -10001 (-10000 ms), class mask word 2 = 0x40000000, and effect 1 the same aura with BasePoints -30001 (-30000 ms) and mask word 1 = 0x02000000. Burrow Bolt 802269 has flag word 2 0x40000000 and a 40000 ms cooldown, Stoicism 804802 has flag word 1 0x02000000 and 180000 ms. Player::AddSpellAndCategoryCooldowns applies SPELLMOD_COOLDOWN to the recovery and category times (Player.cpp:11451-11456), so the expected cooldowns are 30000 and 150000 ms. The scenario reads both through the spell_modifier probe and then casts Stoicism (free, no reagents) and reads its real remaining cooldown.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Stoicism", "actor": "hunter", "spell": 804802},
+    {"action": "learn", "label": "Burrow Bolt", "actor": "hunter", "spell": 802269},
+    {"action": "assert", "label": "Stoicism is 180000 ms without the talent", "actor": "hunter", "metric": "spell_modifier", "spell": 804802, "op": 11, "base": 180000, "equals": 180000},
+    {"action": "assert", "label": "Burrow Bolt is 40000 ms without the talent", "actor": "hunter", "metric": "spell_modifier", "spell": 802269, "op": 11, "base": 40000, "equals": 40000},
+    {"action": "learn", "label": "Calm Under Pressure", "actor": "hunter", "spell": 705519},
+    {"action": "assert", "label": "The passive is active", "actor": "hunter", "metric": "aura", "spell": 705519, "equals": 1},
+    {"action": "assert", "label": "Stoicism drops by 30 s", "actor": "hunter", "metric": "spell_modifier", "spell": 804802, "op": 11, "base": 180000, "equals": 150000},
+    {"action": "assert", "label": "Burrow Bolt drops by 10 s", "actor": "hunter", "metric": "spell_modifier", "spell": 802269, "op": 11, "base": 40000, "equals": 30000},
+    {"action": "cast", "label": "Cast Stoicism", "actor": "hunter", "spell": 804802},
+    {"action": "assert", "label": "Stoicism's live cooldown starts at 150 s", "actor": "hunter", "metric": "cooldown_ms", "spell": 804802, "min": 148000, "max": 150000, "within_ms": 3000},
+    {"action": "unlearn", "label": "Drop Calm Under Pressure", "actor": "hunter", "spell": 705519},
+    {"action": "assert", "label": "Stoicism returns to 180000 ms", "actor": "hunter", "metric": "spell_modifier", "spell": 804802, "op": 11, "base": 180000, "equals": 180000},
+    {"action": "assert", "label": "Burrow Bolt returns to 40000 ms", "actor": "hunter", "metric": "spell_modifier", "spell": 802269, "op": 11, "base": 40000, "equals": 40000}
+  ]
+}

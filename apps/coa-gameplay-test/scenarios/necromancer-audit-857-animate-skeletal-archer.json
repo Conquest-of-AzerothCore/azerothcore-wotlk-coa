@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Animate: Skeletal Archer raises three archers for 15 sec on a 30 sec cooldown (#857)",
+  "contract": "Animate: Skeletal Archer 805040 reads 'Animate ${$500330m1} Skeletal Archers to aid you in combat for $500330d.' with an instant cast and RecoveryTime 30000. Its only effect is SPELL_EFFECT_TRIGGER_SPELL 500330 on the caster. 500330 (EffectBasePoints 2 + DieSides 1 = 3, SpellDuration 8 = 15000 ms) summons creature 50076 and says 'Does not occupy Life Force.' The audit looked for 805040 in source, but the trigger is native and 500330 is bound to spell_ascension_necromancer_summon (rev_20260909_01_necromancer_completion.sql), whose NecromancerSummons row (500330, 0, 50076, 3) raises three Skeletal Archers with the spell's 15000 ms lifetime; Cost() gives 500330 no Life Force, so free Life Force (525004 stacks) stays at the full capacity of 2. The archers exist right after the cast, are still up 11 s later and are gone by 17 s.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the Life Force aura synchronize", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 805040 },
+    {
+      "action": "assert", "label": "SETUP: Life Force capacity is 2", "actor": "n",
+      "metric": "aura_stacks", "spell": 805011, "equals": 2, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: no archer exists before the cast", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 0
+    },
+    { "action": "cast", "label": "Animate: Skeletal Archer", "actor": "n", "spell": 805040 },
+    {
+      "action": "assert", "label": "Three Skeletal Archers are animated", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 3, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The instant cast starts the 30 s cooldown", "actor": "n",
+      "metric": "cooldown_ms", "spell": 805040, "min": 27000, "max": 30000
+    },
+    {
+      "action": "assert", "label": "The archers occupy no Life Force: 2 free of 2", "actor": "n",
+      "metric": "aura_stacks", "spell": 525004, "equals": 2, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Most of the 15 s lifetime", "ms": 11000 },
+    {
+      "action": "assert", "label": "The archers are still up 11 s later", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 3
+    },
+    {
+      "action": "assert", "label": "The archers expire after 15 s", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 0, "within_ms": 5000
+    }
+  ]
+}

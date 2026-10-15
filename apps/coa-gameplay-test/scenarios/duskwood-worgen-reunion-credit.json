@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Duskwood: talking to the caged worgen credits 'May We Be Reunited' to every player nearby",
+  "contract": "Quest 254091 'May We Be Reunited' (rev_20261011_95_coa_duskwood_restore.sql) needs the 254905 credit. The client's Spell.dbc carries 355229 'Arvis Reunion Credit': KILL_CREDIT2 for 254905 on every unit within 30 yards of its caster (TargetA 22, TargetB 7, radius index 10). Talking to the caged Nightbane Worgen 764561 must cast it, so the speaker, a group member beside them and an ungrouped player beside them who all carry 254091 each get the credit. A direct SmartAI credit reaches only the speaker and their group, so the ungrouped player is the discriminating case.",
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -10560.0, "y": -1150.0, "z": 28.0, "o": 0},
+  "players": [
+    {"id": "speaker", "race": 1, "class": 1, "level": 30},
+    {"id": "member", "race": 1, "class": 1, "level": 30},
+    {"id": "stranger", "race": 1, "class": 1, "level": 30}
+  ],
+  "creatures": [
+    {"id": "worgen", "owner": "speaker", "entry": 764561, "distance": 3, "faction": 35, "level": 24}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"label": "SETUP: the speaker and the member form a party; the stranger stays ungrouped", "action": "group",
+     "actor": "speaker", "target": "member"},
+    {"label": "SETUP: the speaker carries 254091 unfinished", "action": "prepare_quest", "actor": "speaker",
+     "quest": 254091, "complete": false},
+    {"label": "SETUP: the member carries 254091 unfinished", "action": "prepare_quest", "actor": "member",
+     "quest": 254091, "complete": false},
+    {"label": "SETUP: the stranger carries 254091 unfinished", "action": "prepare_quest", "actor": "stranger",
+     "quest": 254091, "complete": false},
+    {"label": "SETUP: the speaker has no 254905 credit yet", "action": "assert", "actor": "speaker",
+     "metric": "quest_objective_count", "quest": 254091, "equals": 0},
+    {"label": "SETUP: the stranger has no 254905 credit yet", "action": "assert", "actor": "stranger",
+     "metric": "quest_objective_count", "quest": 254091, "equals": 0},
+    {"label": "SETUP: the stranger stands within the spell's 30 yards of the worgen", "action": "assert",
+     "actor": "stranger", "metric": "distance", "target": "worgen", "max": 20},
+    {"label": "the speaker talks to the caged worgen", "action": "gossip_hello", "actor": "speaker",
+     "target": "worgen"},
+    {"label": "the speaker gets the 254905 credit", "action": "assert", "actor": "speaker",
+     "metric": "quest_objective_count", "quest": 254091, "equals": 1, "within_ms": 3000},
+    {"label": "the party member beside the speaker gets the credit", "action": "assert", "actor": "member",
+     "metric": "quest_objective_count", "quest": 254091, "equals": 1, "within_ms": 3000},
+    {"label": "DISCRIMINATING: the ungrouped stranger beside the worgen gets the credit through 355229",
+     "action": "assert", "actor": "stranger", "metric": "quest_objective_count", "quest": 254091, "equals": 1,
+     "within_ms": 3000},
+    {"label": "254091 is complete for the stranger", "action": "assert", "actor": "stranger",
+     "metric": "quest_status", "quest": 254091, "equals": 1, "within_ms": 3000}
+  ]
+}

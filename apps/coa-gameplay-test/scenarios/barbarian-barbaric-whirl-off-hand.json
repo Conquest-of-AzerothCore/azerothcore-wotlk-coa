@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "name": "Barbaric Whirl strikes each enemy with the off hand too (#265)",
+  "contract": [
+    "Barbaric Whirl 500002: 'Whirl in a barbaric fury, striking up to $i nearby enemies with both weapons'. The",
+    "off-hand strike is Barbaric Whirl 805232, cast once per whirled enemy at that enemy. 805232's Spell.dbc",
+    "targets are TARGET_SRC_CASTER/TARGET_UNIT_SRC_AREA_ENEMY; CoA retargets it to TARGET_UNIT_TARGET_ENEMY in the",
+    "spell-attribute hook. #265 reported an ASSERT in Spell::SelectImplicitTargetObjectTargets for 805232 on",
+    "release feb155c82: the explicit-target mask was cached before that hook, so the unit target was dropped",
+    "and every off-hand strike asserted. A dual-wielding Barbarian whirling next to one enemy must hit it once",
+    "with 500002 and once with 805232, and survive. Ratings remove melee misses, dodges and parries."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "barbarian", "race": 1, "class": 12, "level": 20, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "barbarian", "entry": 36, "level": 20, "health": 100000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "barbarian", "spell": 201 },
+    { "action": "learn", "actor": "barbarian", "spell": 1180 },
+    { "action": "learn", "actor": "barbarian", "spell": 674 },
+    { "action": "learn", "actor": "barbarian", "spell": 500002 },
+    { "action": "add_item", "actor": "barbarian", "item": 25 },
+    { "action": "equip", "actor": "barbarian", "item": 25, "slot": 15 },
+    { "action": "add_item", "actor": "barbarian", "item": 2092 },
+    { "action": "equip", "actor": "barbarian", "item": 2092, "slot": 16 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "SETUP: no off-hand strike before the whirl", "actor": "barbarian",
+      "metric": "spell_damage_count", "spell": 805232, "equals": 0
+    },
+    { "action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "enemy_before_whirl" },
+    { "action": "set_power", "actor": "barbarian", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "barbarian", "spell": 500002 },
+    {
+      "action": "assert", "label": "The whirl hits the enemy", "actor": "barbarian",
+      "metric": "spell_damage_count", "spell": 500002, "target": "enemy", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the off-hand strike reaches the whirled enemy once",
+      "actor": "barbarian", "metric": "spell_damage_count", "spell": 805232, "target": "enemy", "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Both strikes damage the enemy", "actor": "enemy", "metric": "health",
+      "relative_to": "enemy_before_whirl", "max": -2
+    },
+    { "action": "wait", "ms": 3000 },
+    {
+      "action": "assert", "label": "One whirl makes exactly one off-hand strike", "actor": "barbarian",
+      "metric": "spell_damage_count", "spell": 805232, "target": "enemy", "equals": 1
+    },
+    { "action": "assert", "actor": "barbarian", "metric": "alive", "equals": 1 },
+    { "action": "console", "command": "server info" }
+  ]
+}

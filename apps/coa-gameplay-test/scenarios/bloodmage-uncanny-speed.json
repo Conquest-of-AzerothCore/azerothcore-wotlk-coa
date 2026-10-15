@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Uncanny Speed grants 20% movement speed and 5% melee haste (#3677)",
+  "contract": "Uncanny Speed 807491 ships three SPELL_EFFECT_APPLY_AURA effects in Spell.dbc: aura 31 SPELL_AURA_MOD_INCREASE_SPEED with BasePoints 19 + DieSides 1 = 20% (AuraEffect::HandleAuraModIncreaseSpeed), aura 172 SPELL_AURA_MOD_MOUNTED_SPEED_NOT_STACK with the same 20% (HandleAuraModIncreaseMountedSpeed), and aura 138 SPELL_AURA_MOD_MELEE_HASTE with BasePoints 4 + DieSides 1 = 5% (HandleModMeleeSpeedPct). All three have real handlers. The aura is passive and hidden from the client (Attributes 0xc0), so it never appears on a buff bar; that is shipped behaviour, not a defect. attack_time_ms reads the hasted swing time, so 5% melee haste divides it by 1.05. This is the coa-gameplay-test port of the Ghost e2e check recorded in .agents/plans/coa-aura-handler-reports/observations.md, which measured run speed 8.40 = 7.0 * 1.20.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 20, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "caster", "metric": "run_speed_rate", "save_as": "run_before" },
+    { "action": "snapshot", "actor": "caster", "metric": "attack_time_ms", "hand": 0, "save_as": "swing_before" },
+    { "action": "learn", "actor": "caster", "spell": 807491 },
+    {
+      "action": "assert", "label": "Run speed rises by 20%",
+      "actor": "caster", "metric": "run_speed_rate", "ratio_to": "run_before",
+      "min": 1.199, "max": 1.201, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "Melee swing time drops by 5%",
+      "actor": "caster", "metric": "attack_time_ms", "hand": 0, "ratio_to": "swing_before",
+      "min": 0.951, "max": 0.953, "within_ms": 5000
+    }
+  ]
+}

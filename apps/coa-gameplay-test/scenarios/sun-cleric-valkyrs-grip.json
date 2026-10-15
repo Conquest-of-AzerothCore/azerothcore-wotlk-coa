@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Valkyr's Grip's offhand damage and disarm-duration reduction are native stat auras (#820)",
+  "contract": "Spell.dbc 807507 (\"Valkyr's Grip\", SpellFamilyName 33, Passive, self-targeted) effect 0 is SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT (122) with EffectBasePoints 30 (amount 31, DieSides 1) — AuraEffect::HandleModOffhandDamagePercent (SpellAuraEffects.cpp:187) is a pure native aura-type registration with no scripted apply/remove logic; Unit::CalculateDamage (Unit.cpp:12731) multiplies offhand white/melee damage by GetTotalAuraMultiplier(SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT) for every unit that carries this aura, matching the tooltip's \"increases off-hand Weapon Damage dealt by 31%\" with zero server script needed. Effect 1 is SPELL_AURA_MECHANIC_DURATION_MOD (232) with EffectBasePoints -16 (amount -15) and EffectMiscValue 3 (MECHANIC_DISARM); Unit::ModSpellDuration (Unit.cpp:12144, called from Spell::EffectApplyAura before a debuff's duration is fixed) reads the *recipient's own* SPELL_AURA_MECHANIC_DURATION_MOD aura for the mechanic being applied to them and shrinks that debuff's duration accordingly — i.e. this aura reduces the duration of disarm effects landed on the Sun Cleric who has it, matching the tooltip. Both aura types are generic engine paths already wired into AuraEffect::handleEffects[122] and [232]; the harness has no way to force an external disarm cast onto a fixture without extra positioning/resource setup, so this scenario pins the exact DBC amounts (31 and -15) that those native handlers consume, rather than re-deriving them live.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "cleric", "spell": 807507 },
+    { "action": "assert", "label": "The passive self-applies", "actor": "cleric", "metric": "aura", "spell": 807507, "equals": 1 },
+    {
+      "action": "assert", "label": "Offhand damage bonus is exactly 31% (SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT amount)",
+      "actor": "cleric", "metric": "aura_amount", "spell": 807507, "effect": 0, "equals": 31
+    },
+    {
+      "action": "assert", "label": "Disarm duration reduction is exactly -15% (SPELL_AURA_MECHANIC_DURATION_MOD amount)",
+      "actor": "cleric", "metric": "aura_amount", "spell": 807507, "effect": 1, "equals": -15
+    }
+  ]
+}

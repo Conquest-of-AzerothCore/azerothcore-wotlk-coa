@@ -1,0 +1,276 @@
+{
+  "schema": 1,
+  "name": "Runemaster: Arcane Palm Sigil with Primordial Blast (#6087)",
+  "contract": [
+    "Original 807322 specifies the next direct Magic hit adds 8% of the damage each Arcane tick and silences its",
+    "victim.",
+    "The current main spell_proc row gives the Arcane chain one base charge. This is a control for the already",
+    "implemented sigil and must preserve Elements of Fury additional charges.",
+    "Primordial Blast 800732 is a normal direct magic probe. Reset its 8-second cooldown and restore caster mana",
+    "before each separate hit to isolate the one-use Sigil behavior.",
+    "The 8 percent payload floors its magnitude to whole points. A triggering hit of at least 100 limits",
+    "the ratio error to less than 0.01; the percentage assertion includes only that integer-rounding interval."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 800732
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 807322
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807819,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "label": "SETUP: enough mana for the repeated probe",
+      "actor": "rm",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "label": "SETUP: isolate the trigger from its 8-second cooldown",
+      "actor": "rm",
+      "spell": 800732
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807819,
+      "equals": 0,
+      "label": "Without a sigil there is no extra Arcane hit"
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 1,
+      "label": "Fixture: the alternative Waveforged window"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 808089,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 807322
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 807322,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura_amount",
+      "spell": 807322,
+      "effect": 0,
+      "equals": 8
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 800732,
+      "target": "dummy",
+      "save_as": "before_hit"
+    },
+    {
+      "action": "set_power",
+      "label": "SETUP: enough mana for the repeated probe",
+      "actor": "rm",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "label": "SETUP: isolate the trigger from its 8-second cooldown",
+      "actor": "rm",
+      "spell": 800732
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807819,
+      "equals": 1,
+      "within_ms": 1500,
+      "label": "The next direct spell produces one Arcane hit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 800732,
+      "target": "dummy",
+      "relative_to": "before_hit",
+      "save_as": "trigger_hit"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 800732,
+      "target": "dummy",
+      "relative_to": "before_hit",
+      "min": 100,
+      "label": "The probe hit bounds whole-point rounding error to at most 1 percent"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura_amount",
+      "spell": 807819,
+      "ratio_to": "trigger_hit",
+      "min": 0.07,
+      "max": 0.0801,
+      "label": "The Arcane hit copies 8% of the actual triggering damage",
+      "caster": "rm",
+      "effect": 0
+    },
+    {
+      "action": "assert",
+      "label": "The next magic hit silences its victim",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 808020,
+      "caster": "rm",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 807322,
+      "equals": 0,
+      "label": "The one-use sigil is consumed"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "label": "SETUP: enough mana for the repeated probe",
+      "actor": "rm",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "label": "SETUP: isolate the trigger from its 8-second cooldown",
+      "actor": "rm",
+      "spell": 800732
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 800732,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "target": "dummy",
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807819,
+      "equals": 1,
+      "label": "The following direct spell cannot reuse the consumed sigil"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "rm",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  }
+}

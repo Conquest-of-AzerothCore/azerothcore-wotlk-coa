@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Barbarian audit: Rage Whirling spell modifier reaches its target spells (#1181)",
+  "contract": "Audit report #1181 asked for a script for a passive whose effects are native spell-mod auras (107 flat, 108 percent). The effect BasePoints and EffectSpellClassMask in Spell.dbc name the spell-mod operation, amount and affected Barbarian spells; Player::ApplySpellMod, which the spell_modifier metric calls, must deliver base+flat or base*(100+pct)/100. Expected values are computed from the DBC amount, not from the implementation.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "before: 500919 has no modifier for op 7",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 500919,
+      "op": 7,
+      "base": 100000,
+      "min": 99998,
+      "max": 100002
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 561321
+    },
+    {
+      "action": "assert",
+      "label": "Rage Whirling (561321) is active",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 561321,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "561321 op 7 flat +50 reaches 500919 (mask selects 10 Barbarian spell(s))",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 500919,
+      "op": 7,
+      "base": 100000,
+      "min": 100048,
+      "max": 100052
+    }
+  ]
+}

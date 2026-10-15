@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Shadow Howl grants the party root and snare immunity (#3605)",
+  "contract": "Shadow Howl 806177 ships two SPELL_EFFECT_APPLY_AURA effects in Spell.dbc, both aura 77 SPELL_AURA_MECHANIC_IMMUNITY with BasePoints -1, MiscValue 11 (MECHANIC_SNARE) and MiscValue 7 (MECHANIC_ROOT), TargetA 22 / TargetB 56 (caster-area party/raid), radius index 10 (30 yards), duration index 32 (6 seconds) and RecoveryTime 60000. The native handler is AuraEffect::HandleModMechanicImmunity, and root plus snare immunity is exactly the tooltip's \"immunity to movement impairing effects\". Two probes are used, one per effect, because Unit::IsImmunedToSpellEffect matches spellInfo->Effects[index].Mechanic against the IMMUNITY_MECHANIC list SpellInfo::ApplyAllSpellImmunitiesTo registers: Frost Nova 122 effect 1 is SPELL_EFFECT_APPLY_AURA with aura 26 SPELL_AURA_MOD_ROOT and Mechanic 7, and Hamstring 1715 effect 0 is SPELL_EFFECT_APPLY_AURA with aura 33 SPELL_AURA_MOD_DECREASE_SPEED and Mechanic 11; neither carries SPELL_ATTR0_NO_IMMUNITIES, so each must report immunity only while the howl is up. The shipped BasePoints are not asserted: SpellEffectInfo::CalcValue adds the 1..DieSides roll, so BasePoints -1 with DieSides 1 computes to 0, and AuraEffect::HandleModMechanicImmunity keys on MiscValue rather than on the amount. 806177 carries CasterAuraSpell 525031, one of the two Cursed Form markers AscensionBloodmageTalents.cpp mirrors onto the real form state, so the caster is given that marker as a fixture.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 20, "level": 80 },
+    { "id": "ally", "race": 1, "class": 20, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "group", "actor": "caster", "target": "ally" },
+    {
+      "action": "assert", "label": "The ally is rootable before the howl",
+      "actor": "ally", "metric": "spell_effect_immune", "spell": 122, "effect": 1,
+      "target": "caster", "equals": 0
+    },
+    {
+      "action": "assert", "label": "The ally is snareable before the howl",
+      "actor": "ally", "metric": "spell_effect_immune", "spell": 1715, "effect": 0,
+      "target": "caster", "equals": 0
+    },
+    { "action": "set_aura", "actor": "caster", "spell": 525031, "stacks": 1 },
+    { "action": "set_power", "actor": "caster", "power": 1, "value": 1000 },
+    { "action": "learn", "label": "Fixture: know the howl", "actor": "caster", "spell": 806177 },
+    { "action": "cast", "actor": "caster", "spell": 806177 },
+    {
+      "action": "assert", "label": "The howl reaches the grouped ally",
+      "actor": "ally", "metric": "aura", "spell": 806177, "caster": "caster", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The ally is immune to the root mechanic while it lasts",
+      "actor": "ally", "metric": "spell_effect_immune", "spell": 122, "effect": 1,
+      "target": "caster", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The ally is immune to the snare mechanic while it lasts",
+      "actor": "ally", "metric": "spell_effect_immune", "spell": 1715, "effect": 0,
+      "target": "caster", "equals": 1, "within_ms": 3000
+    }
+  ]
+}

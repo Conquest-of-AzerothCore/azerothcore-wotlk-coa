@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Bloodbender raises the effectiveness of Offerings by 20% (#1293)",
+  "contract": "Bloodbender 704635: \"Increases the effectiveness of Offerings by $s1%.\" Effect 0 is aura 108 with MiscValue 8 = SPELLMOD_ALL_EFFECTS (SpellDefines.h:84), amount 20, EffectSpellClassMask [32, 0, 0], which over SpellFamilyName 26 selects exactly the Offering line: Sanguinary Offering 706630 and 707336-707340, Bloodsoaked Offering 572400-572403, Greater Bloodsoaked Offering 572404 and Greater Sanguinary Offering 680299 - twelve records, no remainder. Aura 108 is consumed by AuraEffect::CalculateSpellMod (SpellAuraEffects.cpp:173) and applied through Player::ApplySpellMod, which the spell_modifier metric calls directly. Effects 1 and 2 (auras 303 and 360, MiscValue 18) both resolve to an amount of 0 and are mentioned nowhere in the tooltip, so they are not asserted; they are recorded as an observation. No source or SQL change is involved.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Sanguinary Offering carries no effectiveness modifier yet",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 706630,
+      "op": 8,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 704635
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 704635,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Sanguinary Offering is 20% more effective",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 706630,
+      "op": 8,
+      "base": 1000,
+      "equals": 1200
+    },
+    {
+      "action": "assert",
+      "label": "The same modifier reaches Greater Sanguinary Offering",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 680299,
+      "op": 8,
+      "base": 1000,
+      "equals": 1200
+    }
+  ]
+}

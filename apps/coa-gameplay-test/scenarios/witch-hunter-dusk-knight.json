@@ -1,0 +1,147 @@
+{
+  "schema": 1,
+  "name": "Dusk Knight converts Agility into parry rating and Intellect into dodge rating (#738)",
+  "contract": "Dusk Knight 681200 (installed Spell.dbc) is a passive family-21 spell with two SPELL_AURA_MOD_RATING_FROM_STAT (220) effects: effect 0 misc 8 (bit 3 = CR_PARRY) MiscValueB 1 (Agility) base 39 die 1 -> 40, effect 1 misc 4 (bit 2 = CR_DODGE) MiscValueB 3 (Intellect) base 24 die 1 -> 25; the text reads 'parry rating by 40% of your Agility and your dodge rating by 25% of your Intellect'. Player::UpdateRating adds int32(CalculatePct(GetStat(MiscValueB), amount)) for every rating in the mask and UpdateStats refreshes it when the source stat moves. Base Agility and Intellect of a level-60 Witch Hunter are not values this scenario may assume, so the conversion is measured as a slope: after learning, a fixture aura with a known flat stat gain is applied and the rating must rise by that gain times the percentage. Increased Agility 40 (14404, MOD_STAT misc 1, base 39 die 1 = +40) must add 16 parry rating (15-17 absorbs the two int truncations); Increased Intellect 39 (14429, misc 3, +39) must add 9.75, so 9 or 10 dodge rating. The aura amounts are asserted first so a wrong fixture is caught.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "dk",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dk",
+      "metric": "combat_rating",
+      "save_as": "parry_0",
+      "label": "Parry rating before the talent",
+      "rating": 3
+    },
+    {
+      "action": "snapshot",
+      "actor": "dk",
+      "metric": "combat_rating",
+      "save_as": "dodge_0",
+      "label": "Dodge rating before the talent",
+      "rating": 2
+    },
+    {
+      "action": "learn",
+      "actor": "dk",
+      "spell": 681200,
+      "label": "Learn Dusk Knight"
+    },
+    {
+      "action": "assert",
+      "label": "Effect 0 is 40% of Agility as parry rating",
+      "actor": "dk",
+      "metric": "aura_amount",
+      "spell": 681200,
+      "effect": 0,
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "label": "Effect 1 is 25% of Intellect as dodge rating",
+      "actor": "dk",
+      "metric": "aura_amount",
+      "spell": 681200,
+      "effect": 1,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "The talent grants parry rating",
+      "actor": "dk",
+      "metric": "combat_rating",
+      "rating": 3,
+      "relative_to": "parry_0",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The talent grants dodge rating",
+      "actor": "dk",
+      "metric": "combat_rating",
+      "rating": 2,
+      "relative_to": "dodge_0",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "dk",
+      "metric": "combat_rating",
+      "save_as": "parry_1",
+      "label": "Parry rating with the talent",
+      "rating": 3
+    },
+    {
+      "action": "snapshot",
+      "actor": "dk",
+      "metric": "combat_rating",
+      "save_as": "dodge_1",
+      "label": "Dodge rating with the talent",
+      "rating": 2
+    },
+    {
+      "action": "set_aura",
+      "actor": "dk",
+      "spell": 14404,
+      "stacks": 1,
+      "label": "Add a known +40 Agility"
+    },
+    {
+      "action": "assert",
+      "label": "Fixture: the Agility aura is +40",
+      "actor": "dk",
+      "metric": "aura_amount",
+      "spell": 14404,
+      "effect": 0,
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "label": "+40 Agility adds 40% of it (16) as parry rating",
+      "actor": "dk",
+      "metric": "combat_rating",
+      "rating": 3,
+      "relative_to": "parry_1",
+      "min": 15,
+      "max": 17
+    },
+    {
+      "action": "set_aura",
+      "actor": "dk",
+      "spell": 14429,
+      "stacks": 1,
+      "label": "Add a known +39 Intellect"
+    },
+    {
+      "action": "assert",
+      "label": "Fixture: the Intellect aura is +39",
+      "actor": "dk",
+      "metric": "aura_amount",
+      "spell": 14429,
+      "effect": 0,
+      "equals": 39
+    },
+    {
+      "action": "assert",
+      "label": "+39 Intellect adds 25% of it (9.75 -> 9 or 10) as dodge rating",
+      "actor": "dk",
+      "metric": "combat_rating",
+      "rating": 2,
+      "relative_to": "dodge_1",
+      "min": 9,
+      "max": 10
+    }
+  ]
+}

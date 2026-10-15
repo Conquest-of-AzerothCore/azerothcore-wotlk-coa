@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Beware Da Voodoo and Touch of Mueh'zala lengthen ward/spirit durations natively (#869, #3068)",
+  "contract": "#869: Beware Da Voodoo 707168 is one effect, aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 1 (SPELLMOD_DURATION, SpellDefines.h:76), EffectBasePoints 3999 + DieSides 1 = +4000 ms, EffectSpellClassMask [512, 8192, 0], SpellFamilyName 19. That mask matches Mimic Ward 707162 (SpellFamilyFlags [8704=0x2200, 0, 0], bit 9 = 512 in word 0) and Spirit 561136 (SpellFamilyFlags [0, 8192, 4], bit 13 = 8192 in word 1) -- the tooltip's 'Mimic Ward and Spirits'. Both have DurationIndex 29 = 12000 ms (SpellDuration.dbc). #3068: Touch of Mueh'zala 706538 is the same aura/op pattern, EffectBasePoints 999 + DieSides 1 = +1000 ms, EffectSpellClassMask [0, 16384, 0], matching Stasis 801677 (SpellFamilyFlags [0, 16384, 0], bit 14 in word 1, the Stasis Ward's stun) which has DurationIndex 35 = 4000 ms. Stasis is cast by the Stasis Ward creature on itself (AscensionWitchDoctorSummons.cpp:460: me->CastSpell(me, Stasis, true, nullptr, nullptr, _owner)), whose owner GUID is set to the player (Summons.cpp:170: summon->SetOwnerGUID(player->GetGUID())), so Aura::CalcMaxDuration's caster->GetSpellModOwner() chain (SpellAuras.cpp, via Unit::GetSpellModOwner/GetOwner) resolves to the player and applies the player's own SPELLMOD_DURATION mods -- no module code needed for either talent; both are the generic core SpellMod pattern (parity contract rule 7). Neither talent's class mask overlaps the other's target, and neither touches Spirit Glaive's duration; those are asserted as controls. All numbers (4000, 1000, 12000, 4000 base) are cited from Spell.dbc/SpellDuration.dbc, not invented. Regression guard for native behaviour; both issues classify works_natively.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 13,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Mimic Ward 707162 keeps its authored 12000 ms before either talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 707162,
+      "op": 1,
+      "base": 12000,
+      "equals": 12000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Spirit 561136 keeps its authored 12000 ms before either talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 561136,
+      "op": 1,
+      "base": 12000,
+      "equals": 12000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Stasis 801677 keeps its authored 4000 ms before either talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 801677,
+      "op": 1,
+      "base": 4000,
+      "equals": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: nothing modifies Spirit Glaive's duration before either talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 806289,
+      "op": 1,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707168
+    },
+    {
+      "action": "assert",
+      "label": "#869: Beware Da Voodoo lengthens Mimic Ward to 16000 ms (12000 + 4000)",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 707162,
+      "op": 1,
+      "base": 12000,
+      "equals": 16000
+    },
+    {
+      "action": "assert",
+      "label": "#869: Beware Da Voodoo lengthens Spirit the same way (16000 ms)",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 561136,
+      "op": 1,
+      "base": 12000,
+      "equals": 16000
+    },
+    {
+      "action": "assert",
+      "label": "#869 CONTROL: Beware Da Voodoo does not touch Stasis's duration (different class-mask bit)",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 801677,
+      "op": 1,
+      "base": 4000,
+      "equals": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 706538
+    },
+    {
+      "action": "assert",
+      "label": "#3068: Touch of Mueh'zala lengthens Stasis to 5000 ms (4000 + 1000)",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 801677,
+      "op": 1,
+      "base": 4000,
+      "equals": 5000
+    },
+    {
+      "action": "assert",
+      "label": "#3068 CONTROL: Touch of Mueh'zala leaves Mimic Ward at 16000 ms (Beware Da Voodoo's contribution only)",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 707162,
+      "op": 1,
+      "base": 12000,
+      "equals": 16000
+    },
+    {
+      "action": "assert",
+      "label": "#3068 CONTROL: Touch of Mueh'zala leaves Spirit at 16000 ms (Beware Da Voodoo's contribution only)",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 561136,
+      "op": 1,
+      "base": 12000,
+      "equals": 16000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: neither talent touches Spirit Glaive's duration",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 806289,
+      "op": 1,
+      "base": 10000,
+      "equals": 10000
+    }
+  ]
+}

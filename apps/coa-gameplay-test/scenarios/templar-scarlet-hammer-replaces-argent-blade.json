@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "Scarlet Training turns Argent Blade into Scarlet Hammer (#5162)",
+  "contract": "Scarlet Training 301065 reads 'Casting Argent Blade while Warrior of Dawn is active now transforms your next Argent Blade into Scarlet Hammer'. Casting Argent Blade (rank 7 807268 here) with Warrior of Dawn 561156 applies Scarlet Crusader 301172, whose apply swaps Argent Blade for Scarlet Hammer 807035. Player::SetTemporarySpellReplacement refuses a replacement the player does not know and nothing teaches 807035, so the button never changed. AscensionTemplar::Replacement now lends the replacement spell temporarily while the swap is active and removes that temporary copy when it clears; casting Scarlet Hammer consumes Scarlet Crusader. Divine Fury 563269 swaps Vindication 801446 for Divine Fury 500689 through the same helper and had the same gap.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "templar",
+      "entry": 36,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 5000 },
+    { "action": "learn", "actor": "templar", "spell": 807268 },
+    { "action": "learn", "actor": "templar", "spell": 801446 },
+    { "action": "learn", "label": "Pick the Scarlet Training talent", "actor": "templar", "spell": 301065 },
+    { "action": "add_item", "actor": "templar", "item": 2495 },
+    { "action": "equip", "label": "Argent Blade deals weapon damage", "actor": "templar", "item": 2495, "slot": 15 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "assert", "label": "SETUP: the Scarlet Training talent is active", "actor": "templar", "metric": "aura", "spell": 301065, "equals": 1 },
+    { "action": "assert", "label": "SETUP: Scarlet Hammer is not in the spellbook", "actor": "templar", "metric": "knows_spell", "spell": 807035, "equals": 0 },
+
+    { "action": "set_aura", "label": "Warrior of Dawn is active", "actor": "templar", "spell": 561156, "stacks": 1 },
+    { "action": "set_power", "actor": "templar", "power": 3, "value": 100 },
+    { "action": "cast", "label": "Argent Blade under Warrior of Dawn", "actor": "templar", "spell": 807268, "target": "enemy" },
+    { "action": "wait", "ms": 1600 },
+    { "action": "assert", "label": "SETUP: Argent Blade cast completed", "actor": "templar", "metric": "spell_cast_count", "spell": 807268, "min": 1 },
+    { "action": "assert", "label": "SETUP: Scarlet Crusader is applied", "actor": "templar", "metric": "aura", "spell": 301172, "equals": 1 },
+    { "action": "assert", "label": "CONTRACT: Scarlet Hammer is lent while the swap is active", "actor": "templar", "metric": "knows_spell", "spell": 807035, "equals": 1 },
+    { "action": "assert", "label": "CONTRACT: Argent Blade shows as Scarlet Hammer", "actor": "templar", "metric": "temporary_spell_replacement", "spell": 807268, "equals": 807035 },
+
+    { "action": "set_power", "actor": "templar", "power": 3, "value": 100 },
+    { "action": "cast", "label": "Scarlet Hammer", "actor": "templar", "spell": 807035, "target": "enemy" },
+    { "action": "wait", "ms": 1600 },
+    { "action": "assert", "label": "SETUP: Scarlet Hammer cast completed", "actor": "templar", "metric": "spell_cast_count", "spell": 807035, "equals": 1 },
+    { "action": "assert", "label": "CONTRACT: Scarlet Hammer consumes Scarlet Crusader", "actor": "templar", "metric": "aura", "spell": 301172, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: Argent Blade shows as itself again", "actor": "templar", "metric": "temporary_spell_replacement", "spell": 807268, "equals": 807268 },
+    { "action": "assert", "label": "CONTRACT: the lent Scarlet Hammer is removed", "actor": "templar", "metric": "knows_spell", "spell": 807035, "equals": 0 },
+
+    { "action": "set_aura", "label": "Divine Fury is ready", "actor": "templar", "spell": 563269, "stacks": 1 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "CONTRACT: Vindication shows as Divine Fury", "actor": "templar", "metric": "temporary_spell_replacement", "spell": 801446, "equals": 500689 },
+    { "action": "set_aura", "label": "Divine Fury ends", "actor": "templar", "spell": 563269, "stacks": 0 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "CONTRACT: Vindication shows as itself again", "actor": "templar", "metric": "temporary_spell_replacement", "spell": 801446, "equals": 801446 },
+    { "action": "assert", "label": "CONTRACT: the lent Divine Fury is removed", "actor": "templar", "metric": "knows_spell", "spell": 500689, "equals": 0 }
+  ]
+}

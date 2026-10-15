@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "An Exalted Pendant stops sparkling once the player carries one",
+  "contract": "rev_20261004_93_coa_exalted_pendant_quest_link clears the chest quest link of the Exalted Pendant 2300515. Expected: while Death and Dishonor 1660032 still needs its pendant 559152 the pendant is quest-active (sparkles and can be clicked), and once the player carries one it is not.",
+  "timeout_ms": 30000,
+  "location": {
+    "map": 1,
+    "x": -3460.0,
+    "y": -1085.0,
+    "z": 207.0,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "gatherer",
+      "race": 6,
+      "class": 1,
+      "level": 6
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "actor": "gatherer",
+      "quest": 1660032,
+      "complete": false
+    },
+    {
+      "action": "destroy_item",
+      "actor": "gatherer",
+      "item": 559152
+    },
+    {
+      "action": "destroy_item",
+      "actor": "gatherer",
+      "item": 559151
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "gatherer",
+      "entry": 2300515,
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "metric": "nearby_gameobject_quest_active",
+      "entry": 2300515,
+      "equals": 1,
+      "label": "The pendant sparkles while the quest still needs one"
+    },
+    {
+      "action": "add_item",
+      "actor": "gatherer",
+      "item": 559152
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "metric": "quest_status",
+      "quest": 1660032,
+      "equals": 3,
+      "label": "The quest still needs its armor pieces"
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "metric": "nearby_gameobject_count",
+      "entry": 2300515,
+      "equals": 1,
+      "label": "The pendant is still there"
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "metric": "nearby_gameobject_quest_active",
+      "entry": 2300515,
+      "equals": 0,
+      "within_ms": 1000,
+      "label": "The pendant stops sparkling once the player carries one"
+    }
+  ]
+}

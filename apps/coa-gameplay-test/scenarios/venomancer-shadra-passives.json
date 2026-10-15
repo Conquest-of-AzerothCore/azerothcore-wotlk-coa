@@ -1,0 +1,352 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Shadra's Presence and Shadra's Gift work natively (#1254, #1345)",
+  "contract": "#1254, #1345: both are pure Spell.dbc modifiers that need no script. Shadra's Presence (504348) effect 0 is a party area aura 118 (MOD_HEALING_PCT) of bp 5, so +6 percent healing taken (value 5+1 with DieSides 1), and effect 1 is a SPELLMOD_EFFECT1 (aura 107, misc 3) of +1 on mask (0x4000,0,0), which selects Antivenom Dispel (803680) whose effect 0 cures 1 poison, so 2 with the passive. Shadra's Gift (706937 rank 1, 707868 rank 2) effect 2 is a SPELLMOD_CASTING_TIME percentage (aura 108, misc 10) of -10/-20 on mask (0,0x8000000,0x40000), which selects every Shadra's Prayer and Emerald Veil rank (base 2000 and 2500 ms); effect 1 is SPELL_AURA_REDUCE_PUSHBACK 35/70 read in Spell.cpp with no harness metric for a delayed cast, so only its amount is asserted. Each clause is measured against the same player before the passive.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "v",
+      "target": "ally"
+    },
+    {
+      "action": "snapshot",
+      "label": "Healing the ally takes from v, base 1000, without Shadra's Presence",
+      "actor": "ally",
+      "metric": "spell_healing_taken",
+      "save_as": "heal0",
+      "spell": 2061,
+      "target": "v"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally carries no Shadra's Presence yet",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 504348,
+      "caster": "v",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Antivenom Dispel cures 1 poison without Shadra's Presence",
+      "actor": "v",
+      "metric": "spell_effect_value",
+      "spell": 803680,
+      "effect": 0,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 504348
+    },
+    {
+      "action": "assert",
+      "label": "Shadra's Presence reaches the party member",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 504348,
+      "caster": "v",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The party member's aura carries the healing-taken amount 5+1 = 6",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 504348,
+      "caster": "v",
+      "effect": 0,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ally takes 6 percent more healing (1060 of 1000, float truncation allows 1059)",
+      "actor": "ally",
+      "metric": "spell_healing_taken",
+      "spell": 2061,
+      "target": "v",
+      "relative_to": "heal0",
+      "min": 59,
+      "max": 60,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The self-only effect is a flat effect-1 modifier of +1 on Antivenom Dispel",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803680,
+      "op": 3,
+      "base": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Antivenom Dispel now cures 2 poisons",
+      "actor": "v",
+      "metric": "spell_effect_value",
+      "spell": 803680,
+      "effect": 0,
+      "equals": 2
+    },
+    {
+      "action": "unlearn",
+      "actor": "v",
+      "spell": 504348
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning restores Antivenom Dispel to 1 poison",
+      "actor": "v",
+      "metric": "spell_effect_value",
+      "spell": 803680,
+      "effect": 0,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning removes the party bonus",
+      "actor": "ally",
+      "metric": "spell_healing_taken",
+      "spell": 2061,
+      "target": "v",
+      "relative_to": "heal0",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Shadra's Prayer rank 1 cast time before Shadra's Gift",
+      "actor": "v",
+      "metric": "spell_cast_time_ms",
+      "save_as": "prayer0",
+      "spell": 800870
+    },
+    {
+      "action": "snapshot",
+      "label": "Shadra's Prayer rank 10 cast time before Shadra's Gift",
+      "actor": "v",
+      "metric": "spell_cast_time_ms",
+      "save_as": "prayer10_0",
+      "spell": 502947
+    },
+    {
+      "action": "snapshot",
+      "label": "Emerald Veil rank 1 cast time before Shadra's Gift",
+      "actor": "v",
+      "metric": "spell_cast_time_ms",
+      "save_as": "veil0",
+      "spell": 800926
+    },
+    {
+      "action": "snapshot",
+      "label": "Emerald Veil rank 6 cast time before Shadra's Gift",
+      "actor": "v",
+      "metric": "spell_cast_time_ms",
+      "save_as": "veil6_0",
+      "spell": 801152
+    },
+    {
+      "action": "snapshot",
+      "label": "Spore rank 1 cast time (not in Shadra's Gift's mask), the control",
+      "actor": "v",
+      "metric": "spell_cast_time_ms",
+      "save_as": "control0",
+      "spell": 804983
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 706937
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: Shadra's Prayer rank 1 cast time",
+      "actor": "v",
+      "metric": "spell_cast_time_ms",
+      "spell": 800870,
+      "ratio_to": "prayer0",
+      "min": 0.898,
+      "max": 0.902,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: Shadra's Prayer rank 10 cast time",
+      "actor": "v",
+      "metric": "spell_cast_time_ms",
+      "spell": 502947,
+      "ratio_to": "prayer10_0",
+      "min": 0.898,
+      "max": 0.902
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: Emerald Veil rank 1 cast time",
+      "actor": "v",
+      "metric": "spell_cast_time_ms",
+      "spell": 800926,
+      "ratio_to": "veil0",
+      "min": 0.898,
+      "max": 0.902
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: Emerald Veil rank 6 cast time",
+      "actor": "v",
+      "metric": "spell_cast_time_ms",
+      "spell": 801152,
+      "ratio_to": "veil6_0",
+      "min": 0.898,
+      "max": 0.902
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: an unrelated Venomancer spell keeps its cast time",
+      "actor": "v",
+      "metric": "spell_cast_time_ms",
+      "spell": 804983,
+      "ratio_to": "control0",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: the pushback-reduction effect carries 35",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 706937,
+      "effect": 1,
+      "equals": 35
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: the casting-time modifier carries -10",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 706937,
+      "effect": 2,
+      "equals": -10
+    },
+    {
+      "action": "unlearn",
+      "actor": "v",
+      "spell": 706937
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning rank 1 restores Shadra's Prayer rank 1",
+      "actor": "v",
+      "metric": "spell_cast_time_ms",
+      "spell": 800870,
+      "ratio_to": "prayer0",
+      "min": 0.999,
+      "max": 1.001,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 707868
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: Shadra's Prayer rank 1 cast time",
+      "actor": "v",
+      "metric": "spell_cast_time_ms",
+      "spell": 800870,
+      "ratio_to": "prayer0",
+      "min": 0.798,
+      "max": 0.802,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: Shadra's Prayer rank 10 cast time",
+      "actor": "v",
+      "metric": "spell_cast_time_ms",
+      "spell": 502947,
+      "ratio_to": "prayer10_0",
+      "min": 0.798,
+      "max": 0.802
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: Emerald Veil rank 1 cast time",
+      "actor": "v",
+      "metric": "spell_cast_time_ms",
+      "spell": 800926,
+      "ratio_to": "veil0",
+      "min": 0.798,
+      "max": 0.802
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: Emerald Veil rank 6 cast time",
+      "actor": "v",
+      "metric": "spell_cast_time_ms",
+      "spell": 801152,
+      "ratio_to": "veil6_0",
+      "min": 0.798,
+      "max": 0.802
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: an unrelated Venomancer spell keeps its cast time",
+      "actor": "v",
+      "metric": "spell_cast_time_ms",
+      "spell": 804983,
+      "ratio_to": "control0",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: the pushback-reduction effect carries 70",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 707868,
+      "effect": 1,
+      "equals": 70
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: the casting-time modifier carries -20",
+      "actor": "v",
+      "metric": "aura_amount",
+      "spell": 707868,
+      "effect": 2,
+      "equals": -20
+    }
+  ]
+}

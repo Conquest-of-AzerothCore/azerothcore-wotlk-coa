@@ -1,0 +1,389 @@
+{
+  "schema": 1,
+  "name": "Primalist Primal Resurgence: additional Seismic Rage",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 500000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 582532
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 503264
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 300688
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 582532
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 681356,
+      "save_as": "baseline_582532"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "target": "target",
+      "save_as": "baseline_582532_damage"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 582532,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 681356,
+      "relative_to": "baseline_582532",
+      "equals": 40,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "target": "target",
+      "relative_to": "baseline_582532_damage",
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 503264
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 681355,
+      "save_as": "baseline_503264"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "target": "target",
+      "save_as": "baseline_503264_damage"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 503264,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 681355,
+      "relative_to": "baseline_503264",
+      "equals": 200,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "target": "target",
+      "relative_to": "baseline_503264_damage",
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 300688
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 582532
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 681356,
+      "save_as": "talented_582532"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "target": "target",
+      "save_as": "talented_582532_damage"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 582532,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 681356,
+      "relative_to": "talented_582532",
+      "equals": 70,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "target": "target",
+      "relative_to": "talented_582532_damage",
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 503264
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 681355,
+      "save_as": "talented_503264"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "target": "target",
+      "save_as": "talented_503264_damage"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 503264,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 681355,
+      "relative_to": "talented_503264",
+      "equals": 300,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "target": "target",
+      "relative_to": "talented_503264_damage",
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 300688
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 582532
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 681356,
+      "save_as": "removed_582532"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "target": "target",
+      "save_as": "removed_582532_damage"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 582532,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 681356,
+      "relative_to": "removed_582532",
+      "equals": 40,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "target": "target",
+      "relative_to": "removed_582532_damage",
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 503264
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 681355,
+      "save_as": "removed_503264"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "target": "target",
+      "save_as": "removed_503264_damage"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 503264,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 681355,
+      "relative_to": "removed_503264",
+      "equals": 200,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "target": "target",
+      "relative_to": "removed_503264_damage",
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    }
+  ],
+  "contract": "Native flat modifiers add 10 Rage to Crash and 3 Rage to Spike. The branch Seismic resource implementation supplies the base casts; inspect energize packets independently of periodic Rage and regeneration."
+}

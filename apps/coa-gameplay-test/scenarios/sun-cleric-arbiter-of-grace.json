@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Arbiter of Grace boosts Glorious Execution's mana passive by 15% (#1818)",
+  "contract": "301313 is ADD_FLAT_MODIFIER (aura 107), MiscValue 3 = SPELLMOD_EFFECT1, EffectSpellClassMask word 1 = 0x400, matching the Glorious Execution Mana Passive's (807451) own SpellFamilyFlags word 1 (0x400) exactly -- SpellInfo::IsAffectedBySpellMod's generic flag96 AND admits it with no extra routing. But 301313's own EffectBasePoints_1 was -1, which SpellEffectInfo::CalcBaseValue resolves to 0 (DieSides 1 only ever subtracts one from the stored value; every correctly authored sibling in this class stores value-1, e.g. Taking Vows' 4 for '+5%'), so the SPELLMOD_EFFECT1 flat modifier this aura built always added zero regardless of routing -- a real bug, not a missing mechanism. The fix (AscensionSunClericValkyrie.cpp, a GlobalScript::OnLoadSpellCustomAttr load-time patch) corrects BasePoints to 14, so the modifier now adds +15, matching 'your Glorious Execution now regenerates an additional 15% mana equal to the damage dealt'. The already-existing AscensionSunClericAbilities.cpp OnSpellHitResult handler reads this exact value (Amount(807451)) and grants the mana whenever Glorious Execution's main-hand (800691) or off-hand (802566) hit lands with damage -- unmodified by this fix. This scenario fails on unpatched code (spell_effect_value would show a 0 delta) and passes once the BasePoints correction ships.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_effect_value", "spell": 807451, "effect": 0, "save_as": "mana_passive_before" },
+    { "action": "learn", "label": "While Vow of Grace is active, Glorious Execution regenerates an additional 15% mana", "actor": "caster", "spell": 301313 },
+    {
+      "action": "assert", "label": "807451's own effect value rises by 15, not 0",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 807451, "effect": 0,
+      "relative_to": "mana_passive_before", "equals": 15
+    }
+  ]
+}

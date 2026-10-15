@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Necromancer Ice Mastery adds 30% of Intellect to spell power (#657)",
+  "contract": "Ice Mastery 560045 is the Necromancer's Rime level 20 passive (CharacterAdvancement 4436, ClassType 25 = class 23, Tab 60 Rime, RequiredLevel 20, no essence cost). Its client description reads 'Increases your spell power by $s3% of your Intellect.' Effect 2 is SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT (174) with MiscValue 126 (every magic school), MiscValueB 3 (Intellect) and BasePoints 29 + DieSides 1 = 30. Effects 0 (MOD_RATING_FROM_STAT, crit rating) and 1 (Ascension all-hit) have BasePoints -1 + DieSides 1 = 0, so they add nothing; the aura ToolTip's crit wording describes that zero-amount effect. Unit::SpellBaseDamageBonusDone adds CalculatePct(Intellect, 30) for every aura of type 174 whose school mask matches, so learning the passive must raise Shadow and Frost spell power by 30% of the current Intellect (integer truncation keeps the ratio within 0.28-0.305) and unlearning it must remove exactly that bonus.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and stat updates settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: Ice Mastery is not active yet", "actor": "necro",
+      "metric": "aura", "spell": 560045, "equals": 0
+    },
+    { "action": "snapshot", "actor": "necro", "metric": "stat", "stat": 3, "save_as": "intellect" },
+    {
+      "action": "assert", "label": "SETUP: the fixture has Intellect to scale from", "actor": "necro",
+      "metric": "stat", "stat": 3, "min": 40
+    },
+    { "action": "snapshot", "actor": "necro", "metric": "spell_power", "school": 5, "save_as": "shadow0" },
+    { "action": "snapshot", "actor": "necro", "metric": "spell_power", "school": 4, "save_as": "frost0" },
+    { "action": "learn", "actor": "necro", "spell": 560045 },
+    {
+      "action": "assert", "label": "The passive aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 560045, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Intellect itself is unchanged", "actor": "necro",
+      "metric": "stat", "stat": 3, "relative_to": "intellect", "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Shadow spell power rises by 30% of Intellect", "actor": "necro",
+      "metric": "spell_power", "school": 5, "relative_to": "shadow0", "ratio_to": "intellect",
+      "min": 0.28, "max": 0.305
+    },
+    {
+      "action": "assert", "label": "Frost spell power rises by 30% of Intellect", "actor": "necro",
+      "metric": "spell_power", "school": 4, "relative_to": "frost0", "ratio_to": "intellect",
+      "min": 0.28, "max": 0.305
+    },
+    { "action": "unlearn", "actor": "necro", "spell": 560045 },
+    {
+      "action": "assert", "label": "Unlearning removes the passive", "actor": "necro",
+      "metric": "aura", "spell": 560045, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Unlearning restores the original Shadow spell power", "actor": "necro",
+      "metric": "spell_power", "school": 5, "relative_to": "shadow0", "equals": 0
+    }
+  ]
+}

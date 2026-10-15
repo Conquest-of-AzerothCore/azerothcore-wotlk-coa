@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Overflowing Juju reaches ShadowflareHit (#3127)",
+  "contract": "#3127 Overflowing Juju (707405) is a SPELLMOD_BONUS_MULTIPLIER (op24) SPELL_AURA_ADD_PCT_MODIFIER aura with EffectSpellClassMask word0=4 (bit2, Shadowflare 801669's own SpellFamilyFlags) and word1=33792 (bits10+15, Bad Juju 802087's and Malefic Wrath 807037's own SpellFamilyFlags). SpellInfo::IsAffected matches a modifier's class mask against the resolving spell's own SpellFamilyFlags, but Shadowflare (801669) never resolves its own damage bonus: its damage is dealt by ShadowflareHit (802704), whose own SpellFamilyFlags[0] is 1024 (bit10), not 4. So word0=4 never matches 802704 and Overflowing Juju's 20% boost never reaches Shadowflare's actual damage-dealing spell, even though it correctly reaches Bad Juju and Malefic Wrath (both resolve their own damage, and their own flags already fall inside word1=33792). This scenario proves the gap via spell_modifier (structurally unaffected by the separate spell_bonus_data/#4608 state, since it reads the registered SpellModifier itself, not a computed damage bonus) and fails before the class-mask widening fix, passes after. The post-learn assertions use a tight min/max band (119.999-120.001) instead of an exact equals: Player::ApplySpellMod computes the +20% as `100 * (1.0f + CalculatePct(1.0f, 20.0f))` in float32, and 0.2 is not exactly representable in binary, so the observed value is 120.00000762939453, not exactly 120 (confirmed by a live run: repair-witchdoctor-fix-overflowing-juju-shadowflare.md).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 4000 },
+
+    { "action": "assert", "actor": "caster", "metric": "spell_modifier", "spell": 802087, "op": 24, "base": 100, "equals": 100, "label": "#3127 baseline: no bonus-multiplier modifier on Bad Juju yet" },
+    { "action": "assert", "actor": "caster", "metric": "spell_modifier", "spell": 807037, "op": 24, "base": 100, "equals": 100, "label": "#3127 baseline: no bonus-multiplier modifier on Malefic Wrath yet" },
+    { "action": "assert", "actor": "caster", "metric": "spell_modifier", "spell": 802704, "op": 24, "base": 100, "equals": 100, "label": "#3127 baseline: no bonus-multiplier modifier on ShadowflareHit yet" },
+
+    { "action": "learn", "actor": "caster", "spell": 707405, "label": "#3127 learn Overflowing Juju" },
+
+    { "action": "assert", "actor": "caster", "metric": "spell_modifier", "spell": 802087, "op": 24, "base": 100, "min": 119.999, "max": 120.001, "within_ms": 2000, "label": "#3127 Overflowing Juju adds +20% bonus multiplier to Bad Juju (already native, regression only)" },
+    { "action": "assert", "actor": "caster", "metric": "spell_modifier", "spell": 807037, "op": 24, "base": 100, "min": 119.999, "max": 120.001, "within_ms": 2000, "label": "#3127 Overflowing Juju adds +20% bonus multiplier to Malefic Wrath (already native, regression only)" },
+    { "action": "assert", "actor": "caster", "metric": "spell_modifier", "spell": 802704, "op": 24, "base": 100, "min": 119.999, "max": 120.001, "within_ms": 2000, "label": "#3127 Overflowing Juju adds +20% bonus multiplier to ShadowflareHit (Shadowflare's actual damage-dealing spell) - fails before the class-mask fix, passes after" }
+  ]
+}

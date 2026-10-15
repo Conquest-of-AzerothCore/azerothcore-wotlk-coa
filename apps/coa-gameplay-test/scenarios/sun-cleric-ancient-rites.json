@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Ancient Rites already grants bonus mana from Intellect and periodic mana regen (#1825)",
+  "contract": "Both ranks' effect 0 is SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE (aura 227, natively implemented in AuraEffect::PeriodicTick / HandlePeriodicTriggerSpellWithValueAuraTick, which casts EffectTriggerSpell 301368 every EffectAmplitude 15000ms carrying the aura's own GetAmount() as SPELLVALUE_BASE_POINT0): rank 1's BasePoints 3 resolves to 4, rank 2's 5 resolves to 6, matching 'regenerate mana equal to 4%/6% of your maximum mana every 15 sec'. Effect 1 is SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT (aura 328, natively implemented in AuraEffect::HandleAscensionModMaxManaFromStat, which requires MiscValue == POWER_MANA (0, present here as an omitted/zero field) and reads the source stat from MiscValueB): MiscValueB 3 selects STAT_INTELLECT; rank 1's BasePoints 299 resolves to 300, rank 2's 449 resolves to 450, matching 'Increases your mana by 300%/450% of your Intellect'. Both aura types are fully implemented by the core engine with no module code anywhere in this repository; the pending, unrelated sun-cleric-completion package's spell_script_names row for these two ids (not yet applied) is not required for either effect to work. Native only, no server code needed.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "snapshot", "actor": "caster", "metric": "max_power", "power": 0, "save_as": "mana_before" },
+    { "action": "learn", "label": "Rank 1: +300% Intellect mana, 4% mana every 15 sec", "actor": "caster", "spell": 301345 },
+    { "action": "assert", "label": "Rank 1's own periodic percentage is 4", "actor": "caster", "metric": "aura_amount", "spell": 301345, "effect": 0, "equals": 4 },
+    {
+      "action": "assert", "label": "Max mana rises meaningfully from the Intellect-based bonus",
+      "actor": "caster", "metric": "max_power", "power": 0, "relative_to": "mana_before", "min": 200
+    },
+    { "action": "learn", "label": "Rank 2 replaces rank 1: +450% Intellect mana, 6% mana every 15 sec", "actor": "caster", "spell": 301817 },
+    { "action": "assert", "label": "Rank 2's own periodic percentage is 6", "actor": "caster", "metric": "aura_amount", "spell": 301817, "effect": 0, "equals": 6 },
+    {
+      "action": "assert", "label": "Max mana rises further from the larger Intellect-based bonus",
+      "actor": "caster", "metric": "max_power", "power": 0, "relative_to": "mana_before", "min": 300
+    }
+  ]
+}

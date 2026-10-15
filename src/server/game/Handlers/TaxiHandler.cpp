@@ -201,6 +201,19 @@ void WorldSession::HandleActivateTaxiExpressOpcode(WorldPacket& recvData)
     GetPlayer()->ActivateTaxiPathTo(nodes, npc, 0);
 }
 
+// The Ascension action bar's leave button calls TaxiRequestEarlyLanding() during a flight, which sends this empty
+// extension opcode.
+void WorldSession::HandleTaxiRequestEarlyLandingOpcode(WorldPacket& /*recvData*/)
+{
+    LOG_DEBUG("network", "WORLD: CMSG_TAXI_REQUEST_EARLY_LANDING");
+
+    MotionMaster* motionMaster = GetPlayer()->GetMotionMaster();
+    if (motionMaster->GetCurrentMovementGeneratorType() != FLIGHT_MOTION_TYPE)
+        return;
+
+    static_cast<FlightPathMovementGenerator*>(motionMaster->top())->RequestEarlyLanding(GetPlayer());
+}
+
 void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recvData)
 {
     ObjectGuid guid;           // used only for proper packet read

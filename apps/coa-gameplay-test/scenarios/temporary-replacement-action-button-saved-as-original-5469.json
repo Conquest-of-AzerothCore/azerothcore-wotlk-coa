@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "A temporary replacement on the action bar is saved as the spell it replaces (#5469)",
+  "contract": "Custom-class talents swap a known spell for a variant through Player::SetTemporarySpellReplacement, learning the variant with learnSpell(..., true) so it is never written to character_spell. The Witch Doctor's Malefic Arrow talent 707854 ('Transforms your Malefic Wrath into Malefic Arrow') is one: AscensionWitchDoctor::SyncReplacements learns Malefic Arrow 801674 as a temporary spell and replaces Malefic Wrath 807037 with it. #5469 reports that Malefic Arrow disappears at login; the server log shows 'ActionButton loading problem, will be deleted from db ... action: 801674'. Player::_SaveActions wrote the variant's id, and at the next login Player::_LoadActions runs before the replacement is learned again, so IsActionButtonDataValid refuses the unknown spell and the button is deleted. The same log drops a Bloodmage's Transgression 801076 from AscensionTalentReplacementData the same way. persisted_action_button reads Player::GetSavedActionButtonSpell, the spell id _SaveActions writes for a button. A button holding the temporary variant must be saved as the spell it replaces, which survives the login and is replaced again once the talent's swap runs; a button holding an ordinary known spell is saved unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "wd", "race": 8, "class": 13, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "learn", "actor": "wd", "spell": 807037 },
+    { "action": "learn", "actor": "wd", "spell": 707854 },
+    {
+      "action": "assert",
+      "label": "The talent replaces Malefic Wrath with Malefic Arrow",
+      "actor": "wd",
+      "metric": "temporary_spell_replacement",
+      "spell": 807037,
+      "equals": 801674,
+      "within_ms": 3000
+    },
+    { "action": "set_action_button", "actor": "wd", "button": 2, "spell": 801674 },
+    { "action": "set_action_button", "actor": "wd", "button": 3, "spell": 807037 },
+    {
+      "action": "assert",
+      "label": "The bar holds Malefic Arrow",
+      "actor": "wd",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 801674
+    },
+    {
+      "action": "assert",
+      "label": "The Malefic Arrow button is saved as Malefic Wrath",
+      "actor": "wd",
+      "metric": "persisted_action_button",
+      "button": 2,
+      "equals": 807037
+    },
+    {
+      "action": "assert",
+      "label": "Control: an ordinary known spell is saved unchanged",
+      "actor": "wd",
+      "metric": "persisted_action_button",
+      "button": 3,
+      "equals": 807037
+    }
+  ]
+}

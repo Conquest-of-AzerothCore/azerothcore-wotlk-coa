@@ -17,6 +17,7 @@
 
 #include "Common.h"
 #include "Item.h"
+#include "LocalLevelScaling.h"
 #include "Log.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
@@ -392,6 +393,11 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket& recvData)
     uint32 item;
     recvData >> item;
 
+    SendItemQuerySingleResponse(item);
+}
+
+void WorldSession::SendItemQuerySingleResponse(uint32 item)
+{
     LOG_DEBUG("network.opcode", "STORAGE: Item Query = {}", item);
 
     ItemTemplate const* pProto = sObjectMgr->GetItemTemplate(item);
@@ -647,7 +653,7 @@ void WorldSession::HandleSellItemOpcode(WorldPackets::Item::SellItem& packet)
             }
         }
 
-        ItemTemplate const* pProto = pItem->GetTemplate();
+        ItemTemplate const* pProto = LocalLevelScaling::InstanceTemplateFor(pItem, pItem->GetTemplate());
         if (pProto)
         {
             if (pProto->SellPrice > 0)

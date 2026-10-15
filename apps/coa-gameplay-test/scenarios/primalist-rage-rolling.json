@@ -1,0 +1,213 @@
+{
+  "schema": 1,
+  "name": "Primalist Rage Rolling: one grant per Boulder Dash cast",
+  "contract": "Only a character with Rage Rolling gains 50 Rage from casting Boulder Dash; periodic ticks do not grant more.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "baseline",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "talented",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "removed",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "baseline",
+      "spell": 500692
+    },
+    {
+      "action": "set_power",
+      "actor": "baseline",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "baseline",
+      "spell": 500692,
+      "target": "baseline"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "aura_stacks",
+      "spell": 500692,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "power",
+      "power": 1,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "baseline",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 500692
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 561191
+    },
+    {
+      "action": "set_power",
+      "actor": "talented",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "talented",
+      "spell": 500692,
+      "target": "talented"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "aura_stacks",
+      "spell": 500692,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "power",
+      "power": 1,
+      "min": 480,
+      "max": 500
+    },
+    {
+      "action": "set_power",
+      "actor": "talented",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "removed",
+      "spell": 500692
+    },
+    {
+      "action": "learn",
+      "actor": "removed",
+      "spell": 561191
+    },
+    {
+      "action": "unlearn",
+      "actor": "removed",
+      "spell": 561191
+    },
+    {
+      "action": "set_power",
+      "actor": "removed",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "removed",
+      "spell": 500692,
+      "target": "removed"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "aura_stacks",
+      "spell": 500692,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "power",
+      "power": 1,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "removed",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 5100
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "power",
+      "power": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "baseline",
+      "metric": "aura_stacks",
+      "spell": 500692,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "power",
+      "power": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "aura_stacks",
+      "spell": 500692,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "power",
+      "power": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "removed",
+      "metric": "aura_stacks",
+      "spell": 500692,
+      "equals": 1
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Blessing of Y'Shaarj raises max health and fills Strength of the Black Empire's inert damage slot (#1165)",
+  "contract": "801968 effect1 is self aura 133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT, BasePoints 9 / DieSides 1 -> value 10, matching $s2=10%: a plain native stat aura. Effect0 is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 12 = SPELLMOD_EFFECT2 (modifies effect-index-1 of whatever spell its classmask matches), BasePoints 19 / DieSides 1 -> value 20, matching $s1=20%; its EffectSpellClassMask dwordC bit31 (2147483648) matches Strength of the Black Empire (680556)'s own SpellFamilyFlags dwordC bit31 -- verified directly from Spell.dbc. 680556 (the 'void monstrosity' transform, effect0 SPELL_AURA_TRANSFORM) ships effect1 as SPELL_AURA_MOD_DAMAGE_PERCENT_DONE with BasePoints -1 (baseline value 0, an intentionally inert placeholder slot). Unit::ApplyEffectModifiers is called from inside SpellEffectInfo::CalcValue itself (SpellInfo.cpp ~520, before the function returns), so the harness's spell_effect_value metric -- which calls CalcValue(caster) directly -- already reflects SPELLMOD_EFFECT2 without needing the transform to actually be (re)cast; this differs from the audit's own note that the live buff only picks up the value on its next cast, which is a statement about the cached AuraEffect amount of an already-active buff instance, not about whether the native modifier exists. The audit also notes 801968's classmask happens to also hit Voidborne (681104)'s crit-chance effect, an unrelated dual-purpose collision that is out of this issue's scope and is not asserted here.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 40 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn/level settle", "ms": 3000 },
+    { "action": "snapshot", "actor": "cultist", "metric": "max_health", "save_as": "health_before" },
+    {
+      "action": "assert", "label": "SETUP: Strength of the Black Empire's damage-done slot is inert (0) before the talent",
+      "actor": "cultist", "metric": "spell_effect_value", "spell": 680556, "effect": 1, "equals": 0
+    },
+    { "action": "learn", "actor": "cultist", "spell": 801968 },
+    {
+      "action": "assert", "label": "Blessing of Y'Shaarj raises max health by 10%",
+      "actor": "cultist", "metric": "max_health", "ratio_to": "health_before", "min": 1.09, "max": 1.11
+    },
+    {
+      "action": "assert", "label": "Blessing of Y'Shaarj fills the placeholder slot with +20% damage done",
+      "actor": "cultist", "metric": "spell_effect_value", "spell": 680556, "effect": 1, "equals": 20
+    }
+  ]
+}

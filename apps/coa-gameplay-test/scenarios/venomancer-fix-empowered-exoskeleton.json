@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Empowered Exoskeleton lengthens Chitin Rush",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "v",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 803570
+    },
+    {
+      "action": "assert",
+      "label": "Chitin Rush dash length is unmodified without Empowered Exoskeleton",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803570,
+      "op": 6,
+      "base": 20,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "Chitin Rush costs resource without Empowered Exoskeleton",
+      "actor": "v",
+      "metric": "spell_power_cost",
+      "spell": 803570,
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 804993
+    },
+    {
+      "action": "assert",
+      "label": "Empowered Exoskeleton adds 5 yd to the dash length (effect radius)",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803570,
+      "op": 6,
+      "base": 20,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "Empowered Exoskeleton makes Chitin Rush free",
+      "actor": "v",
+      "metric": "spell_power_cost",
+      "spell": 803570,
+      "equals": 0
+    }
+  ],
+  "contract": "#889: Empowered Exoskeleton (804993) promises +5 yd Chitin Rush range and -100% cost. Chitin Rush (803570) has range 0 and dashes its effect radius (20 yd), so the range modifier must be delivered as a radius modifier; the cost clause is native and is asserted as well."
+}

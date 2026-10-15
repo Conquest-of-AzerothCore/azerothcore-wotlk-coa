@@ -97,6 +97,34 @@ class ScopedLintTests(unittest.TestCase):
             self.git("add", relative)
         self.assertNotEqual(self.lint("sql", "--base", "main").returncode, 0)
 
+    def test_sql_multiline_delete_matches_insert(self):
+        path = self.pending + "selected.sql"
+        self.put(path, "DELETE FROM `spell_script_names` WHERE `spell_id` = 123\n"
+                       "  AND `ScriptName` = 'example';\n"
+                       "INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (123, 'example');\n")
+        self.assert_passes(self.lint("sql", "--files", path))
+
+    def test_sql_protected_upsert_preserves_existing_template(self):
+        path = self.pending + "selected.sql"
+        self.put(path, "INSERT INTO `creature_template` (`entry`, `name`)\n"
+                       "VALUES (557911, 'Soulstone Lure')\n"
+                       "ON DUPLICATE KEY UPDATE `name` = VALUES(`name`);\n")
+        self.assert_passes(self.lint("sql", "--files", path))
+        self.put(path, "DELETE FROM `creature_template` WHERE `entry` = 557911;\n"
+                       "INSERT INTO `creature_template` (`entry`, `name`) VALUES (557911, 'Soulstone Lure');\n")
+        self.assertNotEqual(self.lint("sql", "--files", path).returncode, 0)
+
+    def test_sql_unrelated_delete_and_quoted_upsert_do_not_bypass_safety(self):
+        path = self.pending + "selected.sql"
+        for text in [
+            "DELETE FROM `spell_proc` WHERE `SpellId` = 123;\n"
+            "INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES (123, 'example');\n",
+            "INSERT INTO `creature_template` (`entry`, `name`) VALUES (557911, 'ON DUPLICATE KEY UPDATE');\n",
+        ]:
+            with self.subTest(text=text):
+                self.put(path, text)
+                self.assertNotEqual(self.lint("sql", "--files", path).returncode, 0)
+
     def test_invalid_inputs_fail_clearly(self):
         for language in ("cpp", "sql"):
             result = self.lint(language, "--files", "missing.file")

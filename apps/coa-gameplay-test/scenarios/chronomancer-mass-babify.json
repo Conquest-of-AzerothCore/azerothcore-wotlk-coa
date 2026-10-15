@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "name": "Mass Babify stuns, transforms, regenerates and breaks on damage (#1349)",
+  "contract": "Mass Babify 520855 needs no script: effect 0 is aura 12 SPELL_AURA_MOD_STUN with Mechanic 17 (AuraEffect::HandleAuraModStun, the 'preventing them from acting' half), effect 1 is aura 56 SPELL_AURA_TRANSFORM with EffectMiscValue 26365 (AuraEffect::HandleAuraTransform, the baby), and effect 2 is aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL at EffectAmplitude 1000 firing Babify 801260, a SPELL_EFFECT_HEAL_PCT with EffectBasePoints 2 (die 1 => 3%) handled by Spell::EffectHealPct - the 'rapidly regenerate health' half, 30000 per second against a 1000000 maximum. 'Damage dealt will interrupt this effect' is AuraInterruptFlags 524290, whose 0x2 bit is the native take-damage interrupt. DurationIndex 64 = 40000 ms, matching the tooltip's 40 seconds. The fixture creature is a critter template (Dig Rat 3444, creature_template.type 8): AscensionCompat's CanScaleCreature (AscensionCompat.cpp:6093-6099) excludes critters from local level scaling, so it keeps the maximum health CoAGameplayTest asked for instead of having it rebuilt by Creature::SelectLevel, and it still has room to take a melee swing at the end after four seconds of regeneration. The scenario asserts no maximum of its own: the regeneration clause is 3% of maximum health per second, so it is read as a percentage with health_pct, which is what the tooltip states and is independent of whatever the maximum turns out to be. The dummy is dropped to one hit point rather than to a fixed fraction for the same reason - one is a valid health fixture for any maximum.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 3444,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 520855
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1,
+      "label": "Drop the dummy low enough that four seconds of regeneration are visible"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 520855
+    },
+    {
+      "action": "assert",
+      "label": "Mass Babify lands on the nearby enemy",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 520855,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "metric": "health_pct",
+      "save_as": "babified"
+    },
+    {
+      "action": "wait",
+      "label": "Let at least one Babify tick land",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The babified enemy regenerates 3% of maximum health per second",
+      "actor": "dummy",
+      "metric": "health_pct",
+      "relative_to": "babified",
+      "min": 8.5
+    },
+    {
+      "action": "attack",
+      "actor": "chronomancer",
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Damage dealt interrupts the effect",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 520855,
+      "equals": 0,
+      "within_ms": 6000
+    }
+  ]
+}

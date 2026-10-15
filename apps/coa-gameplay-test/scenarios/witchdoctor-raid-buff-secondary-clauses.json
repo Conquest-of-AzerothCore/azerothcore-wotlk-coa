@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: raid/party buffs with a secondary SpellMod clause (#1031, #847, #1775)",
+  "contract": "#1031 One Armed Waltz (705909, family 19, no class mask of its own) carries three SPELL_AURA_ADD_FLAT_MODIFIER (107) effects targeting the caster: effect0 BasePoints 24->25 op 12 (SPELLMOD_EFFECT2) class-masked to Big Bad Voodoo's self-buff 802718 (flags[0]=0x8000); effect1 BasePoints 24->25 op 23 (SPELLMOD_EFFECT3) same mask; effect2 BasePoints -6->-5 op 12 (SPELLMOD_EFFECT2) class-masked to Big Bad Voodoo's outer cast 802719 (flags[2]=0x2000). 802718's own effect1 (SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, BasePoints -51->-50) and effect2 (SPELL_AURA_MOD_HEALING_DONE_PERCENT, BasePoints -51->-50) combine with One Armed Waltz's flat +25 to read -25%, matching the tooltip 'now only reduces damage dealt by 25%'; the healing-done slot mirrors it (same mechanism, not itself quoted by the tooltip). 802719's effect1 (SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, BasePoints -21->-20) combines with One Armed Waltz's flat -5 to read -25%, matching 'reduces damage taken by an additional 5%'. This is the vanilla generic SpellMod pipeline (Unit::ApplyEffectModifiers, Unit.cpp; SpellInfo::IsAffected matching SpellFamilyName 19 + overlapping SpellFamilyFlags, SpellInfo.cpp) with no module code involved. #847 Dark Loa's Blessing (560545, family 19) has effect0 SPELL_EFFECT_APPLY_AREA_AURA_RAID carrying SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (MiscValue 127, all schools) BasePoints 2->3, delivered raid-wide by the vanilla Spell::EffectApplyAreaAura path; effect1 SPELL_AURA_ADD_PCT_MODIFIER (108) op 1 (SPELLMOD_DURATION) and effect2 the same aura op 19 (SPELLMOD_ACTIVATION_TIME), both BasePoints -21->-20 and both class-masked (flags[0]=0x8) to Shadow Puppets (500015, family 19, flags[0]=0x8, EffectAmplitude 750ms both periodic effects): the -20% activation-time mod lands on SpellAuraEffects.cpp's generic per-periodic-effect ApplySpellMod(SPELLMOD_ACTIVATION_TIME) call, 750ms -> 600ms, matching 'Shadow Puppets now deals damage 20% faster'. #1775 Strength of Da Loa (300871, family 19) has effect0/1 SPELL_EFFECT_APPLY_AREA_AURA_RAID carrying SPELL_AURA_MOD_ATTACK_POWER_PCT and SPELL_AURA_MOD_RANGED_ATTACK_POWER_PCT, both BasePoints 4->5, delivered raid-wide the same way; effect2 SPELL_AURA_ADD_PCT_MODIFIER op 19 (SPELLMOD_ACTIVATION_TIME) BasePoints -51->-50, class-masked (flags[1]=0x2000) to Spirit (561136, family 19, flags[1]=0x2000, EffectAmplitude 4000ms on both its energize and heal periodic effects), landing on the same generic per-periodic-effect path: 4000ms -> 2000ms, i.e. restoration occurs twice as often, matching 'occurs 50% more often'. All three spells, and their target siblings, were read live from Spell.dbc for this scenario (SpellFamilyName/SpellFamilyFlags/EffectBasePoints/EffectApplyAuraName/EffectMiscValue/EffectSpellClassMask/EffectAmplitude); SPELLMOD_EFFECT2=12, SPELLMOD_EFFECT3=23, SPELLMOD_DURATION=1, SPELLMOD_ACTIVATION_TIME=19 per src/server/game/Spells/SpellDefines.h. This is a regression scenario: all three clauses are delivered by vanilla core SpellMod/AreaAura code already present without any module change, so it makes no code change and every assertion is expected to pass on the current tree.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 13, "level": 80 },
+    { "id": "mate", "race": 1, "class": 13, "level": 80 },
+    { "id": "outsider", "race": 1, "class": 13, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn and level scaling settle", "ms": 5000 },
+    { "action": "group", "label": "Party the caster and mate; the outsider stays ungrouped", "actor": "caster", "target": "mate" },
+
+    { "action": "assert", "label": "BASELINE #1031: Big Bad Voodoo's damage-dealt slot is unmodified before One Armed Waltz",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802718, "op": 12, "base": -50, "equals": -50 },
+    { "action": "assert", "label": "BASELINE #1031: Big Bad Voodoo's healing-done slot is unmodified",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802718, "op": 23, "base": -50, "equals": -50 },
+    { "action": "assert", "label": "BASELINE #1031: Big Bad Voodoo's damage-taken slot is unmodified",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802719, "op": 12, "base": -20, "equals": -20 },
+
+    { "action": "learn", "actor": "caster", "spell": 705909 },
+    { "action": "assert", "label": "One Armed Waltz applies its own self aura on learn",
+      "actor": "caster", "metric": "aura", "spell": 705909, "equals": 1, "within_ms": 2000 },
+
+    { "action": "assert", "label": "DISCRIMINATING #1031: damage-dealt slot becomes -25% (-50 base +25 flat), matching 'reduces damage dealt by 25%'",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802718, "op": 12, "base": -50, "equals": -25 },
+    { "action": "assert", "label": "DISCRIMINATING #1031: healing-done slot mirrors the same -25% (symmetric partner, same mechanism)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802718, "op": 23, "base": -50, "equals": -25 },
+    { "action": "assert", "label": "DISCRIMINATING #1031: damage-taken slot becomes -25% (-20 base -5 flat), matching 'an additional 5%'",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802719, "op": 12, "base": -20, "equals": -25 },
+    { "action": "assert", "label": "CONTROL #1031: a party member without One Armed Waltz keeps the unmodified -50% slot",
+      "actor": "mate", "metric": "spell_modifier", "spell": 802718, "op": 12, "base": -50, "equals": -50 },
+
+    { "action": "assert", "label": "BASELINE #847: Shadow Puppets ticks are unmodified before Dark Loa's Blessing",
+      "actor": "caster", "metric": "spell_modifier", "spell": 500015, "op": 19, "base": 750, "equals": 750 },
+    { "action": "assert", "label": "BASELINE #847: the party member carries no raid damage buff yet",
+      "actor": "mate", "metric": "aura", "spell": 560545, "equals": 0 },
+
+    { "action": "learn", "actor": "caster", "spell": 560545 },
+
+    { "action": "assert", "label": "DISCRIMINATING #847: the caster's own copy of the raid buff carries +3% damage done",
+      "actor": "caster", "metric": "aura_amount", "spell": 560545, "effect": 0, "caster": "caster", "equals": 3, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING #847: the party member receives the +3% damage-done raid buff",
+      "actor": "mate", "metric": "aura_amount", "spell": 560545, "effect": 0, "caster": "caster", "equals": 3, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTROL #847: the ungrouped bystander receives no raid buff",
+      "actor": "outsider", "metric": "aura", "spell": 560545, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING #847: Shadow Puppets ticks 20% faster (750ms -> 600ms), matching 'deals damage 20% faster'",
+      "actor": "caster", "metric": "spell_modifier", "spell": 500015, "op": 19, "base": 750, "equals": 600 },
+    { "action": "assert", "label": "CONTROL #847: the party member's own Shadow Puppets modifier is unaffected (they have no Dark Loa's Blessing of their own)",
+      "actor": "mate", "metric": "spell_modifier", "spell": 500015, "op": 19, "base": 750, "equals": 750 },
+
+    { "action": "assert", "label": "BASELINE #1775: Spirit's restoration ticks are unmodified before Strength of Da Loa",
+      "actor": "caster", "metric": "spell_modifier", "spell": 561136, "op": 19, "base": 4000, "equals": 4000 },
+    { "action": "assert", "label": "BASELINE #1775: the party member carries no raid attack-power buff yet",
+      "actor": "mate", "metric": "aura", "spell": 300871, "equals": 0 },
+
+    { "action": "learn", "actor": "caster", "spell": 300871 },
+
+    { "action": "assert", "label": "DISCRIMINATING #1775: the caster's own copy carries +5% attack power",
+      "actor": "caster", "metric": "aura_amount", "spell": 300871, "effect": 0, "caster": "caster", "equals": 5, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING #1775: the caster's own copy also carries +5% ranged attack power",
+      "actor": "caster", "metric": "aura_amount", "spell": 300871, "effect": 1, "caster": "caster", "equals": 5 },
+    { "action": "assert", "label": "DISCRIMINATING #1775: the party member receives the +5% attack power raid buff",
+      "actor": "mate", "metric": "aura_amount", "spell": 300871, "effect": 0, "caster": "caster", "equals": 5, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING #1775: the party member also receives the +5% ranged attack power raid buff",
+      "actor": "mate", "metric": "aura_amount", "spell": 300871, "effect": 1, "caster": "caster", "equals": 5 },
+    { "action": "assert", "label": "CONTROL #1775: the ungrouped bystander receives no raid buff",
+      "actor": "outsider", "metric": "aura", "spell": 300871, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING #1775: Spirit's restoration ticks 50% faster (4000ms -> 2000ms), matching 'occurs 50% more often'",
+      "actor": "caster", "metric": "spell_modifier", "spell": 561136, "op": 19, "base": 4000, "equals": 2000 },
+    { "action": "assert", "label": "CONTROL #1775: the party member's own Spirit modifier is unaffected (they have no Strength of Da Loa of their own)",
+      "actor": "mate", "metric": "spell_modifier", "spell": 561136, "op": 19, "base": 4000, "equals": 4000 }
+  ]
+}

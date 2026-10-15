@@ -1,0 +1,124 @@
+{
+  "schema": 1,
+  "name": "Barbarian can spend the whole class point budget and cannot exceed it (#4070)",
+  "contract": [
+    "The active CharacterAdvancementEssence budget gives six class points at level 20. Seven distinct AE-1",
+    "shared-class nodes with no level gate are requested through native uploads, without a specialization",
+    "signature. The first six must all learn, including the final available point; the seventh must be refused",
+    "without changing the learned build. This verifies the server budget, not client drawing behavior."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "b",
+      "entry": 4297,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "label": "Every affordable class point activates its purchased node",
+      "spell": 801767,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "b",
+      "entry": 5373,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "label": "Every affordable class point activates its purchased node",
+      "spell": 800131,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "b",
+      "entry": 6374,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "label": "Every affordable class point activates its purchased node",
+      "spell": 801549,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "b",
+      "entry": 6462,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "label": "Every affordable class point activates its purchased node",
+      "spell": 706353,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "b",
+      "entry": 6753,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "label": "Every affordable class point activates its purchased node",
+      "spell": 560364,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "b",
+      "entry": 6790,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "label": "Every affordable class point activates its purchased node",
+      "spell": 706352,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "b",
+      "entry": 6802,
+      "rank": 1,
+      "refused": true
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "knows_spell",
+      "label": "The seventh point is refused",
+      "spell": 705202,
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,184 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Crackling Devastation and Jolt modify Electrocute natively (#2773, #3109)",
+  "contract": "#2773 and #3109 report 'Spell Script / Aura Handler Not Implemented' for two passives that are plain Spell.dbc modifiers on Electrocute (501421-501432/801844, SpellFamilyName 22, SchoolMask 8 Nature, DmgClass 1 Magic). #2773: Crackling Devastation (705645) is aura 108 ADD_PCT_MODIFIER, misc 15 SPELLMOD_CRIT_DAMAGE_BONUS, EffectBasePoints 29 + DieSides 1 = +30%, class mask word1 2097152 intersecting Electrocute's own SpellFamilyFlags[1] bit 21. Unit::SpellCriticalDamageBonus computes a magic spell's crit bonus as damage/2 (500 on a base of 1000, giving 1500 total) then runs that 500 bonus through Player::ApplySpellMod(SPELLMOD_CRIT_DAMAGE_BONUS); +30% turns 500 into 650, for a total of 1650, i.e. +150 over the unmodified 1500. #3109: Jolt rank 1 (707054) and rank 2 (707859) each carry effect0 ADD_PCT_MODIFIER misc 0 SPELLMOD_DAMAGE (EffectBasePoints 14/29 + 1 = +15%/+30%) and effect1 ADD_FLAT_MODIFIER misc 7 SPELLMOD_CRITICAL_CHANCE (EffectBasePoints 14/29 + 1 = +15/+30 points), both effects' class mask word0 33554432 intersecting Electrocute's SpellFamilyFlags[0] bit 25. SPELLMOD_DAMAGE is consumed generically wherever direct spell damage is totalled (Unit.cpp) and reads back through spell_damage_done's own base-1000 calculation as a ratio; SPELLMOD_CRITICAL_CHANCE is consumed in Unit::SpellDoneCritChance, which is exactly what the spell_done_crit_chance metric calls, so a flat +15/+30 point delta is observed there directly (the separate spell_crit_chance metric reads the player's raw PLAYER_SPELL_CRIT_PERCENTAGE1 stat field, which these classmask-scoped per-spell modifiers never touch, and would show no change). SpellInfo::IsAffectedBySpellMod has no special case for family 22, so all three ops are consumed by stock, non-class-specific core code with no module script needed. All values are the server's own computed metrics, snapshotted on the same actor before and after learning each passive.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "t",
+      "owner": "s",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "BASELINE: Electrocute critical damage without Crackling Devastation",
+      "actor": "s",
+      "metric": "spell_critical_damage",
+      "spell": 801844,
+      "target": "t",
+      "save_as": "crit_dmg0"
+    },
+    {
+      "action": "snapshot",
+      "label": "BASELINE: Electrocute direct damage without Jolt",
+      "actor": "s",
+      "metric": "spell_damage_done",
+      "spell": 801844,
+      "target": "t",
+      "save_as": "dmg0"
+    },
+    {
+      "action": "snapshot",
+      "label": "BASELINE: Electrocute crit chance without Jolt",
+      "actor": "s",
+      "metric": "spell_done_crit_chance",
+      "spell": 801844,
+      "target": "t",
+      "save_as": "crit_chance0"
+    },
+    {
+      "action": "learn",
+      "label": "Learn Crackling Devastation",
+      "actor": "s",
+      "spell": 705645
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Crackling Devastation raises Electrocute's critical damage by 30% of the crit bonus (1500 -> 1650)",
+      "actor": "s",
+      "metric": "spell_critical_damage",
+      "spell": 801844,
+      "target": "t",
+      "relative_to": "crit_dmg0",
+      "min": 149,
+      "max": 151
+    },
+    {
+      "action": "assert",
+      "label": "Crackling Devastation does not change Electrocute's direct damage",
+      "actor": "s",
+      "metric": "spell_damage_done",
+      "spell": 801844,
+      "target": "t",
+      "ratio_to": "dmg0",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "unlearn",
+      "label": "Unlearn Crackling Devastation before isolating Jolt",
+      "actor": "s",
+      "spell": 705645
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning Crackling Devastation restores Electrocute's critical damage",
+      "actor": "s",
+      "metric": "spell_critical_damage",
+      "spell": 801844,
+      "target": "t",
+      "relative_to": "crit_dmg0",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Jolt rank 1",
+      "actor": "s",
+      "spell": 707054
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Jolt rank 1 raises Electrocute's direct damage by 15%",
+      "actor": "s",
+      "metric": "spell_damage_done",
+      "spell": 801844,
+      "target": "t",
+      "ratio_to": "dmg0",
+      "min": 1.149,
+      "max": 1.151
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Jolt rank 1 raises Electrocute's crit chance by 15 points",
+      "actor": "s",
+      "metric": "spell_done_crit_chance",
+      "spell": 801844,
+      "target": "t",
+      "relative_to": "crit_chance0",
+      "min": 14.9,
+      "max": 15.1
+    },
+    {
+      "action": "unlearn",
+      "label": "Unlearn Jolt rank 1 before isolating rank 2",
+      "actor": "s",
+      "spell": 707054
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning Jolt rank 1 restores Electrocute's direct damage",
+      "actor": "s",
+      "metric": "spell_damage_done",
+      "spell": 801844,
+      "target": "t",
+      "ratio_to": "dmg0",
+      "min": 0.999,
+      "max": 1.001,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Jolt rank 2",
+      "actor": "s",
+      "spell": 707859
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Jolt rank 2 raises Electrocute's direct damage by 30%",
+      "actor": "s",
+      "metric": "spell_damage_done",
+      "spell": 801844,
+      "target": "t",
+      "ratio_to": "dmg0",
+      "min": 1.299,
+      "max": 1.301
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Jolt rank 2 raises Electrocute's crit chance by 30 points",
+      "actor": "s",
+      "metric": "spell_done_crit_chance",
+      "spell": 801844,
+      "target": "t",
+      "relative_to": "crit_chance0",
+      "min": 29.9,
+      "max": 30.1
+    }
+  ]
+}

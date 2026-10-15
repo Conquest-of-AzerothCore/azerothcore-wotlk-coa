@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "name": "Expediting Time shortens Time Out!'s stasis by 40% (#1310)",
+  "contract": "Expediting Time 706055's tooltip, in both the Description and the AuraDescription, is \"Reduces the channel time of your Time Out! by $s1%\". Spell.dbc gives it two SPELL_AURA_ADD_PCT_MODIFIER (108) effects with EffectSpellClassMask word0 bit 0x8000: EffectMiscValue SPELLMOD_DURATION (1) and SPELLMOD_ACTIVATION_TIME (19), both EffectBasePoints -41, i.e. -40% with DieSides 1. The time the player is held is not on the castable ranks: 802229/803896/803897 have Effect 0 SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE on 802228 and cite it in their own tooltip as \"Enter a stasis for $802228d\". 802228 carries SPELL_AURA_MOD_STUN (12) and DurationIndex 32 (SpellDuration.dbc row 32 = 6000ms), but SpellFamilyFlags (0, 2, 0) instead of the ranks' (32768, 0, 0), so SpellInfo::IsAffected rejects the modifier and Aura::CalcMaxDuration leaves the stun at 6 sec while the ranks' own 6 sec mana-regeneration aura drops to 3.6 sec - the talent is a net loss. 802228 is the only family-28 record with that family bit. With both halves reaching it, the stasis becomes 3600ms and the ranks' 500ms interval becomes 300ms, so the same twelve mana ticks are delivered over the shortened stasis. The three modified readings are asserted as ranges rather than exact equalities because Player::ApplySpellMod multiplies through a float totalmul: 6000 * (1 + -40/100) lands on 3600.000244140625, not 3600.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 706055
+    },
+    {
+      "action": "assert",
+      "label": "The stasis keeps its 6 sec duration without the talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 802228,
+      "op": 1,
+      "base": 6000,
+      "equals": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The stasis is shortened to 3.6 sec with the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 802228,
+      "op": 1,
+      "base": 6000,
+      "min": 3599.5,
+      "max": 3600.5
+    },
+    {
+      "action": "assert",
+      "label": "The rank's own mana-regeneration aura still drops to 3.6 sec",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 803897,
+      "op": 1,
+      "base": 6000,
+      "min": 3599.5,
+      "max": 3600.5
+    },
+    {
+      "action": "assert",
+      "label": "The rank's 500ms mana tick still shortens to 300ms",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 803897,
+      "op": 19,
+      "base": 500,
+      "min": 299.5,
+      "max": 300.5
+    },
+    {
+      "action": "assert",
+      "label": "Nothing without the talent shortens the rank's mana tick",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 803897,
+      "op": 19,
+      "base": 500,
+      "equals": 500
+    }
+  ]
+}

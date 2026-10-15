@@ -1,0 +1,327 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Eye of the Tornado refunds Static and Dark Skies stacks on non-crits (#1098, #1671)",
+  "contract": "Eye of the Tornado 706297 is a permanent passive (DurationIndex 21) whose Effect[0] is SPELL_EFFECT_APPLY_AURA with EffectApplyAuraName[0] = 42 SPELL_AURA_PROC_TRIGGER_SPELL and EffectTriggerSpell[0] = 804044 'Add 5 Static', whose Effect[1] is 175 SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS with EffectMiscValue[1] = 5 on trigger spell 803102 Static, targeted at TARGET_UNIT_CASTER, so one damaging critical strike must add exactly 5 Static. Dark Skies 300593 is the same kind of passive with EffectTriggerSpell[0] = 680855; its DBC Description resolves every promised number from 680855, whose StackAmount is 5, DurationIndex 1 (10000 ms) and EffectApplyAuraName[0] = 71 SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL with EffectMiscValue[0] = 72 (SPELL_SCHOOL_MASK_NATURE 8 | SPELL_SCHOOL_MASK_ARCANE 64) and EffectBasePoints[0] 1 + EffectDieSides[0] 1 = 2 per stack, so a non-critical direct damage spell must cast 680855 on the Stormbringer, a critical strike must remove it, five stacks must add exactly 10 Nature spell crit and nothing outside school mask 72. Both spells carry DBC ProcFlags 0 and had no spell_proc row, so SpellMgr generated no SpellProcEntry and Aura::GetProcEffectMask returned 0 on every event. Shock 804020 is the probe: SpellFamilyName 22, SchoolMask 8 Nature, DmgClass 1 magic, RecoveryTime 0, CastTime 1500 ms, and it appears in neither the class-16 ResourceGainRules nor the class-16 ResourceCostRules of AscensionCustomResourceData.h. It is not, however, Static-neutral: Call Lightning 500040 and Shock 804020 are both class-16 level-1 baseline abilities (AscensionCustomClassData.h), so every player here already knows Call Lightning without an explicit learn step, and stormbringer_talent_casts::OnSpellHitResult's pre-existing native branch (predating this fix, from 'restore CoA abilities and gameplay') casts 804086 'Add 20 Static' on every damaging, non-triggered hit of the Shock chain while the caster lacks Thunder Ward 800098 - regardless of critical status. That flat +20 per cast is deterministic (804086's EffectMiscValue[1] = 20 via SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS, no roll_chance) and is accounted for in the Static assertions below alongside Eye of the Tornado's own +5 per crit. The Dark Skies gain is proved with spell_cast_count of 680855 rather than its stack count, because a later critical strike wipes the stacks while the cast counter is monotonic; with base crit only, six casts make an all-critical run vanishingly unlikely. spell_crit_rating 100000 is the fixture's way of forcing the critical branches.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "tornado",
+      "race": 8,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 100000
+    },
+    {
+      "id": "skies",
+      "race": 8,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "crit",
+      "race": 8,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 100000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "tornado_dummy",
+      "owner": "tornado",
+      "entry": 36,
+      "level": 80,
+      "health": 2000000,
+      "distance": 5
+    },
+    {
+      "id": "skies_dummy",
+      "owner": "skies",
+      "entry": 36,
+      "level": 80,
+      "health": 2000000,
+      "distance": 5
+    },
+    {
+      "id": "crit_dummy",
+      "owner": "crit",
+      "entry": 36,
+      "level": 80,
+      "health": 2000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let logins, spawns and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "tornado",
+      "spell": 804020
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the Stormbringer starts with no Static",
+      "actor": "tornado",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "BASELINE: Shock crits the dummy without Eye of the Tornado learned",
+      "actor": "tornado",
+      "spell": 804020,
+      "target": "tornado_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Shock is in no class-16 Static gain or cost rule, but the native Call Lightning kit passive still adds a flat 20 Static per hit",
+      "actor": "tornado",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "equals": 20
+    },
+    {
+      "action": "learn",
+      "actor": "tornado",
+      "spell": 706297
+    },
+    {
+      "action": "cast",
+      "label": "Shock crits the dummy with Eye of the Tornado learned",
+      "actor": "tornado",
+      "spell": 804020,
+      "target": "tornado_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: one damaging critical strike adds 804044's EffectMiscValue[1] = 5 Static on top of the 20 baseline and the 20 native per-cast add, 20 + 20 + 5 = 45",
+      "actor": "tornado",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "equals": 45
+    },
+    {
+      "action": "cast",
+      "label": "A second critical Shock",
+      "actor": "tornado",
+      "spell": 804020,
+      "target": "tornado_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the refund repeats per critical strike, 45 + 20 (native) + 5 (refund) = 70 Static",
+      "actor": "tornado",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "equals": 70
+    },
+    {
+      "action": "snapshot",
+      "label": "SETUP: Nature spell crit chance before Dark Skies",
+      "actor": "skies",
+      "metric": "spell_crit_chance",
+      "school": 3,
+      "save_as": "skies_nature"
+    },
+    {
+      "action": "snapshot",
+      "label": "SETUP: Fire spell crit chance before Dark Skies, a school outside mask 72",
+      "actor": "skies",
+      "metric": "spell_crit_chance",
+      "school": 2,
+      "save_as": "skies_fire"
+    },
+    {
+      "action": "learn",
+      "actor": "skies",
+      "spell": 804020
+    },
+    {
+      "action": "learn",
+      "actor": "skies",
+      "spell": 300593
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the Dark Skies buff is absent before any cast",
+      "actor": "skies",
+      "metric": "aura",
+      "spell": 680855,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "skies",
+      "spell": 804020,
+      "target": "skies_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "skies",
+      "spell": 804020,
+      "target": "skies_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "skies",
+      "spell": 804020,
+      "target": "skies_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "skies",
+      "spell": 804020,
+      "target": "skies_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "skies",
+      "spell": 804020,
+      "target": "skies_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "skies",
+      "spell": 804020,
+      "target": "skies_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: at least one of six non-critical Shocks made Dark Skies cast its buff 680855",
+      "actor": "skies",
+      "metric": "spell_cast_count",
+      "spell": 680855,
+      "min": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "SETUP: hold the buff at its DBC StackAmount of 5",
+      "actor": "skies",
+      "spell": 680855,
+      "stacks": 5
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the buff caps at 5 stacks",
+      "actor": "skies",
+      "metric": "aura_stacks",
+      "spell": 680855,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: 5 stacks add 5 x 2 = 10 Nature spell crit, the value 680855 authors",
+      "actor": "skies",
+      "metric": "spell_crit_chance",
+      "school": 3,
+      "relative_to": "skies_nature",
+      "min": 9.9,
+      "max": 10.1
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Fire is outside school mask 72, so it gains nothing",
+      "actor": "skies",
+      "metric": "spell_crit_chance",
+      "school": 2,
+      "relative_to": "skies_fire",
+      "min": -0.1,
+      "max": 0.1
+    },
+    {
+      "action": "learn",
+      "actor": "crit",
+      "spell": 804020
+    },
+    {
+      "action": "learn",
+      "actor": "crit",
+      "spell": 300593
+    },
+    {
+      "action": "set_aura",
+      "label": "SETUP: start the removal test with 3 Dark Skies stacks",
+      "actor": "crit",
+      "spell": 680855,
+      "stacks": 3
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the 3 stacks are in place",
+      "actor": "crit",
+      "metric": "aura_stacks",
+      "spell": 680855,
+      "equals": 3
+    },
+    {
+      "action": "cast",
+      "label": "One guaranteed critical Shock, kept well inside the buff's 10000 ms duration",
+      "actor": "crit",
+      "spell": 804020,
+      "target": "crit_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a critical strike removes the Dark Skies buff entirely",
+      "actor": "crit",
+      "metric": "aura",
+      "spell": 680855,
+      "equals": 0
+    }
+  ]
+}

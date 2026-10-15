@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Ranger Strike Where It Hurts (804178) proc fires once it has a spell_proc row (#3357)",
+  "contract": "804178 'Strike Where It Hurts' reads 'Your ability critical strikes now increase the damage the target takes from bleeds by $567588s1% for $567588d'. Its effect 2 is SPELL_AURA_PROC_TRIGGER_SPELL (42) on 567588, which applies aura 255 SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT with EffectMiscValue 15 (MECHANIC_BLEED) and BasePoints 29 (+30%) to the struck enemy. Spell.dbc gives 804178 ProcFlags 0, and before this change the world had no spell_proc row for it, so SpellMgr::LoadSpellProcs generated no entry ('Skip if no proc flags in DBC') and Aura::GetProcEffectMask returned 0 on the missing entry, meaning the aura could never fire. The new row supplies ProcFlags 69904 = DONE_SPELL_MELEE_DMG_CLASS 0x10 | DONE_SPELL_RANGED_DMG_CLASS 0x100 | DONE_SPELL_NONE_DMG_CLASS_NEG 0x1000 | DONE_SPELL_MAGIC_DMG_CLASS_NEG 0x10000 with HitMask 2 (PROC_HIT_CRITICAL), i.e. 'ability critical strikes' and not white swings. melee_crit_rating is pinned at 100000 so Wild Strike (800083, DmgClass 2) crits, and the assertion is that the debuff lands on the struck enemy. Without the row this assertion cannot pass at any crit rate.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "melee_crit_rating": 100000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "ranger",
+      "entry": 16542,
+      "level": 80,
+      "health": 500000,
+      "faction": 14
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "learn", "actor": "ranger", "spell": 800083 },
+    { "action": "learn", "actor": "ranger", "spell": 804178 },
+    { "action": "add_item", "actor": "ranger", "item": 25 },
+    { "action": "equip", "actor": "ranger", "item": 25, "slot": 15 },
+    {
+      "action": "assert",
+      "label": "the passive itself is active on the Ranger",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 804178,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "baseline: the target carries no bleed-damage debuff yet",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 567588,
+      "equals": 0
+    },
+    { "action": "cast", "actor": "ranger", "spell": 800083, "target": "dummy" },
+    { "action": "wait", "ms": 2000 },
+    { "action": "reset_cooldown", "actor": "ranger", "spell": 800083 },
+    { "action": "cast", "actor": "ranger", "spell": 800083, "target": "dummy" },
+    { "action": "wait", "ms": 2000 },
+    { "action": "reset_cooldown", "actor": "ranger", "spell": 800083 },
+    { "action": "cast", "actor": "ranger", "spell": 800083, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "the revived proc applied Strike Where It Hurts to the struck enemy",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 567588,
+      "equals": 1,
+      "within_ms": 8000
+    }
+  ]
+}

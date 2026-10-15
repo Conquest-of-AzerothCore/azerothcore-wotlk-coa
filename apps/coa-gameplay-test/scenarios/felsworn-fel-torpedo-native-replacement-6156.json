@@ -1,0 +1,300 @@
+{
+  "schema": 1,
+  "name": "felsworn-fel-torpedo-native-replacement-6156",
+  "contract": [
+    "Fel Torpedo passive 520853, CharacterAdvancement 12170 in Tyrant specialization 9, transforms Chaos Rush 500028 into 500610. A native paid talent upload must register the replacement, enable the active spell, and support a normal rush cast delivering 500761 path damage and generating Fel Fury. Removing the talent restores Chaos Rush. Client actionbar rendering is outside this harness. Late learning, relog and the level-24 Chaos Rush rank must retain the same mapping."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "f",
+      "race": 1,
+      "class": 14,
+      "level": 41,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "f",
+      "spell": 500028
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "temporary_spell_replacement",
+      "spell": 500028,
+      "equals": 500028,
+      "label": "f: temporary_spell_replacement 500028 500028"
+    },
+    {
+      "action": "specialization",
+      "actor": "f",
+      "id": 9
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "f",
+      "entry": 12170,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "knows_spell",
+      "spell": 520853,
+      "equals": 1,
+      "label": "f: knows_spell 520853 1"
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "aura",
+      "spell": 520853,
+      "equals": 1,
+      "label": "f: aura 520853 1"
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "temporary_spell_replacement",
+      "spell": 500028,
+      "equals": 500610,
+      "label": "f: temporary_spell_replacement 500028 500610"
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "knows_spell",
+      "spell": 500610,
+      "equals": 1,
+      "label": "f: knows_spell 500610 1"
+    },
+    {
+      "action": "set_power",
+      "actor": "f",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "f",
+      "spell": 500610,
+      "destination": {
+        "x": -8905.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "cast_failure",
+      "spell": 500610,
+      "equals": 0,
+      "label": "f: cast_failure 500610 0"
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "spell_go_count",
+      "spell": 500610,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "f: spell_go_count 500610 1"
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "spell_damage_count",
+      "spell": 500761,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 4000,
+      "label": "f: spell_damage_count 500761 enemy 1"
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "aura_stacks",
+      "spell": 800058,
+      "min": 1,
+      "label": "f: aura_stacks 800058 1"
+    },
+    {
+      "action": "wait",
+      "ms": 7000,
+      "label": "Let the native rush combat state expire before changing talents"
+    },
+    {
+      "action": "money",
+      "actor": "f",
+      "copper": 100000,
+      "label": "Fund the normal native talent-removal fee"
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "f",
+      "entry": 12170,
+      "rank": 0
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "temporary_spell_replacement",
+      "spell": 500028,
+      "equals": 500028,
+      "label": "f: temporary_spell_replacement 500028 500028"
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "knows_spell",
+      "spell": 500610,
+      "equals": 0,
+      "label": "f: knows_spell 500610 0"
+    },
+    {
+      "action": "unlearn",
+      "actor": "f",
+      "spell": 500028
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "f",
+      "entry": 12170,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "knows_spell",
+      "spell": 500610,
+      "equals": 0,
+      "label": "f: knows_spell 500610 0"
+    },
+    {
+      "action": "learn",
+      "actor": "f",
+      "spell": 500028
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "temporary_spell_replacement",
+      "spell": 500028,
+      "equals": 500610,
+      "label": "f: temporary_spell_replacement 500028 500610"
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "knows_spell",
+      "spell": 500610,
+      "equals": 1,
+      "label": "f: knows_spell 500610 1"
+    },
+    {
+      "action": "relog",
+      "actor": "f"
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "temporary_spell_replacement",
+      "spell": 500028,
+      "equals": 500610,
+      "label": "f: temporary_spell_replacement 500028 500610"
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "knows_spell",
+      "spell": 500610,
+      "equals": 1,
+      "label": "f: knows_spell 500610 1"
+    },
+    {
+      "action": "learn",
+      "actor": "f",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "f",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "f"
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "trainer_window_state",
+      "spell": 500422,
+      "equals": 0
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "f",
+      "spell": 500422,
+      "label": "Buy the level-24 Chaos Rush rank through the normal Book handler"
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 500422,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "temporary_spell_replacement",
+      "spell": 500422,
+      "equals": 500610,
+      "label": "f: temporary_spell_replacement 500422 500610"
+    },
+    {
+      "action": "assert",
+      "actor": "f",
+      "metric": "temporary_spell_replacement",
+      "spell": 500028,
+      "equals": 500028,
+      "label": "f: temporary_spell_replacement 500028 500028"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "f",
+      "entry": 36,
+      "level": 41,
+      "health": 1000000,
+      "distance": 5
+    }
+  ]
+}

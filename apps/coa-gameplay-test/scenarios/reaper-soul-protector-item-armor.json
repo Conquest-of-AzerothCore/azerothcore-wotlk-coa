@@ -1,0 +1,236 @@
+{
+  "schema": 1,
+  "name": "Soul Protector adds item armor and magic resistance (#1643)",
+  "contract": "At level 60, Soul Protector adds 25% armor from equipped plate and 22 resistance to each magic school; unlearning restores baseline values.",
+  "players": [
+    {
+      "id": "protector",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "unlearn",
+      "actor": "protector",
+      "spell": 300553,
+      "all_specs": true
+    },
+    {
+      "action": "snapshot",
+      "actor": "protector",
+      "metric": "armor",
+      "save_as": "naked_armor"
+    },
+    {
+      "action": "learn",
+      "actor": "protector",
+      "spell": 750
+    },
+    {
+      "action": "add_item",
+      "actor": "protector",
+      "item": 8094
+    },
+    {
+      "action": "equip",
+      "actor": "protector",
+      "item": 8094,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "protector",
+      "metric": "armor",
+      "relative_to": "naked_armor",
+      "save_as": "item_armor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "protector",
+      "metric": "armor",
+      "save_as": "equipped_armor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "protector",
+      "metric": "resistance",
+      "school": 1,
+      "save_as": "resistance_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "protector",
+      "metric": "resistance",
+      "school": 2,
+      "save_as": "resistance_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "protector",
+      "metric": "resistance",
+      "school": 3,
+      "save_as": "resistance_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "protector",
+      "metric": "resistance",
+      "school": 4,
+      "save_as": "resistance_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "protector",
+      "metric": "resistance",
+      "school": 5,
+      "save_as": "resistance_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "protector",
+      "metric": "resistance",
+      "school": 6,
+      "save_as": "resistance_6"
+    },
+    {
+      "action": "learn",
+      "actor": "protector",
+      "spell": 300553
+    },
+    {
+      "action": "assert",
+      "actor": "protector",
+      "metric": "aura",
+      "spell": 300553,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "protector",
+      "metric": "aura_amount",
+      "spell": 300553,
+      "effect": 0,
+      "equals": 25
+    },
+    {
+      "action": "snapshot",
+      "actor": "protector",
+      "metric": "armor",
+      "relative_to": "equipped_armor",
+      "ratio_to": "item_armor",
+      "save_as": "armor_gain_ratio"
+    },
+    {
+      "action": "snapshot",
+      "actor": "protector",
+      "metric": "resistance",
+      "school": 1,
+      "relative_to": "resistance_1",
+      "save_as": "resistance_gain_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "protector",
+      "metric": "resistance",
+      "school": 2,
+      "relative_to": "resistance_2",
+      "save_as": "resistance_gain_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "protector",
+      "metric": "resistance",
+      "school": 3,
+      "relative_to": "resistance_3",
+      "save_as": "resistance_gain_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "protector",
+      "metric": "resistance",
+      "school": 4,
+      "relative_to": "resistance_4",
+      "save_as": "resistance_gain_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "protector",
+      "metric": "resistance",
+      "school": 5,
+      "relative_to": "resistance_5",
+      "save_as": "resistance_gain_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "protector",
+      "metric": "resistance",
+      "school": 6,
+      "relative_to": "resistance_6",
+      "save_as": "resistance_gain_6"
+    },
+    {
+      "action": "unlearn",
+      "actor": "protector",
+      "spell": 300553,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "protector",
+      "metric": "armor",
+      "relative_to": "equipped_armor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "protector",
+      "metric": "resistance",
+      "school": 1,
+      "relative_to": "resistance_1",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "protector",
+      "metric": "resistance",
+      "school": 2,
+      "relative_to": "resistance_2",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "protector",
+      "metric": "resistance",
+      "school": 3,
+      "relative_to": "resistance_3",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "protector",
+      "metric": "resistance",
+      "school": 4,
+      "relative_to": "resistance_4",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "protector",
+      "metric": "resistance",
+      "school": 5,
+      "relative_to": "resistance_5",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "protector",
+      "metric": "resistance",
+      "school": 6,
+      "relative_to": "resistance_6",
+      "equals": 0
+    }
+  ]
+}

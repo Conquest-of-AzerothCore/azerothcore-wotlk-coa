@@ -1,0 +1,327 @@
+{
+  "schema": 1,
+  "name": "Wind, Black Knight and Valkyrie native repurchases and budgets (#4287, #4466, #4657, #5039)",
+  "contract": "Native 0x0727 uploads buy authored entries and switch to another specialization and back. An\nidentity-only return leaves omitted purchases absent; explicit repurchase, paid removal and repurchase\nsucceed. Level 11 has one specialization point, so a second paid entry must be refused without losing the\nfirst. This checks server authority; unlimited point display and client tree rendering are not observed.\nNative removals and resets retain their original prices; fixture actors have 100 gold to pay them.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "wind",
+      "race": 1,
+      "class": 16,
+      "level": 60
+    },
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 15,
+      "level": 11
+    },
+    {
+      "id": "valkyrie",
+      "race": 1,
+      "class": 27,
+      "level": 11
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_money",
+      "label": "Fund the original native removal and purge prices",
+      "actor": "wind",
+      "value": 1000000
+    },
+    {
+      "action": "set_money",
+      "label": "Fund the original native removal and purge prices",
+      "actor": "knight",
+      "value": 1000000
+    },
+    {
+      "action": "set_money",
+      "label": "Fund the original native removal and purge prices",
+      "actor": "valkyrie",
+      "value": 1000000
+    },
+    {
+      "action": "specialization",
+      "actor": "wind",
+      "id": 13
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "wind",
+      "entry": 6337,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "wind",
+      "metric": "knows_spell",
+      "spell": 704211,
+      "equals": 1
+    },
+    {
+      "action": "specialization",
+      "actor": "wind",
+      "id": 15
+    },
+    {
+      "action": "assert",
+      "actor": "wind",
+      "metric": "knows_spell",
+      "spell": 704211,
+      "equals": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "wind",
+      "id": 13
+    },
+    {
+      "action": "assert",
+      "label": "An identity-only return leaves the omitted purchase absent",
+      "actor": "wind",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 704211
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Repurchase through the complete native upload",
+      "actor": "wind",
+      "entry": 6337,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "wind",
+      "metric": "knows_spell",
+      "spell": 704211,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "wind",
+      "entry": 6337,
+      "rank": 0
+    },
+    {
+      "action": "assert",
+      "actor": "wind",
+      "metric": "knows_spell",
+      "spell": 704211,
+      "equals": 0
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "wind",
+      "entry": 6337,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "wind",
+      "metric": "knows_spell",
+      "spell": 704211,
+      "equals": 1
+    },
+    {
+      "action": "specialization",
+      "actor": "knight",
+      "id": 97
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "knight",
+      "entry": 6613,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "knows_spell",
+      "spell": 805533,
+      "equals": 1
+    },
+    {
+      "action": "specialization",
+      "actor": "knight",
+      "id": 10
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "knows_spell",
+      "spell": 805533,
+      "equals": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "knight",
+      "id": 97
+    },
+    {
+      "action": "assert",
+      "label": "An identity-only return leaves the omitted purchase absent",
+      "actor": "knight",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 805533
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Repurchase through the complete native upload",
+      "actor": "knight",
+      "entry": 6613,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "knows_spell",
+      "spell": 805533,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "knight",
+      "entry": 6613,
+      "rank": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "knows_spell",
+      "spell": 805533,
+      "equals": 0
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "knight",
+      "entry": 6613,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "knows_spell",
+      "spell": 805533,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "knight",
+      "entry": 7061,
+      "rank": 1,
+      "refused": true
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "knows_spell",
+      "spell": 805533,
+      "equals": 1
+    },
+    {
+      "action": "specialization",
+      "actor": "valkyrie",
+      "id": 47
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "valkyrie",
+      "entry": 3830,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "valkyrie",
+      "metric": "knows_spell",
+      "spell": 680618,
+      "equals": 1
+    },
+    {
+      "action": "specialization",
+      "actor": "valkyrie",
+      "id": 46
+    },
+    {
+      "action": "assert",
+      "actor": "valkyrie",
+      "metric": "knows_spell",
+      "spell": 680618,
+      "equals": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "valkyrie",
+      "id": 47
+    },
+    {
+      "action": "assert",
+      "label": "An identity-only return leaves the omitted purchase absent",
+      "actor": "valkyrie",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 680618
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Repurchase through the complete native upload",
+      "actor": "valkyrie",
+      "entry": 3830,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "valkyrie",
+      "metric": "knows_spell",
+      "spell": 680618,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "valkyrie",
+      "entry": 3830,
+      "rank": 0
+    },
+    {
+      "action": "assert",
+      "actor": "valkyrie",
+      "metric": "knows_spell",
+      "spell": 680618,
+      "equals": 0
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "valkyrie",
+      "entry": 3830,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "valkyrie",
+      "metric": "knows_spell",
+      "spell": 680618,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "valkyrie",
+      "entry": 4978,
+      "rank": 1,
+      "refused": true
+    },
+    {
+      "action": "assert",
+      "actor": "valkyrie",
+      "metric": "knows_spell",
+      "spell": 680618,
+      "equals": 1
+    }
+  ]
+}

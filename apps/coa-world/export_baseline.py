@@ -81,7 +81,7 @@ def export(snapshot, mysql, output, baseline_id, release):
     recorded = {row[0]: row[1].lower() for row in mysql.query("SELECT `name`,`hash` FROM `updates`;")}
     covered = {}
     migrations = [*sorted((ROOT / "data/sql/updates/pending_db_world").glob("*.sql")),
-                  *sorted((ROOT / "modules/mod-ascension-compat/data/sql/db-world").glob("*.sql"))]
+                  *sorted((ROOT / "modules/mod-ascension/data/sql/db-world").glob("*.sql"))]
     for migration in migrations:
         checksum = hashlib.sha1(migration.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
         if recorded.get(migration.name) != checksum:

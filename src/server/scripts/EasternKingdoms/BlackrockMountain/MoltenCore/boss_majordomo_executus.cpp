@@ -16,6 +16,9 @@
  */
 
 #include "CreatureScript.h"
+#include "GameObjectAI.h"
+#include "GameObjectScript.h"
+#include "LootMgr.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptedCreature.h"
@@ -78,6 +81,7 @@ enum Events
     EVENT_TELEPORT_RANDOM,
     EVENT_TELEPORT_TARGET,
     EVENT_AEGIS_OF_RAGNAROS,
+    EVENT_SACRIFICIAL_CHAINS,               // CoA addition (rev_20260930_97)
 
     EVENT_DEFEAT_OUTRO_1                    = 1,
     EVENT_DEFEAT_OUTRO_2,
@@ -100,6 +104,10 @@ enum Misc
     FACTION_MAJORDOMO_FRIENDLY              = 1080,
     SUMMON_GROUP_ADDS                       = 1,
 
+    // CoA addition: the encounter completes once Majordomo himself drops to this health floor
+    // after all 8 adds are dead, not the instant the last add dies (user's own CoA play memory).
+    MAJORDOMO_DEFEAT_HEALTH_PCT             = 20,
+
     // Points
     POINT_RAGNAROS_SUMMON                   = 1,
 
@@ -108,12 +116,23 @@ enum Misc
     PHASE_COMBAT                            = 2,
     PHASE_DEFEAT_OUTRO                      = 3,
     PHASE_RAGNAROS_SUMMONING                = 4,
+
+    // CoA addition (rev_20260930_97): Sacrificial Chains, Majordomo's periodic hostage add
+    // (mc-dataset.json: 92030 in 48/49 corpus Majordomo pulls, median first spawn +29s,
+    // repeating on a median ~47-50s cycle across every sampled difficulty/player count).
+    NPC_SACRIFICIAL_CHAINS_COA              = 92030,
 };
 
 Position const MajordomoRagnaros = { 848.933f, -812.875f, -229.601f, 4.046f };
-Position const MajordomoSummonPos = {759.542f, -1173.43f, -118.974f, 3.3048f };
+// CoA correction: the user stood at the room's real center and read the point off `.gps`
+// directly (floor Z -120.0913), replacing the earlier add-ring-centroid estimate.
+Position const MajordomoSummonPos = { 742.1174f, -1181.1216f, -120.0913f, 5.7636776f };
 Position const MajordomoMoveRagPos = { 830.9636f, -814.7055f, -228.9733f, 0.0f };   // Position used at Ragnaros summoning event
 Position const RagnarosSummonPos = { 838.3082f, -831.4665f, -232.1853f, 2.199115f };
+
+// CoA correction: the user stood at the Ragnaros lair entrance and read the point off `.gps`
+// directly (floor Z -228.51599), replacing the earlier estimated midpoint.
+Position const RagnarosLairEntranceCoa = { 814.8772f, -851.9799f, -228.51599f, 0.7247386f };
 
 struct MajordomoAddData
 {
@@ -183,6 +202,7 @@ struct boss_majordomo : public BossAI
         events.Reset();
         scheduler.CancelAll();
         aliveMinionsGUIDS.clear();
+        _allAddsDefeated = false;
 
         if (instance->GetBossState(DATA_MAJORDOMO_EXECUTUS) != DONE)
         {
@@ -247,6 +267,9 @@ struct boss_majordomo : public BossAI
         events.ScheduleEvent(EVENT_TELEPORT_RANDOM, 25s, PHASE_COMBAT, PHASE_COMBAT);
         events.ScheduleEvent(EVENT_TELEPORT_TARGET, 15s, PHASE_COMBAT, PHASE_COMBAT);
 
+        // CoA addition (rev_20260930_97): see NPC_SACRIFICIAL_CHAINS_COA above.
+        events.ScheduleEvent(EVENT_SACRIFICIAL_CHAINS, 29s, PHASE_COMBAT, PHASE_COMBAT);
+
         aliveMinionsGUIDS.clear();
         aliveMinionsGUIDS = static_minionsGUIDS;
     }
@@ -275,18 +298,32 @@ struct boss_majordomo : public BossAI
             else if (!remainingAdds)
             {
                 static_minionsGUIDS.clear();
+                _allAddsDefeated = true;
 
-                instance->SetBossState(DATA_MAJORDOMO_EXECUTUS, DONE);
-                events.CancelEventGroup(PHASE_COMBAT);
-                me->GetMap()->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, me->GetEntry(), me);
-                me->SetImmuneToAll(true);
-                me->SetFaction(FACTION_MAJORDOMO_FRIENDLY);
-                EnterEvadeMode();
-                Talk(SAY_DEFEAT);
+                scheduler.Schedule(500ms, [this](TaskContext context)
+                {
+                    if (me->GetHealthPct() <= float(MAJORDOMO_DEFEAT_HEALTH_PCT))
+                    {
+                        CompleteEncounter();
+                        return;
+                    }
+                    context.Repeat(500ms);
+                });
                 return;
             }
             DoCastAOE(SPELL_ENCOURAGEMENT);
         }
+    }
+
+    void CompleteEncounter()
+    {
+        instance->SetBossState(DATA_MAJORDOMO_EXECUTUS, DONE);
+        events.CancelEventGroup(PHASE_COMBAT);
+        me->GetMap()->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, me->GetEntry(), me);
+        me->SetImmuneToAll(true);
+        me->SetFaction(FACTION_MAJORDOMO_FRIENDLY);
+        EnterEvadeMode();
+        Talk(SAY_DEFEAT);
     }
 
     void JustReachedHome() override
@@ -302,10 +339,21 @@ struct boss_majordomo : public BossAI
 
     void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*dmgType*/, SpellSchoolMask /*school*/) override
     {
-        if (events.IsInPhase(PHASE_COMBAT) && me->GetHealth() <= damage)
+        if (!events.IsInPhase(PHASE_COMBAT))
+            return;
+
+        if (!_allAddsDefeated)
         {
-            damage = 0;
+            if (me->GetHealth() <= damage)
+                damage = 0;
+            return;
         }
+
+        // Solo phase (all adds dead): killable down to the floor, not immune outright - the
+        // recurring health check in SummonedCreatureDies completes the encounter once he gets there.
+        uint32 const floor = me->CountPctFromMaxHealth(MAJORDOMO_DEFEAT_HEALTH_PCT);
+        if (me->GetHealth() <= floor + damage)
+            damage = me->GetHealth() > floor ? me->GetHealth() - floor : 0;
     }
 
     void UpdateAI(uint32 diff) override
@@ -357,6 +405,18 @@ struct boss_majordomo : public BossAI
                             DoCastSelf(SPELL_HATE_TO_ZERO, true);
                             DoCastAOE(SPELL_TELEPORT_TARGET);
                             events.Repeat(30s);
+                            break;
+                        }
+                        case EVENT_SACRIFICIAL_CHAINS:
+                        {
+                            // Corrected (diag-G3.md "Ascension evidence" #2): the chain always
+                            // spawns at the same fixed point, the burning ground in the middle
+                            // of Majordomo's room (MajordomoSummonPos, his own battle position),
+                            // not on a random raid member -- npc_sacrificial_chains_coa.cpp owns
+                            // the add's own sacrifice/heal-to-full/Berserk/teleport-and-pacify
+                            // behaviour.
+                            me->SummonCreature(NPC_SACRIFICIAL_CHAINS_COA, MajordomoSummonPos, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 5 * MINUTE * IN_MILLISECONDS);
+                            events.Repeat(47s);
                             break;
                         }
                     }
@@ -534,6 +594,12 @@ private:
     GuidSet static_minionsGUIDS;    // contained data should be changed on encounter completion
     GuidSet aliveMinionsGUIDS;      // used for calculations
     std::unordered_map<uint32, MajordomoAddData> majordomoSummonsData;
+
+    // CoA addition: he no longer yields the instant his last add dies (user report, live CoA memory
+    // of a real "fight him down" phase). Set once all 8 adds are dead; DamageTaken then clamps him
+    // to MAJORDOMO_DEFEAT_HEALTH_PCT instead of 100%, and a recurring health check completes the
+    // encounter once he actually reaches that floor.
+    bool _allAddsDefeated = false;
 };
 
 // 20538 Hate to Zero (SERVERSIDE)
@@ -576,9 +642,54 @@ class spell_summon_ragnaros : public SpellScript
     }
 };
 
+// CoA addition: once Majordomo turns friendly, instance_molten_core.cpp summons
+// go_ragnaros_portal_coa (GO_RAGNAROS_PORTAL_COA); using it teleports a player straight to the
+// Ragnaros lair entrance instead of requiring the gossip-triggered summon sequence.
+struct go_ragnaros_portal_coa : public GameObjectAI
+{
+    go_ragnaros_portal_coa(GameObject* go) : GameObjectAI(go) { }
+
+    bool GossipHello(Player* player, bool reportUse) override
+    {
+        if (reportUse || !player)
+            return false;
+
+        player->TeleportTo(me->GetMapId(), RagnarosLairEntranceCoa.GetPositionX(), RagnarosLairEntranceCoa.GetPositionY(),
+                            RagnarosLairEntranceCoa.GetPositionZ(), RagnarosLairEntranceCoa.GetOrientation());
+        return true;
+    }
+};
+
+// CoA addition: GameObject::Use() has no GAMEOBJECT_TYPE_CHEST case at all (it falls to
+// default:, spellId stays 0, nothing happens) - a type-3 chest is normally opened only via
+// Spell::EffectOpenLock, reached by the client auto-casting the spell matching its lock's
+// LockType.dbc entry. Cache of the Firelord's lock (57) resolves through LockType 5 ("Open"),
+// which SkillByLockType maps to SKILL_NONE, so CanOpenLock always succeeds with no real skill
+// or key - but nothing in this core ever drives that cast for a bare GAMEOBJECT_TYPE_CHEST
+// (confirmed live: neither CMSG_LOOT, guarded to creature/vehicle GUIDs only in
+// WorldSession::HandleLootOpcode, nor plain CMSG_GAMEOBJ_USE ever opened the loot window).
+// GossipHello fires before Use()'s switch and short-circuits it on a true return (the same
+// idiom go_ragnaros_portal_coa above already uses), so this calls SendLoot directly instead of
+// waiting on the unreachable lock-spell path.
+struct go_cache_of_the_firelord_coa : public GameObjectAI
+{
+    go_cache_of_the_firelord_coa(GameObject* go) : GameObjectAI(go) { }
+
+    bool GossipHello(Player* player, bool reportUse) override
+    {
+        if (reportUse || !player)
+            return false;
+
+        player->SendLoot(me->GetGUID(), LOOT_CORPSE);
+        return true;
+    }
+};
+
 void AddSC_boss_majordomo()
 {
     RegisterMoltenCoreCreatureAI(boss_majordomo);
+    RegisterMoltenCoreGameObjectAI(go_ragnaros_portal_coa);
+    RegisterMoltenCoreGameObjectAI(go_cache_of_the_firelord_coa);
 
     // Spells
     RegisterSpellScript(spell_hate_to_zero);

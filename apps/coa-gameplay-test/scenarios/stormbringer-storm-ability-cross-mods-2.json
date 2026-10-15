@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Titanic Thunderbolt and Storm Sorcery are native cross-spell modifiers (#2778, #2800)",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+
+    { "action": "learn", "actor": "s", "spell": 804020 },
+    { "action": "assert", "label": "BASELINE: Shock's crit chance modifier is 0 before Titanic Thunderbolt",
+      "actor": "s", "metric": "spell_modifier", "spell": 804020, "op": 7, "base": 0, "equals": 0 },
+
+    { "action": "learn", "actor": "s", "spell": 501415 },
+    { "action": "assert", "label": "BASELINE: Conjure Storm's crit chance modifier is 0 before Titanic Thunderbolt",
+      "actor": "s", "metric": "spell_modifier", "spell": 501415, "op": 7, "base": 0, "equals": 0 },
+
+    { "action": "learn", "actor": "s", "spell": 806307 },
+    { "action": "learn", "actor": "s", "spell": 806308 },
+    { "action": "assert", "label": "BASELINE: Eye of the Storm's periodic tick (806308) crit chance modifier is 0 before Titanic Thunderbolt",
+      "actor": "s", "metric": "spell_modifier", "spell": 806308, "op": 7, "base": 0, "equals": 0 },
+    { "action": "assert", "label": "BASELINE: Eye of the Storm's own aura spell (806307) carries no crit chance modifier",
+      "actor": "s", "metric": "spell_modifier", "spell": 806307, "op": 7, "base": 0, "equals": 0 },
+
+    { "action": "learn", "actor": "s", "spell": 705653 },
+    { "action": "assert", "label": "DISCRIMINATING: Titanic Thunderbolt rank 1 adds 4 crit percentage points to Shock",
+      "actor": "s", "metric": "spell_modifier", "spell": 804020, "op": 7, "base": 0, "equals": 4 },
+    { "action": "assert", "label": "DISCRIMINATING: Titanic Thunderbolt rank 1 adds 4 crit percentage points to Conjure Storm",
+      "actor": "s", "metric": "spell_modifier", "spell": 501415, "op": 7, "base": 0, "equals": 4 },
+    { "action": "assert", "label": "DISCRIMINATING: Titanic Thunderbolt rank 1 adds 4 crit percentage points to Eye of the Storm's periodic tick (806308, not the 806307 aura spell)",
+      "actor": "s", "metric": "spell_modifier", "spell": 806308, "op": 7, "base": 0, "equals": 4 },
+    { "action": "assert", "label": "Titanic Thunderbolt does not modify 806307 itself, only its 806308 damage trigger",
+      "actor": "s", "metric": "spell_modifier", "spell": 806307, "op": 7, "base": 0, "equals": 0 },
+
+    { "action": "unlearn", "actor": "s", "spell": 705653 },
+    { "action": "learn", "actor": "s", "spell": 707794 },
+    { "action": "assert", "label": "DISCRIMINATING: Titanic Thunderbolt rank 2 adds 8 crit percentage points to Shock",
+      "actor": "s", "metric": "spell_modifier", "spell": 804020, "op": 7, "base": 0, "equals": 8 },
+    { "action": "assert", "label": "DISCRIMINATING: Titanic Thunderbolt rank 2 adds 8 crit percentage points to Conjure Storm",
+      "actor": "s", "metric": "spell_modifier", "spell": 501415, "op": 7, "base": 0, "equals": 8 },
+    { "action": "assert", "label": "DISCRIMINATING: Titanic Thunderbolt rank 2 adds 8 crit percentage points to Eye of the Storm's periodic tick (806308)",
+      "actor": "s", "metric": "spell_modifier", "spell": 806308, "op": 7, "base": 0, "equals": 8 },
+
+    { "action": "learn", "actor": "s", "spell": 503319 },
+    { "action": "assert", "label": "BASELINE: Call of the Wind's effect value modifier is unmodified before Storm Sorcery",
+      "actor": "s", "metric": "spell_modifier", "spell": 503319, "op": 8, "base": 100, "equals": 100 },
+
+    { "action": "learn", "actor": "s", "spell": 578312 },
+    { "action": "assert", "label": "BASELINE: Call of the Storm's effect value modifier is unmodified before Storm Sorcery",
+      "actor": "s", "metric": "spell_modifier", "spell": 578312, "op": 8, "base": 100, "equals": 100 },
+
+    { "action": "learn", "actor": "s", "spell": 705689 },
+    { "action": "assert", "label": "DISCRIMINATING: Storm Sorcery raises Call of the Wind's effective value by 20%",
+      "actor": "s", "metric": "spell_modifier", "spell": 503319, "op": 8, "base": 100, "min": 119.9, "max": 120.1 },
+    { "action": "assert", "label": "DISCRIMINATING: Storm Sorcery raises Call of the Storm's effective value by 20%",
+      "actor": "s", "metric": "spell_modifier", "spell": 578312, "op": 8, "base": 100, "min": 119.9, "max": 120.1 },
+    { "action": "assert", "label": "Storm Sorcery does not touch Shock's effect value modifier",
+      "actor": "s", "metric": "spell_modifier", "spell": 804020, "op": 8, "base": 100, "equals": 100 }
+  ],
+  "contract": "#2778: Titanic Thunderbolt (705653/707794) is SpellFamilyName 22, effect 0 APPLY_AURA -> SPELL_AURA_ADD_FLAT_MODIFIER (107) over EffectMiscValue 7 = SPELLMOD_CRITICAL_CHANCE, EffectBasePoints 3/7 with EffectDieSides=1 (SpellEffectInfo::CalcValue, SpellInfo.cpp:495, adds 1 when DieSides==1, so the applied values are +4/+8, matching the tooltip's 4%/8%), classmask (2048, 67108864, 16). Word0=2048 matches Shock's top obtainable rank (804020); word2=16 matches the whole Conjure Storm chain (501415-501420, own word2=48, a superset); word1=67108864 does not match Eye of the Storm's aura spell (806307, flags word2=1024 only) but matches exactly its own EffectTriggerSpell[1]=806308 (\"Deals $s1 Spellstorm Damage\", flags word1=67108864), confirmed via coa-dbc-viewer -- a crit-chance modifier correctly targets the damage-dealing sub-spell rather than the aura-application parent, so the scenario asserts on 806308 and additionally asserts 806307 itself carries no modifier, to keep any future edit from silently pointing the assertion at the wrong id. SPELLMOD_CRITICAL_CHANCE is applied at the shared spell-crit-chance calculation (Unit.cpp:9697), used by every class; rank 2 is exercised by unlearning rank 1 first to avoid any ambiguity about how two active ranks of the same talent would combine. #2800: Storm Sorcery (705689) is a single APPLY_AURA -> ADD_PCT_MODIFIER over EffectMiscValue 8 = SPELLMOD_ALL_EFFECTS, EffectBasePoints=19 with EffectDieSides=1 (applied value = 20%, same +1 convention, matching the tooltip's 'Call of the Winds and Call of the Storm' bonus), classmask (0, 16384, 0) matching every rank of both the Call of the Wind heal chain (503319-503323/804018) and the Call of the Storm damage chain (578311-578316), confirmed per-id identical family flags. SPELLMOD_ALL_EFFECTS is applied at Unit.cpp:12153 and consumed generically in AuraEffect::CalculateSpellMod (SpellAuraEffects.cpp:940/956/995), the shared per-effect percentage scaling path used across all classes. Neither mechanism has any module or core override (grepped module src, module SQL and pending_db_world: zero hits on any of the four spell ids). Base numbers (804020/501415/806308's crit baseline of 0, and the representative 100-unit base for the percentage-scaled Call of the Wind/Storm effect values, matching the convention used by the Venomancer audit's percentage-modifier scenarios) are read via the harness's own spell_modifier metric, not hand-computed. No overlap with the open #4612 (806307's spell_bonus_data coefficients there are an unrelated damage-scaling mechanism to this crit-chance/effect-value spellmod pair)."
+}

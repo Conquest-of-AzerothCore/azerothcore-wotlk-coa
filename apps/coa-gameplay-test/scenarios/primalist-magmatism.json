@@ -1,0 +1,749 @@
+{
+  "schema": 1,
+  "name": "Primalist Magmatism: Magma Geode health threshold and Eruption cooldown",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "enemy",
+      "race": 5,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "primalist",
+      "entry": 36,
+      "level": 80,
+      "distance": 35,
+      "health": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "pvp",
+      "actor": "primalist",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9612.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 95
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 300697,
+      "all_specs": true,
+      "label": "Remove the automatic Geomancy Crushing the Earth spell power, which refreshes after the baselines"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 802335
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 803140
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 803138
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 10000,
+      "maximum": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 50
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "save_as": "base_cd",
+      "label": "base_cd",
+      "spell": 802335,
+      "op": 11,
+      "base": 60000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "save_as": "base_803140",
+      "label": "base_803140",
+      "spell": 803140,
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "save_as": "base_803138",
+      "label": "base_803138",
+      "spell": 803138,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 802335,
+      "op": 11,
+      "base": 60000,
+      "relative_to": "base_cd",
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7500
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 7500
+    },
+    {
+      "action": "wait",
+      "ms": 50
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "dummy",
+      "ratio_to": "base_803140",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "dummy",
+      "ratio_to": "base_803138",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_7500",
+      "label": "baseline_7500",
+      "spell": 803140,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803140,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803140,
+      "target": "enemy",
+      "relative_to": "baseline_7500",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7501
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 7501
+    },
+    {
+      "action": "wait",
+      "ms": 50
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "dummy",
+      "ratio_to": "base_803140",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "dummy",
+      "ratio_to": "base_803138",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_7501",
+      "label": "baseline_7501",
+      "spell": 803140,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803140,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803140,
+      "target": "enemy",
+      "relative_to": "baseline_7501",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 10000
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 50
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "dummy",
+      "ratio_to": "base_803140",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "dummy",
+      "ratio_to": "base_803138",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_10000",
+      "label": "baseline_10000",
+      "spell": 803140,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803140,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803140,
+      "target": "enemy",
+      "relative_to": "baseline_10000",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 706174
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 802335,
+      "op": 11,
+      "base": 60000,
+      "relative_to": "base_cd",
+      "equals": -15000
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7500
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 7500
+    },
+    {
+      "action": "wait",
+      "ms": 50
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "dummy",
+      "ratio_to": "base_803140",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "dummy",
+      "ratio_to": "base_803138",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_7500",
+      "label": "talented_7500",
+      "spell": 803140,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803140,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803140,
+      "target": "enemy",
+      "relative_to": "talented_7500",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7501
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 7501
+    },
+    {
+      "action": "wait",
+      "ms": 50
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "dummy",
+      "ratio_to": "base_803140",
+      "min": 1.299,
+      "max": 1.301
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "dummy",
+      "ratio_to": "base_803138",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_7501",
+      "label": "talented_7501",
+      "spell": 803140,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803140,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803140,
+      "target": "enemy",
+      "relative_to": "talented_7501",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 10000
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 50
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "dummy",
+      "ratio_to": "base_803140",
+      "min": 1.299,
+      "max": 1.301
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "dummy",
+      "ratio_to": "base_803138",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_10000",
+      "label": "talented_10000",
+      "spell": 803140,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803140,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803140,
+      "target": "enemy",
+      "relative_to": "talented_10000",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706174
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 802335,
+      "op": 11,
+      "base": 60000,
+      "relative_to": "base_cd",
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7500
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 7500
+    },
+    {
+      "action": "wait",
+      "ms": 50
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "dummy",
+      "ratio_to": "base_803140",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "dummy",
+      "ratio_to": "base_803138",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_7500",
+      "label": "removed_7500",
+      "spell": 803140,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803140,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803140,
+      "target": "enemy",
+      "relative_to": "removed_7500",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7501
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 7501
+    },
+    {
+      "action": "wait",
+      "ms": 50
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "dummy",
+      "ratio_to": "base_803140",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "dummy",
+      "ratio_to": "base_803138",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_7501",
+      "label": "removed_7501",
+      "spell": 803140,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803140,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803140,
+      "target": "enemy",
+      "relative_to": "removed_7501",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 10000
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 50
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "dummy",
+      "ratio_to": "base_803140",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "dummy",
+      "ratio_to": "base_803138",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_10000",
+      "label": "removed_10000",
+      "spell": 803140,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803140,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803140,
+      "target": "enemy",
+      "relative_to": "removed_10000",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    }
+  ],
+  "contract": "Magma Geodes deal 30% more damage strictly above 75% target health. Test 75%, 75.01% and 100%, normal hits, unrelated physical Geodes and unlearning. The existing native Eruption cooldown modifier reduces it by 15 seconds. Specialization 95 (Geomancy) grants Crushing the Earth (300697) automatically; its two-second refresh adds spell power after the baselines are taken, so the scenario removes it and keeps spell power constant. The Magma Geode damage probes query a creature whose 10000 health follows the enemy's thresholds; normal class 887019 (-15%) and Geomancy 887086 (+23%) tuning scale its 1000 base to 1045, and 1.3 reads 1359/1045. Casts still target the enemy player."
+}

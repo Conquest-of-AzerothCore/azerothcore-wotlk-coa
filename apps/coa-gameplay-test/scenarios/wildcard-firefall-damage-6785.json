@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "name": "Firefall rains damaging stars and keeps its end-of-duration Hot Streak",
+  "contract": [
+    "Spell284677 triggers284679 every1000ms for8000ms. Dummy284679 names damaging projectile983370; its",
+    "explosion983372 affects other enemies within5yards. At most two stars per tick gives sixteen with",
+    "two nearby targets. A target outside20yards remains untouched. The final helper284678 grants48108;",
+    "retain that working payoff."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "nearby",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 4,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "outside",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 25,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 284677
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 284677,
+      "target": "hero"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 284677,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 8700
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 983370,
+      "target": "enemy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 983370,
+      "target": "nearby",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 983370,
+      "min": 14,
+      "max": 16
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 983372,
+      "target": "enemy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 983372,
+      "target": "outside",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 48108,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 284677,
+      "equals": 0
+    }
+  ]
+}

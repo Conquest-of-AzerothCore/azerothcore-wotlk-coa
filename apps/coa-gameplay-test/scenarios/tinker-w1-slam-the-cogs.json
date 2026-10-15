@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "name": "Tinker Slam the Cogs! buffs the Tinker and its summons (#1377)",
+  "contract": "Slam the Cogs! rank 1 520453 and rank 2 520876 each apply SPELL_AURA_MOD_DAMAGE_PERCENT_DONE with MiscValue 127 twice: once on the caster (effect 0) and once through SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (190) with RadiusIndex 12 = 100 yd (effect 1). Amounts are 4 for rank 1 (DBC EffectBasePoints 3, DieSides 1) and 8 for rank 2 (EffectBasePoints 7, DieSides 1). Effect 190 is dispatched to Spell::EffectApplyAreaAura and its targets come from Aura::FillTargetMap (SpellAuras.cpp:2882-2901), which walks the owner's controlled summons. The Mechano-Bear build 803405 (creature 60671) is the summon fixture; Sticky Bomb Explosion 801009 is the Fire damage probe, and MiscValue 127 covers its school.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "t",
+      "entry": 36,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 803405
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 803405
+    },
+    {
+      "action": "assert",
+      "label": "The Mechano-Bear is out",
+      "actor": "t",
+      "metric": "pet_entry",
+      "equals": 60671,
+      "within_ms": 10000
+    },
+    {
+      "action": "snapshot",
+      "save_as": "dmg0",
+      "actor": "t",
+      "metric": "spell_damage_done",
+      "spell": 801009,
+      "target": "d"
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 520453
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds 4% to the Tinker's own damage",
+      "actor": "t",
+      "metric": "spell_damage_done",
+      "spell": 801009,
+      "target": "d",
+      "ratio_to": "dmg0",
+      "min": 1.03,
+      "max": 1.05
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 reaches the summon",
+      "actor": "t",
+      "metric": "pet_aura_stacks",
+      "spell": 520453,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "unlearn",
+      "actor": "t",
+      "spell": 520453
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning rank 1 takes the aura off the summon",
+      "actor": "t",
+      "metric": "pet_aura_stacks",
+      "spell": 520453,
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Damage is back to the unbuffed value",
+      "actor": "t",
+      "metric": "spell_damage_done",
+      "spell": 801009,
+      "target": "d",
+      "relative_to": "dmg0",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 520876
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 adds 8% to the Tinker's own damage",
+      "actor": "t",
+      "metric": "spell_damage_done",
+      "spell": 801009,
+      "target": "d",
+      "ratio_to": "dmg0",
+      "min": 1.07,
+      "max": 1.09
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 reaches the summon",
+      "actor": "t",
+      "metric": "pet_aura_stacks",
+      "spell": 520876,
+      "equals": 1,
+      "within_ms": 8000
+    }
+  ]
+}

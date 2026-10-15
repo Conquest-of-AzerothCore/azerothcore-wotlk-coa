@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Titan's Gaze cuts Time Out!'s damage reduction by 75% (#3397)",
+  "contract": "Titan's Gaze 804462's tooltip clause is \"reduces its damage reduction by $s3%\". Its effect 2 is SPELL_AURA_ADD_PCT_MODIFIER with MiscValue 3 (SPELLMOD_EFFECT1) and BasePoints -76 -> -75%, class-masked to Time Out! (SpellFamilyName 28, SpellFamilyFlags word0 32768: ranks 802229 / 803896 / 803897). Unit::ApplyEffectModifiers maps SPELLMOD_EFFECT1 to effect index 0, and Time Out!'s effect index 0 is SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE with BasePoints -91 -> -90, forwarded to 802228's SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN as SPELLVALUE_BASE_POINT0. The modifier therefore lands exactly where the tooltip says, natively, with no script, spell_proc or spell_dbc row involved. This is a regression scenario for that native spell-modifier path; it makes no code change. Rank 803897's base value is -90, so with the talent it must read about -22, a ratio near 0.25. The tooltip's other clause, \"no longer breaks on damage\", has no positive assertion here: 802228 already carries AuraInterruptFlags 0x0 and never breaks on damage, so nothing would discriminate the talent.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "chronomancer", "spell": 803897 },
+    {
+      "action": "snapshot",
+      "label": "Time Out!'s damage reduction without Titan's Gaze",
+      "actor": "chronomancer",
+      "metric": "spell_effect_value",
+      "spell": 803897,
+      "effect": 0,
+      "save_as": "base_reduction"
+    },
+    { "action": "learn", "actor": "chronomancer", "spell": 804462 },
+    {
+      "action": "assert",
+      "label": "Titan's Gaze leaves Time Out! with about a quarter of its damage reduction",
+      "actor": "chronomancer",
+      "metric": "spell_effect_value",
+      "spell": 803897,
+      "effect": 0,
+      "ratio_to": "base_reduction",
+      "min": 0.2,
+      "max": 0.3
+    }
+  ]
+}

@@ -1,0 +1,408 @@
+{
+  "schema": 1,
+  "name": "Mechsuit transforms Scrap Shot into Gatling Gun (#5777)",
+  "contract": "Build: Mechsuit 801384 explicitly states that Scrap Shot transforms into Gatling Gun while the suit is active. At level 28 and with rank 7 at level 60, entering the suit must retain the learned abilities, record the temporary replacement and emit SMSG_SUPERCEDED_SPELL (0x012C). Manual exit, exhausted Scrap and unlearning the suit restore Scrap Shot. Ordinary Gatling casts still work and the configured form bar remains separate.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 28,
+      "ranged_hit_rating": 10000
+    },
+    {
+      "id": "ranked",
+      "race": 1,
+      "class": 28,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 28,
+      "distance": 15
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "fixture: Scrap Shot",
+      "actor": "tinker",
+      "spell": 500549
+    },
+    {
+      "action": "learn",
+      "label": "fixture: Mechsuit talent",
+      "actor": "tinker",
+      "spell": 92141
+    },
+    {
+      "action": "learn",
+      "label": "fixture: Build: Mechsuit",
+      "actor": "tinker",
+      "spell": 801384
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT Gatling Gun is learned with Build: Mechsuit",
+      "actor": "tinker",
+      "metric": "knows_spell",
+      "spell": 500213,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "combat_rating",
+      "rating": 6,
+      "equals": 10000
+    },
+    {
+      "action": "cast",
+      "label": "Gatling Gun outside the suit",
+      "actor": "tinker",
+      "spell": 500213,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT Gatling Gun is refused outside the suit as mounted-only (SPELL_FAILED_ONLY_MOUNTED)",
+      "actor": "tinker",
+      "metric": "cast_failure",
+      "spell": 500213,
+      "equals": 91,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_aura",
+      "label": "fixture: pre-fill Scrap",
+      "actor": "tinker",
+      "spell": 801816,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "label": "enter the Mechsuit",
+      "actor": "tinker",
+      "spell": 801384
+    },
+    {
+      "action": "assert",
+      "label": "the Mechsuit is on",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Mechsuit transforms Scrap Shot into Gatling Gun",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 500549,
+      "equals": 500213,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The client receives the original Scrap Shot ID",
+      "actor": "tinker",
+      "metric": "server_packet_u32",
+      "opcode": 300,
+      "index": 0,
+      "equals": 500549
+    },
+    {
+      "action": "assert",
+      "label": "The client receives the Gatling Gun replacement ID",
+      "actor": "tinker",
+      "metric": "server_packet_u32",
+      "opcode": 300,
+      "index": 1,
+      "equals": 500213
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown of Build: Mechsuit pass",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Scrap Shot inside the suit",
+      "actor": "tinker",
+      "spell": 500549,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT casting Scrap Shot inside the suit starts Gatling Gun",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 500213,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Let the transformed channel and global cooldown end",
+      "ms": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Gatling Gun inside the suit",
+      "actor": "tinker",
+      "spell": 500213,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT Gatling Gun's channel starts at once",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 500213,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Gatling Gun dealt damage (via its triggered shot 500577)",
+      "actor": "tinker",
+      "metric": "spell_damage_total",
+      "spell": 500577,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cancel_aura",
+      "label": "leave the Mechsuit",
+      "actor": "tinker",
+      "spell": 801384
+    },
+    {
+      "action": "assert",
+      "label": "the Mechsuit is off",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Leaving Mechsuit restores Scrap Shot",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 500549,
+      "equals": 500549,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The client receives restored Scrap Shot",
+      "actor": "tinker",
+      "metric": "server_packet_u32",
+      "opcode": 300,
+      "index": 1,
+      "equals": 500549
+    },
+    {
+      "action": "wait",
+      "label": "Let the Tinker refresh run after leaving",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT Gatling Gun stays learned after leaving the suit",
+      "actor": "tinker",
+      "metric": "knows_spell",
+      "spell": 500213,
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "label": "Build: Mechsuit is unlearned",
+      "actor": "tinker",
+      "spell": 801384
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT Gatling Gun is removed with Build: Mechsuit",
+      "actor": "tinker",
+      "metric": "knows_spell",
+      "spell": 500213,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "ranked",
+      "spell": 92141
+    },
+    {
+      "action": "learn",
+      "actor": "ranked",
+      "spell": 500561
+    },
+    {
+      "action": "learn",
+      "actor": "ranked",
+      "spell": 801384
+    },
+    {
+      "action": "assert",
+      "actor": "ranked",
+      "label": "Gatling Gun is learned with the suit at level 60",
+      "metric": "knows_spell",
+      "equals": 1,
+      "spell": 500213,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranked",
+      "spell": 801816,
+      "stacks": 100
+    },
+    {
+      "action": "cast",
+      "actor": "ranked",
+      "spell": 801384
+    },
+    {
+      "action": "assert",
+      "actor": "ranked",
+      "label": "Rank 7 Scrap Shot transforms",
+      "metric": "temporary_spell_replacement",
+      "equals": 500213,
+      "spell": 500561,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "ranked",
+      "label": "The replacement packet names rank 7",
+      "metric": "server_packet_u32",
+      "equals": 500561,
+      "opcode": 300,
+      "index": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ranked",
+      "label": "Rank 7 remains learned while transformed",
+      "metric": "knows_spell",
+      "equals": 1,
+      "spell": 500561
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranked",
+      "spell": 801816,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ranked",
+      "label": "Running out of Scrap ends the suit",
+      "metric": "aura",
+      "equals": 0,
+      "spell": 801384,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "ranked",
+      "label": "Scrap depletion restores rank 7",
+      "metric": "temporary_spell_replacement",
+      "equals": 500561,
+      "spell": 500561
+    },
+    {
+      "action": "assert",
+      "actor": "ranked",
+      "label": "The client receives rank 7 after depletion",
+      "metric": "server_packet_u32",
+      "equals": 500561,
+      "opcode": 300,
+      "index": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranked",
+      "spell": 801816,
+      "stacks": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "label": "Fixture clears the independent ten-second suit cooldown",
+      "actor": "ranked",
+      "spell": 801384
+    },
+    {
+      "action": "cast",
+      "actor": "ranked",
+      "spell": 801384
+    },
+    {
+      "action": "assert",
+      "actor": "ranked",
+      "label": "The suit can be entered again",
+      "metric": "aura",
+      "equals": 1,
+      "spell": 801384,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "ranked",
+      "label": "Reentry restores the replacement",
+      "metric": "temporary_spell_replacement",
+      "equals": 500213,
+      "spell": 500561
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranked",
+      "spell": 801384
+    },
+    {
+      "action": "assert",
+      "actor": "ranked",
+      "label": "Unlearning the suit restores Scrap Shot",
+      "metric": "temporary_spell_replacement",
+      "equals": 500561,
+      "spell": 500561,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "ranked",
+      "label": "Gatling Gun is removed with the suit",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 500213
+    }
+  ]
+}

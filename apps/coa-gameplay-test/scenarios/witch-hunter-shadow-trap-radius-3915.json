@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "name": "Shadow Trap uses its data-defined secondary radius (#3915)",
+  "contract": [
+    "Shadow Trap 680238 refers to the radius of stun helper 681179 effect 0. SpellRadius 15 gives three yards; the summon AI currently searches five yards around the enemy that activates it.",
+    "The activation range remains native. Unit combat reach is included in the existing range check; the outside fixture is seven center yards from the activating enemy, inside the former five-yard search plus combat reach and outside the three-yard search plus combat reach.",
+    "A normal trap cast must stun its activating target while leaving the outside enemy unaffected."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "trigger",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 80,
+      "distance": 1,
+      "health": 1000000
+    },
+    {
+      "id": "outside",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 80,
+      "distance": 8,
+      "health": 1000000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 680238
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680238
+    },
+    {
+      "action": "assert",
+      "actor": "trigger",
+      "metric": "aura",
+      "spell": 681179,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 2500,
+      "label": "The close enemy activates the trap"
+    },
+    {
+      "action": "assert",
+      "actor": "outside",
+      "metric": "aura",
+      "spell": 681179,
+      "caster": "hunter",
+      "equals": 0,
+      "label": "An enemy outside the data-defined radius is not stunned"
+    },
+    {
+      "action": "assert",
+      "actor": "outside",
+      "metric": "aura",
+      "spell": 681177,
+      "caster": "hunter",
+      "equals": 0,
+      "label": "The outside enemy is not given the damage-over-time effect"
+    }
+  ]
+}

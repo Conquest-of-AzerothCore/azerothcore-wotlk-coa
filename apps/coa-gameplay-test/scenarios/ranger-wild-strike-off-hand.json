@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Ranger Wild Strike off-hand helper deals weapon damage, not a flat 319 (#4543, #4002)",
+  "contract": "Wild Strike (800083 and ranks 501724-501734, SpellFamilyName 27) carries SPELL_EFFECT_TRIGGER_SPELL in slot 2 pointing at the shared helper Wild Strike (Off Hand) 560962. The parent's visible text promises only 'If dual wielding, deals additional Weapon Damage with your off-hand weapon'. 560962 has a single slot: SPELL_EFFECT_NORMALIZED_WEAPON_DMG with EffectBasePoints 318 and EffectDieSides 1. Spell::EffectWeaponDmg accumulates a NORMALIZED_WEAPON_DMG slot's value into fixed_bonus (src/server/game/Spells/SpellEffects.cpp), so that payload adds a flat +319 on top of normalized off-hand weapon damage at every rank and every level, which the native 0.5 off-hand modifier turns into roughly +160. 560962 carries no SPELL_EFFECT_WEAPON_PERCENT_DAMAGE slot, so normalized weapon damage alone is the whole contract. A level 10 Ranger dual-wielding two Worn Shortswords (item 25, 1-3 damage) must therefore see a two-digit off-hand hit. The uncorrected payload lands about 160. The count assertion exists so the max assertion cannot pass vacuously when the off-hand hit never fires.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 10,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "ranger",
+      "entry": 16542,
+      "level": 10,
+      "health": 500000,
+      "faction": 14
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "learn", "actor": "ranger", "spell": 800083 },
+    { "action": "add_item", "actor": "ranger", "item": 25, "count": 2 },
+    { "action": "equip", "actor": "ranger", "item": 25, "slot": 15 },
+    { "action": "equip", "actor": "ranger", "item": 25, "slot": 16 },
+    {
+      "action": "assert",
+      "label": "off hand is equipped so the helper can fire",
+      "actor": "ranger",
+      "metric": "weapon_damage_min",
+      "hand": 1,
+      "min": 1
+    },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_damage_total", "spell": 560962, "save_as": "off_hand_before" },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_damage_count", "spell": 560962, "save_as": "off_hand_hits_before" },
+    { "action": "cast", "actor": "ranger", "spell": 800083, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "the off-hand helper actually landed once",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 560962,
+      "relative_to": "off_hand_hits_before",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "the off-hand hit is weapon damage, not the copied flat 319 payload",
+      "actor": "ranger",
+      "metric": "spell_damage_total",
+      "spell": 560962,
+      "relative_to": "off_hand_before",
+      "min": 1,
+      "max": 60,
+      "within_ms": 5000
+    }
+  ]
+}

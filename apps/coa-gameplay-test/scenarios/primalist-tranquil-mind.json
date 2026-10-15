@@ -1,0 +1,393 @@
+{
+  "schema": 1,
+  "name": "Primalist Tranquil Mind: both damage and healing ranks",
+  "contract": "Both ranks grant 4%/8% damage and healing through native modifiers. Verify exact calculation ratios, ordinary damage/healing casts and talent removal.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 803138
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 2061
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "spell_damage_done"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_healing_done",
+      "spell": 2061,
+      "target": "primalist",
+      "save_as": "spell_healing_done"
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "baseline_803138"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "relative_to": "baseline_803138",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2061,
+      "target": "primalist",
+      "save_as": "baseline_2061"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2061,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2061,
+      "target": "primalist",
+      "relative_to": "baseline_2061",
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 504223
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "target",
+      "ratio_to": "spell_damage_done",
+      "min": 1.038,
+      "max": 1.042
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_healing_done",
+      "spell": 2061,
+      "target": "primalist",
+      "ratio_to": "spell_healing_done",
+      "min": 1.038,
+      "max": 1.042
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "rank1_803138"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "relative_to": "rank1_803138",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2061,
+      "target": "primalist",
+      "save_as": "rank1_2061"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2061,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2061,
+      "target": "primalist",
+      "relative_to": "rank1_2061",
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504223
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 504882
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "target",
+      "ratio_to": "spell_damage_done",
+      "min": 1.078,
+      "max": 1.082
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_healing_done",
+      "spell": 2061,
+      "target": "primalist",
+      "ratio_to": "spell_healing_done",
+      "min": 1.078,
+      "max": 1.082
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "rank2_803138"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "relative_to": "rank2_803138",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2061,
+      "target": "primalist",
+      "save_as": "rank2_2061"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2061,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2061,
+      "target": "primalist",
+      "relative_to": "rank2_2061",
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504882
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "target",
+      "ratio_to": "spell_damage_done",
+      "min": 0.998,
+      "max": 1.002
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_healing_done",
+      "spell": 2061,
+      "target": "primalist",
+      "ratio_to": "spell_healing_done",
+      "min": 0.998,
+      "max": 1.002
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "removed_803138"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "relative_to": "removed_803138",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2061,
+      "target": "primalist",
+      "save_as": "removed_2061"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2061,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2061,
+      "target": "primalist",
+      "relative_to": "removed_2061",
+      "equals": 1
+    }
+  ]
+}

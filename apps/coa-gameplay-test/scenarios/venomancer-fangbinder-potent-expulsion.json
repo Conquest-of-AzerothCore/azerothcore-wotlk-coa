@@ -1,0 +1,245 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Fangbinder and Potent Expulsion modify Serpent's Fang healing and Expulsion's damage over time (#1995, #1999)",
+  "contract": "#1995 and #1999 report 'Spell Script / Aura Handler Not Implemented' for two class passives that are native spell modifiers (SpellFamilyName 35). #1995: Fangbinder (560195) effect 0 is aura 108 SPELLMOD_DAMAGE BasePoints 49 (+50%), class mask (0x400000,0,0) = Serpent's Fang heal 560202 (SpellFamilyFlags 0x400000; SpellHealingBonusDone applies SPELLMOD_DAMAGE to healing, Unit.cpp); effect 1 is aura 107 SPELLMOD_RESIST_MISS_CHANCE BasePoints 99 (+100), class mask (0,0x1000000,0) = Serpent's Fang 800946 (flags 0,0x1000000,0), which Unit::MagicSpellHitResult adds to the base hit chance before clamping to 100%, so the spell can no longer miss. #1999: Potent Expulsion (560266) is aura 108 SPELLMOD_DOT BasePoints 19 (+20%), class mask (0,0,0x4) = Expulsion 805094 (flags 0,0,0x4, periodic damage aura 3), applied by SpellDamageBonusDone for periodic damage. The scenario compares one Venomancer before and after learning each passive: healing done of 560202 with a fixed base of 1000, periodic and direct damage done of 805094 with a fixed base of 1000, and the native modifier values, and it asserts that each passive leaves the other's spell untouched. The no-miss clause is asserted through its native modifier (hit chance 83 becomes 183, clamped to 100% in MagicSpellHitResult); the miss roll itself is random and is not sampled.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "v",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "v",
+      "entry": 36,
+      "level": 80,
+      "distance": 15
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Serpent's Fang healing done before any passive",
+      "actor": "v",
+      "metric": "spell_healing_done",
+      "save_as": "heal0",
+      "spell": 560202,
+      "target": "v"
+    },
+    {
+      "action": "assert",
+      "label": "Serpent's Fang healing has a positive baseline",
+      "actor": "v",
+      "metric": "spell_healing_done",
+      "spell": 560202,
+      "target": "v",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Expulsion periodic damage done before any passive",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "save_as": "dot0",
+      "spell": 805094,
+      "target": "enemy",
+      "periodic": true
+    },
+    {
+      "action": "assert",
+      "label": "Expulsion periodic damage has a positive baseline",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "spell": 805094,
+      "target": "enemy",
+      "periodic": true,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Expulsion direct-path damage done before any passive",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "save_as": "direct0",
+      "spell": 805094,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "No damage modifier on Serpent's Fang healing before learning",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 560202,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "No resist/miss modifier on Serpent's Fang before learning",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 800946,
+      "op": 16,
+      "base": 83,
+      "equals": 83
+    },
+    {
+      "action": "assert",
+      "label": "No DoT modifier on Expulsion before learning",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 805094,
+      "op": 22,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Fangbinder",
+      "actor": "v",
+      "spell": 560195
+    },
+    {
+      "action": "assert",
+      "label": "Fangbinder is +50% on Serpent's Fang healing (560202)",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 560202,
+      "op": 0,
+      "base": 1000,
+      "min": 1499,
+      "max": 1501
+    },
+    {
+      "action": "assert",
+      "label": "Serpent's Fang healing done is 1.5x its baseline",
+      "actor": "v",
+      "metric": "spell_healing_done",
+      "spell": 560202,
+      "target": "v",
+      "ratio_to": "heal0",
+      "min": 1.49,
+      "max": 1.51
+    },
+    {
+      "action": "assert",
+      "label": "Fangbinder adds a flat +100 to Serpent's Fang's hit chance (83 -> 183, clamped to 100%)",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 800946,
+      "op": 16,
+      "base": 83,
+      "equals": 183
+    },
+    {
+      "action": "assert",
+      "label": "Fangbinder's hit-chance clause does not reach Venomtip Poison",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803195,
+      "op": 16,
+      "base": 83,
+      "equals": 83
+    },
+    {
+      "action": "assert",
+      "label": "Fangbinder's damage clause does not touch Serpent's Fang's own damage",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 800946,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Fangbinder leaves Expulsion's periodic damage alone",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "spell": 805094,
+      "target": "enemy",
+      "periodic": true,
+      "ratio_to": "dot0",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "learn",
+      "label": "Learn Potent Expulsion",
+      "actor": "v",
+      "spell": 560266
+    },
+    {
+      "action": "assert",
+      "label": "Potent Expulsion is +20% DoT on Expulsion (805094)",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 805094,
+      "op": 22,
+      "base": 1000,
+      "min": 1199,
+      "max": 1201
+    },
+    {
+      "action": "assert",
+      "label": "Expulsion periodic damage done is 1.2x its baseline",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "spell": 805094,
+      "target": "enemy",
+      "periodic": true,
+      "ratio_to": "dot0",
+      "min": 1.19,
+      "max": 1.21
+    },
+    {
+      "action": "assert",
+      "label": "Potent Expulsion does not raise Expulsion's direct-path damage",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "spell": 805094,
+      "target": "enemy",
+      "ratio_to": "direct0",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "label": "Potent Expulsion does not touch Serpent's Fang healing modifiers",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 560202,
+      "op": 22,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Fangbinder's healing bonus is still 1.5x after Potent Expulsion",
+      "actor": "v",
+      "metric": "spell_healing_done",
+      "spell": 560202,
+      "target": "v",
+      "ratio_to": "heal0",
+      "min": 1.49,
+      "max": 1.51
+    }
+  ]
+}

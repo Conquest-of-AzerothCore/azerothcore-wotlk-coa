@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "Wild Magic installs its periodic aura with the authored values (#2733)",
+  "contract": "#2733: Wild Magic 705559 is a passive whose effect 1 is SPELL_AURA_PERIODIC_TRIGGER_SPELL (amplitude 4999 ms) triggering 707651 on the Pyromancer; 707651 is an infinite aura with ProcChance 50 whose effect 1 is 50 (bp 49) and effect 2 is 85 (bp 84), the values the Dragon's Wrath hook in AscensionPyromancerAbilities.cpp reads for the extra Magic damage (50 + INT*0.125 percent) and the mana drain (85 + INT*0.4). This file asserts the deterministic half: 707651 is absent before learning, present within 10 s after, and carries the authored values. The 50 percent damage copy 804103 itself is a proc roll and is not asserted, because the group report records no castable Dragon's Wrath setup (cost, cooldown, resource) to drive it repeatedly.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000,
+      "label": "Let spawn AI and level scaling settle"
+    },
+    {
+      "action": "assert",
+      "label": "The Wild Magic aura is absent before the passive",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 707651,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 705559
+    },
+    {
+      "action": "assert",
+      "label": "The periodic trigger installs the Wild Magic aura",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 707651,
+      "equals": 1,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "Effect 1 carries the authored 50 percent",
+      "actor": "caster",
+      "metric": "spell_effect_value",
+      "spell": 707651,
+      "effect": 0,
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "label": "Effect 2 carries the authored 85 mana",
+      "actor": "caster",
+      "metric": "spell_effect_value",
+      "spell": 707651,
+      "effect": 1,
+      "equals": 85
+    }
+  ]
+}

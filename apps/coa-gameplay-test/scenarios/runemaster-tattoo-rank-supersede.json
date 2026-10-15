@@ -1,0 +1,26 @@
+{
+ "schema": 1,
+ "name": "Runemaster: a higher Runic Tattoos rank supersedes the lower one (#4208)",
+ "contract": "Once Runic Tattoos: Earth rank 2 is learned, rank 1 is no longer an active spell, so the client's stance bar shows one Earth tattoo. The superseded rank cannot be cast; the current rank can.",
+ "timeout_ms": 90000,
+ "players": [
+  {
+   "id": "r",
+   "race": 1,
+   "class": 32,
+   "level": 20
+  }
+ ],
+ "steps": [
+  {"action": "wait", "ms": 3000},
+  {"action": "learn", "actor": "r", "spell": 801094},
+  {"action": "learn", "actor": "r", "spell": 803754},
+  {"action": "cast", "actor": "r", "spell": 801094},
+  {"action": "wait", "ms": 1500},
+  {"action": "assert", "metric": "aura", "spell": 801094, "equals": 0, "actor": "r"},
+  {"action": "cast", "actor": "r", "spell": 803754},
+  {"action": "assert", "metric": "aura", "spell": 803754, "equals": 1, "within_ms": 3000, "actor": "r"},
+  {"action": "assert", "label": "The active higher rank must not also apply the lower-rank aura",
+   "metric": "aura", "spell": 801094, "equals": 0, "actor": "r"}
+ ]
+}

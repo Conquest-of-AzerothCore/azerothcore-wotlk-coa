@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Heat Death gives Solar Eclipse's hit-chance debuff a 15 second duration (#930)",
+  "contract": "Heat Death 704932 (SpellFamilyName 33) has one live effect: SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 1 (SPELLMOD_DURATION) and EffectBasePoints 14999 -> real 15000 ms, and EffectSpellClassMask word 3 bit 0x2 (2). Scanning Spell.dbc for the family-33 record whose own SpellFamilyFlags carry that exact bit finds Solar Eclipse's proc effect 704931 (SpellFamilyFlags_3 2, SpellName 'Solar Eclipse', Rank 'Proc'): effect 0 is SPELL_AURA_MOD_HIT_CHANCE (54) with EffectBasePoints -4 -> real -3, matching the tooltip's 'reduces the enemies chance to hit by 3%' on its own, independent of this talent. 704931 has no DurationIndex entry (falls back to SpellInfo::GetDuration() == 0, confirmed via SpellDuration.dbc), so without Heat Death the debuff is a 0 ms application; SPELLMOD_DURATION is read generically by Player::ApplySpellMod wherever a spell computes its own duration (Spell::CheckCast/Aura::CalcMaxDuration), so it needs no script -- it fires the moment a caster with 704932 has an aura computed for 704931. The 'spell_modifier' query metric calls exactly that native Player::ApplySpellMod(704931, SPELLMOD_DURATION, base) path directly, without casting anything or needing a proc chain (Solar Eclipse's own trigger plumbing, 704929/704930, is not part of this issue). Native handlers only; regression scenario for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 27, "level": 80 },
+    { "id": "talent", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talent", "spell": 704932 },
+    {
+      "action": "assert",
+      "label": "Without Heat Death, Solar Eclipse's proc debuff keeps its shipped 0 ms duration",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 704931,
+      "op": 1,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Heat Death extends the same debuff's duration to 15 seconds",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 704931,
+      "op": 1,
+      "base": 0,
+      "equals": 15000
+    }
+  ]
+}

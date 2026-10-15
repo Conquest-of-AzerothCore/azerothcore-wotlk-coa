@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Wrath of Al'Akir extends Unshackle when Static is depleted (#1772)",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "s", "spell": 804019 },
+    { "action": "cast", "actor": "s", "spell": 804019 },
+    { "action": "assert", "label": "SETUP: the Air Elemental Unshackle transforms is present",
+      "actor": "s", "metric": "pet_entry", "equals": 500941, "within_ms": 24000 },
+    { "action": "learn", "actor": "s", "spell": 706625 },
+    { "action": "learn", "actor": "s", "spell": 804035 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "set_aura", "actor": "s", "spell": 803102, "stacks": 100 },
+    { "action": "set_aura", "actor": "s", "spell": 707050, "stacks": 1 },
+    { "action": "cast", "actor": "s", "spell": 706625 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "assert", "label": "SETUP: Unshackle applied its aura to the Air Elemental",
+      "actor": "s", "metric": "pet_aura_stacks", "spell": 706625, "equals": 1 },
+    { "action": "assert", "label": "BASELINE: Unshackle lasts its own 15000 ms (SpellDuration 8) without the passive",
+      "actor": "s", "metric": "pet_aura_duration_ms", "spell": 706625, "min": 12000, "max": 15000 },
+    { "action": "assert", "label": "SETUP: Unshackle depleted the 50 Static it costs, leaving 50 of 100",
+      "actor": "s", "metric": "aura_stacks", "spell": 803102, "min": 45, "max": 50 },
+    { "action": "snapshot", "actor": "s", "metric": "pet_aura_duration_ms", "spell": 706625,
+      "save_as": "before_spend" },
+    { "action": "learn", "actor": "s", "spell": 300834 },
+    { "action": "set_aura", "actor": "s", "spell": 681016, "stacks": 1 },
+    { "action": "cast", "actor": "s", "spell": 804035 },
+    { "action": "wait", "ms": 1200 },
+    { "action": "assert", "label": "SETUP: Tailwind depleted 20 more Static",
+      "actor": "s", "metric": "aura_stacks", "spell": 803102, "min": 25, "max": 30 },
+    { "action": "assert", "label": "DISCRIMINATING: depleting Static with Wrath of Al'Akir known adds 300835's +3000 ms (EffectBasePoints[0] 2999 + EffectDieSides[0] 1) to Unshackle, so the remaining duration rises instead of ticking down",
+      "actor": "s", "metric": "pet_aura_duration_ms", "spell": 706625, "relative_to": "before_spend",
+      "min": 1500, "max": 3000 }
+  ],
+  "contract": "#1772: Wrath of Al'Akir (300834) reads \"Depleting Static extends the duration of your Unshackle by $/1000;300835S1 sec\", i.e. 3 sec, because its proc payload 300835 carries two SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION effects with EffectMiscValue 706625 and EffectBasePoints 2999 + EffectDieSides 1 = +3000 ms, the first of them on TARGET_UNIT_PET where Unshackle's aura lives. Unshackle (706625) has DurationIndex 8 = 15000 ms and costs 50 Static; Tailwind (804035) costs 20 more. Static is spent by module resource code, not by a native proc event, so the payload has to be cast from the depletion site itself."
+}

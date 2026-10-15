@@ -1,0 +1,252 @@
+{
+  "schema": 1,
+  "entries": [
+    {
+      "key": "ability:1257670",
+      "title": "Replenishment",
+      "implementation": "source-present",
+      "summary": "Shared resource helper; raw DBC aura metadata is corrected before periodic execution.",
+      "entities": {
+        "spell": [
+          1257670
+        ]
+      },
+      "execution": [
+        {
+          "stage": "registration",
+          "interpretation": "The CoA script loader registers the resource talent hooks.",
+          "source": {
+            "path": "src/server/coa/CoAScriptLoader.cpp",
+            "anchor": "    AddSC_AscensionResourceTalents();",
+            "reviewed_sha256": "23635e3fc02e9c76b8a74c330327e3e1b8cda0d509ba5d93dcd258655db0dcfc"
+          }
+        },
+        {
+          "stage": "metadata correction",
+          "interpretation": "For Mana periodic energize, the load hook replaces the flat aura with OBS_MOD_POWER.",
+          "source": {
+            "path": "src/server/coa/AscensionResourceTalents.cpp",
+            "anchor": "            case Replenishment:",
+            "reviewed_sha256": "425b825f74ee0f7f1c7edc7ac49d4fa44b70a400466b18870f9cc6c0dbf20726"
+          }
+        },
+        {
+          "stage": "periodic dispatch",
+          "interpretation": "The periodic aura dispatcher routes OBS_MOD_POWER to HandleObsModPowerAuraTick.",
+          "source": {
+            "path": "src/server/game/Spells/Auras/SpellAuraEffects.cpp",
+            "anchor": "void AuraEffect::PeriodicTick(",
+            "reviewed_sha256": "e6982c12e43d6a30399cab4d23809f9fae715566a45818b9a21262dda9157968"
+          }
+        },
+        {
+          "stage": "result",
+          "interpretation": "Uses recipient max power and aura amount / 100; alive/power/immunity gates apply.",
+          "source": {
+            "path": "src/server/game/Spells/Auras/SpellAuraEffects.cpp",
+            "anchor": "void AuraEffect::HandleObsModPowerAuraTick(",
+            "reviewed_sha256": "e6982c12e43d6a30399cab4d23809f9fae715566a45818b9a21262dda9157968"
+          }
+        }
+      ],
+      "related": [],
+      "scenarios": [],
+      "gaps": [
+        "This maps the shared helper. Its class-specific callers and proc eligibility need separate traces."
+      ]
+    },
+    {
+      "key": "feature:spell-acquisition",
+      "title": "Spell acquisition through character advancement",
+      "implementation": "source-present",
+      "summary": "DBC membership is a candidate; native loading and player eligibility decide acquisition.",
+      "entities": {},
+      "execution": [
+        {
+          "stage": "catalog load",
+          "interpretation": "Joins class/spec data, filters rank entries, resolves automatic dependencies and records each specialization's identity and signature entries.",
+          "source": {
+            "path": "src/server/coa/AscensionCoATalentData.cpp",
+            "anchor": "bool LoadCoATalentData()",
+            "reviewed_sha256": "1071eb29fa10c2e7f3f01effbab972d97230443ad2de3c651ce4e4b4438a6771"
+          }
+        },
+        {
+          "stage": "rank selection",
+          "interpretation": "Checks class, spec, rank, level and budget, with distinct automatic/free-choice rules.",
+          "source": {
+            "path": "src/server/coa/AscensionCompat.cpp",
+            "anchor": "  bool SetTalentRank(Player* player,",
+            "reviewed_sha256": "ac3b9f80e9ace0d21461336f2bc0d041c722c45c3346184e4bb4ec42ca73c400"
+          }
+        },
+        {
+          "stage": "client upload",
+          "interpretation": "Reads the specialization from identity and paid entries; entering another one without choosing its talents switches and restores its stored build, otherwise validates and applies the complete set.",
+          "source": {
+            "path": "src/server/coa/AscensionCompat.cpp",
+            "anchor": "  bool ApplyKnownEntriesUpload(Player* player,",
+            "reviewed_sha256": "ac3b9f80e9ace0d21461336f2bc0d041c722c45c3346184e4bb4ec42ca73c400"
+          }
+        }
+      ],
+      "related": [],
+      "scenarios": [],
+      "gaps": [
+        "Automatic grants, paid ranks and hidden helper spells are distinct; inspect the selected character context."
+      ]
+    },
+    {
+      "key": "feature:quests",
+      "title": "Quest acceptance, objectives and rewards",
+      "implementation": "source-present",
+      "summary": "Shared native quest path, joined with each quest definition, relations and scenarios.",
+      "entities": {},
+      "execution": [
+        {
+          "stage": "accept packet",
+          "interpretation": "Checks the quest giver and ordinary eligibility; custom packet hooks may intercept first.",
+          "source": {
+            "path": "src/server/game/Handlers/QuestHandler.cpp",
+            "anchor": "void WorldSession::HandleQuestgiverAcceptQuestOpcode(",
+            "reviewed_sha256": "8b4454f2ee9fd464da23d467cadb423aac9309325428d36e50cc9d9fc75894fa"
+          }
+        },
+        {
+          "stage": "eligibility",
+          "interpretation": "Checks class/race/level, chain, quest-log status and other conditions.",
+          "source": {
+            "path": "src/server/game/Entities/Player/PlayerQuest.cpp",
+            "anchor": "bool Player::CanTakeQuest(Quest const* quest, bool msg)",
+            "reviewed_sha256": "cff2168029f495ed80b82faa9b4cf31cf0b1f0685ccd4062eab426ffa4b07778"
+          }
+        },
+        {
+          "stage": "reward packet",
+          "interpretation": "Validates the selected reward and quest giver before awarding an ordinary quest.",
+          "source": {
+            "path": "src/server/game/Handlers/QuestHandler.cpp",
+            "anchor": "void WorldSession::HandleQuestgiverChooseRewardOpcode(",
+            "reviewed_sha256": "8b4454f2ee9fd464da23d467cadb423aac9309325428d36e50cc9d9fc75894fa"
+          }
+        },
+        {
+          "stage": "reward application",
+          "interpretation": "Applies rewards and rewarded state, including script hooks.",
+          "source": {
+            "path": "src/server/game/Entities/Player/PlayerQuest.cpp",
+            "anchor": "void Player::RewardQuest(",
+            "reviewed_sha256": "cff2168029f495ed80b82faa9b4cf31cf0b1f0685ccd4062eab426ffa4b07778"
+          }
+        }
+      ],
+      "related": [],
+      "scenarios": [
+        "destiny-weaver-quest-fallback",
+        "legacy-class-quest-spells",
+        "wisdomball-dungeon-quests"
+      ],
+      "gaps": [
+        "These scenarios cover particular behaviors, not every quest or client UI flow."
+      ]
+    },
+    {
+      "key": "quest:4004",
+      "title": "Quest 4004 via Wisdomball",
+      "implementation": "source-present",
+      "summary": "The Wisdomball can offer this dungeon quest despite an incomplete ordinary chain.",
+      "entities": {
+        "quest": [
+          4004
+        ]
+      },
+      "execution": [
+        {
+          "stage": "packet interception",
+          "interpretation": "Intercepts quest packets naming a usable Wisdomball; ordinary quest-giver paths remain.",
+          "source": {
+            "path": "src/server/coa/AscensionWisdomball.cpp",
+            "anchor": "bool HandlePacket(Player* player, WorldPacket const& packet)",
+            "reviewed_sha256": "aedc138d7091f7e3f77dcf880be07b20e106363cf54289816334fa158341a00f"
+          }
+        },
+        {
+          "stage": "interaction gates",
+          "interpretation": "Requires a living ball in range, map and phase; the interacting player need not own it.",
+          "source": {
+            "path": "src/server/coa/AscensionWisdomball.cpp",
+            "anchor": "bool CanUseBall(Player* player, Creature const* ball)",
+            "reviewed_sha256": "aedc138d7091f7e3f77dcf880be07b20e106363cf54289816334fa158341a00f"
+          }
+        },
+        {
+          "stage": "acceptance",
+          "interpretation": "Offers dungeon quests through CanAddQuest, bypassing ordinary chain gates.",
+          "source": {
+            "path": "src/server/coa/AscensionWisdomball.cpp",
+            "anchor": "bool Accept(Player* player, Creature* ball, Quest const* quest)",
+            "reviewed_sha256": "aedc138d7091f7e3f77dcf880be07b20e106363cf54289816334fa158341a00f"
+          }
+        },
+        {
+          "stage": "reward validation",
+          "interpretation": "The ball still checks reward eligibility before native RewardQuest.",
+          "source": {
+            "path": "src/server/coa/AscensionWisdomball.cpp",
+            "anchor": "            if (player->CanRewardQuest(quest, reward, true))",
+            "reviewed_sha256": "aedc138d7091f7e3f77dcf880be07b20e106363cf54289816334fa158341a00f"
+          }
+        }
+      ],
+      "related": [
+        "ability:83050",
+        "feature:quests"
+      ],
+      "scenarios": [],
+      "gaps": [
+        "This explanation covers the ball route only; inspect captured starters for ordinary acquisition."
+      ]
+    },
+    {
+      "key": "ability:83050",
+      "title": "Wondrous Wisdomball summon",
+      "implementation": "source-present",
+      "summary": "Summoned quest service connects a spell and its acquisition item to dungeon quest behavior.",
+      "entities": {
+        "spell": [
+          83050
+        ],
+        "item": [
+          101169
+        ]
+      },
+      "execution": [
+        {
+          "stage": "script registration",
+          "interpretation": "Registers the Wisdomball creature, player and packet-facing hooks.",
+          "source": {
+            "path": "src/server/coa/AscensionWisdomball.cpp",
+            "anchor": "void AddSC_AscensionWisdomball()",
+            "reviewed_sha256": "aedc138d7091f7e3f77dcf880be07b20e106363cf54289816334fa158341a00f"
+          }
+        },
+        {
+          "stage": "quest service",
+          "interpretation": "Provides scripted quest lists beyond the creature queststarter rows.",
+          "source": {
+            "path": "src/server/coa/AscensionWisdomball.cpp",
+            "anchor": "class npc_wondrous_wisdomball : public CreatureScript",
+            "reviewed_sha256": "aedc138d7091f7e3f77dcf880be07b20e106363cf54289816334fa158341a00f"
+          }
+        }
+      ],
+      "related": [
+        "quest:4004"
+      ],
+      "scenarios": [],
+      "gaps": [
+        "Item-to-spell acquisition needs a separate capture; fixture item grants do not test purchases."
+      ]
+    }
+  ]
+}

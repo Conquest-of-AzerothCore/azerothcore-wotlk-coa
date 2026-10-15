@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "name": "Arsonist raises the critical damage of Ember spenders (#1809)",
+  "contract": "#1809: Arsonist 301286 is SPELL_AURA_ADD_PCT_MODIFIER 108 on SPELLMOD_CRIT_DAMAGE_BONUS (misc 15) with bp 9 (+10 percent) and class mask A 0x200040, B 0x8000, C 0x800000, which covers Explode 800792, Flames of Neltharion 801915 and Ignis Ultimatus 680369. Unit::SpellCriticalDamageBonus scales only the bonus portion: for these magic spells (DmgClass 1) a base of 1000 crits for 1500, and with the modifier for 1500 + 50 = 1550. spell_critical_damage reads exactly that function from a fixed base of 1000, so each spender must gain 50 over its own pre-passive value (asserted as 49..51 to absorb float rounding). No script exists for 301286.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000,
+      "label": "Let spawn AI and level scaling settle"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "save_as": "crit_800792",
+      "spell": 800792,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "save_as": "crit_801915",
+      "spell": 801915,
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "save_as": "crit_680369",
+      "spell": 680369,
+      "target": "target"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 301286
+    },
+    {
+      "action": "assert",
+      "label": "Arsonist adds 10 percent of the crit bonus to Explode (1500 -> 1550 on a base of 1000)",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "spell": 800792,
+      "target": "target",
+      "relative_to": "crit_800792",
+      "min": 49,
+      "max": 51
+    },
+    {
+      "action": "assert",
+      "label": "Arsonist adds 10 percent of the crit bonus to Flames of Neltharion (1500 -> 1550 on a base of 1000)",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "spell": 801915,
+      "target": "target",
+      "relative_to": "crit_801915",
+      "min": 49,
+      "max": 51
+    },
+    {
+      "action": "assert",
+      "label": "Arsonist adds 10 percent of the crit bonus to Ignis Ultimatus (1500 -> 1550 on a base of 1000)",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "spell": 680369,
+      "target": "target",
+      "relative_to": "crit_680369",
+      "min": 49,
+      "max": 51
+    }
+  ]
+}

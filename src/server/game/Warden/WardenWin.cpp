@@ -290,6 +290,10 @@ void WardenWin::RequestChecks()
     _serverTicks = GameTime::GetGameTimeMS().count();
     _CurrentChecks.clear();
 
+    // A Lua check reports through SendAddonMessage, which only the in-game interface has; run on the character
+    // select screen it can report nothing, and the Ascension client shows it there as a Lua error.
+    bool const luaChecksRunnable = _session->GetPlayer() && _session->GetPlayer()->IsInWorld();
+
     // Erase any nullptrs.
     Acore::Containers::EraseIf(_PendingChecks,
         [this](uint16 id)
@@ -319,6 +323,9 @@ void WardenWin::RequestChecks()
     {
         for (uint8 checkType = 0; checkType < MAX_WARDEN_CHECK_TYPES; ++checkType)
         {
+            if (checkType == WARDEN_CHECK_LUA_TYPE && !luaChecksRunnable)
+                continue;
+
             for (uint32 y = 0; y < sWorld->getIntConfig(GetMaxWardenChecksForType(checkType)); ++y)
             {
                 // If todo list is done break loop (will be filled on next Update() run)
@@ -369,8 +376,11 @@ void WardenWin::RequestChecks()
                 check = &_payloadMgr.CachedChecks.at(checkId);
             }
 
-            if (!hasLuaChecks && check->Type == LUA_EVAL_CHECK)
+            if (check->Type == LUA_EVAL_CHECK)
             {
+                if (!luaChecksRunnable)
+                    continue;
+
                 hasLuaChecks = true;
             }
 
@@ -378,7 +388,7 @@ void WardenWin::RequestChecks()
         }
 
         // Always include lua checks
-        if (!hasLuaChecks)
+        if (!hasLuaChecks && luaChecksRunnable)
         {
             for (uint32 i = 0; i < sWorld->getIntConfig(GetMaxWardenChecksForType(WARDEN_CHECK_LUA_TYPE)); ++i)
             {

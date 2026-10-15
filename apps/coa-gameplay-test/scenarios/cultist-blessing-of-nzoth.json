@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "name": "Cultist: Blessing of N'Zoth converts 100% Intellect into attack power (#1295)",
+  "contract": "681107 has a single effect: Apply Aura SPELL_AURA_MOD_ATTACK_POWER_OF_STAT_PERCENT (268), EffectMiscValue 3 = Stats::STAT_INTELLECT (this aura reads the stat straight from MiscValue, not MiscValueB), EffectBasePoints 99 + DieSides 1 = +100%. Unit::UpdateAttackPowerAndDamage (StatSystem.cpp:627-629) does `attPowerMod += CalculatePct(GetStat(Stats(MiscValue)), Amount)`, i.e. it adds 100% of current Intellect straight to melee attack power; the attack_power metric reads GetTotalAttackPowerValue(BASE_ATTACK) directly, which includes this term. StatSystem.cpp:160-181 (UpdateStatBuffMod) only calls UpdateAttackPowerAndDamage for an Intellect change when a MOD_ATTACK_POWER_OF_STAT_PERCENT aura keyed on Intellect is present, so injecting Intellect without the talent cannot move attack power at all - the negative control. The scenario isolates Intellect from the class's native Strength-based attack power term (which would otherwise confound a broader stat injection) with Arcane Intellect (1461), a stock buff whose only relevant effect is Apply Aura MOD_STAT (29), MiscValue 3 (Intellect), EffectBasePoints 14 + DieSides 1 = +15; its second effect is SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT (345), which does not touch Strength or attack power. +15 Intellect at 100% conversion must raise attack power by exactly 15 once Blessing of N'Zoth is known. Numbers read from Spell.dbc via coa-dbc-viewer. No script or SQL references 681107. Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 25,
+      "level": 50
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "cultist",
+      "metric": "attack_power",
+      "save_as": "ap_base"
+    },
+    {
+      "action": "set_aura",
+      "actor": "cultist",
+      "spell": 1461,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: +15 Intellect alone does not raise attack power without the talent",
+      "actor": "cultist",
+      "metric": "attack_power",
+      "relative_to": "ap_base",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "cultist",
+      "spell": 1461,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 681107
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "knows_spell",
+      "spell": 681107,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "cultist",
+      "metric": "attack_power",
+      "save_as": "ap_before_buff"
+    },
+    {
+      "action": "set_aura",
+      "actor": "cultist",
+      "spell": 1461,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Blessing of N'Zoth converts +15 Intellect into +15 attack power (#1295)",
+      "actor": "cultist",
+      "metric": "attack_power",
+      "relative_to": "ap_before_buff",
+      "min": 13,
+      "max": 17
+    }
+  ]
+}

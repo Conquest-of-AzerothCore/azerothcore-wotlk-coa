@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Argent Blade heals even when the hit kills the target (#4744)",
+  "contract": "Argent Blade 807263 heals the caster via 807414 for the damage dealt, even when that hit is the killing blow on the target. As the tooltip orders it, Scourgebane 801832 is unleashed after Argent Blade's own hit, so it cannot kill the 50-health target first and drop that hit.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 19,
+      "level": 25,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    { "id": "weak", "owner": "t", "entry": 299, "health": 50, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "t", "spell": 807263 },
+    { "action": "add_item", "actor": "t", "item": 2495 },
+    { "action": "equip", "actor": "t", "item": 2495, "slot": 15 },
+    { "action": "set_health", "actor": "t", "value": 4700, "maximum": 10000 },
+    { "action": "set_power", "actor": "t", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "t", "spell": 807263, "target": "weak" },
+    { "action": "wait", "label": "let hits land", "ms": 3000 },
+    { "action": "assert", "label": "Argent Blade dealt damage", "actor": "t", "metric": "spell_damage_total", "spell": 807263, "min": 1 },
+    { "action": "assert", "label": "target died from the hit", "actor": "weak", "metric": "health", "equals": 0 },
+    { "action": "assert", "label": "self-heal 807414 still fires", "actor": "t", "metric": "spell_heal_count", "spell": 807414, "equals": 1 },
+    { "action": "assert", "label": "self-heal amount is positive", "actor": "t", "metric": "spell_heal_total", "spell": 807414, "min": 1 }
+  ]
+}

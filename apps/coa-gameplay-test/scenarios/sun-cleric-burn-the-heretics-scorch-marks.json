@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "name": "Burn The Heretics grants 10% Magic damage when Scorch Marks are consumed (#708)",
+  "contract": "#708: Burn The Heretics 560857 reads '... Additionally, when Scorch Marks are consumed you now gain $560856s1% increased Magic damage for $560856d.' The named buff 560856 is SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79) with EffectMiscValue 126 (every magic school) and EffectBasePoints 9 + DieSides 1 = 10, DurationIndex 31 = 8000 ms. Scorch Marks 807059 ('Your next Radiant Flame has no mana cost, ticks faster...') is a SunClericFinite aura: a normal Radiant Flame (806060 chain) cast reserves it in OnSpellBeforeEffects and Finish removes it at cast, which is the consumption the tooltip names. Finish already grants the analogous Sacred Vessel buff when Angelic Presence is expended; before the fix nothing granted 560856, so the clause never applied. Two identical Sun Clerics receive Scorch Marks as a fixture and cast Radiant Flame on their own dummies; only the one who learned Burn The Heretics gains 560856 for 8 s, and its Horusath Blast 500154 (family 33, magic school) damage query is 10% above the control's against the same untouched full-health dummy, so the talent's below-35%-health clause is not involved.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "heretic",
+      "race": 1,
+      "class": 27,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 27,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "heretic_dummy",
+      "owner": "heretic",
+      "entry": 36,
+      "distance": 3
+    },
+    {
+      "id": "control_dummy",
+      "owner": "control",
+      "entry": 36,
+      "distance": 3
+    },
+    {
+      "id": "query_dummy",
+      "owner": "heretic",
+      "entry": 36,
+      "distance": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "heretic",
+      "spell": 806060
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 806060
+    },
+    {
+      "action": "learn",
+      "actor": "heretic",
+      "spell": 560857
+    },
+    {
+      "action": "set_aura",
+      "actor": "heretic",
+      "spell": 807059,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 807059,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "No Burn The Heretics buff before Scorch Marks are consumed",
+      "actor": "heretic",
+      "metric": "aura",
+      "spell": 560856,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "heretic",
+      "spell": 806060,
+      "target": "heretic_dummy"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 806060,
+      "target": "control_dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Radiant Flame consumes the talented cleric's Scorch Marks",
+      "actor": "heretic",
+      "metric": "aura",
+      "spell": 807059,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Radiant Flame consumes the control's Scorch Marks",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 807059,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Consuming Scorch Marks grants Burn The Heretics' Magic damage buff",
+      "actor": "heretic",
+      "metric": "aura",
+      "spell": 560856,
+      "caster": "heretic",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The buff lasts 8 seconds",
+      "actor": "heretic",
+      "metric": "aura_duration_ms",
+      "spell": 560856,
+      "caster": "heretic",
+      "min": 5000,
+      "max": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent consuming Scorch Marks grants nothing",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 560856,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Control's Horusath Blast damage against an untouched dummy",
+      "actor": "control",
+      "metric": "spell_damage_done",
+      "spell": 500154,
+      "target": "query_dummy",
+      "save_as": "control_blast"
+    },
+    {
+      "action": "assert",
+      "label": "The buff raises the talented cleric's Magic damage by 10%",
+      "actor": "heretic",
+      "metric": "spell_damage_done",
+      "spell": 500154,
+      "target": "query_dummy",
+      "ratio_to": "control_blast",
+      "min": 1.095,
+      "max": 1.105
+    }
+  ]
+}

@@ -34,3 +34,10 @@ data/coa-world/*.zip -text -diff
 
 # Preserve the exact bytes of this already-applied local migration on future checkouts.
 data/sql/updates/pending_db_world/rev_1787754600000000000.sql -text
+
+# Preserve the pinned and applied bytes of these imported CoA artifacts, including CRLF.
+modules/mod-ascension/data/sql/db-world/2026_08_26_01_ascension_appearance_item_templates.sql -text
+src/server/coa/AscensionClassContracts19To25Data.h -text
+src/server/coa/AscensionClassContracts26To32Data.h -text
+src/server/coa/AscensionCoATalentData.h -text
+src/server/coa/AscensionCustomClassData.h -text

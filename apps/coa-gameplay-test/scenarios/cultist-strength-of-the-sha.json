@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "name": "Cultist: Strength of the Sha converts 25% Str/Int into spell power and 10% Int into spell hit rating (#1260)",
+  "contract": "804286 has three native stat auras, all read directly from Spell.dbc via coa-dbc-viewer: effect 0 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT (174), EffectMiscValue 126 (every magic school), EffectMiscValueB 0 (STAT_STRENGTH), EffectBasePoints 24 + DieSides 1 = 25%; effect 2 same aura, EffectMiscValueB 3 (STAT_INTELLECT), EffectBasePoints 24 + DieSides 1 = 25%; effect 1 SPELL_AURA_MOD_RATING_FROM_STAT (220), EffectMiscValue 224 (bits for CR_HIT_MELEE/CR_HIT_RANGED/CR_HIT_SPELL), EffectMiscValueB 3 (Intellect), EffectBasePoints 9 + DieSides 1 = 10%. Unit::SpellBaseDamageBonusDone (Unit.cpp:9560-9592, the function the spell_power metric calls directly) sums CalculatePct(GetStat(stat), amount) over every matching MOD_SPELL_DAMAGE_OF_STAT_PERCENT aura for a school in the mask; Unit::StatSystem.cpp:188-197 (UpdateStatBuffMod) refreshes every MOD_RATING_FROM_STAT rating whenever the matching stat changes. Arcane Intellect's own SpellFamilyFlags are irrelevant; only the raw Str/Int delta matters, so the scenario injects a controlled, class-independent +100 Strength/+100 Intellect via QA Test +100 All stats (10039, aura 29 MOD_STAT, EffectMiscValue -1 = every stat, EffectBasePoints 99 + DieSides 1 = +100), applied and removed with set_aura before and after learning 804286. Without the talent the injected stats cannot reach spell power or CR_HIT_SPELL (id 7) at all (native code paths only sum those auras when SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT / SPELL_AURA_MOD_RATING_FROM_STAT are present), so that half is the negative control. With the talent, +100 Str and +100 Int must raise Shadow-school (school 5, mask 32, inside the 126 mask) spell power by exactly 0.25*100 + 0.25*100 = 50, and CR_HIT_SPELL by exactly 0.10*100 = 10; both are deterministic (DieSides 1 everywhere, CalculatePct on round numbers). No script or SQL references 804286. Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 25,
+      "level": 40
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "cultist",
+      "metric": "spell_power",
+      "school": 5,
+      "save_as": "sp_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cultist",
+      "metric": "combat_rating",
+      "rating": 7,
+      "save_as": "cr_base"
+    },
+    {
+      "action": "set_aura",
+      "actor": "cultist",
+      "spell": 10039,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: +100 Str/Int alone does not raise spell power without the talent",
+      "actor": "cultist",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "sp_base",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: +100 Int alone does not raise CR_HIT_SPELL without the talent",
+      "actor": "cultist",
+      "metric": "combat_rating",
+      "rating": 7,
+      "relative_to": "cr_base",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "cultist",
+      "spell": 10039,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 804286
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "knows_spell",
+      "spell": 804286,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "cultist",
+      "metric": "spell_power",
+      "school": 5,
+      "save_as": "sp_before_buff"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cultist",
+      "metric": "combat_rating",
+      "rating": 7,
+      "save_as": "cr_before_buff"
+    },
+    {
+      "action": "set_aura",
+      "actor": "cultist",
+      "spell": 10039,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Strength of the Sha converts +100 Str and +100 Int into +50 Shadow spell power (#1260)",
+      "actor": "cultist",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "sp_before_buff",
+      "min": 48,
+      "max": 52
+    },
+    {
+      "action": "assert",
+      "label": "Strength of the Sha converts +100 Int into +10 CR_HIT_SPELL (#1260)",
+      "actor": "cultist",
+      "metric": "combat_rating",
+      "rating": 7,
+      "relative_to": "cr_before_buff",
+      "min": 9,
+      "max": 11
+    }
+  ]
+}

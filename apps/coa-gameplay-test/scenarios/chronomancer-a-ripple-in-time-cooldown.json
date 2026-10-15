@@ -1,0 +1,170 @@
+{
+  "schema": 1,
+  "name": "A Ripple In Time reduces Ripple's cooldown on critical strikes (#2970)",
+  "contract": "A Ripple In Time 706096's tooltip is \"Your damaging and healing critical strikes now reduce the remaining cooldown of Ripple by $/1000;706783s1 sec\". Its effect 0 is aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) on 706783, whose single effect is SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN with MiscValue 806296 (Ripple, RecoveryTime 30000) and BasePoints -1001 -> -1000 ms. Spell.dbc gives 706096 ProcFlags 0x0 and no spell_proc row existed, so the reduction never happened. Elapsed time is removed from the measurement by a second, otherwise identical Chronomancer who starts the same Ripple cooldown at the same moment but has not learned the talent: both cooldowns decay in real time, so the difference between them is exactly the talent's contribution. The crit source is Chromatic Shard 801292, not a heal. Rippling Renewal 560385 was the original choice and it does not work: on the slot its cast produced no critical-strike proc event at all - neither this talent's row nor Ideal Time 807210's row (both HitMask PROC_HIT_CRITICAL) fired on it, the fixtured Ideal Time buff was still up afterwards with its charge unspent, and the heal landed for 102 on a 7453 maximum, the size of a non-critical heal, even though spell_done_crit_chance for that spell read 103.18. Chromatic Shard is SPELL_EFFECT_SCHOOL_DAMAGE with DmgClass 1 (magic), so a critical hit raises PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG / PROC_SPELL_TYPE_DAMAGE / PROC_SPELL_PHASE_HIT / PROC_HIT_CRITICAL, which is what the row keys on, and the talented caster's 10000 spell crit rating makes every one of the three hits critical. 504723, the class's own Incarnation of Chaos buff (aura 108, MiscValue 11 = SPELLMOD_COOLDOWN, -100%, class-masked to Chromatic Shard's SpellFamilyFlags word1 4096), is fixtured before every cast so 801292's CategoryRecoveryTime 30000 does not stall the volley; Player::AddSpellAndCategoryCooldowns applies SPELLMOD_COOLDOWN to catrec as well as rec. One critical strike therefore makes one proc and a deterministic 1000 ms difference, which the scenario asserts both as a proc count and as the cooldown delta. A single strike is enough: the tooltip's claim is per strike, and a volley of three was measurably fragile - Chromatic Shard's CastingTimeIndex 22 is 3500 ms (SpellCastTimes.dbc) and in repeated runs the third cast of a volley spaced 3700 ms, and then 5000 ms, apart consistently spent its mana without ever landing, leaving two procs out of three and a delta of -2000 ms. Nothing in the contract needs three. The fixture creature is a critter template (Dig Rat 3444, creature_template.type 8) rather than a levelled mob, and the scenario pins neither its level nor a maximum health it expects the server to produce. AscensionCompat's CanScaleCreature (AscensionCompat.cpp:6093-6099) excludes critters from local level scaling, so this fixture keeps the level and the maximum health CoAGameplayTest asked for at summon instead of having them rebuilt by Creature::SelectLevel, which on this tree leaves a levelled creature 36 at level 16 with 349 maximum health whatever the scenario requested.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "talent",
+      "entry": 3444,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 806296
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 806296
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 801292
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 706096
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 806296
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 806296
+    },
+    {
+      "action": "wait",
+      "label": "Let Ripple's 5 sec channel finish on both casters",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "Ripple is on cooldown for the control caster",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 806296,
+      "min": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Ripple is on cooldown for the talented caster",
+      "actor": "talent",
+      "metric": "cooldown_ms",
+      "spell": 806296,
+      "min": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The crit rating makes Chromatic Shard a guaranteed critical strike",
+      "actor": "talent",
+      "metric": "spell_done_crit_chance",
+      "spell": 801292,
+      "target": "dummy",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "No proc has happened before the strike",
+      "actor": "talent",
+      "metric": "spell_proc_count",
+      "spell": 706096,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "talent",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "talent",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "One critical Chromatic Shard",
+      "actor": "talent",
+      "spell": 801292,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The dummy survived the strike, so the shard had a target",
+      "actor": "dummy",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The critical strike procced A Ripple In Time exactly once",
+      "actor": "talent",
+      "metric": "spell_proc_count",
+      "spell": 706096,
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "label": "Control caster's remaining Ripple cooldown, with no talent contribution",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 806296,
+      "save_as": "control_cooldown"
+    },
+    {
+      "action": "assert",
+      "label": "One damaging critical strike took about 1000 ms more off Ripple than elapsed time alone",
+      "actor": "talent",
+      "metric": "cooldown_ms",
+      "spell": 806296,
+      "relative_to": "control_cooldown",
+      "min": -1600,
+      "max": -400
+    }
+  ]
+}

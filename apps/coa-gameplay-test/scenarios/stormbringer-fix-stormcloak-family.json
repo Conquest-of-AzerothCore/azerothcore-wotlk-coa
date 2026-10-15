@@ -1,0 +1,453 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Stormcloak survives incoming damage and keeps its companion (#3451)",
+  "contract": [
+    "#3451: Stormcloak 804833 reads \"Cover yourself in a barrier of volatile energy for $d, causing all attacks",
+    "against you to have a $h% chance to deal half damage and generate 10 Static.  Stormcloak has a $805161s2%",
+    "chance to resist dispel effects.\" Spell.dbc 804833: effect 0 SPELL_AURA_SCHOOL_ABSORB (69) over",
+    "EffectMiscValue 127, EffectBasePoints 1 + EffectDieSides 1 = a pool of 2; effect 1",
+    "SPELL_AURA_PROC_TRIGGER_SPELL (42) on 804084, which adds 10 stacks of Static 803102; effect 2",
+    "SPELL_AURA_DUMMY (4), EffectBasePoints 49 + 1 = 50, the half-damage percentage; ProcFlags 0x100000",
+    "PROC_FLAG_TAKEN_DAMAGE, ProcChance 50, RecoveryTime 30000, DurationIndex 8 = 15000 ms.",
+    "AuraEffect::CalculateAmount adds no bonus term to SPELL_AURA_SCHOOL_ABSORB, so the pool stayed at 2 and",
+    "Unit::CalcAbsorbResist (Unit.cpp:2546-2552) drained it on the first incoming damage and removed the whole",
+    "aura, which also removed the linked companion 805161 (SpellAuras.cpp:1284-1295) and with it the 60% dispel",
+    "resistance. The native clauses are unchanged: the companion comes from the shipped spell_linked_spell row",
+    "(804833 -> 805161, type 2), the dispel resistance is 805161 effect 1 (EffectBasePoints 59 + 1 = 60), and the",
+    "Static generation is the DBC-generated proc entry firing 804084 at ProcChance 50 on taken damage.",
+    "Self-applied Corruption rank 8 (27216) supplies a controlled 150 damage tick every 3 sec as incoming damage;",
+    "the fixture has regeneration disabled and 100000 maximum health so no tick can kill it, and melee on the",
+    "dummy keeps it in combat so Static does not decay. The 50% halving roll itself is not assertable on a single",
+    "hit and is not asserted here; the scenario asserts the structural pool and the survival of both auras.",
+    "Corruption is removed and reapplied for every new observation window, and its remaining duration must be at",
+    "least 17 seconds. Three subsequent Stormcloak windows each verify four incoming Corruption ticks while the",
+    "barrier is active. Alongside the initial damage control this gives at least thirteen eligible 50% rolls, so",
+    "a missed Static observation is below 0.1%."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "s",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "label": "Survive a long chain of 150 damage ticks",
+      "actor": "s",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 804833
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the record's own absorb pool is 2 (EffectBasePoints 1 + EffectDieSides 1)",
+      "actor": "s",
+      "metric": "spell_effect_value",
+      "spell": 804833,
+      "effect": 0,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the half-damage percentage is 50 (EffectBasePoints 49 + EffectDieSides 1)",
+      "actor": "s",
+      "metric": "spell_effect_value",
+      "spell": 804833,
+      "effect": 2,
+      "equals": 50
+    },
+    {
+      "action": "attack",
+      "label": "Stay in combat so Static does not decay",
+      "actor": "s",
+      "target": "d"
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804833
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Stormcloak is applied",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 804833,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the shipped spell_linked_spell row applies the companion 805161",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 805161,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the companion carries 60% dispel resistance (EffectBasePoints 59 + 1)",
+      "actor": "s",
+      "metric": "aura_amount",
+      "spell": 805161,
+      "effect": 1,
+      "equals": 60
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the applied dummy effect still reads 50",
+      "actor": "s",
+      "metric": "aura_amount",
+      "spell": 804833,
+      "effect": 2,
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: casting starts the 30 s cooldown (RecoveryTime 30000)",
+      "actor": "s",
+      "metric": "cooldown_ms",
+      "spell": 804833,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the barrier holds a non-depleting pool (-1), not the raw pool of 2",
+      "actor": "s",
+      "metric": "aura_amount",
+      "spell": 804833,
+      "effect": 0,
+      "equals": -1
+    },
+    {
+      "action": "snapshot",
+      "actor": "s",
+      "metric": "health",
+      "save_as": "hp_before_tick"
+    },
+    {
+      "action": "set_aura",
+      "label": "Self Corruption rank 8: a 150 damage tick every 3 sec",
+      "actor": "s",
+      "spell": 27216,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "label": "First Corruption tick",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "A tick really landed while Stormcloak was active",
+      "actor": "s",
+      "metric": "health",
+      "relative_to": "hp_before_tick",
+      "max": -1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Stormcloak survives the damage that used to consume its pool",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 804833,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the companion 805161 survives with it",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 805161,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Stormcloak still has duration left instead of being removed",
+      "actor": "s",
+      "metric": "aura_duration_ms",
+      "spell": 804833,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the dispel resistance is still applied after taking damage",
+      "actor": "s",
+      "metric": "aura_amount",
+      "spell": 805161,
+      "effect": 1,
+      "equals": 60
+    },
+    {
+      "action": "wait",
+      "label": "Let the first 15 s window run out",
+      "ms": 13000
+    },
+    {
+      "action": "assert",
+      "label": "The 15 s duration expires normally (DurationIndex 8)",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 804833,
+      "equals": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "s",
+      "spell": 804833
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804833
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: second Stormcloak window",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 804833,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Remove the old Corruption before applying a fresh duration",
+      "actor": "s",
+      "spell": 27216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Refresh Corruption for the second window",
+      "actor": "s",
+      "spell": 27216,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Corruption was fully refreshed for another observation window",
+      "actor": "s",
+      "metric": "aura_duration_ms",
+      "spell": 27216,
+      "min": 17000
+    },
+    {
+      "action": "snapshot",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 27216,
+      "target": "s",
+      "save_as": "window_2_ticks"
+    },
+    {
+      "action": "wait",
+      "label": "Observe four incoming ticks before the barrier expires",
+      "ms": 13500
+    },
+    {
+      "action": "assert",
+      "label": "Four Corruption ticks landed in window 2",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 27216,
+      "target": "s",
+      "relative_to": "window_2_ticks",
+      "min": 4
+    },
+    {
+      "action": "assert",
+      "label": "The barrier still covers all four observed damage events",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 804833,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the observation window expire before recasting",
+      "ms": 2500
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "s",
+      "spell": 804833
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804833
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Stormcloak window 3",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 804833,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Remove the old Corruption before applying a fresh duration",
+      "actor": "s",
+      "spell": 27216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 27216,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Corruption has its full observation duration",
+      "actor": "s",
+      "metric": "aura_duration_ms",
+      "spell": 27216,
+      "min": 17000
+    },
+    {
+      "action": "snapshot",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 27216,
+      "target": "s",
+      "save_as": "window_3_ticks"
+    },
+    {
+      "action": "wait",
+      "label": "Observe four incoming ticks before the barrier expires",
+      "ms": 13500
+    },
+    {
+      "action": "assert",
+      "label": "Four Corruption ticks landed in window 3",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 27216,
+      "target": "s",
+      "relative_to": "window_3_ticks",
+      "min": 4
+    },
+    {
+      "action": "assert",
+      "label": "The barrier still covers all four observed damage events",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 804833,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the observation window expire before recasting",
+      "ms": 2500
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "s",
+      "spell": 804833
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804833
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Stormcloak window 4",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 804833,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Remove the old Corruption before applying a fresh duration",
+      "actor": "s",
+      "spell": 27216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 27216,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Corruption has its full observation duration",
+      "actor": "s",
+      "metric": "aura_duration_ms",
+      "spell": 27216,
+      "min": 17000
+    },
+    {
+      "action": "snapshot",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 27216,
+      "target": "s",
+      "save_as": "window_4_ticks"
+    },
+    {
+      "action": "wait",
+      "label": "Observe four incoming ticks before the barrier expires",
+      "ms": 13500
+    },
+    {
+      "action": "assert",
+      "label": "Four Corruption ticks landed in window 4",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 27216,
+      "target": "s",
+      "relative_to": "window_4_ticks",
+      "min": 4
+    },
+    {
+      "action": "assert",
+      "label": "The barrier still covers all four observed damage events",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 804833,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the eligible damage events produce at least one 10-Static proc",
+      "actor": "s",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "min": 10
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Vow of Light copies a share of healing the caster receives to the nearest grouped ally (#1511)",
+  "contract": "Vow of Light 807547 (Spell.dbc, SpellFamilyName 33) carries SPELL_AURA_PROC_TRIGGER_SPELL (42) with native ProcFlags 0, so the ProcEntry it needs comes only from the spell_proc row (ProcFlags 1048575, HitMask 32767, Chance 100) shipped in data/sql/updates/pending_db_world/rev_20260909_13_sun_cleric_completion.sql and already applied on this checkout's database (confirmed live: spell_script_names carries 807547 -> aura_ascension_sun_cleric_event and aura_ascension_sun_cleric_lifecycle, and spell_proc carries the 807547 row). aura_ascension_sun_cleric_event::Check admits any non-periodic damage or healing where the vow holder is the event's action target (event.GetActionTarget() == GetTarget()); its Proc handler for id 807547 copies CalculatePct(amount, Amount(807750)) of that received amount -- Amount(807750) reads 807750's own EffectBasePoints_1 = 9, i.e. 9% -- as a heal (spell 505197) to the closest living, friendly, in-raid-with-the-caster ally within its radius. This scenario has the caster receive a direct heal from Greater Heal while grouped with an ally standing at the same fixture location, and asserts the ally's health rises without the caster ever casting anything on the ally directly, proving the copy fires on the currently wired code/SQL. Amount() and CalculatePct() are the same helpers the rest of AscensionSunCleric*.cpp uses; no coefficient here is invented. This does not establish what a solo Sun Cleric (no grouped ally in range, so Allies() returns an empty list and Copy()'s amount-gated CastCustomSpell never fires) would observe, which is left as a documented caveat rather than a tested claim.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 27, "level": 80 },
+    { "id": "ally", "race": 1, "class": 1, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "group", "actor": "caster", "target": "ally" },
+    { "action": "learn", "actor": "caster", "spell": 807547 },
+    { "action": "learn", "actor": "caster", "spell": 2050 },
+    { "action": "cast", "actor": "caster", "spell": 807547 },
+    {
+      "action": "assert", "label": "Vow of Light is active on the caster", "actor": "caster",
+      "metric": "aura", "spell": 807547, "caster": "caster", "equals": 1, "within_ms": 2000
+    },
+    { "action": "set_health", "actor": "caster", "value": 1000 },
+    { "action": "set_health", "actor": "ally", "value": 1000 },
+    { "action": "snapshot", "actor": "ally", "metric": "health", "save_as": "ally_health_before" },
+    { "action": "snapshot", "actor": "caster", "metric": "health", "save_as": "caster_health_before" },
+    { "action": "cast", "actor": "caster", "spell": 2050, "target": "caster" },
+    {
+      "action": "assert", "label": "The caster's own heal lands", "actor": "caster",
+      "metric": "health", "relative_to": "caster_health_before", "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "A share of that received healing is copied onto the grouped ally", "actor": "ally",
+      "metric": "health", "relative_to": "ally_health_before", "min": 1, "within_ms": 5000
+    }
+  ]
+}

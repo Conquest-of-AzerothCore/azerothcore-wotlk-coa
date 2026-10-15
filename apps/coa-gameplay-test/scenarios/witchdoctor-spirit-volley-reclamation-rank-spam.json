@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Spirit Volley swaps only the highest known Reclamation rank",
+  "contract": "Spirit Volley Ready (505158) makes AscensionWitchDoctor::SyncReplacements retarget the Reclamation action-bar slot to Spirit Volley (504582); casting Spirit Volley consumes the buff and the slot reverts to Reclamation. Reclamation ranks are registered in spell_ranks (806288 chain) and are mana spells, so every learned rank stays active in the spellbook. Only the highest known rank sits on the action bar, so gaining the buff and casting Spirit Volley each send exactly one SMSG_SUPERCEDED_SPELL packet (rendered by the client as a learned-spell notice) regardless of how many lower Reclamation ranks remain known, and lower ranks are never retargeted.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy0",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "distance": 4,
+      "health": 100000
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 4000 },
+    { "action": "learn", "actor": "caster", "spell": 806288 },
+    { "action": "learn", "actor": "caster", "spell": 680902 },
+    { "action": "learn", "actor": "caster", "spell": 680903 },
+    { "action": "learn", "actor": "caster", "spell": 680904 },
+    { "action": "learn", "actor": "caster", "spell": 504582 },
+    {
+      "action": "assert", "label": "SETUP: the highest learned Reclamation rank is known",
+      "actor": "caster", "metric": "knows_spell", "spell": 680904, "equals": 1
+    },
+    { "action": "wait", "ms": 1200 },
+    {
+      "action": "snapshot", "actor": "caster", "metric": "spellbook_superseded_packets",
+      "save_as": "packets_before_ready"
+    },
+    { "action": "set_aura", "actor": "caster", "spell": 505158, "stacks": 1 },
+    {
+      "action": "assert", "label": "Spirit Volley Ready retargets the highest Reclamation rank",
+      "actor": "caster", "metric": "temporary_spell_replacement", "spell": 680904, "equals": 504582,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let the throttled sync run again", "ms": 1200 },
+    {
+      "action": "assert", "label": "One superseded-spell packet regardless of how many Reclamation ranks are known",
+      "actor": "caster", "metric": "spellbook_superseded_packets",
+      "relative_to": "packets_before_ready", "equals": 1
+    },
+    {
+      "action": "assert", "label": "Lower Reclamation ranks are left untouched",
+      "actor": "caster", "metric": "temporary_spell_replacement", "spell": 806288, "equals": 806288
+    },
+    {
+      "action": "snapshot", "actor": "caster", "metric": "spellbook_superseded_packets",
+      "save_as": "packets_before_cast"
+    },
+    { "action": "cast", "actor": "caster", "spell": 504582, "target": "enemy0" },
+    {
+      "action": "assert", "label": "The cast consumes Spirit Volley Ready",
+      "actor": "caster", "metric": "aura", "spell": 505158, "equals": 0, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "The action bar reverts to the highest Reclamation rank",
+      "actor": "caster", "metric": "temporary_spell_replacement", "spell": 680904, "equals": 680904,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let the throttled sync run again", "ms": 1200 },
+    {
+      "action": "assert", "label": "Casting Spirit Volley sends one superseded-spell packet, not one per Reclamation rank",
+      "actor": "caster", "metric": "spellbook_superseded_packets",
+      "relative_to": "packets_before_cast", "equals": 1
+    }
+  ]
+}

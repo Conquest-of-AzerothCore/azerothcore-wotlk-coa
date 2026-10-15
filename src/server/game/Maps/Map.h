@@ -39,6 +39,7 @@
 #include "SpawnData.h"
 #include "Timer.h"
 #include "GridTerrainData.h"
+#include <atomic>
 #include <bitset>
 #include <list>
 #include <memory>
@@ -572,6 +573,13 @@ public:
 
     size_t GetUpdatableObjectsCount() const { return _updatableObjectList.size(); }
 
+    // Only used while GameTime runs a simulated clock (gameplay test harness): objects that share no phase with
+    // these bits are invisible to every test player, so the fast-forwarded world skips their updates.
+    static void SetSimulatedUpdatePhases(uint32 phases)
+    {
+        _simulatedUpdatePhases.store(phases, std::memory_order_relaxed);
+    }
+
     virtual std::string GetDebugInfo() const;
 
     uint32 GetCreatedGridsCount();
@@ -740,6 +748,7 @@ private:
     std::unordered_set<Object*> _updateObjects;
 
     UpdatableObjectList _updatableObjectList;
+    static inline std::atomic<uint32> _simulatedUpdatePhases{0};
     PendingAddUpdatableObjectList _pendingAddUpdatableObjectList;
     IntervalTimer _updatableObjectListRecheckTimer;
     ZoneWideVisibleWorldObjectsMap _zoneWideVisibleWorldObjectsMap;

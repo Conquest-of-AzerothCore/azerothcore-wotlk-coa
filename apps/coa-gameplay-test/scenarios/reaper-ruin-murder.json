@@ -1,0 +1,173 @@
+{
+  "schema": 1,
+  "name": "Ruin marks what Murder hits",
+  "contract": "Original Ruin 805198 describes Murder applying Ruin when Shudder Scythe 805708 is not known. Murder\n500376 is a magic Shadow attack costing 300 internal Runic Power; melee accuracy does not remove its\nnative spell miss chance. Provide native spell accuracy and normal Runic Power, then require an accepted\ncast and positive Murder damage. Without Ruin the same attack must leave the target unmarked. After\nlearning the talent, another normal hit must apply Ruin 805199 for its original ten-second lifetime and\nexpire normally. No Shudder Scythe, forced damage, triggered attack or hit-result override is used.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "location": { "map": 530, "x": 10349.6, "y": -6357.29, "z": 33.4026, "o": 5.31605 },
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "reaper",
+      "entry": 1601,
+      "level": 80,
+      "health": 1000000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Native magic accuracy covers Murder",
+      "actor": "reaper",
+      "metric": "spell_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "No Shudder Scythe replacement",
+      "actor": "reaper",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 805708
+    },
+    {
+      "action": "assert",
+      "label": "No Ruin talent in the baseline",
+      "actor": "reaper",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 805198
+    },
+    {
+      "action": "set_power",
+      "actor": "reaper",
+      "power": 6,
+      "value": 300
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500376,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "The baseline Murder cast is accepted",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "equals": 0,
+      "spell": 500376
+    },
+    {
+      "action": "assert",
+      "label": "Baseline Murder deals actual damage",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "equals": 1,
+      "spell": 500376,
+      "target": "enemy",
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "An ordinary hit without the talent applies no mark",
+      "actor": "enemy",
+      "metric": "aura",
+      "equals": 0,
+      "spell": 805199
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 805198
+    },
+    {
+      "action": "assert",
+      "label": "The native talent aura is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "equals": 1,
+      "spell": 805198,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "reaper",
+      "power": 6,
+      "value": 300
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500376,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "The talented Murder cast is accepted",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "equals": 0,
+      "spell": 500376
+    },
+    {
+      "action": "assert",
+      "label": "The talented Murder deals actual damage",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "equals": 2,
+      "spell": 500376,
+      "target": "enemy",
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "A talented Murder hit applies Ruin",
+      "actor": "enemy",
+      "metric": "aura",
+      "equals": 1,
+      "spell": 805199,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_duration_ms",
+      "spell": 805199,
+      "min": 9000,
+      "max": 10000,
+      "label": "Ruin retains its original ten-second lifetime"
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "label": "Ruin expires normally",
+      "actor": "enemy",
+      "metric": "aura",
+      "equals": 0,
+      "spell": 805199
+    }
+  ]
+}

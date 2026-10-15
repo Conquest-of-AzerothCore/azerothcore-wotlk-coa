@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "name": "Chosen of the Moon cuts Physical damage taken by 60% (#1097)",
+  "contract": "Chosen of the Moon 680755 (Spell.dbc, SpellFamilyName 32 (Starcaller). instant, no cost, self target, RecoveryTime 180000, DurationIndex 1 = 10 s. Effect 0 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN (87), EffectMiscValue 1 (Physical), EffectBasePoints -61 with DieSides 1 resolves to -60. This matches the tooltip 'reducing all Physical damage taken by $s1%'. Native path: Unit::MeleeDamageBonusTaken multiplies by GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, schoolMask), read by the melee_damage_taken metric with a fixed base of 1000 and a creature as attacker, so a white hit of 1000 must become 400. The same actor is measured before and after the cast. Effect 1 triggers the taunt helper 680756 and Effect 2 is an Umbral Blade chance modifier; neither is asserted, and the helper's 6 s duration against the 10 s tooltip is a data conflict recorded elsewhere, not judged here. Cast the spell once, it has a 180 s cooldown.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "attacker",
+      "owner": "tank",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 6
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 680755
+    },
+    {
+      "action": "snapshot",
+      "label": "Physical damage taken from a 1000 white hit before the cast",
+      "actor": "tank",
+      "metric": "melee_damage_taken",
+      "save_as": "taken_base",
+      "target": "attacker"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Chosen of the Moon on self",
+      "actor": "tank",
+      "spell": 680755,
+      "target": "tank"
+    },
+    {
+      "action": "assert",
+      "label": "Chosen of the Moon is applied",
+      "actor": "tank",
+      "metric": "aura",
+      "spell": 680755,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Effect 0 resolves to -60%",
+      "actor": "tank",
+      "metric": "aura_amount",
+      "spell": 680755,
+      "effect": 0,
+      "equals": -60
+    },
+    {
+      "action": "assert",
+      "label": "A 1000 Physical hit is reduced to 40%",
+      "actor": "tank",
+      "metric": "melee_damage_taken",
+      "target": "attacker",
+      "ratio_to": "taken_base",
+      "min": 0.399,
+      "max": 0.401
+    }
+  ]
+}

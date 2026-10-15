@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Blood Wraith buffs Wraithblade's weapon damage and Runic Power cost (#3122)",
+  "contract": [
+    "Spell 707305 (Blood Wraith) carries two native SPELL_AURA_ADD_FLAT_MODIFIER effects, family 36,",
+    "classmask 2, matching Wraithblade's (805258 and ranks) own SpellFamilyFlags[0] = 2:",
+    "SPELLMOD_EFFECT3 (op 23, BasePoints 99 -> +100) on Wraithblade's weapon-percent-damage effect, and",
+    "SPELLMOD_COST (op 14, BasePoints -201 -> -200) on its Runic Power cost.",
+    "Both ops are applied generically by the core (Unit::ApplyEffectModifiers dispatches SPELLMOD_EFFECT3",
+    "for effect index 2; SpellInfo::CalcPowerCost applies SPELLMOD_COST), so no CoA script is required:",
+    "learning the passive talent alone should move both modifiers."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "creatures": [],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no effect-3 modifier on Wraithblade before learning the talent",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 805258,
+      "op": 23,
+      "base": 100,
+      "min": 99,
+      "max": 101
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no cost modifier on Wraithblade before learning the talent",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 805258,
+      "op": 14,
+      "base": 1000,
+      "min": 999,
+      "max": 1001
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 707305
+    },
+    {
+      "action": "assert",
+      "label": "Blood Wraith adds a flat +100 modifier to Wraithblade's weapon-damage effect",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 805258,
+      "op": 23,
+      "base": 100,
+      "min": 199,
+      "max": 201
+    },
+    {
+      "action": "assert",
+      "label": "Blood Wraith reduces Wraithblade's Runic Power cost by 200",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 805258,
+      "op": 14,
+      "base": 1000,
+      "min": 799,
+      "max": 801
+    },
+    {
+      "action": "unlearn",
+      "actor": "reaper",
+      "spell": 707305
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning removes the weapon-damage modifier",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 805258,
+      "op": 23,
+      "base": 100,
+      "min": 99,
+      "max": 101
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning removes the cost modifier",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 805258,
+      "op": 14,
+      "base": 1000,
+      "min": 999,
+      "max": 1001
+    }
+  ]
+}

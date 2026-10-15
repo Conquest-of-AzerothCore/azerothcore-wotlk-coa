@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Centenarian Bullion sell price and Witch Hunter caltrop size (#4508, #4502)",
+  "contract": "The Centenarian Bullion vendors for 50 gold, matching its sibling currency's 2:1 relation. The Witch Hunter caltrop prop (creature 506010) renders the Outland passive doodad Caltrop01, which is authored at doodad size, so it is drawn at a small fraction of the mesh instead of at full size: the template says so, and a live cast of Caltrops 503679 - which only a Witch Hunter summons, because the summon script resolves its owner through the class - has to hand that same scale to the client. The scale is read from the summoned creature's own object-scale field, the value that reaches the wire, not from the template, because a template read alone cannot tell a cached row from a live spawn. The scatter count is the spell's own effect (BasePoints 11, DieSides 1 = 12 summons) and the hidden cauldron 506011 shares the display and stays at full size, which is why the two are asserted separately.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9458.0,
+    "y": 42.0,
+    "z": 55.5
+  },
+  "players": [
+    { "id": "owner", "race": 1, "class": 15, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+
+    { "action": "assert", "label": "Centenarian Bullion sells for 50 gold", "actor": "owner",
+      "metric": "item_sell_price", "item": 413799, "equals": 500000 },
+    { "action": "assert", "label": "its sibling coin keeps the same 2:1 relation", "actor": "owner",
+      "metric": "item_sell_price", "item": 413800, "equals": 250000 },
+
+    { "action": "assert", "label": "the caltrop spawns the caltrop doodad", "actor": "owner",
+      "metric": "creature_model_display", "entry": 506010, "equals": 401941 },
+    { "action": "assert", "label": "at caltrop size, not doodad size", "actor": "owner",
+      "metric": "creature_model_scale", "entry": 506010, "min": 0.0099, "max": 0.0101 },
+    { "action": "assert", "label": "the shared hidden cauldron is untouched", "actor": "owner",
+      "metric": "creature_model_scale", "entry": 506011, "equals": 1 },
+
+    { "action": "learn", "actor": "owner", "spell": 503679 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "cast", "actor": "owner", "spell": 503679,
+      "destination": { "x": -9454.0, "y": 42.0, "z": 55.5 } },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "casting Caltrops scatters the caltrops it says it does", "actor": "owner",
+      "metric": "owned_creature_count", "entry": 506010, "equals": 12 },
+    { "action": "assert", "label": "and the live prop is drawn at that same small scale", "actor": "owner",
+      "metric": "owned_creature_scale", "entry": 506010, "min": 0.0099, "max": 0.0101 },
+    { "action": "console", "command": "server info" }
+  ]
+}

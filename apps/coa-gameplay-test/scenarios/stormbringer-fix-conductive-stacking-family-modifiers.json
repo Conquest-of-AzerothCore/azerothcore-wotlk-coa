@@ -1,0 +1,189 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Hydromatic and Voltaic Mastery enable Conductive's modifier slots (#1688, #819)",
+  "contract": "#1688 Hydromatic (300619) and #819 Voltaic Mastery (706661) are both passives that switch on a dormant slot of Conductive 567573, and both mechanisms are delivered by the engine with no module code. 567573 is a stacking modifier carrier: SpellFamilyName 22, SpellFamilyFlags (0, 0, 2097152), StackAmount 10, DurationIndex 9 = 30000 ms, and three aura 108 SPELL_AURA_ADD_PCT_MODIFIER effects on EffectMiscValue 0 SPELLMOD_DAMAGE. Effect 0 is authored at EffectBasePoints 29 + EffectDieSides 1 = 30% with class mask dword 0 bit 15, which is Conduction 567560. Effects 1 and 2 are authored at EffectBasePoints -1 + EffectDieSides 1 = 0, i.e. switched off, with class masks 33554432 (dword 0 bit 25 = Electrocute 501421/801844) and 49152 (dword 1 bits 14 and 15 = Deluge 806400/807713/807717). Hydromatic is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER with EffectMiscValue 12 = SPELLMOD_EFFECT2 and amount EffectBasePoints 9 + EffectDieSides 1 = 10, class mask dword 2 bit 21, which matches 567573's own SpellFamilyFlags[2] 2097152 under family 22; Voltaic Mastery is the same shape one slot over, EffectMiscValue 23 = SPELLMOD_EFFECT3 and amount EffectBasePoints 4 + EffectDieSides 1 = 5. SpellEffectInfo::CalcValue runs Unit::ApplyEffectModifiers, which applies SPELLMOD_EFFECT2 to effect index 1 and SPELLMOD_EFFECT3 to effect index 2, and SpellInfo::IsAffectedBySpellMod accepts 567573 because its AttributesEx3 is 0x40000000 (DO_NOT_DISPLAY_RANGE) and not ATTR3_IGNORE_CASTER_MODIFIERS. The \"per stack\" wording needs no code either: AuraEffect::CalculateAmount ends with amount *= GetBase()->GetStackAmount(). The scenario asserts each talent's exact authored number on the slot it owns, and guards that neither one modifies Electrocute or Deluge directly, since a naive implementation would put the bonus there instead. Voltaic Mastery's second effect is a direct SPELLMOD_DAMAGE percent modifier on Deluge authored at 0; it is asserted to leave a base of 100 at 100 so that it is not mistaken for the delivery channel. None of these numbers depends on the player's stats. What this scenario cannot assert is the end-to-end promise, because nothing in the tree ever applies 567573: its only DBC parents are 567559 and 570039, and the obtainable entry point 92098 \"Conductive\" has ProcFlags 0 with no `spell_proc` row and triggers 567560 rather than 567559. That is a defect of 92098/500005, which neither issue reports and which needs a maintainer decision about which record is canonical; it is recorded as an observation and deliberately not fixed here.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture character settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Conductive's Electrocute slot is authored off - 567573 EffectBasePoints[1] -1 + EffectDieSides[1] 1 = 0, EffectRealPointsPerLevel[1] 0",
+      "actor": "s",
+      "metric": "spell_effect_value",
+      "spell": 567573,
+      "effect": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Conductive's Deluge slot is authored off - 567573 EffectBasePoints[2] -1 + EffectDieSides[2] 1 = 0",
+      "actor": "s",
+      "metric": "spell_effect_value",
+      "spell": 567573,
+      "effect": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: nothing yet adds a SPELLMOD_EFFECT2 flat modifier to Conductive",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 567573,
+      "op": 12,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: nothing yet adds a SPELLMOD_EFFECT3 flat modifier to Conductive",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 567573,
+      "op": 23,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: nothing yet applies a SPELLMOD_DAMAGE percent modifier to Deluge",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 806400,
+      "op": 0,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 300619
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Hydromatic turns Conductive's Electrocute slot on at EffectBasePoints[0] 9 + EffectDieSides[0] 1 = 10% per stack",
+      "actor": "s",
+      "metric": "spell_effect_value",
+      "spell": 567573,
+      "effect": 1,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Hydromatic's aura 107 ADD_FLAT_MODIFIER lands on SPELLMOD_EFFECT2 (EffectMiscValue[0] 12) of Conductive, matched by family 22 and class mask bit 21 of dword 2",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 567573,
+      "op": 12,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "GUARD: Hydromatic does not modify Electrocute directly - 801844's SpellFamilyFlags[2] is 32 and does not intersect the modifier's dword-2 bit 21",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 801844,
+      "op": 12,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "GUARD: Hydromatic leaves Conductive's Deluge slot alone",
+      "actor": "s",
+      "metric": "spell_effect_value",
+      "spell": 567573,
+      "effect": 2,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 706661
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Voltaic Mastery turns Conductive's Deluge slot on at EffectBasePoints[0] 4 + EffectDieSides[0] 1 = 5% per stack",
+      "actor": "s",
+      "metric": "spell_effect_value",
+      "spell": 567573,
+      "effect": 2,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Voltaic Mastery's aura 107 ADD_FLAT_MODIFIER lands on SPELLMOD_EFFECT3 (EffectMiscValue[0] 23) of Conductive",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 567573,
+      "op": 23,
+      "base": 0,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "GUARD: the two talents use different SpellModOps, so Hydromatic's slot is untouched",
+      "actor": "s",
+      "metric": "spell_effect_value",
+      "spell": 567573,
+      "effect": 1,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "GUARD: Voltaic Mastery does not modify Electrocute",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 801844,
+      "op": 23,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DOCUMENTING: Voltaic Mastery's second effect is a SPELLMOD_DAMAGE percent modifier on Deluge authored at EffectBasePoints[1] -1 + EffectDieSides[1] 1 = 0, so it contributes nothing and is not the delivery channel",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 806400,
+      "op": 0,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DOCUMENTING: Conductive's own Conduction slot is authored at EffectBasePoints[0] 29 + EffectDieSides[0] 1 = 30% per stack and needs no talent",
+      "actor": "s",
+      "metric": "spell_effect_value",
+      "spell": 567573,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "DOCUMENTING: Conductive's authored StackAmount is 10, so the enabled slots are worth 10 x 10% and 10 x 5% at full stacks",
+      "actor": "s",
+      "metric": "spell_max_stacks",
+      "spell": 567573,
+      "equals": 10
+    }
+  ]
+}

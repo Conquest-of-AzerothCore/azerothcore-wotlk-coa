@@ -1,0 +1,546 @@
+{
+  "schema": 1,
+  "name": "Defiance signature survives prestige completion at level 9 (PR #6916 P2)",
+  "contract": [
+    "Requires CoAPrestige.RequiredLevel=9, a supported completion level below signature eligibility.",
+    "Actual Chromie prestige clears Suffuse and paid purchases at level one, then completes at the configured level.",
+    "Completion and relog do not discard the pending signature restoration; Suffuse returns at its authored level ten.",
+    "The complete known-entry validator charges its one ability point and preserves later valid purchases.",
+    "After successful restoration, completed prestige must not undo manual unlearning or duplicate spellbook rows.",
+    "An already-present signature clears the pending state without another learn announcement.",
+    "A second real cycle resets the pending restoration."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8816.5,
+    "y": 627.0,
+    "z": 94.1,
+    "o": 3.8
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "chromie",
+      "owner": "p",
+      "entry": 178081,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "actor": "p",
+      "opcode": 618,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "p"
+        }
+      ]
+    },
+    {
+      "action": "specialization",
+      "actor": "p",
+      "id": 17
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "equals": 1,
+      "spell": 801063,
+      "within_ms": 3000
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "p",
+      "entry": 31086,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "equals": 1,
+      "spell": 707232,
+      "within_ms": 3000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "p",
+      "target": "chromie"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "p",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "equals": 1,
+      "spell": 9930831,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 801063,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 707232,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "p",
+      "value": 9
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "player_setting",
+      "equals": 0,
+      "label": "Prestige completes at the configured level below signature eligibility",
+      "source": "core.coa_prestige",
+      "index": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "equals": 0,
+      "spell": 9930831
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 801063,
+      "within_ms": 3000
+    },
+    {
+      "action": "relog",
+      "actor": "p"
+    },
+    {
+      "action": "client_packet",
+      "actor": "p",
+      "opcode": 618,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "p"
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "player_setting",
+      "equals": 0,
+      "label": "Completed prestige stays complete after a real relog",
+      "source": "core.coa_prestige",
+      "index": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "equals": 0,
+      "label": "The signature is still ineligible below level ten",
+      "spell": 801063,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "p",
+      "value": 10
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "equals": 1,
+      "entry": 4018,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "equals": 1,
+      "label": "A completed early prestige cycle restores Suffuse when eligible",
+      "spell": 801063,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "known_entry_rank",
+      "equals": 1,
+      "entry": 7099,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "player_setting",
+      "equals": 0,
+      "source": "core.coa_prestige",
+      "index": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "player_setting",
+      "equals": 0,
+      "label": "Successful signature restoration clears its pending state",
+      "source": "core.coa_prestige",
+      "index": 3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "equals": 0,
+      "spell": 9930831
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "client_spellbook_copies",
+      "equals": 1,
+      "spell": 801063
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "p",
+      "entry": 34075,
+      "rank": 1,
+      "refused": true
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "equals": 0,
+      "label": "The restored signature consumes its authored ability point",
+      "spell": 706566,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "p",
+      "value": 14
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "p",
+      "entry": 31086,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "equals": 1,
+      "spell": 707232,
+      "within_ms": 3000
+    },
+    {
+      "action": "relog",
+      "actor": "p"
+    },
+    {
+      "action": "client_packet",
+      "actor": "p",
+      "opcode": 618,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "p"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "equals": 1,
+      "spell": 801063,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "equals": 1,
+      "spell": 707232,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "client_spellbook_copies",
+      "equals": 1,
+      "spell": 801063
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 801063,
+      "all_specs": true
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spellbook_learned_alerts",
+      "spell": 801063,
+      "save_as": "manual_unlearn_alerts"
+    },
+    {
+      "action": "set_level",
+      "actor": "p",
+      "value": 15
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "equals": 0,
+      "label": "Completed prestige does not undo a later manual unlearn",
+      "spell": 801063,
+      "within_ms": 3000
+    },
+    {
+      "action": "relog",
+      "actor": "p"
+    },
+    {
+      "action": "client_packet",
+      "actor": "p",
+      "opcode": 618,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "p"
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 801063,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "equals": 1,
+      "spell": 707232,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spellbook_learned_alerts",
+      "equals": 0,
+      "spell": 801063,
+      "relative_to": "manual_unlearn_alerts"
+    },
+    {
+      "action": "set_level",
+      "actor": "p",
+      "value": 60
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -8816.5,
+      "y": 627.0,
+      "z": 94.1,
+      "o": 3.8
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "p",
+      "target": "chromie"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "p",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "equals": 1,
+      "spell": 9930831,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 801063,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "p",
+      "value": 9
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "player_setting",
+      "equals": 0,
+      "source": "core.coa_prestige",
+      "index": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 801063,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 801063
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spellbook_learned_alerts",
+      "spell": 801063,
+      "save_as": "existing_signature_alerts"
+    },
+    {
+      "action": "set_level",
+      "actor": "p",
+      "value": 10
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "equals": 1,
+      "spell": 801063,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "player_setting",
+      "equals": 0,
+      "label": "An already-present signature also clears the pending state",
+      "source": "core.coa_prestige",
+      "index": 3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spellbook_learned_alerts",
+      "equals": 0,
+      "spell": 801063,
+      "relative_to": "existing_signature_alerts"
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 801063,
+      "all_specs": true
+    },
+    {
+      "action": "relog",
+      "actor": "p"
+    },
+    {
+      "action": "client_packet",
+      "actor": "p",
+      "opcode": 618,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "p"
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "equals": 0,
+      "label": "Pending state must not survive successful restoration of an existing signature",
+      "spell": 801063,
+      "within_ms": 3000
+    }
+  ]
+}

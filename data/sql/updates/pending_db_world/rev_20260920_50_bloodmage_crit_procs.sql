@@ -1,0 +1,55 @@
+-- Mortal Wounds (504292), Ultra Instinct (704654) and Flesh Foundry (704633): three Bloodmage passives
+-- gated on critical strikes. Each carries at least one SPELL_EFFECT_APPLY_AURA /
+-- SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) effect, but Spell.dbc gives each record ProcFlags 0 and none had
+-- a `spell_proc` row. SpellMgr::LoadSpellProcs skips generating a fallback entry for
+-- such records ("Skip if no proc flags in DBC"), so SpellMgr::GetSpellProcEntry returns nullptr,
+-- Aura::GetProcEffectMask returns 0 and AuraEffect::HandleProcTriggerSpellAuraProc is never reached: both
+-- auras are inert. Each row below restores the missing proc condition; nothing else in either record changes.
+--
+-- Mortal Wounds (504292): "Your direct harmful critical strikes with spells and abilities now cause the
+-- target to bleed". Effect 0 is aura 42 on Mortal Wounds 504291, a correct bleed (aura 3 SPELL_AURA_PERIODIC_
+-- DAMAGE, BasePoints 50, Amplitude 1000, DurationIndex 32, Mechanic 15, TargetA 6 = enemy), already
+-- registered for scaling at AscensionScalingBaseData.h. Effect 0's EffectSpellClassMask is (0,0,0), so the
+-- proc is not restricted to a spell family and the row leaves SpellFamilyName 0.
+-- ProcFlags 69904 = PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS (0x10) | PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS
+-- (0x100) | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG (0x1000) | PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG
+-- (0x10000): the four "damage done by a spell or ability" directions. PROC_FLAG_DONE_MELEE_AUTO_ATTACK is
+-- deliberately absent - a white swing is neither a spell nor an ability - and the periodic flags are absent
+-- because the tooltip says "direct". SpellTypeMask 1 (PROC_SPELL_TYPE_DAMAGE) for "harmful",
+-- SpellPhaseMask 2 (PROC_SPELL_PHASE_HIT), HitMask 2 (PROC_HIT_CRITICAL) for "critical strikes".
+-- Targeting needs no script: the Bloodmage is the proc actor, so AuraEffect::HandleProcTriggerSpellAuraProc
+-- casts 504291 at eventInfo.GetActionTarget(), the enemy just struck.
+--
+-- Ultra Instinct (704654): "Direct ability critical strikes now increase your spell and ability critical
+-- strike chance and critical damage ... stacking up to 10 times." Effect 0 is aura 42 on Ultra Instinct
+-- 504166, which is entirely native: aura 290 SPELL_AURA_MOD_CRIT_PCT, aura 163
+-- SPELL_AURA_MOD_CRIT_DAMAGE_BONUS (Misc 127, all schools) and SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION
+-- (177) with BasePoints -1001 and MiscValue 504166 - the self-referential "reduces its duration by 1 sec
+-- per stack" clause. The stack cap is 504166's own StackAmount 10, so the row needs no `Charges`.
+-- Same ProcFlags/HitMask reasoning as Mortal Wounds: "ability" excludes auto attacks, "direct" excludes the
+-- periodic flags, "critical" sets HitMask 2.
+--
+-- Flesh Foundry (704633): "Your critical strikes now reduce the cooldown of Fleshcraft and the duration of
+-- Sated on the target by $/1000;504253s1 sec. In addition, increases your critical strike rating by $s2% of
+-- your Spirit." The second clause already works - effect 1 is aura 220 SPELL_AURA_MOD_RATING_FROM_STAT
+-- (MiscValue 1792, MiscValueB 4 = Spirit, BasePoints 14), handled by AuraEffect::HandleModRatingFromStat.
+-- The first clause was dead twice over: effects 0 and 2 are both aura 42, on Flesh Foundry 504253 (a
+-- SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN with BasePoints -4001 and MiscValue 801952 = Fleshcraft) and on
+-- Flesh Foundry 504412 (a SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION with BasePoints -4001, MiscValue
+-- 532125 = Sated and TargetA 21, i.e. on the target). Both handlers exist. One row covers both effects:
+-- `spell_proc` is keyed by SpellId and DisableEffectsMask 0 leaves every trigger-aura effect eligible, so
+-- Aura::GetProcEffectMask builds a mask containing effect 0 and effect 2.
+-- ProcFlags 69908 adds PROC_FLAG_DONE_MELEE_AUTO_ATTACK (0x4) to the set above, because this tooltip says
+-- "your critical strikes" with no "spell or ability" qualifier, so a white swing counts. The periodic
+-- flags are still out: a damage-over-time tick is not a strike, and periodic crits would fire this several
+-- times a second.
+--
+-- Chance is left at 0 in all three rows so SpellMgr::LoadSpellProcs falls back to the record's own
+-- ProcChance (100 for all three), the convention established by rev_20260919_20_coa_proc_chance_parity.sql.
+-- AttributesMask 0: none of the triggers is itself cast as a triggered spell by some other record, so
+-- PROC_ATTR_TRIGGERED_CAN_PROC is not wanted.
+DELETE FROM `spell_proc` WHERE `SpellId` IN (504292, 704654, 704633);
+INSERT INTO `spell_proc` (`SpellId`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `ProcFlags`, `SpellTypeMask`, `SpellPhaseMask`, `HitMask`, `AttributesMask`, `DisableEffectsMask`, `ProcsPerMinute`, `Chance`, `Cooldown`, `Charges`) VALUES
+(504292, 0, 0, 0, 0, 0, 69904, 1, 2, 2, 0, 0, 0, 0, 0, 0),
+(704654, 0, 0, 0, 0, 0, 69904, 1, 2, 2, 0, 0, 0, 0, 0, 0),
+(704633, 0, 0, 0, 0, 0, 69908, 1, 2, 2, 0, 0, 0, 0, 0, 0);

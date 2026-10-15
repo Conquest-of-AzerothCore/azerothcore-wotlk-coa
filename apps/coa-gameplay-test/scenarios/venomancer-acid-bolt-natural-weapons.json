@@ -1,0 +1,510 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Acid Bolt raises Venom Bolt damage and crit, Natural Weapons raises Beetle Form crit (#1178, #1233)",
+  "contract": "#1178 and #1233 are native spell modifiers. Acid Bolt (706025, 707870, 712480) has effect 0 aura 108 (ADD_PCT_MODIFIER) misc 0 SPELLMOD_DAMAGE with BasePoints 9/19/29 DieSides 1 (+10/+20/+30 percent) and effect 1 aura 107 (ADD_FLAT_MODIFIER) misc 7 SPELLMOD_CRITICAL_CHANCE with BasePoints 1/3/5 DieSides 1 (+2/+4/+6), both with EffectSpellClassMask (0,0x80,0) in SpellFamilyName 35, which every Venom Bolt rank carries (800869, 502870..502876, 573333..573335 all have SpellFamilyFlags word 1 bit 0x80). Unit::SpellDamageBonusDone reads SPELLMOD_DAMAGE and Unit::SpellDoneCritChance reads SPELLMOD_CRITICAL_CHANCE through Player::ApplySpellMod; SpellInfo::IsAffectedBySpellMod has no family 35 exclusion other than spell 504705. Natural Weapons 504393 is effect 0 aura 107 misc 7, BasePoints 9 DieSides 1 (+10), EffectSpellClassMask (0x200002, 0x40000, 0x800004): a scan of Spell.dbc for SpellFamilyName 35 spells carrying any of those bits finds only Hivebreak (word 0 bit 0x2), Carapace Crash (0x200000), Barbed Stinger (word 1 0x40000), Venomtip Poison (word 2 0x800000) and Expulsion (0x4), i.e. exactly the Beetle Form abilities. Every assertion compares the server's own numbers against a baseline taken in the same run: a control Venomancer without the talent, and each talented Venomancer's own value snapshotted before the learn. The critical-chance queries use SpellDoneCritChance directly, so no random roll is involved. Expulsion is a periodic aura (aura 3) whose ticks cannot critically strike without an ABILITY_PERIODIC_CRIT aura, so only the modifier value (not a critical tick) is asserted for it. No script or SQL is needed; this is a regression scenario for behaviour that already works.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "acid1",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "acid2",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "acid3",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "natural",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "control",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt has no damage modifier without a talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 800869,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt has no critical modifier without a talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 800869,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline Venom Bolt damage of acid1 before Acid Bolt 10",
+      "actor": "acid1",
+      "metric": "spell_damage_done",
+      "save_as": "dmg0_acid1",
+      "spell": 800869,
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline Venom Bolt critical chance of acid1 before Acid Bolt",
+      "actor": "acid1",
+      "metric": "spell_done_crit_chance",
+      "save_as": "crit0_acid1",
+      "spell": 800869,
+      "target": "dummy"
+    },
+    {
+      "action": "learn",
+      "actor": "acid1",
+      "spell": 706025,
+      "label": "Learn Acid Bolt rank spell 706025"
+    },
+    {
+      "action": "assert",
+      "label": "Acid Bolt 706025 adds 10 percent to Venom Bolt's damage modifier",
+      "actor": "acid1",
+      "metric": "spell_modifier",
+      "spell": 800869,
+      "op": 0,
+      "base": 1000,
+      "min": 1099.5,
+      "max": 1100.5
+    },
+    {
+      "action": "assert",
+      "label": "Acid Bolt 706025 adds 2 points of critical chance to Venom Bolt",
+      "actor": "acid1",
+      "metric": "spell_modifier",
+      "spell": 800869,
+      "op": 7,
+      "base": 0,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "The server's Venom Bolt damage rises by 10 percent over the same player's own baseline",
+      "actor": "acid1",
+      "metric": "spell_damage_done",
+      "spell": 800869,
+      "target": "dummy",
+      "ratio_to": "dmg0_acid1",
+      "min": 1.098,
+      "max": 1.102
+    },
+    {
+      "action": "assert",
+      "label": "The server's Venom Bolt critical chance rises by 2 points over the same player's own baseline",
+      "actor": "acid1",
+      "metric": "spell_done_crit_chance",
+      "spell": 800869,
+      "target": "dummy",
+      "relative_to": "crit0_acid1",
+      "min": 1.99,
+      "max": 2.01
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline Venom Bolt damage of acid2 before Acid Bolt 20",
+      "actor": "acid2",
+      "metric": "spell_damage_done",
+      "save_as": "dmg0_acid2",
+      "spell": 800869,
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline Venom Bolt critical chance of acid2 before Acid Bolt",
+      "actor": "acid2",
+      "metric": "spell_done_crit_chance",
+      "save_as": "crit0_acid2",
+      "spell": 800869,
+      "target": "dummy"
+    },
+    {
+      "action": "learn",
+      "actor": "acid2",
+      "spell": 707870,
+      "label": "Learn Acid Bolt rank spell 707870"
+    },
+    {
+      "action": "assert",
+      "label": "Acid Bolt 707870 adds 20 percent to Venom Bolt's damage modifier",
+      "actor": "acid2",
+      "metric": "spell_modifier",
+      "spell": 800869,
+      "op": 0,
+      "base": 1000,
+      "min": 1199.5,
+      "max": 1200.5
+    },
+    {
+      "action": "assert",
+      "label": "Acid Bolt 707870 adds 4 points of critical chance to Venom Bolt",
+      "actor": "acid2",
+      "metric": "spell_modifier",
+      "spell": 800869,
+      "op": 7,
+      "base": 0,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "The server's Venom Bolt damage rises by 20 percent over the same player's own baseline",
+      "actor": "acid2",
+      "metric": "spell_damage_done",
+      "spell": 800869,
+      "target": "dummy",
+      "ratio_to": "dmg0_acid2",
+      "min": 1.198,
+      "max": 1.202
+    },
+    {
+      "action": "assert",
+      "label": "The server's Venom Bolt critical chance rises by 4 points over the same player's own baseline",
+      "actor": "acid2",
+      "metric": "spell_done_crit_chance",
+      "spell": 800869,
+      "target": "dummy",
+      "relative_to": "crit0_acid2",
+      "min": 3.99,
+      "max": 4.01
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline Venom Bolt damage of acid3 before Acid Bolt 30",
+      "actor": "acid3",
+      "metric": "spell_damage_done",
+      "save_as": "dmg0_acid3",
+      "spell": 800869,
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline Venom Bolt critical chance of acid3 before Acid Bolt",
+      "actor": "acid3",
+      "metric": "spell_done_crit_chance",
+      "save_as": "crit0_acid3",
+      "spell": 800869,
+      "target": "dummy"
+    },
+    {
+      "action": "learn",
+      "actor": "acid3",
+      "spell": 712480,
+      "label": "Learn Acid Bolt rank spell 712480"
+    },
+    {
+      "action": "assert",
+      "label": "Acid Bolt 712480 adds 30 percent to Venom Bolt's damage modifier",
+      "actor": "acid3",
+      "metric": "spell_modifier",
+      "spell": 800869,
+      "op": 0,
+      "base": 1000,
+      "min": 1299.5,
+      "max": 1300.5
+    },
+    {
+      "action": "assert",
+      "label": "Acid Bolt 712480 adds 6 points of critical chance to Venom Bolt",
+      "actor": "acid3",
+      "metric": "spell_modifier",
+      "spell": 800869,
+      "op": 7,
+      "base": 0,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "The server's Venom Bolt damage rises by 30 percent over the same player's own baseline",
+      "actor": "acid3",
+      "metric": "spell_damage_done",
+      "spell": 800869,
+      "target": "dummy",
+      "ratio_to": "dmg0_acid3",
+      "min": 1.298,
+      "max": 1.302
+    },
+    {
+      "action": "assert",
+      "label": "The server's Venom Bolt critical chance rises by 6 points over the same player's own baseline",
+      "actor": "acid3",
+      "metric": "spell_done_crit_chance",
+      "spell": 800869,
+      "target": "dummy",
+      "relative_to": "crit0_acid3",
+      "min": 5.99,
+      "max": 6.01
+    },
+    {
+      "action": "assert",
+      "label": "Acid Bolt rank 1 reaches Venom Bolt rank 2 (502870)",
+      "actor": "acid1",
+      "metric": "spell_modifier",
+      "spell": 502870,
+      "op": 0,
+      "base": 1000,
+      "min": 1099.5,
+      "max": 1100.5
+    },
+    {
+      "action": "assert",
+      "label": "Acid Bolt rank 1 reaches Venom Bolt rank 10 (573335)",
+      "actor": "acid1",
+      "metric": "spell_modifier",
+      "spell": 573335,
+      "op": 0,
+      "base": 1000,
+      "min": 1099.5,
+      "max": 1100.5
+    },
+    {
+      "action": "assert",
+      "label": "Acid Bolt rank 1 reaches Venom Bolt rank 10's critical chance",
+      "actor": "acid1",
+      "metric": "spell_modifier",
+      "spell": 573335,
+      "op": 7,
+      "base": 0,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Acid Bolt leaves Venom Fang (another class spell) alone: damage",
+      "actor": "acid3",
+      "metric": "spell_modifier",
+      "spell": 800880,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Acid Bolt leaves Venom Fang (another class spell) alone: critical chance",
+      "actor": "acid3",
+      "metric": "spell_modifier",
+      "spell": 800880,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Beetle abilities carry no critical modifier before Natural Weapons",
+      "actor": "natural",
+      "metric": "spell_modifier",
+      "spell": 803199,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline Carapace Crash critical chance before Natural Weapons",
+      "actor": "natural",
+      "metric": "spell_done_crit_chance",
+      "save_as": "crit0_cc",
+      "spell": 803199,
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline Hivebreak critical chance before Natural Weapons",
+      "actor": "natural",
+      "metric": "spell_done_crit_chance",
+      "save_as": "crit0_hb",
+      "spell": 803193,
+      "target": "dummy"
+    },
+    {
+      "action": "learn",
+      "actor": "natural",
+      "spell": 504393,
+      "label": "Learn Natural Weapons"
+    },
+    {
+      "action": "assert",
+      "label": "Natural Weapons adds 10 critical points to Hivebreak (803193)",
+      "actor": "natural",
+      "metric": "spell_modifier",
+      "spell": 803193,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Natural Weapons adds 10 critical points to Hivebreak rank (503149)",
+      "actor": "natural",
+      "metric": "spell_modifier",
+      "spell": 503149,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Natural Weapons adds 10 critical points to Hivebreak top rank (572039)",
+      "actor": "natural",
+      "metric": "spell_modifier",
+      "spell": 572039,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Natural Weapons adds 10 critical points to Carapace Crash (803199)",
+      "actor": "natural",
+      "metric": "spell_modifier",
+      "spell": 803199,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Natural Weapons adds 10 critical points to Carapace Crash rank (573061)",
+      "actor": "natural",
+      "metric": "spell_modifier",
+      "spell": 573061,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Natural Weapons adds 10 critical points to Venomtip Poison (803195)",
+      "actor": "natural",
+      "metric": "spell_modifier",
+      "spell": 803195,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Natural Weapons adds 10 critical points to Venomtip Poison rank (503164)",
+      "actor": "natural",
+      "metric": "spell_modifier",
+      "spell": 503164,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Natural Weapons adds 10 critical points to Barbed Stinger (803208)",
+      "actor": "natural",
+      "metric": "spell_modifier",
+      "spell": 803208,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Natural Weapons adds 10 critical points to Expulsion (805094)",
+      "actor": "natural",
+      "metric": "spell_modifier",
+      "spell": 805094,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Natural Weapons adds 10 critical points to Expulsion top rank (807599)",
+      "actor": "natural",
+      "metric": "spell_modifier",
+      "spell": 807599,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Carapace Crash's server critical chance rises by 10 points over the same player's baseline",
+      "actor": "natural",
+      "metric": "spell_done_crit_chance",
+      "spell": 803199,
+      "target": "dummy",
+      "relative_to": "crit0_cc",
+      "min": 9.99,
+      "max": 10.01
+    },
+    {
+      "action": "assert",
+      "label": "Hivebreak's server critical chance rises by 10 points over the same player's baseline",
+      "actor": "natural",
+      "metric": "spell_done_crit_chance",
+      "spell": 803193,
+      "target": "dummy",
+      "relative_to": "crit0_hb",
+      "min": 9.99,
+      "max": 10.01
+    },
+    {
+      "action": "assert",
+      "label": "Natural Weapons does not reach Venom Bolt (outside the Beetle Form masks)",
+      "actor": "natural",
+      "metric": "spell_modifier",
+      "spell": 800869,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Natural Weapons does not reach Venom Fang",
+      "actor": "natural",
+      "metric": "spell_modifier",
+      "spell": 800880,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    }
+  ]
+}

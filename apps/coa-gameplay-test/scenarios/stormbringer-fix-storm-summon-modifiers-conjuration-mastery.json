@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Conjuration Mastery refunds 10 Static on Conjure Storm (#1673)",
+  "contract": "#1673: Conjuration Mastery 300595 reads 'Your Conjure Storm now refunds 10 Static.' Its only effect is SPELL_AURA_PROC_TRIGGER_SPELL (42) on 804084 'Add 10 Static', a SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS with MiscValue 10 and TriggerSpell 803102 (Static) on TARGET_UNIT_CASTER, so one Conjure Storm cast must return exactly 10 Static. Conjure Storm 800227 spends a fixed 50 Static (AscensionCustomResourceData.h ResourceCostRules, class 16) and has no cooldown (RecoveryTime 0, CategoryRecoveryTime 0), only the 1500 ms global cooldown. Static 803102 has StackAmount 100 and decays one stack per second after five seconds out of combat, so this scenario fixtures 80 stacks while in combat: 80 - 50 = 30 without the passive, 80 - 50 + 10 = 40 with it, and neither ordering of the cost and the refund can clamp at the cap. Spell.dbc gives 300595 ProcFlags 0 and no spell_proc row existed, so a first attempt added one, but Conjure Storm's cast-phase proc always reaches AuraEffect::HandleProcTriggerSpellAuraProc with a null action target (Spell::cast's CAST-phase ProcSkillsAndAuras call), and 804084's own SPELL_EFFECT_DUMMY (TARGET_UNIT_TARGET_ANY) then fails SpellInfo::CheckExplicitTarget before its Static effect runs: still no refund. The fix casts 804084 on the caster directly from the module's existing on-cast Stormbringer talent hook instead, the same way it already does for Critical Circuit.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "storm", "race": 1, "class": 16, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "storm", "entry": 36, "health": 1000000, "distance": 3 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "storm", "spell": 800227 },
+    { "action": "assert", "label": "SETUP: Conjure Storm rank 800227 is known",
+      "actor": "storm", "metric": "knows_spell", "spell": 800227, "equals": 1 },
+    { "action": "attack", "actor": "storm", "target": "dummy" },
+    { "action": "assert", "label": "SETUP: combat holds Static steady, since it decays one per second out of combat",
+      "actor": "storm", "metric": "combat", "equals": 1, "within_ms": 2000 },
+    { "action": "set_aura", "actor": "storm", "spell": 803102, "stacks": 80 },
+    { "action": "assert", "label": "SETUP: 80 Static, below the 100 stack cap so no refund can be clamped",
+      "actor": "storm", "metric": "aura_stacks", "spell": 803102, "equals": 80 },
+    { "action": "cast", "actor": "storm", "spell": 800227, "target": "dummy" },
+    { "action": "assert", "label": "BASELINE: without Conjuration Mastery the cast only spends its fixed 50 Static (80 - 50)",
+      "actor": "storm", "metric": "aura_stacks", "spell": 803102, "equals": 30, "within_ms": 5000 },
+    { "action": "wait", "label": "Global cooldown", "ms": 2000 },
+    { "action": "learn", "actor": "storm", "spell": 300595 },
+    { "action": "assert", "label": "SETUP: the Conjuration Mastery passive is active",
+      "actor": "storm", "metric": "aura", "spell": 300595, "equals": 1 },
+    { "action": "set_aura", "actor": "storm", "spell": 803102, "stacks": 80 },
+    { "action": "assert", "label": "SETUP: Static restored to 80 for the second case",
+      "actor": "storm", "metric": "aura_stacks", "spell": 803102, "equals": 80 },
+    { "action": "cast", "actor": "storm", "spell": 800227, "target": "dummy" },
+    { "action": "assert", "label": "DISCRIMINATING: Conjuration Mastery refunds 10 of the 50 spent (80 - 50 + 10)",
+      "actor": "storm", "metric": "aura_stacks", "spell": 803102, "equals": 40, "within_ms": 5000 }
+  ]
+}

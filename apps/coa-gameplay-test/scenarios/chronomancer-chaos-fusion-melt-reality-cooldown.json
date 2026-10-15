@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "name": "Incarnation of Chaos grants Chaos Fusion's no-cooldown buff (#3685)",
+  "contract": "Chaos Fusion 807578 applies aura 42 (proc trigger spell) on 807755, a 15 s self-buff whose aura 108 (ADD_PCT_MODIFIER, MiscValue 11 = SPELLMOD_COOLDOWN, BasePoints -101 = -100%) is class-masked to Melt Reality's SpellFamilyFlags word1 512, but Spell.dbc gives 807578 ProcFlags 0 and no spell_proc row existed, so the buff was never granted and the tooltip's \"while active your Melt Reality now has no cooldown\" clause never worked. Effect 1 (aura 107, SPELLMOD_DURATION +3000 ms on Incarnation of Chaos) is native and untouched. The record's own ProcChance is 100, so one Incarnation of Chaos cast must grant it every time - one cast is already deterministic. Melt Reality 806335 has CategoryRecoveryTime 30000 in Spell.dbc, so the native SPELLMOD_COOLDOWN probe over a 30000 ms base must read 0 while the buff is up.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 807578
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 570067
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 806335
+    },
+    {
+      "action": "assert",
+      "label": "No Chaos Fusion buff before any cast",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807755,
+      "caster": "chronomancer",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Melt Reality still carries its full 30 s cooldown modifier",
+      "actor": "chronomancer",
+      "metric": "spell_modifier",
+      "spell": 806335,
+      "op": 11,
+      "base": 30000,
+      "equals": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 570067
+    },
+    {
+      "action": "assert",
+      "label": "Incarnation of Chaos grants the Chaos Fusion buff",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807755,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Melt Reality's cooldown modifier is now reduced to nothing",
+      "actor": "chronomancer",
+      "metric": "spell_modifier",
+      "spell": 806335,
+      "op": 11,
+      "base": 30000,
+      "equals": 0
+    }
+  ]
+}

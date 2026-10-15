@@ -1,0 +1,180 @@
+{
+  "schema": 1,
+  "name": "Pyromancer Lighting the Fuse lets Blaze ticks critically strike (#681)",
+  "contract": "#681: Lighting the Fuse 807509 (the Incineration level-30 specialization passive) reads 'Allows your periodic effects to critically strike'. Its effect 0 is SPELL_AURA_ABILITY_PERIODIC_CRIT (286) with EffectSpellClassMask [512, 16777472, 1075838976] in family 30, and word-0 bit 512 is Blaze's own SpellFamilyFlags (805500 and ranks). AuraEffect::CalcPeriodicCritChance gives a periodic effect a crit chance only when the caster holds a matching aura 286, and snapshots it when the aura is created. The Incineration talent Sulfuron Harbinger 807146 also raises Blaze's crit chance and reacts to its periodic crits, which presumes those ticks can crit. Before the fix aura_ascension_pyromancer_lifecycle forced every Blaze's snapshotted crit chance to 0 unless the caster held Draconic's Aspect of Eternity 520770 or the next-Blaze buff, which overrode Lighting the Fuse. Three Pyromancers cast Blaze on their own dummies with an Ember fixture: without either aura the snapshot is 0, with Lighting the Fuse it is positive, and Aspect of Eternity 520770 (another aura 286 masked to Blaze) keeps its positive snapshot.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 24,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 1000
+    },
+    {
+      "id": "fuse",
+      "race": 1,
+      "class": 24,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 1000
+    },
+    {
+      "id": "eternity",
+      "race": 1,
+      "class": 24,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 1000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "control_dummy",
+      "owner": "control",
+      "entry": 36,
+      "distance": 3
+    },
+    {
+      "id": "fuse_dummy",
+      "owner": "fuse",
+      "entry": 36,
+      "distance": 3
+    },
+    {
+      "id": "eternity_dummy",
+      "owner": "eternity",
+      "entry": 36,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 805500
+    },
+    {
+      "action": "learn",
+      "actor": "fuse",
+      "spell": 805500
+    },
+    {
+      "action": "learn",
+      "actor": "eternity",
+      "spell": 805500
+    },
+    {
+      "action": "learn",
+      "actor": "fuse",
+      "spell": 807509
+    },
+    {
+      "action": "learn",
+      "actor": "eternity",
+      "spell": 520770
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 807533,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "fuse",
+      "spell": 807533,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "eternity",
+      "spell": 807533,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 805500,
+      "target": "control_dummy"
+    },
+    {
+      "action": "cast",
+      "actor": "fuse",
+      "spell": 805500,
+      "target": "fuse_dummy"
+    },
+    {
+      "action": "cast",
+      "actor": "eternity",
+      "spell": 805500,
+      "target": "eternity_dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Control's Blaze is applied",
+      "actor": "control_dummy",
+      "metric": "aura",
+      "spell": 805500,
+      "caster": "control",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Lighting the Fuse caster's Blaze is applied",
+      "actor": "fuse_dummy",
+      "metric": "aura",
+      "spell": 805500,
+      "caster": "fuse",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of Eternity caster's Blaze is applied",
+      "actor": "eternity_dummy",
+      "metric": "aura",
+      "spell": 805500,
+      "caster": "eternity",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Without a periodic-crit aura Blaze ticks cannot crit",
+      "actor": "control_dummy",
+      "metric": "aura_crit_chance",
+      "spell": 805500,
+      "caster": "control",
+      "effect": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Lighting the Fuse lets Blaze ticks crit",
+      "actor": "fuse_dummy",
+      "metric": "aura_crit_chance",
+      "spell": 805500,
+      "caster": "fuse",
+      "effect": 0,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of Eternity still lets Blaze ticks crit",
+      "actor": "eternity_dummy",
+      "metric": "aura_crit_chance",
+      "spell": 805500,
+      "caster": "eternity",
+      "effect": 0,
+      "min": 1
+    }
+  ]
+}

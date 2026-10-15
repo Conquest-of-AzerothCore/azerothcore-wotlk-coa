@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Mounted Reaver cuts Mounted Combat abilities' cooldown by 20% (#1001)",
+  "contract": "Mounted Reaver 707835 reads 'Reduces the cooldown of all Mounted Combat abilities by $s1%.' Its sole effect is native aura 108 (SPELL_AURA_ADD_PCT_MODIFIER), MiscValue 11 (SPELLMOD_COOLDOWN), EffectBasePoints -21 with DieSides 1 -- CalcBaseValue subtracts one when DieSides is nonzero (ascension-spell-parity.md), so the resolved amount is -20, not the raw -21 BasePoints. The installed client's own moa_description confirms 'Reduces the cooldown ... by -20%', so -20 is the tooltip-matching value under test, not -21. Effect classmask [0, 8196, 0] (spell_family_id 23) matches two distinct 'Mounted Combat' spells' own family flags in the same capture: Dreadrider's Stomp 804702 (word1 bit2 = 4) and Hellfire Trample 804704 (word1 bit13 = 8192) -- both confirmed via csv.DictReader against /home/fab/CoaServer/reference/snapshots/ascension-data/tables/spell.csv.gz. Player::ApplySpellMod (Player.cpp:10219) is the native SPELLMOD_COOLDOWN consumer: for SPELLMOD_PCT it accumulates totalmul += CalculatePct(1.0f, mod->value) and returns basevalue*totalmul, so a 20000ms base becomes 16000ms. The harness's 'spell_modifier' metric (CoAGameplayTest.cpp) calls this exact native ApplySpellMod path directly, avoiding the need to actually be mounted to exercise it.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: Dreadrider's Stomp cooldown is unmodified before the talent",
+      "actor": "knight", "metric": "spell_modifier", "spell": 804702, "op": 11, "base": 20000, "equals": 20000
+    },
+    {
+      "action": "assert", "label": "SETUP: Hellfire Trample cooldown is unmodified before the talent",
+      "actor": "knight", "metric": "spell_modifier", "spell": 804704, "op": 11, "base": 20000, "equals": 20000
+    },
+    { "action": "learn", "actor": "knight", "spell": 707835 },
+    { "action": "set_aura", "actor": "knight", "spell": 707835, "stacks": 1, "label": "Force the Mounted Reaver passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Mounted Reaver passive is active",
+      "actor": "knight", "metric": "aura", "spell": 707835, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Dreadrider's Stomp cooldown drops by 20 percent (word1 bit2 classmask overlap)",
+      "actor": "knight", "metric": "spell_modifier", "spell": 804702, "op": 11, "base": 20000, "equals": 16000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Hellfire Trample cooldown drops by 20 percent (word1 bit13 classmask overlap)",
+      "actor": "knight", "metric": "spell_modifier", "spell": 804704, "op": 11, "base": 20000, "equals": 16000
+    }
+  ]
+}

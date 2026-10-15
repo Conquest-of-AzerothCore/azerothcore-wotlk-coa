@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Bulwark of Darkness gives Pommel Smash 10% Dawn Blade damage per stack (#1199)",
+  "contract": "Bulwark of Darkness 680496 has E1 aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER) MiscValue 12 (SPELLMOD_EFFECT2), BasePoints 9 / DieSides 1 = +10, class mask (0, 0, 0x80000) in the installed server Spell.dbc (sha256 d3dd6072...), the record of Pommel Smash's aura 582588 (SpellFamilyFlags C 0x80000). Effect 1 of 582588 is aura 271 (SPELL_AURA_MOD_DAMAGE_FROM_CASTER) BasePoints -1 / DieSides 1 = 0 with class mask (0x400, 0, 0) = Dawn Blade, and aura amounts are multiplied by the stack count, so each stack adds 10% Dawn Blade damage as the description says ('increased by $s2% for each stack'). E0 (SPELLMOD_EFFECT1, mask C 0x10000) matches no family-21 record, so effect 0 (Magic damage taken, BasePoints 1 + 1 = 2) must stay at 2. Only the per-stack amount is asserted here; the cast-driven stacking is covered elsewhere and the older scenario reported-passive-modifiers.json expects 5 / 10 per one / two stacks, the value of an older Spell.dbc.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 680496,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "label": "Baseline effect 1 (damage from Dawn Blade) is 0 per stack",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "spell": 582588,
+      "effect": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Baseline effect 0 (Magic damage taken) is the DBC's 1 + 1",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "spell": 582588,
+      "effect": 0,
+      "equals": 2
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 680496
+    },
+    {
+      "action": "assert",
+      "label": "The passive aura is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 680496,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Effect 1 grants 10% per stack",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "spell": 582588,
+      "effect": 1,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Effect 0 is unchanged",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "spell": 582588,
+      "effect": 0,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "The flat EFFECT2 modifier itself is +10 on Pommel Smash's aura",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 582588,
+      "op": 12,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Dawn Blade is not touched by the EFFECT2 modifier",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 802024,
+      "op": 12,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 680496,
+      "all_specs": true,
+      "label": "Remove the passive"
+    },
+    {
+      "action": "assert",
+      "label": "Effect 1 returns to 0",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "spell": 582588,
+      "effect": 1,
+      "equals": 0
+    }
+  ]
+}

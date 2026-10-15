@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Dark Barrier extends Stoicism by 5 s and raises its effectiveness by 25% (#1346)",
+  "contract": "Dark Barrier 705520 reads 'Increases the duration of Stoicism by $/1000;s1 sec and increases its effectiveness by $s2%.' In the installed Spell.dbc (server DBC 2026-09-17; the older dbc_clientset copy has only the duration effect) it is passive, family 21, effect 0 = SPELL_AURA_ADD_FLAT_MODIFIER misc 1 = SPELLMOD_DURATION BasePoints 4999 (+5000 ms) and effect 1 = SPELL_AURA_ADD_PCT_MODIFIER misc 8 = SPELLMOD_ALL_EFFECTS BasePoints 24 (+25%), both with class mask word 1 = 0x02000000, which is Stoicism 804802's flag word. Stoicism has SpellDuration index 31 = 8000 ms and two auras: effect 0 dodge (aura 49) and effect 1 parry (aura 47), BasePoints 29 (DieSides 1, so 30 each). Aura::CalcMaxDuration applies SPELLMOD_DURATION (SpellAuras.cpp:812) so the duration is 13000 ms, and Unit::ApplyEffectModifiers (Unit.cpp:12149) applies ALL_EFFECTS so each amount is 30 * 1.25 = 37.5, truncated to 37 (SpellInfo.cpp:582). The scenario reads the probes before and after learning, then casts Stoicism and reads the real aura.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Stoicism", "actor": "hunter", "spell": 804802},
+    {"action": "assert", "label": "Stoicism lasts 8000 ms without the talent (SpellDuration 31)", "actor": "hunter", "metric": "spell_modifier", "spell": 804802, "op": 1, "base": 8000, "equals": 8000},
+    {"action": "assert", "label": "Stoicism dodge amount is 30 without the talent", "actor": "hunter", "metric": "spell_effect_value", "spell": 804802, "effect": 0, "equals": 30},
+    {"action": "assert", "label": "Stoicism parry amount is 30 without the talent", "actor": "hunter", "metric": "spell_effect_value", "spell": 804802, "effect": 1, "equals": 30},
+    {"action": "learn", "label": "Dark Barrier", "actor": "hunter", "spell": 705520},
+    {"action": "assert", "label": "The passive is active", "actor": "hunter", "metric": "aura", "spell": 705520, "equals": 1},
+    {"action": "assert", "label": "Stoicism lasts 13000 ms", "actor": "hunter", "metric": "spell_modifier", "spell": 804802, "op": 1, "base": 8000, "equals": 13000},
+    {"action": "assert", "label": "Dodge amount is 37", "actor": "hunter", "metric": "spell_effect_value", "spell": 804802, "effect": 0, "equals": 37},
+    {"action": "assert", "label": "Parry amount is 37", "actor": "hunter", "metric": "spell_effect_value", "spell": 804802, "effect": 1, "equals": 37},
+    {"action": "cast", "label": "Cast Stoicism", "actor": "hunter", "spell": 804802},
+    {"action": "assert", "label": "The aura is up", "actor": "hunter", "metric": "aura", "spell": 804802, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "Live duration is at most 13 s and clearly above the 8 s base", "actor": "hunter", "metric": "aura_duration_ms", "spell": 804802, "min": 12000, "max": 13000},
+    {"action": "assert", "label": "Live dodge amount is 37", "actor": "hunter", "metric": "aura_amount", "spell": 804802, "effect": 0, "equals": 37},
+    {"action": "assert", "label": "Live parry amount is 37", "actor": "hunter", "metric": "aura_amount", "spell": 804802, "effect": 1, "equals": 37},
+    {"action": "unlearn", "label": "Drop Dark Barrier", "actor": "hunter", "spell": 705520},
+    {"action": "assert", "label": "Stoicism returns to 8000 ms", "actor": "hunter", "metric": "spell_modifier", "spell": 804802, "op": 1, "base": 8000, "equals": 8000},
+    {"action": "assert", "label": "Dodge amount returns to 30", "actor": "hunter", "metric": "spell_effect_value", "spell": 804802, "effect": 0, "equals": 30}
+  ]
+}

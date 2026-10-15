@@ -1459,18 +1459,19 @@ void OpcodeTable::Initialize()
     /*0x5BF*/ DEFINE_HANDLER(CMSG_COA_RATE_TRIAL,                                                    STATUS_LOGGEDIN,   PROCESS_INPLACE,        &WorldSession::Handle_NULL                              );
     /*0x5C9*/ DEFINE_HANDLER(CMSG_COA_QUERY_TRIAL_COMPLETIONS,                                       STATUS_LOGGEDIN,   PROCESS_INPLACE,        &WorldSession::Handle_NULL                              );
     /*0x5A4*/ DEFINE_HANDLER(CMSG_COA_TOGGLE_GAME_MODE,                                              STATUS_LOGGEDIN,   PROCESS_INPLACE,        &WorldSession::Handle_NULL                              );
+    /*0x61F*/ DEFINE_HANDLER(CMSG_RESET_DUNGEONS,                                                   STATUS_LOGGEDIN,   PROCESS_THREADUNSAFE,   &WorldSession::HandleResetDungeonsOpcode                );
+    /*0x544*/ DEFINE_HANDLER(CMSG_PORT_GRAVEYARD,                                                   STATUS_LOGGEDIN,   PROCESS_THREADUNSAFE,   &WorldSession::HandlePortGraveyardOpcode                );
+    /*0x5F2*/ DEFINE_HANDLER(CMSG_TAXI_REQUEST_EARLY_LANDING,                                       STATUS_LOGGEDIN,   PROCESS_THREADUNSAFE,   &WorldSession::HandleTaxiRequestEarlyLandingOpcode      );
+    /*0x67C*/ DEFINE_HANDLER(CMSG_STABLE_DELETE_PET,                                                STATUS_LOGGEDIN,   PROCESS_THREADUNSAFE,   &WorldSession::HandleStableDeletePet                    );
+    /*0x6FD*/ DEFINE_HANDLER(CMSG_QUERY_INSTANCE_BINDS,                                             STATUS_LOGGEDIN,   PROCESS_THREADUNSAFE,   &WorldSession::HandleQueryInstanceBindsOpcode           );
+    /*0x6FE*/ DEFINE_SERVER_OPCODE_HANDLER(SMSG_QUERY_INSTANCE_BINDS_RESULT,                        STATUS_NEVER);
+    /*0x58C*/ DEFINE_HANDLER(CMSG_RESET_INSTANCE,                                                   STATUS_LOGGEDIN,   PROCESS_THREADUNSAFE,   &WorldSession::HandleResetInstanceOpcode                );
 
     // Default every other extension slot to a safe NULL handler so an
     // unregistered custom opcode can never null-dereference opcodeTable[].
     for (uint32 i = 0x521; i < NUM_OPCODE_HANDLERS; ++i)
     {
-        if (i == CMSG_COA_START_CHALLENGE || i == CMSG_COA_STOP_CHALLENGE
-            || i == CMSG_COA_QUERY_FAILURES || i == CMSG_COA_QUERY_COMPLETIONS
-            || i == CMSG_COA_SYNC_RESPONSE || i == CMSG_COA_SAVE_TRIAL
-            || i == CMSG_COA_DELETE_TRIAL || i == CMSG_COA_QUERY_TRIALS
-            || i == CMSG_COA_ACTIVATE_TRIAL || i == CMSG_COA_DEACTIVATE_TRIAL
-            || i == CMSG_COA_QUERY_TRIAL_COMPLETIONS
-            || i == CMSG_COA_TOGGLE_GAME_MODE)
+        if (_internalTableClient[i])
             continue;
         // Native Manastorm gameplay runs on the world thread after login.
         // The compatibility early hook can still route these to the donor when

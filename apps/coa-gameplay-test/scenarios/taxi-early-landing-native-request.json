@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "name": "Native early landing ends a flight at the next discovered flight point",
+  "contract": "During a flight the original action bar's leave button calls TaxiRequestEarlyLanding(), which Extensions.dll sends as the empty CMSG_TAXI_REQUEST_EARLY_LANDING (0x05F2). Retail's early landing ends the flight at the next discovered flight point on its route and drops the rest, unless that point is already the destination; each leg is paid when it starts (Stormwind to Lakeshire 210 copper, Lakeshire to Darkshire 330). Expected: a Stormwind - Lakeshire - Darkshire flight asked to land early during its first leg keeps flying, now ends at Lakeshire, lands there, and never pays the Darkshire leg.",
+  "timeout_ms": 300000,
+  "location": { "map": 0, "x": -8840.56, "y": 489.7, "z": 109.61, "o": 0 },
+  "players": [
+    { "id": "traveler", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "gryphon_master", "owner": "traveler", "entry": 352, "faction": 12 }
+  ],
+  "steps": [
+    { "action": "discover_taxi_node", "actor": "traveler", "entry": 2 },
+    { "action": "discover_taxi_node", "actor": "traveler", "entry": 5 },
+    { "action": "discover_taxi_node", "actor": "traveler", "entry": 12 },
+    { "action": "set_money", "actor": "traveler", "value": 10000 },
+    { "action": "snapshot", "actor": "traveler", "metric": "carried_money", "save_as": "before_departure" },
+    {
+      "action": "client_packet", "label": "Fly Stormwind - Lakeshire - Darkshire", "actor": "traveler",
+      "opcode": 786, "consumed": false,
+      "fields": [
+        { "actor_guid": "gryphon_master" }, { "u32": 3 }, { "u32": 2 }, { "u32": 5 }, { "u32": 12 }
+      ]
+    },
+    {
+      "action": "assert", "label": "The flight starts", "actor": "traveler", "metric": "in_flight", "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The route ends at Darkshire", "actor": "traveler", "metric": "taxi_destination",
+      "equals": 12
+    },
+    {
+      "action": "assert", "label": "Only the first leg is paid at departure", "actor": "traveler",
+      "metric": "carried_money", "relative_to": "before_departure", "min": -210, "max": -1
+    },
+    { "action": "snapshot", "actor": "traveler", "metric": "carried_money", "save_as": "after_departure" },
+    { "action": "wait", "label": "Fly for a while", "ms": 5000 },
+    {
+      "action": "client_packet", "label": "Ask to land early", "actor": "traveler", "opcode": 1522,
+      "consumed": false
+    },
+    {
+      "action": "assert", "label": "The route now ends at Lakeshire", "actor": "traveler",
+      "metric": "taxi_destination", "equals": 5
+    },
+    {
+      "action": "assert", "label": "The traveler keeps flying toward Lakeshire", "actor": "traveler",
+      "metric": "in_flight", "equals": 1
+    },
+    {
+      "action": "assert", "label": "The flight lands", "actor": "traveler", "metric": "in_flight", "equals": 0,
+      "within_ms": 240000
+    },
+    {
+      "action": "assert", "label": "It lands at the Lakeshire flight point", "actor": "traveler",
+      "metric": "position_x", "min": -9456.0, "max": -9416.0
+    },
+    { "action": "assert", "actor": "traveler", "metric": "position_y", "min": -2257.74, "max": -2217.74 },
+    {
+      "action": "assert", "label": "The Darkshire leg is never paid", "actor": "traveler",
+      "metric": "carried_money", "relative_to": "after_departure", "equals": 0
+    }
+  ]
+}

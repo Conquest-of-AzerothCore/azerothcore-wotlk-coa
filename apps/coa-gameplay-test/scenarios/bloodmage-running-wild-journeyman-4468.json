@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: learning Running Wild also teaches Running Wild (Journeyman) (#4468)",
+  "contract": "#4468 Running Wild 800175 (+60% speed, family 26 mask0 0x20000000) is a Bloodmage class spell at level 20 in AscensionCompatData::ClassSpells, which mod-spellbook's BuildRows offers and SynchronizeProgression reconciles by level. Class spells are not auto-learned while CoA.AutoProgression = 0. Running Wild (Journeyman) 520575 (hidden passive Add Flat Modifier +40 on SPELLMOD_EFFECT1, same mask) is not sold; it is learned together with Running Wild and removed with it. Expected: level 20 alone teaches neither; the book offers Running Wild but not 520575; buying Running Wild teaches both; Running Wild's amount is then 100 and the run speed rate is doubled; 520575 shares the mask with Pooled Vitality 680687, whose effect 0 is a 0-value Rage energize, so the raw data also gives it +40 (4 Rage), which is kept; dropping below level 20 removes both.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "b", "race": 1, "class": 20, "level": 19 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 4000 },
+    { "action": "money", "actor": "b", "copper": 1000000, "label": "fixture: a purse for the ability the book sells" },
+    { "action": "learn", "actor": "b", "spell": 97930, "label": "learn the book companion spell" },
+    { "action": "cast", "actor": "b", "spell": 97930, "label": "summon the book" },
+    { "action": "assert", "actor": "b", "metric": "owned_creature_count", "entry": 75115, "equals": 1, "within_ms": 5000, "label": "the book is out" },
+    { "action": "set_level", "actor": "b", "value": 20 },
+    { "action": "assert", "actor": "b", "metric": "knows_spell", "spell": 520575, "equals": 0, "label": "level 20 alone does not teach Running Wild (Journeyman)" },
+    { "action": "gossip_hello", "actor": "b", "label": "open the book" },
+    { "action": "assert", "actor": "b", "metric": "gossip_options", "equals": 0, "label": "the book answered with a trainer window" },
+    { "action": "assert", "actor": "b", "metric": "spellbook_offers_spell", "spell": 800175, "equals": 1, "label": "the book offers Running Wild" },
+    { "action": "assert", "actor": "b", "metric": "spellbook_offers_spell", "spell": 520575, "equals": 0, "label": "the book does not sell Running Wild (Journeyman)" },
+    { "action": "trainer_buy", "actor": "b", "spell": 800175, "label": "buy Running Wild" },
+    { "action": "assert", "actor": "b", "metric": "spellbook_buy_succeeded", "spell": 800175, "equals": 1, "label": "the purchase was granted" },
+    { "action": "assert", "actor": "b", "metric": "knows_spell", "spell": 800175, "equals": 1, "label": "Running Wild was learned" },
+    { "action": "assert", "actor": "b", "metric": "knows_spell", "spell": 520575, "equals": 1, "label": "learning Running Wild also taught Running Wild (Journeyman)" },
+    { "action": "wait", "ms": 1600, "label": "let the global cooldown the book shares with Running Wild run out" },
+    { "action": "cast", "actor": "b", "spell": 800175, "label": "run wild" },
+    { "action": "assert", "actor": "b", "metric": "aura", "spell": 800175, "equals": 1, "within_ms": 3000, "label": "Running Wild is active" },
+    { "action": "assert", "actor": "b", "metric": "aura_amount", "spell": 800175, "effect": 0, "equals": 100, "label": "Running Wild (Journeyman) raises it to a 100% increase" },
+    { "action": "assert", "actor": "b", "metric": "run_speed_rate", "min": 1.99, "max": 2.01, "label": "the run speed rate is doubled" },
+    { "action": "assert", "actor": "b", "metric": "spell_modifier", "spell": 680687, "op": 3, "base": 0, "equals": 40, "label": "the shared family mask also gives Pooled Vitality +40 (4 Rage), as in the raw data" },
+    { "action": "cancel_aura", "actor": "b", "spell": 800175, "label": "stand up" },
+    { "action": "set_level", "actor": "b", "value": 19 },
+    { "action": "assert", "actor": "b", "metric": "knows_spell", "spell": 800175, "equals": 0, "label": "dropping to level 19 removes Running Wild" },
+    { "action": "assert", "actor": "b", "metric": "knows_spell", "spell": 520575, "equals": 0, "label": "dropping to level 19 removes Running Wild (Journeyman)" }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Who hides bot sessions when Who.ShowBots is off",
+  "contract": "With Who.ShowBots=0 a native Who response lists only the players, never a bot session, and a name search for a bot returns nothing.",
+  "players": [
+    { "id": "player", "race": 1, "class": 18, "level": 20 },
+    { "id": "mate", "race": 1, "class": 29, "level": 20 },
+    { "id": "botone", "race": 1, "class": 31, "level": 20, "bot": true },
+    { "id": "bottwo", "race": 1, "class": 32, "level": 20, "bot": true }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "who", "actor": "player" },
+    { "action": "assert", "actor": "player", "metric": "who_count", "equals": 2 },
+    { "action": "assert", "actor": "player", "metric": "who_class", "target": "player", "equals": 18 },
+    { "action": "assert", "actor": "player", "metric": "who_class", "target": "mate", "equals": 29 },
+    { "action": "assert", "actor": "player", "metric": "who_class", "target": "botone", "equals": 0 },
+    { "action": "assert", "actor": "player", "metric": "who_class", "target": "bottwo", "equals": 0 },
+    { "action": "who", "actor": "player", "target": "botone" },
+    { "action": "assert", "actor": "player", "metric": "who_count", "equals": 0 },
+    { "action": "who", "actor": "player", "target": "mate" },
+    { "action": "assert", "actor": "player", "metric": "who_count", "equals": 1 },
+    { "action": "assert", "actor": "player", "metric": "who_class", "target": "mate", "equals": 29 }
+  ]
+}

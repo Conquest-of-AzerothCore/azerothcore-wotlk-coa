@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "name": "Issue 422: Doomrend generates Runic Power",
+  "contract": "Every Doomrend rank (800172, 502668-502671, 567531-567532) says it 'generates Runic Power', and none of its records carries an energize effect or a rune cost, so the gain must come from the server's native power rules. A landed Doomrend must raise Runic Power above zero. The amount is not stated by the tooltip or any retained source; it matches the 15 Runic Power (150 internal) placeholder of Soulrend, the sibling Soul Infusion spender with the same wording, until a live value is confirmed.",
+  "players": [
+    {
+      "id": "reaper",
+      "race": 2,
+      "class": 30,
+      "level": 14,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "reaper",
+      "entry": 36,
+      "level": 12,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 800172
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "knows_spell",
+      "spell": 800172,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "reaper",
+      "power": 6,
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "power",
+      "power": 6,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "health",
+      "save_as": "before_hit"
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 800172,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "health",
+      "relative_to": "before_hit",
+      "max": -1,
+      "within_ms": 1000,
+      "label": "Doomrend lands"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Soul Infusion spent"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "power",
+      "power": 6,
+      "min": 1,
+      "within_ms": 500,
+      "label": "A landed Doomrend generates Runic Power"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Contract Killing adds 15% damage above 75% and below 35% health (#671)",
+  "contract": "Contract Killing 705506 reads 'Increases damage dealt against enemies above 75% health and below 35% health by $s1%.' In the installed Spell.dbc both effects are SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE (303) with BasePoints 14 (DieSides 1, so 15%), effect 0 misc 13 = AURA_STATE_HEALTHLESS_35_PERCENT and effect 1 misc 23 = AURA_STATE_HEALTH_ABOVE_75_PERCENT, MiscValueB 127 (not the Ascension class-mask marker, so it applies to every spell). Unit::SpellDamageBonusDone (Unit.cpp:8869) and Unit::MeleeDamageBonusDone (Unit.cpp:10815) multiply by the aura when the victim has the state, and Unit::Update (Unit.cpp:642-644) refreshes the states every tick with the strict HealthBelowPct(35) / HealthAbovePct(75) comparisons, so exactly 35% and exactly 75% carry no bonus. The two bands never overlap, so a hit gets 1.15 in either, never 1.15 squared. The expected ratio 1.15 is the DBC value, read through the spell_damage_done / melee_damage_done probes (fixed base 1000, no hit roll) against a snapshot taken at 50% health before the talent is learned.",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 60}
+  ],
+  "creatures": [
+    {"id": "enemy", "owner": "hunter", "entry": 36, "level": 60, "distance": 5, "health": 100000}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "assert", "label": "The fixture keeps its declared maximum health", "actor": "enemy", "metric": "max_health", "equals": 100000},
+    {"action": "set_health", "label": "50% health: outside both bands", "actor": "enemy", "value": 50000},
+    {"action": "wait", "label": "Let Unit::Update refresh the aura states", "ms": 1500},
+    {"action": "snapshot", "actor": "hunter", "metric": "spell_damage_done", "spell": 805754, "target": "enemy", "save_as": "spell_mid"},
+    {"action": "snapshot", "actor": "hunter", "metric": "melee_damage_done", "target": "enemy", "save_as": "melee_mid"},
+    {"action": "learn", "label": "Contract Killing", "actor": "hunter", "spell": 705506},
+    {"action": "assert", "label": "50% health: no bonus on the spell", "actor": "hunter", "metric": "spell_damage_done", "spell": 805754, "target": "enemy", "ratio_to": "spell_mid", "min": 0.999, "max": 1.001},
+    {"action": "set_health", "label": "100% health: above 75%", "actor": "enemy", "value": 100000},
+    {"action": "wait", "label": "Let Unit::Update refresh the aura states", "ms": 1500},
+    {"action": "assert", "label": "Above 75%: +15% on the spell", "actor": "hunter", "metric": "spell_damage_done", "spell": 805754, "target": "enemy", "ratio_to": "spell_mid", "min": 1.145, "max": 1.155},
+    {"action": "assert", "label": "Above 75%: +15% on a white hit", "actor": "hunter", "metric": "melee_damage_done", "target": "enemy", "ratio_to": "melee_mid", "min": 1.145, "max": 1.155},
+    {"action": "set_health", "label": "30% health: below 35%", "actor": "enemy", "value": 30000},
+    {"action": "wait", "label": "Let Unit::Update refresh the aura states", "ms": 1500},
+    {"action": "assert", "label": "Below 35%: +15% on the spell", "actor": "hunter", "metric": "spell_damage_done", "spell": 805754, "target": "enemy", "ratio_to": "spell_mid", "min": 1.145, "max": 1.155},
+    {"action": "assert", "label": "Below 35%: +15% on a white hit", "actor": "hunter", "metric": "melee_damage_done", "target": "enemy", "ratio_to": "melee_mid", "min": 1.145, "max": 1.155},
+    {"action": "set_health", "label": "Exactly 35% health (HealthBelowPct is strict)", "actor": "enemy", "value": 35000},
+    {"action": "wait", "label": "Let Unit::Update refresh the aura states", "ms": 1500},
+    {"action": "assert", "label": "Exactly 35%: no bonus", "actor": "hunter", "metric": "spell_damage_done", "spell": 805754, "target": "enemy", "ratio_to": "spell_mid", "min": 0.999, "max": 1.001},
+    {"action": "set_health", "label": "One point under 35%", "actor": "enemy", "value": 34999},
+    {"action": "wait", "label": "Let Unit::Update refresh the aura states", "ms": 1500},
+    {"action": "assert", "label": "Just under 35%: bonus", "actor": "hunter", "metric": "spell_damage_done", "spell": 805754, "target": "enemy", "ratio_to": "spell_mid", "min": 1.145, "max": 1.155},
+    {"action": "set_health", "label": "Exactly 75% health (HealthAbovePct is strict)", "actor": "enemy", "value": 75000},
+    {"action": "wait", "label": "Let Unit::Update refresh the aura states", "ms": 1500},
+    {"action": "assert", "label": "Exactly 75%: no bonus", "actor": "hunter", "metric": "spell_damage_done", "spell": 805754, "target": "enemy", "ratio_to": "spell_mid", "min": 0.999, "max": 1.001},
+    {"action": "set_health", "label": "One point over 75%", "actor": "enemy", "value": 75001},
+    {"action": "wait", "label": "Let Unit::Update refresh the aura states", "ms": 1500},
+    {"action": "assert", "label": "Just over 75%: bonus", "actor": "hunter", "metric": "spell_damage_done", "spell": 805754, "target": "enemy", "ratio_to": "spell_mid", "min": 1.145, "max": 1.155},
+    {"action": "set_health", "label": "Back to 50%", "actor": "enemy", "value": 50000},
+    {"action": "wait", "label": "Let Unit::Update refresh the aura states", "ms": 1500},
+    {"action": "unlearn", "label": "Drop Contract Killing", "actor": "hunter", "spell": 705506},
+    {"action": "assert", "label": "Without the talent the bonus is gone at 50%", "actor": "hunter", "metric": "spell_damage_done", "spell": 805754, "target": "enemy", "ratio_to": "spell_mid", "min": 0.999, "max": 1.001},
+    {"action": "set_health", "label": "30% health again", "actor": "enemy", "value": 30000},
+    {"action": "wait", "label": "Let Unit::Update refresh the aura states", "ms": 1500},
+    {"action": "assert", "label": "Without the talent nothing is added at 30%", "actor": "hunter", "metric": "spell_damage_done", "spell": 805754, "target": "enemy", "ratio_to": "spell_mid", "min": 0.999, "max": 1.001}
+  ]
+}

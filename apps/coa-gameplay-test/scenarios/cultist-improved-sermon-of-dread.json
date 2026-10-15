@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Cultist: Improved Sermon of Dread boosts Sermon of Dread by 40% through a native spell mod (#3018)",
+  "contract": "706177 is SpellFamilyName 31, effect0 ADD_PCT_MODIFIER (108), MiscValue=3 (SPELLMOD_EFFECT1), BasePoints=39 -> CalcValue 40, SpellClassMask [0,0,268435456] (dword2 bit28). Every Sermon of Dread rank (620610-620614) is SpellFamilyName 31 with SpellFamilyFlags[2]=268435456, an exact classmask match, and no other family-31 spell carries that bit. Player::ApplySpellMod applies a percent SPELLMOD_EFFECT1 mod as basevalue*(1+0.40) with zero custom C++ (Player.cpp ~10275). Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "c", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: Sermon of Dread's effect is unmodified before Improved Sermon of Dread",
+      "actor": "c", "metric": "spell_modifier", "spell": 620610, "op": 3, "base": 1000, "min": 1000, "max": 1000
+    },
+    { "action": "learn", "actor": "c", "spell": 706177 },
+    {
+      "action": "assert", "label": "Improved Sermon of Dread adds 40% to Sermon of Dread rank 1 (#3018)",
+      "actor": "c", "metric": "spell_modifier", "spell": 620610, "op": 3, "base": 1000, "min": 1399, "max": 1401
+    },
+    {
+      "action": "assert", "label": "Improved Sermon of Dread adds 40% to Sermon of Dread's highest rank too (#3018)",
+      "actor": "c", "metric": "spell_modifier", "spell": 620614, "op": 3, "base": 1000, "min": 1399, "max": 1401
+    },
+    {
+      "action": "assert", "label": "Improved Sermon of Dread leaves an unrelated Hammer of Twilight effect alone (control)",
+      "actor": "c", "metric": "spell_modifier", "spell": 806498, "op": 3, "base": 1000, "min": 1000, "max": 1000
+    }
+  ]
+}

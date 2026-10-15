@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Moment of Clarity ranks 1 and 2 reduce pushback and reach Sanity Tap's mana gain natively (#918, #939)",
+  "contract": "Moment of Clarity rank 1 (706179) and rank 2 (707783) (Spell.dbc, read for this scenario) are each passives with two SPELL_EFFECT_APPLY_AURA effects, target caster. Effect 0 is aura 149 SPELL_AURA_REDUCE_PUSHBACK: rank 1 BasePoints 34 DieSides 1 (+35), rank 2 BasePoints 69 DieSides 1 (+70), matching both tooltips exactly. Its handler is the stock AuraEffect::HandleNoImmediateEffect (SpellAuraEffects.cpp:214): pushback reduction is read directly from the caster's aura list at the point the engine computes pushback, the same mechanism every other class's pushback-reduction talent uses, with no per-spell code. Effect 1 is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 12 (SPELLMOD_EFFECT2): rank 1 BasePoints 4 DieSides 1 (+5), rank 2 BasePoints 9 DieSides 1 (+10), EffectSpellClassMask word 0 bit 12 (4096) on both ranks. Sanity Tap 802575 (read for this scenario) is SpellFamilyName 31 with SpellFamilyFlags word 0 = 4096, an exact match, and is not in the family-31 special-routing switch in SpellInfo::IsAffectedBySpellMod, so it uses the generic classmask path. grep confirms zero occurrences of 706179/707783 in src/server/coa or src/server/game, matching the issue's own evidence that no per-spell script exists; both effects are native aura/spellmod machinery and need none. spell_modifier(op=12) exercises the live IsAffectedBySpellMod path against Sanity Tap, not just the DBC value.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+
+    { "action": "assert", "label": "BASELINE: Sanity Tap's SPELLMOD_EFFECT2 modifier is untouched", "actor": "cultist", "metric": "spell_modifier", "spell": 802575, "op": 12, "base": 100, "min": 99.99, "max": 100.01 },
+
+    { "action": "learn", "label": "Learn rank 1", "actor": "cultist", "spell": 706179 },
+    { "action": "assert", "label": "Rank 1 applies its own self-aura", "actor": "cultist", "metric": "aura", "spell": 706179, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Rank 1 effect 0 carries the authored +35 pushback reduction", "actor": "cultist", "metric": "aura_amount", "spell": 706179, "effect": 0, "equals": 35 },
+    { "action": "assert", "label": "Rank 1 effect 1 carries the authored +5 flat SPELLMOD_EFFECT2", "actor": "cultist", "metric": "aura_amount", "spell": 706179, "effect": 1, "equals": 5 },
+    { "action": "assert", "label": "CONTRACT (#918): rank 1 raises Sanity Tap's SPELLMOD_EFFECT2 modifier by +5", "actor": "cultist", "metric": "spell_modifier", "spell": 802575, "op": 12, "base": 100, "min": 104.99, "max": 105.01 },
+
+    { "action": "unlearn", "actor": "cultist", "spell": 706179 },
+    { "action": "assert", "label": "Unlearning rank 1 removes its self-aura", "actor": "cultist", "metric": "aura", "spell": 706179, "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "Sanity Tap's modifier returns to baseline between ranks", "actor": "cultist", "metric": "spell_modifier", "spell": 802575, "op": 12, "base": 100, "min": 99.99, "max": 100.01 },
+
+    { "action": "learn", "label": "Learn rank 2", "actor": "cultist", "spell": 707783 },
+    { "action": "assert", "label": "Rank 2 applies its own self-aura", "actor": "cultist", "metric": "aura", "spell": 707783, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Rank 2 effect 0 carries the authored +70 pushback reduction", "actor": "cultist", "metric": "aura_amount", "spell": 707783, "effect": 0, "equals": 70 },
+    { "action": "assert", "label": "Rank 2 effect 1 carries the authored +10 flat SPELLMOD_EFFECT2", "actor": "cultist", "metric": "aura_amount", "spell": 707783, "effect": 1, "equals": 10 },
+    { "action": "assert", "label": "CONTRACT (#939): rank 2 raises Sanity Tap's SPELLMOD_EFFECT2 modifier by +10", "actor": "cultist", "metric": "spell_modifier", "spell": 802575, "op": 12, "base": 100, "min": 109.99, "max": 110.01 },
+
+    { "action": "unlearn", "actor": "cultist", "spell": 707783 },
+    { "action": "assert", "label": "Unlearning rank 2 removes its self-aura", "actor": "cultist", "metric": "aura", "spell": 707783, "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "Sanity Tap's modifier returns to baseline", "actor": "cultist", "metric": "spell_modifier", "spell": 802575, "op": 12, "base": 100, "min": 99.99, "max": 100.01 }
+  ]
+}

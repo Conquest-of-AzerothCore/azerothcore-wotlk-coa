@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Lich Essence shortens Lichfrost's cast by 15% and halves spell pushback (#922)",
+  "contract": "Lich Essence 802988 (Passive) reads 'Reduces the cast time of Lichfrost by $s2% and reduces your spell pushback suffered from taking damage by $s1%.' Effect 0 is SPELL_AURA_REDUCE_PUSHBACK (149), EffectBasePoints 49 + DieSides 1 = 50; effect 1 is SPELL_AURA_ADD_PCT_MODIFIER (108), MiscValue 10 (SPELLMOD_CASTING_TIME), EffectBasePoints -16 + 1 = -15, class mask (0, 0, 0x08000000), the SpellFamilyName 29 flag every Lichfrost rank carries (501969-501980, 801722). Both are native: SpellInfo::CalcCastTime applies SPELLMOD_CASTING_TIME, so Lichfrost rank 13 (501980, SpellCastTimes 19 = 2500 ms) casts in 2125 ms, and Spell::Delayed adds GetTotalAuraModifier(SPELL_AURA_REDUCE_PUSHBACK) - 100 to its 100% reduction base, so each damaging hit pushes the cast back 250 ms instead of 500 ms (Lichfrost InterruptFlags 47 include PUSH_BACK and not ABORT_ON_DMG). The audit's premise (no source reference to 802988) does not apply to native aura types. The pushback fixture follows witchdoctor-flat-percent-self-passives: a PvP-flagged mage with fixture hit rating lands Fire Blast 2136 during the cast.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 },
+    { "id": "enemy", "race": 1, "class": 8, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "pvp", "actor": "n", "enabled": true },
+    { "action": "pvp", "actor": "enemy", "enabled": true },
+    { "action": "teleport", "actor": "n", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "enemy", "map": 0, "x": -9612.06, "y": -288.949, "z": 57.3053, "o": 3.14159265 },
+    { "action": "learn", "actor": "n", "spell": 501980 },
+    { "action": "learn", "actor": "enemy", "spell": 2136 },
+    {
+      "action": "assert", "label": "SETUP: Lich Essence is not known yet", "actor": "n",
+      "metric": "aura", "spell": 802988, "equals": 0
+    },
+    {
+      "action": "snapshot", "label": "Lichfrost cast time without Lich Essence", "actor": "n",
+      "metric": "spell_cast_time_ms", "spell": 501980, "save_as": "cast_base"
+    },
+    {
+      "action": "assert", "label": "CONTROL: Lichfrost casts in 2.5 s", "actor": "n",
+      "metric": "spell_cast_time_ms", "spell": 501980, "min": 2400, "max": 2500
+    },
+    { "action": "cast", "label": "Baseline Lichfrost", "actor": "n", "spell": 501980, "target": "enemy" },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "actor": "n", "metric": "cast_remaining_ms", "spell": 501980, "min": 800 },
+    { "action": "snapshot", "actor": "n", "metric": "cast_pushback_ms", "save_as": "pushback_base" },
+    { "action": "cast", "actor": "enemy", "spell": 2136, "target": "n" },
+    {
+      "action": "assert", "label": "SETUP: Fire Blast hits during the cast", "actor": "enemy",
+      "metric": "spell_damage_count", "spell": 2136, "target": "n", "equals": 1, "within_ms": 500
+    },
+    {
+      "action": "assert", "label": "CONTROL: full 500 ms pushback without Lich Essence", "actor": "n",
+      "metric": "cast_pushback_ms", "relative_to": "pushback_base", "equals": 500
+    },
+    { "action": "wait", "label": "Let the delayed cast finish and land", "ms": 3500 },
+    {
+      "action": "assert", "label": "SETUP: the delayed Lichfrost still lands", "actor": "n",
+      "metric": "spell_damage_count", "spell": 501980, "target": "enemy", "equals": 1
+    },
+    { "action": "reset_cooldown", "actor": "enemy", "spell": 2136 },
+    { "action": "learn", "actor": "n", "spell": 802988 },
+    {
+      "action": "assert", "label": "SETUP: the Lich Essence passive is active", "actor": "n",
+      "metric": "aura", "spell": 802988, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Effect 0 reduces pushback by 50%", "actor": "n",
+      "metric": "aura_amount", "spell": 802988, "effect": 0, "equals": 50
+    },
+    {
+      "action": "assert", "label": "Effect 1 is a -15% cast time modifier", "actor": "n",
+      "metric": "aura_amount", "spell": 802988, "effect": 1, "equals": -15
+    },
+    {
+      "action": "assert", "label": "Lichfrost casts 15% faster (2125 ms)", "actor": "n",
+      "metric": "spell_cast_time_ms", "spell": 501980, "min": 2040, "max": 2130
+    },
+    {
+      "action": "assert", "label": "Lichfrost cast time is 85% of the baseline", "actor": "n",
+      "metric": "spell_cast_time_ms", "spell": 501980, "ratio_to": "cast_base", "min": 0.845, "max": 0.855
+    },
+    { "action": "cast", "label": "Lichfrost with Lich Essence", "actor": "n", "spell": 501980, "target": "enemy" },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "actor": "n", "metric": "cast_remaining_ms", "spell": 501980, "min": 800 },
+    { "action": "snapshot", "actor": "n", "metric": "cast_pushback_ms", "save_as": "pushback_essence" },
+    { "action": "cast", "actor": "enemy", "spell": 2136, "target": "n" },
+    {
+      "action": "assert", "label": "SETUP: Fire Blast hits during the cast", "actor": "enemy",
+      "metric": "spell_damage_count", "spell": 2136, "target": "n", "equals": 2, "within_ms": 500
+    },
+    {
+      "action": "assert", "label": "Lich Essence halves the pushback to 250 ms", "actor": "n",
+      "metric": "cast_pushback_ms", "relative_to": "pushback_essence", "equals": 250
+    },
+    { "action": "wait", "label": "Let the delayed cast finish and land", "ms": 3500 },
+    {
+      "action": "assert", "label": "The delayed Lichfrost still lands", "actor": "n",
+      "metric": "spell_damage_count", "spell": 501980, "target": "enemy", "equals": 2
+    },
+    { "action": "unlearn", "actor": "n", "spell": 802988 },
+    {
+      "action": "assert", "label": "Unlearning Lich Essence restores the 2.5 s cast", "actor": "n",
+      "metric": "spell_cast_time_ms", "spell": 501980, "ratio_to": "cast_base", "min": 0.999, "max": 1.001
+    }
+  ]
+}

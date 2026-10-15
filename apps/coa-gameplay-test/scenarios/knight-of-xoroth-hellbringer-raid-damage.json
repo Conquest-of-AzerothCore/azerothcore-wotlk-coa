@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Hellbringer raises party and raid damage dealt by 3% (#3911)",
+  "contract": "Hellbringer 300963 reads 'Increases all damage dealt by party and raid members by 3%. Does not stack with similar effects.' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z; matches the client's own moa_description). The decoded Spell.dbc capture shows a single, already-complete native effect: SPELL_EFFECT_APPLY_AREA_AURA_RAID (65), aura 79 (SPELL_AURA_MOD_DAMAGE_PERCENT_DONE), MiscValue 127 (SPELL_SCHOOL_MASK_ALL - every school, matching 'all damage'), BasePoints 2 (+1 from DieSides 1 = 3), TargetA 1 (TARGET_UNIT_CASTER, which SpellAuras.cpp's SPELL_EFFECT_APPLY_AREA_AURA_RAID handling auto-expands to nearby group members via Acore::AnyGroupedUnitInObjectRangeCheck), RadiusIndex 287 (100 yards in the installed SpellRadius.dbc, confirmed by direct parse of /srv/coa/server-data/dbc/SpellRadius.dbc). This is the exact same native effect/aura pair already used as the fix template elsewhere in this repo (AscensionGuardianCompletion.cpp/AscensionWitchDoctorCompletion.cpp convert broken records to SPELL_EFFECT_APPLY_AREA_AURA_RAID + TARGET_UNIT_CASTER), except 300963's own DBC record already carries it correctly - nothing in AscensionXorothContracts.cpp touches 300963, and AscensionStockCoefficients.cpp only clears BonusMultiplier (unused by this aura type). This scenario is a regression proof, not a functional change, for the percentage buff and its raid-wide propagation. NOT covered: the tooltip's 'does not stack with similar effects' clause needs a cross-spell spell_group/spell_group_stack_rules exclusivity entry spanning every comparable raid damage buff in the game, which is a systemic SQL change outside this single spell's scope and outside AGENTS.md's pending-SQL-only editing rule; it is neither implemented nor asserted here. weapon_damage_min is used (not melee_damage_done) per the documented lesson that the melee-damage-done metric is structurally blind to SPELL_AURA_MOD_DAMAGE_PERCENT_DONE for the normal school.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "group", "actor": "knight", "target": "ally" },
+    {
+      "action": "assert", "label": "SETUP: mainhand weapon damage is nonzero",
+      "actor": "ally", "metric": "weapon_damage_min", "min": 1
+    },
+    { "action": "snapshot", "actor": "ally", "metric": "weapon_damage_min", "save_as": "wdm_before" },
+    {
+      "action": "assert", "label": "SETUP: the ally does not carry Hellbringer before the caster learns it",
+      "actor": "ally", "metric": "aura", "spell": 300963, "caster": "knight", "equals": 0
+    },
+    { "action": "learn", "actor": "knight", "spell": 300963 },
+    { "action": "set_aura", "actor": "knight", "spell": 300963, "stacks": 1, "label": "Force the Hellbringer raid aura" },
+    { "action": "wait", "label": "Let the area aura propagate to the grouped ally", "ms": 2000 },
+    {
+      "action": "assert", "label": "SETUP: the caster carries Hellbringer",
+      "actor": "knight", "metric": "aura", "spell": 300963, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the raid area aura reaches the grouped ally",
+      "actor": "ally", "metric": "aura", "spell": 300963, "caster": "knight", "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the ally's mainhand damage rises by ~3%",
+      "actor": "ally", "metric": "weapon_damage_min", "ratio_to": "wdm_before", "min": 1.025, "max": 1.035
+    }
+  ]
+}

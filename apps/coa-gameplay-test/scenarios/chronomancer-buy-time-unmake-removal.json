@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "name": "Casting Unmake removes Buy Time's stasis from the target (#449)",
+  "contract": "Buy Time 520188's Description ends \"Casting Unmake on a target will remove this effect.\" Its three SPELL_EFFECT_TRIGGER_SPELL effects at TARGET_DEST_DEST cast 520185 (allies), 520186 (enemies: SPELL_AURA_DAMAGE_IMMUNITY, SPELL_AURA_MOD_STUN, MECHANIC_BANISH, SpellDuration 32 = 6000 ms, radius 8 yd) and 520205. Spell.dbc also ships 807310, rank \"Buy Time Remover\" of Unmake: SPELL_EFFECT_REMOVE_AURA on TARGET_UNIT_TARGET_ENEMY with EffectTriggerSpell 520186 and SPELL_ATTR0_NO_IMMUNITIES, but nothing cast it, so Unmake left the enemy banished for the full 6 sec. The golem stands 10 yd from the Chronomancer, so the 8 yd stasis at its position reaches it and not the caster. Unmake rank 1 804418 has a 1.5 sec cast and rank 11 574345 a 2 sec cast; each is started 1.6 sec after Buy Time, so a removal must land by about 3.6 sec, while the stasis without it lasts until 6 sec. Each removal check expires before that 6 sec mark. Spell hit rating is fixtured so the removal cannot miss.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    { "id": "chronomancer", "race": 1, "class": 22, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "chronomancer", "entry": 36, "level": 80, "health": 1000000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "chronomancer", "spell": 520188 },
+    { "action": "learn", "actor": "chronomancer", "spell": 804418 },
+    { "action": "learn", "actor": "chronomancer", "spell": 574345 },
+    {
+      "action": "cast", "label": "Buy Time on the golem's position", "actor": "chronomancer", "spell": 520188,
+      "destination": { "x": -8907.41, "y": -115.853, "z": 82.3711 }
+    },
+    {
+      "action": "assert", "label": "SETUP: the golem is put into the enemy stasis", "actor": "golem",
+      "metric": "aura", "spell": 520186, "caster": "chronomancer", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the stasis would otherwise last beyond the removal deadline",
+      "actor": "golem", "metric": "aura_duration_ms", "spell": 520186, "min": 5000
+    },
+    {
+      "action": "assert", "label": "SETUP: the caster stays outside its own stasis", "actor": "chronomancer",
+      "metric": "aura", "spell": 520185, "equals": 0
+    },
+    { "action": "wait", "label": "Let Buy Time's global cooldown pass", "ms": 1600 },
+    {
+      "action": "cast", "label": "Unmake rank 1 on the golem", "actor": "chronomancer", "spell": 804418,
+      "target": "golem"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Unmake rank 1 removes the stasis before it expires",
+      "actor": "golem", "metric": "aura", "spell": 520186, "equals": 0, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let the delayed Untimely Disposition and any leftovers settle", "ms": 6000 },
+    { "action": "reset_cooldown", "actor": "chronomancer", "spell": 520188 },
+    {
+      "action": "cast", "label": "Buy Time again", "actor": "chronomancer", "spell": 520188,
+      "destination": { "x": -8907.41, "y": -115.853, "z": 82.3711 }
+    },
+    {
+      "action": "assert", "label": "SETUP: the golem is in stasis again", "actor": "golem",
+      "metric": "aura", "spell": 520186, "caster": "chronomancer", "equals": 1, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Let Buy Time's global cooldown pass", "ms": 1600 },
+    {
+      "action": "cast", "label": "Unmake rank 11 on the golem", "actor": "chronomancer", "spell": 574345,
+      "target": "golem"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Unmake rank 11 removes the stasis before it expires",
+      "actor": "golem", "metric": "aura", "spell": 520186, "equals": 0, "within_ms": 3500
+    }
+  ]
+}

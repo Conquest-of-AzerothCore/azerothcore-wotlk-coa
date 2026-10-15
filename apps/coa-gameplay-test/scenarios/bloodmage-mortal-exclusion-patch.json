@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "name": "Bloodmage mortal abilities stream the internal cursed form exclusion (#5737, #6394)",
+  "contract": [
+    "The client's own Spell.dbc excludes the Mortal Form abilities (Bloodmoon Blast, Vampyr's Kiss,",
+    "Keleseth's Calamity, Valanar's Vengeance, Sanguine Rupture, Taldaram's Torment) with",
+    "ExcludeCasterAuraSpell 524861, the marker every Cursed Form sets, so the client greys them under",
+    "Sanguine Essence 680692 and Transgression 801076 as well; the tooltips carry the same",
+    "$?a524861[...]Requires Mortal Form|r line, 47 ranks in total. AscensionCompat rewrites the exclusion",
+    "field and the tooltip text to the internal marker 802877, which SyncCursedFormRequirement applies only",
+    "for the restricting Cursed Forms, but a client only receives that rewrite through the SMSG_PATCH_SPELL",
+    "(opcode 2346) stream whose rows were gated behind ClientSpellPatches registration that only Running",
+    "Wild had. The stream sends the DBC record's fields first, and ExcludeCasterAuraSpell is field 26, so a",
+    "streamed row must carry 802877 at index 26. This scenario asserts that for the first rank of each",
+    "chain, with row 500639 (Runeshroud) and the rewritten text of 500125 as controls. Expected before the",
+    "registration: none of the six rows arrive. After: each arrives with the internal marker. A second, larger set",
+    "of mortal abilities (Mend, Crimson Tide, Sanguine Mend and 59 more) is already gated on 802877 in the",
+    "client data, so those rows were never built at all and kept the raw red $?a524861 requirement line",
+    "while staying usable; they must stream too, rewritten to the internal marker."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 12,
+      "level": 32
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the login patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the shared description stream is captured - Runeshroud's row 500639",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500639,
+      "text": "Requires Runeshroud",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Bloodmoon Blast rank 1 (500125) reaches the client with the internal cursed form marker",
+      "actor": "bloodmage",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 500125,
+      "index": 26,
+      "equals": 802877,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: its tooltip text is rewritten to the internal marker",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500125,
+      "text": "$?a802877",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Vampyr's Kiss rank 1 (504275) reaches the client with the internal cursed form marker",
+      "actor": "bloodmage",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 504275,
+      "index": 26,
+      "equals": 802877
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Keleseth's Calamity rank 1 (560249) reaches the client with the internal cursed form marker",
+      "actor": "bloodmage",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 560249,
+      "index": 26,
+      "equals": 802877
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Valanar's Vengeance rank 1 (560315) reaches the client with the internal cursed form marker",
+      "actor": "bloodmage",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 560315,
+      "index": 26,
+      "equals": 802877
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Sanguine Rupture rank 1 (572907) reaches the client with the internal cursed form marker",
+      "actor": "bloodmage",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 572907,
+      "index": 26,
+      "equals": 802877
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Taldaram's Torment rank 1 (800772) reaches the client with the internal cursed form marker",
+      "actor": "bloodmage",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 800772,
+      "index": 26,
+      "equals": 802877
+    },
+    {
+      "action": "assert",
+      "label": "TEXT: Mend rank 1 (504079) is already gated on the internal marker in the client data, so its row must still be streamed with a rewritten requirement line",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504079,
+      "text": "$?a802877[|cffff3232][|cffffffff]Requires Mortal Form",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "TEXT: Mend rank 1 no longer carries the raw cursed form check that coloured it red under Sanguine Essence",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504079,
+      "text": "$?a524861",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "TEXT: Crimson Tide rank 1 (504129) is rewritten as well",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504129,
+      "text": "$?a802877[|cffff3232][|cffffffff]Requires Mortal Form",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "TEXT: Sanguine Mend rank 1 (572575) is rewritten as well",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 572575,
+      "text": "$?a802877[|cffff3232][|cffffffff]Requires Mortal Form",
+      "equals": 1
+    }
+  ]
+}

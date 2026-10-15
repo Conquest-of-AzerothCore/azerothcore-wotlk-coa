@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Angelic cuts Illumination's cast time by 0.25/0.5 sec per rank (#1213)",
+  "contract": "Angelic has two rank spell IDs, both SpellFamilyName 33, EffectSpellClassMask word 1 bit 0x200 (512): rank 1 (704582) is SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 10 (SPELLMOD_CASTING_TIME) and EffectBasePoints -251 -> real -250 ms; rank 2 (707771) is the same aura/op with EffectBasePoints -501 -> real -500 ms. Illumination's base spell (500143, Rank 1) carries SpellFamilyFlags_2 512 -- the same bit -- so SpellInfo::IsAffectedBySpellMod admits it on the shared family and mask. SpellInfo::CalcCastTime consumes SPELLMOD_CASTING_TIME through Player::ApplySpellMod inside its own calculation, which the 'spell_cast_time_ms' query metric reads directly. Both fixtures are the same race, class and level with no ratings, so their cast-speed multipliers are identical and only the flat modifier can move the difference. Native handlers only; regression scenario for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 27, "level": 80 },
+    { "id": "rank1", "race": 1, "class": 27, "level": 80 },
+    { "id": "rank2", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "rank1", "spell": 704582 },
+    { "action": "learn", "actor": "rank2", "spell": 707771 },
+    {
+      "action": "snapshot",
+      "label": "Illumination's cast time without either rank",
+      "actor": "control",
+      "metric": "spell_cast_time_ms",
+      "spell": 500143,
+      "save_as": "cast_time_base"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 cuts Illumination's cast time by 0.25 sec",
+      "actor": "rank1",
+      "metric": "spell_cast_time_ms",
+      "spell": 500143,
+      "relative_to": "cast_time_base",
+      "equals": -250
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 cuts Illumination's cast time by 0.5 sec",
+      "actor": "rank2",
+      "metric": "spell_cast_time_ms",
+      "spell": 500143,
+      "relative_to": "cast_time_base",
+      "equals": -500
+    }
+  ]
+}

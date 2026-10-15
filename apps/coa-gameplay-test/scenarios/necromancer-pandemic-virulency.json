@@ -9,8 +9,8 @@
   "steps": [
     { "action": "wait", "ms": 3000 },
     { "action": "learn", "actor": "n", "spell": 801938 },
-    { "action": "learn", "actor": "n", "spell": 500971 },
-    { "action": "command", "actor": "n", "command": ".localtalent 33759 1" },
+    { "action": "advancement_rank", "actor": "n", "entry": 33759, "rank": 1 },
+    { "action": "learn", "label": "Fixture: the Ghoul raise of another specialization", "actor": "n", "spell": 500971 },
     { "action": "wait", "ms": 1500 },
     { "action": "set_aura", "actor": "n", "spell": 803782, "stacks": 1 },
     { "action": "cast", "actor": "n", "spell": 500971 },

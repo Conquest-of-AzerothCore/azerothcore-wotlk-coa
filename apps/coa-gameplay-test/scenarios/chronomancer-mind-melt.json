@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "name": "Mind Melt gives its debuff a 15 second life (#2165)",
+  "contract": "Mind Melt 572771's tooltip reads \"Damage dealt by Melt Reality now also reduces the target's primary attributes by $572851s2% for $/1000;s1 sec, stacking $572851u times.\" In Spell.dbc the talent is a single SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 1 (SPELLMOD_DURATION), EffectBasePoints 14999 + DieSides 1 = +15000 ms, EffectSpellClassMask [0,0,262144], which inside SpellFamilyName 28 selects the Mind Melt debuff 572851. 572851 has DurationIndex 0, so SpellInfo::GetDuration returns 0, not -1; Player::IsAffectedBySpellmod only blocks duration modifiers on spells whose duration is -1 (Player.cpp), and Aura::CalcMaxDuration then yields 0 + 15000 = 15000 ms (SpellAuras.cpp). Without the talent the debuff would expire immediately, so the talent is what gives it a life. Its payload is 572851's Effect[1], SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (137) with EffectMiscValue -1 (all stats) and EffectBasePoints -4 + DieSides 1 = -3%, with StackAmount 5. Every Melt Reality rank (503895-503899, 572835, 806335) carries EffectTriggerSpell 572851 on a SPELL_AURA_PERIODIC_TRIGGER_SPELL effect, so the debuff is applied by the Melt Reality caster and takes that caster's modifiers. Generic core machinery. This scenario is a regression guard for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "The debuff's own duration before the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 572851,
+      "op": 1,
+      "base": 0,
+      "save_as": "melt_duration"
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, the debuff has no duration at all",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 572851,
+      "op": 1,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The debuff's attribute payload is -3% per stack either way",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 572851,
+      "effect": 1,
+      "equals": -3
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 572771
+    },
+    {
+      "action": "assert",
+      "label": "Mind Melt self-applies its passive",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 572771,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The debuff now lasts 15 seconds",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 572851,
+      "op": 1,
+      "base": 0,
+      "equals": 15000
+    },
+    {
+      "action": "assert",
+      "label": "That is exactly +15000 ms against the baseline",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 572851,
+      "op": 1,
+      "base": 0,
+      "relative_to": "melt_duration",
+      "equals": 15000
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture the debuff at its five-stack cap",
+      "actor": "talent",
+      "spell": 572851,
+      "stacks": 5
+    },
+    {
+      "action": "assert",
+      "label": "The debuff stacks five times",
+      "actor": "talent",
+      "metric": "aura_stacks",
+      "spell": 572851,
+      "caster": "talent",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "Five stacks reduce every stat by 15%",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 572851,
+      "caster": "talent",
+      "effect": 1,
+      "equals": -15
+    }
+  ]
+}

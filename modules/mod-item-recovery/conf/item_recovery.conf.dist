@@ -1,0 +1,20 @@
+###################################################################################################
+#  mod-item-recovery
+#
+#  Answers the Ascension client's Item Recovery window from the character's twelve native vendor
+#  buyback slots. A recovered item is the sold instance itself, bought back for the price the
+#  vendor paid, exactly as the vendor's own buyback tab would return it.
+#
+#  The historical service also kept a longer archive of sold and deleted items with its own fees.
+#  That archive is not restored: the window lists what the buyback tab would list.
+#
+#  This code is part of the AzerothCore project. See AUTHORS file for Copyright information.
+###################################################################################################
+
+[worldserver]
+
+#    ItemRecovery.Enable
+#        Description: Whether the Item Recovery window is offered to players and answered.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled; the client keeps the window hidden)
+ItemRecovery.Enable = 1

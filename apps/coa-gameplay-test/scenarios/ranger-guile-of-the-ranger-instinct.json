@@ -1,0 +1,125 @@
+{
+  "schema": 1,
+  "name": "Ranger Guile of the Ranger: Instinct adds 20% of Agility as critical strike rating (#1371)",
+  "contract": "Guile of the Ranger 520353 reads 'Your Instinct now additionally increases your critical strike rating by $s1% of your Agility.' ($s1 = BasePoints 19 + 1 = 20). Its only effect is SPELL_AURA_PROC_TRIGGER_SPELL on 520545, a 15 sec (DurationIndex 8) self aura SPELL_AURA_MOD_RATING_FROM_STAT with MiscValue 1792 (CR_CRIT_MELEE, CR_CRIT_RANGED, CR_CRIT_SPELL) and MiscValueB 1 (Agility), BasePoints 19 (+20%). Instinct 801434 (SpellFamilyName 27, SpellFamilyFlags (16,0,0), DmgClass 2) also lasts 15 sec. Spell.dbc gives 520353 ProcFlags 0; the spell_proc row from rev_20260921_40_ranger_dead_procs.sql (ProcFlags 16, family 27 mask0 16, phase HIT) is what lets it fire. Expected: casting Instinct without the talent grants no 520545 and leaves the ratings alone; with the talent each Instinct grants 520545 for up to 15 sec and raises the melee, ranged and spell critical strike ratings by floor(20% of current Agility), so each rating delta divided by Agility is in [0.19, 0.201] for any plausible level-80 Agility.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let the character settle", "ms": 3000 },
+    { "action": "learn", "actor": "ranger", "spell": 801434 },
+    { "action": "snapshot", "actor": "ranger", "metric": "combat_rating", "rating": 8, "save_as": "melee_crit_before" },
+    { "action": "snapshot", "actor": "ranger", "metric": "combat_rating", "rating": 9, "save_as": "ranged_crit_before" },
+    { "action": "snapshot", "actor": "ranger", "metric": "combat_rating", "rating": 10, "save_as": "spell_crit_before" },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 0 },
+    { "action": "cast", "label": "Control Instinct without Guile of the Ranger", "actor": "ranger", "spell": 801434 },
+    {
+      "action": "assert",
+      "label": "SETUP: the control Instinct is active",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 801434,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    { "action": "wait", "label": "Let any follow-up aura land", "ms": 1000 },
+    {
+      "action": "assert",
+      "label": "Control: Instinct alone grants no Guile of the Ranger",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 520545,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Control: Instinct alone leaves melee critical strike rating unchanged",
+      "actor": "ranger",
+      "metric": "combat_rating",
+      "rating": 8,
+      "relative_to": "melee_crit_before",
+      "equals": 0
+    },
+    { "action": "cancel_aura", "actor": "ranger", "spell": 801434 },
+    { "action": "reset_cooldown", "actor": "ranger", "spell": 801434 },
+    { "action": "learn", "actor": "ranger", "spell": 520353 },
+    {
+      "action": "assert",
+      "label": "SETUP: Guile of the Ranger is active on the Ranger",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 520353,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "snapshot", "actor": "ranger", "metric": "stat", "stat": 1, "save_as": "agility" },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "Instinct with Guile of the Ranger", "actor": "ranger", "spell": 801434 },
+    {
+      "action": "assert",
+      "label": "Instinct grants Guile of the Ranger",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 520545,
+      "caster": "ranger",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Guile of the Ranger lasts 15 seconds, like Instinct",
+      "actor": "ranger",
+      "metric": "aura_duration_ms",
+      "spell": 520545,
+      "caster": "ranger",
+      "min": 12000,
+      "max": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Melee critical strike rating rises by 20% of Agility",
+      "actor": "ranger",
+      "metric": "combat_rating",
+      "rating": 8,
+      "relative_to": "melee_crit_before",
+      "ratio_to": "agility",
+      "min": 0.19,
+      "max": 0.201
+    },
+    {
+      "action": "assert",
+      "label": "Ranged critical strike rating rises by 20% of Agility",
+      "actor": "ranger",
+      "metric": "combat_rating",
+      "rating": 9,
+      "relative_to": "ranged_crit_before",
+      "ratio_to": "agility",
+      "min": 0.19,
+      "max": 0.201
+    },
+    {
+      "action": "assert",
+      "label": "Spell critical strike rating rises by 20% of Agility",
+      "actor": "ranger",
+      "metric": "combat_rating",
+      "rating": 10,
+      "relative_to": "spell_crit_before",
+      "ratio_to": "agility",
+      "min": 0.19,
+      "max": 0.201
+    }
+  ]
+}

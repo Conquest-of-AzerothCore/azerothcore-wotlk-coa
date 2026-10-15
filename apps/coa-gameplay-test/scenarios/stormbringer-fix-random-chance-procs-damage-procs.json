@@ -1,0 +1,665 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Storm Chaser and Thunder Grip proc from direct spell damage (#1684, #1800)",
+  "contract": "#1684 Storm Chaser (300612) and #1800 Thunder Grip (301219) are SPELL_ATTR0_PASSIVE records whose single effect is SPELL_EFFECT_APPLY_AURA with EffectApplyAuraName 42 (SPELL_AURA_PROC_TRIGGER_SPELL) on EffectTriggerSpell 300915 and 301220. Both carry Spell.dbc ProcFlags 0 and had no spell_proc row, so SpellMgr::LoadSpellProcs skipped them ('Skip if no proc flags in DBC') and Aura::GetProcEffectMask returned 0 before any effect was examined ('only auras with spell proc entry can trigger proc'): the passives occupied a spellbook slot and could never produce a single proc. Their triggered halves are already native. 300915 is aura 108 (SPELL_AURA_ADD_PCT_MODIFIER) with EffectMiscValue 10 (SPELLMOD_CASTING_TIME), EffectBasePoints -16 / EffectDieSides 1 -> -15%, StackAmount 2, DurationIndex 1 (SpellDuration.dbc 1 = 10000 ms) and EffectSpellClassMask word 1 = 17 = bit 0 | bit 4, matching Torrential Wrath 503352 (SpellFamilyFlags[1] = 1) and Call Lightning 500040 (SpellFamilyFlags[1] = 16) inside SpellFamilyName 22; the scenario reads it on Torrential Wrath because Call Lightning has CastingTimeIndex 0 and no cast time to shorten, while Torrential Wrath's CastingTimeIndex 19 is 2500 ms in SpellCastTimes.dbc, so one stack gives 2500 * 0.85 = 2125. 301220 is Mechanic 8 with DurationIndex 31 (SpellDuration.dbc 31 = 8000 ms) and two enemy-targeted effects, aura 92 (SPELL_AURA_PREVENTS_FLEEING) and aura 191 (SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED), both with stock handlers. The fix is one spell_proc row each with ProcFlags 65536 (PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG - every Stormbringer damage spell inspected has DmgClass 1), SpellTypeMask 1, SpellPhaseMask 2, HitMask 3 and Chance 0, which makes the engine use each record's own ProcChance (33 and 30). Shock 804020 is the trigger: DmgClass 1, SchoolMask 8, no cooldown. The harness cannot force a sub-100% roll, so the discriminator is the proc count over a long burst with the stated false-failure probability, not a live reading of an 8- or 10-second aura at an unpredictable moment. Both counts read zero on the current binary.",
+  "timeout_ms": 240000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "s",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5,
+      "stationary": true
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 804020
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Torrential Wrath's cast time is unmodified without a Storm Chaser stack (SpellCastTimes.dbc 19 = 2500 ms)",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 503352,
+      "op": 10,
+      "base": 2500,
+      "equals": 2500
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 300915,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: one fixtured Storm Chaser stack shortens the cast time natively by 15% (300915 EffectBasePoints -16 / EffectDieSides 1 on SPELLMOD_CASTING_TIME): 2500 * 0.85 = 2125",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 503352,
+      "op": 10,
+      "base": 2500,
+      "equals": 2125
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 300915,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the fixtured Storm Chaser stack is gone again",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 300915,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Storm Chaser proc has happened yet",
+      "actor": "s",
+      "metric": "spell_proc_count",
+      "spell": 300612,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Thunder Grip proc has happened yet",
+      "actor": "s",
+      "metric": "spell_proc_count",
+      "spell": 301219,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "assert",
+      "label": "All six untalented Shock casts deal real damage",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 804020,
+      "target": "dummy",
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: six direct-damage hits without the passive proc Storm Chaser zero times",
+      "actor": "s",
+      "metric": "spell_proc_count",
+      "spell": 300612,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: six direct-damage hits without the passive proc Thunder Grip zero times",
+      "actor": "s",
+      "metric": "spell_proc_count",
+      "spell": 301219,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the enemy carries no Thunder Grip debuff",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 301220,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 300612
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 301219
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "assert",
+      "label": "All six untalented and 24 talented Shock casts deal real damage",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 804020,
+      "target": "dummy",
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Storm Chaser procced at least once in 24 direct-damage hits (33% per hit, so a run of 24 misses is 0.008%)",
+      "actor": "s",
+      "metric": "spell_proc_count",
+      "spell": 300612,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the proc cast the Storm Chaser buff 300915 on the caster",
+      "actor": "s",
+      "metric": "spell_cast_count",
+      "spell": 300915,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Thunder Grip procced at least once in 24 direct-damage hits (30% per hit, so a run of 24 misses is 0.05%)",
+      "actor": "s",
+      "metric": "spell_proc_count",
+      "spell": 301219,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the proc cast the Thunder Grip debuff 301220 at the enemy",
+      "actor": "s",
+      "metric": "spell_cast_count",
+      "spell": 301220,
+      "min": 1
+    }
+  ]
+}

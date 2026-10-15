@@ -1,0 +1,138 @@
+{
+  "schema": 1,
+  "name": "Cultist: Feeding Darkness extends the range and crit chance of the Corruption tree's spells, not the other trees' (#1550)",
+  "contract": "#1550. Feeding Darkness (300302 rank 1, 301347 rank 2) is CharacterAdvancement 6327 in Cultist tab 65, whose CharacterAdvancementTabTypes token is 'Corruption': 'your Corruption spells' names that specialization, not a spell called Corruption (none exists in family 31). Both ranks are passive ADD_FLAT_MODIFIER (107) auras: effect 0 SPELLMOD_RANGE (5), effect 1 SPELLMOD_CRITICAL_CHANCE (7), EffectBasePoints + DieSides 1 = +3 yd/+2% (rank 1) and +6 yd/+4% (rank 2), the tooltip's own numbers. Matched bit by bit against every family-31 SpellFamilyFlags, the range mask covers every active Corruption-tab spell that carries family flags - Psychic Suppression 800432, Obliteration Beam 805572, Eldritch Devastation 802727, Darkwither 800446, all 30 yd (SpellRange 4) - and the crit mask covers Eldritch Devastation and Darkwither; neither mask covers an active spell of the Godblade (tab 64) or Influence (tab 66) trees, such as Empire's Grasp 500704 (30 yd) or Hand of Yogg-Saron 704476 (20 yd). The talent is learned as a player takes it, rank 1 then rank 2 alone; ranges are read through the native modified maximum range and crit through the native SPELLMOD_CRITICAL_CHANCE path, each against its own unmodified baseline.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "c", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "c", "metric": "spell_max_range", "spell": 800446, "save_as": "darkwither_range" },
+    {
+      "action": "snapshot", "actor": "c", "metric": "spell_max_range", "spell": 802727, "save_as": "devastation_range"
+    },
+    { "action": "snapshot", "actor": "c", "metric": "spell_max_range", "spell": 805572, "save_as": "beam_range" },
+    {
+      "action": "snapshot", "actor": "c", "metric": "spell_max_range", "spell": 800432, "save_as": "suppression_range"
+    },
+    { "action": "snapshot", "actor": "c", "metric": "spell_max_range", "spell": 500704, "save_as": "grasp_range" },
+    { "action": "snapshot", "actor": "c", "metric": "spell_max_range", "spell": 704476, "save_as": "yogg_range" },
+    {
+      "action": "snapshot", "actor": "c", "metric": "spell_modifier", "spell": 800446, "op": 7, "base": 5,
+      "save_as": "darkwither_crit"
+    },
+    {
+      "action": "snapshot", "actor": "c", "metric": "spell_modifier", "spell": 802727, "op": 7, "base": 5,
+      "save_as": "devastation_crit"
+    },
+    {
+      "action": "snapshot", "actor": "c", "metric": "spell_modifier", "spell": 500704, "op": 7, "base": 5,
+      "save_as": "grasp_crit"
+    },
+    {
+      "action": "assert", "label": "SETUP: Darkwither starts at its 30-yard range",
+      "actor": "c", "metric": "spell_max_range", "spell": 800446, "min": 29.99, "max": 30.01
+    },
+    { "action": "learn", "label": "Take Feeding Darkness rank 1", "actor": "c", "spell": 300302 },
+    {
+      "action": "assert", "label": "SETUP: rank 1's passive is active",
+      "actor": "c", "metric": "aura", "spell": 300302, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Rank 1: Darkwither +3 yd",
+      "actor": "c", "metric": "spell_max_range", "spell": 800446, "relative_to": "darkwither_range",
+      "min": 2.99, "max": 3.01
+    },
+    {
+      "action": "assert", "label": "Rank 1: Eldritch Devastation +3 yd",
+      "actor": "c", "metric": "spell_max_range", "spell": 802727, "relative_to": "devastation_range",
+      "min": 2.99, "max": 3.01
+    },
+    {
+      "action": "assert", "label": "Rank 1: Obliteration Beam +3 yd",
+      "actor": "c", "metric": "spell_max_range", "spell": 805572, "relative_to": "beam_range",
+      "min": 2.99, "max": 3.01
+    },
+    {
+      "action": "assert", "label": "Rank 1: Psychic Suppression +3 yd",
+      "actor": "c", "metric": "spell_max_range", "spell": 800432, "relative_to": "suppression_range",
+      "min": 2.99, "max": 3.01
+    },
+    {
+      "action": "assert", "label": "Rank 1: Darkwither +2% crit",
+      "actor": "c", "metric": "spell_modifier", "spell": 800446, "op": 7, "base": 5, "relative_to": "darkwither_crit",
+      "min": 1.99, "max": 2.01
+    },
+    {
+      "action": "assert", "label": "Rank 1: Eldritch Devastation +2% crit",
+      "actor": "c", "metric": "spell_modifier", "spell": 802727, "op": 7, "base": 5,
+      "relative_to": "devastation_crit", "min": 1.99, "max": 2.01
+    },
+    {
+      "action": "assert", "label": "Rank 1: the Godblade tree's Empire's Grasp keeps its range",
+      "actor": "c", "metric": "spell_max_range", "spell": 500704, "relative_to": "grasp_range",
+      "min": -0.01, "max": 0.01
+    },
+    {
+      "action": "assert", "label": "Rank 1: the Godblade tree's Empire's Grasp keeps its crit chance",
+      "actor": "c", "metric": "spell_modifier", "spell": 500704, "op": 7, "base": 5, "relative_to": "grasp_crit",
+      "min": -0.01, "max": 0.01
+    },
+    {
+      "action": "assert", "label": "Rank 1: the Influence tree's Hand of Yogg-Saron keeps its range",
+      "actor": "c", "metric": "spell_max_range", "spell": 704476, "relative_to": "yogg_range",
+      "min": -0.01, "max": 0.01
+    },
+    { "action": "unlearn", "label": "Drop rank 1", "actor": "c", "spell": 300302 },
+    { "action": "learn", "label": "Take Feeding Darkness rank 2", "actor": "c", "spell": 301347 },
+    {
+      "action": "assert", "label": "SETUP: rank 2's passive is active",
+      "actor": "c", "metric": "aura", "spell": 301347, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: rank 1's passive is gone",
+      "actor": "c", "metric": "aura", "spell": 300302, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Rank 2: Darkwither +6 yd",
+      "actor": "c", "metric": "spell_max_range", "spell": 800446, "relative_to": "darkwither_range",
+      "min": 5.99, "max": 6.01
+    },
+    {
+      "action": "assert", "label": "Rank 2: Eldritch Devastation +6 yd",
+      "actor": "c", "metric": "spell_max_range", "spell": 802727, "relative_to": "devastation_range",
+      "min": 5.99, "max": 6.01
+    },
+    {
+      "action": "assert", "label": "Rank 2: Obliteration Beam +6 yd",
+      "actor": "c", "metric": "spell_max_range", "spell": 805572, "relative_to": "beam_range",
+      "min": 5.99, "max": 6.01
+    },
+    {
+      "action": "assert", "label": "Rank 2: Psychic Suppression +6 yd",
+      "actor": "c", "metric": "spell_max_range", "spell": 800432, "relative_to": "suppression_range",
+      "min": 5.99, "max": 6.01
+    },
+    {
+      "action": "assert", "label": "Rank 2: Darkwither +4% crit",
+      "actor": "c", "metric": "spell_modifier", "spell": 800446, "op": 7, "base": 5, "relative_to": "darkwither_crit",
+      "min": 3.99, "max": 4.01
+    },
+    {
+      "action": "assert", "label": "Rank 2: Eldritch Devastation +4% crit",
+      "actor": "c", "metric": "spell_modifier", "spell": 802727, "op": 7, "base": 5,
+      "relative_to": "devastation_crit", "min": 3.99, "max": 4.01
+    },
+    {
+      "action": "assert", "label": "Rank 2: Empire's Grasp still keeps its range",
+      "actor": "c", "metric": "spell_max_range", "spell": 500704, "relative_to": "grasp_range",
+      "min": -0.01, "max": 0.01
+    },
+    {
+      "action": "assert", "label": "Rank 2: Hand of Yogg-Saron still keeps its range",
+      "actor": "c", "metric": "spell_max_range", "spell": 704476, "relative_to": "yogg_range",
+      "min": -0.01, "max": 0.01
+    }
+  ]
+}

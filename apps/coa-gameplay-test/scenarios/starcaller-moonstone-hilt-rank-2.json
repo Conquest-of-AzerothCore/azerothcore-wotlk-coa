@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "name": "Moonstone Hilt rank 2 adds 5% parry and 50% block value (#841)",
+  "contract": "Moonstone Hilt 680757 (Spell.dbc, SpellFamilyName 32 (Starcaller). Effect 0 SPELL_AURA_MOD_PARRY_PERCENT (47), EffectBasePoints 4 with DieSides 1 resolves to 5; Effect 1 SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT (150), EffectBasePoints 49 resolves to 50. This matches the tooltip 'parry +$s1%, block value +$s2%'. Native path: Player::UpdateParryPercentage adds GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT) to the non-diminishing part when CanParry() (HandleAuraModParryPercent also sets it), and HandleShieldBlockValuePercent multiplies the SHIELD_BLOCK_VALUE base percent read by Player::GetShieldBlockValue, (flat + Strength*0.5 - 10) * pct. Parry is asserted as an absolute delta against the control (band 4.99-5.01); the control's own parry is asserted at least 1 so the delta cannot come from CanParry flipping on. Block value is a ratio; it is truncated to an integer, so the band is wider than the effect and still excludes 1.0. Both fixtures are the same race, class and level with no ratings or gear, so only the learned passive can move the difference. Nothing in AscensionStarcallerContracts.cpp touches this spell id, and the scenario is a regression guard: it is expected to pass on the shipped data.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 680757
+    },
+    {
+      "action": "assert",
+      "label": "Effect 0 resolves to 5% parry",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 680757,
+      "effect": 0,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "Effect 1 resolves to 50% block value",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 680757,
+      "effect": 1,
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "label": "Control already parries, so the delta is the aura alone",
+      "actor": "control",
+      "metric": "parry_chance",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Parry chance without the passive",
+      "actor": "control",
+      "metric": "parry_chance",
+      "save_as": "parry_base"
+    },
+    {
+      "action": "assert",
+      "label": "Parry chance rises by 5",
+      "actor": "talent",
+      "metric": "parry_chance",
+      "relative_to": "parry_base",
+      "min": 4.99,
+      "max": 5.01
+    },
+    {
+      "action": "assert",
+      "label": "Control block value is large enough for a ratio",
+      "actor": "control",
+      "metric": "block_value",
+      "min": 20
+    },
+    {
+      "action": "snapshot",
+      "label": "Block value without the passive",
+      "actor": "control",
+      "metric": "block_value",
+      "save_as": "block_base"
+    },
+    {
+      "action": "assert",
+      "label": "Block value is 50% higher",
+      "actor": "talent",
+      "metric": "block_value",
+      "ratio_to": "block_base",
+      "min": 1.4,
+      "max": 1.6
+    }
+  ]
+}

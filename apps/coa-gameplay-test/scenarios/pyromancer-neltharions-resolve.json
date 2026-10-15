@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "name": "Neltharion's Resolve makes the party immune to fear (#3711)",
+  "contract": "#3711: Neltharion's Resolve 520488 is APPLY_AREA_AURA_PARTY (effect 35, radius index 9 = 20 yd) carrying aura 77 (MECHANIC_IMMUNITY) with MiscValue 5 = MECHANIC_FEAR, 60 s. Spell::EffectApplyAreaAura and AuraEffect::HandleModMechanicImmunity are native. Probe: Fear 5782 (Spell.dbc Mechanic 5, read in the group 4 audit), queried with spell_immune against a hostile dummy as the caster. Both the caster and the grouped ally must become immune; both must stop being immune when the aura ends. Note: the ward is not consumed by the first fear (stock Fear Ward 6346 has the same shape), so no consumption is asserted.",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 520488
+    },
+    {
+      "action": "assert",
+      "label": "Control: the caster is not fear immune before the cast",
+      "actor": "caster",
+      "metric": "spell_immune",
+      "spell": 5782,
+      "target": "dummy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Control: the ally is not fear immune before the cast",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 5782,
+      "target": "dummy",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 520488
+    },
+    {
+      "action": "assert",
+      "label": "The ward is on the caster",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 520488,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The caster is immune to Fear",
+      "actor": "caster",
+      "metric": "spell_immune",
+      "spell": 5782,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The grouped ally receives the ward",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 520488,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The grouped ally is immune to Fear",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 5782,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ward ends after its 60 s duration on the caster",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 520488,
+      "equals": 0,
+      "within_ms": 70000
+    },
+    {
+      "action": "assert",
+      "label": "Fear lands on the caster again",
+      "actor": "caster",
+      "metric": "spell_immune",
+      "spell": 5782,
+      "target": "dummy",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Fear lands on the ally again",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 5782,
+      "target": "dummy",
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

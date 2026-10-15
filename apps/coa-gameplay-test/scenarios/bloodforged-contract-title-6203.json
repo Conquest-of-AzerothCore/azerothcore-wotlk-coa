@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "name": "Bloodforged Contract grants the Bloody title (#6203)",
+  "contract": "Reported #6203: using the item Bloodforged Contract never grants the promised title. The item 977220 is an on-use store contract whose only spell is 18282 'Dummy Spell' (SPELL_EFFECT_DUMMY, EffectMiscValue 411500, self target, 3600 s item cooldown); the spell carries no per-item parameter, and 880 item_template rows share it, so the title can only come from the contract that was used. The item description promises 'Grants you the Bloody Title!' and the client CharTitles.dbc holds 230 '%s, the Bloody' (bit index 173, custom CoA range). Nothing granted it: no spell script was bound to 18282, no achievement_reward row rewards 210/230, and no module or SQL handler references the item. The fix resolves the contract by item entry in the all-item use hook, so this scenario drives the real use path: the title must be absent before the use, present after it, and a contract that advertises a different title must not grant this one. Founder's Charter 134988 shares the same dummy spell and advertises the Founder title, 210 'Founder %s' (bit 153), so both mapped contracts are exercised, and a second use of the first contract must be idempotent (the title stays, and the other title is still absent). The scenario uses a level-1 character, matching the report.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the session settle",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 977220
+    },
+    {
+      "action": "assert",
+      "label": "The Bloody title is not known before the contract is used",
+      "actor": "bloodmage",
+      "metric": "has_title",
+      "title": 230,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Founder title is not known either",
+      "actor": "bloodmage",
+      "metric": "has_title",
+      "title": 210,
+      "equals": 0
+    },
+    {
+      "action": "use_item",
+      "label": "Use the Bloodforged Contract",
+      "actor": "bloodmage",
+      "item": 977220,
+      "spell": 18282
+    },
+    {
+      "action": "assert",
+      "label": "Using the contract grants the Bloody title",
+      "actor": "bloodmage",
+      "metric": "has_title",
+      "title": 230,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "It does not grant the other contract's title",
+      "actor": "bloodmage",
+      "metric": "has_title",
+      "title": 210,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "bloodmage",
+      "item": 134988
+    },
+    {
+      "action": "use_item",
+      "label": "Use the Founder's Charter",
+      "actor": "bloodmage",
+      "item": 134988,
+      "spell": 18282
+    },
+    {
+      "action": "assert",
+      "label": "Founder's Charter grants the Founder title from the same dummy spell",
+      "actor": "bloodmage",
+      "metric": "has_title",
+      "title": 210,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The first title is untouched",
+      "actor": "bloodmage",
+      "metric": "has_title",
+      "title": 230,
+      "equals": 1
+    }
+  ]
+}

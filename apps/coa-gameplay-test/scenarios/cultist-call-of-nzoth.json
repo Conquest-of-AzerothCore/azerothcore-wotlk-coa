@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Cultist: Call of N'Zoth extends Darkwither's duration natively (#1553)",
+  "contract": "300306 is ADD_FLAT_MODIFIER (107), MiscValue=1 (SPELLMOD_DURATION), EffectBasePoints=8999/DieSides=1 giving a flat +9000 ms (SpellInfo.cpp:489), classmask dword1=2097152 (bit21). Verified against Spell.dbc: 800446 'Darkwither' has SpellFamilyFlags dword1=2097152 (bit21 set) and DurationIndex=8, whose SpellDuration.dbc row gives a finite 15000 ms base. Player::IsAffectedBySpellmod (Player.cpp:10202) only rejects SPELLMOD_DURATION when the affected spell's GetDuration() == -1 (permanent); Darkwither's is finite, so the guard never fires and the mod applies: 15000 + 9000 = 24000 ms, matching the tooltip's '+9 sec' exactly. No script needed.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "c", "race": 1, "class": 25, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: Darkwither keeps its 15000 ms base duration before Call of N'Zoth",
+      "actor": "c", "metric": "spell_modifier", "spell": 800446, "op": 1, "base": 15000, "min": 15000, "max": 15000
+    },
+    {
+      "action": "assert", "label": "SETUP: an outside-the-mask spell (Psychic Suppression) is unaffected",
+      "actor": "c", "metric": "spell_modifier", "spell": 800432, "op": 1, "base": 5000, "min": 5000, "max": 5000
+    },
+    { "action": "learn", "actor": "c", "spell": 300306 },
+    {
+      "action": "assert", "label": "Call of N'Zoth adds 9000 ms to Darkwither's duration",
+      "actor": "c", "metric": "spell_modifier", "spell": 800446, "op": 1, "base": 15000, "min": 24000, "max": 24000
+    },
+    {
+      "action": "assert", "label": "Call of N'Zoth leaves Psychic Suppression's duration alone",
+      "actor": "c", "metric": "spell_modifier", "spell": 800432, "op": 1, "base": 5000, "min": 5000, "max": 5000
+    }
+  ]
+}

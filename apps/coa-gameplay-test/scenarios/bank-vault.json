@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Banks are acquired: receiving the bank item grants the bank, and both routes share the ten-minute cooldown",
-  "contract": "A bank is not part of AscensionCompat.UnlockAllVanity - it is obtained, and the item is what obtains it. A character that has not received one does not know its summon spell and cannot open a placed chest. Handing the bank item to a character - what a shop or a grant does - records the account's own acquisition and grants the summon spell at once, with no relog. After that the item and the spell are the same act: either places the same vault and starts the same ten-minute cooldown, the value the vault's lifetime is matched to. Placing the vault, its despawn and the rule that anyone holding a bank may use a chest someone else placed are outside this harness's reach.",
+  "contract": "A bank is not part of CoA.UnlockAllVanity - it is obtained, and the item is what obtains it. A character that has not received one does not know its summon spell and cannot open a placed chest. Handing the bank item to a character - what a shop or a grant does - records the account's own acquisition and grants the summon spell at once, with no relog. After that the item and the spell are the same act: either places the same vault and starts the same ten-minute cooldown, the value the vault's lifetime is matched to. Placing the vault, its despawn and the rule that anyone holding a bank may use a chest someone else placed are outside this harness's reach.",
   "timeout_ms": 120000,
   "players": [
     { "id": "banker", "race": 1, "class": 1, "level": 80 }

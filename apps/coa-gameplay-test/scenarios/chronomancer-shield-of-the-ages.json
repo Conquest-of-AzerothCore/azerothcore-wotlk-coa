@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "Shield of the Ages' buff reduces damage taken and caps at three stacks (#3391)",
+  "contract": "Shield of the Ages 804444's tooltip is \"When hit by a damaging critical strike, your damage taken is reduced by $804445s1%, and healing received is increased by $804445s2% for $804445d, stacking $804445u times\". Its only effect is aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) on 804445, whose effect 0 is SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN -3 (applied in Unit::SpellDamageBonusTaken) and whose effect 1 is SPELL_AURA_ASCENSION_MOD_HEALING_RECEIVED_PCT +5, with duration index 27 (3000 ms) and StackAmount 3. Spell.dbc gives 804444 ProcFlags 0x0 and no spell_proc row existed, so the buff was never granted. The proc trigger itself cannot be asserted in this harness: it requires an incoming CRITICAL melee or spell hit, the harness has no way to force a creature to crit, a hostile player attacker is unavailable (CoAGameplayTest.cpp has no PvP-flag or player-faction support and Unit::_IsValidAttackTarget requires it), and a base creature crit rate makes a long-window assertion fail roughly half the time. What this scenario does prove deterministically is the buff's own numbers - the values the spell_proc row makes reachable - by fixturing 804445 directly.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    { "id": "attacker", "owner": "chronomancer", "entry": 36, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "chronomancer", "spell": 804444 },
+    {
+      "action": "assert",
+      "label": "Learning the talent alone grants no Shield of the Ages buff",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 804445,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Incoming spell damage without the buff",
+      "actor": "chronomancer",
+      "metric": "spell_damage_taken",
+      "spell": 503875,
+      "target": "attacker",
+      "save_as": "base_damage_taken"
+    },
+    { "action": "set_aura", "actor": "chronomancer", "spell": 804445, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "One stack of Shield of the Ages reduces damage taken by about 3%",
+      "actor": "chronomancer",
+      "metric": "spell_damage_taken",
+      "spell": 503875,
+      "target": "attacker",
+      "ratio_to": "base_damage_taken",
+      "min": 0.95,
+      "max": 0.99
+    },
+    { "action": "set_aura", "actor": "chronomancer", "spell": 804445, "stacks": 3 },
+    {
+      "action": "assert",
+      "label": "Shield of the Ages stacks three times, as StackAmount 3 requires",
+      "actor": "chronomancer",
+      "metric": "aura_stacks",
+      "spell": 804445,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Shield of the Ages lasts 3 seconds",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 804445,
+      "min": 1,
+      "max": 3000
+    }
+  ]
+}

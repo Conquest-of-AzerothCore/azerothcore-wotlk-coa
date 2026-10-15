@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "name": "Altered Course triggers on Discharge casts (#4423, #4448)",
+  "contract": "Spell.dbc: 20% speed per Discharge cast, max 2 stacks, 6s; Ride the Lightning shares the modifier.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "solo", "race": 2, "class": 16, "level": 20 },
+    { "id": "area", "race": 1, "class": 16, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "first", "owner": "area", "entry": 721, "level": 60, "health": 100000, "distance": 2 },
+    { "id": "second", "owner": "area", "entry": 721, "level": 60, "health": 100000, "distance": 3 },
+    { "id": "shock_target", "owner": "area", "entry": 721, "level": 60, "health": 100000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "solo", "spell": 807255 },
+    { "action": "assert", "actor": "solo", "metric": "aura", "spell": 707053, "equals": 0 },
+    { "action": "snapshot", "actor": "solo", "metric": "run_speed_rate", "save_as": "solo_speed" },
+    { "action": "set_aura", "actor": "solo", "spell": 803102, "stacks": 100 },
+    { "action": "cast", "actor": "solo", "spell": 807255 },
+    {
+      "action": "assert", "label": "Discharge spent Static without the talent",
+      "actor": "solo", "metric": "aura_stacks", "spell": 803102, "max": 80, "within_ms": 1000
+    },
+    { "action": "assert", "actor": "solo", "metric": "aura", "spell": 707219, "equals": 0 },
+    {
+      "action": "assert", "actor": "solo", "metric": "run_speed_rate",
+      "ratio_to": "solo_speed", "min": 0.999, "max": 1.001
+    },
+    { "action": "learn", "actor": "solo", "spell": 707053 },
+    { "action": "assert", "actor": "solo", "metric": "aura", "spell": 707053, "equals": 1 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "set_aura", "actor": "solo", "spell": 803102, "stacks": 0 },
+    { "action": "cast", "actor": "solo", "spell": 807255 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "A cast rejected for insufficient Static grants no buff",
+      "actor": "solo", "metric": "aura", "spell": 707219, "equals": 0
+    },
+    { "action": "assert", "actor": "solo", "metric": "spell_proc_count", "spell": 707053, "equals": 0 },
+    { "action": "set_aura", "actor": "solo", "spell": 803102, "stacks": 100 },
+    { "action": "cast", "actor": "solo", "spell": 807255 },
+    {
+      "action": "assert", "label": "Rank 3 grants one stack with no enemies nearby",
+      "actor": "solo", "metric": "aura_stacks", "spell": 707219, "equals": 1, "within_ms": 1000
+    },
+    { "action": "assert", "actor": "solo", "metric": "aura_amount", "spell": 707219, "effect": 0, "equals": 20 },
+    {
+      "action": "assert", "label": "The buff changes actual run speed",
+      "actor": "solo", "metric": "run_speed_rate", "ratio_to": "solo_speed", "min": 1.199, "max": 1.201
+    },
+    {
+      "action": "assert", "actor": "solo", "metric": "aura_duration_ms", "spell": 707219,
+      "min": 5000, "max": 6000
+    },
+    { "action": "wait", "ms": 1600 },
+    { "action": "set_aura", "actor": "solo", "spell": 803102, "stacks": 100 },
+    { "action": "cast", "actor": "solo", "spell": 807255 },
+    {
+      "action": "assert", "actor": "solo", "metric": "aura_stacks", "spell": 707219,
+      "equals": 2, "within_ms": 1000
+    },
+    {
+      "action": "assert", "actor": "solo", "metric": "run_speed_rate",
+      "ratio_to": "solo_speed", "min": 1.399, "max": 1.401
+    },
+    { "action": "wait", "ms": 1600 },
+    { "action": "set_aura", "actor": "solo", "spell": 803102, "stacks": 100 },
+    { "action": "cast", "actor": "solo", "spell": 807255 },
+    {
+      "action": "assert", "label": "The third cast refreshes the capped buff",
+      "actor": "solo", "metric": "aura_duration_ms", "spell": 707219,
+      "min": 5000, "max": 6000, "within_ms": 1000
+    },
+    { "action": "assert", "actor": "solo", "metric": "aura_stacks", "spell": 707219, "equals": 2 },
+    { "action": "assert", "actor": "solo", "metric": "spell_proc_count", "spell": 707053, "equals": 3 },
+    {
+      "action": "assert", "label": "The buff expires naturally",
+      "actor": "solo", "metric": "aura", "spell": 707219, "equals": 0, "within_ms": 6500
+    },
+    {
+      "action": "assert", "actor": "solo", "metric": "run_speed_rate",
+      "ratio_to": "solo_speed", "min": 0.999, "max": 1.001
+    },
+    { "action": "unlearn", "actor": "solo", "spell": 707053 },
+    { "action": "assert", "actor": "solo", "metric": "aura", "spell": 707053, "equals": 0 },
+    { "action": "set_aura", "actor": "solo", "spell": 803102, "stacks": 100 },
+    { "action": "cast", "actor": "solo", "spell": 807255 },
+    {
+      "action": "assert", "label": "Discharge still works after removing the talent",
+      "actor": "solo", "metric": "aura_stacks", "spell": 803102, "max": 80, "within_ms": 1000
+    },
+    { "action": "assert", "actor": "solo", "metric": "aura", "spell": 707219, "equals": 0 },
+    { "action": "assert", "actor": "solo", "metric": "spell_proc_count", "spell": 707053, "equals": 3 },
+    { "action": "learn", "actor": "area", "spell": 707053 },
+    { "action": "learn", "actor": "area", "spell": 807259 },
+    { "action": "snapshot", "actor": "area", "metric": "run_speed_rate", "save_as": "area_speed" },
+    { "action": "snapshot", "actor": "first", "metric": "health", "save_as": "first_health" },
+    { "action": "snapshot", "actor": "second", "metric": "health", "save_as": "second_health" },
+    { "action": "set_aura", "actor": "area", "spell": 803102, "stacks": 100 },
+    { "action": "cast", "actor": "area", "spell": 807259 },
+    {
+      "action": "assert", "actor": "first", "metric": "health",
+      "relative_to": "first_health", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "actor": "second", "metric": "health",
+      "relative_to": "second_health", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Rank 7 hitting two enemies still grants only one stack",
+      "actor": "area", "metric": "aura_stacks", "spell": 707219, "equals": 1
+    },
+    { "action": "assert", "actor": "area", "metric": "spell_proc_count", "spell": 707053, "equals": 1 },
+    { "action": "assert", "actor": "first", "metric": "aura", "spell": 707219, "equals": 0 },
+    { "action": "assert", "actor": "second", "metric": "aura", "spell": 707219, "equals": 0 },
+    {
+      "action": "assert", "actor": "area", "metric": "run_speed_rate",
+      "ratio_to": "area_speed", "min": 1.199, "max": 1.201
+    },
+    { "action": "assert", "actor": "area", "metric": "aura", "spell": 707219, "equals": 0, "within_ms": 6500 },
+    { "action": "learn", "actor": "area", "spell": 504634 },
+    { "action": "snapshot", "actor": "shock_target", "metric": "health", "save_as": "before_shock" },
+    { "action": "cast", "actor": "area", "spell": 504634, "target": "shock_target" },
+    {
+      "action": "assert", "label": "An unrelated Stormbringer spell lands",
+      "actor": "shock_target", "metric": "health", "relative_to": "before_shock", "max": -1, "within_ms": 3000
+    },
+    { "action": "assert", "actor": "area", "metric": "aura", "spell": 707219, "equals": 0 },
+    { "action": "assert", "actor": "area", "metric": "spell_proc_count", "spell": 707053, "equals": 1 },
+    { "action": "learn", "actor": "area", "spell": 800099 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "set_power", "actor": "area", "power": 0, "value": 2500 },
+    { "action": "set_aura", "actor": "area", "spell": 803102, "stacks": 100 },
+    { "action": "cast", "actor": "area", "spell": 800099 },
+    {
+      "action": "assert", "label": "Ride the Lightning inherits the Discharge modifier",
+      "actor": "area", "metric": "aura_stacks", "spell": 707219, "equals": 1, "within_ms": 1000
+    },
+    { "action": "assert", "actor": "area", "metric": "spell_proc_count", "spell": 707053, "equals": 2 }
+  ]
+}

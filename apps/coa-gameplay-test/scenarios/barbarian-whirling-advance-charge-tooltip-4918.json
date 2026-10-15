@@ -1,0 +1,462 @@
+{
+  "schema": 1,
+  "name": "Whirling Advance describes its native charges and recharge at every rank (#4918)",
+  "contract": "The installed SpellCharges.dbc links every Whirling Advance rank to category 662. SpellChargesCategory.dbc defines that category as two charges with a 6000 ms serial recharge. Spell.dbc has no ordinary cooldown and none of the six descriptions mentions charges or recharge. Rank one and rank six are trained with native learnSpell fixtures; ordinary untriggered casts must consume both charges, remain empty before six seconds, then recover one charge and finally both without fixtures. SMSG_PATCH_SPELL must carry the missing charge and recharge information for all six ranks while preserving the damage formula and root restriction. Runeshroud is a positive control for the shared text stream. These observations cover server delivery; graphical client rendering is not available.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "low",
+      "race": 1,
+      "class": 12,
+      "level": 6,
+      "allow_regeneration": false,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "high",
+      "race": 1,
+      "class": 12,
+      "level": 60,
+      "allow_regeneration": false,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "low_enemy",
+      "owner": "low",
+      "entry": 36,
+      "level": 6,
+      "health": 500000,
+      "distance": 8
+    },
+    {
+      "id": "high_enemy",
+      "owner": "high",
+      "entry": 36,
+      "level": 60,
+      "health": 500000,
+      "distance": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 7000,
+      "label": "Allow normal class grants and login text stream to settle"
+    },
+    {
+      "action": "learn",
+      "actor": "low",
+      "spell": 500919
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "knows_spell",
+      "spell": 500919,
+      "equals": 1,
+      "label": "The test rank is trained through the native spellbook"
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "spell_charges",
+      "spell": 500919,
+      "equals": 2,
+      "label": "Both authored charges are available"
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "low",
+      "spell": 500919,
+      "target": "low_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "cast_failure",
+      "spell": 500919,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "spell_charges",
+      "spell": 500919,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "low",
+      "spell": 500919,
+      "target": "low_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "cast_failure",
+      "spell": 500919,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "spell_charges",
+      "spell": 500919,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "spell_charges",
+      "spell": 500919,
+      "equals": 0,
+      "label": "Charges do not recover before six seconds"
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "spell_charges",
+      "spell": 500919,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "The first charge naturally recovers at six seconds"
+    },
+    {
+      "action": "wait",
+      "ms": 6100
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "spell_charges",
+      "spell": 500919,
+      "equals": 2,
+      "label": "Serial recharge restores both charges"
+    },
+    {
+      "action": "learn",
+      "actor": "high",
+      "spell": 504916
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "knows_spell",
+      "spell": 504916,
+      "equals": 1,
+      "label": "The test rank is trained through the native spellbook"
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "spell_charges",
+      "spell": 504916,
+      "equals": 2,
+      "label": "Both authored charges are available"
+    },
+    {
+      "action": "set_power",
+      "actor": "high",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "high",
+      "spell": 504916,
+      "target": "high_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "cast_failure",
+      "spell": 504916,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "spell_charges",
+      "spell": 504916,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "high",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "high",
+      "spell": 504916,
+      "target": "high_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "cast_failure",
+      "spell": 504916,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "spell_charges",
+      "spell": 504916,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "spell_charges",
+      "spell": 504916,
+      "equals": 0,
+      "label": "Charges do not recover before six seconds"
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "spell_charges",
+      "spell": 504916,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "The first charge naturally recovers at six seconds"
+    },
+    {
+      "action": "wait",
+      "ms": 6100
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "spell_charges",
+      "spell": 504916,
+      "equals": 2,
+      "label": "Serial recharge restores both charges"
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500639,
+      "text": "Requires Runeshroud",
+      "equals": 1,
+      "within_ms": 5000,
+      "label": "The shared description stream is captured"
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500919,
+      "text": "2 charges. 6 sec recharge.",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500919,
+      "text": "${$m1+0+$AP*.15}",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500919,
+      "text": "Not usable while rooted.",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504912,
+      "text": "2 charges. 6 sec recharge.",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504912,
+      "text": "${$m1+0+$AP*.15}",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504912,
+      "text": "Not usable while rooted.",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504913,
+      "text": "2 charges. 6 sec recharge.",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504913,
+      "text": "${$m1+0+$AP*.15}",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504913,
+      "text": "Not usable while rooted.",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504914,
+      "text": "2 charges. 6 sec recharge.",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504914,
+      "text": "${$m1+0+$AP*.15}",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504914,
+      "text": "Not usable while rooted.",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504915,
+      "text": "2 charges. 6 sec recharge.",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504915,
+      "text": "${$m1+0+$AP*.15}",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504915,
+      "text": "Not usable while rooted.",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504916,
+      "text": "2 charges. 6 sec recharge.",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504916,
+      "text": "${$m1+0+$AP*.15}",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 504916,
+      "text": "Not usable while rooted.",
+      "equals": 1,
+      "within_ms": 1000
+    }
+  ]
+}

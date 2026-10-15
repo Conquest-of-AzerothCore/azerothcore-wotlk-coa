@@ -115,6 +115,7 @@ namespace Acore::XP
     uint32 BaseGain(uint8 pl_level, uint8 mob_level, ContentLevels content);
 
     uint32 Gain(Player* player, Unit* unit, bool isBattleGround = false);
+    float QuestRate(bool isDFQuest, int32 questLevel, uint8 playerLevel);
 
     inline float xp_in_group_rate(uint32 count, bool isRaid)
     {

@@ -1,0 +1,291 @@
+{
+  "schema": 1,
+  "name": "Primalist Spiritual Warrior: Spirit Charge critical strike chance",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 58
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800144
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 504570
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 800144,
+      "target": "ally",
+      "save_as": "crit_800144"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 504570,
+      "target": "ally",
+      "save_as": "crit_504570"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 803138,
+      "target": "ally",
+      "save_as": "crit_803138"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 800144,
+      "target": "ally",
+      "relative_to": "crit_800144",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 504570,
+      "target": "ally",
+      "relative_to": "crit_504570",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 803138,
+      "target": "ally",
+      "relative_to": "crit_803138",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 31000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800144,
+      "target": "ally",
+      "save_as": "baseline_heal"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800144,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800144,
+      "target": "ally",
+      "relative_to": "baseline_heal",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 504220
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 800144,
+      "target": "ally",
+      "relative_to": "crit_800144",
+      "min": 24.999,
+      "max": 25.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 504570,
+      "target": "ally",
+      "relative_to": "crit_504570",
+      "min": 24.999,
+      "max": 25.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 803138,
+      "target": "ally",
+      "relative_to": "crit_803138",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 31000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 504570,
+      "target": "ally",
+      "save_as": "talented_heal"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 504570,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 504570,
+      "target": "ally",
+      "relative_to": "talented_heal",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504220
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 800144,
+      "target": "ally",
+      "relative_to": "crit_800144",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 504570,
+      "target": "ally",
+      "relative_to": "crit_504570",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 803138,
+      "target": "ally",
+      "relative_to": "crit_803138",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 31000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800144,
+      "target": "ally",
+      "save_as": "removed_heal"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800144,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800144,
+      "target": "ally",
+      "relative_to": "removed_heal",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    }
+  ],
+  "contract": "The native critical chance calculation gains 25 percentage points for both active Spirit Charge ranks while learned, and returns to baseline after removal. An unrelated Geode is unchanged. Normal Spirit Charge casts must successfully heal the nearby ally. timeout_ms counts the real setup time as well as the 100800 ms of waits, and setup took up to 20 s in a full simulated run, so it is 180000 ms."
+}

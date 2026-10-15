@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Runemaster Elemental Assassin converts Agility into spell power, spell critical and hit ratings (#991)",
+  "contract": [
+    "Tooltip 705541: spell damage +$s2% of Agility, spell critical strike +$s1% of Agility, hit rating +$s3%.",
+    "Effect 0 is SPELL_AURA_MOD_RATING_FROM_STAT (220): MiscValue 1024 = 1 << CR_CRIT_SPELL, MiscValueB 1, 10.",
+    "Effect 1 is SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT (174): MiscValue 126 (magic), MiscValueB 1, 20.",
+    "Effect 2 is aura 220 for MiscValue 224 = CR_HIT_MELEE | CR_HIT_RANGED | CR_HIT_SPELL, MiscValueB 1, 5.",
+    "Both aura types are native: Unit::SpellBaseDamageBonusDone and Player::UpdateRating read them.",
+    "The audit's premise (spell ID absent from source) does not apply to native aura types.",
+    "A +100 Agility buff therefore adds 20 spell power, 10 spell critical rating and 5 of each hit rating.",
+    "Without the passive the same buff adds none. Regression evidence for behaviour that already works."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 3000},
+    {
+      "action": "snapshot", "label": "Frost spell power without the passive", "actor": "rm",
+      "metric": "spell_power", "school": 4, "save_as": "base_power"
+    },
+    {
+      "action": "snapshot", "label": "Spell critical rating without the passive", "actor": "rm",
+      "metric": "combat_rating", "rating": 10, "save_as": "base_crit"
+    },
+    {
+      "action": "snapshot", "label": "Spell hit rating without the passive", "actor": "rm",
+      "metric": "combat_rating", "rating": 7, "save_as": "base_hit"
+    },
+    {"action": "set_aura", "label": "Fixture: +100 Agility", "actor": "rm", "spell": 300111, "stacks": 1},
+    {
+      "action": "assert", "label": "Control: Agility alone adds no spell power", "actor": "rm",
+      "metric": "spell_power", "school": 4, "relative_to": "base_power", "equals": 0
+    },
+    {
+      "action": "assert", "label": "Control: Agility alone adds no spell critical rating", "actor": "rm",
+      "metric": "combat_rating", "rating": 10, "relative_to": "base_crit", "equals": 0
+    },
+    {
+      "action": "assert", "label": "Control: Agility alone adds no spell hit rating", "actor": "rm",
+      "metric": "combat_rating", "rating": 7, "relative_to": "base_hit", "equals": 0
+    },
+    {"action": "set_aura", "actor": "rm", "spell": 300111, "stacks": 0},
+    {"action": "learn", "actor": "rm", "spell": 705541},
+    {
+      "action": "assert", "label": "Elemental Assassin passive is active", "actor": "rm", "metric": "aura",
+      "spell": 705541, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Agility-to-spell-critical amount is 10", "actor": "rm",
+      "metric": "aura_amount", "spell": 705541, "effect": 0, "equals": 10
+    },
+    {
+      "action": "assert", "label": "Agility-to-spell-power amount is 20", "actor": "rm", "metric": "aura_amount",
+      "spell": 705541, "effect": 1, "equals": 20
+    },
+    {
+      "action": "assert", "label": "Agility-to-hit amount is 5", "actor": "rm", "metric": "aura_amount",
+      "spell": 705541, "effect": 2, "equals": 5
+    },
+    {
+      "action": "snapshot", "label": "Spell power with the passive on base Agility", "actor": "rm",
+      "metric": "spell_power", "school": 4, "save_as": "passive_power"
+    },
+    {
+      "action": "snapshot", "label": "Spell critical rating with the passive", "actor": "rm",
+      "metric": "combat_rating", "rating": 10, "save_as": "passive_crit"
+    },
+    {
+      "action": "snapshot", "label": "Melee hit rating with the passive", "actor": "rm",
+      "metric": "combat_rating", "rating": 5, "save_as": "passive_melee_hit"
+    },
+    {
+      "action": "snapshot", "label": "Ranged hit rating with the passive", "actor": "rm",
+      "metric": "combat_rating", "rating": 6, "save_as": "passive_ranged_hit"
+    },
+    {
+      "action": "snapshot", "label": "Spell hit rating with the passive", "actor": "rm",
+      "metric": "combat_rating", "rating": 7, "save_as": "passive_spell_hit"
+    },
+    {"action": "set_aura", "label": "Reapply +100 Agility", "actor": "rm", "spell": 300111, "stacks": 1},
+    {
+      "action": "assert", "label": "+100 Agility adds 20% of itself as spell power", "actor": "rm",
+      "metric": "spell_power", "school": 4, "relative_to": "passive_power", "min": 19, "max": 21,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "+100 Agility adds 10% of itself as spell critical rating", "actor": "rm",
+      "metric": "combat_rating", "rating": 10, "relative_to": "passive_crit", "min": 9, "max": 11,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "+100 Agility adds 5% of itself as melee hit rating", "actor": "rm",
+      "metric": "combat_rating", "rating": 5, "relative_to": "passive_melee_hit", "min": 4, "max": 6
+    },
+    {
+      "action": "assert", "label": "+100 Agility adds 5% of itself as ranged hit rating", "actor": "rm",
+      "metric": "combat_rating", "rating": 6, "relative_to": "passive_ranged_hit", "min": 4, "max": 6
+    },
+    {
+      "action": "assert", "label": "+100 Agility adds 5% of itself as spell hit rating", "actor": "rm",
+      "metric": "combat_rating", "rating": 7, "relative_to": "passive_spell_hit", "min": 4, "max": 6
+    },
+    {"action": "set_aura", "actor": "rm", "spell": 300111, "stacks": 0},
+    {
+      "action": "assert", "label": "Removing the Agility buff returns spell power to the passive baseline",
+      "actor": "rm", "metric": "spell_power", "school": 4, "relative_to": "passive_power", "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}

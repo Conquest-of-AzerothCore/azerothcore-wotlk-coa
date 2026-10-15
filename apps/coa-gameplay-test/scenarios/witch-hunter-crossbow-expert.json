@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "name": "Crossbow Expert raises Shadowblast and Witchbane damage (#2195)",
+  "contract": "Crossbow Expert 680384 (rank 1) / 681490 (rank 2) have E0 aura 108 (SPELL_AURA_ADD_PCT_MODIFIER) MiscValue 0 (SPELLMOD_DAMAGE) BasePoints 9 / 19 = +10% / +20% on mask (0, 0, 0x10) = Shadowblast (680264 ... 680269, 804191), and E1 the same aura with BasePoints 4 / 9 = +5% / +10% on mask (0, 0, 0x80000000) = Witchbane's shot 704342. The description reads 'Increases the damage of Shadowblast by $s1% and Witchbane by $s2%'. Shadowblast is a ranged-class weapon spell so its bonus is read through Unit::MeleeDamageBonusDone (melee_spell_damage_done); the Witchbane shot is a ranged-class school-damage spell read through Unit::SpellDamageBonusDone (spell_damage_done). Both apply SPELLMOD_DAMAGE as a multiplier on the full amount, so the ratio to the untalented value equals the DBC percentage. Darkslayer 804179 (flags C 0x20) is the control. Ranks are learned one at a time.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 680384,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 681490,
+      "all_specs": true
+    },
+    {
+      "action": "snapshot",
+      "label": "Shadowblast before",
+      "actor": "hunter",
+      "metric": "melee_spell_damage_done",
+      "save_as": "blast_before",
+      "spell": 804191,
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "label": "Witchbane shot before",
+      "actor": "hunter",
+      "metric": "spell_damage_done",
+      "save_as": "shot_before",
+      "spell": 704342,
+      "effect": 0,
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "label": "Darkslayer before",
+      "actor": "hunter",
+      "metric": "melee_spell_damage_done",
+      "save_as": "slayer_before",
+      "spell": 804179,
+      "target": "dummy"
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 680384,
+      "label": "Learn rank 1"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 aura is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 680384,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 Shadowblast +10%",
+      "actor": "hunter",
+      "metric": "melee_spell_damage_done",
+      "spell": 804191,
+      "target": "dummy",
+      "ratio_to": "blast_before",
+      "min": 1.095,
+      "max": 1.105
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 Witchbane shot +5%",
+      "actor": "hunter",
+      "metric": "spell_damage_done",
+      "spell": 704342,
+      "effect": 0,
+      "target": "dummy",
+      "ratio_to": "shot_before",
+      "min": 1.045,
+      "max": 1.055
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 leaves Darkslayer alone",
+      "actor": "hunter",
+      "metric": "melee_spell_damage_done",
+      "spell": 804179,
+      "target": "dummy",
+      "ratio_to": "slayer_before",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 680384,
+      "all_specs": true,
+      "label": "Replace rank 1"
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 681490,
+      "label": "Learn rank 2"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 aura is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 681490,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 Shadowblast +20%",
+      "actor": "hunter",
+      "metric": "melee_spell_damage_done",
+      "spell": 804191,
+      "target": "dummy",
+      "ratio_to": "blast_before",
+      "min": 1.195,
+      "max": 1.205
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 Witchbane shot +10%",
+      "actor": "hunter",
+      "metric": "spell_damage_done",
+      "spell": 704342,
+      "effect": 0,
+      "target": "dummy",
+      "ratio_to": "shot_before",
+      "min": 1.095,
+      "max": 1.105
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 leaves Darkslayer alone",
+      "actor": "hunter",
+      "metric": "melee_spell_damage_done",
+      "spell": 804179,
+      "target": "dummy",
+      "ratio_to": "slayer_before",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

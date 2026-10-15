@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Runemaster audit #2730: Speedy Attuner raises move speed and cuts Runic Tattoo mana cost",
+  "contract": [
+    "Speedy Attuner rank1 705554: 'Increases your movement speed by 8% and reduces the mana cost of your Runic",
+    "Tattoos by 25%.' Rank2 707746: 15% / 50%. Re-verified in Spell.dbc: both ranks' Effect0 is",
+    "SPELL_AURA_MOD_INCREASE_SPEED (31), EffectBasePoints0 7/14 = +8%/+15% (native stat aura,",
+    "HandleAuraModIncreaseSpeed). Effect1 is SPELL_AURA_ADD_PCT_MODIFIER (108), MiscValue 14 = SPELLMOD_COST,",
+    "EffectBasePoints1 -26/-51 = -25%/-50%, EffectSpellClassMask mask0(effect1) 2097156 (0x200004) and",
+    "mask2(effect1) 16416 (0x4020) on family 38. Runic Tattoos: Earth 801094 carries SpellFamilyName 38,",
+    "SpellFamilyFlags[2] 16386 (0x4002), which shares bit 0x4000 with mask2 - a confirmed match - and has",
+    "ManaCostPercentage 30 (a real percentage-based cost, the kind SPELLMOD_COST reduces). SPELLMOD_COST is",
+    "applied generically inside SpellInfo::CalcPowerCost; no occurrence of 705554/707746 exists in",
+    "src/server/coa/. Expected: each rank raises run speed by its percentage and cuts 801094's power cost",
+    "proportionally."
+  ],
+  "timeout_ms": 60000,
+  "players": [{"id": "rm", "race": 1, "class": 32, "level": 80}],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 3000},
+    {"action": "snapshot", "label": "Base run speed", "actor": "rm", "metric": "run_speed_rate",
+      "save_as": "base_speed"},
+    {"action": "snapshot", "label": "Base Runic Tattoo cost", "actor": "rm", "metric": "spell_power_cost",
+      "spell": 801094, "save_as": "base_cost"},
+    {"action": "learn", "actor": "rm", "spell": 705554},
+    {"action": "assert", "label": "CONTRACT: Speedy Attuner rank 1 is active", "actor": "rm",
+      "metric": "aura", "spell": 705554, "equals": 1, "within_ms": 1500},
+    {"action": "assert", "label": "CONTRACT: rank 1 raises run speed by 8%", "actor": "rm",
+      "metric": "run_speed_rate", "ratio_to": "base_speed", "min": 1.07, "max": 1.09},
+    {"action": "assert", "label": "CONTRACT: rank 1 cuts Runic Tattoo cost by 25%", "actor": "rm",
+      "metric": "spell_power_cost", "spell": 801094, "ratio_to": "base_cost", "min": 0.74, "max": 0.76},
+    {"action": "unlearn", "actor": "rm", "spell": 705554},
+    {"action": "assert", "label": "SETUP: run speed returns to base after unlearning rank 1", "actor": "rm",
+      "metric": "run_speed_rate", "ratio_to": "base_speed", "min": 0.99, "max": 1.01, "within_ms": 2000},
+    {"action": "learn", "actor": "rm", "spell": 707746},
+    {"action": "assert", "label": "CONTRACT: rank 2 is active", "actor": "rm", "metric": "aura",
+      "spell": 707746, "equals": 1, "within_ms": 1500},
+    {"action": "assert", "label": "CONTRACT: rank 2 raises run speed by 15%", "actor": "rm",
+      "metric": "run_speed_rate", "ratio_to": "base_speed", "min": 1.14, "max": 1.16},
+    {"action": "assert", "label": "CONTRACT: rank 2 cuts Runic Tattoo cost by 50%", "actor": "rm",
+      "metric": "spell_power_cost", "spell": 801094, "ratio_to": "base_cost", "min": 0.49, "max": 0.51}
+  ]
+}

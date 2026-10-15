@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "name": "Erasion raises the Anomaly Spikes chance and Anomaly Spike damage (#695)",
+  "contract": "Erasion 704489's tooltip reads \"Increases the chance to trigger Anomaly Spikes by $s1% and their damage by $s2%.\" In Spell.dbc, Effect[0] is SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 18 (SPELLMOD_CHANCE_OF_SUCCESS), EffectBasePoints 4 + DieSides 1 = +5, EffectSpellClassMask [8192,0,0], which inside SpellFamilyName 28 selects Anomaly Spikes 503825 (ProcChance 8) and 504886; Effect[1] is SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue 0 (SPELLMOD_DAMAGE), EffectBasePoints 19 + DieSides 1 = +20%, EffectSpellClassMask [134217728,0,0], which selects the launched Anomaly Spike 503826 only. 503826 is SPELL_EFFECT_SCHOOL_DAMAGE with DmgClass 1, so Unit::SpellDamageBonusDone consumes the damage modifier (Unit.cpp), and Aura::CalcProcChance consumes the chance modifier (SpellAuras.cpp). Both of Erasion's own halves are correct data on a correct core path. The chance half produces no observable spike today because Anomaly Spikes 503825 has ProcFlags 0 and no spell_proc row, so Aura::GetProcEffectMask never admits it and Aura::CalcProcChance is never reached; that missing proc entry belongs to Anomaly Spikes, not to Erasion, and is fixed under issue #852. This scenario guards Erasion's own contribution, which already works.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Anomaly Spike damage before the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 503826,
+      "op": 0,
+      "base": 1000,
+      "save_as": "spike_damage"
+    },
+    {
+      "action": "snapshot",
+      "label": "The authored 8% Anomaly Spikes chance before the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 503825,
+      "op": 18,
+      "base": 8,
+      "save_as": "spike_chance"
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, Anomaly Spike damage is unmodified",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 503826,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, the trigger chance stays at its authored 8",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 503825,
+      "op": 18,
+      "base": 8,
+      "equals": 8
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 704489
+    },
+    {
+      "action": "assert",
+      "label": "Erasion self-applies its passive",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 704489,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Anomaly Spike damage rises by a fifth",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 503826,
+      "op": 0,
+      "base": 1000,
+      "equals": 1200
+    },
+    {
+      "action": "assert",
+      "label": "That is exactly +200 against the baseline",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 503826,
+      "op": 0,
+      "base": 1000,
+      "relative_to": "spike_damage",
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "label": "The trigger chance rises from 8 to 13",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 503825,
+      "op": 18,
+      "base": 8,
+      "equals": 13
+    },
+    {
+      "action": "assert",
+      "label": "That is exactly +5 points against the baseline",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 503825,
+      "op": 18,
+      "base": 8,
+      "relative_to": "spike_chance",
+      "equals": 5
+    }
+  ]
+}

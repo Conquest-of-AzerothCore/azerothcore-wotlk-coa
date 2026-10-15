@@ -1,0 +1,181 @@
+{
+  "schema": 1,
+  "name": "Bloodsores applies a Bloodsore from periodic damage (#3286)",
+  "contract": "Bloodsores 805591 is the rank a Bloodmage owns (CharacterAdvancement class 20 level 30, and present in the live-client capture). Its tooltip is \"Periodic damage dealt now has a $h% chance to apply a Bloodsore to your target for $805592d, stacking $805592u times\", and its single effect is aura 42 SPELL_AURA_PROC_TRIGGER_SPELL with EffectTriggerSpell 805592, ProcChance 20 and Spell.dbc ProcFlags 0x0. SpellMgr::LoadSpellProcs skips DBC fallback generation for a record without proc flags, so with no `spell_proc` row Aura::GetProcEffectMask returned 0 and the proc could never fire. 805592 \"Bloodsore\" is aura 271 MOD_DAMAGE_FROM_CASTER with BasePoints 9 + DieSides 1 = 10%, DurationIndex 31 = 8000 ms and StackAmount 5. The harness has no statistical test, so the assertion is \"at least once in N trials\". Six periodic sources are stacked on one victim before the polling assertion opens: Scarlet Delirium 803688 (DurationIndex 64 = 40000 ms, Amplitude 3000, TargetA 22/TargetB 15 over radius index 14 = 8 yards, so it is cast without a unit target), Vampyr's Kiss 504281 (30000 ms, 5000), Taldaram's Torment 802580 (15000 ms, 3000), Malediction 800776 -> 704120 (12000 ms, 3000), Agonizing Pain 680744 (10000 ms, 2000) and Crimson Tide 504282 (15000 ms, 3000, also caster-centred over radius index 13 = 10 yards). The victim stands 3 yards away, inside both radii. Allowing a 1.5 s global cooldown between casts and a 2 s cast for Scarlet Delirium, about 32 ticks fall inside the 34 s polling window, and 0.8^32 is 7.9e-4, i.e. a false failure under 0.1%; even a conservative 30 ticks gives 1.2e-3. The proc chance itself stays the record's own 20 and is not asserted. The discriminating assertion is the presence of 805592 on the victim at all: on today's tree it can never appear. The authored 10% is checked in two race-free halves, because `aura_amount` cannot report it directly: AuraEffect::CalculateAmount ends with `amount *= GetBase()->GetStackAmount()` (SpellAuraEffects.cpp), so the metric returns 10 times the stack count, and under six concurrent periodic sources the stack count at the moment the assertion runs is whatever the 20% rolls have produced (1 to the record's StackAmount cap of 5). The applied aura is therefore asserted between 10 and 50 - zero when it is absent, so the assertion still fails on a tree without the `spell_proc` row - and the per-stack value itself is pinned exactly by `spell_effect_value` on 805592 effect 0, which reads SpellEffectInfo::CalcValue (BasePoints 9 plus the DieSides 1 range 1..1, RealPointsPerLevel 0, and no SPELLMOD among the spells this caster knows) without going through a stack count. No damage or healing magnitude is asserted anywhere, so the per-viewer scaling mod-destiny-weaver applies to fixture creatures cannot move these numbers.",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "victim",
+      "owner": "caster",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 805591
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803688
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 504281
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 802580
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800776
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680744
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 504282
+    },
+    {
+      "action": "assert",
+      "label": "The victim carries no Bloodsore before any tick",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 805592,
+      "caster": "caster",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "label": "Scarlet Delirium, caster-centred",
+      "spell": 803688
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 504281,
+      "target": "victim"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802580,
+      "target": "victim"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800776,
+      "target": "victim"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 680744,
+      "target": "victim"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "label": "Crimson Tide, caster-centred",
+      "spell": 504282
+    },
+    {
+      "action": "assert",
+      "label": "Periodic damage applies a Bloodsore to the victim",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 805592,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 34000
+    },
+    {
+      "action": "assert",
+      "label": "The applied Bloodsore carries 10% per stack, inside its five-stack cap",
+      "actor": "victim",
+      "metric": "aura_amount",
+      "spell": 805592,
+      "caster": "caster",
+      "effect": 0,
+      "min": 10,
+      "max": 50,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Bloodsore's authored damage-taken bonus is the record's 10%",
+      "actor": "caster",
+      "metric": "spell_effect_value",
+      "spell": 805592,
+      "effect": 0,
+      "equals": 10
+    }
+  ]
+}

@@ -1,0 +1,626 @@
+{
+  "schema": 1,
+  "name": "Harnessed Life keeps a Tormented Soul on a quarter of hits taken (#2659)",
+  "contract": [
+    "Harnessed Life 705406 (live): 'Your Tormented Souls now has a 25% chance to not consume a stack from damage",
+    "taken.' Its effect is a -25 SPELLMOD_CHANCE_OF_SUCCESS on 500481-500483, which the core applies to 500481's proc",
+    "chance, so a hit that keeps its stack also does not heal. Tormented Souls is recast every 4 sec (6 stacks with",
+    "Soulfused Constitution) so it never runs out. Heals per landed hit near 0.75 is consistent; 1.0, every hit",
+    "consuming, is rejected (false failure about 1e-4 at 30 or more hits)."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80
+    },
+    {
+      "id": "attacker",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let player setup settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 561100
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 705406
+    },
+    {
+      "action": "assert",
+      "label": "Harnessed Life is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 705406,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "reaper",
+      "maximum": 5000000,
+      "value": 5000000
+    },
+    {
+      "action": "pvp",
+      "actor": "reaper",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "attacker",
+      "enabled": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500481,
+      "equals": 6,
+      "within_ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "attacker",
+      "target": "reaper"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "attacker"
+    },
+    {
+      "action": "assert",
+      "label": "Tormented Souls never ran out, so every landed hit could consume a stack",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 500481,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Landed hits on the Reaper",
+      "actor": "attacker",
+      "metric": "melee_damage_count",
+      "save_as": "hits"
+    },
+    {
+      "action": "assert",
+      "label": "Enough hits for the rate to mean something",
+      "actor": "attacker",
+      "metric": "melee_damage_count",
+      "min": 25
+    },
+    {
+      "action": "assert",
+      "label": "About three hits in four consume a stack and heal",
+      "actor": "reaper",
+      "metric": "spell_heal_count",
+      "spell": 500482,
+      "ratio_to": "hits",
+      "min": 0.5,
+      "max": 0.95
+    }
+  ]
+}

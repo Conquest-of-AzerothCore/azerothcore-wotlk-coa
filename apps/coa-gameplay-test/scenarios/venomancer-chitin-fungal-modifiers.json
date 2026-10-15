@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Chitinous Surge and Captivation modifiers",
+  "contract": "#610 and #669: both are native spell modifiers. Chitinous Surge (705973) is a flat SPELLMOD_COOLDOWN of -3000 (effect 0) and a PCT SPELLMOD_DAMAGE of +15% (effect 1), both with class mask (0,0,0x2000000), which selects every rank of Chitin Rush (803570, 803641-803644; Spell.dbc cooldown 15000 ms, a melee-class spell so the damage path is Unit::MeleeDamageBonusDone). Captivation (503930) is a flat SPELLMOD_EFFECT2 of +5 with class mask (0,0,0x80000000) on Fungal Growth (804971), whose second effect (aura 271, damage from caster, Mycosis) reads 20 in Spell.dbc and must read 25 as cast. Each value is compared with the same run's value without the passive.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "v", "race": 1, "class": 29, "level": 80, "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "v", "entry": 36, "health": 10000000, "distance": 3}
+  ],
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "assert", "label": "BASELINE: Chitin Rush 803570 cooldown is 15000 ms before Chitinous Surge", "actor": "v", "metric": "spell_modifier", "spell": 803570, "op": 11, "base": 15000, "equals": 15000},
+    {"action": "assert", "label": "BASELINE: Chitin Rush 803641 cooldown is 15000 ms before Chitinous Surge", "actor": "v", "metric": "spell_modifier", "spell": 803641, "op": 11, "base": 15000, "equals": 15000},
+    {"action": "assert", "label": "BASELINE: Chitin Rush 803642 cooldown is 15000 ms before Chitinous Surge", "actor": "v", "metric": "spell_modifier", "spell": 803642, "op": 11, "base": 15000, "equals": 15000},
+    {"action": "assert", "label": "BASELINE: Chitin Rush 803643 cooldown is 15000 ms before Chitinous Surge", "actor": "v", "metric": "spell_modifier", "spell": 803643, "op": 11, "base": 15000, "equals": 15000},
+    {"action": "assert", "label": "BASELINE: Chitin Rush 803644 cooldown is 15000 ms before Chitinous Surge", "actor": "v", "metric": "spell_modifier", "spell": 803644, "op": 11, "base": 15000, "equals": 15000},
+    {"action": "snapshot", "actor": "v", "metric": "melee_spell_damage_done", "spell": 803570, "target": "dummy", "save_as": "chitin_dmg_base"},
+    {"action": "assert", "label": "SETUP: Chitin Rush damage query returns damage", "actor": "v", "metric": "melee_spell_damage_done", "spell": 803570, "target": "dummy", "min": 1},
+    {"action": "snapshot", "actor": "v", "metric": "spell_effect_value", "spell": 804971, "effect": 1, "save_as": "fungal_e1_base"},
+    {"action": "snapshot", "actor": "v", "metric": "spell_effect_value", "spell": 804971, "effect": 0, "save_as": "fungal_e0_base"},
+    {"action": "assert", "label": "BASELINE: Fungal Growth's damage-from-caster effect is 20 before Captivation", "actor": "v", "metric": "spell_effect_value", "spell": 804971, "effect": 1, "equals": 20},
+    {"action": "assert", "label": "SETUP: Chitinous Surge is not applied yet", "actor": "v", "metric": "aura", "spell": 705973, "equals": 0},
+    {"action": "learn", "actor": "v", "spell": 705973},
+    {"action": "assert", "label": "SETUP: Chitinous Surge is applied", "actor": "v", "metric": "aura", "spell": 705973, "within_ms": 3000, "equals": 1},
+    {"action": "assert", "label": "Chitinous Surge shortens Chitin Rush 803570's cooldown by 3 s (15000 -> 12000)", "actor": "v", "metric": "spell_modifier", "spell": 803570, "op": 11, "base": 15000, "within_ms": 3000, "equals": 12000},
+    {"action": "assert", "label": "Chitinous Surge shortens Chitin Rush 803641's cooldown by 3 s (15000 -> 12000)", "actor": "v", "metric": "spell_modifier", "spell": 803641, "op": 11, "base": 15000, "within_ms": 3000, "equals": 12000},
+    {"action": "assert", "label": "Chitinous Surge shortens Chitin Rush 803642's cooldown by 3 s (15000 -> 12000)", "actor": "v", "metric": "spell_modifier", "spell": 803642, "op": 11, "base": 15000, "within_ms": 3000, "equals": 12000},
+    {"action": "assert", "label": "Chitinous Surge shortens Chitin Rush 803643's cooldown by 3 s (15000 -> 12000)", "actor": "v", "metric": "spell_modifier", "spell": 803643, "op": 11, "base": 15000, "within_ms": 3000, "equals": 12000},
+    {"action": "assert", "label": "Chitinous Surge shortens Chitin Rush 803644's cooldown by 3 s (15000 -> 12000)", "actor": "v", "metric": "spell_modifier", "spell": 803644, "op": 11, "base": 15000, "within_ms": 3000, "equals": 12000},
+    {"action": "assert", "label": "Chitinous Surge raises Chitin Rush's damage by 15% against the same-run baseline", "actor": "v", "metric": "melee_spell_damage_done", "spell": 803570, "target": "dummy", "ratio_to": "chitin_dmg_base", "min": 1.149, "max": 1.151, "within_ms": 3000},
+    {"action": "assert", "label": "CONTROL: Chitinous Surge leaves Beetle Form's cooldown alone", "actor": "v", "metric": "spell_modifier", "spell": 803183, "op": 11, "base": 15000, "equals": 15000},
+    {"action": "assert", "label": "SETUP: Captivation is not applied yet", "actor": "v", "metric": "aura", "spell": 503930, "equals": 0},
+    {"action": "learn", "actor": "v", "spell": 503930},
+    {"action": "assert", "label": "SETUP: Captivation is applied", "actor": "v", "metric": "aura", "spell": 503930, "within_ms": 3000, "equals": 1},
+    {"action": "assert", "label": "Captivation adds a flat 5 to Fungal Growth's second effect (SPELLMOD_EFFECT2)", "actor": "v", "metric": "spell_modifier", "spell": 804971, "op": 12, "base": 20, "within_ms": 3000, "equals": 25},
+    {"action": "assert", "label": "Fungal Growth's damage-from-caster effect is now 25 as it would be cast", "actor": "v", "metric": "spell_effect_value", "spell": 804971, "effect": 1, "within_ms": 3000, "equals": 25},
+    {"action": "assert", "label": "CONTROL: Fungal Growth's first effect is untouched", "actor": "v", "metric": "spell_effect_value", "spell": 804971, "effect": 0, "relative_to": "fungal_e0_base", "equals": 0}
+  ]
+}

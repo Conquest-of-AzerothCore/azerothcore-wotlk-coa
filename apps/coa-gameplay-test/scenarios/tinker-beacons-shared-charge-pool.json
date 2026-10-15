@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "Tinker beacons share one charge pool (#4746)",
+  "contract": "SpellCharges.dbc puts all 9 beacon spells (560750 Replenishment, 560754 Alarm, 801799/803799-803803 Shield ranks, 801801 Restorative) in Category 13 (SpellChargesCategory.dbc: 3 charges, 15000 ms recharge), and the tooltip says Shield Beacon 'Shares a cooldown with other Beacons'. Draining Shield Beacon's 3 charges must leave the other three families at 0 charges too.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "t", "spell": 801799 },
+    { "action": "learn", "actor": "t", "spell": 560750 },
+    { "action": "learn", "actor": "t", "spell": 560754 },
+    { "action": "learn", "actor": "t", "spell": 801801 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "Shield Beacon starts with a full pool",
+      "actor": "t", "metric": "spell_charges", "spell": 801799, "equals": 3 },
+    { "action": "assert", "label": "Replenishment Beacon starts with a full pool",
+      "actor": "t", "metric": "spell_charges", "spell": 560750, "equals": 3 },
+    { "action": "assert", "label": "Alarm Beacon starts with a full pool",
+      "actor": "t", "metric": "spell_charges", "spell": 560754, "equals": 3 },
+    { "action": "assert", "label": "Restorative Beacon starts with a full pool",
+      "actor": "t", "metric": "spell_charges", "spell": 801801, "equals": 3 },
+    { "action": "cast", "actor": "t", "spell": 801799 },
+    { "action": "wait", "ms": 1700 },
+    { "action": "cast", "actor": "t", "spell": 801799 },
+    { "action": "wait", "ms": 1700 },
+    { "action": "cast", "actor": "t", "spell": 801799 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "Three Shield Beacon casts spend the whole pool",
+      "actor": "t", "metric": "spell_charges", "spell": 801799, "equals": 0 },
+    { "action": "assert", "label": "Replenishment Beacon shares the drained pool",
+      "actor": "t", "metric": "spell_charges", "spell": 560750, "equals": 0 },
+    { "action": "assert", "label": "Alarm Beacon shares the drained pool",
+      "actor": "t", "metric": "spell_charges", "spell": 560754, "equals": 0 },
+    { "action": "assert", "label": "Restorative Beacon shares the drained pool",
+      "actor": "t", "metric": "spell_charges", "spell": 801801, "equals": 0 }
+  ]
+}

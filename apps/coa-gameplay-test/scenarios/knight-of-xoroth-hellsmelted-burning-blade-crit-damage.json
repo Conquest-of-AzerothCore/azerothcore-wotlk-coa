@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Hellsmelted raises Burning Blade's crit chance and damage by 30% (#2478)",
+  "contract": "Hellsmelted 705016 reads 'Increases the critical strike chance and damage of Burning Blade by 30%' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z; matches the client's own moa_description). The decoded client Spell.dbc capture (spell.csv.gz) shows this is already a fully-formed native record, not a gap: effect 0 is aura 108 (SPELL_AURA_ADD_PCT_MODIFIER), MiscValue 0 (SPELLMOD_DAMAGE), BasePoints 29 (+1 from DieSides 1 = 30); effect 1 is aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER), MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 29 (= 30). Both carry SpellClassMask (0,0,262144) - dword2 bit 18. Spell 524919 ('Burning Blade', the crit-triggered SPELL_EFFECT_SCHOOL_DAMAGE + Armor-penetration proc cast from 524920's native PROC_TRIGGER_SPELL on melee crit, see aura_ascension_xoroth_event::Proc case 524920 in AscensionXorothEvents.cpp) carries that exact same family flags (0,0,262144), so the native spellmod pipeline already applies both bonuses automatically whenever the player casts 524919 - no entry exists for 705016 in AscensionXorothContracts.cpp because none is needed. This scenario is therefore a regression proof, not a functional change: nothing in ApplyContracts, AscensionXorothData.h's XorothEvents/XorothCoefficients lists, or AscensionStockCoefficients.cpp (which only clears BonusMultiplier, unused by SPELLMOD_DAMAGE/SPELLMOD_CRITICAL_CHANCE) interferes with 705016's native record. spell_modifier reads the player's live spellmods without submitting a cast.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: no damage bonus on Burning Blade before Hellsmelted",
+      "actor": "knight", "metric": "spell_modifier", "spell": 524919, "op": 0, "base": 100, "equals": 100
+    },
+    {
+      "action": "assert", "label": "SETUP: no crit bonus on Burning Blade before Hellsmelted",
+      "actor": "knight", "metric": "spell_modifier", "spell": 524919, "op": 7, "base": 0, "equals": 0
+    },
+    { "action": "learn", "actor": "knight", "spell": 705016 },
+    { "action": "set_aura", "actor": "knight", "spell": 705016, "stacks": 1, "label": "Force the Hellsmelted passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Hellsmelted passive is active",
+      "actor": "knight", "metric": "aura", "spell": 705016, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Burning Blade's damage rises 30%",
+      "actor": "knight", "metric": "spell_modifier", "spell": 524919, "op": 0, "base": 100, "equals": 130
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Burning Blade's crit chance rises 30 percentage points",
+      "actor": "knight", "metric": "spell_modifier", "spell": 524919, "op": 7, "base": 0, "equals": 30
+    },
+    {
+      "action": "assert", "label": "REGRESSION: an unrelated family spell is untouched",
+      "actor": "knight", "metric": "spell_modifier", "spell": 501518, "op": 0, "base": 100, "equals": 100
+    }
+  ]
+}

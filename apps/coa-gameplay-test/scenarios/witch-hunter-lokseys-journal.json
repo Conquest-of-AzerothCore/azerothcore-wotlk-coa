@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "name": "Loksey's Journal adds 10 to Shadow Rage's hound haste effect (#1937)",
+  "contract": "Loksey's Journal 504903 has E0 aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER), MiscValue 12 (SPELLMOD_EFFECT2), BasePoints 9 / DieSides 1 = +10, class mask (0, 0x1000, 0); its description reads 'Shadow Rage now also grants your Shadow Hounds $s1% increased haste' = 10%. Both Shadow Rage records, 680275 and 804192, carry SpellFamilyFlags B 0x1000. Effect 1 of 804192 is the aura 138 (SPELL_AURA_MOD_MELEE_HASTE) with BasePoints -1 / DieSides 1 = 0, the slot the tooltip promises the 10% for ($504903m1), so the flat modifier must lift it from 0 to 10 through SpellEffectInfo::CalcValue -> Unit::ApplyEffectModifiers. SPELLMOD_EFFECT2 only touches effect index 1, so effects 0 and 2 are the controls. Deltas are measured relative to a snapshot so the scenario does not depend on the module's contract rewrite of the base amount.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 504903,
+      "all_specs": true,
+      "label": "Start without the passive"
+    },
+    {
+      "action": "snapshot",
+      "label": "Haste effect before",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "save_as": "haste_before",
+      "spell": 804192,
+      "effect": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Effect 0 before",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "save_as": "e0_before",
+      "spell": 804192,
+      "effect": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Effect 2 before",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "save_as": "e2_before",
+      "spell": 804192,
+      "effect": 2
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 504903
+    },
+    {
+      "action": "assert",
+      "label": "The passive aura is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 504903,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The hound haste effect gains 10",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "spell": 804192,
+      "effect": 1,
+      "relative_to": "haste_before",
+      "min": 9.99,
+      "max": 10.01
+    },
+    {
+      "action": "assert",
+      "label": "Effect 0 is unchanged",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "spell": 804192,
+      "effect": 0,
+      "relative_to": "e0_before",
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "assert",
+      "label": "Effect 2 is unchanged",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "spell": 804192,
+      "effect": 2,
+      "relative_to": "e2_before",
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 504903,
+      "all_specs": true,
+      "label": "Remove the passive"
+    },
+    {
+      "action": "assert",
+      "label": "The haste effect returns to its base",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "spell": 804192,
+      "effect": 1,
+      "relative_to": "haste_before",
+      "min": -0.01,
+      "max": 0.01
+    }
+  ]
+}

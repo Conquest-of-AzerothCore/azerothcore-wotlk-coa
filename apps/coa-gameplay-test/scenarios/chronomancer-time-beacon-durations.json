@@ -1,0 +1,298 @@
+{
+  "schema": 1,
+  "name": "Time Beacon extends the durations of Renewal and Protection (#1183)",
+  "contract": "Both Time Beacon ranks read \"Increases the duration of effects applied by your Aeons by $/1000;s1 sec\". Spell.dbc gives 574310 (Rank 1) and 574362 (Rank 2) a single effect, Aura=107 SPELL_AURA_ADD_FLAT_MODIFIER with EffectMiscValue 1 = SPELLMOD_DURATION and EffectSpellClassMask [0,0,32768], EffectBasePoints 3999 and 7999 with EffectDieSides 1, so +4000 ms and +8000 ms; both are DurationIndex 21 (permanent) passives with Stances 0, so learning them applies the modifier. The effects applied by the Aeons are Renewal 560355 and Protection 560374, the spells cast by Aeon of Renewal 806290 and Aeon of Protection 806292; both carry SpellFamilyName 28 and the word-2 bit 32768 the class mask selects (Renewal [0,0,32768], Protection [64,0,32768]). SpellDuration.dbc gives Renewal's DurationIndex 27 a duration of 3000 ms with no per-level scaling, and Protection's DurationIndex 31 a duration of 8000 ms, also unscaled. The contract is therefore Renewal at 3000 / 7000 / 11000 ms and Protection at 8000 / 12000 / 16000 ms for no beacon, Rank 1 and Rank 2 - Protection always 5000 ms longer than Renewal, which is the same expectation the CoA unit test in apps/coa-tests/chronomancer_time/cases.cpp asserts. Renewal carries the aura_ascension_epoch_renewal script (AscensionChronomancerRenewal.cpp), which sets the aura's duration to the time left on its positive per-tick contributions; Renewal's own Spell.dbc amount is 0 (EffectBasePoints -1, EffectDieSides 1), so a bare set_aura adds no contribution and lasts 0 ms. Renewal is therefore applied the way the game applies it: with Aeon of Renewal 806290 active, an Epoch 801270 heal on the Chronomancer makes ApplyEpochAeon (AscensionChronomancerTime.cpp) cast Renewal with a positive per-tick amount, and the aura's maximum duration still comes from SPELLMOD_DURATION. Protection has no such script and stays fixtured with set_aura, which applies it through the ordinary Aura creation path. aura_duration_ms reads the remaining duration, so the absolute bounds allow for real-time decay and each rank's assertion is also taken relative to the unbeaconed snapshot of the same aura.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Fixture teaches Epoch, the heal Aeon of Renewal turns into Renewal",
+      "actor": "chronomancer",
+      "spell": 801270
+    },
+    {
+      "action": "set_aura",
+      "label": "Aeon of Renewal stays active for every Renewal application",
+      "actor": "chronomancer",
+      "spell": 806290,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "label": "Epoch heals the Chronomancer with no Time Beacon learned",
+      "actor": "chronomancer",
+      "spell": 801270
+    },
+    {
+      "action": "assert",
+      "label": "Aeon of Renewal applies Renewal from the unbeaconed Epoch",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 560355,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Renewal's unbeaconed duration",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 560355,
+      "caster": "chronomancer",
+      "save_as": "renewal_none"
+    },
+    {
+      "action": "assert",
+      "label": "Renewal lasts its authored 3000 ms without a beacon",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 560355,
+      "caster": "chronomancer",
+      "min": 2500,
+      "max": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 560355,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Protection with no Time Beacon learned",
+      "actor": "chronomancer",
+      "spell": 560374,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Protection's unbeaconed duration",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 560374,
+      "caster": "chronomancer",
+      "save_as": "protection_none"
+    },
+    {
+      "action": "assert",
+      "label": "Protection lasts its authored 8000 ms without a beacon",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 560374,
+      "caster": "chronomancer",
+      "min": 7500,
+      "max": 8000
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 560374,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "label": "Time Beacon Rank 1",
+      "actor": "chronomancer",
+      "spell": 574310
+    },
+    {
+      "action": "assert",
+      "label": "Time Beacon Rank 1's passive is active on the Chronomancer",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 574310,
+      "caster": "chronomancer",
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Epoch heals the Chronomancer with Time Beacon Rank 1 learned",
+      "actor": "chronomancer",
+      "spell": 801270
+    },
+    {
+      "action": "assert",
+      "label": "Aeon of Renewal applies Renewal under Rank 1",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 560355,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 makes Renewal last 7000 ms",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 560355,
+      "caster": "chronomancer",
+      "min": 6500,
+      "max": 7000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds 4000 ms to Renewal",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 560355,
+      "caster": "chronomancer",
+      "relative_to": "renewal_none",
+      "min": 3500,
+      "max": 4500
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 560355,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 560374,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 makes Protection last 12000 ms",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 560374,
+      "caster": "chronomancer",
+      "min": 11500,
+      "max": 12000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds 4000 ms to Protection",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 560374,
+      "caster": "chronomancer",
+      "relative_to": "protection_none",
+      "min": 3500,
+      "max": 4500
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 560374,
+      "stacks": 0
+    },
+    {
+      "action": "unlearn",
+      "label": "Only one rank may contribute at a time",
+      "actor": "chronomancer",
+      "spell": 574310
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning Rank 1 removes its passive",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 574310,
+      "caster": "chronomancer",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "label": "Time Beacon Rank 2",
+      "actor": "chronomancer",
+      "spell": 574362
+    },
+    {
+      "action": "assert",
+      "label": "Time Beacon Rank 2's passive is active on the Chronomancer",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 574362,
+      "caster": "chronomancer",
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Epoch heals the Chronomancer with Time Beacon Rank 2 learned",
+      "actor": "chronomancer",
+      "spell": 801270
+    },
+    {
+      "action": "assert",
+      "label": "Aeon of Renewal applies Renewal under Rank 2",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 560355,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 makes Renewal last 11000 ms",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 560355,
+      "caster": "chronomancer",
+      "min": 10500,
+      "max": 11000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 adds 8000 ms to Renewal",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 560355,
+      "caster": "chronomancer",
+      "relative_to": "renewal_none",
+      "min": 7500,
+      "max": 8500
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 560355,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 560374,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 makes Protection last 16000 ms",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 560374,
+      "caster": "chronomancer",
+      "min": 15500,
+      "max": 16000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 adds 8000 ms to Protection",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 560374,
+      "caster": "chronomancer",
+      "relative_to": "protection_none",
+      "min": 7500,
+      "max": 8500
+    }
+  ]
+}

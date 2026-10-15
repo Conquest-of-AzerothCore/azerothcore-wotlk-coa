@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Mutilation raises Gore, Infernal Strike and Sever damage by 10/20/30% per rank (#3550)",
+  "contract": "Mutilation reads 'Increases the damage of Gore and Sever by 10%' at rank 1 (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z; matches the client's own moa_description, which omits the conditional third target). The client's full description (spell.csv.gz) actually names all three: 'Increases the damage of Gore, Infernal Strike, and Brimstone Bludgeon (Shieldgore) [Sever] by $s1%.' The decoded Spell.dbc capture shows ranks 805695/807900/807913 each carry a single effect: aura 108 (SPELL_AURA_ADD_PCT_MODIFIER), MiscValue 0 (SPELLMOD_DAMAGE), BasePoints 9/19/29 (+1 from DieSides 1 = 10/20/30), SpellClassMask (0,2097728,0). Decoding that dword1 value: bit 6 (64) matches Gore's (680939-680944/805555) own family flags, bit 9 (512) matches Infernal Strike's (501511-501520/801016), and bit 21 (2097152) matches Sever's (500904/501499-501507) - the exact combined bits already used elsewhere in this file (Combusting Blade's 'Infernal Strike' SPELLMOD_COST classmask flag96(0,768,0) documents bit 9; Chop Shop's flag96(0,2097152|8388608,0) documents bit 21). The native classmask already covers all three named abilities at their stated per-rank percentages; nothing in AscensionXorothContracts.cpp touches 805695/807900/807913, so no functional change is needed - this scenario is a regression proof. At level 60 the owned ranks are Gore 680944, Infernal Strike 501518, Sever 501505 (AscensionSpellProgressionData.h). Only rank 1 (805695, +10%) is exercised directly; ranks 2/3 share the identical mechanism and are confirmed against the same capture in the commit body.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: no damage bonus on Gore before Mutilation",
+      "actor": "knight", "metric": "spell_modifier", "spell": 680944, "op": 0, "base": 100, "equals": 100
+    },
+    {
+      "action": "assert", "label": "SETUP: no damage bonus on Infernal Strike before Mutilation",
+      "actor": "knight", "metric": "spell_modifier", "spell": 501518, "op": 0, "base": 100, "equals": 100
+    },
+    {
+      "action": "assert", "label": "SETUP: no damage bonus on Sever before Mutilation",
+      "actor": "knight", "metric": "spell_modifier", "spell": 501505, "op": 0, "base": 100, "equals": 100
+    },
+    { "action": "learn", "actor": "knight", "spell": 805695 },
+    { "action": "set_aura", "actor": "knight", "spell": 805695, "stacks": 1, "label": "Force rank 1's passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: rank 1 of Mutilation is active",
+      "actor": "knight", "metric": "aura", "spell": 805695, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Gore's damage rises 10%",
+      "actor": "knight", "metric": "spell_modifier", "spell": 680944, "op": 0, "base": 100, "equals": 110
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Infernal Strike's damage rises 10%",
+      "actor": "knight", "metric": "spell_modifier", "spell": 501518, "op": 0, "base": 100, "equals": 110
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Sever's damage rises 10%",
+      "actor": "knight", "metric": "spell_modifier", "spell": 501505, "op": 0, "base": 100, "equals": 110
+    },
+    {
+      "action": "assert", "label": "REGRESSION: an unrelated family spell is untouched",
+      "actor": "knight", "metric": "spell_modifier", "spell": 524919, "op": 0, "base": 100, "equals": 100
+    }
+  ]
+}

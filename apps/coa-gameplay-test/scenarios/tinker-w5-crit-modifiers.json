@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Tinker crit modifiers reach their spells natively (#3116, #2845)",
+  "contract": "Two passives must keep delivering their crit modifiers through the stock spell-modifier path, with no module binding. #2845 Arclight Adept (705788) is an ADD_PCT_MODIFIER of SPELLMOD_CRIT_DAMAGE_BONUS worth +15, routed to the Mechsuit set by the family-34 override in SpellInfo::IsAffectedBySpellMod, so the crit bonus of Combustion (801388) is multiplied by 1.15: the harness probe feeds 1000 base damage, a ranged-class spell doubles it to 2000, and the +15% applies to the 1000 bonus half only, giving 2150 (2149 when the float product truncates). #3116 Short Fuse (707246) is an ADD_FLAT_MODIFIER of SPELLMOD_EFFECT1 worth +20 that raises effect 0 of Sparked and Ready! (537247) from 0 to 20, turning its otherwise no-op SPELLMOD_CRITICAL_CHANCE modifier into +20 percentage points for Rocket Launcher (500220). A second Tinker carries 537247 without Short Fuse and must measure 0.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "adept", "race": 1, "class": 28, "level": 80 },
+    { "id": "fuse", "race": 1, "class": 28, "level": 80 },
+    { "id": "plain", "race": 1, "class": 28, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "adept", "entry": 36, "health": 1000000 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "Unmodified Combustion crit probe doubles the 1000 base",
+      "actor": "adept", "metric": "spell_critical_damage", "spell": 801388, "target": "dummy",
+      "equals": 2000 },
+    { "action": "learn", "actor": "adept", "spell": 705788 },
+    { "action": "assert", "label": "Arclight Adept applies itself as a passive",
+      "actor": "adept", "metric": "aura", "spell": 705788, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Arclight Adept carries its +15 percent modifier",
+      "actor": "adept", "metric": "aura_amount", "spell": 705788, "effect": 0, "equals": 15 },
+    { "action": "assert", "label": "Arclight Adept scales the Combustion crit bonus by 1.15",
+      "actor": "adept", "metric": "spell_critical_damage", "spell": 801388, "target": "dummy",
+      "min": 2149, "max": 2150, "within_ms": 3000 },
+    { "action": "learn", "actor": "fuse", "spell": 707246 },
+    { "action": "assert", "label": "Short Fuse applies itself as a passive",
+      "actor": "fuse", "metric": "aura", "spell": 707246, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Short Fuse carries its +20 flat modifier",
+      "actor": "fuse", "metric": "aura_amount", "spell": 707246, "effect": 0, "equals": 20 },
+    { "action": "set_aura", "actor": "fuse", "spell": 537247, "stacks": 1 },
+    { "action": "set_aura", "actor": "plain", "spell": 537247, "stacks": 1 },
+    { "action": "assert", "label": "Short Fuse raises Sparked and Ready! effect 0 to 20",
+      "actor": "fuse", "metric": "aura_amount", "spell": 537247, "effect": 0, "equals": 20,
+      "within_ms": 2000 },
+    { "action": "assert", "label": "Sparked and Ready! alone leaves effect 0 at 0",
+      "actor": "plain", "metric": "aura_amount", "spell": 537247, "effect": 0, "equals": 0,
+      "within_ms": 2000 },
+    { "action": "assert", "label": "Rocket Launcher gains 20 points of crit chance",
+      "actor": "fuse", "metric": "spell_modifier", "spell": 500220, "op": 7, "base": 0,
+      "equals": 20 },
+    { "action": "assert", "label": "Without Short Fuse the same modifier contributes nothing",
+      "actor": "plain", "metric": "spell_modifier", "spell": 500220, "op": 7, "base": 0,
+      "equals": 0 }
+  ]
+}

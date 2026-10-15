@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "Crimson Etchings removes the Blood Shield and Vital Shield health costs (#2158)",
+  "contract": "Crimson Etchings 570735 is one effect: aura 108 with MiscValue 14 (SPELLMOD_COST), BasePoints -101 + DieSides 1 = -100%, over EffectSpellClassMask (1342177280, 0, 0) = word 0 bits 28 and 30, i.e. Blood Shield 504296, Vital Shield 504849/804309, Thick Pelt 556233 and Coagulated Shield 504897. Blood Shield is PowerType -2 (POWER_HEALTH) with ManaCostPercentage 10 and Vital Shield is PowerType -2 with ManaCost 50 and ManaCostPercentage 12; SpellInfo::CalcPowerCost applies SPELLMOD_COST after its POWER_HEALTH branch, so both health costs really go to zero. Tooltip: \"Removes the health cost of your Blood Shield and Vital Shield.\" Thick Pelt and Coagulated Shield share bit 30 but have no power cost, so the extra reach is inert. Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Blood Shield costs health before the talent",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 504296,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Vital Shield costs health before the talent",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 504849,
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 570735
+    },
+    {
+      "action": "assert",
+      "label": "Crimson Etchings removes Blood Shield's cost",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 504296,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Crimson Etchings removes Vital Shield's cost",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 504849,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Crimson Etchings does not touch Bloodbolt's cost",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 14,
+      "base": 300,
+      "equals": 300
+    }
+  ]
+}

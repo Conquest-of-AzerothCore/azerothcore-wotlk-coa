@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Embodied Presences raises Presence proc chance and halves their mana cost (#3321)",
+  "contract": "Embodied Presences 803283 (Spell.dbc, passive, family 31) has two effects sharing class mask dword A bit9 (512) + dword C bit6 (64). effect0 is SPELLMOD_FLAT (107) on SPELLMOD_CHANCE_OF_SUCCESS (misc 18), BasePoints 4+1=+5 (percentage points). effect1 is SPELLMOD_PCT (108) on SPELLMOD_COST (misc 14), BasePoints -51+1=-50%. That combined mask independently name-matches the Cultist's actually-granted Presence spells (src/server/coa/AscensionCultistData.h CultistEvents[]): Presence of Y'Shaarj (803035) and Presence of N'Zoth (803037) both carry SpellFamilyFlags [16384,0,64] (dword C bit6 matches), and Presence of C'Thun (803339) carries the same [16384,0,64] -- confirmed here by DBC lookup, upgrading the chunk7 investigator's 'medium confidence, not name-verified' note to high. (Two other same-named DBC rows, 803038 and 803355/801560, exist with different flags but are absent from CultistEvents[] and are not live Cultist grants.) Both spellmods are stock ops read generically by the engine wherever it rolls proc chance (SPELLMOD_CHANCE_OF_SUCCESS) or computes power cost (SpellInfo::CalcPowerCost, SPELLMOD_COST) for the affected spell; no CoA script or dummy handler exists for 803283 anywhere in src/server/coa or src/server/game. spell_power_cost proves the -50% mana cost directly and deterministically; the +5%-proc-chance clause has no scenario metric that reads a raw SPELLMOD_CHANCE_OF_SUCCESS total without an actual proc roll, so it is asserted via spell_modifier (op 18) against an arbitrary base instead of an unreliable repeated-roll count, avoiding a coin-flip assertion. A control spell outside the mask (Netherstrike 806222) must be unaffected by both mods. Regression guard for behaviour that already works natively; no code change.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "p", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "p", "spell": 803037 },
+    {
+      "action": "assert", "label": "SETUP: Presence of N'Zoth's proc-chance mod is unaffected before Embodied Presences",
+      "actor": "p", "metric": "spell_modifier", "spell": 803037, "op": 18, "base": 10, "equals": 10
+    },
+    {
+      "action": "snapshot", "label": "SETUP: Presence of N'Zoth's native mana cost",
+      "actor": "p", "metric": "spell_power_cost", "spell": 803037, "save_as": "cost_before"
+    },
+    {
+      "action": "assert", "label": "SETUP: Netherstrike's proc-chance mod is unaffected too (control)",
+      "actor": "p", "metric": "spell_modifier", "spell": 806222, "op": 18, "base": 10, "equals": 10
+    },
+    { "action": "learn", "actor": "p", "spell": 803283 },
+    {
+      "action": "assert", "label": "Embodied Presences adds 5 points to Presence of N'Zoth's proc-chance mod (#3321)",
+      "actor": "p", "metric": "spell_modifier", "spell": 803037, "op": 18, "base": 10, "equals": 15
+    },
+    {
+      "action": "assert", "label": "Embodied Presences adds 5 points to Presence of Y'Shaarj's proc-chance mod too (#3321)",
+      "actor": "p", "metric": "spell_modifier", "spell": 803035, "op": 18, "base": 10, "equals": 15
+    },
+    {
+      "action": "assert", "label": "Embodied Presences adds 5 points to Presence of C'Thun's proc-chance mod too (#3321)",
+      "actor": "p", "metric": "spell_modifier", "spell": 803339, "op": 18, "base": 10, "equals": 15
+    },
+    {
+      "action": "assert", "label": "Embodied Presences halves Presence of N'Zoth's mana cost (#3321)",
+      "actor": "p", "metric": "spell_power_cost", "spell": 803037, "ratio_to": "cost_before", "min": 0.49, "max": 0.51
+    },
+    {
+      "action": "assert", "label": "Control: Netherstrike's proc-chance mod stays unaffected by Embodied Presences",
+      "actor": "p", "metric": "spell_modifier", "spell": 806222, "op": 18, "base": 10, "equals": 10
+    }
+  ]
+}

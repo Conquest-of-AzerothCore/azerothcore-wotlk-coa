@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "NPC crowd control on a player diminishes to 50%, 25%, then immune (#5091)",
+  "contract": "Spell::DoSpellHitOnUnit raised a target's diminishing level only when the caster was player-controlled, so creatures could chain the same crowd control on a player at full duration. Crowd control from a creature now raises the level on a player-controlled target in every diminishing group. Hammer of Justice 10308 (mechanic stun, DurationIndex 27 = 3000 ms) is DIMINISHING_CONTROLLED_STUN (DRTYPE_ALL); Silence 15487 (mechanic silence, DurationIndex 28 = 5000 ms) is DIMINISHING_SILENCE (DRTYPE_PLAYER). Each application within 15 s of the previous one ending halves the duration, and the fourth is resisted as immune. The creature is ten levels above the player so its spells cannot miss.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "p", "race": 1, "class": 24, "level": 70 }
+  ],
+  "creatures": [
+    { "id": "npc", "owner": "p", "entry": 28168, "health": 500000, "level": 80, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "set_health", "actor": "p", "maximum": 1000000, "value": 1000000 },
+    { "action": "attack", "actor": "p", "target": "npc" },
+    { "action": "wait", "ms": 1000 },
+    { "action": "cast", "actor": "npc", "spell": 10308, "target": "p" },
+    { "action": "assert", "label": "First NPC stun lands", "actor": "p", "metric": "aura", "spell": 10308, "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "First NPC stun has its full duration", "actor": "p", "metric": "aura_duration_ms", "spell": 10308, "min": 2000, "max": 3000 },
+    { "action": "assert", "actor": "p", "metric": "aura", "spell": 10308, "equals": 0, "within_ms": 4000 },
+    { "action": "cast", "actor": "npc", "spell": 10308, "target": "p" },
+    { "action": "assert", "label": "Second NPC stun lands", "actor": "p", "metric": "aura", "spell": 10308, "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "Second NPC stun is diminished to half", "actor": "p", "metric": "aura_duration_ms", "spell": 10308, "min": 900, "max": 1500 },
+    { "action": "assert", "actor": "p", "metric": "aura", "spell": 10308, "equals": 0, "within_ms": 2500 },
+    { "action": "cast", "actor": "npc", "spell": 10308, "target": "p" },
+    { "action": "assert", "label": "Third NPC stun lands", "actor": "p", "metric": "aura", "spell": 10308, "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "Third NPC stun is diminished to a quarter", "actor": "p", "metric": "aura_duration_ms", "spell": 10308, "min": 300, "max": 750 },
+    { "action": "assert", "actor": "p", "metric": "aura", "spell": 10308, "equals": 0, "within_ms": 2000 },
+    { "action": "cast", "actor": "npc", "spell": 10308, "target": "p" },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "Fourth NPC stun is resisted as immune", "actor": "p", "metric": "aura", "spell": 10308, "equals": 0 },
+    { "action": "cast", "actor": "npc", "spell": 15487, "target": "p" },
+    { "action": "assert", "label": "First NPC silence lands", "actor": "p", "metric": "aura", "spell": 15487, "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "First NPC silence has its full duration", "actor": "p", "metric": "aura_duration_ms", "spell": 15487, "min": 4000, "max": 5000 },
+    { "action": "assert", "actor": "p", "metric": "aura", "spell": 15487, "equals": 0, "within_ms": 6000 },
+    { "action": "cast", "actor": "npc", "spell": 15487, "target": "p" },
+    { "action": "assert", "label": "Second NPC silence lands", "actor": "p", "metric": "aura", "spell": 15487, "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "Second NPC silence is diminished to half", "actor": "p", "metric": "aura_duration_ms", "spell": 15487, "min": 1500, "max": 2500 },
+    { "action": "assert", "actor": "p", "metric": "aura", "spell": 15487, "equals": 0, "within_ms": 3500 },
+    { "action": "cast", "actor": "npc", "spell": 15487, "target": "p" },
+    { "action": "assert", "label": "Third NPC silence lands", "actor": "p", "metric": "aura", "spell": 15487, "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "Third NPC silence is diminished to a quarter", "actor": "p", "metric": "aura_duration_ms", "spell": 15487, "min": 600, "max": 1250 },
+    { "action": "assert", "actor": "p", "metric": "aura", "spell": 15487, "equals": 0, "within_ms": 2500 },
+    { "action": "cast", "actor": "npc", "spell": 15487, "target": "p" },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "Fourth NPC silence is resisted as immune", "actor": "p", "metric": "aura", "spell": 15487, "equals": 0 },
+    { "action": "assert", "label": "The player survived the whole sequence", "actor": "p", "metric": "alive", "equals": 1 }
+  ]
+}

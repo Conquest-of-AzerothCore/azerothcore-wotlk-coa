@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "name": "Injunction pulls an idle defensive creature at reported level 15 (#5784)",
+  "contract": [
+    "Injunction 800624 is an authored taunt, with ATTACK_ME and MOD_TAUNT. The taunt must select its caster as the attack victim during the aura.",
+    "Use a defensive creature with its real template AI, so combat/aura flags alone cannot pass the test.",
+    "Observe victim and actual movement, either starting idle or already attacking a second player.",
+    "Use the reported level 15; authored ClassSpells grants Injunction at level 14. No attack, victim change or movement is injected."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 15,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 800624
+    },
+    {
+      "action": "assert",
+      "actor": "golem",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "golem",
+      "metric": "victim",
+      "target": "cleric",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "distance",
+      "target": "cleric",
+      "save_as": "before_taunt"
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 800624,
+      "target": "golem"
+    },
+    {
+      "action": "assert",
+      "actor": "golem",
+      "metric": "aura",
+      "spell": 800624,
+      "caster": "cleric",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "golem",
+      "metric": "victim",
+      "target": "cleric",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "golem",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "golem",
+      "metric": "distance",
+      "target": "cleric",
+      "relative_to": "before_taunt",
+      "max": -1,
+      "within_ms": 3500,
+      "label": "The taunted creature approaches its new victim"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "golem",
+      "owner": "cleric",
+      "entry": 36,
+      "level": 15,
+      "health": 1000000,
+      "distance": 12,
+      "reaction": 1
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  }
+}

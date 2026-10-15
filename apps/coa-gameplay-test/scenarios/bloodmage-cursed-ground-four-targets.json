@@ -1,0 +1,267 @@
+{
+  "schema": 1,
+  "name": "Cursed Ground does not bleed when Sanguine Rupture hits only four enemies (#4752)",
+  "contract": "At level 25 with Cursed Ground 561195 learned, Sanguine Rupture rank 802456 deals one direct 800775 hit per selected enemy but no 561303 bleed when only four enemies are hit.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 25,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target1",
+      "owner": "caster",
+      "entry": 36,
+      "level": 25,
+      "health": 1000000,
+      "distance": 2
+    },
+    {
+      "id": "target2",
+      "owner": "caster",
+      "entry": 36,
+      "level": 25,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "target3",
+      "owner": "caster",
+      "entry": 36,
+      "level": 25,
+      "health": 1000000,
+      "distance": 4
+    },
+    {
+      "id": "target4",
+      "owner": "caster",
+      "entry": 36,
+      "level": 25,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "target1",
+      "value": 999999
+    },
+    {
+      "action": "set_health",
+      "actor": "target2",
+      "value": 999999
+    },
+    {
+      "action": "set_health",
+      "actor": "target3",
+      "value": 999999
+    },
+    {
+      "action": "set_health",
+      "actor": "target4",
+      "value": 999999
+    },
+    {
+      "action": "wait",
+      "label": "Let fixture AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "target1",
+      "metric": "max_health",
+      "equals": 1000000,
+      "label": "Target 1 maximum health is stable"
+    },
+    {
+      "action": "assert",
+      "actor": "target2",
+      "metric": "max_health",
+      "equals": 1000000,
+      "label": "Target 2 maximum health is stable"
+    },
+    {
+      "action": "assert",
+      "actor": "target3",
+      "metric": "max_health",
+      "equals": 1000000,
+      "label": "Target 3 maximum health is stable"
+    },
+    {
+      "action": "assert",
+      "actor": "target4",
+      "metric": "max_health",
+      "equals": 1000000,
+      "label": "Target 4 maximum health is stable"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 802456
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 802456,
+      "equals": 1,
+      "label": "Learn the level-24 Sanguine Rupture rank"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 802456,
+      "equals": 0,
+      "label": "Sanguine Rupture is instant without Cursed Ground"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 561195
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 561195,
+      "equals": 1,
+      "label": "Cursed Ground, four targets: Cursed Ground is learned"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_cast_time_ms",
+      "spell": 802456,
+      "equals": 2000,
+      "label": "Cursed Ground, four targets: Cursed Ground adds two seconds to the cast"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 800775,
+      "save_as": "b_direct"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 800775,
+      "target": "target1",
+      "save_as": "b_direct_one"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561303,
+      "save_as": "b_bleed"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561303,
+      "target": "target1",
+      "save_as": "b_bleed_one"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_go_count",
+      "spell": 802456,
+      "save_as": "b_go"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_cast_count",
+      "spell": 802456,
+      "save_as": "b_cast"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802456,
+      "target": "target1",
+      "label": "Cursed Ground, four targets: cast Sanguine Rupture once"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_go_count",
+      "spell": 802456,
+      "relative_to": "b_go",
+      "equals": 1,
+      "within_ms": 6000,
+      "label": "Cursed Ground, four targets: one native Rupture dispatch"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_cast_count",
+      "spell": 802456,
+      "relative_to": "b_cast",
+      "equals": 1,
+      "within_ms": 6000,
+      "label": "Cursed Ground, four targets: one Rupture cast completes"
+    },
+    {
+      "action": "wait",
+      "label": "Cursed Ground, four targets: wait through the two-second bleed window",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 800775,
+      "relative_to": "b_direct",
+      "equals": 4,
+      "label": "Cursed Ground, four targets: one direct hit per selected enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 800775,
+      "target": "target1",
+      "relative_to": "b_direct_one",
+      "equals": 1,
+      "label": "Cursed Ground, four targets: representative target takes one direct hit"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561303,
+      "relative_to": "b_bleed",
+      "equals": 0,
+      "label": "Cursed Ground, four targets: expected total bleed tick count"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561303,
+      "target": "target1",
+      "relative_to": "b_bleed_one",
+      "equals": 0,
+      "label": "Cursed Ground, four targets: representative target takes 0 bleed ticks"
+    }
+  ]
+}

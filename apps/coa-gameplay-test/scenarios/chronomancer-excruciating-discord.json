@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "name": "Excruciating Discord makes Discordance crit under Chronological (#2187)",
+  "contract": "Excruciating Discord 582356's tooltip reads \"Your Discordances used with Chronological are now guaranteed to critically strike.\" In Spell.dbc the talent is a single SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 12 (SPELLMOD_EFFECT2), EffectBasePoints 99 + DieSides 1 = +100, EffectSpellClassMask [0,0,16384], which inside SpellFamilyName 28 selects Chronological 542728 and nothing else. Chronological's Effect[1] is SPELL_AURA_ADD_FLAT_MODIFIER EffectMiscValue 7 (SPELLMOD_CRITICAL_CHANCE) with EffectBasePoints -1 + DieSides 1 = 0, masked [33554432,0,0], which selects Discordance (503875-503880, 582758-582760); its Effect[0] is the SPELLMOD_CASTING_TIME -100% that makes Discordance instant, which is what \"used with Chronological\" means. Unit::ApplyEffectModifiers routes SPELLMOD_EFFECT2 to effect index 1 (Unit.cpp), raising the crit modifier to 100, and Unit::SpellDoneCritChance consumes SPELLMOD_CRITICAL_CHANCE (Unit.cpp). The modifier is flat, so the percent-only HasSpellModApplied early return in Player::ApplySpellMod does not apply and the only guard is the totalflat >= 100 check that forbids a second 100-point crit modifier. Generic core machinery. This scenario is a regression guard for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "talent",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Chronological's crit modifier before the talent",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 542728,
+      "effect": 1,
+      "save_as": "chrono_crit"
+    },
+    {
+      "action": "snapshot",
+      "label": "Discordance's crit chance with no Chronological",
+      "actor": "talent",
+      "metric": "spell_done_crit_chance",
+      "spell": 503875,
+      "target": "dummy",
+      "save_as": "discord_crit"
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, Chronological's crit modifier resolves to zero",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 542728,
+      "effect": 1,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 582356
+    },
+    {
+      "action": "assert",
+      "label": "Excruciating Discord self-applies its passive",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 582356,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Chronological's crit modifier resolves to 100 with the talent",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 542728,
+      "effect": 1,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "That is exactly +100 against the baseline",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 542728,
+      "effect": 1,
+      "relative_to": "chrono_crit",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "The talent alone does not make Discordance crit",
+      "actor": "talent",
+      "metric": "spell_done_crit_chance",
+      "spell": 503875,
+      "target": "dummy",
+      "relative_to": "discord_crit",
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture Chronological on the talented player",
+      "actor": "talent",
+      "spell": 542728,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Discordance is now guaranteed to crit",
+      "actor": "talent",
+      "metric": "spell_done_crit_chance",
+      "spell": 503875,
+      "target": "dummy",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "Chronological added exactly 100 points of crit chance",
+      "actor": "talent",
+      "metric": "spell_done_crit_chance",
+      "spell": 503875,
+      "target": "dummy",
+      "relative_to": "discord_crit",
+      "min": 99.5,
+      "max": 100.5
+    },
+    {
+      "action": "set_aura",
+      "label": "Remove Chronological again",
+      "actor": "talent",
+      "spell": 542728,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Without Chronological the bonus is gone, as the tooltip conditions it",
+      "actor": "talent",
+      "metric": "spell_done_crit_chance",
+      "spell": 503875,
+      "target": "dummy",
+      "relative_to": "discord_crit",
+      "min": -0.01,
+      "max": 0.01
+    }
+  ]
+}

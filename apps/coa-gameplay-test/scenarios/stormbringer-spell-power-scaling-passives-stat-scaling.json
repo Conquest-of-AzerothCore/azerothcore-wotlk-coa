@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Whirling Maelstrom and Arcane Lightning convert stats natively (#1175, #1687)",
+  "contract": "#1175: Whirling Maelstrom (705725) is a single SPELL_AURA_MOD_RATING_FROM_STAT (220) effect, EffectBasePoints 19 + DieSides 1 = 20, EffectMiscValue 524288 = 1<<19 = CR_HASTE_SPELL (Unit.h:243), EffectMiscValueB 3 = STAT_INTELLECT. AuraEffect::HandleModRatingFromStat (SpellAuraEffects.cpp:5054-5067) fires on both apply and removal and calls Player::ApplyRatingMod(cr, 0, apply), which unconditionally calls Player::UpdateRating(cr) (Player.cpp:5548-5552); UpdateRating reads GetStat(STAT_INTELLECT) live at the moment it runs (PlayerUpdates.cpp:651-663) and writes the cached PLAYER_FIELD_COMBAT_RATING field the combat_rating metric reads back verbatim (CoAGameplayTest.cpp:1442-1447) - the field is NOT auto-refreshed by a later, unrelated Intellect change, only by the next apply/remove of a rating-from-stat aura. To prove the 20%-of-Intellect scaling without assuming an unmeasured base Intellect value, Arcane Intellect (36880, SPELL_AURA_MOD_STAT effect, misc 3, EffectBasePoints 99 = +100 flat Intellect, precedent: starcaller-explosive-moonlight-intellect-scaling.json) is applied as a fixture via set_aura while Whirling Maelstrom is already learned (confirming the Intellect delta is exactly the buff's own 100), then Whirling Maelstrom is unlearned and relearned to force a fresh UpdateRating(CR_HASTE_SPELL) read against the now-buffed Intellect; the resulting CR_HASTE_SPELL delta against the pre-buff baseline must be exactly 20% of the known, controlled 100-point Intellect gain = 20, isolating the passive's own math from the character's unknown base stat. #1687: Arcane Lightning (300618) has two SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (137) effects, EffectBasePoints 4 + DieSides 1 = +5 each, EffectMiscValue 4 (Spirit) and 3 (Intellect); AuraEffect::HandleModTotalPercentStat is the standard multiplicative +X% total-stat aura, consumed live by GetTotalStatValue on every stat read, so a plain ratio against a live-stat snapshot proves it without needing a fixture buff or a forced recompute. Neither passive has any module code; both close as regression scenarios only.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "sb",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "label": "Learn Whirling Maelstrom", "actor": "sb", "spell": 705725 },
+    { "action": "assert", "label": "Whirling Maelstrom's aura is applied",
+      "actor": "sb", "metric": "aura", "spell": 705725, "equals": 1, "within_ms": 3000 },
+    { "action": "snapshot", "label": "BASELINE: Intellect before the Arcane Intellect fixture buff",
+      "actor": "sb", "metric": "stat", "stat": 3, "save_as": "int0" },
+    { "action": "snapshot", "label": "BASELINE: Spell haste rating before the Arcane Intellect fixture buff",
+      "actor": "sb", "metric": "combat_rating", "rating": 19, "save_as": "haste0" },
+    { "action": "set_aura", "label": "Arcane Intellect adds exactly 100 Intellect",
+      "actor": "sb", "spell": 36880, "stacks": 1 },
+    { "action": "assert", "label": "Intellect rose by exactly the fixture's 100",
+      "actor": "sb", "metric": "stat", "stat": 3, "relative_to": "int0", "min": 99.99, "max": 100.01 },
+    { "action": "unlearn", "label": "Unlearn Whirling Maelstrom to force a fresh rating recompute",
+      "actor": "sb", "spell": 705725 },
+    { "action": "learn", "label": "Relearn Whirling Maelstrom against the now-buffed Intellect",
+      "actor": "sb", "spell": 705725 },
+    { "action": "assert", "label": "DISCRIMINATING: Spell haste rating rose by 20% of the 100 Intellect gained",
+      "actor": "sb", "metric": "combat_rating", "rating": 19, "relative_to": "haste0", "min": 19, "max": 21 },
+    { "action": "snapshot", "label": "BASELINE: Intellect before Arcane Lightning",
+      "actor": "sb", "metric": "stat", "stat": 3, "save_as": "int1" },
+    { "action": "snapshot", "label": "BASELINE: Spirit before Arcane Lightning",
+      "actor": "sb", "metric": "stat", "stat": 4, "save_as": "spi1" },
+    { "action": "learn", "label": "Learn Arcane Lightning", "actor": "sb", "spell": 300618 },
+    { "action": "assert", "label": "DISCRIMINATING: Intellect rises by ~5% (Player::UpdateStats stores int32(value), so a non-multiple-of-20 baseline truncates below the exact 1.05 ratio; tolerance widened to bracket that truncation, matching venomancer-rage-and-stat-auras.json/starcaller-flow-of-mana-stats.json precedent for the same 5%-stat-pct aura)",
+      "actor": "sb", "metric": "stat", "stat": 3, "ratio_to": "int1", "min": 1.04, "max": 1.06 },
+    { "action": "assert", "label": "DISCRIMINATING: Spirit rises by ~5% (same int32 truncation tolerance as the Intellect assertion above)",
+      "actor": "sb", "metric": "stat", "stat": 4, "ratio_to": "spi1", "min": 1.04, "max": 1.06 }
+  ]
+}

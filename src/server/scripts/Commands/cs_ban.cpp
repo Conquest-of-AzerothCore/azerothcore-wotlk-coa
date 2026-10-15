@@ -89,6 +89,26 @@ public:
         return commandTable;
     }
 
+    static std::string ExtractBanTarget(char* args, char*& rest, bool characterName)
+    {
+        char* first = strtok(args, " ");
+        rest = first ? strtok(nullptr, "") : nullptr;
+        if (!first)
+            return "";
+
+        std::string target = first;
+        if (!characterName)
+            return target;
+
+        std::string_view tail(rest ? rest : "");
+        tail.remove_prefix(std::min(tail.find_first_not_of(' '), tail.size()));
+        if (!joinQuotedPlayerName(target, tail))
+            return target;
+
+        rest = tail.empty() ? nullptr : const_cast<char*>(tail.data());
+        return target;
+    }
+
     static bool HandleBanAccountCommand(ChatHandler* handler, char const* args)
     {
         return HandleBanHelper(BAN_ACCOUNT, args, handler);
@@ -99,13 +119,12 @@ public:
         if (!*args)
             return false;
 
-        char* nameStr = strtok((char*)args, " ");
-        if (!nameStr)
+        char* rest = nullptr;
+        std::string name = ExtractBanTarget((char*)args, rest, true);
+        if (name.empty())
             return false;
 
-        std::string name = nameStr;
-
-        char* durationStr = strtok(nullptr, " ");
+        char* durationStr = rest ? strtok(rest, " ") : nullptr;
         if (!durationStr || !atoi(durationStr))
             return false;
 
@@ -160,13 +179,12 @@ public:
         if (!*args)
             return false;
 
-        char* cnameOrIP = strtok((char*)args, " ");
-        if (!cnameOrIP)
+        char* rest = nullptr;
+        std::string nameOrIP = ExtractBanTarget((char*)args, rest, mode == BAN_CHARACTER);
+        if (nameOrIP.empty())
             return false;
 
-        std::string nameOrIP = cnameOrIP;
-
-        char* durationStr = strtok(nullptr, " ");
+        char* durationStr = rest ? strtok(rest, " ") : nullptr;
         if (!durationStr || !atoi(durationStr))
             return false;
 
@@ -310,9 +328,16 @@ public:
         if (!*args)
             return false;
 
-        Player* target = ObjectAccessor::FindPlayerByName(args, false);
+        char* rest = nullptr;
+        std::string name = ExtractBanTarget((char*)args, rest, true);
+        if (!normalizePlayerName(name))
+        {
+            handler->PSendSysMessage(LANG_BANINFO_NOCHARACTER);
+            return false;
+        }
+
+        Player* target = ObjectAccessor::FindPlayerByName(name, false);
         ObjectGuid targetGuid;
-        std::string name(args);
 
         if (!target)
         {
@@ -661,11 +686,10 @@ public:
         if (!*args)
             return false;
 
-        char* nameStr = strtok((char*)args, " ");
-        if (!nameStr)
+        char* rest = nullptr;
+        std::string CharacterName = ExtractBanTarget((char*)args, rest, true);
+        if (CharacterName.empty())
             return false;
-
-        std::string CharacterName = nameStr;
 
         if (!normalizePlayerName(CharacterName))
         {
@@ -697,11 +721,10 @@ public:
         if (!*args)
             return false;
 
-        char* nameOrIPStr = strtok((char*)args, " ");
-        if (!nameOrIPStr)
+        char* rest = nullptr;
+        std::string nameOrIP = ExtractBanTarget((char*)args, rest, mode == BAN_CHARACTER);
+        if (nameOrIP.empty())
             return false;
-
-        std::string nameOrIP = nameOrIPStr;
 
         switch (mode)
         {

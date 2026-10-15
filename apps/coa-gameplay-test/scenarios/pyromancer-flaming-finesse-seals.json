@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "name": "Pyromancer Flaming Finesse raises Seal effectiveness by 20% (#3103)",
+  "contract": "#3103: Flaming Finesse 706878 effect 2 is aura 108 ADD_PCT_MODIFIER misc 8 (SPELLMOD_ALL_EFFECTS) bp 19 (+20%) on SpellClassMask (0x10000,0,0), family 30, which covers the Seal of Alysrazor / Seal of Al'ar ranks (800196, 803649 ...). SpellEffectInfo::CalcValue applies the caster's ALL_EFFECTS mod through Unit::ApplyEffectModifiers, so it works with no module code. Al'ar 803649 effect 1 (aura 85, base 10) is asserted through spell_effect_value at 1.2x its value without 706878; Alysrazor 800196 (base value only 2, too small to show 20%) is asserted through the spell_modifier probe on op 8. Values from inv-group-8.md and Spell.dbc.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Al'ar seal effect 1 unmodified",
+      "actor": "p",
+      "metric": "spell_effect_value",
+      "save_as": "alar0",
+      "spell": 803649,
+      "effect": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Alysrazor seal modifier probe unmodified",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "save_as": "alys0",
+      "spell": 800196,
+      "op": 8,
+      "base": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 706878
+    },
+    {
+      "action": "assert",
+      "label": "Flaming Finesse is known",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 706878,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Seal of Al'ar effect 1 is 20% stronger (ALL_EFFECTS +20 on family-30 flag 0x10000)",
+      "actor": "p",
+      "metric": "spell_effect_value",
+      "spell": 803649,
+      "effect": 0,
+      "ratio_to": "alar0",
+      "min": 1.15,
+      "max": 1.25,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Seal of Alysrazor ALL_EFFECTS modifier is +20%",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 800196,
+      "op": 8,
+      "base": 1000,
+      "min": 1199,
+      "max": 1201,
+      "within_ms": 3000
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 706878
+    },
+    {
+      "action": "assert",
+      "label": "Removing the passive removes the bonus",
+      "actor": "p",
+      "metric": "spell_effect_value",
+      "spell": 803649,
+      "effect": 0,
+      "ratio_to": "alar0",
+      "min": 0.99,
+      "max": 1.01,
+      "within_ms": 3000
+    }
+  ]
+}

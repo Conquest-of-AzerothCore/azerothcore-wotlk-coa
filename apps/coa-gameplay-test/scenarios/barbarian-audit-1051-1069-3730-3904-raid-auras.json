@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "name": "Barbarian audit: raid-wide passives reach party members natively (#1051, #1069, #3730, #3904)",
+  "contract": "All four passives use SPELL_EFFECT_APPLY_AREA_AURA_RAID (65), which Spell::EffectApplyAreaAura/UnitAura::FillTargetMap already deliver to every party member on the same map; none needs a script. #1051 Ancestral Wisdom (803511) effect 0 carries SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT (333, BasePoints 1) which AuraEffect::HandleAscensionModHitChanceAll resolves into both HandleModHitChance and HandleModSpellHitChance, raising m_modMeleeHitChance/m_modRangedHitChance and m_modSpellHitChance by 1; its effect 2 is an inert DBC row (aura 0, BasePoints 0) and is not asserted. #1069 Crystal Enhancements (707541) effect 0 carries SPELL_AURA_MOD_RESISTANCE (22, BasePoints 389, DieSides 1) with MiscValue 1 = SPELL_SCHOOL_MASK_NORMAL, i.e. Armor, and EffectRealPointsPerLevel 25.0 with BaseLevel/SpellLevel 30; SpellEffectInfo::CalcValue scales BasePoints by (casterLevel - max(BaseLevel, SpellLevel)) * RealPointsPerLevel before the DieSides=1 rule adds a flat +1, so a level-80 caster resolves 389 + (80-30)*25 + 1 = 1640, not the raw DBC BasePoints; AuraEffect::HandleAuraModResistance applies that scaled amount via HandleStatModifier(UNIT_MOD_ARMOR, ...), read back by the armor metric. #3730 Ancestral Fury (804731) carries SPELL_AURA_MOD_MELEE_RANGED_HASTE (192, BasePoints 10); AuraEffect::HandleModMeleeRangedSpeedPct calls Unit::ApplyAttackTimePercentMod, dividing the melee swing timer by 1.10. #3904 Manhunter (300879) effect 0 carries SPELL_AURA_MOD_CRIT_PCT (290, BasePoints 3) via the raid aura, and effect 1 is a self-only SPELL_AURA_MOD_DAMAGE_DONE_VERSUS (168, BasePoints 10, MiscValue 64 = Humanoid creature-type mask), implemented in Unit::SpellDamageBonus/MeleeDamageBonus with no direct harness metric, so effect 1 is only asserted via aura_amount. AuraEffect::HandleAuraModCritPct ignores MiscValue and calls UpdateAllWeaponDependentCritAuras + UpdateAllSpellCritChances, raising both melee_crit_chance and spell_crit_chance by 3. As already established for #1308 (One With The Ancestors), PLAYER_CRIT_PERCENTAGE/PLAYER_SPELL_CRIT_PERCENTAGE1..7 are only ever recomputed from these AuraEffect handlers, so a character who has not yet had a crit-affecting aura applied or removed reads 0 rather than its true resting crit chance; the member here never received one before Manhunter (the earlier hit/armor/haste passives don't touch crit), so the scenario primes the member's crit fields with a throwaway learn+unlearn of Manhunter itself before taking the mcrit_m0/scrit_m0 baseline.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "leader", "race": 1, "class": 12, "level": 80 },
+    { "id": "member", "race": 1, "class": 12, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "group", "label": "Put both Barbarians in one party", "actor": "leader", "target": "member" },
+
+    { "action": "snapshot", "label": "Baseline leader melee hit chance", "actor": "leader", "metric": "melee_hit_chance", "save_as": "mhit_l0" },
+    { "action": "snapshot", "label": "Baseline member melee hit chance", "actor": "member", "metric": "melee_hit_chance", "save_as": "mhit_m0" },
+    { "action": "snapshot", "label": "Baseline member spell hit chance", "actor": "member", "metric": "spell_hit_chance", "save_as": "shit_m0" },
+
+    { "action": "learn", "actor": "leader", "spell": 803511 },
+    { "action": "assert", "label": "Ancestral Wisdom reaches the leader", "actor": "leader", "metric": "aura", "spell": 803511, "equals": 1, "within_ms": 15000 },
+    { "action": "assert", "label": "Ancestral Wisdom reaches the party member", "actor": "member", "metric": "aura", "spell": 803511, "equals": 1, "within_ms": 15000 },
+    { "action": "assert", "label": "Leader melee hit chance rises by 1", "actor": "leader", "metric": "melee_hit_chance", "relative_to": "mhit_l0", "min": 0.9, "max": 1.1 },
+    { "action": "assert", "label": "Member melee hit chance rises by 1", "actor": "member", "metric": "melee_hit_chance", "relative_to": "mhit_m0", "min": 0.9, "max": 1.1 },
+    { "action": "assert", "label": "Member spell hit chance rises by 1", "actor": "member", "metric": "spell_hit_chance", "relative_to": "shit_m0", "min": 0.9, "max": 1.1 },
+    { "action": "unlearn", "actor": "leader", "spell": 803511 },
+    { "action": "assert", "label": "Unlearning removes it from the member too", "actor": "member", "metric": "aura", "spell": 803511, "equals": 0, "within_ms": 15000 },
+
+    { "action": "snapshot", "label": "Baseline member armor", "actor": "member", "metric": "armor", "save_as": "armor_m0" },
+    { "action": "learn", "actor": "leader", "spell": 707541 },
+    { "action": "assert", "label": "Crystal Enhancements reaches the party member", "actor": "member", "metric": "aura", "spell": 707541, "equals": 1, "within_ms": 15000 },
+    { "action": "assert", "label": "Effect 0 resolves to 1640 armor (389 + (80-30)*25 level scaling + 1)", "actor": "leader", "metric": "aura_amount", "spell": 707541, "effect": 0, "equals": 1640 },
+    { "action": "assert", "label": "Member armor rises by 1640", "actor": "member", "metric": "armor", "relative_to": "armor_m0", "equals": 1640 },
+    { "action": "unlearn", "actor": "leader", "spell": 707541 },
+
+    { "action": "snapshot", "label": "Baseline member swing time", "actor": "member", "metric": "attack_time_ms", "hand": 0, "save_as": "swing_m0" },
+    { "action": "learn", "actor": "leader", "spell": 804731 },
+    { "action": "assert", "label": "Ancestral Fury reaches the party member", "actor": "member", "metric": "aura", "spell": 804731, "equals": 1, "within_ms": 15000 },
+    { "action": "assert", "label": "Member swings are 10% faster (1/1.10 = 0.909)", "actor": "member", "metric": "attack_time_ms", "hand": 0, "ratio_to": "swing_m0", "min": 0.895, "max": 0.925 },
+    { "action": "unlearn", "actor": "leader", "spell": 804731 },
+
+    { "action": "learn", "actor": "leader", "spell": 300879 },
+    { "action": "assert", "label": "Priming cycle: Manhunter applies to the member before baseline", "actor": "member", "metric": "aura", "spell": 300879, "equals": 1, "within_ms": 15000 },
+    { "action": "unlearn", "actor": "leader", "spell": 300879 },
+    { "action": "assert", "label": "Priming cycle: Manhunter is removed from the member again", "actor": "member", "metric": "aura", "spell": 300879, "equals": 0, "within_ms": 15000 },
+
+    { "action": "snapshot", "label": "Baseline member melee crit chance", "actor": "member", "metric": "melee_crit_chance", "save_as": "mcrit_m0" },
+    { "action": "snapshot", "label": "Baseline member spell crit chance", "actor": "member", "metric": "spell_crit_chance", "save_as": "scrit_m0" },
+    { "action": "learn", "actor": "leader", "spell": 300879 },
+    { "action": "assert", "label": "Manhunter reaches the party member", "actor": "member", "metric": "aura", "spell": 300879, "equals": 1, "within_ms": 15000 },
+    { "action": "assert", "label": "Member melee crit chance rises by 3", "actor": "member", "metric": "melee_crit_chance", "relative_to": "mcrit_m0", "min": 2.9, "max": 3.1 },
+    { "action": "assert", "label": "Member spell crit chance rises by 3", "actor": "member", "metric": "spell_crit_chance", "relative_to": "scrit_m0", "min": 2.9, "max": 3.1 },
+    { "action": "assert", "label": "Leader effect 1 (versus Humanoid) resolves to 10", "actor": "leader", "metric": "aura_amount", "spell": 300879, "effect": 1, "equals": 10 },
+    { "action": "unlearn", "actor": "leader", "spell": 300879 }
+  ]
+}

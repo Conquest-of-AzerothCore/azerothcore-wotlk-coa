@@ -1,4 +1,4 @@
-"""Extract, check and compare the CoA client DBC set the worldserver loads.
+CLI_DESCRIPTION = """Extract, check and compare the CoA client DBC set the worldserver loads.
 
 The worldserver reads DataDir/dbc once at startup. That directory must hold the client's own
 tables: with a stock or partial set the core silently drops every item limit, gameobject
@@ -33,7 +33,6 @@ PROCESS_OPTIONS = {"creationflags": subprocess.CREATE_NO_WINDOW} if os.name == "
 
 
 class Table:
-    """A WDBC file. Only the header is interpreted until a caller supplies a field format."""
 
     def __init__(self, name, data):
         if len(data) < HEADER.size or data[:4] != b"WDBC":
@@ -54,7 +53,6 @@ class Table:
         return self.data[start:start + self.record_size]
 
     def string(self, offset):
-        # Mirrors DBCFileLoader::AutoProduceStrings: an offset outside the block reads as "".
         if offset >= self.string_size:
             return b""
         start = self.string_start + offset
@@ -63,7 +61,6 @@ class Table:
 
 
 def core_stores(root=ROOT):
-    """(file name, field format, SQL overlay table) for every store DBCStores.cpp loads."""
     active = lambda path: "\n".join(line for line in path.read_text(encoding="utf-8").splitlines()
                                     if not line.lstrip().startswith("//"))
     formats = dict(re.findall(r'char constexpr (\w+)\[\] = "([^"]*)";', active(root / FORMATS.relative_to(ROOT))))
@@ -76,14 +73,12 @@ def core_stores(root=ROOT):
 
 
 def file_format(table, fmt):
-    # Mirrors DBCStore.cpp: one-float game tables use the row number as their ID.
     if fmt == "df" and table.fields == 1 and table.record_size == 4:
         return "f"
     return fmt
 
 
 def record_struct(table, fmt):
-    """A struct reading the fields the core reads, or None when the record is too short."""
     codes = {"f": "f", "i": "i", "n": "i", "d": "i", "s": "I", "b": "B", "x": "4x", "X": "x"}
     widths = {"b": 1, "X": 1}
     used = max((i for i, kind in enumerate(fmt) if kind not in "xX"), default=-1) + 1
@@ -103,7 +98,6 @@ def layout_problems(table, fmt):
 
 
 def invalid_strings(table, fmt):
-    """How many string fields the core reads point outside the string block."""
     fmt = file_format(table, fmt)
     positions = [i for i, kind in enumerate(k for k in fmt if k not in "xX") if kind == "s"]
     if not positions:
@@ -114,7 +108,6 @@ def invalid_strings(table, fmt):
 
 
 def unindexed_rows(table, fmt):
-    """Rows whose index field is -1; DBCFileLoader stores them but cannot index them."""
     fmt = file_format(table, fmt)
     kinds = [kind for kind in fmt if kind not in "xX"]
     key = next((i for i, kind in enumerate(kinds) if kind in "nd"), None)
@@ -125,7 +118,6 @@ def unindexed_rows(table, fmt):
 
 
 def values(table, fmt):
-    """{key: tuple of the values the core reads}, strings resolved. Keys are the index field or the row."""
     fmt = file_format(table, fmt)
     reader = record_struct(table, fmt)
     kinds = [kind for kind in fmt if kind not in "xX"]
@@ -146,7 +138,6 @@ def values(table, fmt):
 
 
 def raw_records(table):
-    """{key: record bytes} for tables the core does not load; the layout is unknown."""
     if table.fields == 1 or table.record_size < 4:
         return {row: table.record(row) for row in range(table.rows)}
     return {struct.unpack_from("<I", table.data, HEADER.size + row * table.record_size)[0]: table.record(row)
@@ -161,7 +152,6 @@ def dbc_files(directory):
 
 
 def check(directory, root=ROOT):
-    """(problems that stop or corrupt the core's DBC load, notes that do not)."""
     files = dbc_files(directory)
     folded = {name.lower(): path for name, path in files.items()}
     problems = []
@@ -190,7 +180,6 @@ def check(directory, root=ROOT):
 
 
 def diff(old_directory, new_directory, root=ROOT):
-    """Per-file row differences between two DBC sets."""
     old_directory, new_directory = Path(old_directory), Path(new_directory)
     formats = {file.lower(): fmt for file, fmt, _ in core_stores(root)}
     old_files = {name.lower(): path for name, path in dbc_files(old_directory).items()}
@@ -226,17 +215,12 @@ def diff(old_directory, new_directory, root=ROOT):
             removed=sorted(old_rows.keys() - new_rows.keys()),
             added=sorted(new_rows.keys() - old_rows.keys()),
             changed=sorted(key for key in old_rows.keys() & new_rows.keys() if old_rows[key] != new_rows[key]))
-        # Bytes the core never reads (skipped fields, string block layout) are not a difference.
         if entry["added"] or entry["removed"] or entry["changed"]:
             report.append(entry)
     return report
 
 
 def archive_rank(relative):
-    """Client load order: later archives override earlier ones.
-
-    base < locale base < patch.MPQ < patch-<digit> < locale patches < Ascension letter patches.
-    """
     parts = relative.replace("\\", "/").split("/")
     locale = len(parts) > 1
     stem = parts[-1].rsplit(".", 1)[0].lower()
@@ -254,8 +238,6 @@ def archive_rank(relative):
 
 
 def client_archives(data_directory, replacements, original=False):
-    """Archives in load order. `original` reads NAME.ORIGINAL, the launcher's untouched copy of a locally
-    replaced archive, wherever one exists; explicit replacements still take precedence."""
     data_directory = Path(data_directory)
     archives = {}
     for path in data_directory.iterdir():
@@ -282,7 +264,6 @@ def client_archives(data_directory, replacements, original=False):
 
 
 class MpqCli:
-    """StormLib through mpqcli (https://github.com/TheGrayDot/mpqcli)."""
 
     def __init__(self, executable):
         self.executable = str(executable)
@@ -303,10 +284,6 @@ class MpqCli:
 
 
 def extract(data_directory, output, mpq, replacements=None, log=print, original=False, root=ROOT):
-    """Write the client's effective DBC set (last archive in load order wins) and its manifest.
-
-    Tables the core loads are written under the names DBCStores.cpp opens, so the set can be copied
-    into DataDir/dbc as it is, also on case-sensitive systems."""
     output = Path(output)
     if output.exists() and any(output.iterdir()):
         raise ValueError(f"{output} is not empty")
@@ -372,7 +349,7 @@ def print_diff(report, ids):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser = argparse.ArgumentParser(description=CLI_DESCRIPTION.splitlines()[0])
     commands = parser.add_subparsers(dest="command", required=True)
 
     command = commands.add_parser("extract", help="extract the client's effective DBC set from its archives")

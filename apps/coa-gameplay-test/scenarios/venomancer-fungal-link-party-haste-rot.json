@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Venomancer Fungal Link hastes the group and extends Rot range, lowers Rot threat (#3909)",
+  "contract": "#3909: Fungal Link 300959 (Spell.dbc, read for this scenario) is a passive with three effects: effect 0 SPELL_EFFECT 65 (apply area aura raid) ImplicitTargetA 1 (caster), radius index 287 (100 yd), aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 2 DieSides 1 (+3%); effect 1 aura 108 (ADD_PCT_MODIFIER) MiscValue 5 SPELLMOD_RANGE BasePoints 19 (+20%); effect 2 aura 108 MiscValue 2 SPELLMOD_THREAT BasePoints -21 (-20%). Effects 1 and 2 carry EffectSpellClassMask (8256, 16777384, 8) = (0x2040, 0x1000028, 0x8) with SpellFamilyName 35; Spore 804983 is family 35 with SpellFamilyFlags (0, 8, 0), so it matches the mask through the second word, and its range index is 4 (30 yd). No script or spell_proc handles 300959 (the id only appears in the stock-coefficient list, the spellbook tables and the non-stacking spell_group 2000182 row of pending_db_world rev_20260908_05_guardian_completion.sql): the effects are native aura handlers. This is a regression scenario, it makes no code change. Learning the passive applies its self aura; the raid area aura reaches a grouped member, and a bystander outside the group is the negative control. Haste is read as the native cast-speed multiplier (UNIT_MOD_CAST_SPEED, 1/1.03 = 0.9709) against each player's own pre-aura snapshot. The stacking rule with Wrath of Air and similar effects is not asserted here (it is a pending SQL row and needs those spells).",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "venomancer", "race": 1, "class": 29, "level": 80 },
+    { "id": "mate", "race": 1, "class": 29, "level": 80 },
+    { "id": "outsider", "race": 1, "class": 29, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "group", "label": "Party the venomancer and the mate; the outsider stays ungrouped", "actor": "venomancer", "target": "mate" },
+
+    { "action": "snapshot", "label": "Baseline cast speed of the venomancer", "actor": "venomancer", "metric": "cast_speed_multiplier", "save_as": "speed_v0" },
+    { "action": "snapshot", "label": "Baseline cast speed of the party member", "actor": "mate", "metric": "cast_speed_multiplier", "save_as": "speed_m0" },
+    { "action": "snapshot", "label": "Baseline cast speed of the outsider", "actor": "outsider", "metric": "cast_speed_multiplier", "save_as": "speed_o0" },
+    { "action": "snapshot", "label": "Spore max range before Fungal Link", "actor": "venomancer", "metric": "spell_max_range", "spell": 804983, "save_as": "range0" },
+    { "action": "assert", "label": "BASELINE: Spore range is unmodified before the passive", "actor": "venomancer", "metric": "spell_modifier", "spell": 804983, "op": 5, "base": 100, "min": 99.99, "max": 100.01 },
+    { "action": "assert", "label": "BASELINE: Spore threat is unmodified before the passive", "actor": "venomancer", "metric": "spell_modifier", "spell": 804983, "op": 2, "base": 100, "min": 99.99, "max": 100.01 },
+
+    { "action": "learn", "actor": "venomancer", "spell": 300959 },
+
+    { "action": "assert", "label": "The venomancer carries Fungal Link with +3 spell haste", "actor": "venomancer", "metric": "aura_amount", "spell": 300959, "effect": 0, "caster": "venomancer", "equals": 3, "within_ms": 5000 },
+    { "action": "assert", "label": "The party member receives the +3 spell haste aura from the venomancer", "actor": "mate", "metric": "aura_amount", "spell": 300959, "effect": 0, "caster": "venomancer", "equals": 3, "within_ms": 5000 },
+    { "action": "assert", "label": "CONTROL: the ungrouped bystander does not carry the aura", "actor": "outsider", "metric": "aura", "spell": 300959, "equals": 0 },
+
+    { "action": "assert", "label": "The venomancer's cast time shrinks by 3%", "actor": "venomancer", "metric": "cast_speed_multiplier", "ratio_to": "speed_v0", "min": 0.968, "max": 0.974 },
+    { "action": "assert", "label": "The party member's cast time shrinks by 3%", "actor": "mate", "metric": "cast_speed_multiplier", "ratio_to": "speed_m0", "min": 0.968, "max": 0.974 },
+    { "action": "assert", "label": "CONTROL: the bystander's cast speed is unchanged", "actor": "outsider", "metric": "cast_speed_multiplier", "ratio_to": "speed_o0", "min": 0.999, "max": 1.001 },
+
+    { "action": "assert", "label": "Spore's range modifier is +20% (100 -> 120)", "actor": "venomancer", "metric": "spell_modifier", "spell": 804983, "op": 5, "base": 100, "min": 119.99, "max": 120.01 },
+    { "action": "assert", "label": "Spore's threat modifier is -20% (100 -> 80)", "actor": "venomancer", "metric": "spell_modifier", "spell": 804983, "op": 2, "base": 100, "min": 79.99, "max": 80.01 },
+    { "action": "assert", "label": "Spore's real max range rises by 20% of its 30 yards", "actor": "venomancer", "metric": "spell_max_range", "spell": 804983, "ratio_to": "range0", "min": 1.19, "max": 1.21 },
+    { "action": "assert", "label": "CONTROL: the party member owns no Fungal Link modifier, so Spore range there is unchanged", "actor": "mate", "metric": "spell_modifier", "spell": 804983, "op": 5, "base": 100, "min": 99.99, "max": 100.01 }
+  ]
+}

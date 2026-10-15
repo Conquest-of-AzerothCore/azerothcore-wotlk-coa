@@ -1,0 +1,253 @@
+{
+  "schema": 1,
+  "name": "Chains of Darkness pulls, damages and taunts every enemy in range (#1216)",
+  "contract": "Chains of Darkness 680521 (installed Spell.dbc) is a 180000 ms cooldown spell whose only effect is TRIGGER_SPELL 680522 on TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY (radius index 9 = 20 yd, SpellRadius.dbc). Helper 680522 has effect 0 PULL_TOWARDS (misc 250, jump onto the caster), effect 1 SCHOOL_DAMAGE base 48 die 2 +1.0 per level over level 25 (level 60: 83 + 1..2 = 84-85, plus the authored 15% AP / 55% SP coefficients added by the module base-value hook) and effect 2 SPELL_AURA_MOD_TAUNT with duration index 27 = 3000 ms. The tooltip reads 'Pull all nearby enemies to you, dealing ... Shadow damage and taunting them for 3 sec'. Three level-60 dummies stand 12, 15 and 18 yd away (all inside the 20 yd radius); each must be pulled to the hunter, take positive damage, carry the taunt with at most 3 s left, and the helper must have been cast once per enemy. The damage total is only bounded below (60, under the 84 base) because attack power is not a value this scenario may assume and a critical hit or the AP term only raise it; the value query on the helper's damage effect is bounded 84-400 for the same reason.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "c1",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 60,
+      "distance": 12
+    },
+    {
+      "id": "c2",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 60,
+      "distance": 15
+    },
+    {
+      "id": "c3",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 60,
+      "distance": 18
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 680521,
+      "label": "Learn Chains of Darkness"
+    },
+    {
+      "action": "assert",
+      "label": "Chains' damage helper carries its authored base (48 + 35 levels + die 1-2) plus the AP term",
+      "actor": "hunter",
+      "metric": "spell_effect_value",
+      "spell": 680522,
+      "effect": 1,
+      "min": 84,
+      "max": 400
+    },
+    {
+      "action": "assert",
+      "label": "Fixture: first enemy starts far away",
+      "actor": "hunter",
+      "metric": "distance",
+      "target": "c1",
+      "min": 11
+    },
+    {
+      "action": "assert",
+      "label": "Fixture: second enemy starts far away",
+      "actor": "hunter",
+      "metric": "distance",
+      "target": "c2",
+      "min": 14
+    },
+    {
+      "action": "assert",
+      "label": "Fixture: third enemy starts far away",
+      "actor": "hunter",
+      "metric": "distance",
+      "target": "c3",
+      "min": 17
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 680521,
+      "label": "Cast Chains of Darkness"
+    },
+    {
+      "action": "assert",
+      "label": "c1 carries the taunt aura from the hunter",
+      "actor": "c1",
+      "metric": "aura",
+      "spell": 680522,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "c1 taunt lasts at most 3 seconds",
+      "actor": "c1",
+      "metric": "aura_duration_ms",
+      "spell": 680522,
+      "caster": "hunter",
+      "min": 1000,
+      "max": 3000
+    },
+    {
+      "action": "assert",
+      "label": "c1 is pulled next to the hunter",
+      "actor": "hunter",
+      "metric": "distance",
+      "target": "c1",
+      "max": 6,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "c1 takes damage from the helper",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 680522,
+      "target": "c1",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "c1 damage is at least the authored base",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 680522,
+      "target": "c1",
+      "min": 60
+    },
+    {
+      "action": "assert",
+      "label": "c2 carries the taunt aura from the hunter",
+      "actor": "c2",
+      "metric": "aura",
+      "spell": 680522,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "c2 taunt lasts at most 3 seconds",
+      "actor": "c2",
+      "metric": "aura_duration_ms",
+      "spell": 680522,
+      "caster": "hunter",
+      "min": 1000,
+      "max": 3000
+    },
+    {
+      "action": "assert",
+      "label": "c2 is pulled next to the hunter",
+      "actor": "hunter",
+      "metric": "distance",
+      "target": "c2",
+      "max": 6,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "c2 takes damage from the helper",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 680522,
+      "target": "c2",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "c2 damage is at least the authored base",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 680522,
+      "target": "c2",
+      "min": 60
+    },
+    {
+      "action": "assert",
+      "label": "c3 carries the taunt aura from the hunter",
+      "actor": "c3",
+      "metric": "aura",
+      "spell": 680522,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "c3 taunt lasts at most 3 seconds",
+      "actor": "c3",
+      "metric": "aura_duration_ms",
+      "spell": 680522,
+      "caster": "hunter",
+      "min": 1000,
+      "max": 3000
+    },
+    {
+      "action": "assert",
+      "label": "c3 is pulled next to the hunter",
+      "actor": "hunter",
+      "metric": "distance",
+      "target": "c3",
+      "max": 6,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "c3 takes damage from the helper",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 680522,
+      "target": "c3",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "c3 damage is at least the authored base",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 680522,
+      "target": "c3",
+      "min": 60
+    },
+    {
+      "action": "assert",
+      "label": "One helper cast per enemy in range",
+      "actor": "hunter",
+      "metric": "spell_cast_count",
+      "spell": 680522,
+      "min": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The 3 minute cooldown started",
+      "actor": "hunter",
+      "metric": "cooldown_ms",
+      "spell": 680521,
+      "min": 170000,
+      "max": 180000
+    }
+  ]
+}

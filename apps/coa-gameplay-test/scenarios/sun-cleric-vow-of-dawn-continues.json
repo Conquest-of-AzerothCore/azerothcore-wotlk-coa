@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "Vow of Dawn splashes onto a fresh target's neighbors after the first target dies (#4071)",
+  "contract": "Vow of Dawn 803491 (Spell.dbc, SpellFamilyName 33) carries SPELL_AURA_PROC_TRIGGER_SPELL (42) with native ProcFlags 0, so SpellMgr::LoadSpellProcs only generates a ProcEntry for it from the spell_proc row (ProcFlags 1048575, HitMask 32767, Chance 100) already shipped in data/sql/updates/pending_db_world/rev_20260909_13_sun_cleric_completion.sql and applied on this checkout's database (confirmed live: spell_script_names carries 803491 -> aura_ascension_sun_cleric_event and aura_ascension_sun_cleric_lifecycle, and spell_proc carries the 803491 row). aura_ascension_sun_cleric_event::Check (AscensionSunClericEvents.cpp) admits any direct hit/heal the vow holder personally deals; its Proc handler for id 803491 recomputes Nearby(target,10) fresh on every qualifying hit -- filtered to valid attack targets -- and copies CalculatePct(damage,90) of that hit's raw damage to up to Amount(803492) (=1 without Dawn's Fulfillment) of them via the triggered spell 803493. Nothing in this path remembers a previously struck target, so a second, unrelated direct hit on a fresh target after the first target's death must reach that fresh target's own nearby neighbor exactly the same way. This scenario proves the mechanic does not stop once its first target dies, refuting that half of #4071 on the currently wired code/SQL. The other half of #4071 (the missing 'damage received' animation over nearby heads) is a client-rendered spell-visual effect: every Sun Cleric copy/splash spell, including 803493, is applied through the shared Copy() helper's CastCustomSpell(..., triggered=true), and this harness's own evidence boundary excludes rendered animations and SMSG_SPELL_GO delivery, so that half is not provable here and is not addressed by this scenario. Both Vow of Dawn (803491) and the direct-hit vehicle Frostbolt (116) carry StartRecoveryCategory 133 with StartRecoveryTime 1000; GlobalCooldownMgr keys its lock by StartRecoveryCategory alone (CharmInfo.cpp:397-427), so casting one starts a 1000 ms lock that blocks the other too, and Spell::CheckCast's strict-mode GCD check (Spell.cpp:5780) silently drops a cast attempted inside that window with no assertable side effect. The scenario now waits 1200 ms after the Vow of Dawn cast and again after the first Frostbolt cast so each direct hit is attempted only once its own shared GCD has cleared.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 27, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "target1", "owner": "caster", "entry": 36, "level": 80, "health": 100000, "distance": 5 },
+    { "id": "splash1", "owner": "caster", "entry": 36, "level": 80, "health": 100000, "distance": 7 },
+    { "id": "target2", "owner": "caster", "entry": 36, "level": 80, "health": 100000, "distance": 20 },
+    { "id": "splash2", "owner": "caster", "entry": 36, "level": 80, "health": 100000, "distance": 22 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "caster", "spell": 803491 },
+    { "action": "learn", "actor": "caster", "spell": 116 },
+    { "action": "cast", "actor": "caster", "spell": 803491 },
+    {
+      "action": "assert", "label": "Vow of Dawn is active on the caster", "actor": "caster",
+      "metric": "aura", "spell": 803491, "caster": "caster", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "wait", "ms": 1200,
+      "label": "Vow of Dawn and Frostbolt share StartRecoveryCategory 133 (1000 ms); let that GCD clear before the direct hit"
+    },
+    { "action": "set_health", "actor": "target1", "value": 1 },
+    { "action": "snapshot", "actor": "splash1", "metric": "health", "save_as": "splash1_before" },
+    { "action": "snapshot", "actor": "splash2", "metric": "health", "save_as": "splash2_before_phase1" },
+    { "action": "cast", "actor": "caster", "spell": 116, "target": "target1" },
+    {
+      "action": "assert", "label": "The first target dies from the direct hit", "actor": "target1",
+      "metric": "alive", "equals": 0, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "Its own nearby neighbor takes the Vow of Dawn splash", "actor": "splash1",
+      "metric": "health", "relative_to": "splash1_before", "max": -1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The distant, unrelated neighbor is untouched by the first hit", "actor": "splash2",
+      "metric": "health", "relative_to": "splash2_before_phase1", "equals": 0
+    },
+    {
+      "action": "wait", "ms": 1200,
+      "label": "The first Frostbolt also started a 1000 ms category-133 GCD; let it clear before the second hit"
+    },
+    { "action": "snapshot", "actor": "splash2", "metric": "health", "save_as": "splash2_before_phase2" },
+    { "action": "cast", "actor": "caster", "spell": 116, "target": "target2" },
+    {
+      "action": "assert", "label": "Hitting a fresh target after the first died still splashes onto its own neighbor",
+      "actor": "splash2", "metric": "health", "relative_to": "splash2_before_phase2", "max": -1, "within_ms": 5000
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Cinderblade converts Intellect into critical strike rating and raises spell hit (#1187)",
+  "contract": "Cinderblade 704959 reads 'Level 30 Passive. Increases your critical strike rating by 20% of your Intellect and your spell hit chance by 6%' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z). Effect 0 is the native aura 220 (SPELL_AURA_MOD_RATING_FROM_STAT), MiscValue 1792 (a CombatRating bitmask: (1<<CR_CRIT_MELEE)|(1<<CR_CRIT_RANGED)|(1<<CR_CRIT_SPELL) = 256+512+1024), MiscValueB 3 (STAT_INTELLECT), BasePoints 20. Player::UpdateRating (Entities/Unit/StatSystem.cpp) reads every SPELL_AURA_MOD_RATING_FROM_STAT aura whose MiscValue bit matches the rating being recalculated and adds CalculatePct(GetStat(MiscValueB), GetAmount()) - a fully native, already-implemented conversion, so no bespoke stat hook is needed. Effect 1 is the native aura 55 (SPELL_AURA_MOD_SPELL_HIT_CHANCE), BasePoints 6.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "knight", "metric": "stat", "stat": 3, "save_as": "int_before" },
+    { "action": "snapshot", "actor": "knight", "metric": "combat_rating", "rating": 8, "save_as": "crit_melee_before" },
+    { "action": "snapshot", "actor": "knight", "metric": "combat_rating", "rating": 9, "save_as": "crit_ranged_before" },
+    { "action": "snapshot", "actor": "knight", "metric": "combat_rating", "rating": 10, "save_as": "crit_spell_before" },
+    { "action": "snapshot", "actor": "knight", "metric": "combat_rating", "rating": 4, "save_as": "block_before" },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_hit_chance", "save_as": "hit_before" },
+    {
+      "action": "assert", "label": "SETUP: the character has nonzero Intellect to convert",
+      "actor": "knight", "metric": "stat", "stat": 3, "min": 1
+    },
+    { "action": "learn", "actor": "knight", "spell": 704959 },
+    { "action": "set_aura", "actor": "knight", "spell": 704959, "stacks": 1, "label": "Force the Cinderblade passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Cinderblade passive is active",
+      "actor": "knight", "metric": "aura", "spell": 704959, "equals": 1
+    },
+    {
+      "action": "assert", "label": "REGRESSION: Intellect itself is untouched",
+      "actor": "knight", "metric": "stat", "stat": 3, "ratio_to": "int_before", "min": 0.999, "max": 1.001
+    },
+    {
+      "action": "assert", "label": "CONTRACT: melee crit rating rises by 20% of Intellect",
+      "actor": "knight", "metric": "combat_rating", "rating": 8, "relative_to": "crit_melee_before", "min": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: ranged crit rating rises by 20% of Intellect",
+      "actor": "knight", "metric": "combat_rating", "rating": 9, "relative_to": "crit_ranged_before", "min": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: spell crit rating rises by 20% of Intellect",
+      "actor": "knight", "metric": "combat_rating", "rating": 10, "relative_to": "crit_spell_before", "min": 1
+    },
+    {
+      "action": "assert", "label": "REGRESSION: Block rating is untouched",
+      "actor": "knight", "metric": "combat_rating", "rating": 4, "relative_to": "block_before", "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTRACT: spell hit chance rises by 6",
+      "actor": "knight", "metric": "spell_hit_chance", "relative_to": "hit_before", "equals": 6
+    }
+  ]
+}

@@ -114,10 +114,14 @@ bool StartDB()
     std::string modules = sConfigMgr->GetOption<std::string>("Updates.AllowedModules", "all");
     LOG_INFO("dbimport", "Loading modules: {}", modules.empty() ? "none" : modules);
 
-    DatabaseLoader loader =
-        modules.empty() ? DatabaseLoader("dbimport") :
-        (modules == "all") ? DatabaseLoader("dbimport", DatabaseLoader::DATABASE_MASK_ALL, AC_MODULES_LIST) :
-        DatabaseLoader("dbimport", DatabaseLoader::DATABASE_MASK_ALL, modules);
+    // CoA is part of the core, so its SQL is applied whichever modules are allowed.
+    // DatabaseLoader keeps a view of this list, so it must outlive the loader.
+    std::string const updateModules =
+        COA_DATABASE_MODULE_LIST + (modules == "all" ? std::string(AC_MODULES_LIST) : modules);
+    DatabaseLoader loader = modules.empty() ?
+        DatabaseLoader("dbimport", DatabaseLoader::DATABASE_LOGIN | DatabaseLoader::DATABASE_CHARACTER |
+            DatabaseLoader::DATABASE_WORLD, updateModules) :
+        DatabaseLoader("dbimport", DatabaseLoader::DATABASE_MASK_ALL, updateModules);
 
     loader
         .AddDatabase(LoginDatabase, "Login")

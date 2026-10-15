@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Mystic Thunder silences a marked recast (#798)",
+  "contract": "#798: Mystic Thunder 504846 reads \"Interrupt the target's current spell cast and then mark them for $505214d. If they cast again while marked they are silenced for $505347d.\" Spell.dbc gives 504846 effect 0 SPELL_EFFECT_INTERRUPT_CAST (EffectMechanic 26) and effect 1 SPELL_EFFECT_TRIGGER_SPELL on 505214, both TARGET_UNIT_TARGET_ENEMY, so the interrupt and the mark are stock core effects. 505214 has DurationIndex 28 (SpellDuration.dbc 28 = 5000 ms, the tooltip's 5 sec) and a single SPELL_AURA_PROC_TRIGGER_SPELL(42) effect on 505347, but its ProcFlags is 0 and no spell_proc row exists, so SpellMgr::LoadSpellProcs skips it at SpellMgr.cpp:2256-2257 ('Skip if no proc flags in DBC') and 505347 was never cast. 505347 has DurationIndex 27 (SpellDuration.dbc 27 = 3000 ms, the tooltip's 3 sec) and one SPELL_AURA_MOD_SILENCE(27) effect on TARGET_UNIT_CASTER. The fix casts 505347 from the marked unit itself on its next non-triggered cast and consumes the mark. The victim's second cast must be Drown 806407 (SchoolMask 16, Frost, CastingTimeIndex 1 = instant): Spell::EffectInterruptCast prohibits the interrupted spell's school for the interrupt spell's own duration (504846 DurationIndex 28 = 5000 ms), which covers Call Lightning's Nature school for exactly as long as the mark lasts. Call Lightning 501398 has ManaCost/ManaCostPercentage 0 in Spell.dbc, so the mana fixture alone does not satisfy its cast requirement: AscensionCompatData::ResourceCostRules (AscensionCustomResourceData.h) has {16, 501388, 501399, 803102, 50, ResourceConsumption::Fixed}, and AscensionCompat::CheckCast (AscensionCompat.cpp:2320-2330) returns SPELL_FAILED_NO_POWER when the caster's Static (803102) stacks are below the rule's Amount (50); a fresh fixture starts at 0 Static. The fix fixtures the victim to 100 Static stacks via set_aura before the Call Lightning cast, mirroring the Torrential Wrath/Deluge Static gate fix in stormbringer-fix-torrential-wrath-family-kinetic-energy.json.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "storm", "race": 1, "class": 16, "level": 80, "spell_hit_rating": 10000 },
+    { "id": "victim", "race": 2, "class": 16, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 5000 },
+    { "action": "pvp", "actor": "storm", "enabled": true },
+    { "action": "pvp", "actor": "victim", "enabled": true },
+    { "action": "learn", "actor": "storm", "spell": 504846 },
+    { "action": "learn", "actor": "victim", "spell": 501398 },
+    { "action": "learn", "actor": "victim", "spell": 806407 },
+    { "action": "set_power", "actor": "victim", "power": 0, "value": 2500 },
+    { "action": "set_aura", "actor": "victim", "spell": 803102, "stacks": 100 },
+    { "action": "cast", "actor": "victim", "spell": 501398, "target": "storm" },
+    { "action": "assert", "label": "BASELINE: the victim is casting Call Lightning (2000 ms, SpellCastTimes.dbc 5)",
+      "actor": "victim", "metric": "casting", "equals": 1, "within_ms": 1500 },
+    { "action": "cast", "actor": "storm", "spell": 504846, "target": "victim" },
+    { "action": "assert", "label": "BASELINE: effect 0 interrupts the victim's cast",
+      "actor": "victim", "metric": "casting", "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "BASELINE: effect 1 marks the victim with 505214",
+      "actor": "victim", "metric": "aura", "spell": 505214, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "BASELINE: the mark lasts 5000 ms (SpellDuration.dbc 28)",
+      "actor": "victim", "metric": "aura_duration_ms", "spell": 505214, "min": 3000, "max": 6000 },
+    { "action": "assert", "label": "BASELINE: no silence before the victim casts again",
+      "actor": "victim", "metric": "aura", "spell": 505347, "equals": 0 },
+    { "action": "set_power", "actor": "victim", "power": 0, "value": 2500 },
+    { "action": "cast", "actor": "victim", "spell": 806407, "target": "storm" },
+    { "action": "assert", "label": "DISCRIMINATING: casting again while marked silences the victim (505347)",
+      "actor": "victim", "metric": "aura", "spell": 505347, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the silence lasts 3000 ms (SpellDuration.dbc 27)",
+      "actor": "victim", "metric": "aura_duration_ms", "spell": 505347, "min": 1500, "max": 3500 },
+    { "action": "assert", "label": "DISCRIMINATING: the mark is consumed by the silence",
+      "actor": "victim", "metric": "aura", "spell": 505214, "equals": 0 }
+  ]
+}

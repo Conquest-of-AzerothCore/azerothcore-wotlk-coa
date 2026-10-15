@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Runemaster audit: Primal Rune adds -10 to Granite Resolve's damage-taken reduction (#2769)",
+  "contract": "Primal Rune 705636 effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 3 (SPELLMOD_EFFECT1), EffectBasePoints -11 + DieSides 1 = -10, EffectSpellClassMask word 2 bit 31 (2147483648). Granite Resolve 520229 has SpellFamilyName 38, SpellFamilyFlags word 2 bit 31 (2147483648) - an exact classmask match. Player::ApplySpellMod, which the spell_modifier metric calls, must therefore subtract 10 more from any op-3 query against 520229 once 705636 is learned.",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "assert", "label": "before: 520229 has no modifier for op 3", "actor": "rm",
+      "metric": "spell_modifier", "spell": 520229, "op": 3, "base": 100000, "min": 99998, "max": 100002},
+    {"action": "learn", "actor": "rm", "spell": 705636},
+    {"action": "assert", "label": "Primal Rune (705636) is active", "actor": "rm",
+      "metric": "aura", "spell": 705636, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "705636 op 3 flat -10 reaches 520229 (classmask matches Granite Resolve's family flags)",
+      "actor": "rm", "metric": "spell_modifier", "spell": 520229, "op": 3, "base": 100000, "min": 99988, "max": 99992}
+  ]
+}

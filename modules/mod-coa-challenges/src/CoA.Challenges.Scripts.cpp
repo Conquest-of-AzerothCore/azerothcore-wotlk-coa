@@ -2,12 +2,21 @@
 // Mechanical split of review-CoAChallenges.cpp; no logic changes.
 #include "CoA.Challenges.Review.h"
 #include "RBAC.h"
+#include "KillRewarder.h"
 #include "Random.h"
+#include "AllCreatureScript.h"
+#include "AccountScript.h"
+#include "LocalLevelScaling.h"
 
 using namespace Acore::ChatCommands;
 
 namespace CoAChallenges
 {
+
+    bool UsesCoreProfessionXP(Player* player)
+    {
+        return player && ActiveChallenges(player->GetGUID().GetCounter()).contains(167);
+    }
 
     // Heal-path helpers (defined below, used by HealBlocked earlier in this TU).
     void AllowBandageHeal(uint32 guid);
@@ -552,12 +561,15 @@ namespace CoAChallenges
         add("CHALLENGE_RULES_TYPE_CAST_RANGE_LIMITED_TO_MELEE", REGEN_CAST_RANGE);
         add("CHALLENGE_RULES_TYPE_NO_PORTALS", REGEN_NO_PORTALS);
 
-        std::lock_guard<std::mutex> lock(RegenMutex);
-        uint32 guid = player->GetGUID().GetCounter();
-        if (mask)
-            RegenRuleMask[guid] = mask;
-        else
-            RegenRuleMask.erase(guid);
+        {
+            std::lock_guard<std::mutex> lock(RegenMutex);
+            uint32 guid = player->GetGUID().GetCounter();
+            if (mask)
+                RegenRuleMask[guid] = mask;
+            else
+                RegenRuleMask.erase(guid);
+        }
+        player->UpdateManaRegen();
     }
 
     void UntrackRegen(Player* player)
@@ -704,7 +716,7 @@ namespace CoAChallenges
     }
 
     // ---- HIGH_RISK_ONLY -----------------------------------------------------
-    // High Risk is a ruleset aura applied by mod-ascension-compat
+    // High Risk is a ruleset aura applied by CoA
     // (SPELL_ASCENSION_HIGH_RISK = 1004019; see AscensionRulesets.cpp). The rule
     // means the challenge may only run while the character carries it. The aura
     // is polled per tick from a cached guid set (refreshed on login/activate/
@@ -743,6 +755,69 @@ namespace CoAChallenges
     {
         std::lock_guard<std::mutex> lock(HighRiskMutex);
         return HighRiskGuids.find(guid) != HighRiskGuids.end();
+    }
+
+    // ---- NO_CREATURE_LEVEL_SCALING / NO_QUEST_LEVEL_SCALING -----------------
+    // The scaling paths ask once per creature per viewer update, so the mask is
+    // cached per guid like the High Risk set, with a count for the common case
+    // of nobody holding such a challenge. A change re-sends the character's
+    // creatures and quest log, which the client otherwise keeps from before.
+    std::mutex LevelScalingMutex;
+    std::unordered_map<uint32, uint8> LevelScalingMasks;
+    std::atomic<uint32> LevelScalingMaskCount{0};
+
+    uint8 LevelScalingBlocks(Player const* player)
+    {
+        if (!player || !LevelScalingMaskCount.load(std::memory_order_relaxed))
+            return 0;
+        std::lock_guard<std::mutex> lock(LevelScalingMutex);
+        auto const it = LevelScalingMasks.find(player->GetGUID().GetCounter());
+        return it == LevelScalingMasks.end() ? 0 : it->second;
+    }
+
+    uint8 StoreLevelScalingBlocks(uint32 guid, uint8 blocks)
+    {
+        std::lock_guard<std::mutex> lock(LevelScalingMutex);
+        auto const it = LevelScalingMasks.find(guid);
+        uint8 const previous = it == LevelScalingMasks.end() ? 0 : it->second;
+        if (it != LevelScalingMasks.end() && !blocks)
+        {
+            LevelScalingMasks.erase(it);
+            LevelScalingMaskCount.fetch_sub(1, std::memory_order_relaxed);
+        }
+        else if (it != LevelScalingMasks.end())
+            it->second = blocks;
+        else if (blocks)
+        {
+            LevelScalingMasks.emplace(guid, blocks);
+            LevelScalingMaskCount.fetch_add(1, std::memory_order_relaxed);
+        }
+        return previous;
+    }
+
+    void RefreshLevelScalingTracking(Player* player)
+    {
+        if (!player)
+            return;
+        uint8 blocks = 0;
+        if (ChallengesEnabled())
+        {
+            uint32 level = 0;
+            if (ActiveChallengeWithRule(player, "CHALLENGE_RULES_TYPE_NO_CREATURE_LEVEL_SCALING", level))
+                blocks |= LocalLevelScaling::ChallengeBlocksCreatureScaling;
+            if (ActiveChallengeWithRule(player, "CHALLENGE_RULES_TYPE_NO_QUEST_LEVEL_SCALING", level))
+                blocks |= LocalLevelScaling::ChallengeBlocksQuestScaling;
+        }
+        if (StoreLevelScalingBlocks(player->GetGUID().GetCounter(), blocks) == blocks || !player->IsInWorld())
+            return;
+        if (!LocalLevelScaling::NotifyScalingChanged(player))
+            player->RefreshQuestLogQueries();
+    }
+
+    void UntrackLevelScaling(Player* player)
+    {
+        if (player)
+            StoreLevelScalingBlocks(player->GetGUID().GetCounter(), 0);
     }
 
     // HIGH_RISK_ONLY activation gate (shared by ValidateChallenge and tests).
@@ -891,6 +966,48 @@ namespace CoAChallenges
         return PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_OUTSIDE_INTERACTION");
     }
 
+    // ---- OUTSIDE_INTERACTION activation gate (implicit, #4205 family) -----
+    // Any outside service interaction (mail/trade/AH/vendor/guild bank) taints
+    // the character, so a non-prestige trial can no longer be started. One
+    // persistent flag; the in-memory set avoids a DB write per vendor click.
+    // ponytail: personal bank has no core hook, so it is not tracked yet.
+    std::mutex OutsideMutex;
+    std::unordered_set<std::string> OutsideMarked;
+
+    void MarkOutsideInteraction(Player* player, char const* facet)
+    {
+        if (!player || !facet || !ChallengesEnabled() || !OutsideInteractionGateEnabled() || IsPrestiged(player))
+            return;
+        uint32 const guid = player->GetGUID().GetCounter();
+        if (HasActiveTrial(guid))   // condition gates activation only
+            return;
+        std::string const key = std::to_string(guid) + ":" + facet;
+        {
+            std::lock_guard<std::mutex> lock(OutsideMutex);
+            if (!OutsideMarked.insert(key).second)
+                return;
+        }
+        // Already permanently blocked (a failure under BlockAllAfterFailure):
+        // the flag can never matter, so don't write it. Checked after the dedup
+        // so the DB query runs at most once per facet per session.
+        if (ActivationPermanentlyBlocked(guid))
+            return;
+        SetConditionFlag(guid, facet);
+    }
+
+    void UntrackOutsideInteraction(uint32 guid)
+    {
+        std::lock_guard<std::mutex> lock(OutsideMutex);
+        std::string const prefix = std::to_string(guid) + ":";
+        for (auto it = OutsideMarked.begin(); it != OutsideMarked.end();)
+        {
+            if (it->compare(0, prefix.size(), prefix) == 0)
+                it = OutsideMarked.erase(it);
+            else
+                ++it;
+        }
+    }
+
     // ---- NO_GROUP_FOR_DUNGEONS ("Solitary Struggle") ----------------------
     // You cannot group with other players while inside a dungeon.
     bool GroupForDungeonsBlocked(Player* player, Player* other)
@@ -904,10 +1021,295 @@ namespace CoAChallenges
         return false;
     }
 
+    // ---- Mailbox (#4205) ---------------------------------------------------
+    // Pre-trial: taking non-store items/currency from the mailbox taints the
+    // character so a non-prestige trial cannot be started (facet of
+    // OUTSIDE_INTERACTION). During the trial: the NO_MAIL rule forbids both
+    // sending and receiving mail. Store items / reward caches are exempt.
+    bool IsMailExemptItem(uint32 entry)
+    {
+        if (!entry)
+            return false;
+        return CoAParse::ListContains(
+            sConfigMgr->GetOption<std::string>("CoAChallenges.MailExemptItems", "1397884;1397885;1397886"),
+            std::to_string(entry));
+    }
+
+    // NO_MAIL / NO_OUTSIDE_INTERACTION (rules) forbid RECEIVING mail during the
+    // trial, mirroring OnPlayerCanSendMail for the sending side. Exempt items
+    // (store items / reward caches, same list as MarkMailTaken) are never
+    // player-to-player mail, so they stay takeable; itemEntry is 0 for money.
+    bool MailTakeForbidden(Player* player, uint32 itemEntry = 0)
+    {
+        if (player && !IsMailExemptItem(itemEntry)
+            && (PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_MAIL")
+                || NoOutsideInteraction(player)))
+        {
+            NotifyPlayer(player, "Your challenge forbids receiving mail.");
+            return true;
+        }
+        return false;
+    }
+
+    // Mail is a facet of the OUTSIDE_INTERACTION condition: taking a non-exempt
+    // item/currency (entry 0 = money) taints the character for the next trial
+    // activation. Store items / reward caches are exempt.
+    void MarkMailTaken(Player* player, uint32 itemEntry)
+    {
+        if (!player || !ChallengesEnabled())
+            return;
+        if (IsMailExemptItem(itemEntry))   // store items / reward caches: exempt
+            return;
+        if (IsPrestiged(player))           // prestige uses the mailbox normally
+            return;
+        MarkOutsideInteraction(player, "OUTSIDE_MAIL");
+    }
+
+    // ---- Adventure Mode: monster health ---------------------------------------
+    // Every tier's main aura reads "Monsters have X% more health". The first
+    // Adventure player to hit an untapped monster (or one their group tapped)
+    // scales it by their tier until it leaves combat. A flat TOTAL_VALUE
+    // modifier survives the aura-driven recalculation of the health multiplier.
+    uint32 AdventureModeTier(Player* player)
+    {
+        if (!player || !ChallengesEnabled())
+            return 0;
+        for (auto const& [cid, level] : CachedCharChallenges(player->GetGUID().GetCounter()))
+            if (cid == 211 || cid == 425)
+                return std::max<uint32>(level, 1);
+        return 0;
+    }
+
+    uint32 AdventureModeExtraHealthPct(uint32 tier)
+    {
+        if (tier >= 89)
+            return 400;
+        if (tier >= 69)
+            return 285;
+        if (tier >= 49)
+            return 215;
+        if (tier >= 29)
+            return 165;
+        if (tier >= 9)
+            return 125;
+        return 100;
+    }
+
+    constexpr char const* AdventureHealthKey = "coa_challenges.adventure_health";
+
+    struct AdventureHealth : DataMap::Base
+    {
+        float extra = 0.0f;
+    };
+
+    void ChangeMaxHealthKeepingPct(Creature* creature, float extra, bool apply)
+    {
+        bool const alive = creature->IsAlive() && creature->GetHealth();
+        float const pct = creature->GetHealthPct();
+        creature->HandleStatFlatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, extra, apply);
+        if (alive)
+            creature->SetHealth(std::max<uint32>(creature->CountPctFromMaxHealth(pct), 1));
+    }
+
+    void ScaleAdventureHealth(Player* attacker, Unit* victim)
+    {
+        Creature* creature = victim->ToCreature();
+        if (!creature || creature->IsCharmedOwnedByPlayerOrPlayer() || !creature->IsAlive())
+            return;
+        if (creature->CustomData.Get<AdventureHealth>(AdventureHealthKey))
+            return;
+        if (creature->hasLootRecipient() && !creature->isTappedBy(attacker))
+            return;
+        uint32 const tier = AdventureModeTier(attacker);
+        if (!tier)
+            return;
+
+        auto* state = new AdventureHealth();
+        state->extra = float(CalculatePct(creature->GetMaxHealth(), AdventureModeExtraHealthPct(tier)));
+        creature->CustomData.Set(AdventureHealthKey, state);
+        ChangeMaxHealthKeepingPct(creature, state->extra, true);
+    }
+
+    void RestoreAdventureHealth(Unit* unit)
+    {
+        Creature* creature = unit ? unit->ToCreature() : nullptr;
+        if (!creature)
+            return;
+        AdventureHealth* state = creature->CustomData.Get<AdventureHealth>(AdventureHealthKey);
+        if (!state)
+            return;
+        ChangeMaxHealthKeepingPct(creature, state->extra, false);
+        creature->CustomData.Erase(AdventureHealthKey);
+    }
+
+    // ---- STRICT_CHALLENGE_RESTRICTED_TAPPING -----------------------------------
+    // A monster's kill rewards (experience, reputation, quest credit and loot)
+    // go only to group members in the same restricted challenge as the player
+    // who tapped it; players outside such a challenge share only with each
+    // other.
+    uint32 RestrictedTappingChallenge(ObjectGuid guid)
+    {
+        for (auto const& [cid, unusedLevel] : CachedCharChallenges(guid.GetCounter()))
+            if (RuleListContains(ChallengeRules(cid), "CHALLENGE_RULES_TYPE_STRICT_CHALLENGE_RESTRICTED_TAPPING"))
+                return cid;
+        return 0;
+    }
+
+    bool TappingAllowsRewards(Player const* player, Creature const* creature)
+    {
+        if (!player || !creature || !ChallengesEnabled())
+            return true;
+        ObjectGuid const tapper = creature->GetLootRecipientGUID();
+        if (!tapper || tapper == player->GetGUID())
+            return true;
+        return RestrictedTappingChallenge(player->GetGUID()) == RestrictedTappingChallenge(tapper);
+    }
+
+    constexpr char const* DeniedKillRewardKey = "coa_challenges.denied_kill_reward";
+
+    struct DeniedKillReward : DataMap::Base
+    {
+        bool denied = false;
+    };
+
+    // ---- COSMETIC_ELITE_ENEMIES ------------------------------------------------
+    // Monsters that are not friendly to the player are shown as elite (rares as
+    // rare elite). The rank lives in the creature query response, which the
+    // client caches, so the responses of visible monsters are re-sent when the
+    // rule starts and restored when it ends.
+    constexpr uint32 CreatureQueryRankUnknownEntry = 0x80000000;
+
+    bool IsCosmeticEliteEnemy(Player* player, CreatureTemplate const* creature)
+    {
+        if (creature->type == CREATURE_TYPE_CRITTER || creature->type == CREATURE_TYPE_NON_COMBAT_PET)
+            return false;
+        FactionTemplateEntry const* own = player->GetFactionTemplateEntry();
+        FactionTemplateEntry const* other = sFactionTemplateStore.LookupEntry(creature->faction);
+        return own && other && !other->IsFriendlyTo(*own);
+    }
+
+    uint32 CosmeticEliteRank(uint32 rank)
+    {
+        if (rank == CREATURE_ELITE_NORMAL)
+            return CREATURE_ELITE_ELITE;
+        if (rank == CREATURE_ELITE_RARE)
+            return CREATURE_ELITE_RAREELITE;
+        return rank;
+    }
+
+    std::size_t CreatureQueryRankPos(WorldPacket const& packet)
+    {
+        std::size_t pos = sizeof(uint32);
+        auto skipString = [&packet, &pos]()
+        {
+            while (pos < packet.size() && packet[pos])
+                ++pos;
+            ++pos;
+        };
+        skipString();
+        pos += 3;
+        skipString();
+        skipString();
+        pos += 3 * sizeof(uint32);
+        return pos + sizeof(uint32) <= packet.size() ? pos : 0;
+    }
+
+    bool SendWithCosmeticEliteRank(WorldSession* session, WorldPacket const& packet)
+    {
+        Player* player = session ? session->GetPlayer() : nullptr;
+        if (!player || packet.size() < sizeof(uint32))
+            return false;
+        uint32 const entry = packet.read<uint32>(0);
+        if (entry & CreatureQueryRankUnknownEntry)
+            return false;
+        CreatureTemplate const* creature = sObjectMgr->GetCreatureTemplate(entry);
+        if (!creature || !IsCosmeticEliteEnemy(player, creature)
+            || !PlayerHasRule(player, "CHALLENGE_RULES_TYPE_COSMETIC_ELITE_ENEMIES"))
+            return false;
+        std::size_t const rankPos = CreatureQueryRankPos(packet);
+        if (!rankPos)
+            return false;
+        uint32 const rank = packet.read<uint32>(rankPos);
+        uint32 const shown = CosmeticEliteRank(rank);
+        if (shown == rank)
+            return false;
+
+        WorldPacket elite(packet);
+        elite.put<uint32>(rankPos, shown);
+        session->SendPacket(&elite);
+        return true;
+    }
+
+    constexpr char const* CosmeticEliteKey = "coa_challenges.cosmetic_elite";
+    constexpr uint32 CosmeticEliteRefreshMs = 1000;
+
+    struct CosmeticEliteDisplay : DataMap::Base
+    {
+        std::unordered_set<uint32> entries;
+        uint32 timer = 0;
+    };
+
+    void ResendCreatureQuery(WorldSession* session, uint32 entry)
+    {
+        WorldPacket query(CMSG_CREATURE_QUERY, sizeof(uint32) + sizeof(uint64));
+        query << uint32(entry) << ObjectGuid::Empty;
+        session->HandleCreatureQueryOpcode(query);
+    }
+
+    void UpdateCosmeticElite(Player* player, uint32 diff)
+    {
+        WorldSession* session = player->GetSession();
+        if (!session)
+            return;
+        CosmeticEliteDisplay* display = player->CustomData.Get<CosmeticEliteDisplay>(CosmeticEliteKey);
+        if (display && display->timer > diff)
+        {
+            display->timer -= diff;
+            return;
+        }
+
+        if (!PlayerHasRule(player, "CHALLENGE_RULES_TYPE_COSMETIC_ELITE_ENEMIES"))
+        {
+            if (!display)
+                return;
+            std::unordered_set<uint32> const shown = std::move(display->entries);
+            player->CustomData.Erase(CosmeticEliteKey);
+            for (uint32 entry : shown)
+                ResendCreatureQuery(session, entry);
+            return;
+        }
+
+        if (!display)
+            display = player->CustomData.GetDefault<CosmeticEliteDisplay>(CosmeticEliteKey);
+        display->timer = CosmeticEliteRefreshMs;
+        std::vector<uint32> added;
+        player->DoForAllVisibleWorldObjects([display, &added](WorldObject* object)
+        {
+            if (Creature* creature = object->ToCreature())
+                if (display->entries.insert(creature->GetEntry()).second)
+                    added.push_back(creature->GetEntry());
+        });
+        for (uint32 entry : added)
+            ResendCreatureQuery(session, entry);
+    }
+
     class CoAChallengesPlayer : public PlayerScript
     {
     public:
-        CoAChallengesPlayer() : PlayerScript("CoAChallengesPlayer", { PLAYERHOOK_ON_SEND_INITIAL_PACKETS_BEFORE_ADD_TO_MAP, PLAYERHOOK_ON_PLAYER_JUST_DIED, PLAYERHOOK_ON_PLAYER_RESURRECT, PLAYERHOOK_CAN_RESURRECT, PLAYERHOOK_CAN_SEND_MAIL, PLAYERHOOK_CAN_JOIN_LFG, PLAYERHOOK_CAN_JOIN_IN_BATTLEGROUND_QUEUE, PLAYERHOOK_CAN_JOIN_IN_ARENA_QUEUE, PLAYERHOOK_CAN_INIT_TRADE, PLAYERHOOK_CAN_PLACE_AUCTION_BID, PLAYERHOOK_ON_BEFORE_SEND_LOOT, PLAYERHOOK_ON_LEVEL_CHANGED, PLAYERHOOK_ON_CREATURE_KILL, PLAYERHOOK_ON_CREATURE_KILLED_BY_PET, PLAYERHOOK_ON_PLAYER_KILLED_BY_CREATURE, PLAYERHOOK_ON_PVP_KILL, PLAYERHOOK_ON_LOOT_ITEM, PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_CAN_GROUP_INVITE, PLAYERHOOK_CAN_GROUP_ACCEPT, PLAYERHOOK_ON_UPDATE_CRAFTING_SKILL, PLAYERHOOK_ON_UPDATE_GATHERING_SKILL, PLAYERHOOK_ON_BEFORE_QUEST_COMPLETE, PLAYERHOOK_ON_QUEST_COMPUTE_EXP, PLAYERHOOK_ON_GIVE_EXP, PLAYERHOOK_CAN_LEARN_TALENT, PLAYERHOOK_CAN_USE_ITEM, PLAYERHOOK_CAN_ENTER_MAP, PLAYERHOOK_CAN_EQUIP_ITEM, PLAYERHOOK_CAN_ENTER_MANASTORM, PLAYERHOOK_ON_PLAYER_ENVIRONMENTAL_DAMAGE, PLAYERHOOK_ON_PLAYER_BREATH_INVERTED, PLAYERHOOK_ON_BEFORE_BUY_ITEM_FROM_VENDOR, PLAYERHOOK_CAN_SELL_ITEM, PLAYERHOOK_ON_CAN_UPDATE_SKILL, PLAYERHOOK_ON_UPDATE_SKILL, PLAYERHOOK_ON_PLAYER_PVP_FLAG_CHANGE, PLAYERHOOK_ON_CAN_REGENERATE, PLAYERHOOK_ON_CAN_ENERGIZE, PLAYERHOOK_ON_CAN_GIVE_LEVEL, PLAYERHOOK_ON_BEFORE_TELEPORT }) { }
+        CoAChallengesPlayer() : PlayerScript("CoAChallengesPlayer", { PLAYERHOOK_ON_SEND_INITIAL_PACKETS_BEFORE_ADD_TO_MAP, PLAYERHOOK_ON_PLAYER_JUST_DIED, PLAYERHOOK_ON_PLAYER_RESURRECT, PLAYERHOOK_CAN_RESURRECT, PLAYERHOOK_CAN_SEND_MAIL, PLAYERHOOK_CAN_JOIN_LFG, PLAYERHOOK_CAN_JOIN_IN_BATTLEGROUND_QUEUE, PLAYERHOOK_CAN_JOIN_IN_ARENA_QUEUE, PLAYERHOOK_CAN_INIT_TRADE, PLAYERHOOK_CAN_PLACE_AUCTION_BID, PLAYERHOOK_ON_BEFORE_SEND_LOOT, PLAYERHOOK_ON_LEVEL_CHANGED, PLAYERHOOK_ON_CREATURE_KILL, PLAYERHOOK_ON_CREATURE_KILLED_BY_PET, PLAYERHOOK_ON_PLAYER_KILLED_BY_CREATURE, PLAYERHOOK_ON_PVP_KILL, PLAYERHOOK_ON_LOOT_ITEM, PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_CAN_GROUP_INVITE, PLAYERHOOK_CAN_GROUP_ACCEPT, PLAYERHOOK_ON_UPDATE_CRAFTING_SKILL, PLAYERHOOK_ON_UPDATE_GATHERING_SKILL, PLAYERHOOK_ON_BEFORE_QUEST_COMPLETE, PLAYERHOOK_ON_QUEST_COMPUTE_EXP, PLAYERHOOK_ON_GIVE_EXP, PLAYERHOOK_ON_GET_MAX_ALLOWED_LEVEL, PLAYERHOOK_ON_HAS_NO_BONUS_EXPERIENCE, PLAYERHOOK_CAN_LEARN_TALENT, PLAYERHOOK_CAN_USE_ITEM, PLAYERHOOK_CAN_ENTER_MAP, PLAYERHOOK_CAN_EQUIP_ITEM, PLAYERHOOK_CAN_ENTER_MANASTORM, PLAYERHOOK_ON_PLAYER_ENVIRONMENTAL_DAMAGE, PLAYERHOOK_ON_PLAYER_BREATH_INVERTED, PLAYERHOOK_ON_BEFORE_BUY_ITEM_FROM_VENDOR, PLAYERHOOK_CAN_SELL_ITEM, PLAYERHOOK_ON_CAN_UPDATE_SKILL, PLAYERHOOK_ON_UPDATE_SKILL, PLAYERHOOK_ON_PLAYER_PVP_FLAG_CHANGE, PLAYERHOOK_ON_CAN_REGENERATE, PLAYERHOOK_ON_CAN_ENERGIZE, PLAYERHOOK_ON_CAN_GIVE_LEVEL, PLAYERHOOK_ON_BEFORE_TELEPORT, PLAYERHOOK_ON_DELETE_FROM_DB, PLAYERHOOK_ON_BANK_WITHDRAW, PLAYERHOOK_ON_REWARD_KILL_REWARDER, PLAYERHOOK_ON_GIVE_REPUTATION, PLAYERHOOK_PASSED_QUEST_KILLED_MONSTER_CREDIT, PLAYERHOOK_ON_LOAD_FROM_DB, PLAYERHOOK_ON_GET_GAME_MODE_MASK }) { }
+
+        bool OnPlayerGetGameModeMask(Player const* player, uint32& mask) override
+        {
+            mask = CachedGameModeMask(player->GetGUID().GetCounter());
+            return true;
+        }
+
+        // Player::LoadFromDB, before the inventory load asks PlayerHasRule: one read of the active
+        // challenges serves both that cache and PushLoginState later in the same login.
+        void OnPlayerLoadFromDB(Player* player) override
+        {
+            PreloadLoginChallengeRows(player->GetGUID().GetCounter());
+        }
 
         // Runs on BOTH login paths (full + re-login-to-in-world; see
         // CharacterHandler.cpp:901 and :1215). Batch is idempotent.
@@ -930,7 +1332,7 @@ namespace CoAChallenges
             return !HasPermaDeathFailure(player);
         }
 
-        // NO_MANASTORM: the Manastorm feature lives in mod-ascension-compat,
+        // NO_MANASTORM: the Manastorm feature lives in CoA,
         // which calls this hook before starting a run.
         bool OnPlayerCanEnterManastorm(Player* player) override
         {
@@ -1090,6 +1492,7 @@ namespace CoAChallenges
 
         bool OnPlayerCanPlaceAuctionBid(Player* player, AuctionEntry* /*auction*/) override
         {
+            MarkOutsideInteraction(player, "OUTSIDE_AH");
             return !PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_AUCTIONHOUSE")
                 && !NoOutsideInteraction(player);
         }
@@ -1098,6 +1501,8 @@ namespace CoAChallenges
         {
             if (!player || !target)
                 return true;
+            MarkOutsideInteraction(player, "OUTSIDE_TRADE");
+            MarkOutsideInteraction(target, "OUTSIDE_TRADE");
             if (PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_TRADE")
                 || PlayerHasRule(target, "CHALLENGE_RULES_TYPE_NO_TRADE")
                 || NoOutsideInteraction(player)
@@ -1213,22 +1618,20 @@ namespace CoAChallenges
             return true;
         }
 
-        void OnPlayerUpdateCraftingSkill(Player* player, SkillLineAbilityEntry const* skill, uint32 /*current_level*/, uint32& gain) override
+        void OnPlayerUpdateCraftingSkill(Player* player, SkillLineAbilityEntry const* skill, uint32 /*current_level*/, uint32& /*gain*/) override
         {
-            if (PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_PROFESSION_EXPERIENCE"))
-                gain = 0;
-            if (player && PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS"))
+            if (player && PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS")
+                && !UsesCoreProfessionXP(player))
             {
                 std::lock_guard<std::mutex> lock(CraftRarityMutex);
                 CraftRarity[player->GetGUID().GetCounter()] = CraftedItemRarity(skill);
             }
         }
 
-        void OnPlayerUpdateGatheringSkill(Player* player, uint32 /*skill_id*/, uint32 /*current*/, uint32 /*gray*/, uint32 /*green*/, uint32 /*yellow*/, uint32& gain) override
+        void OnPlayerUpdateGatheringSkill(Player* player, uint32 /*skill_id*/, uint32 /*current*/, uint32 /*gray*/, uint32 /*green*/, uint32 /*yellow*/, uint32& /*gain*/) override
         {
-            if (PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_PROFESSION_EXPERIENCE"))
-                gain = 0;
-            if (player && PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS"))
+            if (player && PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS")
+                && !UsesCoreProfessionXP(player))
             {
                 // Gathering has no crafted item: flat XP, also clears a stale
                 // craft entry from a failed skill-up roll.
@@ -1254,6 +1657,8 @@ namespace CoAChallenges
             if (!player || !IsProfessionSkill(skillId))
                 return;
             if (!PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS"))
+                return;
+            if (UsesCoreProfessionXP(player))
                 return;
             uint32 mult = 1;
             {
@@ -1305,25 +1710,24 @@ namespace CoAChallenges
             return true;
         }
 
-        // NO_FETCH_QUEST_EXPERIENCE: fetch/collection quests (those requiring
-        // items) grant no experience; other rewards stay.
+        // NO_FETCH_QUEST_EXPERIENCE: quests with no objectives (talk-to and
+        // delivery quests) grant no experience; other rewards stay.
         void OnPlayerQuestComputeXP(Player* player, Quest const* quest, uint32& xpValue) override
         {
             if (!player || !quest)
                 return;
             if (!PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_FETCH_QUEST_EXPERIENCE"))
                 return;
-            for (uint32 i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
-            {
-                if (quest->RequiredItemId[i])
-                {
-                    xpValue = 0;
-                    return;
-                }
-            }
+            if (IsQuestWithoutObjectives(quest))
+                xpValue = 0;
         }
 
         // ---- Rules: experience source / talents / items ----------------------
+        bool OnPlayerHasNoBonusExperience(Player* player) override
+        {
+            return PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_BONUS_EXPERIENCE");
+        }
+
         void OnPlayerGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource) override
         {
             if (PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_QUESTS"))
@@ -1348,9 +1752,15 @@ namespace CoAChallenges
             }
             else if (PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS"))
             {
-                // Profession skill gain does not use GiveXP, so block all XP.
-                amount = 0;
+                uint8 const professionSource = UsesCoreProfessionXP(player)
+                    ? XPSOURCE_PROFESSION : XPSOURCE_PROFESSION_SKILL;
+                if (xpSource != professionSource)
+                    amount = 0;
             }
+
+            if ((xpSource == XPSOURCE_PROFESSION || xpSource == XPSOURCE_PROFESSION_SKILL)
+                && PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_PROFESSION_EXPERIENCE"))
+                amount = 0;
 
             // NO_KILL_CREDIT_UNLESS_AT_DISADVANTAGE ("Punching Up" / Overwhelming
             // Odds): only monsters above the player's level grant kill credit.
@@ -1359,6 +1769,26 @@ namespace CoAChallenges
                 && xpSource == XPSOURCE_KILL && victim && victim->IsCreature()
                 && victim->GetLevel() <= player->GetLevel())
                 amount = 0;
+
+            // Prestige experience bonus: while a prestige cycle is in progress
+            // the character earns the module's configured experience (the single
+            // "Prestige Challenge" aura, 9930831, is the IsPrestiged() marker and
+            // carries no mechanical XP effect, so this core applies it). The bonus
+            // is flat, not per-cycle, and only below the cap. A challenge carrying
+            // NO_BONUS_EXPERIENCE (Prestige - Resolute, Slow and Steady, Resolute
+            // Mode) ignores it.
+            if (amount && CoAPrestige::IsActive(player)
+                && !PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_BONUS_EXPERIENCE"))
+            {
+                amount = uint32(uint64(amount) * CoAPrestige::ExperienceBonusPercent() / 100);
+            }
+
+            // Prestige daily bonus: the content the held Prestige daily names earns extra
+            // experience while it is played (Open World / Battlegrounds / Dungeons). A
+            // challenge carrying NO_BONUS_EXPERIENCE ignores it too.
+            if (amount && !PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_BONUS_EXPERIENCE"))
+                if (uint32 const daily = CoAPrestige::DailyExperienceBonusPercent(player, xpSource))
+                    amount = uint32(uint64(amount) * (100 + daily) / 100);
 
             // NO_LEVEL_PAST_REQUIREMENTS: hold the player one point short of the
             // FIRST unmet objective level ahead. A huge gain (e.g. a big XP
@@ -1397,6 +1827,17 @@ namespace CoAChallenges
                     }
                 }
             }
+        }
+
+        // Hard level-up cap for NO_LEVEL_PAST_REQUIREMENTS. Player::GiveXP
+        // enforces it after every XP multiplier (dynamic-xp rate, RaF, rested,
+        // favored) and regardless of hook order, so a large gain cannot cross
+        // the gate. Complements the projection in OnPlayerGiveXP, which also
+        // lands the bar one point short of the next level.
+        uint8 OnPlayerGetMaxAllowedLevel(Player* player) override
+        {
+            uint32 const gate = NextGatedLevel(player);
+            return gate ? static_cast<uint8>(gate - 1) : 0;
         }
 
         bool OnPlayerCanLearnTalent(Player* player, TalentEntry const* /*talent*/, uint32 /*rank*/) override
@@ -1486,6 +1927,7 @@ namespace CoAChallenges
         {
             if (!player || item == 0)
                 return;
+            MarkOutsideInteraction(player, "OUTSIDE_VENDOR");
             ItemTemplate const* proto = sObjectMgr->GetItemTemplate(item);
             Creature* vendor = player->GetNPCIfCanInteractWith(vendorguid, UNIT_NPC_FLAG_VENDOR);
 
@@ -1512,6 +1954,7 @@ namespace CoAChallenges
         // NO_VENDORS: also block selling to a vendor.
         bool OnPlayerCanSellItem(Player* player, Item* /*item*/, Creature* /*creature*/) override
         {
+            MarkOutsideInteraction(player, "OUTSIDE_VENDOR");
             if (player && (PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_VENDORS")
                 || NoOutsideInteraction(player)))
             {
@@ -1625,7 +2068,9 @@ namespace CoAChallenges
         // ---- Activation-condition tracking (persistent, once broken stays) ----
         void OnPlayerBeforeSendLoot(Player* player, ObjectGuid /*lootGuid*/, Loot* /*loot*/) override
         {
-            SetConditionFlag(player->GetGUID().GetCounter(), "LOOTED");
+            uint32 const guid = player->GetGUID().GetCounter();
+            if (!HasActiveTrial(guid))   // condition gates activation only
+                SetConditionFlag(guid, "LOOTED");
         }
 
         void OnPlayerLevelChanged(Player* player, uint8 /*oldLevel*/) override
@@ -1709,7 +2154,8 @@ namespace CoAChallenges
             LOG_INFO("module.coa_challenges",
                 "{}: {} killed creature {} (type {}), failing challenge {}",
                 rule, player->GetName(), killed->GetEntry(), uint32(killed->GetCreatureType()), cid);
-            FailChallenge(player, cid, level, deaths);
+            FailChallenge(player, cid, level, deaths, ObjectGuid::Empty,
+                KillerKind::Rule, killed->GetEntry(), killed->GetName());
         }
 
         void OnPlayerCreatureKill(Player* player, Creature* killed) override
@@ -1810,6 +2256,34 @@ namespace CoAChallenges
             FatigueUpdate(player, diff);
             SpellbindUpdate(player, diff);
             EnforceHighRisk(player);
+            UpdateCosmeticElite(player, diff);
+        }
+
+        void OnPlayerRewardKillRewarder(Player* player, KillRewarder* rewarder, bool /*isDungeon*/,
+            float& rate) override
+        {
+            bool const denied = !TappingAllowsRewards(player, rewarder->GetVictim()->ToCreature());
+            player->CustomData.GetDefault<DeniedKillReward>(DeniedKillRewardKey)->denied = denied;
+            if (denied)
+                rate = 0.0f;
+        }
+
+        void OnPlayerGiveReputation(Player* player, int32 /*factionID*/, float& amount,
+            ReputationSource repSource) override
+        {
+            if (repSource != REPUTATION_SOURCE_KILL)
+                return;
+            if (DeniedKillReward const* reward = player->CustomData.Get<DeniedKillReward>(DeniedKillRewardKey))
+                if (reward->denied)
+                    amount = 0.0f;
+        }
+
+        bool OnPlayerPassedQuestKilledMonsterCredit(Player* player, Quest const* /*qinfo*/, uint32 /*entry*/,
+            uint32 /*real_entry*/, ObjectGuid guid) override
+        {
+            if (!guid.IsCreatureOrVehicle())
+                return true;
+            return TappingAllowsRewards(player, ObjectAccessor::GetCreature(*player, guid));
         }
 
         void OnPlayerLogout(Player* player) override
@@ -1821,10 +2295,13 @@ namespace CoAChallenges
             UntrackRegen(player);
             UntrackLevelUp(player);
             UntrackHighRisk(player);
+            UntrackLevelScaling(player);
             UntrackLootedItems(player->GetGUID().GetCounter());
             UntrackBandage(player);
+            UntrackOutsideInteraction(player->GetGUID().GetCounter());
             ClearGameModeMaskCache(player->GetGUID().GetCounter());
             ClearCharChallengeCache(player->GetGUID().GetCounter());
+            ForgetLoginChallengeRows(player->GetGUID().GetCounter());
             // Not reset elsewhere; a stale craft multiplier / killer label would
             // otherwise survive into the next session.
             {
@@ -1835,6 +2312,31 @@ namespace CoAChallenges
                 std::lock_guard<std::mutex> lock(LastKillerMutex);
                 LastKiller.erase(player->GetGUID().GetCounter());
             }
+        }
+
+        // Character deletion: drop every character-scoped coa_* row in the same
+        // transaction the core commits for the delete (Player::DeleteFromDB ->
+        // OnPlayerDeleteFromDB), so nothing is orphaned. Keep this list in sync
+        // with ResetCoaCharacterState.
+        void OnPlayerDeleteFromDB(CharacterDatabaseTransaction trans, uint32 guid) override
+        {
+            static char const* const kCharTables[] = {
+                "coa_character_challenge", "coa_character_objective", "coa_challenge_completion",
+                "coa_challenge_failure", "coa_character_condition", "coa_character_gamemode",
+                "coa_character_gamemode_lives", "coa_character_survival", "coa_character_fatigue",
+                "coa_character_looted_item", "coa_custom_trial", "coa_custom_trial_active",
+                "coa_custom_trial_entry", "coa_custom_trial_vote", "coa_custom_trial_completion",
+            };
+            for (char const* table : kCharTables)
+                trans->Append("DELETE FROM {} WHERE guid = {}", table, guid);
+            ForgetConditionFlags(guid);
+        }
+
+        // Personal / realm bank withdrawal (CoA fires this core
+        // hook) feeds the OUTSIDE_INTERACTION gate. kind: 0 = personal, 1 = realm.
+        void OnPlayerBankWithdraw(Player* player, uint8 kind) override
+        {
+            MarkOutsideInteraction(player, kind == 1 ? "OUTSIDE_REALM_BANK" : "OUTSIDE_BANK");
         }
     };
 
@@ -1849,11 +2351,11 @@ namespace CoAChallenges
             LoadChallengesEnabled();
         }
 
-        void OnStartup() override
-        {
-            EnsureTables();
-            LoadChallengeDefinitions();
-        }
+            void OnStartup() override
+            {
+                EnsureTables();
+                LoadChallengeDefinitions();
+            }
 
         void OnUpdate(uint32 diff) override
         {
@@ -1865,7 +2367,15 @@ namespace CoAChallenges
     class CoAChallengesServer : public ServerScript
     {
     public:
-        CoAChallengesServer() : ServerScript("CoAChallengesServer", { SERVERHOOK_CAN_PACKET_RECEIVE }) { }
+        CoAChallengesServer() : ServerScript("CoAChallengesServer",
+            { SERVERHOOK_CAN_PACKET_RECEIVE, SERVERHOOK_CAN_PACKET_SEND }) { }
+
+        bool CanPacketSend(WorldSession* session, WorldPacket const& packet) override
+        {
+            if (packet.GetOpcode() != SMSG_CREATURE_QUERY_RESPONSE)
+                return true;
+            return !SendWithCosmeticEliteRank(session, packet);
+        }
 
         bool CanPacketReceive(WorldSession* session, WorldPacket const& packet) override
         {
@@ -1891,6 +2401,39 @@ namespace CoAChallenges
             }
 
             Player* player = session ? session->GetPlayer() : nullptr;
+
+            // Mail take (#4205). Handled here (not via a core hook) so the whole
+            // rule stays in the module, like the other opcodes below.
+            // - NO_MAIL / NO_OUTSIDE_INTERACTION forbid RECEIVING during a trial.
+            // - Otherwise taking a non-exempt item/currency taints the character
+            //   for the next trial activation (OUTSIDE_INTERACTION facet).
+            // Payload: mailbox ObjectGuid (8) then mailId (u32); take-item adds
+            // the item low guid (u32).
+            if (opcode == CMSG_MAIL_TAKE_ITEM && packet.size() >= 16)
+            {
+                Item* item = player ? player->GetMItem(packet.read<uint32>(12)) : nullptr;
+                uint32 itemEntry = item ? item->GetEntry() : 0;
+                if (MailTakeForbidden(player, itemEntry))
+                {
+                    if (player)
+                        player->SendMailResult(packet.read<uint32>(8), MAIL_ITEM_TAKEN, MAIL_ERR_INTERNAL_ERROR);
+                    return false;
+                }
+                if (player)
+                    MarkMailTaken(player, itemEntry);
+                return true;
+            }
+            if (opcode == CMSG_MAIL_TAKE_MONEY && packet.size() >= 12)
+            {
+                if (MailTakeForbidden(player))
+                {
+                    if (player)
+                        player->SendMailResult(packet.read<uint32>(8), MAIL_MONEY_TAKEN, MAIL_ERR_INTERNAL_ERROR);
+                    return false;
+                }
+                MarkMailTaken(player, 0);
+                return true;
+            }
 
             // NO_VENDOR_BUYBACK / NO_VENDORS / NO_OUTSIDE_INTERACTION: no vendor buyback.
             if (opcode == CMSG_BUYBACK_ITEM)
@@ -2210,10 +2753,13 @@ namespace CoAChallenges
                 { "e2emiss",   HandleCoAE2EMissCommand, SEC_ADMINISTRATOR, Console::Yes },
                 { "ruletest",  HandleCoARuleTestCommand, SEC_ADMINISTRATOR, Console::Yes },
                 { "ruletestall", HandleCoARuleTestAllCommand, SEC_ADMINISTRATOR, Console::Yes },
+                { "conditiontest", HandleCoAConditionTestCommand, SEC_ADMINISTRATOR, Console::Yes },
+                { "flag",      HandleCoAFlagCommand,       SEC_ADMINISTRATOR, Console::Yes },
                 { "ruletestparty", HandleCoARuleTestPartyCommand, SEC_ADMINISTRATOR, Console::Yes },
                 { "ruleaudit", HandleCoARuleAuditCommand, SEC_ADMINISTRATOR, Console::Yes },
                 { "auditdefs", HandleCoAAuditDefsCommand, SEC_ADMINISTRATOR, Console::Yes },
                 { "cachetoctou", HandleCoACacheToctouCommand, SEC_ADMINISTRATOR, Console::Yes },
+                { "pettest",   HandleCoAPetTestCommand,   SEC_ADMINISTRATOR, Console::Yes },
                 { "gamemode",  HandleCoAGameModeCommand,  SEC_ADMINISTRATOR, Console::Yes },
                 { "sync",      HandleCoASyncCommand,       SEC_ADMINISTRATOR, Console::Yes },
                 { "fatigue",   HandleCoAFatigueCommand,   SEC_ADMINISTRATOR, Console::Yes },
@@ -2436,7 +2982,7 @@ namespace CoAChallenges
                 handler->PSendSysMessage("Listed only (no online player; usage: .coa reward <id> [level] [player]).");
                 return true;
             }
-            GrantChallengeRewards(p, challengeId, lvl, true);
+            GrantChallengeRewards(p, challengeId, lvl, true, true);
             handler->PSendSysMessage("Delivered to {} (check the mailbox / achievements).", p->GetName());
             return true;
         }
@@ -2572,6 +3118,51 @@ namespace CoAChallenges
             return true;
         }
 
+        // .coa conditiontest <player>
+        // GM-only: exercises every implemented activation condition through the
+        // real EvaluateConditions, using a synthetic condition string.
+        static bool HandleCoAConditionTestCommand(ChatHandler* handler, std::string playerName)
+        {
+            Player* p = ObjectAccessor::FindPlayerByName(playerName);
+            if (!p)
+            {
+                handler->SendErrorMessage("Player '{}' is not online.", playerName);
+                return false;
+            }
+            if (Test_ConditionGates(p))
+                handler->PSendSysMessage("CONDITION GATES PASS");
+            else
+                handler->SendErrorMessage("CONDITION GATES FAIL (see per-condition lines above)");
+            return true;
+        }
+
+        // .coa flag <player> <FLAG> [on|off]
+        // GM-only: set/clear a persistent activation-condition flag on a
+        // character (e.g. OUTSIDE_BANK) to exercise the activation gate without
+        // performing the real action. Then `.coa trial check <id>`.
+        static bool HandleCoAFlagCommand(ChatHandler* handler, std::string playerName,
+            std::string flag, Optional<bool> on)
+        {
+            Player* p = ObjectAccessor::FindPlayerByName(playerName);
+            if (!p)
+            {
+                handler->SendErrorMessage("Player '{}' is not online.", playerName);
+                return false;
+            }
+            uint32 const guid = p->GetGUID().GetCounter();
+            if (!on || *on)
+            {
+                SetConditionFlag(guid, flag.c_str());
+                handler->PSendSysMessage("Set condition flag '{}' for {}.", flag, p->GetName());
+            }
+            else
+            {
+                ClearConditionFlag(guid, flag);
+                handler->PSendSysMessage("Cleared condition flag '{}' for {}.", flag, p->GetName());
+            }
+            return true;
+        }
+
         // .coa ruletestparty <p1> <p2>
         // GM-only: drives the rules whose check needs a second player
         // (trade / group / PvP range). Both must be online.
@@ -2639,6 +3230,23 @@ namespace CoAChallenges
                 handler->PSendSysMessage("CACHE TOCTOU PASS");
             else
                 handler->SendErrorMessage("CACHE TOCTOU FAIL (see lines above)");
+            return true;
+        }
+
+        // .coa pettest <player>
+        // GM-only: regression test for Issue #4343 (trial auras applied to summons).
+        static bool HandleCoAPetTestCommand(ChatHandler* handler, std::string playerName)
+        {
+            Player* p = ObjectAccessor::FindPlayerByName(playerName);
+            if (!p)
+            {
+                handler->SendErrorMessage("Player '{}' is not online.", playerName);
+                return false;
+            }
+            if (Test_PetTrialAuras(p))
+                handler->PSendSysMessage("PET TRIAL AURAS PASS");
+            else
+                handler->SendErrorMessage("PET TRIAL AURAS FAIL (see lines above)");
             return true;
         }
 
@@ -2755,6 +3363,7 @@ namespace CoAChallenges
         bool CanSendAuctionHello(WorldSession const* session, ObjectGuid /*guid*/, Creature* /*creature*/) override
         {
             Player* player = session ? session->GetPlayer() : nullptr;
+            MarkOutsideInteraction(player, "OUTSIDE_AH");
             if (PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_AUCTIONHOUSE")
                 || NoOutsideInteraction(player))
             {
@@ -2770,7 +3379,7 @@ namespace CoAChallenges
     class CoAChallengesGuild : public GuildScript
     {
     public:
-        CoAChallengesGuild() : GuildScript("CoAChallengesGuild", { GUILDHOOK_CAN_GUILD_SEND_BANK_LIST }) { }
+        CoAChallengesGuild() : GuildScript("CoAChallengesGuild", { GUILDHOOK_CAN_GUILD_SEND_BANK_LIST, GUILDHOOK_ON_ITEM_MOVE, GUILDHOOK_ON_MEMBER_WITDRAW_MONEY }) { }
 
         bool CanGuildSendBankList(Guild const* /*guild*/, WorldSession* session, uint8 /*tabId*/, bool /*sendAllSlots*/) override
         {
@@ -2783,6 +3392,20 @@ namespace CoAChallenges
                 return false;
             }
             return true;
+        }
+
+        // OUTSIDE_INTERACTION gate: withdrawing items/money from the guild bank
+        // is an outside interaction.
+        void OnItemMove(Guild* /*guild*/, Player* player, Item* /*pItem*/, bool isSrcBank, uint8 /*srcContainer*/,
+            uint8 /*srcSlotId*/, bool /*isDestBank*/, uint8 /*destContainer*/, uint8 /*destSlotId*/) override
+        {
+            if (isSrcBank)
+                MarkOutsideInteraction(player, "OUTSIDE_GUILD_BANK");
+        }
+
+        void OnMemberWitdrawMoney(Guild* /*guild*/, Player* player, uint32& /*amount*/, bool /*isRepair*/) override
+        {
+            MarkOutsideInteraction(player, "OUTSIDE_GUILD_BANK");
         }
     };
     // GroupScript: leaving/disbanding a group fails SharedFate (Duo/Trio)
@@ -2798,21 +3421,23 @@ namespace CoAChallenges
         {
             if (group && (group->isBGGroup() || group->isBFGroup()))
                 return;
-            FailSharedFateHolders(group, ObjectAccessor::FindPlayer(guid));
+            FailSharedFateHolders(group, guid);
         }
 
         void OnDisband(Group* group) override
         {
             if (group && (group->isBGGroup() || group->isBFGroup()))
                 return;
-            FailSharedFateHolders(group, nullptr);
+            FailSharedFateHolders(group, ObjectGuid::Empty);
         }
     };
 
     // True when the spell (or a spell it triggers, up to depth 2) summons/tames
     // a pet or minion. Covers summons hidden behind a trigger, e.g.
     // "Harness Animal Spirit" -> "Tame Beast" (SPELL_EFFECT_TAMECREATURE).
-    static bool SpellIsPetSummon(SpellInfo const* info, int depth)
+    // `companion` is set when the summoned creature is a non-combat pet/critter
+    // (a vanity companion), which the NO_PETS_OR_MINIONS rule must not block.
+    static bool SpellIsPetSummon(SpellInfo const* info, int depth, bool& companion)
     {
         if (!info || depth > 2)
             return false;
@@ -2822,6 +3447,10 @@ namespace CoAChallenges
             {
                 case SPELL_EFFECT_SUMMON:
                 case SPELL_EFFECT_SUMMON_PET:
+                    if (CreatureTemplate const* ct = sObjectMgr->GetCreatureTemplate(uint32(info->Effects[i].MiscValue)))
+                        if (ct->type == CREATURE_TYPE_NON_COMBAT_PET || ct->type == CREATURE_TYPE_CRITTER)
+                            companion = true;
+                    return true;
                 case SPELL_EFFECT_TAMECREATURE:
                 case SPELL_EFFECT_CREATE_TAMED_PET:
                     return true;
@@ -2830,7 +3459,7 @@ namespace CoAChallenges
             }
             if (uint32 trig = info->Effects[i].TriggerSpell)
                 if (SpellInfo const* ti = sSpellMgr->GetSpellInfo(trig))
-                    if (SpellIsPetSummon(ti, depth + 1))
+                    if (SpellIsPetSummon(ti, depth + 1, companion))
                         return true;
         }
         return false;
@@ -2870,7 +3499,7 @@ namespace CoAChallenges
                     case SPELL_EFFECT_SUMMON:       // 28: guardians/minions
                         summons = true;
                         if (CreatureTemplate const* ct = sObjectMgr->GetCreatureTemplate(uint32(info->Effects[i].MiscValue)))
-                            if (ct->type == CREATURE_TYPE_NON_COMBAT_PET)
+                            if (ct->type == CREATURE_TYPE_NON_COMBAT_PET || ct->type == CREATURE_TYPE_CRITTER)
                                 companion = true;
                         break;
                     case SPELL_EFFECT_SKILL_STEP:   // 44: learn a profession rank
@@ -2886,7 +3515,7 @@ namespace CoAChallenges
                 }
             }
             // Also catch pets/tames hidden behind a triggered spell.
-            if (!summons && SpellIsPetSummon(info, 0))
+            if (!summons && SpellIsPetSummon(info, 0, companion))
                 summons = true;
             if (!professionSpell)
             {
@@ -2901,7 +3530,11 @@ namespace CoAChallenges
             Player* pl = caster->ToPlayer();
 
             // Spellbind Roulette: casting the marked spell fails the challenge
-            // (FAILABLE variants) or is blocked (plain).
+            // (FAILABLE variants) or is blocked (plain). Only the player's own
+            // (non-triggered) casts count: a buff/proc that re-triggers the
+            // marked ability has no separate cast to punish, so it must not
+            // consume the mark nor fail the trial.
+            if (!spell->IsTriggered() && !spell->GetTriggeredByAuraSpellInfo())
             {
                 SpellbindMark mark;
                 // Peek only: the mark is consumed in the failable branch (death
@@ -3004,7 +3637,9 @@ namespace CoAChallenges
                 res = SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
                 return;
             }
-            if (PlayerHasRule(pl, "CHALLENGE_RULES_TYPE_NO_PETS_OR_MINIONS"))
+            // NO_PETS_OR_MINIONS refers to combat pets/summons (incl. totems): the
+            // non-combat (vanity) companions are explicitly allowed, as on Ascension.
+            if (!companion && PlayerHasRule(pl, "CHALLENGE_RULES_TYPE_NO_PETS_OR_MINIONS"))
             {
                 NotifyPlayer(pl, "Your challenge forbids pets and minions.");
                 res = SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
@@ -3015,11 +3650,81 @@ namespace CoAChallenges
     // Combat rules enforced through UnitScript (Unit::DealDamage / heal /
     // melee-outcome roll): NO_DAMAGE, NO_KILL_BEASTS/HUMANOIDS, NO_HEALING,
     // CANNOT_DODGE_BLOCK_OR_PARRY, CAN_BE_CRITTED_BY_ANY_ABILITY.
+    class CoAChallengesLoot : public GlobalScript
+    {
+    public:
+        CoAChallengesLoot() : GlobalScript("CoAChallengesLoot",
+            { GLOBALHOOK_ON_ALLOWED_FOR_PLAYER_LOOT_CHECK, GLOBALHOOK_ON_ALLOWED_TO_LOOT_CONTAINER_CHECK }) { }
+
+        bool OnAllowedForPlayerLootCheck(Player const* player, ObjectGuid source) override
+        {
+            return !TappingAllowsLoot(player, source);
+        }
+
+        bool OnAllowedToLootContainerCheck(Player const* player, ObjectGuid source) override
+        {
+            return !TappingAllowsLoot(player, source);
+        }
+
+    private:
+        static bool TappingAllowsLoot(Player const* player, ObjectGuid source)
+        {
+            if (!player || !source.IsCreatureOrVehicle())
+                return true;
+            return TappingAllowsRewards(player, ObjectAccessor::GetCreature(*player, source));
+        }
+    };
+
+    // STRICT_CHALLENGE_RESTRICTED_TAPPING already denies rewards (loot/xp/rep/
+    // quest credit) to a player outside the tapper's restricted challenge via
+    // TappingAllowsRewards; this refusal is the matching attack-time block, so
+    // a mismatched-challenge player cannot fight the mob at all (Ascension
+    // parity), throttled per player so repeated validity checks do not spam chat.
+    constexpr uint32 TappingNoticeIntervalMs = 3000;
+    constexpr char const* TappingNoticeKey = "coa_challenges.tapping_notice";
+
+    struct TappingNotice : DataMap::Base
+    {
+        uint32 Last = 0;
+    };
+
+    // CanUnitAttack (UnitScript / Unit::_IsValidAttackTarget) is evaluated by AI
+    // target-validity scans, AoE splash and threat-list revalidation far more
+    // often than by an actual attack attempt, so the PVE_ONLY refusal below is
+    // throttled per player like mod-scrolls-of-retreat's own refusal notice.
+    constexpr uint32 PveOnlyNoticeIntervalMs = 3000;
+    constexpr char const* PveOnlyNoticeKey = "coa_challenges.pve_only_notice";
+
+    struct PveOnlyNotice : DataMap::Base
+    {
+        uint32 Last = 0;
+    };
+
+    // The same scans also test group members, bots and friendly bystanders, which
+    // the core refuses on its own; the PvP challenge notices are only for a player
+    // the core would otherwise let the attacker fight, so they ask the core once
+    // with this hook stood aside.
+    thread_local bool CoreAttackProbeActive = false;
+
+    bool CoreAllowsAttack(Unit const* attacker, Unit const* target, SpellInfo const* spell)
+    {
+        CoreAttackProbeActive = true;
+        bool const allowed = attacker->IsValidAttackTarget(target, spell);
+        CoreAttackProbeActive = false;
+        return allowed;
+    }
+
     class CoAChallengesUnit : public UnitScript
     {
     public:
         CoAChallengesUnit() : UnitScript("CoAChallengesUnit", true,
-            { UNITHOOK_ON_DAMAGE, UNITHOOK_ON_HEAL, UNITHOOK_MODIFY_HEAL_RECEIVED, UNITHOOK_ON_BEFORE_ROLL_MELEE_OUTCOME_AGAINST, UNITHOOK_CAN_UNIT_ATTACK }) { }
+            { UNITHOOK_ON_DAMAGE, UNITHOOK_ON_HEAL, UNITHOOK_MODIFY_HEAL_RECEIVED, UNITHOOK_ON_BEFORE_ROLL_MELEE_OUTCOME_AGAINST, UNITHOOK_CAN_UNIT_ATTACK,
+              UNITHOOK_ON_UNIT_EXIT_COMBAT }) { }
+
+        void OnUnitExitCombat(Unit* unit) override
+        {
+            RestoreAdventureHealth(unit);
+        }
 
         // Open-world PvP range rules (from the client localization):
         //  - ONLY_PVP_IN_5_LEVEL_RANGE: "You can only PvP with players 5 levels
@@ -3029,13 +3734,38 @@ namespace CoAChallenges
         // Gate is Unit::_IsValidAttackTarget (both melee and spells). Pets/
         // guardians are resolved to their owner. Battlegrounds/arenas keep their
         // own rules (only the open world is restricted).
-        bool CanUnitAttack(Unit const* attacker, Unit const* target, SpellInfo const* /*spell*/) override
+        bool CanUnitAttack(Unit const* attacker, Unit const* target, SpellInfo const* spell) override
         {
-            if (!attacker || !target)
+            if (!attacker || !target || CoreAttackProbeActive)
                 return true;
             Player* a = attacker->GetCharmerOrOwnerPlayerOrPlayerItself();
+            if (!a)
+                return true;
+
+            // STRICT_CHALLENGE_RESTRICTED_TAPPING: a mismatched-challenge player
+            // cannot attack a mob already tapped for someone else's restricted
+            // challenge (creature targets only; TappingAllowsRewards is a no-op
+            // for an untapped mob or a same-challenge/no-challenge tapper).
+            if (Creature const* creatureTarget = target->ToCreature())
+            {
+                if (!TappingAllowsRewards(a, creatureTarget))
+                {
+                    if (a->GetSession())
+                    {
+                        TappingNotice* notice = a->CustomData.GetDefault<TappingNotice>(TappingNoticeKey);
+                        uint32 const now = getMSTime();
+                        if (!notice->Last || now - notice->Last >= TappingNoticeIntervalMs)
+                        {
+                            notice->Last = now;
+                            NotifyPlayer(a, "This target is already tapped by another challenge.");
+                        }
+                    }
+                    return false;
+                }
+            }
+
             Player* t = target->GetCharmerOrOwnerPlayerOrPlayerItself();
-            if (!a || !t || a == t)
+            if (!t || a == t)
                 return true;
 
             // PVE_ONLY (Adventure Mode): cannot fight other players at all.
@@ -3044,7 +3774,16 @@ namespace CoAChallenges
             if (PlayerHasRule(a, "CHALLENGE_RULES_TYPE_PVE_ONLY"))
             {
                 if (a->GetSession())
-                    NotifyPlayer(a, "Your challenge is PvE only: you cannot fight players.");
+                {
+                    PveOnlyNotice* notice = a->CustomData.GetDefault<PveOnlyNotice>(PveOnlyNoticeKey);
+                    uint32 const now = getMSTime();
+                    if ((!notice->Last || now - notice->Last >= PveOnlyNoticeIntervalMs)
+                        && CoreAllowsAttack(attacker, target, spell))
+                    {
+                        notice->Last = now;
+                        NotifyPlayer(a, "Your challenge is PvE only: you cannot fight players.");
+                    }
+                }
                 return false;
             }
 
@@ -3067,7 +3806,7 @@ namespace CoAChallenges
                 if (a->IsMaxLevel() != t->IsMaxLevel())
                     blocked = true;
             }
-            if (blocked && a->GetSession())
+            if (blocked && a->GetSession() && CoreAllowsAttack(attacker, target, spell))
                 NotifyPlayer(a,
                     "Your challenge restricts who you may fight in PvP.");
             return !blocked;
@@ -3089,6 +3828,8 @@ namespace CoAChallenges
                 damage = 0;
                 return;
             }
+
+            ScaleAdventureHealth(pl, victim);
 
             // NO_KILL_*: prevent the killing blow against forbidden creature types.
             if (victim->IsCreature() && damage >= victim->GetHealth() && victim->GetHealth() > 1)
@@ -3144,17 +3885,53 @@ namespace CoAChallenges
         }
     };
 
+    class CoAChallengesAccount : public AccountScript
+    {
+    public:
+        CoAChallengesAccount() : AccountScript("CoAChallengesAccount", { ACCOUNTHOOK_ON_BEFORE_ACCOUNT_DELETE }) { }
+
+        void OnBeforeAccountDelete(uint32 account) override
+        {
+            auto* statement = CharacterDatabase.GetPreparedStatement(CHAR_DEL_COA_ACCOUNT_CHALLENGE_COMPLETIONS);
+            statement->SetData(0, account);
+            CharacterDatabase.DirectExecute(statement);
+        }
+    };
+
+    class CoAChallengesAllCreature : public AllCreatureScript
+    {
+    public:
+        CoAChallengesAllCreature() : AllCreatureScript("CoAChallengesAllCreature") { }
+
+        void OnCreatureAddWorld(Creature* creature) override
+        {
+            if (!creature)
+                return;
+
+            Player* owner = GetPlayerOwner(creature);
+            if (!owner)
+                return;
+
+            ApplyActiveChallengeSpellsToCreature(owner, creature);
+        }
+    };
+
 } // namespace CoAChallenges
 
 void Addmod_coa_challengesScripts()
 {
+    RegisterAscensionClientConfig(&CoAChallenges::AppendClientConfig);
+    LocalLevelScaling::ChallengeBlocksOwner.store(&CoAChallenges::LevelScalingBlocks, std::memory_order_relaxed);
     new CoAChallenges::CoAChallengesPlayer();
     new CoAChallenges::CoAChallengesWorld();
     new CoAChallenges::CoAChallengesServer();
     new CoAChallenges::CoAChallengesUnit();
+    new CoAChallenges::CoAChallengesLoot();
     new CoAChallenges::CoAChallengesCommand();
     new CoAChallenges::CoAChallengesMisc();
     new CoAChallenges::CoAChallengesGuild();
     new CoAChallenges::CoAChallengesGroup();
     new CoAChallenges::CoAChallengesSpells();
+    new CoAChallenges::CoAChallengesAllCreature();
+    new CoAChallenges::CoAChallengesAccount();
 }

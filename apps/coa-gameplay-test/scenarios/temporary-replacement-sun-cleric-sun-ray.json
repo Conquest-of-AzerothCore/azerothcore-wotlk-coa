@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Sun Ray on the action bar is saved as Sunflare (#5469)",
+  "contract": "The Sun Ray buff 803238 is cast on the Sun Cleric by Sunflare or Sunrise procs (AscensionSunClericAbilities.cpp:193, 197); its contract makes it a dummy aura (AscensionSunClericContracts.cpp:116-120). AscensionSunCleric::Refresh, run every 500 ms from sun_cleric_player::OnPlayerUpdate, checks it (AscensionSunCleric.cpp:356-363): while the buff is up and Sunflare 800231 is known it teaches Sun Ray 504764 with learnSpell(504764, true), a temporary spell never written to character_spell, and registers it over every known Sunflare rank with Player::SetTemporarySpellReplacement. Before the fix Player::_SaveActions wrote 504764 for a button holding Sun Ray, and Player::_LoadActions at the next login runs before Refresh teaches it again, so the button was refused and deleted. The fixture applies 803238 directly instead of rolling the proc. persisted_action_button reads Player::GetSavedActionButtonSpell, the id _SaveActions writes. A button holding Sun Ray must be saved as Sunflare; a button holding Sunflare is saved unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "learn", "actor": "cleric", "spell": 800231 },
+    { "action": "set_aura", "label": "Gain the Sun Ray buff", "actor": "cleric", "spell": 803238, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "The buff replaces Sunflare with Sun Ray",
+      "actor": "cleric",
+      "metric": "temporary_spell_replacement",
+      "spell": 800231,
+      "equals": 504764,
+      "within_ms": 3000
+    },
+    { "action": "set_action_button", "actor": "cleric", "button": 2, "spell": 504764 },
+    { "action": "set_action_button", "actor": "cleric", "button": 3, "spell": 800231 },
+    {
+      "action": "assert",
+      "label": "The bar holds Sun Ray",
+      "actor": "cleric",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 504764
+    },
+    {
+      "action": "assert",
+      "label": "The Sun Ray button is saved as Sunflare",
+      "actor": "cleric",
+      "metric": "persisted_action_button",
+      "button": 2,
+      "equals": 800231
+    },
+    {
+      "action": "assert",
+      "label": "Control: an ordinary known spell is saved unchanged",
+      "actor": "cleric",
+      "metric": "persisted_action_button",
+      "button": 3,
+      "equals": 800231
+    }
+  ]
+}

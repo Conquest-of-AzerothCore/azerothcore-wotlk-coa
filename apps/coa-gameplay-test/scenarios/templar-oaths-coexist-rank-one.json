@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Level 6 Templar holds Righteous Lunge and Condemn Oaths together (#303)",
+  "contract": "At level 6 the first ranks of Righteous Lunge 801443 and Condemn 804906 are Follow Ups (SpellFamilyFlags[2] bit 1, not the Breaker bit 128). Righteous Lunge grants Oath: Righteous Lunge 804904 and Condemn grants Oath: Condemn 804922; each Oath and the Oath Chain 704576 stack to 10. Oath Chain 704576: 'Allows you to hold Oath buffs. Once 10 stacks are reached you are unable to build more Oaths.' The cap is on the chain, not on the number of kinds, so a second kind is added next to the first and a repeated kind adds a stack.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 6,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "templar", "entry": 36, "level": 6, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "templar", "spell": 801443 },
+    { "action": "learn", "actor": "templar", "spell": 804906 },
+    { "action": "add_item", "actor": "templar", "item": 2495 },
+    { "action": "equip", "actor": "templar", "item": 2495, "slot": 15 },
+    { "action": "set_power", "actor": "templar", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "templar", "spell": 801443, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "Righteous Lunge grants its Oath",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 804904,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The Oath Chain starts at one stack",
+      "actor": "templar",
+      "metric": "aura_stacks",
+      "spell": 704576,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    { "action": "wait", "label": "Global cooldown", "ms": 1600 },
+    { "action": "set_power", "actor": "templar", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "templar", "spell": 804906, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "Condemn grants its Oath",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 804922,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Lunge's Oath survives Condemn",
+      "actor": "templar",
+      "metric": "aura_stacks",
+      "spell": 804904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Oath Chain counts both grants",
+      "actor": "templar",
+      "metric": "aura_stacks",
+      "spell": 704576,
+      "equals": 2
+    },
+    { "action": "wait", "label": "Global cooldown", "ms": 1600 },
+    { "action": "set_power", "actor": "templar", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "templar", "spell": 801443, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "A second Lunge stacks its Oath",
+      "actor": "templar",
+      "metric": "aura_stacks",
+      "spell": 804904,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Condemn's Oath survives the second Lunge",
+      "actor": "templar",
+      "metric": "aura_stacks",
+      "spell": 804922,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Oath Chain counts three grants",
+      "actor": "templar",
+      "metric": "aura_stacks",
+      "spell": 704576,
+      "equals": 3
+    }
+  ]
+}

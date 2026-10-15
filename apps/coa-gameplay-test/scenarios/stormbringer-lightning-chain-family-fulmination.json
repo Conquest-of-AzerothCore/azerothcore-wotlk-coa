@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Fulmination raises Volt's crit-for-caster amount natively (#1268)",
+  "contract": "#1268 Fulmination 707055 and 707792 (Spell.dbc, server set /srv/coa/server-data/dbc) are SPELL_AURA_ADD_FLAT_MODIFIER with EffectMiscValue 12 = SPELLMOD_EFFECT2 (SpellDefines.h:88), EffectBasePoints 14 + EffectDieSides 1 = 15 and 29 + 1 = 30, and EffectSpellClassMask word0 134217728, which is Volt's own SpellFamilyFlags[0] (500928 and 501403-501411). SPELLMOD_EFFECT2 reaches effect index 1 (Unit::ApplyEffectModifiers, Unit.cpp:12160), and Volt's Effect[1] is SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER with EffectBasePoints -1 + EffectDieSides 1 = 0 by default, so the whole talent is delivered by SpellEffectInfo::CalcValue with no module code: the amount the debuff carries is 0, 15 or 30. The amount is snapshotted when the aura is applied, so each rank is measured on its own dummy with its own Volt cast rather than by re-casting on one. Volt's Effect[2] (SPELL_AURA_MOD_DAMAGE_FROM_CASTER, also -1 + 1 = 0) is asserted unchanged, which pins the modifier to effect index 1 and nothing else. No crit-chance metric is asserted: Volt's EffectSpellClassMask[3..5] = (0, 19, 0) restricts the bonus to Call Lightning and Arm of Thorim, but both consumers of SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER filter by caster GUID alone and never call AuraEffect::IsAffectedOnSpell (Unit.cpp:9896-9899 in Unit::SpellTakenCritChance, and Unit.cpp:4164-4167), so the restriction is a core-wide gap across 82 masked aura-308 effects and is left to a maintainer; and the harness's spell_done_crit_chance reads Unit::SpellDoneCritChance, which ignores its victim parameter (Unit.cpp:9610) and cannot see a debuff on the target at all.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "base", "owner": "p", "entry": 36, "level": 80, "health": 1000000, "distance": 3 },
+    { "id": "rank1", "owner": "p", "entry": 36, "level": 80, "health": 1000000, "distance": 15 },
+    { "id": "rank2", "owner": "p", "entry": 36, "level": 80, "health": 1000000, "distance": 27 }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "p", "spell": 500928 },
+    { "action": "assert", "label": "SETUP: the fixture's mana pool holds the fixture value used below",
+      "actor": "p", "metric": "max_power", "power": 0, "min": 2500 },
+
+    { "action": "set_power", "actor": "p", "power": 0, "value": 2500 },
+    { "action": "cast", "actor": "p", "spell": 500928, "target": "base" },
+    { "action": "assert", "label": "SETUP: Volt lands on the first dummy",
+      "actor": "base", "metric": "aura", "spell": 500928, "caster": "p", "equals": 1, "within_ms": 4000 },
+    { "action": "assert", "label": "BASELINE: without Fulmination Volt's effect 1 carries EffectBasePoints -1 + EffectDieSides 1 = 0",
+      "actor": "base", "metric": "aura_amount", "spell": 500928, "effect": 1, "caster": "p", "equals": 0 },
+
+    { "action": "learn", "actor": "p", "spell": 707055 },
+    { "action": "assert", "label": "SETUP: Fulmination rank 1 is active",
+      "actor": "p", "metric": "aura", "spell": 707055, "equals": 1 },
+    { "action": "wait", "ms": 1700 },
+    { "action": "set_power", "actor": "p", "power": 0, "value": 2500 },
+    { "action": "cast", "actor": "p", "spell": 500928, "target": "rank1" },
+    { "action": "assert", "label": "SETUP: Volt lands on the second dummy",
+      "actor": "rank1", "metric": "aura", "spell": 500928, "caster": "p", "equals": 1, "within_ms": 4000 },
+    { "action": "assert", "label": "Fulmination rank 1 raises Volt's effect 1 to its own 14 + 1 = 15",
+      "actor": "rank1", "metric": "aura_amount", "spell": 500928, "effect": 1, "caster": "p", "equals": 15 },
+    { "action": "assert", "label": "CONTROL: SPELLMOD_EFFECT2 leaves Volt's effect 2 at 0",
+      "actor": "rank1", "metric": "aura_amount", "spell": 500928, "effect": 2, "caster": "p", "equals": 0 },
+
+    { "action": "unlearn", "actor": "p", "spell": 707055 },
+    { "action": "learn", "actor": "p", "spell": 707792 },
+    { "action": "assert", "label": "SETUP: Fulmination rank 2 replaced rank 1",
+      "actor": "p", "metric": "aura", "spell": 707055, "equals": 0 },
+    { "action": "assert", "label": "SETUP: Fulmination rank 2 is active",
+      "actor": "p", "metric": "aura", "spell": 707792, "equals": 1 },
+    { "action": "wait", "ms": 1700 },
+    { "action": "set_power", "actor": "p", "power": 0, "value": 2500 },
+    { "action": "cast", "actor": "p", "spell": 500928, "target": "rank2" },
+    { "action": "assert", "label": "SETUP: Volt lands on the third dummy",
+      "actor": "rank2", "metric": "aura", "spell": 500928, "caster": "p", "equals": 1, "within_ms": 4000 },
+    { "action": "assert", "label": "Fulmination rank 2 raises Volt's effect 1 to its own 29 + 1 = 30",
+      "actor": "rank2", "metric": "aura_amount", "spell": 500928, "effect": 1, "caster": "p", "equals": 30 },
+    { "action": "assert", "label": "CONTROL: the earlier applications keep the amount they were given",
+      "actor": "base", "metric": "aura_amount", "spell": 500928, "effect": 1, "caster": "p", "equals": 0 },
+    { "action": "assert", "label": "CONTROL: rank 1's dummy still carries 15",
+      "actor": "rank1", "metric": "aura_amount", "spell": 500928, "effect": 1, "caster": "p", "equals": 15 }
+  ]
+}

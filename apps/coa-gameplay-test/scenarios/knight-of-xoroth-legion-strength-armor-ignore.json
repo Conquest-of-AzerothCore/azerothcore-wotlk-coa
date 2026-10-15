@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Legion Strength makes Skulltaker ignore 25% of the target's Armor (#1149)",
+  "contract": "Legion Strength 572370 reads 'Your Skulltaker now ignores $s1% of the target's Armor.' Effect 0 is native aura 108 (SPELL_AURA_ADD_PCT_MODIFIER), MiscValue 13 (SPELLMOD_IGNORE_ARMOR), EffectBasePoints -26 with DieSides 1 -> resolved -25 (matching the installed moa_description 'ignores -25% of the target's Armor', not the raw -26 BasePoints), classmask [0, 1, 0] (spell_family_id 23), all verified directly via csv.DictReader against /home/fab/CoaServer/reference/snapshots/ascension-data/tables/spell.csv.gz. That classmask (word1 bit0) matches Skulltaker's own family flags (spells 800168/802416-802421/803899/803900, family_flags word1 bit0 = 4294967296 combined-low encoding) -- the level-60 Knight of Xoroth owns rank 803900 (AscensionSpellProgressionData.h:723). Unit::CalcArmorReducedDamage (Unit.cpp:2259) is the native consumer: modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_IGNORE_ARMOR, armor) runs before mitigation whenever the attacker has a spell-mod owner, a real wired consumer, not a stub. This is the same native SPELLMOD_IGNORE_ARMOR op already exercised structurally elsewhere in this repo (op13), distinct from the custom SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT (338) used by Absolutism.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "knight",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "Fixture assumption: the target has armor to ignore",
+      "actor": "dummy", "metric": "armor", "min": 1
+    },
+    {
+      "action": "assert", "label": "Fixture assumption: that armor mitigates the Skulltaker probe",
+      "actor": "knight", "metric": "armor_reduced_damage", "spell": 803900, "target": "dummy", "max": 999
+    },
+    {
+      "action": "snapshot", "label": "Skulltaker's armor-reduced damage before",
+      "actor": "knight", "metric": "armor_reduced_damage", "spell": 803900, "target": "dummy", "save_as": "skulltaker_before"
+    },
+    {
+      "action": "snapshot", "label": "Meatsaw's armor-reduced damage before (unaffected classmask)",
+      "actor": "knight", "metric": "armor_reduced_damage", "spell": 578119, "target": "dummy", "save_as": "meatsaw_before"
+    },
+    { "action": "learn", "actor": "knight", "spell": 572370 },
+    { "action": "set_aura", "actor": "knight", "spell": 572370, "stacks": 1, "label": "Force the Legion Strength passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Legion Strength passive is active",
+      "actor": "knight", "metric": "aura", "spell": 572370, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: ignoring 25% armor lets more Skulltaker damage through",
+      "actor": "knight", "metric": "armor_reduced_damage", "spell": 803900, "target": "dummy",
+      "ratio_to": "skulltaker_before", "min": 1.001
+    },
+    {
+      "action": "assert", "label": "REGRESSION: Meatsaw's armor mitigation is untouched (different classmask)",
+      "actor": "knight", "metric": "armor_reduced_damage", "spell": 578119, "target": "dummy",
+      "ratio_to": "meatsaw_before", "min": 0.999, "max": 1.001
+    }
+  ]
+}

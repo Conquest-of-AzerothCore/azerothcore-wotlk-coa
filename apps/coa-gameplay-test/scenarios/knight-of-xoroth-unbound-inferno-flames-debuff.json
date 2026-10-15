@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Unbound Inferno blasts only enemies carrying the Flames of Xoroth debuff (#347)",
+  "contract": "Flames of Xoroth is not only frontal damage: every rank (801059, 802411-802415, 573448) has effect 1 SPELL_EFFECT_APPLY_AURA 271 (SPELL_AURA_MOD_DAMAGE_FROM_CASTER, BasePoints -1 + DieSides 1 = 0%) on the same TARGET_UNIT_CONE_ENEMY_24 targets as its damage, DurationIndex 8 (15 s), no SPELL_ATTR0_DO_NOT_DISPLAY and the aura tooltip 'Seared by infernal flames.'; its own description adds '@ifknown:704997:Infernal Strike blasts nearby enemies affected by this for bonus Fire damage.'. Unbound Inferno 704997 reads 'Your Infernal Strikes against enemies affected by your [Hellmaw or] Flames of Xoroth now blasts nearby enemies' for 801037 Fire damage, so the 15 s debuff is the mark. At level 35 the owned ranks are Infernal Strike 501514 and Flames of Xoroth 802413 (spell_ranks chains them to 801016/801059). An Infernal Strike on an unmarked enemy blasts nothing; after Flames of Xoroth the same enemy carries the knight's harmful 801059-family aura and the next Infernal Strike blasts it and a neighbour 3 yd away.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 35,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "marked", "owner": "knight", "entry": 36, "level": 35, "health": 1000000, "distance": 3 },
+    { "id": "neighbour", "owner": "knight", "entry": 36, "level": 35, "health": 1000000, "distance": 6 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 501514 },
+    { "action": "learn", "actor": "knight", "spell": 802413 },
+    { "action": "learn", "actor": "knight", "spell": 704997 },
+    { "action": "set_aura", "actor": "knight", "spell": 704997, "stacks": 1, "label": "Force the Unbound Inferno passive aura" },
+    { "action": "add_item", "actor": "knight", "item": 629951 },
+    { "action": "equip", "label": "Infernal Strike requires a main-hand weapon", "actor": "knight", "item": 629951, "slot": 15 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "SETUP: the Unbound Inferno passive is active", "actor": "knight", "metric": "aura", "spell": 704997, "equals": 1 },
+
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000 },
+    { "action": "cast", "label": "Infernal Strike on an enemy without the Flames of Xoroth debuff", "actor": "knight", "spell": 501514, "target": "marked" },
+    { "action": "assert", "label": "SETUP: Infernal Strike hit the enemy", "actor": "knight", "metric": "spell_damage_count", "spell": 501514, "target": "marked", "equals": 1, "within_ms": 2000 },
+    { "action": "wait", "label": "Let any triggered blast land", "ms": 1000 },
+    { "action": "assert", "label": "CONTRACT: no debuff, no Unbound Inferno blast", "actor": "knight", "metric": "spell_damage_count", "spell": 801037, "equals": 0 },
+
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1000 },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 1, "label": "Flames of Xoroth requires Demonfire (CasterAuraSpell 500906)" },
+    { "action": "cast", "label": "Flames of Xoroth on both enemies in front", "actor": "knight", "spell": 802413, "target": "marked" },
+    { "action": "assert", "label": "SETUP: Flames of Xoroth hit the enemy", "actor": "knight", "metric": "spell_damage_count", "spell": 802413, "target": "marked", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: Flames of Xoroth leaves its own aura on the enemy it burned", "actor": "marked", "metric": "aura", "spell": 802413, "caster": "knight", "equals": 1 },
+    { "action": "assert", "label": "CONTRACT: that aura is a debuff", "actor": "marked", "metric": "aura_positive", "spell": 802413, "caster": "knight", "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: the debuff lasts 15 s", "actor": "marked", "metric": "aura_duration_ms", "spell": 802413, "caster": "knight", "min": 13000, "max": 15000 },
+
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000 },
+    { "action": "cast", "label": "Infernal Strike on the debuffed enemy", "actor": "knight", "spell": 501514, "target": "marked" },
+    { "action": "assert", "label": "SETUP: the second Infernal Strike hit", "actor": "knight", "metric": "spell_damage_count", "spell": 501514, "target": "marked", "equals": 2, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: Unbound Inferno blasts the debuffed enemy", "actor": "knight", "metric": "spell_damage_count", "spell": 801037, "target": "marked", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: the blast also hits the nearby enemy", "actor": "knight", "metric": "spell_damage_count", "spell": 801037, "target": "neighbour", "equals": 1, "within_ms": 2000 }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Eldritch Obelisk buffs a real owned Tentacle and hastes a nearby ally natively (#960)",
+  "contract": "Eldritch Obelisk 560321 (Spell.dbc, read for this scenario) is a single SPELL_EFFECT_TRIGGER_SPELL effect that fires 560322 at the caster's destination. 560322 has three effects: effect 0 is SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (190) carrying aura 79 MOD_DAMAGE_PERCENT_DONE, MiscValue 127 (all schools), BasePoints 99 DieSides 1 (+100), radius index 12 (100 yd) -- matches 'increasing the damage of your Tentacles by 100%'; its native dispatch (Spell::EffectApplyAreaAura, SpellEffects.cpp:262, case SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS in Auras/SpellAuras.cpp:2882) iterates owner->m_Controlled filtered by IsSummon() && GetOwnerGUID()==owner. Effect 2 is SPELL_EFFECT_PERSISTENT_AREA_AURA (27) carrying aura 31 MOD_INCREASE_SPEED, target TARGET_UNIT_DEST_AREA_ALLY, BasePoints 39 DieSides 1 (+40), radius index 18 (15 yd) -- matches '40% movement speed to allies while near it'; this creates the ground DynamicObject checked below (dynamic_object reads the caster's own ground effect for the spell that owns the persistent-aura effect, i.e. 560322, not 560321). Effect 1 (type 168, EffectMiscValue 985354) dispatches to Spell::EffectNULL and is a genuine no-op unrelated to either numeric tooltip clause tested here; its actual purpose (most likely the obelisk's visible model) is not established by source alone and is out of this scenario's scope. Eldritch Tentacle 500707 (learnable, SkillLineAbility 85873) is the real Cultist ability that produces a properly owned Guardian-class Tentacle (creature_template entry 500464, rev_20260909_12_cultist_completion.sql:646, ScriptName npc_ascension_cultist_summon): its own SPELL_EFFECT_SUMMON effect uses SummonPropertiesEntry 61, which selects UNIT_MASK_GUARDIAN in Map::SummonCreature, so the resulting Guardian is registered into the caster's m_Controlled with GetOwnerGUID()==caster via Unit::SetMinion -- unlike the harness's own declarative 'creatures' fixture, which spawns a plain TempSummon with no owner link and would never satisfy the ASCENSION_APPLY_AURA_TO_SUMMONS filter. No metric exposes an unregistered owned creature's own aura_amount, so the damage half is proven present (not its exact +100% magnitude, which is the DBC value above) via owned_creature_count filtered by the installed aura; the speed half is proven with its exact +40% magnitude via run_speed_rate on a co-located ally.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 40 },
+    { "id": "ally", "race": 1, "class": 25, "level": 40 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+
+    { "action": "learn", "actor": "cultist", "spell": 500707 },
+    { "action": "cast", "label": "Summon a real owned Tentacle", "actor": "cultist", "spell": 500707,
+      "destination": { "x": -8917.41, "y": -115.853, "z": 82.3711 } },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "label": "SETUP: a properly owned Tentacle (entry 500464) exists", "actor": "cultist",
+      "metric": "owned_creature_count", "entry": 500464, "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "BASELINE: the Tentacle does not yet carry the Obelisk's damage buff", "actor": "cultist",
+      "metric": "owned_creature_count", "entry": 500464, "spell": 560322, "caster": "cultist", "equals": 0 },
+
+    { "action": "snapshot", "label": "Ally's run speed before the Obelisk", "actor": "ally", "metric": "run_speed_rate", "save_as": "ally_speed_before" },
+    { "action": "assert", "label": "BASELINE: no ground effect from 560322 yet", "actor": "cultist", "metric": "dynamic_object", "spell": 560322, "equals": 0 },
+
+    { "action": "learn", "actor": "cultist", "spell": 560321 },
+    { "action": "cast", "label": "Cast Eldritch Obelisk", "actor": "cultist", "spell": 560321 },
+    { "action": "wait", "ms": 1500 },
+
+    { "action": "assert", "label": "CONTRACT: the real owned Tentacle now carries the damage-to-summons aura", "actor": "cultist",
+      "metric": "owned_creature_count", "entry": 500464, "spell": 560322, "caster": "cultist", "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTRACT: the Obelisk's ground effect exists", "actor": "cultist", "metric": "dynamic_object", "spell": 560322, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTRACT: the nearby ally's run speed rises by exactly 40%", "actor": "ally",
+      "metric": "run_speed_rate", "ratio_to": "ally_speed_before", "min": 1.39, "max": 1.41, "within_ms": 3000 },
+
+    { "action": "wait", "label": "Let the 20 s Obelisk expire", "ms": 20000 },
+    { "action": "assert", "label": "The ground effect is gone after expiry", "actor": "cultist", "metric": "dynamic_object", "spell": 560322, "equals": 0 },
+    { "action": "assert", "label": "The ally's run speed reverts to baseline", "actor": "ally", "metric": "run_speed_rate", "ratio_to": "ally_speed_before", "min": 0.99, "max": 1.01 }
+  ]
+}

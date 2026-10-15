@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Sun Warrior's Guidance is a native spell modifier on Gavels and Dawnbreak (#993)",
+  "contract": "Spell.dbc 800039 (\"Sun Warrior's Guidance\", SpellFamilyName 33, Passive) has one effect, SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 7 (SPELLMOD_CRITICAL_CHANCE), EffectBasePoints 4 (amount 5), and EffectSpellClassMask word 2 = 1073745952. A repository-wide Spell.dbc scan for SpellFamilyName 33 spells whose own SpellFamilyFlags word 2 overlaps that mask returns exactly the Gavel of Light/Grace/Wrath and Dawnbreak spell chains (e.g. 800611 Gavel of Light Rank 1, 800654 Dawnbreak Rank 1) and nothing unrelated among the Radiant-Cascade family. Player::ApplySpellMod (Player.cpp:10219) is the fully generic native spell-modifier pipeline: it walks the player's SpellModifier list, and for a SPELLMOD_FLAT modifier does basevalue = basevalue*totalmul + totalflat, i.e. base 0 plus a single +5 flat modifier reads back as exactly 5. No server script exists or is needed; the DBC class mask alone attaches the bonus to the right spells.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "Sanity: no crit-chance modifier on Gavel of Light before learning",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 800611, "op": 7, "base": 0, "equals": 0
+    },
+    { "action": "learn", "actor": "cleric", "spell": 800039 },
+    {
+      "action": "assert", "label": "Gavel of Light gains +5% crit chance",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 800611, "op": 7, "base": 0, "equals": 5
+    },
+    {
+      "action": "assert", "label": "Dawnbreak gains +5% crit chance",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 800654, "op": 7, "base": 0, "equals": 5
+    },
+    {
+      "action": "assert", "label": "An unrelated family-33 spell (Radiant Cascade) is untouched",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 500141, "op": 7, "base": 0, "equals": 0
+    }
+  ]
+}

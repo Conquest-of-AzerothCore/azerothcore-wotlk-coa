@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "name": "Ranger Phoenix Plumes: 5-Advantage Skullpiercer and Woodland Arrow summon a War Falcon and restore Focus (#480)",
+  "contract": "Phoenix Plumes 705074 (Ranger Survival talent, CharacterAdvancement 34179) reads 'Your Skullpiercers and Woodland Arrows used with 5 stacks of Advantage now restore $520784s3% Focus and summon a War Falcon for $520558d.' The talent record itself is two SPELL_AURA_DUMMY effects with ProcFlags 0 and no class mask, so nothing in Spell.dbc or the world DB acts on it. Its helper 520558 'Phoenix Plumes' carries exactly the promised payload: effect 0 SPELL_EFFECT_SUMMON of creature 50393 'War Falcon' (SummonProperties 61, a guardian) at TARGET_DEST_TARGET_BACK, DurationIndex 32 = 6000 ms ($520558d = 6 sec), and effect 1 SPELL_EFFECT_ENERGIZE_PCT on the caster, MiscValue 2 (Focus), BasePoints 2 + DieSides 1 = 3%, the same 3 as $520784s3. 520567 'Phoenix Plumes' is its client-side trigger (SPELL_EFFECT_TRIGGER_SPELL 520558). Skullpiercer is rank chain 802036 (501715-501723) and Woodland Arrow is chain 806368 (806444-806448, 572579); both are Advantage consumers (CasterAuraSpell 804329, Advantage StackAmount 5). The Ranger uses the bow-requiring Skullpiercer (EquippedItemClass 2, subclass mask bows/crossbows, instant) and Woodland Arrow (no weapon requirement, 2 s cast, 5-30 yd), so the fixture carries Worn Shortbow 2504, faces +X with the Harvest Golem 15 yd ahead and has ranged hit fixed so the consumer lands. The control spends 4 Advantage: no falcon and no Phoenix Plumes energize. With 5 Advantage each ability must leave exactly one War Falcon owned by the Ranger and one 520558 energize log; the falcon must be gone after its 6 s. Before the fix both 5-stack assertions read 0.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 6000 },
+    { "action": "learn", "actor": "ranger", "spell": 264 },
+    { "action": "learn", "actor": "ranger", "spell": 802036 },
+    { "action": "learn", "actor": "ranger", "spell": 806368 },
+    { "action": "learn", "actor": "ranger", "spell": 705074 },
+    { "action": "add_item", "actor": "ranger", "item": 2504 },
+    { "action": "equip", "actor": "ranger", "item": 2504, "slot": 17 },
+    { "action": "wait", "label": "Let the equipment settle", "ms": 1500 },
+    {
+      "action": "assert",
+      "label": "SETUP: Phoenix Plumes is active on the Ranger",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 705074,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no War Falcon exists yet",
+      "actor": "ranger",
+      "metric": "owned_creature_count",
+      "entry": 50393,
+      "equals": 0
+    },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_energize_count", "spell": 520558, "save_as": "plumes_energize_before" },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_damage_count", "spell": 802036, "save_as": "skullpiercer_hits_before" },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 60 },
+    { "action": "set_aura", "label": "Control: only 4 Advantage", "actor": "ranger", "spell": 804329, "stacks": 4 },
+    { "action": "cast", "label": "Control Skullpiercer with 4 Advantage", "actor": "ranger", "spell": 802036, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "SETUP: the control Skullpiercer landed",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 802036,
+      "relative_to": "skullpiercer_hits_before",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    { "action": "wait", "label": "Give any summon time to appear", "ms": 1500 },
+    {
+      "action": "assert",
+      "label": "Control: 4 Advantage summons no War Falcon",
+      "actor": "ranger",
+      "metric": "owned_creature_count",
+      "entry": 50393,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Control: 4 Advantage restores no Phoenix Plumes Focus",
+      "actor": "ranger",
+      "metric": "spell_energize_count",
+      "spell": 520558,
+      "relative_to": "plumes_energize_before",
+      "equals": 0
+    },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 60 },
+    { "action": "set_aura", "label": "5 Advantage", "actor": "ranger", "spell": 804329, "stacks": 5 },
+    { "action": "cast", "label": "Skullpiercer with 5 Advantage", "actor": "ranger", "spell": 802036, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "Skullpiercer with 5 Advantage summons one War Falcon",
+      "actor": "ranger",
+      "metric": "owned_creature_count",
+      "entry": 50393,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Skullpiercer with 5 Advantage restores Focus through Phoenix Plumes once",
+      "actor": "ranger",
+      "metric": "spell_energize_count",
+      "spell": 520558,
+      "relative_to": "plumes_energize_before",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The War Falcon leaves after its 6 seconds",
+      "actor": "ranger",
+      "metric": "owned_creature_count",
+      "entry": 50393,
+      "equals": 0,
+      "within_ms": 9000
+    },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 60 },
+    { "action": "set_aura", "label": "5 Advantage again", "actor": "ranger", "spell": 804329, "stacks": 5 },
+    { "action": "cast", "label": "Woodland Arrow with 5 Advantage", "actor": "ranger", "spell": 806368, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "Woodland Arrow with 5 Advantage summons one War Falcon",
+      "actor": "ranger",
+      "metric": "owned_creature_count",
+      "entry": 50393,
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Woodland Arrow with 5 Advantage restores Focus through Phoenix Plumes",
+      "actor": "ranger",
+      "metric": "spell_energize_count",
+      "spell": 520558,
+      "relative_to": "plumes_energize_before",
+      "equals": 2,
+      "within_ms": 6000
+    }
+  ]
+}

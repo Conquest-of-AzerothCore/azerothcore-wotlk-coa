@@ -1,0 +1,61 @@
+-- Three Bloodmage passives whose tooltip fires on an incoming combat event rather than on a named
+-- ability: being attacked, taking physical damage, and dodging. Each carries an aura 42
+-- (SPELL_AURA_PROC_TRIGGER_SPELL) effect on a correctly-built trigger spell, but Spell.dbc gives every one
+-- of these records ProcFlags 0 and no `spell_proc` row existed, so SpellMgr::LoadSpellProcs skipped them
+-- ("Skip if no proc flags in DBC") and Aura::GetProcEffectMask returned a zero mask. Same reasoning and
+-- shape as rev_20260918_32_bloodmage_council_assembled_proc.
+--
+-- `SpellPhaseMask` is 0 on all three rows. The core only enforces a phase for flags in
+-- REQ_SPELL_PHASE_PROC_FLAG_MASK (SPELL_PROC_FLAG_MASK & DONE_HIT_PROC_FLAG_MASK, i.e. DONE spell-class
+-- flags); auto-attack and TAKEN flags are outside it, so a phase here would be dead data. This matches the
+-- existing repository convention set by rev_20260908_08_class_completion_runtime, which clears
+-- SpellPhaseMask on rows of exactly this kind. `SpellFamilyName`/`SpellFamilyMask` are 0 because none of
+-- the three tooltips names an ability. `Chance` is each record's own ProcChance (100).
+--
+-- 800785 Sacrificial Rite: "While active, attackers are afflicted with Cursed Blood. Can only occur once
+-- per sec." Effects 0 and 2 (MOD_MELEE_RANGED_HASTE and HASTE_SPELLS, BasePoints 19 -> +20%) are the
+-- haste clause and already work natively; they are untouched. Effect 1 is aura 42 on Cursed Blood 573250
+-- (MOD_HEALING_PCT -40, a second aura 42 on 806163, MOD_DAMAGE_PERCENT_TAKEN, Mechanic 15, TargetA 6).
+-- This is a TAKEN proc - the attacker is the actor - so `ProcFlags` 139944 is
+-- TAKEN_MELEE_AUTO_ATTACK 0x8 | TAKEN_SPELL_MELEE_DMG_CLASS 0x20 | TAKEN_RANGED_AUTO_ATTACK 0x80 |
+-- TAKEN_SPELL_RANGED_DMG_CLASS 0x200 | TAKEN_SPELL_NONE_DMG_CLASS_NEG 0x2000 |
+-- TAKEN_SPELL_MAGIC_DMG_CLASS_NEG 0x20000: every way an attacker can damage the Bloodmage. 573250 lands
+-- on the attacker because AuraEffect::HandleProcTriggerSpellAuraProc casts at eventInfo.GetActor() when
+-- the aura's owner is not the actor. `Cooldown` 1000 is the tooltip's "Can only occur once per sec".
+-- The tooltip's third clause (the end-of-duration healing buff, which references 800786) has no effect,
+-- trigger or linked spell on 800785 and is NOT addressed by this row.
+--
+-- 704626 Thick Pelt: "Physical damage taken now reduces the Physical damage taken from the next attack
+-- within $556233d by ${($556233m1+$AP*0.2)}." This record is the one case in this batch where Spell.dbc
+-- does supply a proc flag - and it is the wrong one. 704626 carries ProcFlags 0x4
+-- (PROC_FLAG_DONE_MELEE_AUTO_ATTACK), so SpellMgr::LoadSpellProcs did generate a default entry and the
+-- aura fires, but on the Bloodmage's own outgoing swings instead of on damage taken. The correct mask is
+-- in the DBC too: the trigger spell Thick Pelt 556233 carries ProcFlags 0x2a8 = 680 =
+-- TAKEN_MELEE_AUTO_ATTACK 0x8 | TAKEN_SPELL_MELEE_DMG_CLASS 0x20 | TAKEN_RANGED_AUTO_ATTACK 0x80 |
+-- TAKEN_SPELL_RANGED_DMG_CLASS 0x200, which is exactly "physical damage taken". This row overrides the
+-- generated default with 680. 556233's payload is sound (MOD_DAMAGE_TAKEN, MiscValue 1 = physical,
+-- BasePoints -16 -> -15, ProcCharges 1, TargetA 1 = caster).
+-- NOT fixed here: the tooltip's $AP*0.2 term is not delivered by anything. 556233 has BasePoints -16 with
+-- EffectRealPointsPerLevel 0, no `spell_bonus_data` row and no reference in src/ or modules/, and its own
+-- description states $AP*0.25 where the parent states $AP*0.2. That conflict is unresolved and no
+-- coefficient is invented here.
+--
+-- 570746 Bloodguard: "you now generate $/10;572036s1 Rage every time you dodge." Effect 0 (aura 107
+-- SPELLMOD_DURATION +4000 ms on EffectSpellClassMask (0, 0, 65536) = Blood Pact) is the duration clause
+-- and already works natively; it is untouched. Effect 1 is aura 42 on Bloodguard 572036, a stock
+-- SPELL_EFFECT_ENERGIZE with MiscValue 1 (Rage) and BasePoints 29 -> 30 raw = 3 Rage, TargetA 1.
+-- A dodge is a TAKEN melee event, so `ProcFlags` 40 = TAKEN_MELEE_AUTO_ATTACK 0x8 |
+-- TAKEN_SPELL_MELEE_DMG_CLASS 0x20, and `HitMask` 16 is PROC_HIT_DODGE - the one hit result the tooltip
+-- allows. HitMask must be set explicitly here: an unset HitMask on a TAKEN proc defaults to
+-- NORMAL | CRITICAL (SpellMgr::CanSpellTriggerProcOnEvent), which would grant Rage on every hit taken.
+--
+-- AttributesMask is 0 on all three rows (PROC_ATTR_TRIGGERED_CAN_PROC not set): all three events are
+-- ordinary melee combat, not a spell cast as a triggered effect of something else. `DisableEffectsMask` is
+-- 0 even where the record mixes aura types: AuraEffect::HandleProc has no case for aura 107, 108, 192,
+-- 213 or 216, so those effects cannot trigger anything, and charges are dropped once per proc at the aura
+-- level, not once per effect.
+DELETE FROM `spell_proc` WHERE `SpellId` IN (800785, 704626, 570746);
+INSERT INTO `spell_proc` (`SpellId`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `ProcFlags`, `SpellTypeMask`, `SpellPhaseMask`, `HitMask`, `AttributesMask`, `DisableEffectsMask`, `ProcsPerMinute`, `Chance`, `Cooldown`, `Charges`) VALUES
+(800785, 0, 0, 0, 0, 0, 139944, 0, 0, 0, 0, 0, 0, 100, 1000, 0),
+(704626, 0, 0, 0, 0, 0, 680, 0, 0, 0, 0, 0, 0, 100, 0, 0),
+(570746, 0, 0, 0, 0, 0, 40, 0, 0, 16, 0, 0, 0, 100, 0, 0);

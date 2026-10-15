@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Dark Curse raises weapon and spell critical strike chance (#1996)",
+  "contract": "Dark Curse 704649 (3%) and 560252 (6%): \"Increases critical strike chance by $s1%.\" Each has a single effect, aura 290 SPELL_AURA_MOD_CRIT_PCT, MiscValue 0 and an empty EffectSpellClassMask, handled by AuraEffect::HandleAuraModCritPct (SpellAuraEffects.cpp:355), which for a player runs both UpdateAllWeaponDependentCritAuras and UpdateAllSpellCritChances - exactly the unqualified \"critical strike chance\" the tooltip promises. This core ignores aura 290's misc value and class mask (.agents/docs/systems/ascension-spell-parity.md:333), which does not bite here because both records carry zero for both. No source or SQL change is involved. The scenario primes the crit fields before taking its baselines: melee_crit_chance reads the raw PLAYER_CRIT_PERCENTAGE field (CoAGameplayTest.cpp:657), which only Player::UpdateCritPercentage rewrites and which that function clamps at zero (StatSystem.cpp:815). Run 20260920T155102294488353Z recorded that field as 0 on a fresh level-80 character and as 7.2525 one step later, once applying an aura 290 had forced a recalculation - i.e. the login value was a stale clamped 0 and the 7.2525 is 4.2525 of agility plus the aura's 3. Applying and removing Crit Test Buff 503747 (a single aura 290 effect, DurationIndex 21 = permanent) runs that same recalculation twice and leaves the field at the real unbuffed value, so the relative_to baselines measure the aura and nothing else.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Force one crit recalculation: the login value of PLAYER_CRIT_PERCENTAGE is stale",
+      "actor": "b",
+      "spell": 503747,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Drop the primer again so the baselines are the unbuffed, recalculated values",
+      "actor": "b",
+      "spell": 503747,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_crit_chance",
+      "save_as": "spell_crit_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "melee_crit_chance",
+      "save_as": "melee_crit_base"
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 704649
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 704649,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds 3 points of Shadow spell critical strike",
+      "actor": "b",
+      "metric": "spell_crit_chance",
+      "relative_to": "spell_crit_base",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds 3 points of melee critical strike",
+      "actor": "b",
+      "metric": "melee_crit_chance",
+      "relative_to": "melee_crit_base",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 704649
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 560252
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 adds 6 points of Shadow spell critical strike",
+      "actor": "b",
+      "metric": "spell_crit_chance",
+      "relative_to": "spell_crit_base",
+      "min": 5.9,
+      "max": 6.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 adds 6 points of melee critical strike",
+      "actor": "b",
+      "metric": "melee_crit_chance",
+      "relative_to": "melee_crit_base",
+      "min": 5.9,
+      "max": 6.1
+    }
+  ]
+}

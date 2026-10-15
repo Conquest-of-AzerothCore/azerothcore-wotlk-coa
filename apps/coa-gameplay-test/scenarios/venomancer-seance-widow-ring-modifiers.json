@@ -1,0 +1,471 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Shadra's Seance, Black Widow and Serpent Lord's Ring act natively (#1721, #1922, #1905)",
+  "contract": "#1721 Shadra's Seance (300678): effect 0 is SPELLMOD_DURATION (aura 107, op 1) +6000 and effect 1 SPELLMOD_ACTIVATION_TIME (aura 108, op 19) -20%, both with mask (0,0,0x10000) = every Facemelter rank (800871, 502877-502880, 572900-572903). Aura::CalcMaxDuration applies op 1 and AuraEffect::CalculatePeriodic (SpellAuraEffects.cpp:718) applies op 19, so Facemelter (Duration index 8 = 15000 ms, amplitude 3000) becomes 21000 ms and 2400 ms. #1922 Black Widow (504322): effect 0 is SPELLMOD_EFFECT3 (aura 107, op 23) -20 with mask (0,0x20000000,0), matching Widow's Kiss aura 804118 whose effect 2 is aura 108 SPELLMOD_COST with base 0 and mask (0,0x4000,0) = Venom Fang; Unit::ApplyEffectModifiers turns that 0 into -20, so Venom Fang's 35 energy becomes 28. Effect 1 (aura 154, stealth level) has no harness metric and is not asserted. #1905 Serpent Lord's Ring (503923): effect 0 SPELLMOD_COOLDOWN (op 11) -100% and effect 1 SPELLMOD_COST (op 14) -100% with mask (0,0x20,0) = every Mycosis rank (804986, 572150-572156, 573355), and effect 2 SPELL_EFFECT_ENERGIZE_PCT of 20 on mana. Mycosis carries its 15000 ms as a CategoryRecoveryTime (category 113), which Player::AddSpellAndCategoryCooldowns also passes through SPELLMOD_COOLDOWN; the modifier is probed with base 15000. The Ring's effects 0 and 1 are only active in the 15 s buff it grants, so the Ring is really cast. Each probe compares against an unmodified control or against a baseline taken in the same run, so the scenario fails if a passive stops working. The mana check is an absolute bound on spell_energize_total, not the originally-assumed 100000-mana pool (a class 29/level 80/no-gear character actually has 6081 max mana, measured via the max_power metric in a run of this scenario; the harness's ratio_to/relative_to require the compared step to use the identical metric name, so a cross-metric ratio of spell_energize_total against max_power is not expressible). SPELL_EFFECT_ENERGIZE_PCT computes gain = CalculatePct(GetMaxPower(POWER_MANA), 20) in SpellEffects.cpp, which truncates 6081*20/100 to 1216 regardless of current power, so no set_power fixture is needed either (CoAGameplayTest.cpp's actor setup already fills every power to its max) and the bound is 1200-1232. No source or SQL change is involved.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "s",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "w",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "r",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Facemelter has no duration modifier without Shadra's Seance",
+      "actor": "c",
+      "metric": "spell_modifier",
+      "spell": 800871,
+      "op": 1,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Facemelter's tick interval is unmodified without Shadra's Seance",
+      "actor": "c",
+      "metric": "spell_modifier",
+      "spell": 800871,
+      "op": 19,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Venom Fang costs 35 energy",
+      "actor": "c",
+      "metric": "spell_power_cost",
+      "spell": 800880,
+      "equals": 35
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Mycosis has its full cooldown modifier base without the Ring",
+      "actor": "c",
+      "metric": "spell_modifier",
+      "spell": 804986,
+      "op": 11,
+      "base": 15000,
+      "equals": 15000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Mycosis has its full cost modifier base without the Ring",
+      "actor": "c",
+      "metric": "spell_modifier",
+      "spell": 804986,
+      "op": 14,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Mycosis costs mana",
+      "actor": "c",
+      "metric": "spell_power_cost",
+      "spell": 804986,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Mycosis cost without the Ring",
+      "actor": "c",
+      "metric": "spell_power_cost",
+      "save_as": "myc_cost0",
+      "spell": 804986
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 300678
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 504322
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 503923
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 804986
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Shadra's Seance is applied",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 300678,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Black Widow is applied",
+      "actor": "w",
+      "metric": "aura",
+      "spell": 504322,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Shadra's Seance adds 6000 ms to Facemelter rank 1's duration",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 800871,
+      "op": 1,
+      "base": 0,
+      "equals": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Shadra's Seance adds 6000 ms to Facemelter rank 9's duration",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 572903,
+      "op": 1,
+      "base": 0,
+      "equals": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Shadra's Seance shortens Facemelter rank 1's tick interval by 20%",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 800871,
+      "op": 19,
+      "base": 100,
+      "min": 79.99,
+      "max": 80.01
+    },
+    {
+      "action": "assert",
+      "label": "Shadra's Seance shortens Facemelter rank 9's tick interval by 20%",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 572903,
+      "op": 19,
+      "base": 100,
+      "min": 79.99,
+      "max": 80.01
+    },
+    {
+      "action": "assert",
+      "label": "Shadra's Seance leaves Venom Fang's duration alone",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 800880,
+      "op": 1,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply Facemelter with the unmodified Venomancer as its caster",
+      "actor": "c",
+      "spell": 800871,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply Facemelter with Shadra's Seance's owner as its caster",
+      "actor": "s",
+      "spell": 800871,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Facemelter lasts its 15 s without Shadra's Seance",
+      "actor": "c",
+      "metric": "aura_duration_ms",
+      "spell": 800871,
+      "min": 14000,
+      "max": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Facemelter lasts 21 s with Shadra's Seance",
+      "actor": "s",
+      "metric": "aura_duration_ms",
+      "spell": 800871,
+      "min": 20000,
+      "max": 21000
+    },
+    {
+      "action": "snapshot",
+      "label": "Unmodified Facemelter's remaining duration",
+      "actor": "c",
+      "metric": "aura_duration_ms",
+      "save_as": "fm_dur_c",
+      "spell": 800871
+    },
+    {
+      "action": "assert",
+      "label": "Shadra's Seance extends the applied Facemelter by 6 s over the unmodified one",
+      "actor": "s",
+      "metric": "aura_duration_ms",
+      "spell": 800871,
+      "relative_to": "fm_dur_c",
+      "min": 5500,
+      "max": 6500
+    },
+    {
+      "action": "assert",
+      "label": "Facemelter ticks every 3 s without Shadra's Seance",
+      "actor": "c",
+      "metric": "aura_amplitude_ms",
+      "spell": 800871,
+      "effect": 0,
+      "min": 2999,
+      "max": 3001
+    },
+    {
+      "action": "assert",
+      "label": "Facemelter ticks every 2.4 s with Shadra's Seance",
+      "actor": "s",
+      "metric": "aura_amplitude_ms",
+      "spell": 800871,
+      "effect": 0,
+      "min": 2399,
+      "max": 2401
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: without Black Widow the control pays 35 energy for Venom Fang",
+      "actor": "c",
+      "metric": "spell_power_cost",
+      "spell": 800880,
+      "equals": 35
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: with Black Widow alone Venom Fang still costs 35",
+      "actor": "w",
+      "metric": "spell_power_cost",
+      "spell": 800880,
+      "equals": 35
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply Widow's Kiss's aura with the unmodified Venomancer as its caster",
+      "actor": "c",
+      "spell": 804118,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply Widow's Kiss's aura with Black Widow's owner as its caster",
+      "actor": "w",
+      "spell": 804118,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Widow's Kiss's cost effect is 0 without Black Widow",
+      "actor": "c",
+      "metric": "aura_amount",
+      "spell": 804118,
+      "effect": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Black Widow makes Widow's Kiss's cost effect -20",
+      "actor": "w",
+      "metric": "aura_amount",
+      "spell": 804118,
+      "effect": 2,
+      "equals": -20
+    },
+    {
+      "action": "assert",
+      "label": "Venom Fang still costs 35 energy under an unmodified Widow's Kiss",
+      "actor": "c",
+      "metric": "spell_power_cost",
+      "spell": 800880,
+      "equals": 35
+    },
+    {
+      "action": "assert",
+      "label": "Venom Fang costs 28 energy (-20%) under Widow's Kiss with Black Widow",
+      "actor": "w",
+      "metric": "spell_power_cost",
+      "spell": 800880,
+      "equals": 28
+    },
+    {
+      "action": "assert",
+      "label": "Black Widow leaves Facemelter's cost alone under Widow's Kiss",
+      "actor": "w",
+      "metric": "spell_power_cost",
+      "spell": 800871,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Ring owner has a mana pool",
+      "actor": "r",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Before the Ring, Mycosis costs what it costs the control",
+      "actor": "r",
+      "metric": "spell_power_cost",
+      "spell": 804986,
+      "relative_to": "myc_cost0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Serpent Lord's Ring restores 20% of maximum mana",
+      "actor": "r",
+      "metric": "spell_effect_value",
+      "spell": 503923,
+      "effect": 2,
+      "equals": 20
+    },
+    {
+      "action": "cast",
+      "label": "Cast Serpent Lord's Ring on itself",
+      "actor": "r",
+      "spell": 503923
+    },
+    {
+      "action": "assert",
+      "label": "Serpent Lord's Ring's buff is applied",
+      "actor": "r",
+      "metric": "aura",
+      "spell": 503923,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Ring's energize effect logged a mana gain",
+      "actor": "r",
+      "metric": "spell_energize_count",
+      "spell": 503923,
+      "power": 0,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Ring restored ~20% of the Ring owner's actual max mana (measured at 6081 for this fixture: class 29/level 80/no gear; CalculatePct truncates 6081*20/100 to 1216)",
+      "actor": "r",
+      "metric": "spell_energize_total",
+      "spell": 503923,
+      "power": 0,
+      "min": 1200,
+      "max": 1232
+    },
+    {
+      "action": "assert",
+      "label": "The Ring removes Mycosis rank 1's cooldown",
+      "actor": "r",
+      "metric": "spell_modifier",
+      "spell": 804986,
+      "op": 11,
+      "base": 15000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Ring removes Mycosis rank 8's cooldown",
+      "actor": "r",
+      "metric": "spell_modifier",
+      "spell": 573355,
+      "op": 11,
+      "base": 15000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Ring removes Mycosis rank 1's cost modifier base",
+      "actor": "r",
+      "metric": "spell_modifier",
+      "spell": 804986,
+      "op": 14,
+      "base": 100,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Ring removes Mycosis rank 8's cost modifier base",
+      "actor": "r",
+      "metric": "spell_modifier",
+      "spell": 573355,
+      "op": 14,
+      "base": 100,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "With the Ring Mycosis costs no mana",
+      "actor": "r",
+      "metric": "spell_power_cost",
+      "spell": 804986,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Ring leaves Venom Fang's cost modifier alone",
+      "actor": "r",
+      "metric": "spell_modifier",
+      "spell": 800880,
+      "op": 14,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "The Ring leaves Venom Fang's cooldown modifier alone",
+      "actor": "r",
+      "metric": "spell_modifier",
+      "spell": 800880,
+      "op": 11,
+      "base": 15000,
+      "equals": 15000
+    }
+  ]
+}

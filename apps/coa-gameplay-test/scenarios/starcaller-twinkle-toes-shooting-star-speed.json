@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "name": "Twinkle Toes increases the movement speed granted by Shooting Star by 20% (#2392)",
+  "contract": "Twinkle Toes 704775 (Spell.dbc, SpellFamilyName 32, passive) carries one effect: SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 3 = SPELLMOD_EFFECT1 (the flat modifier of effect index 0's value), EffectBasePoints 19 with DieSides 1 resolving to +20, and EffectSpellClassMask word0 0x1000. Every Shooting Star rank (800505, 803915-803917, 502295-502297; SpellFamilyFlags word0 0x1000) has effect 0 = SPELL_AURA_MOD_INCREASE_SPEED (31) with base points 59..89, so the flat +20 lands on the speed percentage. The tooltip reads 'Increases the movement speed granted by Shooting Star by $s1%.' Native path only: SpellEffectInfo::CalcValue calls Unit::ApplyEffectModifiers(SPELLMOD_EFFECT1 for effect index 0), which is Player::ApplySpellMod on the value; the aura effect amount is CalcValue with the caster. The module touches Shooting Star only in effect 2 (AscensionStarcallerContracts.cpp, Named(info, 800505)) and its aura hooks (AscensionStarcallerAuras.cpp) which do not alter effect 0, and its ModifySpellEffectBaseValue hook has no row for these ids. The spell_effect_value metric returns SpellEffectInfo::CalcValue for the fixture, so the difference between talented and control is exactly the flat modifier. Rank 1 and the top rank are checked because the mask covers every rank. Not asserted: the live speed of a cast Shooting Star, which the run_speed_rate metric could read but which depends on the module's forced-forward movement.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Shooting Star rank 1 movement speed amount without the passive",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 800505,
+      "effect": 0,
+      "save_as": "speed_800505"
+    },
+    {
+      "action": "snapshot",
+      "label": "Shooting Star rank 7 movement speed amount without the passive",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 502297,
+      "effect": 0,
+      "save_as": "speed_502297"
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 704775
+    },
+    {
+      "action": "assert",
+      "label": "Learning the passive applies its aura",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 704775,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Shooting Star rank 1 grants 20 more percent movement speed",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 800505,
+      "effect": 0,
+      "relative_to": "speed_800505",
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "Shooting Star rank 7 grants 20 more percent movement speed",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 502297,
+      "effect": 0,
+      "relative_to": "speed_502297",
+      "equals": 20
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "One Man's Curse frees Accursed Form and restores 15% health (#2206)",
+  "contract": "One Man's Curse 680661's tooltip is \"Removes the health cost of Accursed Form and entering it now instantly restores $680662s1% of your maximum health.\" Its single effect is aura 108 with MiscValue 14 (SPELLMOD_COST), BasePoints -101 + DieSides 1 = -100%, over EffectSpellClassMask (0, 2147483648, 0) = word 1 bit 31, which includes Accursed Form 562572 (PowerType -2 POWER_HEALTH, ManaCostPercentage 25). SpellInfo::CalcPowerCost applies SPELLMOD_COST after its POWER_HEALTH branch, so the cost half is native and already works. The restore half lives in 680662: SPELL_EFFECT_HEAL_PCT (136) with BasePoints 14 + DieSides 1 = 15% of maximum health, on the caster. No Spell.dbc row names 680662 in any field and no acquisition route reaches it, so nothing ever cast it. The discriminating assertion is the health_pct gain across the Accursed Form cast: with the cost already removed the cast is free, so today's tree moves health by roughly zero, while the fix restores 15 percentage points of maximum health. The caster is first dropped well below full so the heal is not clipped by the health cap.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 562572
+    },
+    {
+      "action": "assert",
+      "label": "Accursed Form costs health before the talent",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 562572,
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680661
+    },
+    {
+      "action": "assert",
+      "label": "One Man's Curse removes the health cost",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 562572,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "label": "Leave room for a 15% restore",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "health_pct",
+      "save_as": "before_form"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 562572
+    },
+    {
+      "action": "assert",
+      "label": "Accursed Form is active",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 562572,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Entering Accursed Form restores 15% of maximum health",
+      "actor": "caster",
+      "metric": "health_pct",
+      "relative_to": "before_form",
+      "min": 13
+    }
+  ]
+}

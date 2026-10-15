@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "name": "Darkrider reduces the Rage cost of Shadowblast, Vault and Unleash the Hounds by 10 (#956)",
+  "contract": "Darkrider 705453 (installed Spell.dbc) is a passive family-21 spell whose effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107), misc 14 = SPELLMOD_COST, base -101 die 1 -> -100 (Rage is stored in tenths, so 10 Rage), SpellClassMask [1] 0x8 / [2] 0x18. Vault 500085 (family flag [1] 0x8, cost 150), every Shadowblast rank (flag [2] 0x10, rank 1 804191 and rank 2 680264 cost 400 in DBC) and Unleash the Hounds (flag [2] 0x8, ranks 807918 and 807933 cost 400) match; Guard Strike 804432 (flag [1] 0x2000) does not. SpellInfo::CalcPowerCost applies SPELLMOD_COST and clamps at 0. The Description reads 'Reduces the Rage cost of Shadowblast, Vault, and Unleash the Hounds by 10.' The scenario measures each spell's cost before and after learning through the native cost query and asserts the difference is exactly -100 for the five affected spells and 0 for Guard Strike, so it does not depend on other cost terms. Effects 1 and 2 of Darkrider (Blasting Powder) are not in its Description and are not asserted.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "dr",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "dr",
+      "metric": "spell_power_cost",
+      "save_as": "vault_0",
+      "label": "Vault cost before the talent",
+      "spell": 500085
+    },
+    {
+      "action": "snapshot",
+      "actor": "dr",
+      "metric": "spell_power_cost",
+      "save_as": "blast_0",
+      "label": "Shadowblast rank 1 cost before the talent",
+      "spell": 804191
+    },
+    {
+      "action": "snapshot",
+      "actor": "dr",
+      "metric": "spell_power_cost",
+      "save_as": "blast2_0",
+      "label": "Shadowblast rank 2 cost before the talent",
+      "spell": 680264
+    },
+    {
+      "action": "snapshot",
+      "actor": "dr",
+      "metric": "spell_power_cost",
+      "save_as": "hounds_0",
+      "label": "Unleash the Hounds rank 2 cost before the talent",
+      "spell": 807933
+    },
+    {
+      "action": "snapshot",
+      "actor": "dr",
+      "metric": "spell_power_cost",
+      "save_as": "hounds1_0",
+      "label": "Unleash the Hounds rank 1 cost before the talent",
+      "spell": 807918
+    },
+    {
+      "action": "snapshot",
+      "actor": "dr",
+      "metric": "spell_power_cost",
+      "save_as": "guard_0",
+      "label": "Guard Strike cost before the talent (control spell)",
+      "spell": 804432
+    },
+    {
+      "action": "learn",
+      "actor": "dr",
+      "spell": 705453,
+      "label": "Learn Darkrider"
+    },
+    {
+      "action": "assert",
+      "label": "Vault costs 10 Rage less",
+      "actor": "dr",
+      "metric": "spell_power_cost",
+      "spell": 500085,
+      "relative_to": "vault_0",
+      "equals": -100
+    },
+    {
+      "action": "assert",
+      "label": "Shadowblast rank 1 costs 10 Rage less",
+      "actor": "dr",
+      "metric": "spell_power_cost",
+      "spell": 804191,
+      "relative_to": "blast_0",
+      "equals": -100
+    },
+    {
+      "action": "assert",
+      "label": "Shadowblast rank 2 costs 10 Rage less",
+      "actor": "dr",
+      "metric": "spell_power_cost",
+      "spell": 680264,
+      "relative_to": "blast2_0",
+      "equals": -100
+    },
+    {
+      "action": "assert",
+      "label": "Unleash the Hounds rank 2 costs 10 Rage less",
+      "actor": "dr",
+      "metric": "spell_power_cost",
+      "spell": 807933,
+      "relative_to": "hounds_0",
+      "equals": -100
+    },
+    {
+      "action": "assert",
+      "label": "Unleash the Hounds rank 1 costs 10 Rage less",
+      "actor": "dr",
+      "metric": "spell_power_cost",
+      "spell": 807918,
+      "relative_to": "hounds1_0",
+      "equals": -100
+    },
+    {
+      "action": "assert",
+      "label": "Guard Strike is not affected",
+      "actor": "dr",
+      "metric": "spell_power_cost",
+      "spell": 804432,
+      "relative_to": "guard_0",
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Comforting Winds trades haste with the Air Elemental (#1044)",
+  "contract": "#1044 Comforting Winds (704209) promises a reciprocal haste loop: the Stormbringer's damage hastes the Air Elemental and the Air Elemental's damage hastes the Stormbringer. 704209 is a SPELL_AURA_PROC_TRIGGER_SPELL passive with ProcFlags = 0, so no proc entry is generated and its trigger 584235 (TARGET_UNIT_PET, SPELL_AURA_HASTE_SPELLS) never fires. The other half is carried by 584238 (SPELL_EFFECT_APPLY_AREA_AURA_RAID on TARGET_UNIT_PET, triggering 584237 SPELL_EFFECT_APPLY_AREA_AURA_OWNER), which nothing in the shipped data ever casts and which also has ProcFlags = 0. The fix keeps 584238 on the Air Elemental while the owner has 704209 and adds the two missing spell_proc rows. The expected step is 2% per stack, up to 5 stacks, for 10 seconds, taken from the effective DBC on the server's own DataDir (/azerothcore/env/dist/data/dbc, not a client extraction): 584235 and 584237 both have EffectBasePoints[0] = 1 with EffectDieSides[0] = 1 (SpellEffectInfo::CalcValue gives 2), StackAmount = 5 and DurationIndex 1 (SpellDuration.Duration = 10000). A client Spell.dbc extraction used for an earlier reading of this contract has EffectBasePoints[0] = 0 for both spells and is not the server's effective data; it produced this scenario's original '1%' figure, which post-fix runs contradicted. The issue body's '2%' matches the server DBC; only 584238's own hardcoded '1%, stacking 10 times' tooltip text is contradicted (percent and stack count both) and remains unasserted. Gale (804036) has ManaCostPercentage = 29 (Spell.dbc) and is a real mana spender, unrelated to the class's 'Static' combo resource (803102, spent by other Stormbringer spells, not Gale); the scenario tops mana up to 2500 with set_power before the second Gale cast, the same floor the sibling class-16 scenarios (e.g. stormbringer-fix-lightning-chain-family) use for their own mana-costing casts, because two prior casts (Summon Air Elemental at 75% and the baseline Gale at 29%) leave too little mana, with only a 2.5 s wait, for the second Gale's cost to clear SPELL_FAILED_NO_POWER (85).",
+  "timeout_ms": 240000,
+  "players": [
+    {
+      "id": "s",
+      "race": 1,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "s",
+      "entry": 36,
+      "level": 80,
+      "health": 10000000,
+      "distance": 5
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "s", "spell": 804019 },
+    { "action": "cast", "actor": "s", "spell": 804019 },
+    { "action": "assert", "label": "SETUP: the Air Elemental (creature 500941) is out",
+      "actor": "s", "metric": "pet_entry", "equals": 500941, "within_ms": 25000 },
+    { "action": "learn", "actor": "s", "spell": 804036 },
+    { "action": "assert", "label": "SETUP: the fixture has enough mana for a 29% base mana cast",
+      "actor": "s", "metric": "max_power", "power": 0, "min": 2500 },
+    { "action": "assert", "label": "BASELINE: the Air Elemental carries no reciprocal bond (584238) without Comforting Winds",
+      "actor": "s", "metric": "pet_aura_stacks", "spell": 584238, "equals": 0 },
+    { "action": "snapshot", "label": "Enemy health before the baseline pet attack",
+      "actor": "e", "metric": "health", "save_as": "enemy_health_baseline" },
+    { "action": "attack", "actor": "s", "pet": true, "target": "e" },
+    { "action": "assert", "label": "BASELINE: the Air Elemental really is damaging the enemy",
+      "actor": "e", "metric": "health", "relative_to": "enemy_health_baseline", "max": -1, "within_ms": 10000 },
+    { "action": "assert", "label": "BASELINE: pet damage gives the Stormbringer no 584237 haste stack",
+      "actor": "s", "metric": "aura_stacks", "spell": 584237, "equals": 0 },
+    { "action": "set_aura", "actor": "s", "pet": true, "spell": 3618, "stacks": 1 },
+    { "action": "assert", "label": "BASELINE: the Air Elemental carries no 584235 haste stack",
+      "actor": "s", "metric": "pet_aura_stacks", "spell": 584235, "equals": 0 },
+    { "action": "cast", "actor": "s", "spell": 804036, "target": "e" },
+    { "action": "wait", "label": "Let the baseline Gale land and any proc resolve", "ms": 4000 },
+    { "action": "assert", "label": "BASELINE: without Comforting Winds the owner's damage hastes nothing",
+      "actor": "s", "metric": "pet_aura_stacks", "spell": 584235, "equals": 0 },
+    { "action": "learn", "actor": "s", "spell": 704209 },
+    { "action": "assert", "label": "SETUP: Comforting Winds is a passive and applies on learning",
+      "actor": "s", "metric": "aura", "spell": 704209, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the lifecycle now keeps the 584238 bond on the Air Elemental",
+      "actor": "s", "metric": "pet_aura_stacks", "spell": 584238, "equals": 1, "within_ms": 6000 },
+    { "action": "cast", "actor": "s", "spell": 804036, "target": "e" },
+    { "action": "assert", "label": "DISCRIMINATING: one Gale hit puts one 584235 stack on the Air Elemental",
+      "actor": "s", "metric": "pet_aura_stacks", "spell": 584235, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "DISCRIMINATING: the step is 2% spell haste (584235 EffectBasePoints[0] = 1 plus EffectDieSides[0] = 1, server DataDir DBC)",
+      "actor": "s", "metric": "pet_aura_amount", "spell": 584235, "effect": 0, "equals": 2 },
+    { "action": "wait", "label": "Global cooldown before the second Gale", "ms": 2500 },
+    { "action": "set_power", "actor": "s", "power": 0, "value": 2500 },
+    { "action": "cast", "actor": "s", "spell": 804036, "target": "e" },
+    { "action": "assert", "label": "DISCRIMINATING: a second Gale hit stacks 584235 to 2 (StackAmount = 5)",
+      "actor": "s", "metric": "pet_aura_stacks", "spell": 584235, "equals": 2, "within_ms": 5000 },
+    { "action": "set_aura", "actor": "s", "pet": true, "spell": 3618, "stacks": 0 },
+    { "action": "attack", "actor": "s", "pet": true, "target": "e" },
+    { "action": "assert", "label": "DISCRIMINATING: the Air Elemental's damage now hastes its master (584238 procs 584237)",
+      "actor": "s", "metric": "aura_stacks", "spell": 584237, "min": 1, "within_ms": 15000 },
+    { "action": "assert", "label": "DISCRIMINATING: the owner's step is the same 2% (584237 EffectBasePoints[0] = 1 plus EffectDieSides[0] = 1, server DataDir DBC)",
+      "actor": "s", "metric": "aura_amount", "spell": 584237, "effect": 0, "equals": 2 },
+    { "action": "assert", "label": "DISCRIMINATING: the owner's haste window is 584237's DurationIndex 1 (10000 ms)",
+      "actor": "s", "metric": "aura_duration_ms", "spell": 584237, "min": 8000, "max": 10000 }
+  ]
+}

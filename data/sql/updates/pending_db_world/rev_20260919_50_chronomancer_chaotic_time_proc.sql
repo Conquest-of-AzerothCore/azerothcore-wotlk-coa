@@ -1,0 +1,53 @@
+-- Chaotic Time (583245): "While Incarnation of Chaos is active, your Melt Reality deals $s1% increased
+-- damage and replicates an additional $s2%. In addition, periodic damage dealt now reduces the cooldown
+-- of Incarnation of Chaos by $/1000;583258S1 sec." Effects 0 and 1 are aura 107 (ADD_FLAT_MODIFIER,
+-- MiscValue 3 = SPELLMOD_EFFECT1 with BasePoints 29 = +30, and MiscValue 12 = SPELLMOD_EFFECT2 with
+-- BasePoints 19 = +20), native in AuraEffect::CalculateSpellMod and already working. Effect 2 is aura 42
+-- (SPELL_AURA_PROC_TRIGGER_SPELL) on 583258, whose single effect is 165
+-- SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN (SpellEffects.cpp:237) with MiscValue 570067 (Incarnation of
+-- Chaos, RecoveryTime and CategoryRecoveryTime 180000) and BasePoints -1001 -> -1000 ms, which
+-- Spell::EffectAscensionModifyCooldown forwards to ModifyAscensionCooldown (SpellEffects.cpp:303-327),
+-- which reaches Player::ModifySpellCooldown because 1000 ms is far below the 180000 ms remaining.
+-- That effect is implemented; only the proc gate was missing. Spell.dbc gives 583245 ProcFlags 0,
+-- SpellMgr::LoadSpellProcs generates no entry for a record without proc flags, and
+-- Aura::GetProcEffectMask returns 0 without an entry, so 583258 was never cast and the cooldown never
+-- moved. 583258's effect targets TARGET_UNIT_CASTER, which Spell::SelectImplicitCasterObjectTargets
+-- resolves to m_caster unconditionally, so the reduction lands on the Chronomancer even though
+-- AuraEffect::HandleProcTriggerSpellAuraProc aims the triggered cast at the tick's victim.
+-- Columns, all read from Spell.dbc and from the core's periodic-tick proc call this session:
+--   SchoolMask 0 - no school restriction; the tooltip says "periodic damage dealt" with no school
+--     qualifier, and 583245's own SchoolMask 64 describes the talent record, not the events it watches.
+--   SpellFamilyName 0 / all SpellFamilyMask 0 - effect 2's EffectSpellClassMask is [0, 0, 0] and the
+--     tooltip names no ability, and SpellInfo::IsAffected passes everything when the row's family name
+--     is zero.
+--   ProcFlags 262144 (PROC_FLAG_DONE_PERIODIC, SpellMgr.h:137) - AuraEffect::HandlePeriodicDamageAurasTick
+--     (SpellAuraEffects.cpp:6573-6595) assigns `procAttacker = PROC_FLAG_DONE_PERIODIC` directly for the
+--     caster of a damaging tick. The positive-versus-negative choice that Spell.cpp:2749-2776 makes from
+--     DmgClass (MAGIC/NONE x POS/NEG) applies only to a spell's own hit event and is not reached here, so
+--     no POS/NEG bit belongs in this row.
+--   SpellTypeMask 1 (PROC_SPELL_TYPE_DAMAGE) - the tick passes `&dmgInfo` carrying the tick's damage, and
+--     Unit::ProcSkillsAndAuras (Unit.cpp:7119-7136) computes DAMAGE whenever damageInfo has damage or
+--     absorb.
+--   SpellPhaseMask 2 (PROC_SPELL_PHASE_HIT) - the tick call omits procPhase, whose default in Unit.h:1571
+--     is PROC_SPELL_PHASE_HIT, and PROC_FLAG_DONE_PERIODIC is inside REQ_SPELL_PHASE_PROC_FLAG_MASK
+--     (SpellMgr.h:184), so the phase is checked.
+--   HitMask 0 - default NORMAL|CRITICAL|ABSORB for a DONE proc; the tooltip makes no hit-result claim.
+--   AttributesMask 0 - PROC_ATTR_TRIGGERED_CAN_PROC is deliberately not set. 583258 is cast triggered and
+--     deals no damage, so it cannot re-enter this row, and Aura::GetProcEffectMask (SpellAuras.cpp:2157-
+--     2172) refuses procs from an aura's own triggered spell in any case.
+--   DisableEffectsMask 0 - effects 0 and 1 are aura 107, which SpellMgr's isTriggerAura table marks true
+--     but AuraEffect::HandleProc's switch (SpellAuraEffects.cpp:1384-1411) has no case for, so its
+--     default branch does nothing; 583245 has ProcCharges 0, so Aura::IsUsingCharges is false and no
+--     charge is consumed from the two spellmods that already work.
+--   Chance 100 - the record's own ProcChance, per the convention merged PR #4183 established ("Chance is
+--     the record's own ProcChance"). Conflict considered and rejected: bindmysoul's snapshot renders the
+--     talent as a 5% chance and the child record 583258 carries ProcChance 50 with a "$h%" tooltip, but
+--     583245's own tooltip states no percentage and the installed record is the authority.
+--   ProcsPerMinute 0 / Cooldown 0 / Charges 0 - the record carries none of them.
+-- Not fixed here, and not fixable by this row: the "replicates an additional $s2%" clause routes through
+-- effect 0's class mask word2 4194304 = 504727 "Chronomancer (Infinite)", whose only effect is aura 354,
+-- which has no core handler (SpellAuraEffects.cpp:419 is `nullptr, //354 unknown Ascension aura`). That
+-- clause stays dead until aura 354 is implemented; it is aura 354's gap, not this talent's.
+DELETE FROM `spell_proc` WHERE `SpellId` = 583245;
+INSERT INTO `spell_proc` (`SpellId`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `ProcFlags`, `SpellTypeMask`, `SpellPhaseMask`, `HitMask`, `AttributesMask`, `DisableEffectsMask`, `ProcsPerMinute`, `Chance`, `Cooldown`, `Charges`) VALUES
+(583245, 0, 0, 0, 0, 0, 262144, 1, 2, 0, 0, 0, 0, 100, 0, 0);

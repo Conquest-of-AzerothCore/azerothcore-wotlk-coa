@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Shattering: does Judgement of the Three Hammers grant its buff at all (#5042)",
+  "contract": "#5042: reported that Shattering (520469) grants no buff at all. Investigation found two independent delivery paths: a missing spell_proc row for 520469 (same defect class as #5037, confirmed absent from every tracked spell_proc file), and a redundant native hook (primalist_shattering::OnSpellHitResult, AscensionPrimalistShattering.cpp) that fires on any non-miss, damaging hit of Judgement of the Three Hammers (520468, SpellFamilyName 37) while the caster self-carries the Shattering aura (520469 is SPELL_ATTR0_PASSIVE + TARGET_UNIT_CASTER, so it self-applies once known) -- this path does not depend on spell_proc at all and should fire regardless of the missing row. This scenario only reproduces the report: it does not change any code. It casts 520468 at a dummy with both spells known and records whether the hit lands cleanly (control) and whether ShatteringBuff (520729) actually appears afterward. Neither the investigation nor this authoring pass could establish why the reporter saw no buff given the redundant path works independently of the confirmed missing spell_proc row; the controller's run of this scenario is the evidence.",
+  "timeout_ms": 30000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 500000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "primalist", "spell": 520469 },
+    { "action": "learn", "actor": "primalist", "spell": 520468 },
+    { "action": "assert", "label": "control: Shattering self-applies its passive aura once known", "actor": "primalist", "metric": "aura", "spell": 520469, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "control: no Shattering buff before the cast", "actor": "primalist", "metric": "aura", "spell": 520729, "equals": 0 },
+    { "action": "cast", "label": "Judgement of the Three Hammers", "actor": "primalist", "spell": 520468, "target": "target" },
+    { "action": "assert", "label": "control: the hit landed cleanly", "actor": "primalist", "metric": "spell_damage_count", "spell": 520468, "target": "target", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "reproduction: does ShatteringBuff appear after a clean hit", "actor": "primalist", "metric": "aura", "spell": 520729, "equals": 1, "within_ms": 2000 }
+  ]
+}

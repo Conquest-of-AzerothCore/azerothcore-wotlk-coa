@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Hellbreaker makes Unleash Pestilence remove movement impairing effects (#1314)",
+  "contract": "Hellbreaker 680216 reads 'Casting Unleash Pestilence now removes all active movement impairing effects from you' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z; matches the client's own moa_description). AscensionXorothAbilities.cpp's OnSpellCast handler for SPELL_UNLEASH_PESTILENCE (801002) now calls player->RemoveMovementImpairingAuras(true) when the caster has aura 680216, before Unleash() itself runs - the same native Unit method other classes use for on-cast cleanses (e.g. AscensionNecromancerAbilities.cpp, AscensionPyromancer.cpp).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 801002 },
+    { "action": "set_aura", "actor": "knight", "spell": 339, "stacks": 1, "label": "Root the knight (Entangling Roots, mechanic root)" },
+    { "action": "set_aura", "actor": "knight", "spell": 116, "stacks": 1, "label": "Slow the knight (Frostbolt chill, mechanic snare)" },
+    {
+      "action": "assert", "label": "SETUP: the knight is rooted",
+      "actor": "knight", "metric": "aura", "spell": 339, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the knight is snared",
+      "actor": "knight", "metric": "aura", "spell": 116, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the knight's root state is native-flagged",
+      "actor": "knight", "metric": "rooted", "equals": 1
+    },
+    { "action": "cast", "actor": "knight", "spell": 801002, "label": "Unleash Pestilence, without Hellbreaker" },
+    { "action": "wait", "ms": 500 },
+    {
+      "action": "assert", "label": "REGRESSION: without Hellbreaker, the root persists",
+      "actor": "knight", "metric": "aura", "spell": 339, "equals": 1
+    },
+    {
+      "action": "assert", "label": "REGRESSION: without Hellbreaker, the snare persists",
+      "actor": "knight", "metric": "aura", "spell": 116, "equals": 1
+    },
+    { "action": "reset_cooldown", "actor": "knight", "spell": 801002 },
+    { "action": "learn", "actor": "knight", "spell": 680216 },
+    { "action": "set_aura", "actor": "knight", "spell": 680216, "stacks": 1, "label": "Force the Hellbreaker passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Hellbreaker passive is active",
+      "actor": "knight", "metric": "aura", "spell": 680216, "equals": 1
+    },
+    { "action": "set_aura", "actor": "knight", "spell": 339, "stacks": 1, "label": "Re-root the knight for the contract case" },
+    { "action": "set_aura", "actor": "knight", "spell": 116, "stacks": 1, "label": "Re-snare the knight for the contract case" },
+    {
+      "action": "assert", "label": "SETUP: the knight is rooted again",
+      "actor": "knight", "metric": "aura", "spell": 339, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the knight is snared again",
+      "actor": "knight", "metric": "aura", "spell": 116, "equals": 1
+    },
+    { "action": "cast", "actor": "knight", "spell": 801002, "label": "Unleash Pestilence, with Hellbreaker" },
+    { "action": "wait", "ms": 500 },
+    {
+      "action": "assert", "label": "CONTRACT: Hellbreaker removes the root",
+      "actor": "knight", "metric": "aura", "spell": 339, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Hellbreaker removes the snare",
+      "actor": "knight", "metric": "aura", "spell": 116, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the native root state clears too",
+      "actor": "knight", "metric": "rooted", "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Blessing of Lei Shen heals for the Stormflow tick damage (#1342)",
+  "contract": "#1342: Blessing of Lei Shen (561228) reads 'Damage dealt by Stormflow now heals you equal to the damage dealt'. Its only effect is APPLY_AURA with EffectApplyAuraName 354 on TARGET_UNIT_CASTER, EffectTriggerSpell 561308 and EffectBasePoints 99 / DieSides 1 = 100 (%). Aura 354 has no core handler (src/server/game/Spells/Auras/SpellAuraEffects.cpp:419 is literally 'nullptr, //354 unknown Ascension aura') and 561228 has ProcFlags 0 with no spell_proc row, so SpellMgr::LoadSpellProcs skips it (SpellMgr.cpp:2257) and 561308 is never cast; its only incoming DBC link is 561228 itself. 561308 is SPELL_EFFECT_HEAL on TARGET_UNIT_CASTER with base 0 -> 1 and SPELL_ATTR2_CANT_CRIT, SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS and SPELL_ATTR6_IGNORE_CASTER_DAMAGE_MODIFIERS, i.e. the amount is supplied by the caller. Stormflow is cast as rank 572867, the rank a level-80 Stormbringer owns (module progression grants 572861 from level 20 up to 572867 from level 68); it channels for 8000 ms (SpellDuration 31) and ticks every 1000 ms (EffectAmplitude 1000). The per-tick damage is $m1 + $SP*0.2 and therefore not a constant, and the harness only allows a ratio between snapshots of the same metric, so the 100 % coefficient is asserted structurally instead: one 561308 heal per Stormflow tick, with a heal total far above 561308's own base value. Rank 572867 has EffectBasePoints 187 / DieSides 10, i.e. at least 188 per tick before spell power, so four ticks carry at least 752; the floor of 100 is a conservative bound that still separates a damage-sized caller amount from the base value of 1 (8 ticks of it would total 8).",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "s",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "s", "spell": 572867 },
+    { "action": "set_aura", "actor": "s", "spell": 803102, "stacks": 100 },
+    { "action": "assert", "label": "SETUP: Blessing of Lei Shen is not known yet",
+      "actor": "s", "metric": "aura", "spell": 561228, "equals": 0 },
+    { "action": "cast", "actor": "s", "spell": 572867, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: the baseline Stormflow channel is running",
+      "actor": "s", "metric": "cast_remaining_ms", "spell": 572867, "min": 1, "within_ms": 4000 },
+    { "action": "wait", "label": "Let the 8000 ms channel run out (SpellDuration 31)", "ms": 9000 },
+    { "action": "assert", "label": "SETUP: the baseline channel dealt periodic damage",
+      "actor": "s", "metric": "spell_damage_total", "spell": 572867, "target": "dummy", "min": 1 },
+    { "action": "assert", "label": "BASELINE: Stormflow alone casts no Blessing of Lei Shen heal",
+      "actor": "s", "metric": "spell_heal_count", "spell": 561308, "equals": 0 },
+    { "action": "snapshot", "label": "Baseline Stormflow tick count before the second channel",
+      "actor": "s", "metric": "spell_damage_count", "spell": 572867, "target": "dummy",
+      "save_as": "ticks_before" },
+    { "action": "learn", "actor": "s", "spell": 561228 },
+    { "action": "assert", "label": "SETUP: Blessing of Lei Shen is an active passive",
+      "actor": "s", "metric": "aura", "spell": 561228, "equals": 1 },
+    { "action": "set_aura", "actor": "s", "spell": 803102, "stacks": 100 },
+    { "action": "cast", "actor": "s", "spell": 572867, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: the second Stormflow channel is running",
+      "actor": "s", "metric": "cast_remaining_ms", "spell": 572867, "min": 1, "within_ms": 4000 },
+    { "action": "wait", "label": "Let the second 8000 ms channel run out", "ms": 9000 },
+    { "action": "assert", "label": "DISCRIMINATING: every Stormflow tick now casts 561308 on the caster",
+      "actor": "s", "metric": "spell_heal_count", "spell": 561308, "target": "s", "min": 1 },
+    { "action": "assert", "label": "SETUP: the second channel dealt its 8 periodic ticks (8000 ms at 1000 ms)",
+      "actor": "s", "metric": "spell_damage_count", "spell": 572867, "target": "dummy",
+      "relative_to": "ticks_before", "min": 4 },
+    { "action": "assert", "label": "DISCRIMINATING: one 561308 heal landed per Stormflow tick",
+      "actor": "s", "metric": "spell_heal_count", "spell": 561308, "target": "s", "min": 4 },
+    { "action": "assert", "label": "DISCRIMINATING: the heal carries a caller-supplied amount, not 561308's base value of 1",
+      "actor": "s", "metric": "spell_heal_total", "spell": 561308, "target": "s", "min": 100 }
+  ]
+}

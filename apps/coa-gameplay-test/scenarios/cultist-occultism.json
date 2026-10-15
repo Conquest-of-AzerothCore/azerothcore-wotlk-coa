@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Cultist: Occultism boosts Wrath of the Black Empire's crit chance natively (#1552)",
+  "contract": "300305 is ADD_FLAT_MODIFIER (107), MiscValue=7 (SPELLMOD_CRITICAL_CHANCE), EffectBasePoints=9/DieSides=1 giving a flat +10 (SpellInfo.cpp:489), classmask dword1=256 (bit8). Verified against Spell.dbc: 800413 'Wrath of the Black Empire' has SpellFamilyFlags dword1=288=256+32, so bit8 is set. This is a disjoint bit from Terror's (#1551) bit5 on the same spell, so both talents stack independently without conflict, matching the tooltip. No script needed; 300305 is not in SpellInfo::IsAffectedBySpellMod's family-31 routing table, so the generic fallback applies.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "c", "race": 1, "class": 25, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: Wrath of the Black Empire's crit chance is unmodified before Occultism",
+      "actor": "c", "metric": "spell_modifier", "spell": 800413, "op": 7, "base": 5, "min": 5, "max": 5
+    },
+    {
+      "action": "assert", "label": "SETUP: an outside-the-mask spell (Horrorbolt) is unaffected",
+      "actor": "c", "metric": "spell_modifier", "spell": 800416, "op": 7, "base": 5, "min": 5, "max": 5
+    },
+    { "action": "learn", "actor": "c", "spell": 300305 },
+    {
+      "action": "assert", "label": "Occultism adds 10 crit points to Wrath of the Black Empire",
+      "actor": "c", "metric": "spell_modifier", "spell": 800413, "op": 7, "base": 5, "min": 15, "max": 15
+    },
+    {
+      "action": "assert", "label": "Occultism leaves Horrorbolt's crit chance alone",
+      "actor": "c", "metric": "spell_modifier", "spell": 800416, "op": 7, "base": 5, "min": 5, "max": 5
+    }
+  ]
+}

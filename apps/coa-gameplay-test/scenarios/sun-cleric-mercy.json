@@ -1,0 +1,145 @@
+{
+  "schema": 1,
+  "name": "Mercy periodically dispels 2 disease effects from the target and nearby allies (#1935)",
+  "contract": "Mercy 504848 is family 33, an instant cast (InterruptFlags 8, no PASSIVE attribute). Effect 0 is SPELL_AURA_PERIODIC_TRIGGER_SPELL (23) on TARGET_UNIT_TARGET_ALLY (21) with EffectAmplitude 3000, DurationIndex 29, EffectChainTarget 6 and MaxAffectedTargets 6, EffectTriggerSpell 503650, matching 'an ally and up to 5 nearby allies... repeating every 3 sec for 12 sec'; Spell::EffectApplyAura together with the native chain-target selection (used by many other chain-style spells) applies the aura to the explicit target and spreads it to nearby allies with no script needed. 503650 ('Mercy Proc') has a single SPELL_EFFECT_DISPEL (38) with EffectMiscValue 3 (DISPEL_DISEASE) and EffectBasePoints 1 + DieSides 1 = 2, matching 'abolishing 2 disease effects'; the native dispel handler needs no script either. This is not \"no server-side implementation\": the whole chain already works. This scenario fixtures two distinct disease-type debuffs (Blood Plague 55078, Frost Fever 55095, both Dispel 3) on a grouped ally and proves the periodic trigger removes both once it ticks, that the nearby grouped caster also receives the periodic aura (proving the chain reaches beyond the single explicit target), and that the aura expires around its 12s duration. Mercy has no PASSIVE attribute, so unlike this batch's talent passives it does not self-apply on learn and must be explicitly learned before the cast step; the scenario as originally committed omitted that learn step, so the caster's cast used a spell it did not know (the harness's own cast record reports spell_active: caster->HasSpell(spell) as false) and produced no aura at all - not evidence against the native chain-target/dispel path this contract describes.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55078,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55095,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Blood Plague is fixtured",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 55078,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Frost Fever is fixtured",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 55095,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 504848
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 504848,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "The explicit target receives the periodic aura",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 504848,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The nearby grouped caster receives it too (chain fanout beyond the explicit target)",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 504848,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the first 3s tick fire",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "Blood Plague is dispelled",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 55078,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Frost Fever is dispelled too (2 diseases per tick)",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 55095,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The periodic aura is still running mid-duration",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 504848,
+      "caster": "caster",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the ~12s duration run out",
+      "ms": 9500
+    },
+    {
+      "action": "assert",
+      "label": "The periodic aura expires around its 12s duration",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 504848,
+      "caster": "caster",
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Hallucination's clones despawn after their tooltip duration, not 15 seconds (#4360)",
+  "contract": "Hallucination 560301 tooltip: 'Create 3 copies of yourself that run in a random direction for $706932d and may briefly trick enemies into ignoring you.' $706932d resolves to spell 706932's own DurationIndex, SpellDuration.dbc id 27 = 3000 ms (confirmed via coa-dbc-viewer record --id 706932 / --table SpellDuration --id 27). spell_ascension_cultist_ability::Effect (AscensionCultistAbilities.cpp) hardcoded the three Summon(player, 840000, ...) calls that back the clones to a literal 15000 ms instead of reading 706932's own duration, so the clones outlived the tooltip's 3 seconds fivefold. AscensionCultistSummons.cpp's Summon() remaps entry 840000 to HallucinationEntry (840025, the real creature_template row) before spawning, so this scenario counts entry 840025, the entry the clones actually spawn with.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 40 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn/level settle", "ms": 3000 },
+    { "action": "learn", "actor": "cultist", "spell": 560301 },
+    { "action": "cast", "actor": "cultist", "spell": 560301 },
+    {
+      "action": "assert", "label": "SETUP: three clones spawn",
+      "actor": "cultist", "metric": "owned_creature_count", "entry": 840025, "min": 3, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Past the tooltip's 3000 ms duration", "ms": 3500 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the clones are gone by 3.5s, not still alive from a 15s duration (#4360)",
+      "actor": "cultist", "metric": "owned_creature_count", "entry": 840025, "equals": 0
+    }
+  ]
+}

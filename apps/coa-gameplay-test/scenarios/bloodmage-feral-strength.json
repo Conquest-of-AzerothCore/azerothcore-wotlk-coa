@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "Feral Strength adds 50% Agility and Strength attack power in Eternal Curse (#785)",
+  "contract": "Feral Strength 704661 has both effects over EffectSpellClassMask (0, 1073741824, 0) = word 1 bit 30 = Eternal Curse Hidden 804320 and Vampiric Fang 572373. Effect 0 is aura 107 with MiscValue 12 (SPELLMOD_EFFECT2 -> effect index 1) and BasePoints 49 + DieSides 1 = +50; 804320's effect 1 is aura 268 MOD_ATTACK_POWER_OF_STAT_PERCENT with MiscValue 1 (STAT_AGILITY) and value 0, so it becomes 50. Effect 1 is aura 107 with MiscValue 23 (SPELLMOD_EFFECT3 -> effect index 2), +50; 804320's effect 2 is the same aura with MiscValue 0 (STAT_STRENGTH) and value 0, so it becomes 50. 572373 has only an effect 0, so neither operation can reach it. 804320 is cast whenever Eternal Curse 800157 is applied (AscensionBloodmageTalents.cpp). Tooltip: \"While in Eternal Curse, you now gain $s1% more attack power from Agility and Strength.\" Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Eternal Curse Hidden grants no Agility attack power before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 804320,
+      "op": 12,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Eternal Curse Hidden grants no Strength attack power before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 804320,
+      "op": 23,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 704661
+    },
+    {
+      "action": "assert",
+      "label": "Feral Strength sets the Agility conversion to 50%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 804320,
+      "op": 12,
+      "base": 0,
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "label": "Feral Strength sets the Strength conversion to 50%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 804320,
+      "op": 23,
+      "base": 0,
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "label": "Feral Strength does not touch Bloodbolt",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 12,
+      "base": 0,
+      "equals": 0
+    }
+  ]
+}

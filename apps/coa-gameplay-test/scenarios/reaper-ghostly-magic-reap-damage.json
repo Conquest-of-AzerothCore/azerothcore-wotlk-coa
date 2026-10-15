@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "name": "Reaper Ghostly Magic boosts Reap damage natively",
+  "contract": [
+    "Ghostly Magic rank 1 (803998) and rank 2 (807889) promise 'Increases the damage of Reap, Dirge, and",
+    "Reliquary of the Lost by 10%/20%'.",
+    "Their DBC effect 1 is SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 0 (SPELLMOD_DAMAGE),",
+    "EffectSpellClassMask dword0 8388608 / dword1 1, SpellFamilyName 36.",
+    "Reap rank 1 (500357) has SpellFamilyName 36 and SpellFamilyFlags dword1 1, overlapping the mask.",
+    "Unit::CalculateSpellDamage calls ApplySpellMod(id, SPELLMOD_DAMAGE, tmpDamage) for every damage",
+    "calculation, so this native engine mechanism delivers the tooltip with no CoA-specific handler required."
+  ],
+  "players": [
+    {
+      "id": "reaper",
+      "race": 2,
+      "class": 30,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "No damage bonus without Ghostly Magic",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 500357,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 803998
+    },
+    {
+      "action": "assert",
+      "label": "Ghostly Magic rank 1 aura active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803998,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds exactly 10% Reap damage",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 500357,
+      "op": 0,
+      "base": 1000,
+      "equals": 1100
+    },
+    {
+      "action": "unlearn",
+      "actor": "reaper",
+      "spell": 803998
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 807889
+    },
+    {
+      "action": "assert",
+      "label": "Ghostly Magic rank 2 aura active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 807889,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 adds exactly 20% Reap damage",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 500357,
+      "op": 0,
+      "base": 1000,
+      "equals": 1200
+    }
+  ]
+}

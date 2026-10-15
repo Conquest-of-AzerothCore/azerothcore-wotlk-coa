@@ -1,0 +1,404 @@
+{
+  "schema": 1,
+  "name": "Ranger: Falconstrike ranks retain the authored 121 percent ranged weapon damage (#5932, #5933)",
+  "contract": [
+    "The preserved CoA build-hub skill and talent tooltips both specify 121% ranged weapon damage for Falconstrike.",
+    "The level-11 root 806345 has effect 2 WEAPON_PERCENT_DAMAGE with BasePoints 120 and DieSides 1.",
+    "Higher ranks keep the same transformation and only increase the additive Nature amount; their shipped percentages",
+    "are malformed: rank 2 is 929% and rank 8 is 3197%. Normal Horn casts must prepare Falconstrike at the reported",
+    "levels 18 and 60, and normal casts must deal damage within the 121% weapon bounds and consume readiness.",
+    "Bow 3036 has 16.875-28.125 damage and a 2500ms swing; normalized ranged swings use 2800ms. Matching-level enemies",
+    "have zero Nature resistance. The observed native minimum weapon damage supplies a lower bound; the damage",
+    "ceilings allow bow spread, normalization, additive 15/78 damage and a doubled critical hit, excluding 929/3197%."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "low",
+      "race": 1,
+      "class": 21,
+      "level": 18,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "high",
+      "race": 1,
+      "class": 21,
+      "level": 60,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "low_enemy",
+      "owner": "low",
+      "entry": 36,
+      "level": 18,
+      "health": 1000000,
+      "distance": 15,
+      "faction": 14,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "high_enemy",
+      "owner": "high",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 15,
+      "faction": 14,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "low",
+      "item": 3036
+    },
+    {
+      "action": "equip",
+      "actor": "low",
+      "item": 3036,
+      "slot": 17
+    },
+    {
+      "action": "learn",
+      "actor": "low",
+      "spell": 573060
+    },
+    {
+      "action": "learn",
+      "actor": "low",
+      "spell": 806360
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "weapon_damage_min",
+      "hand": 2,
+      "min": 16
+    },
+    {
+      "action": "snapshot",
+      "actor": "low",
+      "metric": "weapon_damage_min",
+      "hand": 2,
+      "save_as": "low_weapon"
+    },
+    {
+      "action": "assert",
+      "actor": "low_enemy",
+      "metric": "resistance",
+      "school": 3,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "spell_effect_value",
+      "spell": 806345,
+      "effect": 2,
+      "equals": 121
+    },
+    {
+      "action": "add_item",
+      "actor": "high",
+      "item": 3036
+    },
+    {
+      "action": "equip",
+      "actor": "high",
+      "item": 3036,
+      "slot": 17
+    },
+    {
+      "action": "learn",
+      "actor": "high",
+      "spell": 573060
+    },
+    {
+      "action": "learn",
+      "actor": "high",
+      "spell": 806360
+    },
+    {
+      "action": "set_power",
+      "actor": "high",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "weapon_damage_min",
+      "hand": 2,
+      "min": 16
+    },
+    {
+      "action": "snapshot",
+      "actor": "high",
+      "metric": "weapon_damage_min",
+      "hand": 2,
+      "save_as": "high_weapon"
+    },
+    {
+      "action": "assert",
+      "actor": "high_enemy",
+      "metric": "resistance",
+      "school": 3,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "spell_effect_value",
+      "spell": 806345,
+      "effect": 2,
+      "equals": 121
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "knows_spell",
+      "spell": 806437,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "low",
+      "spell": 806360
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "cast_failure",
+      "spell": 806360,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 573338,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "low",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "low",
+      "spell": 806437,
+      "target": "low_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "cast_failure",
+      "spell": 806437,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "spell_damage_count",
+      "spell": 806437,
+      "target": "low_enemy",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Native Falconstrike damage excludes the malformed weapon percentage",
+      "actor": "low",
+      "metric": "spell_damage_total",
+      "spell": 806437,
+      "target": "low_enemy",
+      "ratio_to": "low_weapon",
+      "min": 0.1,
+      "max": 7
+    },
+    {
+      "action": "assert",
+      "actor": "low",
+      "metric": "aura",
+      "spell": 573338,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "knows_spell",
+      "spell": 806443,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "high",
+      "spell": 806360
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "cast_failure",
+      "spell": 806360,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "aura",
+      "spell": 573338,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "high",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "high",
+      "spell": 806443,
+      "target": "high_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "cast_failure",
+      "spell": 806443,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "spell_damage_count",
+      "spell": 806443,
+      "target": "high_enemy",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Native Falconstrike damage excludes the malformed weapon percentage",
+      "actor": "high",
+      "metric": "spell_damage_total",
+      "spell": 806443,
+      "target": "high_enemy",
+      "ratio_to": "high_weapon",
+      "min": 0.1,
+      "max": 20
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "aura",
+      "spell": 573338,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "spell_effect_value",
+      "spell": 806345,
+      "effect": 2,
+      "equals": 121
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "spell_effect_value",
+      "spell": 806437,
+      "effect": 2,
+      "equals": 121
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "spell_effect_value",
+      "spell": 806438,
+      "effect": 2,
+      "equals": 121
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "spell_effect_value",
+      "spell": 806439,
+      "effect": 2,
+      "equals": 121
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "spell_effect_value",
+      "spell": 806440,
+      "effect": 2,
+      "equals": 121
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "spell_effect_value",
+      "spell": 806441,
+      "effect": 2,
+      "equals": 121
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "spell_effect_value",
+      "spell": 806442,
+      "effect": 2,
+      "equals": 121
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "spell_effect_value",
+      "spell": 806443,
+      "effect": 2,
+      "equals": 121
+    }
+  ]
+}

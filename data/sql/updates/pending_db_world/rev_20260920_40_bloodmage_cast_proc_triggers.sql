@@ -1,0 +1,71 @@
+-- Five Bloodmage passives whose tooltip fires "when you cast <named ability>". Each one carries an
+-- aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) effect on a correctly-built trigger spell, but Spell.dbc gives
+-- every one of these records ProcFlags 0 and no `spell_proc` row existed, so SpellMgr::LoadSpellProcs
+-- skipped them ("Skip if no proc flags in DBC") and Aura::GetProcEffectMask returned a zero mask: the
+-- trigger could never fire. Same reasoning and shape as rev_20260918_32_bloodmage_council_assembled_proc.
+--
+-- All five use `SpellPhaseMask` 1 (PROC_SPELL_PHASE_CAST) because every tooltip says "Casting". At CAST
+-- phase Spell::cast passes no victim (Unit::ProcSkillsAndAuras(..., nullptr, ...)), so this phase is only
+-- usable when the triggered spell needs no explicit unit target - verified below for each trigger.
+-- `ProcFlags` are the DONE spell-class flags the core actually raises at CAST phase: Spell::cast falls back
+-- to DONE_SPELL_MAGIC_DMG_CLASS_POS/NEG for DmgClass MAGIC and DONE_SPELL_NONE_DMG_CLASS_POS/NEG for
+-- DmgClass NONE, while Spell::PrepareDataForTriggerSystem already sets DONE_SPELL_MELEE_DMG_CLASS (0x10)
+-- for DmgClass MELEE. `HitMask` stays 0: at CAST phase with DONE flags the core skips the hit check unless
+-- HitMask is set (SpellMgr::CanSpellTriggerProcOnEvent). `Chance` is each record's own ProcChance (100).
+--
+-- 807566 Acquired Taste: "Casting Infuse or Vampyr's Kiss now generates 2 additional stacks of Pooled
+-- Vitality." Effect 0 is aura 42 on Pooled Vitality +2 (524905), an
+-- SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS with MiscValue 2 and TriggerSpell 680687; Spell::
+-- EffectAscensionModifyAuraStacks -> ModifyAscensionAuraStacks adds exactly +2 stacks of Pooled Vitality
+-- and applies the aura itself when it is missing, so effect 0 alone is the whole tooltip. Effect 1 is a
+-- second aura 42 that casts Pooled Vitality 680687 directly, which would add a third stack and make the
+-- talent grant 3 instead of the 2 the tooltip promises; `DisableEffectsMask` 2 removes effect 1 from the
+-- proc mask (Aura::GetProcEffectMask) and leaves the tooltip value exact.
+-- 806428 Universal Donor: same proc source. Effect 0 is aura 42 on Universal Donor 704238
+-- (SPELL_AURA_MOD_HEALING_RECEIVED, BasePoints 5 -> +6%, TargetA 56 = caster's raid, radius index 12),
+-- which needs no unit target.
+-- Proc source for both: Infuse 681403 carries SpellFamilyFlags (0, 0, 4194304) and DmgClass NONE; every
+-- castable Vampyr's Kiss rank (504275-504281) carries (32768, 0, 0) and DmgClass MAGIC with a periodic
+-- damage aura, i.e. negative. Hence SpellFamilyMask0 32768 + SpellFamilyMask2 4194304 and ProcFlags
+-- 70656 = DONE_SPELL_NONE_DMG_CLASS_POS 0x400 | DONE_SPELL_NONE_DMG_CLASS_NEG 0x1000 |
+-- DONE_SPELL_MAGIC_DMG_CLASS_NEG 0x10000. Both NONE polarities are set because Infuse's positivity is a
+-- runtime SpellInfo::IsPositive() result (it applies SPELL_AURA_SCHOOL_ABSORB on an enemy), and the
+-- family mask - not the polarity - is what restricts this proc.
+--
+-- 684331 Blood-Cursed Weapons: "Casting Crimson Tide now additionally increases the haste of all party and
+-- raid members by $685029s1% for $685029d." Aura 42 on 685029, two SPELL_EFFECT_APPLY_AREA_AURA_RAID
+-- effects (SPELL_AURA_HASTE_SPELLS and SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints 4 -> +5%, radius
+-- index 12, TargetA 1 = caster). Crimson Tide ranks 504129-504136 and 504282 all carry SpellFamilyFlags
+-- (16384, 0, 0) with DmgClass MAGIC and a periodic damage aura, so ProcFlags is
+-- DONE_SPELL_MAGIC_DMG_CLASS_NEG 0x10000 alone.
+--
+-- 704625 Coated In Darkness: "Casting Bloodbolt or Bloodfang Bite now reduces the cooldown of your Blood
+-- Pact by $/1000;804205S1 sec." Aura 42 on Coated in Darkness 804205, a single
+-- SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN with BasePoints -501 (-500 ms) and MiscValue 801955 (Blood Pact),
+-- TargetA 1. Bloodbolt ranks (578304, 578305, 804685, 806928-806932) carry (0, 131072, 0) with DmgClass
+-- MAGIC and are harmful; Bloodfang Bite ranks (501695-501697, 503613-503615, 572549-572551, 800156) carry
+-- (0, 8388608, 0) with DmgClass MELEE. Hence SpellFamilyMask1 8519680 (131072 + 8388608) and ProcFlags
+-- 65552 = DONE_SPELL_MELEE_DMG_CLASS 0x10 | DONE_SPELL_MAGIC_DMG_CLASS_NEG 0x10000.
+--
+-- 800766 Enraging Howls: "Casting Howl spells now increases the damage dealt and reduces damage taken by
+-- nearby party members by $504157s1% for $504157d." Aura 42 on Enraging Howl 504157, two
+-- SPELL_EFFECT_APPLY_AREA_AURA_PARTY effects (MOD_DAMAGE_PERCENT_DONE BasePoints 4 -> +5% and
+-- MOD_DAMAGE_PERCENT_TAKEN BasePoints -6 -> -5%, TargetA 20 = caster's party area, radius index 14), so no
+-- unit target is needed. The Howl set in Spell.dbc family 26 is Shadow Howl 806177 and Wicked Howl 804207
+-- (0, 0, 128), Night Hunter's Howl 500124/501680-501686 (0, 0, 2048), Blood Howl 800782 (0, 0, 131072) and
+-- Monstrous Howl 804811 (0, 4, 131072); their union is SpellFamilyMask1 4 + SpellFamilyMask2 133248
+-- (128 + 2048 + 131072). The set spans DmgClass MELEE (Night Hunter's Howl, Monstrous Howl) and MAGIC
+-- (Shadow/Wicked/Blood Howl) with both polarities, so ProcFlags 81936 = DONE_SPELL_MELEE_DMG_CLASS 0x10 |
+-- DONE_SPELL_MAGIC_DMG_CLASS_POS 0x4000 | DONE_SPELL_MAGIC_DMG_CLASS_NEG 0x10000; the family mask is what
+-- restricts the proc to Howls.
+--
+-- AttributesMask is 0 on all five rows (PROC_ATTR_TRIGGERED_CAN_PROC not set): each proc source is an
+-- ability the player casts directly, and no helper spell was found in Spell.dbc that casts any of them as
+-- a triggered effect of something else. SchoolMask is 0 (no school restriction is stated by any tooltip).
+DELETE FROM `spell_proc` WHERE `SpellId` IN (807566, 806428, 684331, 704625, 800766);
+INSERT INTO `spell_proc` (`SpellId`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `ProcFlags`, `SpellTypeMask`, `SpellPhaseMask`, `HitMask`, `AttributesMask`, `DisableEffectsMask`, `ProcsPerMinute`, `Chance`, `Cooldown`, `Charges`) VALUES
+(807566, 0, 26, 32768, 0, 4194304, 70656, 0, 1, 0, 0, 2, 0, 100, 0, 0),
+(806428, 0, 26, 32768, 0, 4194304, 70656, 0, 1, 0, 0, 0, 0, 100, 0, 0),
+(684331, 0, 26, 16384, 0, 0, 65536, 0, 1, 0, 0, 0, 0, 100, 0, 0),
+(704625, 0, 26, 0, 8519680, 0, 65552, 0, 1, 0, 0, 0, 0, 100, 0, 0),
+(800766, 0, 26, 0, 4, 133248, 81936, 0, 1, 0, 0, 0, 0, 100, 0, 0);

@@ -1,0 +1,201 @@
+{
+  "schema": 1,
+  "name": "Jailer's Bargain shield, immunity and Undead type (#3557)",
+  "contract": [
+    "A normal self-cast of Jailer's Bargain grants a ten-second shield worth 30% of current maximum health.",
+    "While active, it blocks Fear, Charm and Sleep mechanics and changes the player's creature type to Undead.",
+    "Native immunity queries use hostile stock spells with verified Fear, Charm and Sleep mechanics."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80
+    },
+    {
+      "id": "hostile",
+      "race": 1,
+      "class": 9,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 805718
+    },
+    {
+      "action": "assert",
+      "label": "Jailer's Bargain is learned",
+      "actor": "reaper",
+      "metric": "knows_spell",
+      "spell": 805718,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Maximum health before the shield",
+      "actor": "reaper",
+      "metric": "max_health",
+      "save_as": "reaper_max_health"
+    },
+    {
+      "action": "assert",
+      "label": "Reaper starts as Humanoid",
+      "actor": "reaper",
+      "metric": "creature_type",
+      "equals": 7
+    },
+    {
+      "action": "assert",
+      "label": "Fear is not blocked without the shield",
+      "actor": "reaper",
+      "metric": "spell_immune",
+      "spell": 5782,
+      "target": "hostile",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Charm is not blocked without the shield",
+      "actor": "reaper",
+      "metric": "spell_immune",
+      "spell": 6358,
+      "target": "hostile",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Sleep is not blocked without the shield",
+      "actor": "reaper",
+      "metric": "spell_immune",
+      "spell": 1090,
+      "target": "hostile",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Cast Jailer's Bargain normally",
+      "actor": "reaper",
+      "spell": 805718
+    },
+    {
+      "action": "assert",
+      "label": "Jailer's Bargain shield is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 805718,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The shield lasts about ten seconds",
+      "actor": "reaper",
+      "metric": "aura_duration_ms",
+      "spell": 805718,
+      "min": 8500,
+      "max": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The shield absorbs 30% of maximum health",
+      "actor": "reaper",
+      "metric": "aura_amount",
+      "spell": 805718,
+      "effect": 0,
+      "ratio_to": "reaper_max_health",
+      "min": 0.299,
+      "max": 0.301
+    },
+    {
+      "action": "assert",
+      "label": "Fear is blocked while shielded",
+      "actor": "reaper",
+      "metric": "spell_immune",
+      "spell": 5782,
+      "target": "hostile",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Charm is blocked while shielded",
+      "actor": "reaper",
+      "metric": "spell_immune",
+      "spell": 6358,
+      "target": "hostile",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Sleep is blocked while shielded",
+      "actor": "reaper",
+      "metric": "spell_immune",
+      "spell": 1090,
+      "target": "hostile",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Reaper is Undead while Jailer's Bargain is active",
+      "actor": "reaper",
+      "metric": "creature_type",
+      "equals": 6
+    },
+    {
+      "action": "wait",
+      "label": "Let the ten-second shield expire",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "label": "Jailer's Bargain expired",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 805718,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Reaper is Humanoid again after expiry",
+      "actor": "reaper",
+      "metric": "creature_type",
+      "equals": 7
+    },
+    {
+      "action": "assert",
+      "label": "Fear is no longer blocked",
+      "actor": "reaper",
+      "metric": "spell_immune",
+      "spell": 5782,
+      "target": "hostile",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Charm is no longer blocked",
+      "actor": "reaper",
+      "metric": "spell_immune",
+      "spell": 6358,
+      "target": "hostile",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Sleep is no longer blocked",
+      "actor": "reaper",
+      "metric": "spell_immune",
+      "spell": 1090,
+      "target": "hostile",
+      "equals": 0
+    }
+  ]
+}

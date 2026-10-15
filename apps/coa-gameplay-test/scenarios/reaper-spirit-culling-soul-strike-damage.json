@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "name": "Reaper: Spirit Culling raises Soul Strike damage by 20% for the duration of Spectral Scythe (#1829)",
+  "contract": "#1829, first clause: 'For the duration of Spectral Scythe, the damage of Soul Strike is increased by $s1%.' Spirit Culling 301986 (Domination talent, CharacterAdvancement 31262) effect 0 is ADD_FLAT_MODIFIER (107), MiscValue 12 = SPELLMOD_EFFECT2, BasePoints 19 + DieSides 1 = 20, EffectSpellClassMask word 2 = 0x2000. In family 36 that bit is carried by both Spectral Scythe auras: the Domination ability 500484 and the talent's own 10-second rank 500576 ('Rank: Spirit Culling'). Each of those has effect 1 ADD_PCT_MODIFIER (108), MiscValue 0 = SPELLMOD_DAMAGE, amount 0 (BasePoints -1 + DieSides 1), mask word 1 = 0x800 = Soul Strike's SpellFamilyFlags, and both tooltips read '$?s301986[ For the duration, damage dealt by Soul Strike is increased by $301986s1%.]'. So with the talent a Spectral Scythe aura carries +20% Soul Strike damage and without it 0; the bonus exists only while the aura does. Soul Strike rank 6 500646 is weapon damage, so the bonus is read through the native weapon-spell damage bonus from a fixed base against a dummy, and through the native SPELLMOD_DAMAGE path, each against an identical Reaper without the talent. The second clause (a generated Reaped Soul summons a Spectral Scythe at 10%) is covered by reaper-spirit-culling.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "culler", "race": 10, "class": 30, "level": 80 },
+    { "id": "plain", "race": 10, "class": 30, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "culler", "entry": 36, "distance": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "label": "Take Spirit Culling", "actor": "culler", "spell": 301986 },
+    {
+      "action": "assert", "label": "SETUP: the talent aura has settled",
+      "actor": "culler", "metric": "aura", "spell": 301986, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "snapshot", "label": "Soul Strike weapon-spell damage without the talent or a scythe",
+      "actor": "plain", "metric": "melee_spell_damage_done", "spell": 500646, "target": "dummy",
+      "save_as": "soul_strike_base"
+    },
+    {
+      "action": "assert", "label": "Outside Spectral Scythe the talent leaves Soul Strike damage unchanged",
+      "actor": "culler", "metric": "melee_spell_damage_done", "spell": 500646, "target": "dummy",
+      "ratio_to": "soul_strike_base", "min": 0.995, "max": 1.005
+    },
+    {
+      "action": "assert", "label": "Outside Spectral Scythe no Soul Strike damage modifier applies",
+      "actor": "culler", "metric": "spell_modifier", "spell": 500646, "op": 0, "base": 100, "min": 99.99, "max": 100.01
+    },
+    { "action": "set_aura", "label": "The talent's Spectral Scythe", "actor": "culler", "spell": 500576, "stacks": 1 },
+    {
+      "action": "set_aura", "label": "The same Spectral Scythe without the talent",
+      "actor": "plain", "spell": 500576, "stacks": 1
+    },
+    {
+      "action": "assert", "label": "With Spirit Culling the scythe carries +20% Soul Strike damage",
+      "actor": "culler", "metric": "aura_amount", "spell": 500576, "effect": 1, "min": 19.99, "max": 20.01
+    },
+    {
+      "action": "assert", "label": "Without the talent the scythe carries no Soul Strike bonus",
+      "actor": "plain", "metric": "aura_amount", "spell": 500576, "effect": 1, "min": -0.01, "max": 0.01
+    },
+    {
+      "action": "assert", "label": "During the scythe Soul Strike's damage modifier is +20%",
+      "actor": "culler", "metric": "spell_modifier", "spell": 500646, "op": 0, "base": 100, "min": 119.99, "max": 120.01
+    },
+    {
+      "action": "assert", "label": "During the scythe Soul Strike deals 20% more weapon-spell damage",
+      "actor": "culler", "metric": "melee_spell_damage_done", "spell": 500646, "target": "dummy",
+      "ratio_to": "soul_strike_base", "min": 1.195, "max": 1.205
+    },
+    {
+      "action": "assert", "label": "The scythe alone does not raise Soul Strike damage",
+      "actor": "plain", "metric": "melee_spell_damage_done", "spell": 500646, "target": "dummy",
+      "ratio_to": "soul_strike_base", "min": 0.995, "max": 1.005
+    },
+    { "action": "set_aura", "label": "The talent's scythe ends", "actor": "culler", "spell": 500576, "stacks": 0 },
+    {
+      "action": "assert", "label": "The bonus ends with the scythe",
+      "actor": "culler", "metric": "melee_spell_damage_done", "spell": 500646, "target": "dummy",
+      "ratio_to": "soul_strike_base", "min": 0.995, "max": 1.005
+    },
+    {
+      "action": "set_aura", "label": "The Domination Spectral Scythe",
+      "actor": "culler", "spell": 500484, "stacks": 1
+    },
+    {
+      "action": "assert", "label": "Spirit Culling also raises the Domination scythe's Soul Strike bonus to 20%",
+      "actor": "culler", "metric": "aura_amount", "spell": 500484, "effect": 1, "min": 19.99, "max": 20.01
+    },
+    {
+      "action": "assert", "label": "During the Domination scythe Soul Strike deals 20% more weapon-spell damage",
+      "actor": "culler", "metric": "melee_spell_damage_done", "spell": 500646, "target": "dummy",
+      "ratio_to": "soul_strike_base", "min": 1.195, "max": 1.205
+    }
+  ]
+}

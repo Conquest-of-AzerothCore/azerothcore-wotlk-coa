@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Cyclone's Embrace and Spellstorm Mastery work natively (#1821, #2782)",
+  "contract": "#1821: Cyclone's Embrace (301318) effect 0 is aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 3 (SPELLMOD_EFFECT1), EffectBasePoints 99 + DieSides 1 = 100%, EffectSpellClassMask[2] = 1048576 (dword 2, bit 20), which resolves to exactly the Kiss of the Clouds rank chain (355241, 500039 Rank 1, 501442-501449 Rank 2..9) and nothing else, both SpellFamilyName 22. Kiss of the Clouds 500039's AttributesEx3 = 256 (ONLY_ON_PLAYER, not IGNORE_CASTER_MODIFIERS), so SpellInfo::IsAffectedBySpellMod (SpellInfo.cpp:1472) -> IsAffected (SpellInfo.cpp:1437) passes, and Unit::ApplyEffectModifiers (Unit.cpp:12157) inside SpellEffectInfo::CalcValue (SpellInfo.cpp:519) applies the SPELLMOD_EFFECT1 multiplier before EffectTriggerSpellWithValue (SpellEffects.cpp:1237-1243) hands the amount to 500292's SCHOOL_ABSORB. At level 80 (clamped to MaxLevel 24, reduced by max(BaseLevel,SpellLevel)=17): EffectBasePoints 100 + int32(7 x 1.95429 = 13.68) = 113, +1 die roll = 114 baseline, doubling to 228 with the talent (totalmul = 1 + 100/100 = 2, Player.cpp:10272-10275/10325). #2782: Spellstorm Mastery (705659 rank 1, 705660 rank 2) effect 0 is the same aura 108 family, EffectMiscValue 8 (SPELLMOD_ALL_EFFECTS), EffectBasePoints 14/29 + 1 = 15%/30%, EffectSpellClassMask[0] = 8 (dword 0, bit 3), which resolves to exactly the Aegis set: 680282 Whirlwind Aegis Rank 1 .. 680594 Rank 6, 680316 Shocking Aegis, 680334 Tempest Aegis, all granted to class 16 by the module (AscensionCustomClassData.h {16,4,680282}, {16,26,680316}, {16,44,680334}). SPELLMOD_ALL_EFFECTS is applied to every effect of an affected spell generically (Unit.cpp:12153); no Aegis spell carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS. Whirlwind Aegis rank 6 (680594, the level-80 rank) effect 0 is SPELL_AURA_MOD_RESISTANCE with EffectBasePoints 559 + 1 = 560 armor, so +15%/+30% gives 644/728. Effect 1 (spell haste, base 2+1=3) is deliberately not asserted: 3 x 1.15 = 3.45 truncates back to 3 at SpellInfo.cpp:581 (int32 CalcValue), which would look like a false negative on a mechanism that is actually working. The two Spellstorm Mastery ranks have no spell_ranks row in data/sql/, so rank 1 is unlearned before rank 2 is learned to avoid stacking to +45%. Neither 301318 nor 705659/705660 has any occurrence in modules/ or src/server/; both close as regression scenarios only.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+
+    { "action": "assert", "label": "BASELINE #1821: Kiss of the Clouds effect0 modifier is unset without Cyclone's Embrace",
+      "actor": "s", "metric": "spell_modifier", "spell": 500039, "op": 3, "base": 100, "equals": 100 },
+    { "action": "snapshot", "label": "BASELINE #1821: Kiss of the Clouds absorb amount before Cyclone's Embrace",
+      "actor": "s", "metric": "spell_effect_value", "spell": 500039, "effect": 0, "save_as": "kiss_base" },
+    { "action": "assert", "label": "BASELINE #1821: Kiss of the Clouds absorb amount is 114 (100 + int32(7*1.95429) + die roll)",
+      "actor": "s", "metric": "spell_effect_value", "spell": 500039, "effect": 0, "equals": 114 },
+
+    { "action": "learn", "label": "Learn Cyclone's Embrace", "actor": "s", "spell": 301318 },
+    { "action": "assert", "label": "DISCRIMINATING #1821: Cyclone's Embrace doubles Kiss of the Clouds' effect0 modifier",
+      "actor": "s", "metric": "spell_modifier", "spell": 500039, "op": 3, "base": 100, "equals": 200 },
+    { "action": "assert", "label": "DISCRIMINATING #1821: Cyclone's Embrace doubles the absorb amount to 228",
+      "actor": "s", "metric": "spell_effect_value", "spell": 500039, "effect": 0, "ratio_to": "kiss_base", "min": 1.99, "max": 2.01 },
+    { "action": "assert", "label": "DISCRIMINATING #1821: the doubled absorb amount is exactly 228",
+      "actor": "s", "metric": "spell_effect_value", "spell": 500039, "effect": 0, "equals": 228 },
+
+    { "action": "learn", "label": "Learn Whirlwind Aegis rank 6", "actor": "s", "spell": 680594 },
+    { "action": "assert", "label": "BASELINE #2782: Whirlwind Aegis rank 6 armor is unmodified without Spellstorm Mastery",
+      "actor": "s", "metric": "spell_effect_value", "spell": 680594, "effect": 0, "equals": 560 },
+    { "action": "assert", "label": "BASELINE #2782: no all-effects modifier on Whirlwind Aegis before Spellstorm Mastery",
+      "actor": "s", "metric": "spell_modifier", "spell": 680594, "op": 8, "base": 100, "equals": 100 },
+
+    { "action": "learn", "label": "Learn Spellstorm Mastery rank 1", "actor": "s", "spell": 705659 },
+    { "action": "assert", "label": "DISCRIMINATING #2782: Spellstorm Mastery rank 1 adds +15% to Whirlwind Aegis' all-effects modifier",
+      "actor": "s", "metric": "spell_modifier", "spell": 680594, "op": 8, "base": 100, "equals": 115 },
+    { "action": "assert", "label": "DISCRIMINATING #2782: Spellstorm Mastery rank 1 raises Whirlwind Aegis rank 6 armor to 644",
+      "actor": "s", "metric": "spell_effect_value", "spell": 680594, "effect": 0, "equals": 644 },
+
+    { "action": "unlearn", "label": "Unlearn Spellstorm Mastery rank 1 before isolating rank 2", "actor": "s", "spell": 705659 },
+    { "action": "learn", "label": "Learn Spellstorm Mastery rank 2", "actor": "s", "spell": 705660 },
+    { "action": "assert", "label": "DISCRIMINATING #2782: Spellstorm Mastery rank 2 adds +30% to Whirlwind Aegis' all-effects modifier",
+      "actor": "s", "metric": "spell_modifier", "spell": 680594, "op": 8, "base": 100, "equals": 130 },
+    { "action": "assert", "label": "DISCRIMINATING #2782: Spellstorm Mastery rank 2 raises Whirlwind Aegis rank 6 armor to 728",
+      "actor": "s", "metric": "spell_effect_value", "spell": 680594, "effect": 0, "equals": 728 }
+  ]
+}

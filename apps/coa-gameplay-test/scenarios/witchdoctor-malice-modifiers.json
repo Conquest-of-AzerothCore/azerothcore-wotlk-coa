@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Malice-line passives modify Hex of Malice and the Jinx family (#2297, #2886)",
+  "contract": "Prolonged Malice 704505 (#2297): effect0 aura 107 (ADD_FLAT_MODIFIER), MiscValue 1 (SPELLMOD_DURATION), BasePoints 5999 + DieSides 1 = 6000 ms, EffectSpellClassMask (0, 33554432, 0) matching exactly Hex of Malice's (501153) own SpellFamilyFlags word1 = 33554432. effect1 aura 107, MiscValue 5 (SPELLMOD_RANGE), BasePoints 5 + 1 = 6 yd, class mask (263432, 33850368, 32), whose word0 bit 262144 and word2 bit 32 both match Lethargy Jinx's (802065) SpellFamilyFlags [262144, 4096, 32]; word1 does not match Lethargy Jinx (4096), so the duration mod must not touch it. Zalazane's Malice 705902 (#2886): effect0 aura 108 (ADD_PCT_MODIFIER), MiscValue 22 (SPELLMOD_DOT), BasePoints 14 + 1 = 15%, class mask (0, 33554432, 0) again exactly Hex of Malice's word1; effect1 aura 108, MiscValue 1 (SPELLMOD_DURATION), BasePoints 1999 + 1 = 2000 ms, class mask (0, 0, 32) exactly Lethargy Jinx's word2 (the Jinx family bit); Hex of Malice's own word2 is 0, so this duration mod must not touch it. Player::ApplySpellMod (Player.cpp) / AuraEffect::CalculateSpellMod (SpellAuraEffects.cpp) apply these generically; SPELLMOD_DOT is read in Unit::SpellDamageBonusDone for every periodic tick. spell_modifier reads each mod against a fixed synthetic base without casting. Regression guard for behaviour that already works natively; no module code touches either spell.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 13, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+
+    { "action": "assert", "label": "BASELINE: Hex of Malice duration unmodified before Prolonged Malice",
+      "actor": "caster", "metric": "spell_modifier", "spell": 501153, "op": 1, "base": 10000, "equals": 10000 },
+    { "action": "assert", "label": "BASELINE: Hex of Malice DoT damage unmodified before Zalazane's Malice",
+      "actor": "caster", "metric": "spell_modifier", "spell": 501153, "op": 22, "base": 1000, "equals": 1000 },
+    { "action": "assert", "label": "BASELINE: Lethargy Jinx duration unmodified",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 1, "base": 10000, "equals": 10000 },
+    { "action": "assert", "label": "BASELINE: Lethargy Jinx range unmodified before Prolonged Malice",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 5, "base": 100, "equals": 100 },
+
+    { "action": "learn", "actor": "caster", "spell": 704505 },
+
+    { "action": "assert", "label": "Prolonged Malice adds 6 sec to Hex of Malice's duration (#2297)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 501153, "op": 1, "base": 10000, "equals": 16000 },
+    { "action": "assert", "label": "Prolonged Malice adds 6 yd range to Lethargy Jinx as an offensive Voodoo spell (#2297)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 5, "base": 100, "equals": 106 },
+    { "action": "assert", "label": "CONTROL: Prolonged Malice's duration clause does not reach Lethargy Jinx (word1 flags differ)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 1, "base": 10000, "equals": 10000 },
+
+    { "action": "learn", "actor": "caster", "spell": 705902 },
+
+    { "action": "assert", "label": "Zalazane's Malice adds 15% DoT damage to Hex of Malice (#2886)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 501153, "op": 22, "base": 1000, "equals": 1150 },
+    { "action": "assert", "label": "Zalazane's Malice adds 2 sec to Lethargy Jinx's duration as a Jinx (#2886)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 1, "base": 10000, "equals": 12000 },
+    { "action": "assert", "label": "CONTROL: Hex of Malice's duration stays at Prolonged Malice's +6 sec only, Zalazane's Malice duration clause targets Jinxes, not Hex of Malice",
+      "actor": "caster", "metric": "spell_modifier", "spell": 501153, "op": 1, "base": 10000, "equals": 16000 },
+    { "action": "assert", "label": "CONTROL: Lethargy Jinx has no DoT-damage mod (word1 flags differ from Hex of Malice's)",
+      "actor": "caster", "metric": "spell_modifier", "spell": 802065, "op": 22, "base": 1000, "equals": 1000 }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "name": "templar harmonic disposition flying 4779",
+  "contract": "Harmonic Disposition 560653 grants water walking. A normal flying mount 809917 must apply its mounted-flight aura and send SMSG_MOVE_SET_CAN_FLY even while Disposition is active. Toggling Disposition must not send SMSG_MOVE_UNSET_CAN_FLY; dismount must. Socketless sessions do not send the client flight acknowledgement, so client input and actual flight remain unverified.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 34091
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 560653
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 809917
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 560653
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "water_walk",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 809917
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 809917,
+      "equals": 1,
+      "within_ms": 4500
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "server_packets",
+      "opcode": 835,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "templar",
+      "metric": "server_packets",
+      "opcode": 836,
+      "save_as": "unset_before"
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "templar",
+      "spell": 560653
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "server_packets",
+      "opcode": 836,
+      "relative_to": "unset_before",
+      "equals": 0
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "templar"
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "server_packets",
+      "opcode": 836,
+      "relative_to": "unset_before",
+      "min": 1
+    }
+  ],
+  "location": {
+    "map": 530,
+    "x": -1830,
+    "y": 5395,
+    "z": -12.4,
+    "o": 0
+  }
+}

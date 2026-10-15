@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Fiery Intent shortens Cataclysm's cooldown by 30 s (#837)",
+  "contract": "#837: Fiery Intent 525018 effect 0 is ADD_FLAT_MODIFIER (107), misc 11 = SPELLMOD_COOLDOWN, base -30001 + 1 = -30000 ms, class mask C 0x20 = Cataclysm 520218 (RecoveryTime and CategoryRecoveryTime 90000). Player::AddSpellAndCategoryCooldowns applies SPELLMOD_COOLDOWN natively (Player.cpp:11451-11457) and no module code references 525018 or 520218, so the cooldown goes from 90000 ms to 60000 ms. Blaze 805500 (outside the mask) is the control. Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Cataclysm keeps 90000 ms before Fiery Intent",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 520218,
+      "op": 11,
+      "base": 90000,
+      "equals": 90000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 525018
+    },
+    {
+      "action": "assert",
+      "label": "Fiery Intent cuts Cataclysm's cooldown to 60000 ms",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 520218,
+      "op": 11,
+      "base": 90000,
+      "equals": 60000,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Control: Blaze cooldown is untouched",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 805500,
+      "op": 11,
+      "base": 90000,
+      "equals": 90000,
+      "within_ms": 3000
+    }
+  ]
+}

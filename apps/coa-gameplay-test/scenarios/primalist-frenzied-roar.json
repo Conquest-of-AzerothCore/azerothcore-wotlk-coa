@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "name": "Primalist Frenzied Roar: Rage, attack speed, cooldown and expiration",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800133
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "save_as": "baseline_attack"
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800133
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 800133,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 800133,
+      "power": 1,
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "ratio_to": "baseline_attack",
+      "min": 0.832,
+      "max": 0.835
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 800133,
+      "min": 59000,
+      "max": 60000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800133
+    },
+    {
+      "action": "wait",
+      "ms": 16000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 800133,
+      "power": 1,
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 800133,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "ratio_to": "baseline_attack",
+      "equals": 1
+    }
+  ]
+}

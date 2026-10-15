@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Rejuvenating Shadows raises raid healing taken and Bloodbolt's leech multiplier (#3917)",
+  "contract": "Rejuvenating Shadows 704623 ships two effects in Spell.dbc. Effect 0 is SPELL_EFFECT_APPLY_AREA_AURA_RAID (Spell::EffectApplyAreaAura) with aura 118 SPELL_AURA_MOD_HEALING_PCT, BasePoints 5 + DieSides 1 = 6%, MiscValue 127, radius index 23 and TargetA 1, so the caster carries the area aura itself; the native consumer is Unit::SpellHealingBonusTaken's GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT). Effect 1 is SPELL_EFFECT_APPLY_AURA with aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 49 + DieSides 1 = +50%, MiscValue 27 = SPELLMOD_VALUE_MULTIPLIER, SpellClassMask (0, 131072, 0), which matches exactly the eight Bloodbolt ranks (578304, 578305, 804685, 806928-806932) and nothing else in family 26; SpellEffectInfo::CalcValueMultiplier feeds that op and Spell.cpp consumes it as Bloodbolt's SPELL_EFFECT_HEALTH_LEECH heal multiplier. 578305 is the Bloodbolt rank a level-80 character owns. The harness has no healing-taken metric, so the 6% half is locked through the applied aura's amount rather than through an observed heal.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 20, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "Bloodbolt's leech multiplier is unmodified before the talent",
+      "actor": "caster", "metric": "spell_modifier", "spell": 578305, "op": 27, "base": 1.0, "equals": 1.0
+    },
+    { "action": "learn", "actor": "caster", "spell": 704623 },
+    {
+      "action": "assert", "label": "Rejuvenating Shadows raises Bloodbolt's leech multiplier to 1.50",
+      "actor": "caster", "metric": "spell_modifier", "spell": 578305, "op": 27, "base": 1.0,
+      "min": 1.499, "max": 1.501
+    },
+    {
+      "action": "assert", "label": "It does not touch an unrelated Bloodmage spell",
+      "actor": "caster", "metric": "spell_modifier", "spell": 572795, "op": 27, "base": 1.0, "equals": 1.0
+    },
+    {
+      "action": "assert", "label": "The raid aura lands on its own caster",
+      "actor": "caster", "metric": "aura", "spell": 704623, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The raid healing-taken bonus is the shipped 6%",
+      "actor": "caster", "metric": "aura_amount", "spell": 704623, "effect": 0, "equals": 6
+    }
+  ]
+}

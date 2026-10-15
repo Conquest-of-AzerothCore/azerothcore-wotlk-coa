@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Modulator raises Power Module's applied amounts by 20% (#710)",
+  "contract": "#710: Modulator 707832 is a native ADD_PCT_MODIFIER (aura 108) passive with one effect, EffectMiscValue 8 SPELLMOD_ALL_EFFECTS, BasePoints 19 DieSides 1 (+20%), EffectSpellClassMask (524288,0,0) = family-34 flag bit 19, which every Module row carries. Power Module rank 7 is 707688: SpellFamilyName 34, SpellFamilyFlags (524288,0,0), AttributesEx3 1048832 (ALLOW_AURA_WHILE_DEAD | ONLY_ON_PLAYER, no modifier gate), effect 0 SPELL_AURA_MOD_ATTACK_POWER and effect 1 SPELL_AURA_MOD_RANGED_ATTACK_POWER, both BasePoints 231 DieSides 1 and EffectRealPointsPerLevel 0, so each resolves to 232 and to 278 with the talent (232 * 1.20 = 278.4, truncated by int32). Unit::ApplyEffectModifiers applies SPELLMOD_ALL_EFFECTS to every effect index and is reached from SpellEffectInfo::CalcValue, which is also what AuraEffect::CalculateAmount uses, so the applied aura amounts and the player's attack power move with it. The modifier belongs to the caster, so each fixture applies its own Power Module rather than receiving a pre-applied buff.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 28, "level": 80 },
+    { "id": "modulator", "race": 1, "class": 28, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "modulator", "spell": 707832 },
+
+    { "action": "assert", "label": "Power Module's attack-power effect is 232 without Modulator",
+      "actor": "control", "metric": "spell_effect_value", "spell": 707688, "effect": 0, "equals": 232 },
+    { "action": "assert", "label": "Modulator raises Power Module's attack-power effect to 278",
+      "actor": "modulator", "metric": "spell_effect_value", "spell": 707688, "effect": 0, "equals": 278 },
+    { "action": "assert", "label": "Power Module's ranged attack-power effect is 232 without Modulator",
+      "actor": "control", "metric": "spell_effect_value", "spell": 707688, "effect": 1, "equals": 232 },
+    { "action": "assert", "label": "Modulator raises Power Module's ranged attack-power effect to 278",
+      "actor": "modulator", "metric": "spell_effect_value", "spell": 707688, "effect": 1, "equals": 278 },
+
+    { "action": "snapshot", "label": "Baseline attack power without a Module",
+      "actor": "control", "metric": "attack_power", "save_as": "ap_control0" },
+    { "action": "snapshot", "label": "Baseline attack power of the Modulator Tinker",
+      "actor": "modulator", "metric": "attack_power", "save_as": "ap_mod0" },
+
+    { "action": "set_aura", "label": "Apply Power Module with the unmodified Tinker as its caster",
+      "actor": "control", "spell": 707688, "stacks": 1 },
+    { "action": "set_aura", "label": "Apply Power Module with Modulator as its caster",
+      "actor": "modulator", "spell": 707688, "stacks": 1 },
+
+    { "action": "assert", "label": "The unmodified Module applies 232 attack power",
+      "actor": "control", "metric": "aura_amount", "spell": 707688, "effect": 0, "equals": 232 },
+    { "action": "assert", "label": "Modulator's Module applies 278 attack power",
+      "actor": "modulator", "metric": "aura_amount", "spell": 707688, "effect": 0, "equals": 278 },
+    { "action": "assert", "label": "The unmodified Module applies 232 ranged attack power",
+      "actor": "control", "metric": "aura_amount", "spell": 707688, "effect": 1, "equals": 232 },
+    { "action": "assert", "label": "Modulator's Module applies 278 ranged attack power",
+      "actor": "modulator", "metric": "aura_amount", "spell": 707688, "effect": 1, "equals": 278 },
+
+    { "action": "assert", "label": "The unmodified Module raises attack power by 232",
+      "actor": "control", "metric": "attack_power", "relative_to": "ap_control0", "min": 231, "max": 233 },
+    { "action": "assert", "label": "Modulator's Module raises attack power by 278",
+      "actor": "modulator", "metric": "attack_power", "relative_to": "ap_mod0", "min": 277, "max": 279 }
+  ]
+}

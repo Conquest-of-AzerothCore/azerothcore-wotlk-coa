@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Horrorbolt Volley on the action bar is saved as Horrorbolt (#5469)",
+  "contract": "The Horrorbolt Volley buff 255070 is cast on the Cultist after three 255020 stacks from Horrorbolt casts under 704892 (AscensionCultistAbilities.cpp:160-168). AscensionCultist::Refresh, run every 500 ms from cultist_player::OnPlayerUpdate, checks it (AscensionCultist.cpp:249-262, row {800416, 504719, HasAura(255070)}): while the buff is up and Horrorbolt 800416 is known it teaches Horrorbolt Volley 504719 with learnSpell(504719, true), a temporary spell never written to character_spell, and registers it over every known Horrorbolt rank with Player::SetTemporarySpellReplacement. The same loop handles Abyssal Ward 804670 -> Black Ward 804711 (706182), Gaze of C'Thun 500110 -> Eldritch Force 680576 (681794) and Twilight Shieldtoss 524876 -> Voidcleave 255282 (255281). Before the fix Player::_SaveActions wrote 504719 for a button holding Horrorbolt Volley, and Player::_LoadActions at the next login runs before Refresh teaches it again, so the button was refused and deleted. The fixture applies 255070 directly instead of building the stacks. persisted_action_button reads Player::GetSavedActionButtonSpell, the id _SaveActions writes. A button holding Horrorbolt Volley must be saved as Horrorbolt; a button holding Horrorbolt is saved unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "learn", "actor": "cultist", "spell": 800416 },
+    { "action": "set_aura", "label": "Gain the Horrorbolt Volley buff", "actor": "cultist", "spell": 255070, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "The buff replaces Horrorbolt with Horrorbolt Volley",
+      "actor": "cultist",
+      "metric": "temporary_spell_replacement",
+      "spell": 800416,
+      "equals": 504719,
+      "within_ms": 3000
+    },
+    { "action": "set_action_button", "actor": "cultist", "button": 2, "spell": 504719 },
+    { "action": "set_action_button", "actor": "cultist", "button": 3, "spell": 800416 },
+    {
+      "action": "assert",
+      "label": "The bar holds Horrorbolt Volley",
+      "actor": "cultist",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 504719
+    },
+    {
+      "action": "assert",
+      "label": "The Horrorbolt Volley button is saved as Horrorbolt",
+      "actor": "cultist",
+      "metric": "persisted_action_button",
+      "button": 2,
+      "equals": 800416
+    },
+    {
+      "action": "assert",
+      "label": "Control: an ordinary known spell is saved unchanged",
+      "actor": "cultist",
+      "metric": "persisted_action_button",
+      "button": 3,
+      "equals": 800416
+    }
+  ]
+}

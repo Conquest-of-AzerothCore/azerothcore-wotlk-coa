@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Slipstream banishes and makes the target immune to damage (#451)",
-  "contract": "Slipstream 707555 applies three APPLY_AURA effects: SPELL_AURA_MOD_STUN (12), SPELL_AURA_SCHOOL_IMMUNITY (39, all schools) and SPELL_AURA_DUMMY (4). The first two are core engine aura handlers (AuraEffect::HandleAuraModStun, AuraEffect::HandleAuraModSchoolImmunity) with no per-spell script required, so casting Slipstream already banishes (stuns) the target and makes it immune to all damage. A melee attack against the banished target should deal zero damage. The dummy effect (recast to relocate the target) has no destination-target data in Spell.dbc to express a location change and is not covered by this scenario.",
+  "contract": "Slipstream 707555 applies three APPLY_AURA effects: SPELL_AURA_MOD_STUN (12), SPELL_AURA_SCHOOL_IMMUNITY (39, all schools) and SPELL_AURA_DUMMY (4). The first two are core engine aura handlers (AuraEffect::HandleAuraModStun, AuraEffect::HandleAuraModSchoolImmunity) with no per-spell script required, so casting Slipstream already banishes (stuns) the target and makes it immune to all damage. A melee attack against the banished target should deal zero damage. The dummy effect (recast to relocate the target) has no destination-target data in Spell.dbc to express a location change and is not covered by this scenario. Slipstream is DmgClass 1 (magic, Arcane), so Unit::MagicSpellHitResult gives it a 96% base hit chance against the same-level (80) dummy; the fixture's spell_hit_rating removes that miss roll, as melee_hit_rating does for the melee swing.",
   "timeout_ms": 60000,
   "players": [
     {
@@ -9,7 +9,8 @@
       "race": 1,
       "class": 22,
       "level": 80,
-      "melee_hit_rating": 10000
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000
     }
   ],
   "creatures": [

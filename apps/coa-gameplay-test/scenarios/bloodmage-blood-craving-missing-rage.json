@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Blood Craving restores a share of missing Rage, not of maximum Rage (#649)",
+  "contract": "Spell.dbc gives Blood Craving 800780 DurationIndex 29 (12000 ms) with effects 0 and 2 = aura 77 (SPELL_AURA_MECHANIC_IMMUNITY) with MiscValue 9 (MECHANIC_SILENCE) and 26 (MECHANIC_INTERRUPT), and effect 1 = aura 23 (SPELL_AURA_PERIODIC_TRIGGER_SPELL) at Amplitude 2000 triggering 805985. 805985 effect 0 is SPELL_EFFECT_HEAL_PCT with base 4 -> 5% and effect 1 is SPELL_EFFECT_ENERGIZE_PCT with MiscValue 1 (POWER_RAGE), MiscValueB 1 and base 14 -> 15%. The Description, the AuraDescription and the reference tooltip all say '15% of your missing Rage', while Spell::EffectEnergizePct pays CalculatePct(GetMaxPower(power), damage), a share of maximum Rage. Rage is stored ten times the displayed value, so maximum Rage is 1000 internal. Starting at 900 internal, the contract pays 15% of the 100 missing, about +15, while a share of maximum pays +150 and saturates the bar. The assertion is therefore that one tick cannot reach the cap. Out-of-combat Rage decay only lowers the value, so it cannot rescue the maximum-Rage behaviour from saturating. Silence 15487 (Mechanic 9) is the immunity probe for the untouched native half.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling and login settle", "ms": 5000 },
+    { "action": "learn", "actor": "bloodmage", "spell": 800780 },
+    {
+      "action": "assert",
+      "label": "Fixture precondition: maximum Rage is 1000 internal",
+      "actor": "bloodmage",
+      "metric": "max_power",
+      "power": 1,
+      "equals": 1000
+    },
+    { "action": "set_power", "actor": "bloodmage", "power": 1, "value": 900 },
+    { "action": "set_health", "actor": "bloodmage", "value": 1000 },
+    {
+      "action": "snapshot",
+      "label": "Health before the first tick",
+      "actor": "bloodmage",
+      "metric": "health",
+      "save_as": "hp_before"
+    },
+    { "action": "cast", "actor": "bloodmage", "spell": 800780 },
+    {
+      "action": "assert",
+      "label": "Blood Craving is running",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 800780,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Regression guard: the silence immunity is active",
+      "actor": "bloodmage",
+      "metric": "spell_immune",
+      "spell": 15487,
+      "target": "bloodmage",
+      "equals": 1
+    },
+    { "action": "wait", "label": "One 2 sec tick", "ms": 2500 },
+    {
+      "action": "assert",
+      "label": "One tick from 900 Rage cannot saturate the bar",
+      "actor": "bloodmage",
+      "metric": "power",
+      "power": 1,
+      "max": 980
+    },
+    {
+      "action": "assert",
+      "label": "Regression guard: the tick still restores health",
+      "actor": "bloodmage",
+      "metric": "health",
+      "relative_to": "hp_before",
+      "min": 200
+    }
+  ]
+}

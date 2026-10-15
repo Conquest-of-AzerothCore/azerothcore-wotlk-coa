@@ -1,0 +1,124 @@
+{
+  "schema": 1,
+  "name": "Spirit Army buffs Spectral Warden's summon count, duration and absorb (#3145)",
+  "contract": [
+    "Spell 707634 (Spirit Army) carries three native ADD_FLAT/ADD_PCT_MODIFIER effects, family 36,",
+    "classmask matching Spectral Warden's (805716) own SpellFamilyFlags (128 in flags0, 16384 in flags1):",
+    "SPELLMOD_EFFECT1 (op 3, BasePoints 1 -> +2 additional wardens), SPELLMOD_DURATION (op 1,",
+    "BasePoints -8001 -> -8000 ms) and SPELLMOD_EFFECT2 (op 12, ADD_PCT_MODIFIER, BasePoints 99 -> +100%",
+    "absorb). All three ops are applied generically by the core (Unit::ApplyEffectModifiers for",
+    "SPELLMOD_EFFECT1/2, the core duration path for SPELLMOD_DURATION), so no CoA script is required:",
+    "learning the passive talent alone should move all three modifiers."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "creatures": [],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no summon-count modifier on Spectral Warden before learning the talent",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 805716,
+      "op": 3,
+      "base": 0,
+      "min": -1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no duration modifier on Spectral Warden before learning the talent",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 805716,
+      "op": 1,
+      "base": 20000,
+      "min": 19998,
+      "max": 20002
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no absorb modifier on Spectral Warden before learning the talent",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 805716,
+      "op": 12,
+      "base": 100,
+      "min": 99,
+      "max": 101
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 707634
+    },
+    {
+      "action": "assert",
+      "label": "Spirit Army adds +2 to Spectral Warden's summon count",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 805716,
+      "op": 3,
+      "base": 0,
+      "min": 1,
+      "max": 3
+    },
+    {
+      "action": "assert",
+      "label": "Spirit Army reduces Spectral Warden's duration by 8000 ms",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 805716,
+      "op": 1,
+      "base": 20000,
+      "min": 11998,
+      "max": 12002
+    },
+    {
+      "action": "assert",
+      "label": "Spirit Army doubles Spectral Warden's absorb amount",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 805716,
+      "op": 12,
+      "base": 100,
+      "min": 199,
+      "max": 201
+    },
+    {
+      "action": "unlearn",
+      "actor": "reaper",
+      "spell": 707634
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning removes the absorb modifier",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 805716,
+      "op": 12,
+      "base": 100,
+      "min": 99,
+      "max": 101
+    }
+  ]
+}

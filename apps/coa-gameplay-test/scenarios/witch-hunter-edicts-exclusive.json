@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "One Witch Hunter Edict per caster, and one of each Edict type, on each recipient (#3928, #3756, #5385)",
+  "contract": "Knight's Edict 523485 and Greater Knight's Edict 523510 are separate spells that both apply armor (aura 22) and all primary attributes (aura 29), and no spell_group listed them, so Aura::CanStackWith let them coexist. The reports say a Witch Hunter can give a target only one of the Edicts (#3756: 'used to be 1 buff per Witch Hunter'), so they share spell group 1138 with stack rule 2 (SPELL_GROUP_STACK_RULE_EXCLUSIVE_FROM_SAME_CASTER, Aura::CanStackWith, SpellAuras.cpp): a new Edict from the same caster replaces the old one, while a second Witch Hunter's different Edict still coexists. The rule choice (2, not 1) is the maintainer decision recorded with the fix. An Edict and its Greater version are the same buff: Knight's Edict's tooltip says 'Does not stack with other similar effects', and #5385 reports a bot's Knight's Edict stacking with the player's Greater Knight's Edict, so each pair also shares a group with stack rule 1 (1039-1041, sorted below 1139 so SpellMgr::CheckSpellGroupStackRules reads it first): the later of the pair replaces the earlier, whoever cast it. Both spells have no stance, cost or reagent in Spell.dbc (2026-09-17); Greater is TARGET_UNIT_SRC_AREA_PARTY, so it lands on the caster alone.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "wh", "race": 1, "class": 15, "level": 60 },
+    { "id": "wh2", "race": 1, "class": 15, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "wh", "spell": 523485 },
+    { "action": "learn", "actor": "wh", "spell": 523510 },
+    { "action": "learn", "actor": "wh2", "spell": 523485 },
+    { "action": "learn", "actor": "wh2", "spell": 706741 },
+    { "action": "cast", "label": "Knight's Edict on self", "actor": "wh", "spell": 523485 },
+    {
+      "action": "assert", "label": "Knight's Edict is applied",
+      "actor": "wh", "metric": "aura", "spell": 523485, "caster": "wh", "equals": 1, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 2500 },
+    { "action": "cast", "label": "Greater Knight's Edict from the same caster", "actor": "wh", "spell": 523510 },
+    {
+      "action": "assert", "label": "Greater Knight's Edict is applied",
+      "actor": "wh", "metric": "aura", "spell": 523510, "caster": "wh", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "It replaced the same caster's Knight's Edict",
+      "actor": "wh", "metric": "aura", "spell": 523485, "caster": "wh", "equals": 0
+    },
+    { "action": "cast", "label": "A second Witch Hunter gives Inquisitor's Edict", "actor": "wh2", "spell": 706741, "target": "wh" },
+    {
+      "action": "assert", "label": "The other caster's different Edict coexists (rule 2, not rule 1)",
+      "actor": "wh", "metric": "aura", "spell": 706741, "caster": "wh2", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The first caster's Greater Knight's Edict is kept",
+      "actor": "wh", "metric": "aura", "spell": 523510, "caster": "wh", "equals": 1
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 2500 },
+    { "action": "cast", "label": "The second Witch Hunter gives Knight's Edict", "actor": "wh2", "spell": 523485, "target": "wh" },
+    {
+      "action": "assert", "label": "The other caster's Knight's Edict is applied",
+      "actor": "wh", "metric": "aura", "spell": 523485, "caster": "wh2", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "It replaced Greater Knight's Edict, the same buff from another caster (#5385)",
+      "actor": "wh", "metric": "aura", "spell": 523510, "caster": "wh", "equals": 0
+    },
+    {
+      "action": "assert", "label": "It replaced the second caster's own Inquisitor's Edict (one Edict per caster)",
+      "actor": "wh", "metric": "aura", "spell": 706741, "caster": "wh2", "equals": 0
+    }
+  ]
+}

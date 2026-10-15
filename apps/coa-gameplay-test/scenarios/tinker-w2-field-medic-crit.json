@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Field Medic raises the Tinker's and its summons' critical chance (#1288)",
+  "contract": "#1288: Field Medic 560789 needs no script. Effect 0 is SPELL_EFFECT_APPLY_AURA with SPELL_AURA_MOD_CRIT_PCT (290), BasePoints 4 DieSides 1 (+5), TargetA 1 (caster); AuraEffect::HandleAuraModCritPct calls UpdateAllWeaponDependentCritAuras and UpdateAllSpellCritChances for a player, so both PLAYER_CRIT_PERCENTAGE and PLAYER_SPELL_CRIT_PERCENTAGE1 rise by 5 points, and its EffectMiscValue 13 is unread by that handler. Effect 1 is SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (190) with the same aura and amount and EffectRadiusIndex 12 (SpellRadius.dbc row 12 = 100 yd); that effect is implemented in the core, dispatched to Spell::EffectApplyAreaAura, accepted by SpellEffectInfo::IsAreaAuraEffect, and its target selection keeps the owner's summons. Build: Mechano-Bear 803405 summons creature 60671, the fixture used by tinker-mechano-bear-fights.json. PLAYER_CRIT_PERCENTAGE is not a raw sum: Player::UpdateCritPercentage (StatSystem.cpp:781-818) adds the flat crit auras, the agility contribution and (GetWeaponSkillValue(attType) - GetMaxSkillValueForLevel()) * 0.04, then clamps the result at 0. A bare level-80 Tinker sits below that clamp - gtChanceToMeleeCritBase row 27 is -0.01532 and gtChanceToMeleeCrit row 2779 is 0.00012, so 182 base agility (player_class_stats class 28 level 80) is worth only 0.652 points, and an unarmed character pays the weapon-skill penalty on top - so the 5 points land inside the clamped region and PLAYER_CRIT_PERCENTAGE never moves. Crit Test Buff 503747 (a single SPELL_EFFECT_APPLY_AURA, SPELL_AURA_MOD_CRIT_PCT, BasePoints 99 DieSides 1 for +100, TargetA 1, permanent, in no spell_group) is fixtured first so both readings are taken above the clamp and the difference is the aura's own amount, the same device templar-finesse.json uses with Malice 14139. The summon receives the bonus as spell critical chance only, because HandleAuraModCritPct raises a non-player's m_baseSpellCritChance and never touches creature melee crit, so only aura presence on the pet is asserted here.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "medic", "race": 1, "class": 28, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "set_aura", "label": "Lift melee critical chance clear of its zero clamp",
+      "actor": "medic", "spell": 503747, "stacks": 1 },
+
+    { "action": "snapshot", "label": "Baseline spell critical chance",
+      "actor": "medic", "metric": "spell_crit_chance", "save_as": "spell_crit0" },
+    { "action": "snapshot", "label": "Baseline melee critical chance",
+      "actor": "medic", "metric": "melee_crit_chance", "save_as": "melee_crit0" },
+
+    { "action": "learn", "actor": "medic", "spell": 560789 },
+
+    { "action": "assert", "label": "Field Medic adds 5 points of spell critical chance",
+      "actor": "medic", "metric": "spell_crit_chance", "relative_to": "spell_crit0", "min": 4.9, "max": 5.1 },
+    { "action": "assert", "label": "Field Medic adds 5 points of melee critical chance",
+      "actor": "medic", "metric": "melee_crit_chance", "relative_to": "melee_crit0", "min": 4.9, "max": 5.1 },
+
+    { "action": "learn", "actor": "medic", "spell": 803405 },
+    { "action": "cast", "actor": "medic", "spell": 803405 },
+    { "action": "assert", "label": "The Mechano-Bear is summoned",
+      "actor": "medic", "metric": "pet_entry", "equals": 60671, "within_ms": 15000 },
+    { "action": "assert", "label": "Field Medic's summon aura reaches the Mechano-Bear",
+      "actor": "medic", "metric": "pet_aura_stacks", "spell": 560789, "min": 1, "within_ms": 15000 }
+  ]
+}

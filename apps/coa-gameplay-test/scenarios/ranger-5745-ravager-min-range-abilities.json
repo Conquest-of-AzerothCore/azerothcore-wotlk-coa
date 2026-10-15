@@ -1,0 +1,393 @@
+{
+  "schema": 1,
+  "name": "Ravager removes the minimum range of Cutthroat, Quick Shot, Serrated Shot and Toxic Dart (#5745)",
+  "contract": "Ravager 92116 grants SPELL_AURA_ASCENSION_IGNORE_MIN_RANGE misc 10 (IGNORE_MIN_RANGE_RANGED_ABILITIES). Cutthroat 800359, Serrated Shot 500073 and Toxic Dart 807237 use SpellRange 54 (5-30 yd) and DmgClass SPELL_DAMAGE_CLASS_RANGED, as Quick Shot 500074 does. Without Ravager each cast at 2 yds must fail SPELL_FAILED_TOO_CLOSE (128); with Ravager known the same cast at the same distance must succeed (cast_failure 0). Cutthroat and Serrated Shot also require the caster aura 804329 Advantage (CasterAuraSpell), so the fixture grants it before each of their casts; Toxic Dart has no such requirement. Toxic Dart's Stances mask 536870912 is form 30, Elude (801345); outside it the cast fails SPELL_FAILED_ONLY_SHAPESHIFT, so its cases run last, with the Elude aura applied by the fixture.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 20
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 20,
+      "health": 500000,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "settle",
+      "ms": 3000
+    },
+    {
+      "action": "unlearn",
+      "actor": "ranger",
+      "spell": 92116
+    },
+    {
+      "action": "add_item",
+      "actor": "ranger",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "actor": "ranger",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "add_item",
+      "actor": "ranger",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "ranger",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 800359
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 500073
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 801345
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 500074
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 807237
+    },
+    {
+      "action": "wait",
+      "label": "Let the equipment settle",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Ravager is not known",
+      "actor": "ranger",
+      "metric": "knows_spell",
+      "spell": 92116,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "ranger",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "label": "Advantage, the aura Cutthroat and Serrated Shot require",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 800359,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Cutthroat is too close without Ravager",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 800359,
+      "equals": 128,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "ranger",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "label": "Advantage, the aura Cutthroat and Serrated Shot require",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 500073,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Serrated Shot is too close without Ravager",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 500073,
+      "equals": 128,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "ranger",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 500074,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Quick Shot is too close without Ravager",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 500074,
+      "equals": 128,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 92116
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Ravager known",
+      "actor": "ranger",
+      "metric": "knows_spell",
+      "spell": 92116,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "ranger",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "label": "Advantage, the aura Cutthroat and Serrated Shot require",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 800359,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Ravager removes the minimum range of Cutthroat",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 800359,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "ranger",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "label": "Advantage, the aura Cutthroat and Serrated Shot require",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 500073,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Ravager removes the minimum range of Serrated Shot",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 500073,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "ranger",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 500074,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Ravager removes the minimum range of Quick Shot",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 500074,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "unlearn",
+      "label": "Back to the baseline for Toxic Dart",
+      "actor": "ranger",
+      "spell": 92116
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Ravager is not known again",
+      "actor": "ranger",
+      "metric": "knows_spell",
+      "spell": 92116,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture: put the Ranger in Elude, the form Toxic Dart requires",
+      "actor": "ranger",
+      "spell": 801345,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Ranger is in Elude",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 801345,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "ranger",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 807237,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Toxic Dart is too close without Ravager",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 807237,
+      "equals": 128,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 92116
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Ravager known again",
+      "actor": "ranger",
+      "metric": "knows_spell",
+      "spell": 92116,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "ranger",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 807237,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Ravager removes the minimum range of Toxic Dart",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 807237,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "global cooldown",
+      "ms": 2000
+    }
+  ]
+}

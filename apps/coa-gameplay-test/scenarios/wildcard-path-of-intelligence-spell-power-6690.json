@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "name": "Path of Intelligence doubles equipment spell power (#6690)",
+  "contract": "The original Path of Intelligence84866 description explicitly doubles spell power from items and effects. Compare the contribution of the same spell-power ring without the path and with it.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_power",
+      "school": 6,
+      "save_as": "base"
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 19147
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 19147,
+      "slot": 10
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_power",
+      "school": 6,
+      "relative_to": "base",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_power",
+      "school": 6,
+      "save_as": "geared"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 84866
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 84866,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_power",
+      "school": 6,
+      "save_as": "path_geared"
+    },
+    {
+      "action": "destroy_item",
+      "actor": "hero",
+      "item": 19147
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_power",
+      "school": 6,
+      "relative_to": "path_geared",
+      "equals": -66
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 19147
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 19147,
+      "slot": 10
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_power",
+      "school": 6,
+      "save_as": "double"
+    },
+    {
+      "action": "unlearn",
+      "actor": "hero",
+      "spell": 84866
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_power",
+      "school": 6,
+      "relative_to": "double",
+      "equals": -33
+    }
+  ]
+}

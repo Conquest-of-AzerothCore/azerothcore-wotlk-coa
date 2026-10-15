@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Silas Darkmoon, Burth and the Season 10 board quests exist only while the Wildcard season event runs",
+  "contract": "Darkmoon - Season 10 Wildcard content belongs to that realm alone. The worldserver starts the internal game event 194 at startup only when CoAChallenges.GameModes.Realm names WildCard; the event spawns Silas Darkmoon (642827) and Burth (342828), who stand in Stormwind's Trade District within 60 yards of the Hero's Call Board (402000), and gives the board the Season 10 board quests such as Gorilla Warfare (18065) and the leader quest Lead a Dungeon! (100078). On this Wildcard test realm all of them are present. Stopping the event, the state of any other realm, removes Silas, Burth and those quests while the board keeps its own dailies such as Culling the Felpaw (18017); starting it again brings them back.",
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8822.9, "y": 628.4, "z": 93.8, "o": 2.4},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    {"action": "set_phase", "label": "Join the world phase Silas and the board are spawned in", "actor": "hero", "value": 1},
+    {"action": "wait", "label": "Let the Trade District's grid load", "ms": 3000},
+    {"action": "assert", "label": "Silas Darkmoon stands in the Trade District", "actor": "hero", "metric": "nearby_creature_count", "entry": 642827, "equals": 1, "within_ms": 10000},
+    {"action": "assert", "label": "beside Burth", "actor": "hero", "metric": "nearby_creature_count", "entry": 342828, "equals": 1, "within_ms": 10000},
+    {"action": "use_nearby_gameobject", "label": "Click the board", "actor": "hero", "entry": 402000},
+    {"action": "gossip_select", "label": "Choose PvE Quests", "actor": "hero", "option": 0},
+    {"action": "assert", "label": "The board offers Gorilla Warfare", "actor": "hero", "metric": "quest_menu_has", "quest": 18065, "equals": 1},
+    {"action": "assert", "label": "and Lead a Dungeon!", "actor": "hero", "metric": "quest_menu_has", "quest": 100078, "equals": 1},
+    {"action": "console", "label": "Stop the season event, as on a realm that does not play Wildcard", "command": "event stop 194"},
+    {"action": "assert", "label": "Silas leaves", "actor": "hero", "metric": "nearby_creature_count", "entry": 642827, "equals": 0, "within_ms": 10000},
+    {"action": "assert", "label": "and Burth with him", "actor": "hero", "metric": "nearby_creature_count", "entry": 342828, "equals": 0, "within_ms": 10000},
+    {"action": "use_nearby_gameobject", "label": "Click the board again", "actor": "hero", "entry": 402000},
+    {"action": "gossip_select", "label": "Choose PvE Quests", "actor": "hero", "option": 0},
+    {"action": "assert", "label": "Gorilla Warfare is no longer offered", "actor": "hero", "metric": "quest_menu_has", "quest": 18065, "equals": 0},
+    {"action": "assert", "label": "nor Lead a Dungeon!", "actor": "hero", "metric": "quest_menu_has", "quest": 100078, "equals": 0},
+    {"action": "assert", "label": "while the board's own daily Culling the Felpaw stays", "actor": "hero", "metric": "quest_menu_has", "quest": 18017, "equals": 1},
+    {"action": "console", "label": "Start the season event again", "command": "event start 194"},
+    {"action": "assert", "label": "Silas returns", "actor": "hero", "metric": "nearby_creature_count", "entry": 642827, "equals": 1, "within_ms": 10000}
+  ]
+}

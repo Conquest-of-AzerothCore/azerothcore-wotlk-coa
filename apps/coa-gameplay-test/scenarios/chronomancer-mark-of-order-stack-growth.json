@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Mark of Order gains a stack every second (#2291)",
+  "contract": "Mark of Order 806269's tooltip is \"Increases the healing of your next Reverse Wound on the target by $s2% for $d. Every $t1 sec for the duration, they gain an additional stack of this effect, up to $u\". Spell.dbc gives 806269 StackAmount 5 and effect 0 Aura=23 (SPELL_AURA_PERIODIC_TRIGGER_SPELL) with EffectAmplitude 1000 on 806270 \"Add stack\", so one stack must be added every second up to five. 806270's single effect is Effect=175 (SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS) with EffectTriggerSpell 806269, EffectMiscValue 0 and EffectMiscValueB 1: Spell::EffectAscensionModifyAuraStacks passes effect.MiscValue as the delta and ModifyAscensionAuraStacks returns immediately on a zero delta, so the growth never happened. The fixture applies the Mark directly rather than earning it through Fortify Timeline, because the application half is covered by chronomancer-mark-of-order.json; this scenario covers only the per-second growth. Nothing else in the tree adds a stack of 806269, so an aura that is still at one stack after several seconds is the unrepaired record.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "set_aura",
+      "label": "Fixture one stack of Mark of Order, as Fortify Timeline's heal would leave it",
+      "actor": "chronomancer",
+      "spell": 806269,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Mark is present before any periodic tick",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 806269,
+      "caster": "chronomancer",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Mark of Order grows past its first stack on its own periodic ticks",
+      "actor": "chronomancer",
+      "metric": "aura_stacks",
+      "spell": 806269,
+      "caster": "chronomancer",
+      "min": 3,
+      "within_ms": 8000
+    }
+  ]
+}

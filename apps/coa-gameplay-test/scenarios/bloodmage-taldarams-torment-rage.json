@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Taldaram's Torment energizes Rage on periodic ticks (#5553, #5430)",
+  "contract": "Taldaram's Torment (802568-802573, 802580) description: 'Generates $/10;582765s1 Rage every time it deals damage.' Every rank's only effects are aura 3 SPELL_AURA_PERIODIC_DAMAGE (idx0, Amplitude 3000) and aura 308 SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER (idx1); EffectTriggerSpell is 0 on both, so the generic proc/trigger pipeline never cast 582765 Energize Rage (EffectBasePoints 29 + DieSides 1 = 30, MiscValue 1 = POWER_RAGE). Rage is stored at 10x displayed value (Unit.cpp EnergizeBySpell/ModifyPower), so 30 internal per tick is the 3 displayed Rage the tooltip's /10 divisor shows. Two periodic ticks (6000 ms at 3000 ms amplitude) must add exactly 60 internal Rage from ticks alone, isolated from the initial cast which costs health, not Rage (PowerType -2).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "caster", "spell": 802580},
+    {"action": "set_power", "actor": "caster", "power": 1, "value": 0},
+    {
+      "action": "snapshot",
+      "label": "Rage before the cast",
+      "actor": "caster",
+      "metric": "power",
+      "power": 1,
+      "save_as": "rage_before"
+    },
+    {"action": "cast", "actor": "caster", "spell": 802580, "target": "enemy"},
+    {
+      "action": "assert",
+      "label": "Taldaram's Torment lands on the enemy",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 802580,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Rage right after the debuff lands, before any tick",
+      "actor": "caster",
+      "metric": "power",
+      "power": 1,
+      "save_as": "rage_after_land"
+    },
+    {"action": "wait", "label": "Two periodic ticks", "ms": 6600},
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: two ticks add exactly 60 internal Rage (30 per tick)",
+      "actor": "caster",
+      "metric": "power",
+      "power": 1,
+      "relative_to": "rage_after_land",
+      "equals": 60
+    }
+  ]
+}

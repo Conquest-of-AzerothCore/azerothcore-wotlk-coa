@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "name": "Guardian Deflector and Resolve talents modify Raise Shield (#93)",
+  "contract": "#93: choosing the Guardian class-tree talents Deflector and Resolve reportedly applies no effect. Each\nhas one acquirable rank: CharacterAdvancement 34422 (Deflector, rank spell 706336) and 6818 (Resolve,\nrank spell 706806), class 18, tab 87 (class tree), 1 class point each. Deflector 706336 reads 'Reduces\nthe cooldown of your Raise Shield by $/1000;s1 sec and reduces its Energy cost by $s2%': effect 0\nSPELL_AURA_ADD_FLAT_MODIFIER SPELLMOD_COOLDOWN -5000, effect 1 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_COST\n-10, both on SpellFamilyName 24 mask {0, 0x8000, 0}. Resolve 706806 reads 'Increases the duration of your\nRaise Shield by $/1000;s1 sec': effect 0 SPELL_AURA_ADD_FLAT_MODIFIER SPELLMOD_DURATION +1000 on the same\nmask; its effect 2 is SPELL_EFFECT_DUMMY, not an aura, so it changes no cooldown. Raise Shield 500168\n(family 24, flags {0, 0x8000, 0}) costs 20 Energy, has RecoveryTime 25000, DurationIndex 35 (4000 ms),\nneeds a shield and Tower Formation 800317 (CasterAuraSpell). Expected: base cost 20, cooldown 25 s,\nduration 4 s; Deflector gives 18 Energy and 20 s; Resolve gives 5 s and leaves cost and cooldown; both\nstack; removing the talents restores the base values. The talents are chosen through the native\nknown-entries upload (0x727, SetTalentRank), and each cast's Energy is measured with regeneration\nsuppressed. Deflector 706337 'Rank 2' (flat -2000 cooldown, flat -10 cost, not passive) is referenced by\nno CharacterAdvancement or Talent rank and cannot be acquired, so it is not tested. Native removals and\nresets retain their original prices; fixture actors have 100 gold to pay them.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "guardian", "race": 1, "class": 18, "level": 80, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 3000 },
+    {"action": "set_money", "label": "Fund the original native removal and purge prices", "actor": "guardian", "value": 1000000},
+    { "action": "learn", "label": "Block", "actor": "guardian", "spell": 107 },
+    { "action": "learn", "label": "Shield proficiency", "actor": "guardian", "spell": 9116 },
+    {
+      "action": "learn", "label": "Tower Formation, Raise Shield's required caster aura", "actor": "guardian",
+      "spell": 800317
+    },
+    { "action": "learn", "actor": "guardian", "spell": 500168 },
+    { "action": "add_item", "actor": "guardian", "item": 2362 },
+    { "action": "equip", "label": "Raise Shield requires a shield", "actor": "guardian", "item": 2362, "slot": 16 },
+    {
+      "action": "advancement_rank",
+      "label": "Run the talent progression pass without Deflector so the baseline includes its grants",
+      "actor": "guardian", "entry": 34422, "rank": 0
+    },
+    { "action": "assert", "actor": "guardian", "metric": "knows_spell", "spell": 706336, "equals": 0 },
+    { "action": "assert", "actor": "guardian", "metric": "knows_spell", "spell": 706806, "equals": 0 },
+    { "action": "set_power", "actor": "guardian", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "guardian", "spell": 800317 },
+    { "action": "assert", "actor": "guardian", "metric": "aura", "spell": 800317, "equals": 1, "within_ms": 1000 },
+    { "action": "wait", "ms": 1100 },
+    {
+      "action": "assert", "label": "BASE: Raise Shield costs 20 Energy", "actor": "guardian",
+      "metric": "spell_power_cost", "spell": 500168, "equals": 20
+    },
+    { "action": "set_power", "actor": "guardian", "power": 3, "value": 100 },
+    { "action": "snapshot", "actor": "guardian", "metric": "power", "power": 3, "save_as": "energy_base" },
+    { "action": "cast", "actor": "guardian", "spell": 500168 },
+    { "action": "assert", "actor": "guardian", "metric": "aura", "spell": 500168, "equals": 1, "within_ms": 1000 },
+    {
+      "action": "assert", "label": "BASE: the cast spends 20 Energy", "actor": "guardian", "metric": "power",
+      "power": 3, "relative_to": "energy_base", "equals": -20
+    },
+    {
+      "action": "assert", "label": "BASE: 25 s cooldown", "actor": "guardian", "metric": "cooldown_ms", "spell": 500168,
+      "min": 24000, "max": 25000
+    },
+    {
+      "action": "assert", "label": "BASE: 4 s duration", "actor": "guardian", "metric": "aura_duration_ms",
+      "spell": 500168, "min": 3000, "max": 4000
+    },
+    { "action": "advancement_rank", "label": "Choose Deflector", "actor": "guardian", "entry": 34422, "rank": 1 },
+    {
+      "action": "assert", "actor": "guardian", "metric": "knows_spell", "spell": 706336, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Deflector's passive aura is active", "actor": "guardian", "metric": "aura",
+      "spell": 706336, "equals": 1, "within_ms": 1000
+    },
+    { "action": "set_aura", "actor": "guardian", "spell": 500168, "stacks": 0 },
+    { "action": "reset_cooldown", "actor": "guardian", "spell": 500168 },
+    {
+      "action": "assert", "label": "DEFLECTOR: Raise Shield costs 18 Energy", "actor": "guardian",
+      "metric": "spell_power_cost", "spell": 500168, "equals": 18
+    },
+    { "action": "set_power", "actor": "guardian", "power": 3, "value": 100 },
+    { "action": "snapshot", "actor": "guardian", "metric": "power", "power": 3, "save_as": "energy_deflector" },
+    { "action": "cast", "actor": "guardian", "spell": 500168 },
+    { "action": "assert", "actor": "guardian", "metric": "aura", "spell": 500168, "equals": 1, "within_ms": 1000 },
+    {
+      "action": "assert", "label": "DEFLECTOR: the cast spends 18 Energy", "actor": "guardian", "metric": "power",
+      "power": 3, "relative_to": "energy_deflector", "equals": -18
+    },
+    {
+      "action": "assert", "label": "DEFLECTOR: 20 s cooldown", "actor": "guardian", "metric": "cooldown_ms",
+      "spell": 500168, "min": 19000, "max": 20000
+    },
+    {
+      "action": "assert", "label": "DEFLECTOR: duration unchanged", "actor": "guardian", "metric": "aura_duration_ms",
+      "spell": 500168, "min": 3000, "max": 4000
+    },
+    { "action": "advancement_rank", "label": "Remove Deflector", "actor": "guardian", "entry": 34422, "rank": 0 },
+    { "action": "advancement_rank", "label": "Choose Resolve", "actor": "guardian", "entry": 6818, "rank": 1 },
+    { "action": "assert", "actor": "guardian", "metric": "aura", "spell": 706336, "equals": 0, "within_ms": 1000 },
+    {
+      "action": "assert", "actor": "guardian", "metric": "knows_spell", "spell": 706806, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Resolve's passive aura is active", "actor": "guardian", "metric": "aura",
+      "spell": 706806, "equals": 1, "within_ms": 1000
+    },
+    { "action": "set_aura", "actor": "guardian", "spell": 500168, "stacks": 0 },
+    { "action": "reset_cooldown", "actor": "guardian", "spell": 500168 },
+    {
+      "action": "assert", "label": "RESOLVE: cost unchanged", "actor": "guardian", "metric": "spell_power_cost",
+      "spell": 500168, "equals": 20
+    },
+    { "action": "set_power", "actor": "guardian", "power": 3, "value": 100 },
+    { "action": "snapshot", "actor": "guardian", "metric": "power", "power": 3, "save_as": "energy_resolve" },
+    { "action": "cast", "actor": "guardian", "spell": 500168 },
+    { "action": "assert", "actor": "guardian", "metric": "aura", "spell": 500168, "equals": 1, "within_ms": 1000 },
+    {
+      "action": "assert", "label": "RESOLVE: the cast spends 20 Energy", "actor": "guardian", "metric": "power",
+      "power": 3, "relative_to": "energy_resolve", "equals": -20
+    },
+    {
+      "action": "assert", "label": "RESOLVE: cooldown unchanged", "actor": "guardian", "metric": "cooldown_ms",
+      "spell": 500168, "min": 24000, "max": 25000
+    },
+    {
+      "action": "assert", "label": "RESOLVE: 5 s duration", "actor": "guardian", "metric": "aura_duration_ms",
+      "spell": 500168, "min": 4100, "max": 5000
+    },
+    {
+      "action": "advancement_rank", "label": "Choose Deflector as well", "actor": "guardian", "entry": 34422,
+      "rank": 1
+    },
+    { "action": "assert", "actor": "guardian", "metric": "aura", "spell": 706336, "equals": 1, "within_ms": 1000 },
+    { "action": "set_aura", "actor": "guardian", "spell": 500168, "stacks": 0 },
+    { "action": "reset_cooldown", "actor": "guardian", "spell": 500168 },
+    { "action": "set_power", "actor": "guardian", "power": 3, "value": 100 },
+    { "action": "snapshot", "actor": "guardian", "metric": "power", "power": 3, "save_as": "energy_both" },
+    { "action": "cast", "actor": "guardian", "spell": 500168 },
+    { "action": "assert", "actor": "guardian", "metric": "aura", "spell": 500168, "equals": 1, "within_ms": 1000 },
+    {
+      "action": "assert", "label": "BOTH: the cast spends 18 Energy", "actor": "guardian", "metric": "power",
+      "power": 3, "relative_to": "energy_both", "equals": -18
+    },
+    {
+      "action": "assert", "label": "BOTH: 20 s cooldown", "actor": "guardian", "metric": "cooldown_ms", "spell": 500168,
+      "min": 19000, "max": 20000
+    },
+    {
+      "action": "assert", "label": "BOTH: 5 s duration", "actor": "guardian", "metric": "aura_duration_ms",
+      "spell": 500168, "min": 4100, "max": 5000
+    },
+    { "action": "advancement_rank", "label": "Remove Deflector", "actor": "guardian", "entry": 34422, "rank": 0 },
+    { "action": "advancement_rank", "label": "Remove Resolve", "actor": "guardian", "entry": 6818, "rank": 0 },
+    { "action": "assert", "actor": "guardian", "metric": "aura", "spell": 706336, "equals": 0, "within_ms": 1000 },
+    { "action": "assert", "actor": "guardian", "metric": "aura", "spell": 706806, "equals": 0, "within_ms": 1000 },
+    { "action": "set_aura", "actor": "guardian", "spell": 500168, "stacks": 0 },
+    { "action": "reset_cooldown", "actor": "guardian", "spell": 500168 },
+    {
+      "action": "assert", "label": "REMOVED: cost restored", "actor": "guardian", "metric": "spell_power_cost",
+      "spell": 500168, "equals": 20
+    },
+    { "action": "set_power", "actor": "guardian", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "guardian", "spell": 500168 },
+    { "action": "assert", "actor": "guardian", "metric": "aura", "spell": 500168, "equals": 1, "within_ms": 1000 },
+    {
+      "action": "assert", "label": "REMOVED: cooldown restored", "actor": "guardian", "metric": "cooldown_ms",
+      "spell": 500168, "min": 24000, "max": 25000
+    },
+    {
+      "action": "assert", "label": "REMOVED: duration restored", "actor": "guardian", "metric": "aura_duration_ms",
+      "spell": 500168, "min": 3000, "max": 4000
+    }
+  ]
+}

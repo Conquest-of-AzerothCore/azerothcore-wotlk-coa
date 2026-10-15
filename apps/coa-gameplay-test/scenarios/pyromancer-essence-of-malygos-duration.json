@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Purifying Flames adds 3 s to Essence of Malygos (#859)",
+  "contract": "#859: Essence of Malygos 802120 lasts 6000 ms (DBC duration idx 32). Purifying Flames 807159 is a passive SPELLMOD_DURATION (misc 1) +2999+1 = +3000 ms on class mask C 0x1, which selects 802120. Aura::CalcMaxDuration applies it (SpellAuras.cpp:812). Asserts the native duration modifier applied to 6000 ms is 6000 before and 9000 after learning the passive.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Baseline Essence of Malygos duration",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 802120,
+      "op": 1,
+      "base": 6000,
+      "equals": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 807159
+    },
+    {
+      "action": "assert",
+      "label": "Purifying Flames adds 3 s to Essence of Malygos",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 802120,
+      "op": 1,
+      "base": 6000,
+      "equals": 9000,
+      "within_ms": 3000
+    }
+  ]
+}

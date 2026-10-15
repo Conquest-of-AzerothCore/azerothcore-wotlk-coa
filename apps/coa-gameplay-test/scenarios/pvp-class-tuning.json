@@ -1,0 +1,382 @@
+{
+  "schema": 1,
+  "name": "PvP class and specialization tuning (#250)",
+  "contract": [
+    "Spell.dbc holds a PvP twin 100 ids above each normal tuning aura (887100-887190, same name, class and specialization as 887000-887090). Every twin is a passive self aura with effect 0 aura 322, effect 1 aura 87 with MiscValueB 1 and effect 2 aura 136 or a dummy.",
+    "Aura 322 is damage done against players: Fire and Ice 1582385 reads '$s1% ($s2% against players)' with aura 341 on $s1 and aura 322 on $s2, and Zandalari Windreaver Global pvp mod 301115 (aura 322 -10) reads 'Reduces damage versus player by 10%'. Aura 87 MiscValueB 1 is damage taken from players and 2 from creatures: Libram of Tenacity 801461 reads 'Physical Damage taken by $s2% ($s3% against players)' with MiscValueB 2 on $s2 and 1 on $s3.",
+    "Native SpellEffectInfo::CalcValue at level 60: Chronomancer Class 887110 effect 0 EffectBasePoints -11 + DieSides 1 = -10; Templar Class 887107 effect 0 -11 + floor(50 x -0.4) + 1 = -30; Reaper Domination 887183 effect 0 -3 + floor(50 x -0.56) + 1 = -30 and effect 1 9 + floor(50 x 0.5) + 1 = 35.",
+    "Chronomancer Time 887054/887154 and the normal Chronomancer Class 887010 hold zero damage adjustments, so a Time Chronomancer deals 90% against a player of what it deals against a creature.",
+    "The twins' aura 136 carries no target or PvP scope (Bloodmage Class 887108 -8, Primalist Class 887119 -8, Sun Cleric Blessings 887172 +10), so whether it belongs to PvP only is unresolved; the healing effect is held inert and this scenario guards that the PvP twin leaves healing unchanged."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chrono",
+      "race": 1,
+      "class": 22,
+      "level": 60
+    },
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 60
+    },
+    {
+      "id": "mage",
+      "race": 1,
+      "class": 8,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "mage",
+      "entry": 36,
+      "level": 60,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "aura",
+      "spell": 887010,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Chronomancer holds its PvP class tuning next to the normal one",
+      "actor": "chrono",
+      "metric": "aura",
+      "spell": 887110,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "aura_amount",
+      "spell": 887110,
+      "effect": 0,
+      "equals": -10
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "aura",
+      "spell": 887110,
+      "equals": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "chrono",
+      "id": 33
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "aura",
+      "spell": 887155,
+      "equals": 1
+    },
+    {
+      "action": "specialization",
+      "actor": "chrono",
+      "id": 31
+    },
+    {
+      "action": "assert",
+      "label": "Specialization change replaces the PvP specialization tuning",
+      "actor": "chrono",
+      "metric": "aura",
+      "spell": 887155,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "aura",
+      "spell": 887154,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "chrono",
+      "metric": "aura",
+      "spell": 887110,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono",
+      "metric": "spell_damage_done",
+      "target": "enemy",
+      "save_as": "chrono_spell_enemy",
+      "spell": 686
+    },
+    {
+      "action": "assert",
+      "label": "A Time Chronomancer deals 10% less spell damage to a player than to a creature",
+      "actor": "chrono",
+      "metric": "spell_damage_done",
+      "target": "ally",
+      "ratio_to": "chrono_spell_enemy",
+      "min": 0.898,
+      "max": 0.902,
+      "spell": 686
+    },
+    {
+      "action": "snapshot",
+      "actor": "chrono",
+      "metric": "melee_damage_done",
+      "target": "enemy",
+      "save_as": "chrono_melee_enemy"
+    },
+    {
+      "action": "assert",
+      "label": "A Time Chronomancer deals 10% less melee damage to a player than to a creature",
+      "actor": "chrono",
+      "metric": "melee_damage_done",
+      "target": "ally",
+      "ratio_to": "chrono_melee_enemy",
+      "min": 0.898,
+      "max": 0.902
+    },
+    {
+      "action": "specialization",
+      "actor": "reaper",
+      "id": 57
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 887118,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 887183,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Domination PvP tuning keeps its native level-60 damage-to-players penalty",
+      "actor": "reaper",
+      "metric": "aura_amount",
+      "spell": 887183,
+      "effect": 0,
+      "equals": -30
+    },
+    {
+      "action": "assert",
+      "label": "Domination PvP tuning keeps its native level-60 damage-from-players increase",
+      "actor": "reaper",
+      "metric": "aura_amount",
+      "spell": 887183,
+      "effect": 1,
+      "equals": 35
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "spell_damage_done",
+      "target": "enemy",
+      "save_as": "spell_damage_done_enemy",
+      "spell": 686
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "spell_damage_done",
+      "target": "ally",
+      "save_as": "spell_damage_done_ally",
+      "spell": 686
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "melee_damage_done",
+      "target": "enemy",
+      "save_as": "melee_damage_done_enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "melee_damage_done",
+      "target": "ally",
+      "save_as": "melee_damage_done_ally"
+    },
+    {
+      "action": "set_aura",
+      "actor": "mage",
+      "spell": 887107,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "spell_damage_done",
+      "target": "enemy",
+      "ratio_to": "spell_damage_done_enemy",
+      "min": 0.998,
+      "max": 1.002,
+      "spell": 686
+    },
+    {
+      "action": "assert",
+      "label": "Templar PvP class tuning lowers spell damage against players by 30%",
+      "actor": "mage",
+      "metric": "spell_damage_done",
+      "target": "ally",
+      "ratio_to": "spell_damage_done_ally",
+      "min": 0.698,
+      "max": 0.702,
+      "spell": 686
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "melee_damage_done",
+      "target": "enemy",
+      "ratio_to": "melee_damage_done_enemy",
+      "min": 0.998,
+      "max": 1.002
+    },
+    {
+      "action": "assert",
+      "label": "Templar PvP class tuning lowers melee damage against players by 30%",
+      "actor": "mage",
+      "metric": "melee_damage_done",
+      "target": "ally",
+      "ratio_to": "melee_damage_done_ally",
+      "min": 0.698,
+      "max": 0.702
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "spell_damage_taken",
+      "target": "enemy",
+      "save_as": "spell_damage_taken_enemy",
+      "spell": 686
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "spell_damage_taken",
+      "target": "ally",
+      "save_as": "spell_damage_taken_ally",
+      "spell": 686
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "melee_damage_taken",
+      "target": "enemy",
+      "save_as": "melee_damage_taken_enemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "melee_damage_taken",
+      "target": "ally",
+      "save_as": "melee_damage_taken_ally"
+    },
+    {
+      "action": "set_aura",
+      "actor": "mage",
+      "spell": 887183,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Domination PvP tuning leaves spell damage from creatures unchanged",
+      "actor": "mage",
+      "metric": "spell_damage_taken",
+      "target": "enemy",
+      "ratio_to": "spell_damage_taken_enemy",
+      "min": 0.998,
+      "max": 1.002,
+      "spell": 686
+    },
+    {
+      "action": "assert",
+      "label": "Domination PvP tuning raises spell damage from players by 35%",
+      "actor": "mage",
+      "metric": "spell_damage_taken",
+      "target": "ally",
+      "ratio_to": "spell_damage_taken_ally",
+      "min": 1.348,
+      "max": 1.352,
+      "spell": 686
+    },
+    {
+      "action": "assert",
+      "label": "Domination PvP tuning leaves melee damage from creatures unchanged",
+      "actor": "mage",
+      "metric": "melee_damage_taken",
+      "target": "enemy",
+      "ratio_to": "melee_damage_taken_enemy",
+      "min": 0.998,
+      "max": 1.002
+    },
+    {
+      "action": "assert",
+      "label": "Domination PvP tuning raises melee damage from players by 35%",
+      "actor": "mage",
+      "metric": "melee_damage_taken",
+      "target": "ally",
+      "ratio_to": "melee_damage_taken_ally",
+      "min": 1.348,
+      "max": 1.352
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "spell_healing_done",
+      "target": "ally",
+      "save_as": "healing_done_ally",
+      "spell": 2061
+    },
+    {
+      "action": "set_aura",
+      "actor": "mage",
+      "spell": 887108,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "aura_amount",
+      "spell": 887108,
+      "effect": 2,
+      "equals": -8
+    },
+    {
+      "action": "assert",
+      "label": "Unresolved PvP healing scope: the Bloodmage PvP twin's -8% healing stays inert",
+      "actor": "mage",
+      "metric": "spell_healing_done",
+      "target": "ally",
+      "ratio_to": "healing_done_ally",
+      "min": 0.998,
+      "max": 1.002,
+      "spell": 2061
+    }
+  ]
+}

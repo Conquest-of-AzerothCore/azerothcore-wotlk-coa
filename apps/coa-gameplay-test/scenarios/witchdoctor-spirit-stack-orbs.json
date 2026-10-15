@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: each Spirit stack shows one orb behind the doctor (#270)",
+  "contract": "Spirit 561136 (5 stacks) periodically triggers 'Spirit Visual Stack Checker' 561298 every 0.5 sec, described in the client as 'Will check for amount of stacks and do some crazy visual stuff'. The client data holds the visuals it drives: 'Spirit One/Two/Three/Four/Five Stack Visual' 561378-561382 are hidden 1 sec dummy auras whose SpellVisuals 60003/60002/60004/60001/60005 each attach one 8fx_generic_shadow_orb (with an arcane orb and smoke) through SpellVisualKitModelAttach at a distinct point of an arc behind the character (-0.8/0, -0.69/+-0.40, -0.40/+-0.69). With N Spirits the first N stack visuals must therefore be active and the others absent; they must outlive their own 1 sec duration while the stacks remain, follow stack changes and disappear with the Spirits. Rendering is client-side and not observed here; the scenario observes the server-side auras the client draws.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "doctor", "race": 1, "class": 13, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the character settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "No Spirits, no orb", "actor": "doctor", "metric": "aura", "spell": 561378,
+      "equals": 0
+    },
+    { "action": "set_aura", "label": "Three Spirits", "actor": "doctor", "spell": 561136, "stacks": 3 },
+    { "action": "assert", "actor": "doctor", "metric": "aura_stacks", "spell": 561136, "equals": 3, "within_ms": 1000 },
+    {
+      "action": "assert", "label": "#270: first orb for the first Spirit", "actor": "doctor", "metric": "aura",
+      "spell": 561378, "equals": 1, "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "#270: second orb for the second Spirit", "actor": "doctor", "metric": "aura",
+      "spell": 561379, "equals": 1, "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "#270: third orb for the third Spirit", "actor": "doctor", "metric": "aura",
+      "spell": 561380, "equals": 1, "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "No fourth orb with three Spirits", "actor": "doctor", "metric": "aura",
+      "spell": 561381, "equals": 0
+    },
+    {
+      "action": "assert", "label": "No fifth orb with three Spirits", "actor": "doctor", "metric": "aura",
+      "spell": 561382, "equals": 0
+    },
+    { "action": "wait", "label": "Outlast the orbs' own 1 sec duration", "ms": 2500 },
+    {
+      "action": "assert", "label": "Orbs stay while the Spirits stay", "actor": "doctor", "metric": "aura",
+      "spell": 561378, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Orbs stay while the Spirits stay", "actor": "doctor", "metric": "aura",
+      "spell": 561380, "equals": 1
+    },
+    { "action": "set_aura", "label": "Five Spirits", "actor": "doctor", "spell": 561136, "stacks": 5 },
+    {
+      "action": "assert", "label": "Fourth orb for the fourth Spirit", "actor": "doctor", "metric": "aura",
+      "spell": 561381, "equals": 1, "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "Fifth orb for the fifth Spirit", "actor": "doctor", "metric": "aura",
+      "spell": 561382, "equals": 1, "within_ms": 1500
+    },
+    { "action": "set_aura", "label": "One Spirit left", "actor": "doctor", "spell": 561136, "stacks": 1 },
+    {
+      "action": "assert", "label": "Orbs above the stack count disappear", "actor": "doctor", "metric": "aura",
+      "spell": 561379, "equals": 0, "within_ms": 1500
+    },
+    { "action": "assert", "actor": "doctor", "metric": "aura", "spell": 561380, "equals": 0 },
+    { "action": "assert", "actor": "doctor", "metric": "aura", "spell": 561381, "equals": 0 },
+    { "action": "assert", "actor": "doctor", "metric": "aura", "spell": 561382, "equals": 0 },
+    {
+      "action": "assert", "label": "The first orb stays with one Spirit", "actor": "doctor", "metric": "aura",
+      "spell": 561378, "equals": 1
+    },
+    { "action": "set_aura", "label": "Spirits gone", "actor": "doctor", "spell": 561136, "stacks": 0 },
+    {
+      "action": "assert", "label": "The last orb disappears with the Spirits", "actor": "doctor", "metric": "aura",
+      "spell": 561378, "equals": 0, "within_ms": 1500
+    },
+    { "action": "learn", "actor": "doctor", "spell": 501136 },
+    { "action": "cast", "label": "Mirage grants five Spirits in play", "actor": "doctor", "spell": 501136 },
+    { "action": "assert", "actor": "doctor", "metric": "aura_stacks", "spell": 561136, "equals": 5, "within_ms": 2000 },
+    {
+      "action": "assert", "label": "#270: Spirits gained in play show all five orbs", "actor": "doctor",
+      "metric": "aura", "spell": 561382, "equals": 1, "within_ms": 1500
+    },
+    { "action": "assert", "actor": "doctor", "metric": "aura", "spell": 561378, "equals": 1 }
+  ]
+}

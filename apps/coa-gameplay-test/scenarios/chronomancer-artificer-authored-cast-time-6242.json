@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "name": "Artificer wand preserves authored cast time and active replacement ranks (6242, 6245)",
+  "contract": "Artificer wand ranks 561284 and 561354-561357 use SpellCastTimes5=2000ms. The ranged slot is needed for wand damage, but must not append the stock500ms wind-up to this authored cast. Normal level12 Artificer acquisition grants rank1 and a normal cast must land child561064 before2.4s. All five rank cast times are exactly2000ms; Bronze Echoes subtracts200ms, a second normal cast still lands and generates one fragment, and unrelated Steady Shot retains2500ms including its stock500ms wind-up.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 22,
+      "level": 12,
+      "ranged_hit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "c",
+      "id": 33
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "knows_spell",
+      "spell": 804478,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "knows_spell",
+      "spell": 561284,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "client_spellbook_copies",
+      "spell": 561284,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "temporary_spell_replacement",
+      "spell": 804418,
+      "equals": 561284
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_cast_time_ms",
+      "spell": 561284,
+      "equals": 2000,
+      "label": "The acquired rank uses its authored two-second cast without an extra ranged wind-up"
+    },
+    {
+      "action": "add_item",
+      "actor": "c",
+      "item": 5069
+    },
+    {
+      "action": "equip",
+      "actor": "c",
+      "item": 5069,
+      "slot": 17
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 561284,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_damage_count",
+      "spell": 561064,
+      "target": "target",
+      "min": 1,
+      "within_ms": 2400
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_cast_time_ms",
+      "spell": 561354,
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_cast_time_ms",
+      "spell": 561355,
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_cast_time_ms",
+      "spell": 561356,
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_cast_time_ms",
+      "spell": 561357,
+      "equals": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "c",
+      "spell": 520800
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_cast_time_ms",
+      "spell": 561354,
+      "equals": 1800
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_cast_time_ms",
+      "spell": 56641,
+      "equals": 2500
+    },
+    {
+      "action": "snapshot",
+      "actor": "c",
+      "metric": "spell_damage_count",
+      "spell": 561064,
+      "target": "target",
+      "save_as": "damage_before_bronze_echoes"
+    },
+    {
+      "action": "snapshot",
+      "actor": "c",
+      "metric": "aura_stacks",
+      "spell": 804455,
+      "save_as": "fragments_before_bronze_echoes"
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 561284,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "spell_damage_count",
+      "spell": 561064,
+      "target": "target",
+      "relative_to": "damage_before_bronze_echoes",
+      "min": 1,
+      "within_ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura_stacks",
+      "spell": 804455,
+      "relative_to": "fragments_before_bronze_echoes",
+      "equals": 1,
+      "within_ms": 1000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "c",
+      "entry": 36,
+      "level": 12,
+      "health": 1000000,
+      "distance": 5
+    }
+  ]
+}

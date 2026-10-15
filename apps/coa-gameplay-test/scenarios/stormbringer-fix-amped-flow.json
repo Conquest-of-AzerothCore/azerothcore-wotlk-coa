@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Amped Flow gives Shock a chain target while Stormflow channels (#3637)",
+  "contract": "#3637: Amped Flow (806411) reads 'While channeling Stormflow, your Shock now strikes ${$567556m1-1} additional target at ${$804020f1*100}% value'. Its only effect is SPELL_AURA_PROC_TRIGGER_SPELL -> 567556 on TARGET_UNIT_CASTER, but 806411 has ProcFlags 0 and no spell_proc row, so SpellMgr::LoadSpellProcs skips it (src/server/game/Spells/SpellMgr.cpp:2257) and nothing ever applied 567556. The payload is native once applied: 567556 is SPELL_AURA_ADD_FLAT_MODIFIER with EffectMiscValue 17 = SPELLMOD_JUMP_TARGETS (src/server/game/Spells/SpellDefines.h:93), EffectBasePoints 1 / DieSides 1 = 2, and EffectSpellClassMask (2048, 131200, 0) which covers Shock (SpellFamilyFlags[0] 2048) and Brine (SpellFamilyFlags[1] 128); Spell::SelectImplicitChainTargets reads it, and the 75 % falloff is Shock's own EffectDamageMultiplier 0.75. Shock's EffectChainTarget is 0, so the modifier is queried against base 0 and must read 2 only while the channel runs. The buff is bound to the Stormflow channel aura rather than to its own DurationIndex 571 = 5500 ms, which would lapse 2500 ms before the 8000 ms channel (SpellDuration 31) ends. Stormflow is cast as rank 572867 and Shock is the rank 504634 a level-80 Stormbringer owns; the base id 804020 is asserted too because the tooltip names it. The additional hit itself is not asserted: Shock cast during the channel still interrupts it, since base Stormflow's own 'Shock can be instantly cast while channeling' clause rides on aura 353 and is a separate, unreported gap.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "s",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "s", "spell": 572867 },
+    { "action": "learn", "actor": "s", "spell": 504634 },
+    { "action": "assert", "label": "BASELINE: Shock has no chain target out of combat (SPELLMOD_JUMP_TARGETS on base 0)",
+      "actor": "s", "metric": "spell_modifier", "spell": 504634, "op": 17, "base": 0, "equals": 0 },
+    { "action": "assert", "label": "BASELINE: the base Shock id has no chain target either",
+      "actor": "s", "metric": "spell_modifier", "spell": 804020, "op": 17, "base": 0, "equals": 0 },
+    { "action": "set_aura", "actor": "s", "spell": 803102, "stacks": 100 },
+    { "action": "cast", "actor": "s", "spell": 572867, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: the baseline Stormflow channel is running",
+      "actor": "s", "metric": "cast_remaining_ms", "spell": 572867, "min": 1, "within_ms": 4000 },
+    { "action": "wait", "label": "Let the channel settle", "ms": 1500 },
+    { "action": "assert", "label": "BASELINE: channelling alone applies no Amped Flow buff",
+      "actor": "s", "metric": "aura", "spell": 567556, "equals": 0 },
+    { "action": "assert", "label": "BASELINE: channelling alone gives Shock no chain target",
+      "actor": "s", "metric": "spell_modifier", "spell": 504634, "op": 17, "base": 0, "equals": 0 },
+    { "action": "wait", "label": "Let the 8000 ms channel run out", "ms": 8000 },
+    { "action": "learn", "actor": "s", "spell": 806411 },
+    { "action": "assert", "label": "SETUP: Amped Flow is an active passive",
+      "actor": "s", "metric": "aura", "spell": 806411, "equals": 1 },
+    { "action": "assert", "label": "SETUP: Amped Flow grants nothing outside the channel",
+      "actor": "s", "metric": "spell_modifier", "spell": 504634, "op": 17, "base": 0, "equals": 0 },
+    { "action": "set_aura", "actor": "s", "spell": 803102, "stacks": 100 },
+    { "action": "cast", "actor": "s", "spell": 572867, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: the second Stormflow channel is running",
+      "actor": "s", "metric": "cast_remaining_ms", "spell": 572867, "min": 1, "within_ms": 4000 },
+    { "action": "assert", "label": "DISCRIMINATING: the channel applies the Amped Flow buff 567556",
+      "actor": "s", "metric": "aura", "spell": 567556, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: Shock gains one chain target during the channel (567556 base 1 + die 1 = 2)",
+      "actor": "s", "metric": "spell_modifier", "spell": 504634, "op": 17, "base": 0, "equals": 2 },
+    { "action": "assert", "label": "DISCRIMINATING: the base Shock id gains the same chain target",
+      "actor": "s", "metric": "spell_modifier", "spell": 804020, "op": 17, "base": 0, "equals": 2 },
+    { "action": "assert", "label": "The buff is bound to the channel, not to its own 5500 ms duration",
+      "actor": "s", "metric": "aura_duration_ms", "spell": 567556, "min": 3000, "max": 8000 },
+    { "action": "wait", "label": "Let the 8000 ms channel run out", "ms": 9000 },
+    { "action": "assert", "label": "The Amped Flow buff ends with the channel",
+      "actor": "s", "metric": "aura", "spell": 567556, "equals": 0 },
+    { "action": "assert", "label": "Shock loses the chain target when the channel ends",
+      "actor": "s", "metric": "spell_modifier", "spell": 504634, "op": 17, "base": 0, "equals": 0 }
+  ]
+}

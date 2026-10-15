@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Valorous Champion grants attack power and Strength-derived spell hit rating natively (#1045)",
+  "contract": "Spell.dbc 804339 (\"Valorous Champion\", SpellFamilyName 33, self-targeted) effect 0 is SPELL_AURA_MOD_ATTACK_POWER_PCT (166) with EffectBasePoints 24 (amount 25); AuraEffect::HandleAuraModAttackPowerPercent (SpellAuraEffects.cpp:231) calls target->SetStatPctModifier(UNIT_MOD_ATTACK_POWER, TOTAL_PCT, GetTotalAuraMultiplier(...)), a pure native stat-percent modifier, so total attack power becomes exactly 1.25x the unbuffed value. Effect 1 is SPELL_AURA_MOD_RATING_FROM_STAT (220) with EffectBasePoints 4 (amount 5), EffectMiscValue 128 = 1<<7 = CR_HIT_SPELL, and EffectMiscValueB 0 = STAT_STRENGTH — the same native Player::UpdateRating path (PlayerUpdates.cpp:650-661) as Solar Discernment, granting spell hit rating equal to 5% of Strength; the raw amount (5) is pinned directly via aura_amount since the scenario validator only allows relative_to/ratio_to between snapshots of the same metric. Both are generic engine paths already wired into the AuraEffect handler table; no server script exists or is needed.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "assert", "label": "Sanity: no baseline spell hit rating on a fresh character", "actor": "cleric", "metric": "combat_rating", "rating": 7, "equals": 0 },
+    { "action": "snapshot", "actor": "cleric", "metric": "attack_power", "save_as": "ap_before" },
+    { "action": "learn", "actor": "cleric", "spell": 804339 },
+    {
+      "action": "assert", "label": "Attack power is exactly 1.25x the unbuffed value",
+      "actor": "cleric", "metric": "attack_power", "ratio_to": "ap_before", "equals": 1.25
+    },
+    {
+      "action": "assert", "label": "Spell hit rating actually increased",
+      "actor": "cleric", "metric": "combat_rating", "rating": 7, "min": 1
+    },
+    {
+      "action": "assert", "label": "Spell hit rating amount is exactly 5% of Strength (SPELL_AURA_MOD_RATING_FROM_STAT amount)",
+      "actor": "cleric", "metric": "aura_amount", "spell": 804339, "effect": 1, "equals": 5
+    }
+  ]
+}

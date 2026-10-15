@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "name": "The Ranger trainer and the Book of Ascension teach Waterskin ranks 2-8 at their spell levels",
+  "contract": "Crude Waterskin 802808 (rank 1) comes with the Bushcraft skill at creation (SkillLineAbility 86420, SkillLine 505, AcquireMethod 2). Ranks 2-8 (802810, 802812-802817; Spell.dbc BaseLevel 14, 22, 30, 38, 44, 50, 56, the levels Exiles DB lists as 'Level required') are SkillLine 505 recipes with AcquireMethod 0 that no trainer, book or item taught. The Ranger class trainer (trainer 900021, Gustaf Blightflight 50281) and the Book of Ascension (SpellbookRankData) now sell each rank at its BaseLevel, requiring the rank below. A level-22 Ranger is offered rank 2 as available, rank 3 as unavailable until rank 2 is held, and rank 4 as unavailable below level 30; it buys ranks 2 and 3 from the trainer, is refused rank 4 at level 22, and buys rank 4 from the book at level 30. It does not test the client's window rendering.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 22 }
+  ],
+  "creatures": [
+    { "id": "trainer", "owner": "ranger", "entry": 50281, "distance": 2, "faction": 35 },
+    { "id": "book", "owner": "ranger", "entry": 75115, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "money", "actor": "ranger", "copper": 200000 },
+    {
+      "action": "assert", "label": "Creation grants Crude Waterskin", "actor": "ranger",
+      "metric": "knows_spell", "spell": 802808, "equals": 1
+    },
+    { "action": "gossip_hello", "label": "Talk to the Ranger trainer", "actor": "ranger", "target": "trainer" },
+    { "action": "gossip_select", "label": "Ask for training", "actor": "ranger", "option": 0 },
+    {
+      "action": "assert", "label": "The option opens the trainer window", "actor": "ranger",
+      "metric": "trainer_list_packets", "equals": 1
+    },
+    {
+      "action": "assert", "label": "Rough Waterskin is available at 22", "actor": "ranger",
+      "metric": "trainer_window_state", "spell": 802810, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Doublestitched Waterskin waits for Rough Waterskin", "actor": "ranger",
+      "metric": "trainer_window_state", "spell": 802812, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Hardened Waterskin waits for level 30", "actor": "ranger",
+      "metric": "trainer_window_state", "spell": 802813, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Masterwork Waterskin is on the trainer", "actor": "ranger",
+      "metric": "trainer_window_state", "spell": 802817, "equals": 1
+    },
+    {
+      "action": "trainer_buy", "label": "Buy Rough Waterskin", "actor": "ranger", "target": "trainer",
+      "spell": 802810
+    },
+    {
+      "action": "assert", "label": "The trainer taught Rough Waterskin", "actor": "ranger",
+      "metric": "knows_spell", "spell": 802810, "equals": 1
+    },
+    {
+      "action": "trainer_buy", "label": "Buy Doublestitched Waterskin", "actor": "ranger", "target": "trainer",
+      "spell": 802812
+    },
+    {
+      "action": "assert", "label": "The trainer taught Doublestitched Waterskin", "actor": "ranger",
+      "metric": "knows_spell", "spell": 802812, "equals": 1
+    },
+    {
+      "action": "trainer_buy", "label": "Ask for Hardened Waterskin below its level", "actor": "ranger",
+      "target": "trainer", "spell": 802813
+    },
+    {
+      "action": "assert", "label": "Below level 30 Hardened Waterskin is refused", "actor": "ranger",
+      "metric": "knows_spell", "spell": 802813, "equals": 0
+    },
+    { "action": "gossip_hello", "label": "Open the Book of Ascension", "actor": "ranger", "target": "book" },
+    {
+      "action": "assert", "label": "The book opens its trainer window", "actor": "ranger",
+      "metric": "trainer_list_packets", "equals": 2
+    },
+    {
+      "action": "assert", "label": "The book holds Hardened Waterskin, unavailable at 22", "actor": "ranger",
+      "metric": "trainer_window_state", "spell": 802813, "equals": 1
+    },
+    {
+      "action": "assert", "label": "and names Doublestitched Waterskin as its requirement", "actor": "ranger",
+      "metric": "trainer_window_ability", "spell": 802813, "equals": 802812
+    },
+    { "action": "set_level", "actor": "ranger", "value": 30 },
+    {
+      "action": "trainer_buy", "label": "Buy Hardened Waterskin from the book", "actor": "ranger", "target": "book",
+      "spell": 802813
+    },
+    {
+      "action": "assert", "label": "The book taught Hardened Waterskin", "actor": "ranger",
+      "metric": "knows_spell", "spell": 802813, "equals": 1
+    }
+  ]
+}

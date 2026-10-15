@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Venomancer: one Pheromone per Venomancer on a recipient (#4264)",
+  "contract": "#4264: Spider (803177), Beetle (803651) and Toxic (707689) Pheromones are three different spells of family 35 with no spell_group, so the server let the same Venomancer keep all three on one ally. The reporter expects one Pheromone per Venomancer per recipient, with a second Venomancer free to add a different one. The fix is a spell_group with stack rule 2 (exclusive from the same caster), as for Tinker Modules. Without it the first Pheromone stays when the next is cast; with it the newest replaces the older one of the same caster, while another Venomancer's Pheromone is untouched.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 80 },
+    { "id": "v2", "race": 1, "class": 29, "level": 80 },
+    { "id": "ally", "race": 1, "class": 1, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn and level scaling settle", "ms": 4000 },
+    { "action": "group", "actor": "v", "target": "ally" },
+    { "action": "group", "actor": "v", "target": "v2" },
+    { "action": "learn", "actor": "v", "spell": 803177 },
+    { "action": "learn", "actor": "v", "spell": 803651 },
+    { "action": "learn", "actor": "v", "spell": 707689 },
+    { "action": "learn", "actor": "v2", "spell": 803177 },
+    { "action": "cast", "actor": "v", "spell": 803177, "target": "ally" },
+    { "action": "assert", "label": "BASELINE: Spider Pheromones is applied by v",
+      "actor": "ally", "metric": "aura", "spell": 803177, "caster": "v", "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Global cooldown", "ms": 2000 },
+    { "action": "cast", "actor": "v", "spell": 803651, "target": "ally" },
+    { "action": "assert", "label": "SETUP: Beetle Pheromones is applied by v",
+      "actor": "ally", "metric": "aura", "spell": 803651, "caster": "v", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: casting Beetle removed v's Spider Pheromones",
+      "actor": "ally", "metric": "aura", "spell": 803177, "caster": "v", "equals": 0, "within_ms": 2000 },
+    { "action": "wait", "label": "Global cooldown", "ms": 2000 },
+    { "action": "cast", "actor": "v", "spell": 707689, "target": "ally" },
+    { "action": "assert", "label": "SETUP: Toxic Pheromones is applied by v",
+      "actor": "ally", "metric": "aura", "spell": 707689, "caster": "v", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: casting Toxic removed v's Beetle Pheromones",
+      "actor": "ally", "metric": "aura", "spell": 803651, "caster": "v", "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "v's Spider Pheromones stays gone",
+      "actor": "ally", "metric": "aura", "spell": 803177, "caster": "v", "equals": 0 },
+    { "action": "cast", "actor": "v2", "spell": 803177, "target": "ally" },
+    { "action": "assert", "label": "SETUP: a second Venomancer applies a different Pheromone on the same ally",
+      "actor": "ally", "metric": "aura", "spell": 803177, "caster": "v2", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "The first Venomancer's Toxic Pheromones is untouched by the other Venomancer",
+      "actor": "ally", "metric": "aura", "spell": 707689, "caster": "v", "equals": 1 }
+  ]
+}

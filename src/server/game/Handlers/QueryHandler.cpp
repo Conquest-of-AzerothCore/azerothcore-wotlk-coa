@@ -17,6 +17,7 @@
 
 #include "Common.h"
 #include "GameTime.h"
+#include "GossipDef.h"
 #include "Log.h"
 #include "MapMgr.h"
 #include "NPCHandler.h"
@@ -280,6 +281,9 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recvData)
     LOG_DEBUG("network", "WORLD: CMSG_NPC_TEXT_QUERY TextId: {}", textID);
 
     recvData >> guid;
+
+    if (GetPlayer()->PlayerTalkClass->SendDynamicGossipText(textID, guid))
+        return;
 
     GossipText const* gossip = sObjectMgr->GetGossipText(textID);
 

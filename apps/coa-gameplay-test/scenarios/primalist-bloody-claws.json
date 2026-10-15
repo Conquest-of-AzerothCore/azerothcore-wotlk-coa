@@ -1,0 +1,842 @@
+{
+  "schema": 1,
+  "name": "Primalist Bloody Claws pet damage and periodic healing",
+  "contract": [
+    "Real pet damage applies 10/20/30% periodic healing reduction for fifteen seconds, capped at three",
+    "stacks. Actual Rejuvenation ticks and direct healing exercise the recipient; native incoming healing",
+    "probes isolate direct/periodic modifiers. Talent removal stops further applications and existing stacks",
+    "expire."
+  ],
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "enemy",
+      "race": 2,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "spirit",
+      "owner": "primalist",
+      "entry": 1188,
+      "level": 19,
+      "health": 100000,
+      "distance": 5
+    }
+  ],
+  "timeout_ms": 240000,
+  "steps": [
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159
+    },
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "pvp",
+      "actor": "primalist",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 100000,
+      "value": 90000
+    },
+    {
+      "action": "specialization",
+      "actor": "enemy",
+      "id": 59
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "maximum": 100000,
+      "value": 90000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 574301
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 574301,
+      "target": "spirit"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 24000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 61017,
+      "effect": 0,
+      "min": 100,
+      "within_ms": 4000,
+      "label": "Native pet hit scaling has settled"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 61017,
+      "effect": 2,
+      "min": 100,
+      "within_ms": 4000,
+      "label": "Native pet expertise scaling has settled"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504874,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "enemy",
+      "spell": 48441
+    },
+    {
+      "action": "learn",
+      "actor": "enemy",
+      "spell": 2050
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_heal_count",
+      "spell": 48441,
+      "target": "enemy",
+      "save_as": "baseline_count_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_heal_total",
+      "spell": 48441,
+      "target": "enemy",
+      "save_as": "baseline_heal_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "enemy",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 48441
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_heal_count",
+      "spell": 48441,
+      "target": "enemy",
+      "relative_to": "baseline_count_before",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_heal_total",
+      "spell": 48441,
+      "target": "enemy",
+      "relative_to": "baseline_heal_before",
+      "save_as": "baseline_heal"
+    },
+    {
+      "action": "set_aura",
+      "actor": "enemy",
+      "spell": 48441,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_healing_taken",
+      "spell": 2050,
+      "target": "enemy",
+      "equals": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "enemy",
+      "save_as": "baseline_direct_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "enemy",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 2050
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "enemy",
+      "relative_to": "baseline_direct_before",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "health",
+      "save_as": "before_pet"
+    },
+    {
+      "action": "attack",
+      "actor": "primalist",
+      "pet": true,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "health",
+      "relative_to": "before_pet",
+      "max": -1,
+      "within_ms": 8000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 505226,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 504874
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 504874,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 505226,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 505226,
+      "effect": 0,
+      "equals": -10
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_healing_taken",
+      "spell": 48441,
+      "target": "enemy",
+      "periodic": true,
+      "min": 899,
+      "max": 901
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_heal_count",
+      "spell": 48441,
+      "target": "enemy",
+      "save_as": "stack_1_count_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_heal_total",
+      "spell": 48441,
+      "target": "enemy",
+      "save_as": "stack_1_heal_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "enemy",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 48441
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_heal_count",
+      "spell": 48441,
+      "target": "enemy",
+      "relative_to": "stack_1_count_before",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_heal_total",
+      "spell": 48441,
+      "target": "enemy",
+      "relative_to": "stack_1_heal_before",
+      "save_as": "stack_1_heal"
+    },
+    {
+      "action": "set_aura",
+      "actor": "enemy",
+      "spell": 48441,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_healing_taken",
+      "spell": 2050,
+      "target": "enemy",
+      "equals": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "enemy",
+      "save_as": "stack_1_direct_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "enemy",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 2050
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "enemy",
+      "relative_to": "stack_1_direct_before",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 505226,
+      "equals": 2,
+      "within_ms": 8000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 505226,
+      "effect": 0,
+      "equals": -20
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_healing_taken",
+      "spell": 48441,
+      "target": "enemy",
+      "periodic": true,
+      "min": 799,
+      "max": 801
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_heal_count",
+      "spell": 48441,
+      "target": "enemy",
+      "save_as": "stack_2_count_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_heal_total",
+      "spell": 48441,
+      "target": "enemy",
+      "save_as": "stack_2_heal_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "enemy",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 48441
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_heal_count",
+      "spell": 48441,
+      "target": "enemy",
+      "relative_to": "stack_2_count_before",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_heal_total",
+      "spell": 48441,
+      "target": "enemy",
+      "relative_to": "stack_2_heal_before",
+      "save_as": "stack_2_heal"
+    },
+    {
+      "action": "set_aura",
+      "actor": "enemy",
+      "spell": 48441,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_healing_taken",
+      "spell": 2050,
+      "target": "enemy",
+      "equals": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "enemy",
+      "save_as": "stack_2_direct_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "enemy",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 2050
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "enemy",
+      "relative_to": "stack_2_direct_before",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 505226,
+      "equals": 3,
+      "within_ms": 8000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 505226,
+      "effect": 0,
+      "equals": -30
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_healing_taken",
+      "spell": 48441,
+      "target": "enemy",
+      "periodic": true,
+      "min": 699,
+      "max": 701
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_heal_count",
+      "spell": 48441,
+      "target": "enemy",
+      "save_as": "stack_3_count_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_heal_total",
+      "spell": 48441,
+      "target": "enemy",
+      "save_as": "stack_3_heal_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "enemy",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 48441
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_heal_count",
+      "spell": 48441,
+      "target": "enemy",
+      "relative_to": "stack_3_count_before",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_heal_total",
+      "spell": 48441,
+      "target": "enemy",
+      "relative_to": "stack_3_heal_before",
+      "save_as": "stack_3_heal"
+    },
+    {
+      "action": "set_aura",
+      "actor": "enemy",
+      "spell": 48441,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_healing_taken",
+      "spell": 2050,
+      "target": "enemy",
+      "equals": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "enemy",
+      "save_as": "stack_3_direct_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "enemy",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 2050
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "enemy",
+      "relative_to": "stack_3_direct_before",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "maximum": 100000,
+      "value": 90000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 505226,
+      "equals": 3
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504874,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 504874,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 16000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 505226,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_healing_taken",
+      "spell": 48441,
+      "target": "enemy",
+      "periodic": true,
+      "equals": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 505226,
+      "equals": 0
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

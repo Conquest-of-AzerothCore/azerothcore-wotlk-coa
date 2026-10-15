@@ -79,6 +79,7 @@ namespace ObjectAccessor
     Player* FindPlayerByLowGUID(ObjectGuid::LowType lowguid);
     Player* FindConnectedPlayer(ObjectGuid const guid);
     Player* FindPlayerByName(std::string const& name, bool checkInWorld = true);
+    Player* FindUniquePlayerByFirstName(std::string const& firstName);
     Creature* GetSpawnedCreatureByDBGUID(uint32 mapId, uint64 guid);
     GameObject* GetSpawnedGameObjectByDBGUID(uint32 mapId, uint64 guid);
 

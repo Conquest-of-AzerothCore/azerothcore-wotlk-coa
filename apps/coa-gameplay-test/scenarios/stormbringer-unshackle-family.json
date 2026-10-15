@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Nimbus resets Windsurf, Unshackle and Wind Gate: Evacuate natively (#3726)",
+  "contract": "#3726: Nimbus 704212 has Effect[0]=Effect[1]=195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN (TargetA=1 CASTER, MiscValue 500042 / 706625, MiscValueB=1) and Effect[2]=187 SPELL_EFFECT_ASCENSION_RESTORE_SPELL_CHARGES (TargetA=1 CASTER, MiscValue=532, BasePoints 1 + DieSides 1 -> 2). Effects 195 and 187 are stock core handlers (Spell::EffectAscensionResetCooldown, SpellEffects.cpp:541-550, calling ResetAscensionCooldown at :290-301 = RemoveSpellCooldown + RemoveCategoryCooldown; Spell::EffectAscensionRestoreSpellCharges, SpellEffects.cpp:552-562, calling Player::RestoreSpellChargeCategory, Player.cpp:17252-17265). Windsurf 500042 (RecoveryTime 90000) and Unshackle 706625 (RecoveryTime 120000, no category) are cleared by effect 195; Wind Gate: Evacuate 504643 is a charge ability with no cooldown of its own (RecoveryTime 0, Category 0) whose SpellCharges.dbc row keys ChargeCategoryId 532 with SpellChargesCategory max 2 / 60000 ms recharge (ApplyClientSpellCharges, AscensionClassMechanics.cpp:1034-1051), so effect 187's RestoreSpellChargeCategory(532, 2) is what \"resets\" it. The issue's premise (\"zero occurrences of 704212 in source\") is true of the spell id and irrelevant, since both effects are generic. No script, dummy or spell_proc wiring exists or is needed.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "p1",
+      "race": 8,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "group", "actor": "p1", "target": "ally" },
+    { "action": "learn", "actor": "p1", "spell": 804019, "label": "Learn Summon: Air Elemental" },
+    { "action": "cast", "actor": "p1", "spell": 804019, "label": "Summon the Air Elemental" },
+    { "action": "assert", "label": "SETUP: the Air Elemental (creature 500941) is the player's guardian pet",
+      "actor": "p1", "metric": "pet_entry", "equals": 500941, "within_ms": 24000 },
+    { "action": "learn", "actor": "p1", "spell": 500042, "label": "Learn Windsurf" },
+    { "action": "learn", "actor": "p1", "spell": 706625, "label": "Learn Unshackle" },
+    { "action": "learn", "actor": "p1", "spell": 504401, "label": "Learn Wind Gate" },
+    { "action": "assert", "label": "SETUP: learning Wind Gate natively grants Wind Gate: Evacuate (SyncEvacuate)",
+      "actor": "p1", "metric": "knows_spell", "spell": 504643, "equals": 1 },
+    { "action": "cast", "actor": "p1", "spell": 504401, "label": "Summon the Wind Gate",
+      "destination": { "x": -8914.41, "y": -115.853, "z": 82.3711 } },
+    { "action": "wait", "label": "Let the Wind Gate object spawn", "ms": 1000 },
+    { "action": "assert", "label": "SETUP: the Wind Gate (creature 617478) is owned by the player",
+      "actor": "p1", "metric": "owned_creature_count", "entry": 617478, "equals": 1 },
+    { "action": "set_aura", "actor": "p1", "spell": 803102, "stacks": 100, "label": "Fixture Static to 100" },
+    { "action": "set_aura", "actor": "p1", "spell": 707050, "stacks": 1, "label": "Fixture \"At Least 50 Static\" gate for Unshackle" },
+    { "action": "wait", "label": "Let the global cooldown expire", "ms": 1500 },
+    { "action": "cast", "actor": "p1", "spell": 500042, "label": "Cast Windsurf" },
+    { "action": "wait", "label": "Let Windsurf's cast/GCD resolve", "ms": 1500 },
+    { "action": "assert", "label": "BASELINE: Windsurf is on cooldown after casting it",
+      "actor": "p1", "metric": "cooldown_ms", "spell": 500042, "min": 85000, "max": 90000 },
+    { "action": "cast", "actor": "p1", "spell": 706625, "label": "Cast Unshackle" },
+    { "action": "wait", "label": "Let Unshackle's cast/GCD resolve", "ms": 1500 },
+    { "action": "assert", "label": "BASELINE: Unshackle is on cooldown after casting it",
+      "actor": "p1", "metric": "cooldown_ms", "spell": 706625, "min": 115000, "max": 120000 },
+    { "action": "cast", "actor": "p1", "spell": 504643, "target": "ally", "label": "Pull the ally through the Wind Gate" },
+    { "action": "wait", "label": "Let Evacuate's cast/GCD resolve", "ms": 1500 },
+    { "action": "assert", "label": "BASELINE: one Evacuate spends one of the two native charges",
+      "actor": "p1", "metric": "spell_charges", "spell": 504643, "equals": 1 },
+    { "action": "learn", "actor": "p1", "spell": 704212, "label": "Learn Nimbus" },
+    { "action": "set_power", "actor": "p1", "power": 0, "value": 2000, "label": "Fixture: refill mana so Nimbus (ManaCostPercentage 36) can be cast" },
+    { "action": "cast", "actor": "p1", "spell": 704212, "label": "Cast Nimbus" },
+    { "action": "assert", "label": "DISCRIMINATING: Nimbus clears Windsurf's cooldown",
+      "actor": "p1", "metric": "cooldown_ms", "spell": 500042, "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: Nimbus clears Unshackle's cooldown",
+      "actor": "p1", "metric": "cooldown_ms", "spell": 706625, "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: Nimbus restores both Wind Gate: Evacuate charges",
+      "actor": "p1", "metric": "spell_charges", "spell": 504643, "equals": 2, "within_ms": 3000 }
+  ]
+}

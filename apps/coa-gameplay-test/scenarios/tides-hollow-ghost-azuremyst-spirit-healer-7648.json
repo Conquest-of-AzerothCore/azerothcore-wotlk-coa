@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Azuremyst Isle: a ghost released in Tides' Hollow reaches a Spirit Healer (#7648)",
+  "contract": "A player who dies in Tides' Hollow (zone 3569, at the Wrathscale Naga spawn (-4874.8,-11600.8,6.4)) releases at the nearest graveyard of Azuremyst Isle (3524), graveyard 923 (-4312.78,-12441,17.1903), instead of the default Westfall graveyard. Its Spirit Healer 6491 stands near it. Death and spirit release use the native handlers.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 530,
+    "x": -4874.8,
+    "y": -11600.8,
+    "z": 6.4,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 11
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "die",
+      "actor": "cleric"
+    },
+    {
+      "action": "release_spirit",
+      "actor": "cleric"
+    },
+    {
+      "action": "assert",
+      "label": "The released player is a ghost",
+      "actor": "cleric",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "map_id",
+      "equals": 530,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ghost lands at the Azuremyst graveyard",
+      "actor": "cleric",
+      "metric": "position_x",
+      "min": -4327.8,
+      "max": -4297.8,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "position_y",
+      "min": -12456,
+      "max": -12426
+    },
+    {
+      "action": "assert",
+      "label": "A Spirit Healer stands at the ghost's graveyard",
+      "actor": "cleric",
+      "metric": "nearby_creature_template",
+      "entry": 6491,
+      "equals": 6491
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "name": "Gift of the Infinite Dragonflight converts Spirit into spell power and spell hit (#2980)",
+  "contract": "Gift of the Infinite Dragonflight 706114 is a level-20 passive with three effects. Effect 0 is SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT (174) with EffectMiscValue 126 (SPELL_SCHOOL_MASK_MAGIC, every school but physical), EffectMiscValueB 4 (STAT_SPIRIT) and EffectBasePoints 39, resolving to 40 with DieSides 1: the tooltip's $s1. Unit::SpellBaseDamageBonusDone consumes it in its IsPlayer branch as DoneAdvertisedBenefit += CalculatePct(GetStat(usedStat), amount) after filtering on the school mask (Unit.cpp). Effect 2 is SPELL_AURA_MOD_RATING_FROM_STAT (220) with EffectMiscValue 128 = 1 << CR_HIT_SPELL (7), EffectMiscValueB 4 and EffectBasePoints 2, resolving to 3: the tooltip's $s3. Player::UpdateRating adds CalculatePct(GetStat(Spirit), amount) into PLAYER_FIELD_COMBAT_RATING_1 + CR_HIT_SPELL (PlayerUpdates.cpp), and AuraEffect::HandleModRatingFromStat forces that recalculation on apply. Effect 1 is the same aura type for 1 << CR_CRIT_SPELL with EffectBasePoints -1, resolving to 0: a deliberate no-op that the shipped DBC ships, not a defect. Both aura types have real handlers in AuraEffectHandler, not HandleNULL. The two actors are identical characters, so their Spirit and every other term is equal and the whole difference is the talent's. Native handlers only. Regression scenario for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 22, "level": 80 },
+    { "id": "talent", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talent", "spell": 706114 },
+    {
+      "action": "assert",
+      "label": "The Spirit-to-spell-power effect resolves to 40",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 706114,
+      "caster": "talent",
+      "effect": 0,
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "label": "The Spirit-to-spell-hit effect resolves to 3",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 706114,
+      "caster": "talent",
+      "effect": 2,
+      "equals": 3
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline shadow spell power without the talent",
+      "actor": "control",
+      "metric": "spell_power",
+      "school": 5,
+      "save_as": "spell_power_base"
+    },
+    {
+      "action": "assert",
+      "label": "Spell power rises with the talent",
+      "actor": "talent",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "spell_power_base",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline spell hit rating without the talent",
+      "actor": "control",
+      "metric": "combat_rating",
+      "rating": 7,
+      "save_as": "spell_hit_base"
+    },
+    {
+      "action": "assert",
+      "label": "Spell hit rating rises with the talent",
+      "actor": "talent",
+      "metric": "combat_rating",
+      "rating": 7,
+      "relative_to": "spell_hit_base",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline spell critical rating without the talent",
+      "actor": "control",
+      "metric": "combat_rating",
+      "rating": 10,
+      "save_as": "spell_crit_base"
+    },
+    {
+      "action": "assert",
+      "label": "Spell critical rating is untouched, as the zero-amount second effect asks",
+      "actor": "talent",
+      "metric": "combat_rating",
+      "rating": 10,
+      "relative_to": "spell_crit_base",
+      "equals": 0
+    }
+  ]
+}

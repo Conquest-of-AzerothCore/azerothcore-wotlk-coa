@@ -24,6 +24,39 @@
 #include "ScriptMgr.h"
 #include "World.h"
 
+namespace
+{
+    ServerConfigs KillXPRate(ContentLevels content)
+    {
+        switch (content)
+        {
+            case CONTENT_61_70:
+                return RATE_XP_KILL_TBC;
+            case CONTENT_71_80:
+                return RATE_XP_KILL_WOTLK;
+            default:
+                return RATE_XP_KILL;
+        }
+    }
+}
+
+float Acore::XP::QuestRate(bool isDFQuest, int32 questLevel, uint8 playerLevel)
+{
+    if (isDFQuest)
+        return sWorld->getRate(RATE_XP_QUEST_DF);
+
+    if (questLevel <= 0)
+        questLevel = playerLevel;
+
+    if (questLevel > 70)
+        return sWorld->getRate(RATE_XP_QUEST_WOTLK);
+
+    if (questLevel > 60)
+        return sWorld->getRate(RATE_XP_QUEST_TBC);
+
+    return sWorld->getRate(RATE_XP_QUEST);
+}
+
 uint32 Acore::XP::BaseGain(uint8 pl_level, uint8 mob_level, ContentLevels content)
 {
     uint32 baseGain;
@@ -82,12 +115,16 @@ uint32 Acore::XP::Gain(Player* player, Unit* unit, bool isBattleGround /*= false
 
         uint8 playerLevel = player->GetLevel();
         sScriptMgr->OnPlayerBeforeGetLevelForXPGain(player, playerLevel);
-        gain = BaseGain(playerLevel, unit->GetLevel(), GetContentLevelsForMapAndZone(unit->GetMapId(), unit->GetZoneId()));
+        // The level the killer is fighting, not the object's own: a character with open-world scaling
+        // on is fighting their version of this creature, and reward has to follow the fight, or
+        // every scaled kill in an old zone is a gray kill and the promise dies.
+        ContentLevels const content = GetContentLevelsForMapAndZone(unit->GetMapId(), unit->GetZoneId());
+        gain = BaseGain(playerLevel, unit->getLevelForTarget(player), content);
 
         if (gain && creature)
         {
             if (creature->isElite())
-                xpMod *= 2.0f;
+                xpMod *= sWorld->getRate(creature->GetMap()->IsDungeon() ? RATE_XP_DUNGEON_ELITE : RATE_XP_ELITE);
 
             // Instanced mobs (particularly bosses) oftentimes have higher bonuses, especially in later content levels
             xpMod *= creature->GetCreatureTemplate()->ModExperience;
@@ -119,7 +156,7 @@ uint32 Acore::XP::Gain(Player* player, Unit* unit, bool isBattleGround /*= false
         }
         else
         {
-            xpMod *= sWorld->getRate(RATE_XP_KILL);
+            xpMod *= sWorld->getRate(KillXPRate(content));
         }
 
         // if players dealt less than 50% of the damage and were credited anyway (due to CREATURE_FLAG_EXTRA_NO_PLAYER_DAMAGE_REQ), scale XP gained appropriately (linear scaling)

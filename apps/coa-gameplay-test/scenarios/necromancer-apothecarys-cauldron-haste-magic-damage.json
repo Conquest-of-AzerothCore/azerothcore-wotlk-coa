@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "name": "Necromancer Apothecary's Cauldron gives the party 3% spell haste and itself 3% magic damage (#1188)",
+  "contract": "Apothecary's Cauldron 560537 is a Death-tab talent (CharacterAdvancement 30919, ClassType 25 = class 23, Tab 59, TalentEssenceCost 1, SpellFamilyName 29) whose description reads 'Increases the spell haste of all party and raid members by $s1%. Does not stack with similar effects. In addition, increases your Magic damage dealt by $s2%.' Effect 0 is SPELL_EFFECT_APPLY_AREA_AURA_RAID (65, radius index 287 = 100 yd) carrying SPELL_AURA_HASTE_SPELLS (216), BasePoints 2 + DieSides 1 = 3; effect 1 is a self SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79) with MiscValue 126 (every magic school, not Physical), also 3. Neither is aura 42/354, so the Necromancer load contract leaves both intact, and both are native handlers: AuraEffect::HandleModCastingSpeed divides UNIT_MOD_CAST_SPEED by 1.03 (ratio 0.97087) for the Necromancer and every grouped player the area aura reaches, and HandleModDamagePercentDone multiplies magic damage done by 1.03. The 'does not stack' clause is data: world SQL puts 560537 in spell_group 2000182 with the other spell-haste auras. Expected: learning the talent applies the aura to the Necromancer and to a party Mage, lowers both cast-speed multipliers by the 1/1.03 factor, raises the Necromancer's Frost (Ice Barrage 803779) and Shadow/Nature (Corpse Explosion 533240) damage done by 3% while leaving its white melee and the Mage's Frostbolt damage done unchanged; unlearning removes the aura from both and restores the haste.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80 },
+    { "id": "mage", "race": 5, "class": 8, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 8 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "group", "label": "Put the Mage in the Necromancer's party", "actor": "necro", "target": "mage" },
+    {
+      "action": "assert", "label": "SETUP: the Necromancer does not have the talent yet", "actor": "necro",
+      "metric": "aura", "spell": 560537, "equals": 0
+    },
+    { "action": "snapshot", "actor": "necro", "metric": "cast_speed_multiplier", "save_as": "necro_haste0" },
+    { "action": "snapshot", "actor": "mage", "metric": "cast_speed_multiplier", "save_as": "mage_haste0" },
+    {
+      "action": "snapshot", "actor": "necro", "metric": "spell_damage_done", "spell": 803779, "target": "golem",
+      "save_as": "necro_frost0"
+    },
+    {
+      "action": "snapshot", "actor": "necro", "metric": "spell_damage_done", "spell": 533240, "target": "golem",
+      "save_as": "necro_shadow0"
+    },
+    {
+      "action": "snapshot", "actor": "necro", "metric": "melee_damage_done", "target": "golem",
+      "save_as": "necro_melee0"
+    },
+    {
+      "action": "snapshot", "actor": "mage", "metric": "spell_damage_done", "spell": 116, "target": "golem",
+      "save_as": "mage_frost0"
+    },
+    { "action": "learn", "actor": "necro", "spell": 560537 },
+    {
+      "action": "assert", "label": "The talent aura is applied to the Necromancer", "actor": "necro",
+      "metric": "aura", "spell": 560537, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The raid aura reaches the party Mage", "actor": "mage",
+      "metric": "aura", "spell": 560537, "caster": "necro", "equals": 1, "within_ms": 15000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Necromancer's spell haste rises by 3%", "actor": "necro",
+      "metric": "cast_speed_multiplier", "ratio_to": "necro_haste0", "min": 0.9700, "max": 0.9718
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the party Mage's spell haste rises by 3%", "actor": "mage",
+      "metric": "cast_speed_multiplier", "ratio_to": "mage_haste0", "min": 0.9700, "max": 0.9718
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Necromancer's Frost damage done rises by 3%", "actor": "necro",
+      "metric": "spell_damage_done", "spell": 803779, "target": "golem", "ratio_to": "necro_frost0",
+      "min": 1.025, "max": 1.035
+    },
+    {
+      "action": "assert", "label": "The Necromancer's Shadow damage done rises by 3%", "actor": "necro",
+      "metric": "spell_damage_done", "spell": 533240, "target": "golem", "ratio_to": "necro_shadow0",
+      "min": 1.025, "max": 1.035
+    },
+    {
+      "action": "assert", "label": "CONTROL: Physical melee damage done is unchanged", "actor": "necro",
+      "metric": "melee_damage_done", "target": "golem", "ratio_to": "necro_melee0", "min": 0.999, "max": 1.001
+    },
+    {
+      "action": "assert", "label": "CONTROL: the damage bonus stays on the Necromancer", "actor": "mage",
+      "metric": "spell_damage_done", "spell": 116, "target": "golem", "ratio_to": "mage_frost0",
+      "min": 0.999, "max": 1.001
+    },
+    { "action": "unlearn", "actor": "necro", "spell": 560537 },
+    {
+      "action": "assert", "label": "Unlearning removes the aura from the Necromancer", "actor": "necro",
+      "metric": "aura", "spell": 560537, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Unlearning removes the aura from the party Mage", "actor": "mage",
+      "metric": "aura", "spell": 560537, "caster": "necro", "equals": 0, "within_ms": 15000
+    },
+    {
+      "action": "assert", "label": "The Mage's spell haste is restored", "actor": "mage",
+      "metric": "cast_speed_multiplier", "ratio_to": "mage_haste0", "min": 0.9995, "max": 1.0005
+    },
+    {
+      "action": "assert", "label": "The Necromancer's spell haste is restored", "actor": "necro",
+      "metric": "cast_speed_multiplier", "ratio_to": "necro_haste0", "min": 0.9995, "max": 1.0005
+    }
+  ]
+}

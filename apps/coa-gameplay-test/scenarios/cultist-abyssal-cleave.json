@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Cultist: Abyssal Cleave adds extra Gaze of C'Thun chain targets through a native SPELLMOD_JUMP_TARGETS spell mod (#3138)",
+  "contract": "707604/707748 (SpellFamilyName 31) each carry effect0 ADD_FLAT_MODIFIER (107), MiscValue=17 (SPELLMOD_JUMP_TARGETS), SpellClassMask [4,0,0] (dword0 bit2), BasePoints 0/1 -> CalcValue 1/2. Gaze of C'Thun (500110 and its ranks) is SpellFamilyName 31 with SpellFamilyFlags[0]=4, an exact classmask match, and its own EffectChainTarget[0]/[1] is 2 at rank 1. Spell::SelectImplicitChainTargets (Spell.cpp ~1886-1891) reads maxTargets from EffectChainTarget and applies ApplySpellMod(spellId, SPELLMOD_JUMP_TARGETS, maxTargets) generically for every spell cast; the spell_modifier metric exercises that same call. Querying spell_modifier(500110, op=17, base=2) reflects the real chain-target count once boosted: 2+1=3 (rank 1) or 2+2=4 (rank 2). No custom C++ needed; regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "c", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: Gaze of C'Thun's chain-target count is unmodified before Abyssal Cleave",
+      "actor": "c", "metric": "spell_modifier", "spell": 500110, "op": 17, "base": 2, "min": 2, "max": 2
+    },
+    { "action": "learn", "actor": "c", "spell": 707604 },
+    {
+      "action": "assert", "label": "Abyssal Cleave rank 1 adds 1 chain target to Gaze of C'Thun (#3138)",
+      "actor": "c", "metric": "spell_modifier", "spell": 500110, "op": 17, "base": 2, "min": 3, "max": 3
+    },
+    {
+      "action": "assert", "label": "Abyssal Cleave rank 1 leaves an unrelated Wrath of the Black Empire cast alone (control)",
+      "actor": "c", "metric": "spell_modifier", "spell": 500724, "op": 17, "base": 2, "min": 2, "max": 2
+    },
+    { "action": "unlearn", "actor": "c", "spell": 707604 },
+    { "action": "learn", "actor": "c", "spell": 707748 },
+    {
+      "action": "assert", "label": "Abyssal Cleave rank 2 adds 2 chain targets to Gaze of C'Thun (#3138)",
+      "actor": "c", "metric": "spell_modifier", "spell": 500110, "op": 17, "base": 2, "min": 4, "max": 4
+    },
+    {
+      "action": "assert", "label": "Abyssal Cleave rank 2 raises the higher Gaze of C'Thun rank too (#3138)",
+      "actor": "c", "metric": "spell_modifier", "spell": 502138, "op": 17, "base": 3, "min": 5, "max": 5
+    }
+  ]
+}

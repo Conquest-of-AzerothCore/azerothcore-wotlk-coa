@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Judgement of the Valkyrie already shortens Judgement Day's cooldown (#1558)",
+  "contract": "300315 is ADD_FLAT_MODIFIER (aura 107), MiscValue 11 = SPELLMOD_COOLDOWN, EffectSpellClassMask word 1 = 0x8. Judgement Day (806121, the RecoveryTime-60000 player-cast rank; its own EffectTriggerSpell 570125 is only an internal incap driver with no cooldown of its own) carries that same bit in its own SpellFamilyFlags word 1 (0x8). 300315 is not one of the family-33 named-root cases in SpellInfo::IsAffectedBySpellMod, so the check falls through to the generic flag96 AND, which matches. BasePoints -15001 resolves to -15000 per SpellEffectInfo::CalcBaseValue (DieSides 1 subtracts one from the stored value), matching 'Reduces the cooldown of Judgement Day by 15 sec' exactly. Native only, no server code needed.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    {
+      "action": "snapshot", "label": "Judgement Day cooldown modifier before the talent",
+      "actor": "caster", "metric": "spell_modifier", "spell": 806121, "op": 11, "base": 60000, "save_as": "cd_before"
+    },
+    { "action": "learn", "label": "Reduces the cooldown of Judgement Day by 15 sec", "actor": "caster", "spell": 300315 },
+    {
+      "action": "assert", "label": "Judgement Day's cooldown modifier drops by 15000ms",
+      "actor": "caster", "metric": "spell_modifier", "spell": 806121, "op": 11, "base": 60000,
+      "relative_to": "cd_before", "equals": -15000
+    }
+  ]
+}

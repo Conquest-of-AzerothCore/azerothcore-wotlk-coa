@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Heavy Winds and Concentrated Static native effect mods (#2054, #2157)",
+  "contract": "#2054: Heavy Winds (567542) effect1 is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 23 (SPELLMOD_EFFECT3), EffectBasePoints 14 + EffectDieSides 1 = 15, EffectSpellClassMask word2 32768 (0x8000) overlapping Stabilizing Pressure's (572399) own SpellFamilyFlags word1/word2 (16777216/32768). Effect0 is the same aura/op11 (SPELLMOD_COOLDOWN) with EffectBasePoints -1+1=0, an inert filler. Unit::ApplyEffectModifiers (Unit.cpp:12149-12168) routes SPELLMOD_EFFECT3 to effect index 2 of the affected spell inside SpellEffectInfo::CalcValue; Stabilizing Pressure's own effect index 2 is SPELL_AURA_REDUCE_PUSHBACK with EffectBasePoints 34 + EffectDieSides 1 = 35, confirmed today via coa-dbc-viewer against /home/fab/CoaServer/dbc_clientset, so Heavy Winds must raise it to 35+15=50. #2157: Concentrated Static (570722) effect0 is aura 107, MiscValue 12 (SPELLMOD_EFFECT2), EffectBasePoints 4+1=5, EffectSpellClassMask word1 4096 (0x1000) matching Discharge's (805288) own SpellFamilyFlags word1 exactly. SPELLMOD_EFFECT2 routes to effect index 1, which on Discharge is SPELL_EFFECT_ENERGIZE_PCT with EffectBasePoints 14+1=15 (confirmed via coa-dbc-viewer), so Concentrated Static must raise it to 15+5=20. Both are plain SPELLMOD_EFFECTn-on-classmask-matched-spell mechanics (parity contract bullet 7): the engine's own SpellInfo effect-value calculation applies them without any module code, independent of PR #4612's pending spell_bonus_data restoration (which touches damage/DoT scaling coefficients, not these percentage effects).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "sb",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "label": "Learn Stabilizing Pressure", "actor": "sb", "spell": 572399 },
+    { "action": "learn", "label": "Learn Discharge", "actor": "sb", "spell": 805288 },
+    { "action": "assert", "label": "BASELINE: Stabilizing Pressure's own pushback-reduction effect is 35",
+      "actor": "sb", "metric": "spell_effect_value", "spell": 572399, "effect": 2, "equals": 35 },
+    { "action": "assert", "label": "BASELINE: no SPELLMOD_EFFECT3 modifier on Stabilizing Pressure before Heavy Winds",
+      "actor": "sb", "metric": "spell_modifier", "spell": 572399, "op": 23, "base": 35, "equals": 35 },
+    { "action": "assert", "label": "BASELINE: Discharge's own mana-restore effect is 15",
+      "actor": "sb", "metric": "spell_effect_value", "spell": 805288, "effect": 1, "equals": 15 },
+    { "action": "assert", "label": "BASELINE: no SPELLMOD_EFFECT2 modifier on Discharge before Concentrated Static",
+      "actor": "sb", "metric": "spell_modifier", "spell": 805288, "op": 12, "base": 15, "equals": 15 },
+    { "action": "learn", "label": "Learn Heavy Winds", "actor": "sb", "spell": 567542 },
+    { "action": "assert", "label": "DISCRIMINATING: Heavy Winds raises Stabilizing Pressure's pushback-reduction effect to 50",
+      "actor": "sb", "metric": "spell_effect_value", "spell": 572399, "effect": 2, "equals": 50 },
+    { "action": "assert", "label": "DISCRIMINATING: Heavy Winds is a +15 SPELLMOD_EFFECT3 modifier on Stabilizing Pressure",
+      "actor": "sb", "metric": "spell_modifier", "spell": 572399, "op": 23, "base": 35, "equals": 50 },
+    { "action": "assert", "label": "Heavy Winds leaves Discharge's mana-restore effect untouched",
+      "actor": "sb", "metric": "spell_effect_value", "spell": 805288, "effect": 1, "equals": 15 },
+    { "action": "learn", "label": "Learn Concentrated Static", "actor": "sb", "spell": 570722 },
+    { "action": "assert", "label": "DISCRIMINATING: Concentrated Static raises Discharge's mana-restore effect to 20",
+      "actor": "sb", "metric": "spell_effect_value", "spell": 805288, "effect": 1, "equals": 20 },
+    { "action": "assert", "label": "DISCRIMINATING: Concentrated Static is a +5 SPELLMOD_EFFECT2 modifier on Discharge",
+      "actor": "sb", "metric": "spell_modifier", "spell": 805288, "op": 12, "base": 15, "equals": 20 },
+    { "action": "assert", "label": "Concentrated Static leaves Stabilizing Pressure's effect at Heavy Winds' 50",
+      "actor": "sb", "metric": "spell_effect_value", "spell": 572399, "effect": 2, "equals": 50 }
+  ]
+}

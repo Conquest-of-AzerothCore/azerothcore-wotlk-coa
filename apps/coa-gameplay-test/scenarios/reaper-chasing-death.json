@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "name": "Chasing Death keeps Deathchaser on a target below 20% health for its 5-second window (#972)",
+  "contract": [
+    "Chasing Death 707455 (Reaper Soul talent, CharacterAdvancement 6709) reads: Deathchaser used against a target below 20% health will now reapply itself at the end of its duration until they die or until $807418d (5 sec, SpellDuration 28) passes. Every Deathchaser rank (805190 and its spell_ranks chain up to 573053, SpellFamilyName 36, SpellFamilyFlags[0] 0x4) repeats the clause.",
+    "Spell.dbc: 707455 is a single SPELL_AURA_PROC_TRIGGER_SPELL effect with TriggerSpell 807418 and ProcFlags 0. 807418 (Chasing Death, Extender Aura) is an enemy-target aura with TargetAuraState 2 (below 20% health), 5000 ms duration and SPELL_AURA_PERIODIC_TRIGGER_SPELL every 499 ms into 807546, which is SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION on Deathchaser 805190 with value 1001, also TargetAuraState 2. Deathchaser itself lasts 1000 ms (SpellDuration 36) and ticks every 250 ms, four ticks without the talent.",
+    "Expected: after a landed Deathchaser on a target below 20% health the extender aura is on the target, Deathchaser is still present and still ticking well after its 1-second duration, and it is gone within about one Deathchaser duration after the 5-second window. On a target above 20% health nothing changes: no extender aura and Deathchaser ends after its four ticks. The same holds for the level-60 rank 573053.",
+    "Deathchaser 805190 is DmgClass 2 (melee), so the Reaper gets melee hit and expertise rating so the application roll cannot miss or be dodged; Soul Infusion 803031 is its CasterAuraSpell."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "creatures": [
+    { "id": "healthy", "owner": "reaper", "entry": 36, "level": 80, "distance": 2, "health": 1000000 },
+    { "id": "dying", "owner": "reaper", "entry": 36, "level": 80, "distance": 2, "health": 1000000 },
+    { "id": "dying_high", "owner": "reaper", "entry": 36, "level": 80, "distance": 2, "health": 1000000 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "reaper", "spell": 707455 },
+    { "action": "assert", "label": "Chasing Death passive is active", "actor": "reaper", "metric": "aura", "spell": 707455, "equals": 1, "within_ms": 3000 },
+    { "action": "learn", "actor": "reaper", "spell": 805190 },
+
+    { "action": "assert", "label": "CONTROL target starts above 20% health", "actor": "healthy", "metric": "health_pct", "min": 99 },
+    { "action": "set_aura", "label": "Supply Deathchaser's required Soul Infusion", "actor": "reaper", "spell": 803031, "stacks": 1 },
+    { "action": "snapshot", "actor": "reaper", "metric": "spell_damage_count", "spell": 805190, "target": "healthy", "save_as": "healthy_ticks0" },
+    { "action": "cast", "label": "Deathchaser on a target above 20% health", "actor": "reaper", "spell": 805190, "target": "healthy" },
+    { "action": "assert", "label": "CONTROL Deathchaser cast was accepted", "actor": "reaper", "metric": "cast_failure", "spell": 805190, "equals": 0 },
+    { "action": "assert", "label": "CONTROL Deathchaser landed", "actor": "healthy", "metric": "aura", "spell": 805190, "caster": "reaper", "equals": 1, "within_ms": 1000 },
+    { "action": "wait", "label": "Outlast Deathchaser's own 1-second duration", "ms": 2000 },
+    { "action": "assert", "label": "CONTROL no extender aura above 20% health", "actor": "healthy", "metric": "aura", "spell": 807418, "equals": 0 },
+    { "action": "assert", "label": "CONTROL Deathchaser expired on schedule above 20% health", "actor": "healthy", "metric": "aura", "spell": 805190, "equals": 0 },
+    { "action": "assert", "label": "CONTROL Deathchaser dealt only its own ticks", "actor": "reaper", "metric": "spell_damage_count", "spell": 805190, "target": "healthy", "relative_to": "healthy_ticks0", "min": 1, "max": 5 },
+
+    { "action": "set_health", "actor": "dying", "value": 150000 },
+    { "action": "wait", "label": "Let the health aura state update", "ms": 250 },
+    { "action": "assert", "label": "Target is below 20% health", "actor": "dying", "metric": "health_pct", "max": 19.9 },
+    { "action": "set_aura", "label": "Supply Deathchaser's required Soul Infusion", "actor": "reaper", "spell": 803031, "stacks": 1 },
+    { "action": "snapshot", "actor": "reaper", "metric": "spell_damage_count", "spell": 805190, "target": "dying", "save_as": "dying_ticks0" },
+    { "action": "cast", "label": "Deathchaser rank 1 on a target below 20% health", "actor": "reaper", "spell": 805190, "target": "dying" },
+    { "action": "assert", "label": "Deathchaser cast was accepted", "actor": "reaper", "metric": "cast_failure", "spell": 805190, "equals": 0 },
+    { "action": "assert", "label": "Deathchaser landed", "actor": "dying", "metric": "aura", "spell": 805190, "caster": "reaper", "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "REGRESSION Chasing Death applies its extender aura", "actor": "dying", "metric": "aura", "spell": 807418, "caster": "reaper", "equals": 1, "within_ms": 1000 },
+    { "action": "wait", "label": "Well past Deathchaser's own 1-second duration", "ms": 2500 },
+    { "action": "assert", "label": "REGRESSION Deathchaser persists on the dying target", "actor": "dying", "metric": "aura", "spell": 805190, "caster": "reaper", "equals": 1 },
+    { "action": "assert", "label": "REGRESSION the persisting Deathchaser keeps ticking past its four ticks", "actor": "reaper", "metric": "spell_damage_count", "spell": 805190, "target": "dying", "relative_to": "dying_ticks0", "min": 8 },
+    { "action": "wait", "label": "Let the 5-second window and one Deathchaser duration pass", "ms": 5000 },
+    { "action": "assert", "label": "The extender aura ends after 5 seconds", "actor": "dying", "metric": "aura", "spell": 807418, "equals": 0 },
+    { "action": "assert", "label": "Deathchaser does not outlast the 5-second window", "actor": "dying", "metric": "aura", "spell": 805190, "equals": 0 },
+    { "action": "assert", "label": "Deathchaser ticked through the whole window", "actor": "reaper", "metric": "spell_damage_count", "spell": 805190, "target": "dying", "relative_to": "dying_ticks0", "min": 16, "max": 28 },
+    { "action": "assert", "label": "The target survived and stayed below 20% health", "actor": "dying", "metric": "health_pct", "min": 1, "max": 19.9 },
+
+    { "action": "learn", "label": "Learn the level-60 rank only now: a learned higher rank deactivates rank 1", "actor": "reaper", "spell": 573053 },
+    { "action": "set_health", "actor": "dying_high", "value": 150000 },
+    { "action": "wait", "label": "Let the health aura state update", "ms": 250 },
+    { "action": "assert", "label": "Second target is below 20% health", "actor": "dying_high", "metric": "health_pct", "max": 19.9 },
+    { "action": "set_aura", "label": "Supply Deathchaser's required Soul Infusion", "actor": "reaper", "spell": 803031, "stacks": 1 },
+    { "action": "cast", "label": "Deathchaser rank 8 on a target below 20% health", "actor": "reaper", "spell": 573053, "target": "dying_high" },
+    { "action": "assert", "label": "Rank 8 cast was accepted", "actor": "reaper", "metric": "cast_failure", "spell": 573053, "equals": 0 },
+    { "action": "assert", "label": "Rank 8 landed", "actor": "dying_high", "metric": "aura", "spell": 573053, "caster": "reaper", "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "REGRESSION rank 8 also applies the extender aura", "actor": "dying_high", "metric": "aura", "spell": 807418, "caster": "reaper", "equals": 1, "within_ms": 1000 },
+    { "action": "wait", "label": "Well past rank 8's own 1-second duration", "ms": 2500 },
+    { "action": "assert", "label": "REGRESSION the extender sustains rank 8, not only rank 1", "actor": "dying_high", "metric": "aura", "spell": 573053, "caster": "reaper", "equals": 1 },
+    { "action": "wait", "label": "Let the 5-second window and one Deathchaser duration pass", "ms": 5000 },
+    { "action": "assert", "label": "Rank 8 does not outlast the 5-second window", "actor": "dying_high", "metric": "aura", "spell": 573053, "equals": 0 }
+  ]
+}

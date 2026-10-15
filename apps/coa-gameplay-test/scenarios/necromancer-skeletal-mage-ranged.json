@@ -1,0 +1,92 @@
+{
+ "schema": 1,
+ "name": "Necromancer: Skeletal Mage stays at range and casts its frost bolt (#4178)",
+ "contract": "A Skeletal Mage (50075) fights from range with its Frost auto-attack (801513) instead of walking up to melee its target.",
+ "timeout_ms": 120000,
+ "players": [
+  {
+   "id": "n",
+   "race": 5,
+   "class": 23,
+   "level": 60
+  }
+ ],
+ "creatures": [
+  {
+   "id": "d",
+   "owner": "n",
+   "entry": 299,
+   "level": 60,
+   "distance": 15
+  }
+ ],
+ "steps": [
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "learn",
+   "spell": 500331,
+   "actor": "n"
+  },
+  {
+   "action": "cast",
+   "spell": 500331,
+   "actor": "n"
+  },
+  {
+   "action": "assert",
+   "label": "mage raised",
+   "metric": "owned_creature_count",
+   "entry": 50075,
+   "min": 1,
+   "within_ms": 8000,
+   "actor": "n"
+  },
+  {
+   "action": "snapshot",
+   "actor": "d",
+   "metric": "health",
+   "save_as": "h0"
+  },
+  {
+   "action": "learn",
+   "actor": "n",
+   "spell": 133
+  },
+  {
+   "action": "cast",
+   "actor": "n",
+   "spell": 133,
+   "target": "d"
+  },
+  {
+   "action": "wait",
+   "ms": 20000
+  },
+  {
+   "action": "assert",
+   "label": "mage cast frost bolts from range (some damage)",
+   "actor": "d",
+   "metric": "health",
+   "relative_to": "h0",
+   "max": -100
+  },
+  {
+   "action": "assert",
+   "label": "mage did not close to melee (baseline melee took ~2400 in the same window)",
+   "actor": "d",
+   "metric": "health",
+   "relative_to": "h0",
+   "min": -1200
+  }
+ ],
+ "location": {
+  "map": 0,
+  "x": -8917.41,
+  "y": -115.853,
+  "z": 82.3711,
+  "o": 0.0
+ }
+}

@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Ungodly Blessing cuts curse duration through the native dispel-type duration aura (#1802)",
+  "contract": "301241 Effect[0] is SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL (245) with EffectMiscValue=2 (DISPEL_CURSE, SharedDefines.h:1466), EffectBasePoints=-41, EffectDieSides=1, so CalcValue=-40 (-40%, matching the tooltip exactly). This aura type is fully native: SpellAuraEffects.cpp:310 binds it to HandleNoImmediateEffect (a passive lookup, not a tick), and Unit::ModSpellDuration (Unit.cpp:12193, consuming line 12243) reads target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL, spellProto->Dispel) whenever a curse (Dispel==DISPEL_CURSE==2) lands on the aura holder, and shortens its applied duration by the sum of this modifier. No script or classmask is needed: any curse works, so Curse of Weakness (702, Dispel=2, DurationIndex=4, SpellDuration.dbc id 4 = 120000 ms, verified) is used as the probe. Positive control: the curse runs its full 120000 ms before the talent is learned. A fresh level-80 Warlock fixture does not automatically know Curse of Weakness (HasActiveSpell returned false on the first native run, and the cast was a silent no-op), so the warlock must `learn` 702 before casting it. Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 80 },
+    { "id": "warlock", "race": 5, "class": 9, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    {
+      "action": "pvp", "actor": "cultist", "enabled": true,
+      "label": "SETUP: same-faction players can't hit each other with a harmful spell (SpellInfo::CheckExplicitTarget -> Unit::_IsValidAttackTarget); the warlock fixture is Horde (race 5) so both need PvP flags for Curse of Weakness to land"
+    },
+    { "action": "pvp", "actor": "warlock", "enabled": true },
+    { "action": "learn", "actor": "warlock", "spell": 702 },
+    {
+      "action": "cast", "label": "SETUP: warlock curses the cultist before the talent is learned",
+      "actor": "warlock", "spell": 702, "target": "cultist"
+    },
+    {
+      "action": "assert", "label": "SETUP: Curse of Weakness runs its full 120000 ms duration",
+      "actor": "cultist", "metric": "aura_duration_ms", "spell": 702,
+      "min": 116000, "max": 120000, "within_ms": 2000
+    },
+    { "action": "set_aura", "actor": "cultist", "spell": 702, "stacks": 0 },
+    { "action": "learn", "actor": "cultist", "spell": 301241 },
+    {
+      "action": "wait", "ms": 1700,
+      "label": "Let the global cooldown from the warlock's first Curse of Weakness cast clear (702's own StartRecoveryCategory 133 / StartRecoveryTime 1000ms; RecoveryTime and CategoryRecoveryTime are both 0, so only the GCD blocks the immediate recast)"
+    },
+    { "action": "cast", "actor": "warlock", "spell": 702, "target": "cultist" },
+    {
+      "action": "assert", "label": "Ungodly Blessing cuts the same curse's duration by 40% (#1802)",
+      "actor": "cultist", "metric": "aura_duration_ms", "spell": 702,
+      "min": 69000, "max": 72000, "within_ms": 2000
+    }
+  ]
+}

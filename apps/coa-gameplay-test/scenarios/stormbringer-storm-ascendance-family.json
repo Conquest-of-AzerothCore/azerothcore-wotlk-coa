@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Ascension and Power Surge modify Storm Ascendance natively (#1806, #3184)",
+  "contract": "#1806 and #3184 report 'Spell Script / Aura Handler Not Implemented' for two passives that are plain Spell.dbc modifiers on Storm Ascendance (681110, SpellFamilyName 22). #1806: Ascension (301260) is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0]=1 SPELLMOD_DURATION, EffectBasePoints[0]=9999 + DieSides 1 = +10000 ms, class mask effect0/word2/bit0 intersecting 681110's own SpellFamilyFlags[2]=1; Storm Ascendance's own DurationIndex 8 -> SpellDuration.dbc row 8 = 15000 ms, so the modified duration is 25000 ms. #3184: Power Surge (800699) is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0]=12 SPELLMOD_EFFECT2, EffectBasePoints[0]=9 + DieSides 1 = +10, same class mask, modifying effect index 1 of 681110 (aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, misc 126, EffectBasePoints[1]=19 + DieSides 1 = 20), so the modified amount is 30. Aura::CalcMaxDuration (SpellAuras.cpp:811-812), Unit::ApplyEffectModifiers (Unit.cpp:12149-12167) and SpellInfo::IsAffectedBySpellMod (SpellInfo.cpp:1472-1552, no family-22 special case) apply SPELLMOD_DURATION and SPELLMOD_EFFECT2 generically for every spell family, so no module code is needed for either passive. Values are the server's own Player::ApplySpellMod, measured before and after learning on the same actor, then confirmed on the live aura after casting 681110.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Storm Ascendance",
+      "actor": "s",
+      "spell": 681110
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Storm Ascendance's duration modifier is unmodified without Ascension",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 681110,
+      "op": 1,
+      "base": 15000,
+      "equals": 15000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Storm Ascendance's magic-damage-done amount is unmodified without Power Surge",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 681110,
+      "op": 12,
+      "base": 20,
+      "equals": 20
+    },
+    {
+      "action": "learn",
+      "label": "Learn Ascension",
+      "actor": "s",
+      "spell": 301260
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING (#1806): Ascension lengthens Storm Ascendance's duration by 10000 ms",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 681110,
+      "op": 1,
+      "base": 15000,
+      "equals": 25000
+    },
+    {
+      "action": "assert",
+      "label": "Ascension leaves Storm Ascendance's damage-done amount untouched (class mask targets effect0/SPELLMOD_DURATION only)",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 681110,
+      "op": 12,
+      "base": 20,
+      "equals": 20
+    },
+    {
+      "action": "cast",
+      "label": "Cast Storm Ascendance with Ascension learned",
+      "actor": "s",
+      "spell": 681110
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING (#1806) confirmation: the live aura's duration reflects the +10000 ms modifier",
+      "actor": "s",
+      "metric": "aura_duration_ms",
+      "spell": 681110,
+      "min": 24000
+    },
+    {
+      "action": "wait",
+      "label": "Let Storm Ascendance expire before isolating Power Surge",
+      "ms": 25500
+    },
+    {
+      "action": "learn",
+      "label": "Learn Power Surge",
+      "actor": "s",
+      "spell": 800699
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING (#3184): Power Surge adds 10 to Storm Ascendance's magic-damage-done amount",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 681110,
+      "op": 12,
+      "base": 20,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Power Surge leaves Storm Ascendance's duration modifier untouched (class mask targets effect0/SPELLMOD_EFFECT2 only)",
+      "actor": "s",
+      "metric": "spell_modifier",
+      "spell": 681110,
+      "op": 1,
+      "base": 15000,
+      "equals": 25000
+    },
+    {
+      "action": "reset_cooldown",
+      "label": "Reset Storm Ascendance's 120000 ms recovery time before recasting (the 25500 ms wait only covers the modified 25000 ms aura duration, not the spell's own cooldown)",
+      "actor": "s",
+      "spell": 681110
+    },
+    {
+      "action": "cast",
+      "label": "Cast Storm Ascendance with Power Surge learned",
+      "actor": "s",
+      "spell": 681110
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING (#3184) confirmation: the live aura's effect 1 amount reflects the +10 modifier",
+      "actor": "s",
+      "metric": "aura_amount",
+      "spell": 681110,
+      "effect": 1,
+      "equals": 30
+    }
+  ]
+}

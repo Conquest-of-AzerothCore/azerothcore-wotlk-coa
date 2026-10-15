@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Gore Barrage already reduces Animated Blood's cost by 30% (#3668)",
+  "contract": "REGRESSION ONLY - nothing is changed for this issue. Gore Barrage 807345 reads 'Reduces the cost of spells that cost health and Animated Blood by $s1%'. Its effect 0 is aura 108 (SPELL_AURA_ADD_PCT_MODIFIER) with MiscValue 14 (SPELLMOD_COST), BasePoints -31 (-30%) and EffectSpellClassMask (3507750913, 2285969409, 2149647768), whose first word has bit 0 set - Animated Blood 573299 carries SpellFamilyFlags (1, 0, 0) and is therefore covered. That clause is delivered entirely by native code and needs no data: AuraEffect::CalculateSpellMod registers the modifier and SpellInfo::CalcPowerCost applies it through Player::ApplySpellMod(SPELLMOD_COST). The assertion is a ratio against the same spell's unmodified cost, so it holds whatever the base Rage cost is. Effect 1 of 807345 is a second, tooltip-less aura 42 on Bloodshards 504741 that is inert for the usual ProcFlags-0 reason; no tooltip clause claims it and it is deliberately not exercised here.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 573299
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Animated Blood is known",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 573299,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Animated Blood's cost without Gore Barrage",
+      "actor": "bloodmage",
+      "metric": "spell_power_cost",
+      "spell": 573299,
+      "save_as": "cost_before"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Animated Blood has a nonzero unmodified cost",
+      "actor": "bloodmage",
+      "metric": "spell_power_cost",
+      "spell": 573299,
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 807345
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Gore Barrage passive is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 807345,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the same reduction expressed as a ratio",
+      "actor": "bloodmage",
+      "metric": "spell_power_cost",
+      "spell": 573299,
+      "ratio_to": "cost_before",
+      "min": 0.69,
+      "max": 0.71
+    }
+  ]
+}

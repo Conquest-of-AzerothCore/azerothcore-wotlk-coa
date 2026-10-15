@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Surge of Might adds Nature damage to allied hits (#1395)",
+  "contract": "#1395: Surge of Might (520083) reads \"Emanate an aura around you for $520084d, causing allied players within $a yds to deal ${$spn*0.7} additional damage as Nature damage when they deal direct damage.\" Spell.dbc: 520083 Effect[0] = 142 SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE on TARGET_UNIT_CASTER_AREA_RAID triggering 520084 with EffectBasePoints -1 + EffectDieSides 1 = 0; 520084 Effect[0] = aura 231 SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE triggering 573254 and Effect[1] applies Exhaustion 573255; 573254 is SPELL_EFFECT_SCHOOL_DAMAGE with SchoolMask 8 (Nature). Two things were missing. 520084 has ProcFlags 0 and no spell_proc row, so SpellMgr::LoadSpellProcs generated no entry and Aura::GetProcEffectMask returned 0 without one: the aura landed and never fired. And the forwarded value was the raw effect value, 0, because nothing computed ${$spn*0.7}. The fix mirrors Neptulon's Wrath: a spell_proc row for 520084, a DoCheckProc restricting it to the owner's own non-periodic hits on an enemy, and a UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE hook adding 0.7 x the Stormbringer's Nature spell power to 520083's effect 0. Flask of the Frost Wyrm (53755) is the fixture's spell power source: its aura 345 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT has EffectBasePoints 124 + EffectDieSides 1 = 125 with MiscValue 127, which covers Nature. Fire Blast (2136) is only the ally's direct-damage carrier.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "sb", "race": 1, "class": 16, "level": 80, "spell_hit_rating": 10000 },
+    { "id": "ally", "race": 1, "class": 16, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "sb", "entry": 28168, "level": 80, "health": 500000, "distance": 3 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn and level scaling settle", "ms": 4000 },
+    { "action": "group", "actor": "sb", "target": "ally" },
+    { "action": "set_aura", "label": "Give the Stormbringer a known spell power", "actor": "sb",
+      "spell": 53755, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: the flask supplies at least 124 + 1 = 125 Nature spell power",
+      "actor": "sb", "metric": "spell_power", "school": 3, "min": 125 },
+    { "action": "learn", "actor": "sb", "spell": 520083 },
+    { "action": "learn", "actor": "ally", "spell": 2136 },
+    { "action": "cast", "actor": "sb", "spell": 520083 },
+    { "action": "assert", "label": "BASELINE: the raid aura reaches the grouped ally",
+      "actor": "ally", "metric": "aura", "spell": 520084, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "BASELINE: the ally is marked with Exhaustion",
+      "actor": "ally", "metric": "aura", "spell": 573255, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the aura carries 0.7 x 125 = 87.5 truncated to 87, plus 1 from EffectDieSides, instead of the forwarded 0 + 1",
+      "actor": "ally", "metric": "aura_amount", "spell": 520084, "min": 87 },
+    { "action": "wait", "label": "Let the Surge of Might global cooldown expire", "ms": 1700 },
+    { "action": "cast", "actor": "ally", "spell": 2136, "target": "dummy" },
+    { "action": "assert", "label": "DISCRIMINATING: the ally's direct damage procs the aura",
+      "actor": "ally", "metric": "spell_proc_count", "spell": 520084, "min": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the proc deals Nature damage 573254, logged under sb (Spell::DoAllEffectOnTarget uses m_originalCaster, which HandleProcTriggerSpellWithValueAuraProc resolves via triggeredByAura->GetCasterGUID() to 520084's own caster sb, not the proccing ally)",
+      "actor": "sb", "metric": "spell_damage_count", "spell": 573254, "min": 1, "within_ms": 2000 }
+  ]
+}

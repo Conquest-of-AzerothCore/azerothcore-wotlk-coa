@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Infernal Pursuit raises melee haste by 3% and shortens root duration by 15% (#2469)",
+  "contract": "Infernal Pursuit 704992 reads 'Increases your melee haste by $s1% and reduces the duration of root effects against you by $s2%.' Effect 0 is native aura 138 (SPELL_AURA_MOD_MELEE_HASTE), EffectBasePoints 2 with DieSides 1 -> 3, handler AuraEffect::HandleModMeleeSpeedPct (src/server/game/Spells/Auras/SpellAuraEffects.cpp:203,4993) -- a native generic attack-speed aura, fully wired. Effect 1 is native aura 232 (SPELL_AURA_MECHANIC_DURATION_MOD), EffectMiscValue 7 (MECHANIC_ROOT, confirmed at src/server/shared/DataStores/SharedDefines.h:1409), EffectBasePoints -16 with DieSides 1 -> -15 (all verified directly in the installed Spell.dbc). Its handler comment at SpellAuraEffects.cpp:297 reads '232 SPELL_AURA_MECHANIC_DURATION_MOD implement in Unit::CalculateSpellDuration' and is consumed at src/server/game/Entities/Unit/Unit.cpp:12224 via target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD, i) inside Unit::ModSpellDuration's per-mechanic loop over a landing harmful spell's mechanic mask -- a real, wired native consumer on the recipient side, not a stub. HARNESS LIMIT: ModSpellDuration's reduction can only be observed on a debuff actually cast on the Knight (Unit::AddAura, used by set_aura, never calls it -- its only callers are the real cast path in Spell.cpp and SpellEffects.cpp). This scenario follows the established Adrenaline precedent (apps/coa-gameplay-test/scenarios/bloodmage-adrenaline.json, same aura type and consuming function) for that same harness limit: it asserts the resolved aura_amount for effect 1 (the value ModSpellDuration would apply) rather than fabricating a self-cast root fixture; the duration reduction on a real incoming root needs a Ghost e2e encounter.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "knight", "metric": "attack_time_ms", "save_as": "attack_time_before" },
+    { "action": "assert", "label": "SETUP: the baseline attack time is positive", "actor": "knight", "metric": "attack_time_ms", "min": 1 },
+    { "action": "learn", "actor": "knight", "spell": 704992 },
+    { "action": "set_aura", "actor": "knight", "spell": 704992, "stacks": 1, "label": "Force the Infernal Pursuit passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Infernal Pursuit passive is active",
+      "actor": "knight", "metric": "aura", "spell": 704992, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: melee attack time drops by ~3% (faster attacks)",
+      "actor": "knight", "metric": "attack_time_ms", "ratio_to": "attack_time_before", "min": 0.965, "max": 0.975
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the root-duration-mod effect resolves to -15 percent",
+      "actor": "knight", "metric": "aura_amount", "spell": 704992, "effect": 1, "equals": -15
+    }
+  ]
+}

@@ -1,0 +1,459 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Hegemony grants and extends Radiance without spending its manual cooldown (#5674)",
+  "contract": "Current Spell.dbc Hegemony561204 adds6000ms to manual Radiance800054 and promises a6000ms grant or extension whenever Dawn804584 is used. Helper302907 independently specifies6000ms. Radiance retains its120000ms manual cooldown. Paid CharacterAdvancement11911 acquires Hegemony normally at level60. Normal Dawn consumes20 Solar Power and grants a working periodic heal/damage aura; untalented Dawn grants none. Talent grants, extensions, expiry and grants during an existing manual cooldown must not start, restart or clear that cooldown. This scenario checks native server cooldown state; client rendering is not observed.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "plain",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "gift",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "manual",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "gift",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 804584
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 800054
+    },
+    {
+      "action": "learn",
+      "actor": "gift",
+      "spell": 804584
+    },
+    {
+      "action": "learn",
+      "actor": "gift",
+      "spell": 800054
+    },
+    {
+      "action": "learn",
+      "actor": "manual",
+      "spell": 804584
+    },
+    {
+      "action": "learn",
+      "actor": "manual",
+      "spell": 800054
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "gift",
+      "entry": 11911,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "gift",
+      "metric": "aura",
+      "spell": 561204,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "manual",
+      "entry": 11911,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "manual",
+      "metric": "aura",
+      "spell": 561204,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "group",
+      "actor": "gift",
+      "target": "plain"
+    },
+    {
+      "action": "set_aura",
+      "actor": "plain",
+      "spell": 500149,
+      "stacks": 20
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "aura",
+      "spell": 704396,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "plain",
+      "spell": 804584
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "aura",
+      "spell": 807440,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "aura",
+      "spell": 800054,
+      "equals": 0,
+      "label": "Dawn without Hegemony grants no Radiance"
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "cooldown_ms",
+      "spell": 800054,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "plain",
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "gift",
+      "spell": 500149,
+      "stacks": 20
+    },
+    {
+      "action": "assert",
+      "actor": "gift",
+      "metric": "aura",
+      "spell": 704396,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "gift",
+      "spell": 804584
+    },
+    {
+      "action": "assert",
+      "actor": "gift",
+      "metric": "aura",
+      "spell": 807440,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "gift",
+      "metric": "aura_duration_ms",
+      "spell": 800054,
+      "min": 5600,
+      "max": 6000,
+      "label": "Hegemony grants the independently authored six-second Radiance"
+    },
+    {
+      "action": "assert",
+      "actor": "gift",
+      "metric": "cooldown_ms",
+      "spell": 800054,
+      "equals": 0,
+      "label": "The talent grant leaves ready Radiance ready"
+    },
+    {
+      "action": "assert",
+      "actor": "gift",
+      "metric": "spell_damage_count",
+      "spell": 800038,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "gift",
+      "metric": "spell_effective_heal_total",
+      "spell": 800038,
+      "target": "plain",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "gift",
+      "spell": 807440,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Let the native Dawn global cooldown expire before the extension control"
+    },
+    {
+      "action": "set_aura",
+      "actor": "gift",
+      "spell": 500149,
+      "stacks": 20
+    },
+    {
+      "action": "assert",
+      "actor": "gift",
+      "metric": "aura",
+      "spell": 704396,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "gift",
+      "metric": "aura_duration_ms",
+      "spell": 800054,
+      "save_as": "gift_remaining"
+    },
+    {
+      "action": "cast",
+      "actor": "gift",
+      "spell": 804584
+    },
+    {
+      "action": "assert",
+      "actor": "gift",
+      "metric": "aura",
+      "spell": 807440,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "gift",
+      "metric": "aura_duration_ms",
+      "spell": 800054,
+      "relative_to": "gift_remaining",
+      "min": 5500,
+      "max": 6100,
+      "label": "An active talent-granted Radiance extends by six seconds"
+    },
+    {
+      "action": "assert",
+      "actor": "gift",
+      "metric": "cooldown_ms",
+      "spell": 800054,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 11500
+    },
+    {
+      "action": "assert",
+      "actor": "gift",
+      "metric": "aura",
+      "spell": 800054,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "gift",
+      "metric": "cooldown_ms",
+      "spell": 800054,
+      "equals": 0,
+      "label": "Radiance expiry also leaves the manual ability ready"
+    },
+    {
+      "action": "cast",
+      "actor": "manual",
+      "spell": 800054
+    },
+    {
+      "action": "assert",
+      "actor": "manual",
+      "metric": "aura_duration_ms",
+      "spell": 800054,
+      "min": 15500,
+      "max": 16000,
+      "within_ms": 2000,
+      "label": "Manual Radiance retains the ten-second base plus six-second talent duration"
+    },
+    {
+      "action": "assert",
+      "actor": "manual",
+      "metric": "cooldown_ms",
+      "spell": 800054,
+      "min": 117000,
+      "max": 120000,
+      "label": "Manual Radiance starts its ordinary two-minute cooldown"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "manual",
+      "spell": 500149,
+      "stacks": 20
+    },
+    {
+      "action": "assert",
+      "actor": "manual",
+      "metric": "aura",
+      "spell": 704396,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "manual",
+      "metric": "aura_duration_ms",
+      "spell": 800054,
+      "save_as": "manual_remaining"
+    },
+    {
+      "action": "snapshot",
+      "actor": "manual",
+      "metric": "cooldown_ms",
+      "spell": 800054,
+      "save_as": "manual_cooldown"
+    },
+    {
+      "action": "cast",
+      "actor": "manual",
+      "spell": 804584
+    },
+    {
+      "action": "assert",
+      "actor": "manual",
+      "metric": "aura",
+      "spell": 807440,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "manual",
+      "metric": "aura_duration_ms",
+      "spell": 800054,
+      "relative_to": "manual_remaining",
+      "min": 5500,
+      "max": 6100
+    },
+    {
+      "action": "assert",
+      "actor": "manual",
+      "metric": "cooldown_ms",
+      "spell": 800054,
+      "relative_to": "manual_cooldown",
+      "min": -600,
+      "max": 0,
+      "label": "Dawn extends manually cast Radiance without restarting or clearing its cooldown"
+    },
+    {
+      "action": "set_aura",
+      "actor": "manual",
+      "spell": 800054,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "manual",
+      "spell": 807440,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "manual",
+      "spell": 500149,
+      "stacks": 20
+    },
+    {
+      "action": "assert",
+      "actor": "manual",
+      "metric": "aura",
+      "spell": 704396,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "manual",
+      "metric": "cooldown_ms",
+      "spell": 800054,
+      "save_as": "still_on_cooldown"
+    },
+    {
+      "action": "cast",
+      "actor": "manual",
+      "spell": 804584
+    },
+    {
+      "action": "assert",
+      "actor": "manual",
+      "metric": "aura",
+      "spell": 807440,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "manual",
+      "metric": "aura_duration_ms",
+      "spell": 800054,
+      "min": 5500,
+      "max": 6000,
+      "within_ms": 2000,
+      "label": "Dawn can grant a fresh Radiance while the manually cast ability is cooling down"
+    },
+    {
+      "action": "assert",
+      "actor": "manual",
+      "metric": "cooldown_ms",
+      "spell": 800054,
+      "relative_to": "still_on_cooldown",
+      "min": -600,
+      "max": 0
+    }
+  ]
+}

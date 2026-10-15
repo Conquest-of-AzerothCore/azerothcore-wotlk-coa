@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "name": "Guardbreaker rank 2 applies an additional stack of Pommel Smash's debuff (#2231)",
+  "contract": "Guardbreaker rank 2 681493 text: 'Pommel Smash now strikes 2 additional nearby enemies and applies an additional stack.' In the client Spell.dbc (2026-09-17) its effect 1 is SPELL_AURA_PROC_TRIGGER_SPELL casting 582588, the debuff Pommel Smash 680515 applies once through its own trigger-spell effect (StackAmount 5), but 681493 has ProcFlags 0 and no spell_proc row existed, and SpellMgr does not generate proc entries for a spell without DBC ProcFlags, so the effect never ran. A spell_proc row on Pommel Smash's class mask (word2 0x2000000, melee spell class, on hit) makes each Pommel Smash hit add the second stack: a fresh target ends with exactly 2 stacks, 1 on main. Rank 1's chain-target clause is native and not asserted.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wh",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e1",
+      "owner": "wh",
+      "entry": 36,
+      "level": 60,
+      "health": 100000,
+      "distance": 3
+    },
+    {
+      "id": "e2",
+      "owner": "wh",
+      "entry": 36,
+      "level": 60,
+      "health": 100000,
+      "distance": 4
+    },
+    {
+      "id": "e3",
+      "owner": "wh",
+      "entry": 36,
+      "level": 60,
+      "health": 100000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "wh",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "wh",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "wait",
+      "label": "Let the weapon swap cooldown expire",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 680515
+    },
+    {
+      "action": "learn",
+      "label": "Guardbreaker rank 2",
+      "actor": "wh",
+      "spell": 681493
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 is known",
+      "actor": "wh",
+      "metric": "knows_spell",
+      "spell": 681493,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "wh",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Pommel Smash the first enemy",
+      "actor": "wh",
+      "spell": 680515,
+      "target": "e1"
+    },
+    {
+      "action": "assert",
+      "label": "Pommel Smash's own effect applies its debuff",
+      "actor": "e1",
+      "metric": "aura",
+      "spell": 582588,
+      "caster": "wh",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Let the proc resolve",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Guardbreaker rank 2 adds one more stack: 1 from Pommel Smash plus 1 from the proc",
+      "actor": "e1",
+      "metric": "aura_stacks",
+      "spell": 582588,
+      "caster": "wh",
+      "equals": 2
+    }
+  ]
+}

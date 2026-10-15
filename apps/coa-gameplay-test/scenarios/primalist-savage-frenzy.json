@@ -1,0 +1,265 @@
+{
+  "schema": 1,
+  "name": "Primalist Savage Frenzy: bonuses on owner and pet",
+  "contract": "One normal cast grants both owner and pet 20% damage, 30% melee/ranged haste and 30% movement speed for 18 seconds; cooldown and pet requirement remain native.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "spirit",
+      "owner": "primalist",
+      "entry": 1188,
+      "level": 19,
+      "health": 100000,
+      "distance": 5
+    },
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 806549
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 806549,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 806549,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 574301
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 574301,
+      "target": "spirit"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 24000
+    },
+    {
+      "action": "attack",
+      "actor": "primalist",
+      "target": "target"
+    },
+    {
+      "action": "attack",
+      "actor": "primalist",
+      "target": "target",
+      "pet": true
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "save_as": "base_attack_time_ms",
+      "label": "base_attack_time_ms"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "save_as": "base_run_speed_rate",
+      "label": "base_run_speed_rate"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "pet_run_speed_rate",
+      "save_as": "base_pet_run_speed_rate",
+      "label": "base_pet_run_speed_rate"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "weapon_damage_min",
+      "save_as": "base_damage",
+      "label": "base_damage"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 806549,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 806549,
+      "label": "aura_stacks",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 806549,
+      "label": "pet_aura_stacks",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 806549,
+      "effect": 0,
+      "label": "pet_effect_0",
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 806549,
+      "effect": 1,
+      "label": "pet_effect_1",
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 806549,
+      "effect": 2,
+      "label": "pet_effect_2",
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "ratio_to": "base_attack_time_ms",
+      "label": "buff_attack_time_ms",
+      "min": 0.765,
+      "max": 0.775
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "ratio_to": "base_run_speed_rate",
+      "label": "buff_run_speed_rate",
+      "min": 1.299,
+      "max": 1.301
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_run_speed_rate",
+      "ratio_to": "base_pet_run_speed_rate",
+      "label": "buff_pet_run_speed_rate",
+      "min": 1.299,
+      "max": 1.301
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "weapon_damage_min",
+      "ratio_to": "base_damage",
+      "label": "damage_ratio",
+      "min": 1.198,
+      "max": 1.202
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 806549,
+      "min": 178000,
+      "max": 180000
+    },
+    {
+      "action": "wait",
+      "ms": 18300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 806549,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 806549,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "ratio_to": "base_attack_time_ms",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "ratio_to": "base_run_speed_rate",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_run_speed_rate",
+      "ratio_to": "base_pet_run_speed_rate",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "weapon_damage_min",
+      "ratio_to": "base_damage",
+      "equals": 1,
+      "label": "damage bonus expires"
+    }
+  ]
+}

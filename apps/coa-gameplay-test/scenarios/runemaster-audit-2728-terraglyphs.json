@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Runemaster audit #2728: Terraglyphs raises Weapon Engraving: Earth's proc chance by 4%",
+  "contract": [
+    "Terraglyphs 705551: 'Increases the chance to trigger Weapon Engraving: Earth by 4%.' Re-verified in",
+    "Spell.dbc: Effect0 is SPELL_AURA_ADD_FLAT_MODIFIER (107), MiscValue 18 = SPELLMOD_CHANCE_OF_SUCCESS,",
+    "EffectBasePoints0 3 with DieSides 1 = +4%, EffectSpellClassMask mask2 33554432 (0x2000000) on family 38.",
+    "Earth Engraving 653221 (the hidden 'Passive2' proc holder, ProcChance 15) carries SpellFamilyName 38,",
+    "SpellFamilyFlags[2] 33554432 - a unique match (no other Runemaster spell shares 0x2000000). 653221's own",
+    "PROC_TRIGGER_SPELL previously never fired because Spell.dbc's ProcFlags is 0 with no spell_proc row; that",
+    "gap is fixed by the already-merged data/sql/updates/pending_db_world/rev_20260927_91_runemaster_earth_",
+    "engraving.sql, which adds the spell_proc row (Chance 0, keeping the Spell.dbc 15%) and links 653221 to",
+    "653219 (the Weapon Engraving: Earth item enchant). This spell_modifier probe exercises Terraglyphs' own",
+    "SPELLMOD_CHANCE_OF_SUCCESS classmask match independently of whether 653221 actually procs at runtime.",
+    "Expected: before the talent 653221's chance modifier reads its 15% base unmodified; with the talent it",
+    "rises to 19%."
+  ],
+  "timeout_ms": 60000,
+  "players": [{"id": "rm", "race": 1, "class": 32, "level": 80}],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 3000},
+    {"action": "assert", "label": "SETUP: Earth Engraving's base chance is 15% before the talent", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653221, "op": 18, "base": 15, "equals": 15},
+    {"action": "learn", "actor": "rm", "spell": 705551},
+    {"action": "assert", "label": "CONTRACT: Terraglyphs is active", "actor": "rm", "metric": "aura",
+      "spell": 705551, "equals": 1, "within_ms": 1500},
+    {"action": "assert", "label": "CONTRACT: Weapon Engraving: Earth chance rises to 19%", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653221, "op": 18, "base": 15, "equals": 19},
+    {"action": "unlearn", "actor": "rm", "spell": 705551},
+    {"action": "assert", "label": "CONTRACT: unlearning restores the 15% base chance", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653221, "op": 18, "base": 15, "equals": 15, "within_ms": 2000}
+  ]
+}

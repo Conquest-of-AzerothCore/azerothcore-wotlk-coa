@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "name": "Persistent Prayers extends Void Shield's and Forbidden Ritual's duration and absorb amount, both ranks (#1830)",
+  "contract": "Both ranks (302072 +25%, 302919 +50%) share the same two-effect shape. Effect[0]: ADD_PCT_MODIFIER (108), Misc=1=SPELLMOD_DURATION, BasePoints 24+1=+25% (rank 1) / 49+1=+50% (rank 2), classmask word B bit29 + word C bit18 combined (536870912 | 262144) matching Void Shield's (500715) own SpellFamilyFlags[1]=536870912 and Forbidden Ritual's (502267) own SpellFamilyFlags[2]=262144, each independently. Effect[1]: Aura 317 = SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT, a custom-but-wired Ascension aura: AuraEffect::CalculateAmount (SpellAuraEffects.cpp:628-648) computes target->GetTotalAuraMultiplier(SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT, ...) filtered by school mask (EffectMiscValue=127=all schools) and by the same classmask (aurEff->IsAffectedOnSpell), applied to any SPELL_AURA_SCHOOL_ABSORB/SPELL_AURA_MANA_SHIELD aura the target owns, and explicitly routes the multiplier source to the caster when caster->getClass()==CLASS_CULTIST && m_spellInfo->SpellFamilyName==31 (line 637) -- built for exactly this talent. The harness has no absorb-cap metric, so this asserts the installed SPELL_AURA_SCHOOL_ABSORB effect's own amount (aura_amount) directly, per prior-audit convention. Void Shield's and Forbidden Ritual's own absorb BasePoints carry DieSides randomness (194+irand(1,5) and 307+irand(1,16)), so amount brackets are widened from the exact 1.25/1.50 multiplier to stay clear of coin-flip width while still excluding an unmodified ratio; duration brackets stay tight since SpellDuration is fixed. Each rank is tested in isolation (learn/unlearn) because two ADD_PCT_MODIFIER effects on the caster's own SpellMod list for the same op/classmask stack additively in Player::ApplySpellMod (Player.cpp:10219), not 'highest rank wins' -- learning both ranks together was not attempted and is not part of this contract. Regression guard for behaviour that already works natively.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "cultist", "spell": 500715 },
+    { "action": "learn", "actor": "cultist", "spell": 502267 },
+    { "action": "cast", "actor": "cultist", "spell": 500715 },
+    { "action": "snapshot", "actor": "cultist", "metric": "aura_duration_ms", "spell": 500715, "save_as": "vs_dur0" },
+    { "action": "snapshot", "actor": "cultist", "metric": "aura_amount", "spell": 500715, "effect": 0, "save_as": "vs_amt0" },
+    { "action": "wait", "label": "Let the global cooldown from the Void Shield cast clear", "ms": 1700 },
+    { "action": "cast", "actor": "cultist", "spell": 502267 },
+    {
+      "action": "wait", "ms": 3200,
+      "label": "Let Forbidden Ritual's own 3000ms cast time (SpellCastTimes.dbc id 14) finish before reading its aura; a bare snapshot has no within_ms retry"
+    },
+    { "action": "snapshot", "actor": "cultist", "metric": "aura_duration_ms", "spell": 502267, "save_as": "fr_dur0" },
+    { "action": "snapshot", "actor": "cultist", "metric": "aura_amount", "spell": 502267, "effect": 0, "save_as": "fr_amt0" },
+
+    { "action": "learn", "actor": "cultist", "spell": 302072 },
+    {
+      "action": "set_aura", "actor": "cultist", "spell": 805801, "stacks": 0,
+      "label": "Clear Void Shield's own Wracked Mind no-reshield debuff (500715's EffectTriggerSpell[2]/ExcludeTargetAuraSpell=805801, SpellDuration 8=15000ms) so the rank-1 recast is not target-aurastate blocked"
+    },
+    { "action": "wait", "label": "Let the global cooldown from the Forbidden Ritual cast clear", "ms": 1700 },
+    { "action": "cast", "actor": "cultist", "spell": 500715 },
+    {
+      "action": "assert", "label": "Persistent Prayers rank 1 adds 25% to Void Shield's duration (#1830)",
+      "actor": "cultist", "metric": "aura_duration_ms", "spell": 500715, "ratio_to": "vs_dur0",
+      "min": 1.20, "max": 1.30, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Persistent Prayers rank 1 adds 25% to Void Shield's absorb amount (#1830)",
+      "actor": "cultist", "metric": "aura_amount", "spell": 500715, "effect": 0, "ratio_to": "vs_amt0",
+      "min": 1.15, "max": 1.35
+    },
+    { "action": "reset_cooldown", "actor": "cultist", "spell": 502267 },
+    { "action": "wait", "label": "Let the global cooldown from the Void Shield recast clear", "ms": 1700 },
+    { "action": "cast", "actor": "cultist", "spell": 502267 },
+    {
+      "action": "assert", "label": "Persistent Prayers rank 1 adds 25% to Forbidden Ritual's duration (#1830)",
+      "actor": "cultist", "metric": "aura_duration_ms", "spell": 502267, "ratio_to": "fr_dur0",
+      "min": 1.20, "max": 1.30, "within_ms": 3200
+    },
+    {
+      "action": "assert", "label": "Persistent Prayers rank 1 adds 25% to Forbidden Ritual's absorb amount (#1830)",
+      "actor": "cultist", "metric": "aura_amount", "spell": 502267, "effect": 0, "ratio_to": "fr_amt0",
+      "min": 1.15, "max": 1.35, "within_ms": 500
+    },
+
+    { "action": "unlearn", "actor": "cultist", "spell": 302072 },
+    { "action": "learn", "actor": "cultist", "spell": 302919 },
+    {
+      "action": "set_aura", "actor": "cultist", "spell": 805801, "stacks": 0,
+      "label": "Clear Void Shield's Wracked Mind again before the rank-2 recast"
+    },
+    {
+      "action": "set_power", "actor": "cultist", "power": 0, "value": 5599,
+      "label": "Restore full mana (5599, this class/level fixture's own max_power, observed in #1828/#3023) before the fourth and fifth casts in this sequence run it dry: Void Shield 500715 costs 26% of max mana and Forbidden Ritual 502267 costs 30%, both spent with no restore since the scenario start"
+    },
+    { "action": "wait", "label": "Let the global cooldown from the Forbidden Ritual recast clear", "ms": 1700 },
+    { "action": "cast", "actor": "cultist", "spell": 500715 },
+    {
+      "action": "assert", "label": "Persistent Prayers rank 2 adds 50% to Void Shield's duration (#1830)",
+      "actor": "cultist", "metric": "aura_duration_ms", "spell": 500715, "ratio_to": "vs_dur0",
+      "min": 1.45, "max": 1.55, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Persistent Prayers rank 2 adds 50% to Void Shield's absorb amount (#1830)",
+      "actor": "cultist", "metric": "aura_amount", "spell": 500715, "effect": 0, "ratio_to": "vs_amt0",
+      "min": 1.35, "max": 1.65
+    },
+    { "action": "reset_cooldown", "actor": "cultist", "spell": 502267 },
+    {
+      "action": "set_power", "actor": "cultist", "power": 0, "value": 5599,
+      "label": "Restore full mana again before Forbidden Ritual's rank-2 recast, the sixth cast in this sequence"
+    },
+    { "action": "wait", "label": "Let the global cooldown from the Void Shield recast clear", "ms": 1700 },
+    { "action": "cast", "actor": "cultist", "spell": 502267 },
+    {
+      "action": "assert", "label": "Persistent Prayers rank 2 adds 50% to Forbidden Ritual's duration (#1830)",
+      "actor": "cultist", "metric": "aura_duration_ms", "spell": 502267, "ratio_to": "fr_dur0",
+      "min": 1.45, "max": 1.55, "within_ms": 3200
+    },
+    {
+      "action": "assert", "label": "Persistent Prayers rank 2 adds 50% to Forbidden Ritual's absorb amount (#1830)",
+      "actor": "cultist", "metric": "aura_amount", "spell": 502267, "effect": 0, "ratio_to": "fr_amt0",
+      "min": 1.35, "max": 1.65, "within_ms": 500
+    }
+  ]
+}

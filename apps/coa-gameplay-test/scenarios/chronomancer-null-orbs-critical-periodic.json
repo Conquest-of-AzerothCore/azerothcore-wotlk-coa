@@ -1,0 +1,313 @@
+{
+  "schema": 1,
+  "name": "Critical periodic damage grants Null Orbs (#2164)",
+  "contract": "Null Orbs 572722 applies aura 42 (proc trigger spell) on 572723, an 8 s self-buff of two SPELL_AURA_ADD_FLAT_MODIFIER effects with MiscValue 15 (SPELLMOD_CRIT_DAMAGE_BONUS) class-masked to Anomaly Spike and Chromatic Shard, but Spell.dbc gives 572722 ProcFlags 0 and no spell_proc row existed, so the buff was never granted. Its tooltip is \"Periodic critical damage dealt now has a $h% chance to grant Null Orbs\", with $h = the record's own ProcChance of 20. Periodic damage can only crit when the caster holds a SPELL_AURA_ABILITY_PERIODIC_CRIT aura affecting the DoT (AuraEffect::CalcPeriodicCritChance), which for this class is the passive Impeccable Timing 560949, class-masked to Melt Reality, Decomposition, Timerend and Unmake; it is learned first so the crit chance snapshotted when each DoT is created is non-zero, and the fixture's 10000 spell crit rating makes every tick a critical one. Eight Decomposition DoTs (21 s, Amplitude 4000), one Melt Reality (36 s, Amplitude 4000), one Timerend (6 s, Amplitude 1000) and one Unmake (1 s, Amplitude 250) put at least 36 critical ticks inside the 25 s assertion window; 0.8^36 = 0.0003, so a false failure is under 0.1% at the record's real 20% chance.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy1",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "dummy2",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 5
+    },
+    {
+      "id": "dummy3",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 7
+    },
+    {
+      "id": "dummy4",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 9
+    },
+    {
+      "id": "dummy5",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 11
+    },
+    {
+      "id": "dummy6",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 13
+    },
+    {
+      "id": "dummy7",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 15
+    },
+    {
+      "id": "dummy8",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 17
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 560949
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 572722
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 800856
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 806335
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 801291
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 804418
+    },
+    {
+      "action": "assert",
+      "label": "No Null Orbs buff before any periodic damage",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 572723,
+      "caster": "chronomancer",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition on dummy 1",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition on dummy 2",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "dummy2"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition on dummy 3",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "dummy3"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition on dummy 4",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "dummy4"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition on dummy 5",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "dummy5"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition on dummy 6",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "dummy6"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition on dummy 7",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "dummy7"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Decomposition on dummy 8",
+      "actor": "chronomancer",
+      "spell": 800856,
+      "target": "dummy8"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Melt Reality adds a 36 s DoT",
+      "actor": "chronomancer",
+      "spell": 806335,
+      "target": "dummy1"
+    },
+    {
+      "action": "wait",
+      "ms": 2700
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Timerend adds six one-second ticks",
+      "actor": "chronomancer",
+      "spell": 801291,
+      "target": "dummy2"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Unmake ticks four times inside the polling window",
+      "actor": "chronomancer",
+      "spell": 804418,
+      "target": "dummy3"
+    },
+    {
+      "action": "assert",
+      "label": "A critical periodic tick grants the Null Orbs crit-damage buff",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 572723,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 25000
+    }
+  ]
+}

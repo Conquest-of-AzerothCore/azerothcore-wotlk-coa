@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "name": "Enchanted Bolts raises Magic damage by 5% and armor penetration by 10% (#1955)",
+  "contract": "Enchanted Bolts 520548 has E0 aura 79 (SPELL_AURA_MOD_DAMAGE_PERCENT_DONE), MiscValue 126 (all magic schools), BasePoints 4 / DieSides 1 = +5%, and E1 aura 280 (SPELL_AURA_MOD_ARMOR_PENETRATION_PCT), MiscValue 0 with no class mask, BasePoints 9 / DieSides 1 = +10%; the description reads 'Increases your Magic damage dealt by $s1% and your Armor penetration by $s2%' (the issue mislabels aura 79 as a school immunity). Aura 79 is read by school mask in Unit::SpellPctDamageModsDone and Unit::MeleeDamageBonusDone, so Tormentor 501355's direct effect 2 (school damage, Shadow 0x20) gains exactly 5% while Darkslayer 804179 (Physical, 0x1) does not. Unit::CalcArmorReducedDamage accepts aura 280 with MiscValue 0 and an empty class mask for every attack and ignores 10% of the capped armor, so Darkslayer lets more of a 1000 hit through a target that has armor; the exact figure depends on the creature's armor, so the scenario asserts a fixture (armor > 0 and the probe mitigated) and an increase, the shape used by the Barely Human scenario. CORRECTION from slot 3 measurements: the first version probed Shadow Rage 567570, which read 1000 both with and without the talent (aura amounts 5 and 10 present). That is by design, not a defect of the passive: Shadow Rage is a copy-damage helper that AscensionWitchHunterCompletion.cpp:308-313 marks SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (Unit::SpellDamageBonusDone returns the raw amount for it, Unit.cpp:9176), because the amount it deals is taken from a hit that already carried the modifiers. Tormentor 501355 (Shadow, no such attribute) read 1000 without and 1050 with the talent for both its direct effect 2 and its periodic effect 0, so effect 2 is the probe now. The scenario also waits 1.5 s after the learn before comparing.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 520548,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "label": "Fixture assumption: the target has armor to penetrate",
+      "actor": "dummy",
+      "metric": "armor",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Fixture assumption: that armor mitigates the probe",
+      "actor": "hunter",
+      "metric": "armor_reduced_damage",
+      "spell": 804179,
+      "target": "dummy",
+      "max": 990
+    },
+    {
+      "action": "snapshot",
+      "label": "Tormentor's direct Shadow damage before",
+      "actor": "hunter",
+      "metric": "spell_damage_done",
+      "save_as": "rage_before",
+      "spell": 501355,
+      "effect": 2,
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "label": "Darkslayer damage before",
+      "actor": "hunter",
+      "metric": "melee_spell_damage_done",
+      "save_as": "slayer_before",
+      "spell": 804179,
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "label": "Darkslayer armor-reduced damage before",
+      "actor": "hunter",
+      "metric": "armor_reduced_damage",
+      "save_as": "armor_before",
+      "spell": 804179,
+      "target": "dummy"
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 520548
+    },
+    {
+      "action": "assert",
+      "label": "The passive aura is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 520548,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the passive's modifiers settle",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Shadow damage gains 5%",
+      "actor": "hunter",
+      "metric": "spell_damage_done",
+      "spell": 501355,
+      "effect": 2,
+      "target": "dummy",
+      "ratio_to": "rage_before",
+      "min": 1.049,
+      "max": 1.051
+    },
+    {
+      "action": "assert",
+      "label": "Physical damage is not a Magic school and is unchanged",
+      "actor": "hunter",
+      "metric": "melee_spell_damage_done",
+      "spell": 804179,
+      "target": "dummy",
+      "ratio_to": "slayer_before",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "label": "Armor penetration lets more damage through",
+      "actor": "hunter",
+      "metric": "armor_reduced_damage",
+      "spell": 804179,
+      "target": "dummy",
+      "ratio_to": "armor_before",
+      "min": 1.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 520548,
+      "all_specs": true,
+      "label": "Remove the passive"
+    },
+    {
+      "action": "wait",
+      "label": "Let the removal settle",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Shadow damage returns to its base",
+      "actor": "hunter",
+      "metric": "spell_damage_done",
+      "spell": 501355,
+      "effect": 2,
+      "target": "dummy",
+      "ratio_to": "rage_before",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

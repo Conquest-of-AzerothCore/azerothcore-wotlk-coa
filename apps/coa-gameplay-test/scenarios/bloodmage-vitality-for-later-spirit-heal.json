@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Vitality For Later's Vitality Heal adds half of Spirit to its base value (#2225)",
+  "contract": "Vitality Heal 681025 (AscensionPooledVitality.h Spells::VitalityHeal) is the heal Vitality For Later 681026 (Spells::VitalityForLater) lets an empowered health-paid cast trigger (bloodmage_vitality_casts::OnSpellCast, AscensionBloodmageVitality.cpp: 'if (player->HasAura(VitalityForLater)) player->CastSpell(player, VitalityHeal, true);'). 681025's own Spell.dbc data is deterministic: effect 0 is SPELL_EFFECT_HEAL, EffectDieSides[0] is 1 (SpellEffectInfo::CalcValue's switch adds a flat +1, no irand roll) and EffectRealPointsPerLevel[0] is 3.5 with BaseLevel/SpellLevel 27 and MaxLevel 0, so at the fixture's fixed level 80 the DBC-only base value is constant. bloodmage_vitality_scaling::ModifySpellEffectBaseValue (AscensionBloodmageVitality.cpp:101-111) then adds caster->GetStat(STAT_SPIRIT) * 0.5 whenever info->Id == VitalityHeal, SpellFamilyName == 26, index == EFFECT_0 and the effect is SPELL_EFFECT_HEAL, gated only on the caster being a class-20 (CLASS_SON_OF_ARUGAL) player; it does not require Vitality For Later to be learned, since the talent only gates whether the game ever issues the CastSpell that reaches this value, not the value itself. spell_effect_value calls SpellEffectInfo::CalcValue(caster) directly (CoAGameplayTest.cpp), which runs this hook, so it is the exact function under test. Item 49686 (Maghia's Misguided Quill) is an existing +1000 Spirit base item_template fixture, already asserted to raise a player's stat(4) reading by at least 1000 in pyromancer-fix-1764-bright-flames-retaliation.json; equipping it here isolates a large, real Spirit delta from gear rather than from any talent or buff that could itself touch the heal. Snapshotting spell_effect_value(681025, effect 0) before and after that equip, then asserting (after - before) ratio_to the measured Spirit delta lands in 0.45..0.55, discriminates the +0.5 coefficient from both its absence (ratio 0, since DBC-only terms do not depend on Spirit) and a doubled or halved-again term (ratio 1.0 or 0.25): with a real delta near 1000, the +-1 int32 truncation on each side of the subtraction moves the ratio by at most about 0.002, far inside the window.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 20, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "snapshot", "label": "Baseline Spirit",
+      "actor": "caster", "metric": "stat", "stat": 4, "save_as": "spirit0"
+    },
+    {
+      "action": "snapshot", "label": "Baseline Vitality Heal base value",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 681025, "effect": 0, "save_as": "val0"
+    },
+    { "action": "add_item", "actor": "caster", "item": 49686 },
+    {
+      "action": "equip", "label": "Maghia's Misguided Quill: +1000 Spirit",
+      "actor": "caster", "item": 49686, "slot": 12
+    },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "snapshot", "label": "Spirit gained from the item",
+      "actor": "caster", "metric": "stat", "stat": 4, "relative_to": "spirit0", "save_as": "spirit_delta"
+    },
+    {
+      "action": "assert", "label": "SETUP: the item raised Spirit enough to dominate int32 truncation",
+      "actor": "caster", "metric": "stat", "stat": 4, "relative_to": "spirit0", "min": 900
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Vitality Heal's base value rises by exactly half the Spirit gained",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 681025, "effect": 0,
+      "relative_to": "val0", "ratio_to": "spirit_delta", "min": 0.45, "max": 0.55
+    }
+  ]
+}

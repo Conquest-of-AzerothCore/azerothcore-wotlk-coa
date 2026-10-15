@@ -1,0 +1,634 @@
+{
+  "schema": 1,
+  "name": "The Treasure Keeper companions serve in PvE and refuse War Mode and High-Risk",
+  "contract": "Both companions summon through their own spells as minipets (SummonProperties 41: control pet, slot 5), and the summoned companion is a banker in the only sense the server cares about: it carries UNIT_NPC_FLAG_BANKER, the flag the core's own bank handler asks the unit for, so the client's click - CMSG_BANKER_ACTIVATE with the pet's GUID - is answered with the character's native bank window (SMSG_SHOW_BANK). Each draws at the display and scale its item promises, and either one replaces the other, so a character keeps one companion at a time. The rulesets are three separate states. PvE (the PvE Mode aura 9931032 alone, without the War Mode aura) keeps the companion; War Mode (1004119) and High-Risk (1004019) refuse the summon, while a companion that is already out keeps its banker flag, stays clickable, and has that click answered with the reason instead of a bank window. A companion serves whoever clicks it: the window the core opens is the clicker's own bank, so a second character clicking the same keeper gets their bank under the same rules, read from themselves. A city is exempt from all of it, because a city is not open world and the rulesets cannot reach a character inside one: in Stormwind the companion summons and its click opens the bank while War Mode is on. Every refusal is sent both to the chat log and to the middle of the screen (SMSG_NOTIFICATION), from one string. An allowed summon says nothing in chat, so those two states stay indistinguishable on the client by design, and the ruleset each attempt was judged under is in the log instead. The refusal is the module's own: the client is sent SPELL_FAILED_DONT_REPORT (27) and the player is told why in chat instead. A summon cast inside the global cooldown is queued by the realm's own spell queue rather than executed, so each cast here is followed by a window rather than by an instant read.",
+  "timeout_ms": 240000,
+  "location": {
+    "map": 0,
+    "x": -9458.0,
+    "y": 42.0,
+    "z": 55.5
+  },
+  "players": [
+    {
+      "id": "keeper",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "guest",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "keeper",
+      "spell": 84421
+    },
+    {
+      "action": "learn",
+      "actor": "keeper",
+      "spell": 84420
+    },
+    {
+      "action": "learn",
+      "actor": "keeper",
+      "spell": 84422
+    },
+    {
+      "action": "learn",
+      "actor": "keeper",
+      "spell": 985356
+    },
+    {
+      "action": "learn",
+      "actor": "keeper",
+      "spell": 93417
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "aura",
+      "spell": 9931032,
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "The login default hands the character the PvE set"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 0,
+      "within_ms": 4000,
+      "label": "and no part of the PvP rulesets, so the states stay separate from the first login on"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "aura",
+      "spell": 1004119,
+      "equals": 0,
+      "within_ms": 4000,
+      "label": "The PvE set carries no War Mode aura, so the character shows only PvE Mode"
+    },
+    {
+      "action": "snapshot",
+      "actor": "keeper",
+      "metric": "system_messages",
+      "save_as": "msgs"
+    },
+    {
+      "action": "cast",
+      "actor": "keeper",
+      "spell": 985356
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "cast_failure",
+      "spell": 985356,
+      "equals": 0,
+      "within_ms": 4000,
+      "label": "The Treasure Keeper summons in PvE"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "system_messages",
+      "relative_to": "msgs",
+      "equals": 0,
+      "within_ms": 4000,
+      "label": "and the summon adds nothing to chat"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "pet_entry",
+      "equals": 10111377,
+      "within_ms": 4000,
+      "label": "as its own creature"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "pet_is_banker",
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "carrying the banker flag the core's bank handler asks for"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "pet_display",
+      "equals": 48611,
+      "within_ms": 4000,
+      "label": "drawing as the wyrmtongue display its cache row gives it"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "pet_scale",
+      "min": 0.99,
+      "max": 1.01,
+      "within_ms": 4000,
+      "label": "at the scale its half-size display expects"
+    },
+    {
+      "action": "banker_activate",
+      "actor": "keeper"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "bank_shows",
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "and its click answered with the character's native bank window"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "keeper",
+      "spell": 93417
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "pet_entry",
+      "equals": 80918,
+      "within_ms": 4000,
+      "label": "The Celestial companion summons in PvE too, replacing its sibling - one companion at a time"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "pet_display",
+      "equals": 47857,
+      "within_ms": 4000,
+      "label": "as the celestial human display the client's cache gives it"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "pet_scale",
+      "min": 0.14,
+      "max": 0.15,
+      "within_ms": 4000,
+      "label": "at the scale that counters that display's own 3.5x client scale"
+    },
+    {
+      "action": "banker_activate",
+      "actor": "keeper"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "bank_shows",
+      "equals": 2,
+      "within_ms": 4000,
+      "label": "and its click opens the bank as well"
+    },
+    {
+      "action": "teleport",
+      "actor": "keeper",
+      "map": 0,
+      "x": -9465.6,
+      "y": 16.8,
+      "z": 65.9
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "area_trigger",
+      "actor": "keeper",
+      "id": 562
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "keeper",
+      "spell": 84421
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "cast_failure",
+      "spell": 84421,
+      "equals": 0,
+      "within_ms": 4000,
+      "label": "High-Risk is selected where it may be, in a rested area"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "and applied"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "aura",
+      "spell": 9931032,
+      "equals": 0,
+      "within_ms": 4000,
+      "label": "with the PvE set removed, so a character is in one ruleset at a time"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "pet_entry",
+      "equals": 80918,
+      "within_ms": 4000,
+      "label": "The companion that was already out stays out"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "pet_is_banker",
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "but still carrying the banker flag, so the companion stays clickable the way the item text promises"
+    },
+    {
+      "action": "snapshot",
+      "actor": "keeper",
+      "metric": "bank_shows",
+      "save_as": "bank_hr"
+    },
+    {
+      "action": "snapshot",
+      "actor": "keeper",
+      "metric": "system_messages",
+      "save_as": "msgs_hr"
+    },
+    {
+      "action": "banker_activate",
+      "actor": "keeper"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "bank_shows",
+      "relative_to": "bank_hr",
+      "equals": 0,
+      "within_ms": 4000,
+      "label": "so the click opens no bank while High-Risk is on"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "system_messages",
+      "relative_to": "msgs_hr",
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "and is answered with the reason instead of being swallowed on a companion that is already out"
+    },
+    {
+      "action": "snapshot",
+      "actor": "guest",
+      "metric": "bank_shows",
+      "save_as": "bank_foreign"
+    },
+    {
+      "action": "snapshot",
+      "actor": "guest",
+      "metric": "system_messages",
+      "save_as": "msgs_foreign"
+    },
+    {
+      "action": "banker_activate",
+      "actor": "guest",
+      "owner": "keeper",
+      "entry": 80918
+    },
+    {
+      "action": "assert",
+      "actor": "guest",
+      "metric": "bank_shows",
+      "relative_to": "bank_foreign",
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "and the companion a second character has out opens that character's own bank"
+    },
+    {
+      "action": "assert",
+      "actor": "guest",
+      "metric": "system_messages",
+      "relative_to": "msgs_foreign",
+      "equals": 0,
+      "within_ms": 4000,
+      "label": "because the rules are the clicker's, and nothing about that click was refused"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "keeper",
+      "spell": 985356
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "cast_failure",
+      "spell": 985356,
+      "equals": 27,
+      "within_ms": 4000,
+      "label": "and no companion may be summoned in High-Risk Open World"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "pet_entry",
+      "equals": 80918,
+      "within_ms": 4000,
+      "label": "the refusal leaving the pet that was already out untouched"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "keeper",
+      "spell": 84420
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "aura",
+      "spell": 1004119,
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "War Mode is selected and applied"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 0,
+      "within_ms": 4000,
+      "label": "with High-Risk left behind"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "aura",
+      "spell": 9931032,
+      "equals": 0,
+      "within_ms": 4000,
+      "label": "and no PvE marker, which is what makes this War Mode rather than PvE"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "keeper",
+      "spell": 93417
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "cast_failure",
+      "spell": 93417,
+      "equals": 27,
+      "within_ms": 4000,
+      "label": "and the companion is refused in War Mode as well"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "pet_is_banker",
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "the pet out staying clickable in War Mode too"
+    },
+    {
+      "action": "snapshot",
+      "actor": "keeper",
+      "metric": "system_messages",
+      "save_as": "msgs_wm"
+    },
+    {
+      "action": "snapshot",
+      "actor": "keeper",
+      "metric": "bank_shows",
+      "save_as": "bank_wm"
+    },
+    {
+      "action": "banker_activate",
+      "actor": "keeper"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "bank_shows",
+      "relative_to": "bank_wm",
+      "equals": 0,
+      "within_ms": 4000,
+      "label": "whose click opens no bank"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "system_messages",
+      "relative_to": "msgs_wm",
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "and says why instead"
+    },
+    {
+      "action": "teleport",
+      "actor": "keeper",
+      "map": 0,
+      "x": -8842.0,
+      "y": 626.0,
+      "z": 94.0
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "aura",
+      "spell": 1004119,
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "In Stormwind (Trade District), still in War Mode"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "keeper",
+      "spell": 985356
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "cast_failure",
+      "spell": 985356,
+      "equals": 0,
+      "within_ms": 4000,
+      "label": "A city is not open world, so the companion may be summoned there whatever the ruleset says"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "pet_entry",
+      "equals": 10111377,
+      "within_ms": 4000,
+      "label": "with the Treasure Keeper out in the city"
+    },
+    {
+      "action": "snapshot",
+      "actor": "keeper",
+      "metric": "bank_shows",
+      "save_as": "bank_city"
+    },
+    {
+      "action": "snapshot",
+      "actor": "keeper",
+      "metric": "system_messages",
+      "save_as": "msgs_city"
+    },
+    {
+      "action": "banker_activate",
+      "actor": "keeper"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "bank_shows",
+      "relative_to": "bank_city",
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "and its click opening the character's native bank in the city"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "system_messages",
+      "relative_to": "msgs_city",
+      "equals": 0,
+      "within_ms": 4000,
+      "label": "with nothing to explain, because nothing was refused"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "keeper",
+      "spell": 84422
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "aura",
+      "spell": 9931032,
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "Back in PvE"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "aura",
+      "spell": 1004119,
+      "equals": 0,
+      "within_ms": 4000,
+      "label": "and the War Mode aura is removed, so only PvE Mode is shown"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "pet_is_banker",
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "and the companion that stayed out serves its bank again, because PvE is a ruleset of its own"
+    },
+    {
+      "action": "snapshot",
+      "actor": "keeper",
+      "metric": "bank_shows",
+      "save_as": "bank_pve_again"
+    },
+    {
+      "action": "banker_activate",
+      "actor": "keeper"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "bank_shows",
+      "relative_to": "bank_pve_again",
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "so its click opens the bank once more"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "keeper",
+      "spell": 985356
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "cast_failure",
+      "spell": 985356,
+      "equals": 0,
+      "within_ms": 4000,
+      "label": "and the companions are summonable in PvE again"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "pet_entry",
+      "equals": 10111377,
+      "within_ms": 4000,
+      "label": "the Treasure Keeper being the one that comes out"
+    },
+    {
+      "action": "assert",
+      "actor": "keeper",
+      "metric": "pet_is_banker",
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "as a banker, the way the PvE set wants it"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Wrath of God already boosts Sunflare/Dawnsear crit and cuts pushback (#1807)",
+  "contract": "Effect 0 of both ranks is ADD_FLAT_MODIFIER (aura 107), MiscValue 7 = SPELLMOD_CRITICAL_CHANCE, EffectSpellClassMask word 1 = 0x102 (bit 1 | bit 8), a single one-mod-two-targets mask: Dawnsear (500146) carries bit 1 (0x2) in its own SpellFamilyFlags word 1, and Sunflare (800231) carries bit 8 (0x100) in its own word 1 -- either bit alone satisfies SpellInfo::IsAffectedBySpellMod's generic flag96 AND, so the same modifier reaches both named spells. Rank 1's BasePoints 2 resolves to 3, rank 2's BasePoints 5 resolves to 6, matching 'Increases the critical strike chance of Sunflare and Dawnsear by 3%/6%'. Effect 1 is a plain APPLY_AURA SPELL_AURA_REDUCE_PUSHBACK (aura 149, no classMask, a stock generic self-buff): rank 1's BasePoints 49 resolves to 50, rank 2's 99 resolves to 100, matching 'reduces spell pushback suffered from damaging attacks by 50%/100%'. Native only, no server code needed. The two ranks are separate spell IDs behind the CoA advancement catalog's own entry (CharacterAdvancement.dbc id 6866): AscensionCompat.cpp's SetTalentRank removes every other rank's spell before learning the selected one, so a real character never holds both at once. Three fixtures (control/rank1/rank2), each learning only its own rank via the harness's raw learnSpell path, reproduce that one-rank-at-a-time reality without needing the harness to model rank replacement.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "control", "race": 1, "class": 27, "level": 80 },
+    { "id": "rank1", "race": 1, "class": 27, "level": 80 },
+    { "id": "rank2", "race": 1, "class": 27, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "control", "entry": 36, "level": 80, "health": 100000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "label": "Rank 1: +3% crit on Sunflare/Dawnsear, -50% pushback", "actor": "rank1", "spell": 301267 },
+    { "action": "learn", "label": "Rank 2: +6% crit on Sunflare/Dawnsear, -100% pushback", "actor": "rank2", "spell": 301343 },
+    { "action": "snapshot", "actor": "control", "metric": "spell_done_crit_chance", "spell": 800231, "target": "target", "save_as": "sunflare_crit_base" },
+    { "action": "snapshot", "actor": "control", "metric": "spell_done_crit_chance", "spell": 500146, "target": "target", "save_as": "dawnsear_crit_base" },
+    {
+      "action": "assert", "label": "Rank 1: Sunflare crit chance rises 3 points",
+      "actor": "rank1", "metric": "spell_done_crit_chance", "spell": 800231, "target": "target", "relative_to": "sunflare_crit_base", "min": 2.999, "max": 3.001
+    },
+    {
+      "action": "assert", "label": "Rank 1: Dawnsear crit chance rises 3 points",
+      "actor": "rank1", "metric": "spell_done_crit_chance", "spell": 500146, "target": "target", "relative_to": "dawnsear_crit_base", "min": 2.999, "max": 3.001
+    },
+    { "action": "assert", "label": "Rank 1: pushback reduced by 50%", "actor": "rank1", "metric": "aura_amount", "spell": 301267, "effect": 1, "equals": 50 },
+    {
+      "action": "assert", "label": "Rank 2: Sunflare crit chance rises 6 points total",
+      "actor": "rank2", "metric": "spell_done_crit_chance", "spell": 800231, "target": "target", "relative_to": "sunflare_crit_base", "min": 5.999, "max": 6.001
+    },
+    {
+      "action": "assert", "label": "Rank 2: Dawnsear crit chance rises 6 points total",
+      "actor": "rank2", "metric": "spell_done_crit_chance", "spell": 500146, "target": "target", "relative_to": "dawnsear_crit_base", "min": 5.999, "max": 6.001
+    },
+    { "action": "assert", "label": "Rank 2: pushback reduced by 100%", "actor": "rank2", "metric": "aura_amount", "spell": 301343, "effect": 1, "equals": 100 }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+ "schema": 1,
+ "name": "Cultist: Insanity 100 triggers Total Madness and decays out of combat (#4216)",
+ "contract": "Reaching 100 Insanity applies Total Madness (803061); out of combat Insanity falls by 2 every 10 seconds.",
+ "timeout_ms": 120000,
+ "players": [
+  {"id": "c", "race": 1, "class": 25, "level": 16, "spell_hit_rating": 10000}
+ ],
+ "creatures": [
+  {"id": "dummy", "owner": "c", "entry": 36, "health": 1000000, "distance": 8}
+ ],
+ "steps": [
+  {"action": "wait", "ms": 3000},
+  {"action": "learn", "spell": 500706, "actor": "c"},
+  {"action": "learn", "spell": 500712, "actor": "c"},
+  {"action": "wait", "ms": 1500},
+  {"action": "set_aura", "spell": 500706, "stacks": 90, "actor": "c"},
+  {"action": "cast", "actor": "c", "spell": 500712, "target": "dummy"},
+  {"action": "assert", "label": "Insanity reaches 100", "actor": "c", "metric": "aura_stacks", "spell": 500706, "min": 100, "within_ms": 3000},
+  {"action": "assert", "label": "Total Madness applied", "actor": "c", "metric": "aura", "spell": 803061, "equals": 1, "within_ms": 3000}
+ ]
+}

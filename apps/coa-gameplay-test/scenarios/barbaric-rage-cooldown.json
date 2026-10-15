@@ -1,7 +1,22 @@
 {
   "schema": 1,
-  "name": "Barbaric Rage: cooldown reduction applies to Outrage's ability cooldown, not the global cooldown (#3945)",
-  "contract": "Barbaric Rage (804337) is a native FLAT -500ms SPELLMOD_COOLDOWN modifier on Barbarian family abilities, auto-known by all Barbarians as a baseline class passive (not learned through training). Outrage (803499), whose own tooltip embeds Barbaric Rage's effect value, has a 90s RecoveryTime with no separate scaling, so a Barbarian with Barbaric Rage must see Outrage's post-cast cooldown reduced by ~500ms while an otherwise identical Barbarian who has explicitly unlearned Barbaric Rage must not. Outrage must be explicitly learned (it is not auto-known) and Outrage's own cast-check (barbarian_casts::OnSpellCheckCast) rejects the cast unless the caster is Enraged, so both actors first cast Unbridled Rage (801761, its own Category 948, distinct from Outrage's Category 949, so it cannot itself contaminate Outrage's cooldown) to enter that state before casting Outrage.",
+  "name": "Barbaric Rage: while enraged, Barbarian abilities have a 1.0 s global cooldown (#3945)",
+  "contract": [
+    "Barbaric Rage (804337) reads 'While enraged, the global cooldown of Barbarian abilities is reduced by 30%.',",
+    "and every Enrage ability tooltip embeds it (@s:804337:0@). Its native effect is a FLAT -500 ms",
+    "SPELLMOD_GLOBAL_COOLDOWN on Barbarian family masks with CasterAuraState ENRAGE, so enraged Barbarian",
+    "abilities have a 1000 ms global cooldown (Spell::TriggerGlobalCooldown clamps to MIN_GCD 1000) and",
+    "everything else keeps 1500 ms. The core applies a learned passive regardless of its CasterAuraState, so the",
+    "modifier is zero unless the Barbarian is Enraged. The ability cooldown of Outrage (803499, 90 s) is not",
+    "changed. Brutal Shout (300857: family 18 flags word 1 = 32, StartRecoveryCategory 133, StartRecoveryTime",
+    "1500, instant, self-cast) is the measured ability; it is a magic, non-ability spell, so its global cooldown",
+    "also scales with UNIT_MOD_CAST_SPEED, asserted 1.0 for both fresh level 80 fixtures. Unbridled Rage (801761,",
+    "Dispel Enrage) sets the enrage state; removing it must restore 1500 ms. The control Barbarian without",
+    "Barbaric Rage keeps 1500 ms while enraged. Barbaric Rage, Unbridled Rage and Brutal Shout are level 2/4",
+    "automatic progression grants (CoA.AutoProgression, off by default) and Outrage must be trained, so all are",
+    "learned explicitly; the control unlearns Barbaric Rage in case progression granted it. Readings are taken",
+    "right after the instant cast; the windows allow 150 ms of world ticks and keep 1000 and 1500 apart."
+  ],
   "timeout_ms": 90000,
   "players": [
     {
@@ -19,8 +34,13 @@
   ],
   "steps": [
     {
+      "action": "learn",
+      "actor": "raged",
+      "spell": 804337
+    },
+    {
       "action": "assert",
-      "label": "raged: Barbaric Rage is a baseline passive, already known before any setup",
+      "label": "raged: knows Barbaric Rage",
       "actor": "raged",
       "metric": "knows_spell",
       "spell": 804337,
@@ -42,44 +62,22 @@
     {
       "action": "learn",
       "actor": "raged",
-      "spell": 803499
-    },
-    {
-      "action": "cast",
-      "actor": "raged",
       "spell": 801761
     },
     {
-      "action": "assert",
-      "label": "raged: Unbridled Rage applies (enters Enrage so Outrage can be cast)",
-      "actor": "raged",
-      "metric": "aura",
-      "spell": 801761,
-      "equals": 1,
-      "within_ms": 1000
-    },
-    {
-      "action": "cast",
+      "action": "learn",
       "actor": "raged",
       "spell": 803499
     },
     {
-      "action": "assert",
-      "label": "raged: Outrage applies",
+      "action": "learn",
       "actor": "raged",
-      "metric": "aura",
-      "spell": 803499,
-      "equals": 1,
-      "within_ms": 1000
+      "spell": 300857
     },
     {
-      "action": "assert",
-      "label": "raged: Barbaric Rage shortens Outrage's cooldown by ~500ms",
-      "actor": "raged",
-      "metric": "cooldown_ms",
-      "spell": 803499,
-      "min": 88800,
-      "max": 89700
+      "action": "learn",
+      "actor": "plain",
+      "spell": 801761
     },
     {
       "action": "learn",
@@ -87,18 +85,245 @@
       "spell": 803499
     },
     {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 300857
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: raged: no haste scales the global cooldown",
+      "actor": "raged",
+      "metric": "cast_speed_multiplier",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: plain: no haste scales the global cooldown",
+      "actor": "plain",
+      "metric": "cast_speed_multiplier",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: raged is not enraged",
+      "actor": "raged",
+      "metric": "aura",
+      "spell": 801761,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: raged has no category-133 global cooldown running",
+      "actor": "raged",
+      "metric": "global_cooldown_ms",
+      "spell": 300857,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "raged",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "raged",
+      "spell": 300857
+    },
+    {
+      "action": "assert",
+      "label": "raged, not enraged: Barbaric Rage leaves the 1500 ms global cooldown",
+      "actor": "raged",
+      "metric": "global_cooldown_ms",
+      "spell": 300857,
+      "min": 1350,
+      "max": 1500
+    },
+    {
+      "action": "assert",
+      "label": "raged: Brutal Shout was cast",
+      "actor": "raged",
+      "metric": "aura",
+      "spell": 300857,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "raged: the global cooldown ends",
+      "actor": "raged",
+      "metric": "global_cooldown_ms",
+      "spell": 300857,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "raged",
+      "spell": 801761
+    },
+    {
+      "action": "assert",
+      "label": "raged: Unbridled Rage enrages",
+      "actor": "raged",
+      "metric": "aura",
+      "spell": 801761,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "raged",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "raged",
+      "spell": 300857
+    },
+    {
+      "action": "assert",
+      "label": "raged, enraged: Barbaric Rage reduces the global cooldown to 1000 ms",
+      "actor": "raged",
+      "metric": "global_cooldown_ms",
+      "spell": 300857,
+      "min": 850,
+      "max": 1000
+    },
+    {
+      "action": "assert",
+      "label": "raged: the global cooldown ends",
+      "actor": "raged",
+      "metric": "global_cooldown_ms",
+      "spell": 300857,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "raged",
+      "spell": 801761,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "raged: the enrage has ended",
+      "actor": "raged",
+      "metric": "aura",
+      "spell": 801761,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "raged",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "raged",
+      "spell": 300857
+    },
+    {
+      "action": "assert",
+      "label": "raged, enrage ended: the global cooldown is 1500 ms again",
+      "actor": "raged",
+      "metric": "global_cooldown_ms",
+      "spell": 300857,
+      "min": 1350,
+      "max": 1500
+    },
+    {
+      "action": "assert",
+      "label": "raged: the global cooldown ends",
+      "actor": "raged",
+      "metric": "global_cooldown_ms",
+      "spell": 300857,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "raged",
+      "spell": 801761,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "raged",
+      "spell": 803499
+    },
+    {
+      "action": "assert",
+      "label": "raged: Outrage applies while enraged",
+      "actor": "raged",
+      "metric": "aura",
+      "spell": 803499,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "raged: Barbaric Rage does not shorten Outrage's 90 s cooldown",
+      "actor": "raged",
+      "metric": "cooldown_ms",
+      "spell": 803499,
+      "min": 89600,
+      "max": 90000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: plain has no category-133 global cooldown running",
+      "actor": "plain",
+      "metric": "global_cooldown_ms",
+      "spell": 300857,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
       "action": "cast",
       "actor": "plain",
       "spell": 801761
     },
     {
       "action": "assert",
-      "label": "plain: Unbridled Rage applies (enters Enrage so Outrage can be cast)",
+      "label": "plain: Unbridled Rage enrages",
       "actor": "plain",
       "metric": "aura",
       "spell": 801761,
       "equals": 1,
       "within_ms": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "plain",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "plain",
+      "spell": 300857
+    },
+    {
+      "action": "assert",
+      "label": "plain, enraged without Barbaric Rage: the global cooldown stays 1500 ms",
+      "actor": "plain",
+      "metric": "global_cooldown_ms",
+      "spell": 300857,
+      "min": 1350,
+      "max": 1500
+    },
+    {
+      "action": "assert",
+      "label": "plain: Brutal Shout was cast",
+      "actor": "plain",
+      "metric": "aura",
+      "spell": 300857,
+      "equals": 1
     },
     {
       "action": "cast",
@@ -116,7 +341,7 @@
     },
     {
       "action": "assert",
-      "label": "plain: without Barbaric Rage the raw 90s cooldown is unchanged",
+      "label": "plain: Outrage keeps its 90 s cooldown",
       "actor": "plain",
       "metric": "cooldown_ms",
       "spell": 803499,

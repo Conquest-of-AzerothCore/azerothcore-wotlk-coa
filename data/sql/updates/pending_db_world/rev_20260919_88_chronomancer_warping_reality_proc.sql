@@ -1,0 +1,31 @@
+-- Warping Reality (504602): "Casting Waves of Time now grants you Warped Reality for $504603d."
+-- 504603 "Warped Reality" is a 10 s self-buff whose single effect is aura 313, class-masked to
+-- SpellFamilyFlags word1 33554944 = Unmake (33554432) + Melt Reality (512). Aura 313 has no handler slot
+-- but is read by type in Unit::CanCastSpellWhileMoving (src/server/game/Entities/Unit/Unit.cpp), which
+-- Spell.cpp consults, so the promised "cast Unmake and Melt Reality while moving" works as soon as
+-- 504603 lands. Effect 1 of 504602 (aura 333, +3% hit) is native and untouched. Only the proc gate was
+-- missing: Spell.dbc gives 504602 ProcFlags 0, SpellMgr::LoadSpellProcs generates no entry for such a
+-- record, and Aura::GetProcEffectMask returns 0 without one.
+-- Columns, all read from Spell.dbc and from the core's proc call sites this session:
+--   SpellFamilyName 28 / SpellFamilyMask1 8 - Waves of Time 801277's own SpellFamilyName and
+--     SpellFamilyFlags word1, the ability the tooltip names.
+--   ProcFlags 65536 (PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG) - 801277 has DmgClass 1 (MAGIC) and is a
+--     harmful cone, so both proc call sites classify it as a negative magic-class cast.
+--   SpellPhaseMask 1 (PROC_SPELL_PHASE_CAST) - the tooltip's trigger is *casting* Waves of Time, and the
+--     buff it grants is a movement permission that must not depend on the cone connecting. Spell.cpp's
+--     CAST-phase call (Spell::handle_immediate's "CAST -> HIT -> FINISH ordering" block) fires once per
+--     non-triggered cast for m_originalCaster, with no target required. The HIT phase would be wrong
+--     here for two reasons read from the data: it fires per landed target, so a cone cast into empty air
+--     would grant nothing, and 801277's effect 0 targets TARGET_UNIT_CASTER (1), so the caster's own
+--     target-hit event is classified positive and would carry
+--     PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS (16384) instead of the NEG flag above.
+--   SpellTypeMask 4 (PROC_SPELL_TYPE_NO_DMG_HEAL) - Unit::ProcSkillsAndAuras supplies
+--     PROC_SPELL_TYPE_MASK_ALL at the CAST phase, so any non-zero SpellTypeMask matches; 4 is recorded
+--     because it is also the value the HIT phase would compute (801277 has no SPELL_EFFECT_SCHOOL_DAMAGE
+--     effect, only SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED and SPELL_EFFECT_TRIGGER_SPELL).
+--   HitMask 0 - SpellMgr::CanSpellTriggerProcOnEvent skips the hit-result check at the CAST phase for a
+--     DONE proc unless HitMask is set, which is what a cast-time grant wants.
+--   Chance 100 - the record's own ProcChance; the tooltip states no percentage.
+DELETE FROM `spell_proc` WHERE `SpellId` = 504602;
+INSERT INTO `spell_proc` (`SpellId`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `ProcFlags`, `SpellTypeMask`, `SpellPhaseMask`, `HitMask`, `AttributesMask`, `DisableEffectsMask`, `ProcsPerMinute`, `Chance`, `Cooldown`, `Charges`) VALUES
+(504602, 0, 28, 0, 8, 0, 65536, 4, 1, 0, 0, 0, 0, 100, 0, 0);

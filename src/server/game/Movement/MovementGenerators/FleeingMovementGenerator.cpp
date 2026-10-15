@@ -37,6 +37,7 @@ void FleeingMovementGenerator<T>::DoInitialize(T* owner)
 
     owner->StopMoving();
     _path = nullptr;
+    _recalculateSpeed = false;
     owner->SetUnitFlag(UNIT_FLAG_FLEEING);
     owner->AddUnitState(UNIT_STATE_FLEEING);
     SetTargetLocation(owner);
@@ -92,9 +93,28 @@ bool FleeingMovementGenerator<T>::DoUpdate(T* owner, uint32 diff)
         _interrupt = false;
 
     _timer.Update(diff);
-    if (!_interrupt && _timer.Passed() && owner->movespline->Finalized())
+    if (_interrupt)
+        return true;
+
+    if (!owner->movespline->Finalized())
     {
-        SetTargetLocation(owner);
+        // A spline already in flight keeps the speed it was launched with, so a speed change only
+        // reaches it through a relaunch. Relaunch it towards the destination it already has:
+        // picking a new one here would re-aim the unit on every damage tick that moves the
+        // low-health speed penalty, which changes roughly every 0.6% of maximum health.
+        if (_recalculateSpeed)
+        {
+            _recalculateSpeed = false;
+            RelaunchCurrentLeg(owner);
+        }
+    }
+    else
+    {
+        // Nothing is in flight, so the next launch reads the current speed on its own. Dropping
+        // the flag here keeps a speed change from cutting the pause between two flee legs short.
+        _recalculateSpeed = false;
+        if (_timer.Passed())
+            SetTargetLocation(owner);
     }
 
     return true;
@@ -170,6 +190,39 @@ void FleeingMovementGenerator<T>::SetTargetLocation(T* owner)
     _timer.Reset(traveltime + urand(800, 1500));
 }
 
+// Re-paths to the destination the current leg already targets and launches it again, so a spline
+// in flight adopts the owner's current speed without choosing a different place to flee to.
+template<class T>
+bool FleeingMovementGenerator<T>::RelaunchCurrentLeg(T* owner)
+{
+    if (!owner || !_path)
+    {
+        return false;
+    }
+
+    // CalculatePath overwrites the stored end position, so keep a copy of it.
+    G3D::Vector3 const destination = _path->GetActualEndPosition();
+    if (!_path->CalculatePath(destination.x, destination.y, destination.z))
+        return false;
+
+    if (_path->GetPathType() & PathType(PATHFIND_NOPATH | PATHFIND_SHORTCUT | PATHFIND_FARFROMPOLY
+        | PATHFIND_NOT_USING_PATH))
+        return false;
+
+    // Too close to the end of the leg to be worth relaunching; the next leg reads the new speed.
+    // Unlike SetTargetLocation this leaves _invalidPathsCount alone: a relaunch is not the flee
+    // target becoming unreachable, and counting it would drop the flee target after five ticks.
+    if (_path->getPathLength() < MIN_PATH_LENGTH)
+        return false;
+
+    Movement::MoveSplineInit init(owner);
+    init.MovebyPath(_path->GetPath());
+    init.SetWalk(false);
+    int32 traveltime = init.Launch();
+    _timer.Reset(traveltime + urand(800, 1500));
+    return true;
+}
+
 template<class T>
 void FleeingMovementGenerator<T>::GetPoint(T* owner, Position& position)
 {
@@ -230,6 +283,8 @@ template bool FleeingMovementGenerator<Player>::DoUpdate(Player*, uint32);
 template bool FleeingMovementGenerator<Creature>::DoUpdate(Creature*, uint32);
 template void FleeingMovementGenerator<Player>::SetTargetLocation(Player*);
 template void FleeingMovementGenerator<Creature>::SetTargetLocation(Creature*);
+template bool FleeingMovementGenerator<Player>::RelaunchCurrentLeg(Player*);
+template bool FleeingMovementGenerator<Creature>::RelaunchCurrentLeg(Creature*);
 template void FleeingMovementGenerator<Player>::GetPoint(Player*, Position&);
 template void FleeingMovementGenerator<Creature>::GetPoint(Creature*, Position&);
 

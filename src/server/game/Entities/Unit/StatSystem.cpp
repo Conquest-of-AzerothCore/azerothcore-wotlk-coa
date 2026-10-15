@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "ClassicPlusStats.h"
 #include "Config.h"
 #include "Creature.h"
 #include "Item.h"
@@ -25,6 +26,7 @@
 #include "SpellAuraEffects.h"
 #include "SpellMgr.h"
 #include "Unit.h"
+#include "World.h"
 
 inline bool _ModifyUInt32(bool apply, uint32& baseValue, int32& amount)
 {
@@ -72,6 +74,22 @@ float GetAscensionMaxManaFromStatBonus(Player const& player)
     {
         int32 const sourceStat = effect->GetMiscValueB();
         if (effect->GetMiscValue() != POWER_MANA || sourceStat < STAT_STRENGTH || sourceStat >= MAX_STATS)
+            continue;
+
+        bonus += CalculatePct(float(player.GetStat(Stats(sourceStat))), effect->GetAmount());
+    }
+
+    return bonus;
+}
+
+float GetAscensionMaxHealthFromStatBonus(Player const& player)
+{
+    float bonus = 0.0f;
+    Unit::AuraEffectList const& effects = player.GetAuraEffectsByType(SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT);
+    for (AuraEffect const* effect : effects)
+    {
+        int32 const sourceStat = effect->GetMiscValueB();
+        if (effect->GetMiscValue() != POWER_HEALTH || sourceStat < STAT_STRENGTH || sourceStat >= MAX_STATS)
             continue;
 
         bonus += CalculatePct(float(player.GetStat(Stats(sourceStat))), effect->GetAmount());
@@ -155,6 +173,7 @@ bool Player::UpdateStats(Stats stat)
             break;
         case STAT_INTELLECT:
             UpdateMaxPower(POWER_MANA);
+            UpdateMaxHealth();                              // SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT, POWER_HEALTH branch
             UpdateAllSpellCritChances();
             UpdateArmor();                                  //SPELL_AURA_MOD_RESISTANCE_OF_INTELLECT_PERCENT, only armor currently
             break;
@@ -408,7 +427,7 @@ void Player::UpdateMaxHealth()
 
     float value = GetFlatModifierValue(unitMod, BASE_VALUE) + GetCreateHealth();
     value *= GetPctModifierValue(unitMod, BASE_PCT);
-    value += GetFlatModifierValue(unitMod, TOTAL_VALUE) + GetHealthBonusFromStamina();
+    value += GetFlatModifierValue(unitMod, TOTAL_VALUE) + GetHealthBonusFromStamina() + GetAscensionMaxHealthFromStatBonus(*this);
     value *= GetPctModifierValue(unitMod, TOTAL_PCT);
 
     sScriptMgr->OnPlayerAfterUpdateMaxHealth(this, value);
@@ -490,8 +509,27 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
     }
     else
     {
-        // Barbarian uses Warrior melee AP independently of its Rogue compatibility for other systems.
-        if (getClass() == CLASS_BARBARIAN || IsClass(CLASS_PALADIN, CLASS_CONTEXT_STATS) ||
+        // CoA changelog 2026-07-09, entries 69019-69020, 69036-69038 and 69043, specifies these stat conversions.
+        // Only the coefficients are recovered: keep the existing level terms and offsets as compatibility values.
+        if (getClass() == CLASS_BARBARIAN)
+        {
+            val2 = level * 3.0f + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20.0f;
+        }
+        else if (getClass() == CLASS_REAPER)
+        {
+            // The entry confirms Strength only; retain the unverified Agility term until it is measured.
+            val2 = level * 2.0f + GetStat(STAT_STRENGTH) * 2.0f + GetStat(STAT_AGILITY) - 20.0f;
+        }
+        else if (getClass() == CLASS_SUN_CLERIC)
+        {
+            val2 = GetStat(STAT_STRENGTH) * 2.0f - 10.0f;
+        }
+        else if (getClass() == CLASS_STARCALLER && GetShapeshiftForm() == FORM_NONE)
+        {
+            // Form-specific scaling is not established by the baseline character-panel correction.
+            val2 = GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20.0f;
+        }
+        else if (IsClass(CLASS_PALADIN, CLASS_CONTEXT_STATS) ||
             IsClass(CLASS_DEATH_KNIGHT, CLASS_CONTEXT_STATS) || IsClass(CLASS_WARRIOR, CLASS_CONTEXT_STATS))
         {
             val2 = level * 3.0f + GetStat(STAT_STRENGTH) * 2.0f - 20.0f;
@@ -501,6 +539,8 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
             IsClass(CLASS_SHAMAN, CLASS_CONTEXT_STATS) || IsClass(CLASS_ROGUE, CLASS_CONTEXT_STATS))
         {
             val2 = level * 2.0f + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20.0f;
+            if (sWorld->getBoolConfig(CONFIG_CLASSIC_PLUS_STAT_FORMULAS))
+                val2 = ClassicPlusStats::MeleeAttackPower(getClass(), GetLevel(), GetStat(STAT_STRENGTH), val2);
         }
         else if (IsClass(CLASS_DRUID, CLASS_CONTEXT_STATS))
         {
@@ -688,7 +728,9 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
     float weaponMinDamage = GetWeaponDamageRange(attType, MINDAMAGE);
     float weaponMaxDamage = GetWeaponDamageRange(attType, MAXDAMAGE);
 
-    if (IsAttackSpeedOverridenShapeShift()) // forms with no override on attack speed use normal weapon damage
+    // The Mechsuit's attack speed only paces its melee swings; its ranged spells shoot the equipped gun
+    bool const mechsuitRanged = attType == RANGED_ATTACK && GetShapeshiftForm() == FORM_TINKER_MECHSUIT;
+    if (IsAttackSpeedOverridenShapeShift() && !mechsuitRanged) // forms with no override on attack speed use normal weapon damage
     {
         uint8 lvl = GetLevel();
         if (lvl > 60)
@@ -709,7 +751,7 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bo
         weaponMinDamage = BASE_MINDAMAGE;
         weaponMaxDamage = BASE_MAXDAMAGE;
     }
-    else if (attType == RANGED_ATTACK && !IsAscensionClass(getClass())) // stock classes use ammo DPS
+    else if (attType == RANGED_ATTACK && UsesProjectileAmmo(getClass())) // stock classes use ammo DPS
     {
         weaponMinDamage += GetAmmoDPS() * attackSpeedMod;
         weaponMaxDamage += GetAmmoDPS() * attackSpeedMod;
@@ -874,9 +916,11 @@ void Player::UpdateParryPercentage()
     // No parry
     float value = 0.0f;
     m_realParry = 0.0f;
-    // Starcaller learns Parry, unlike its general Druid stat fallback.
-    // Use the Hunter parry curve for both its cap and diminishing coefficient.
-    Classes const parryClass = getClass() == CLASS_STARCALLER ? CLASS_HUNTER :
+    // Starcaller and Primalist need Hunter's parry curve; their general Druid fallback has no parry cap.
+    // Sun Cleric's March of the Valkyr uses the Paladin curve with its Strength-based melee scaling.
+    Classes const parryClass = getClass() == CLASS_HERO || getClass() == CLASS_STARCALLER ||
+        getClass() == CLASS_WILDWALKER ? CLASS_HUNTER :
+        getClass() == CLASS_SUN_CLERIC ? CLASS_PALADIN :
         GetLegacyClassForCustomClass(Classes(getClass()));
     uint32 const pclass = parryClass - 1;
     if (CanParry() && parry_cap[pclass] > 0.0f)
@@ -1044,7 +1088,8 @@ void Player::ApplyHealthRegenBonus(int32 amount, bool apply)
 
 void Player::UpdateManaRegen()
 {
-    if (HasAuraTypeWithMiscvalue(SPELL_AURA_PREVENT_REGENERATE_POWER, POWER_MANA + 1))
+    if (HasAuraTypeWithMiscvalue(SPELL_AURA_PREVENT_REGENERATE_POWER, POWER_MANA + 1)
+        || !sScriptMgr->OnPlayerCanRegenerate(this, POWER_MANA))
     {
         SetStatFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER, 0);
         SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, 0);
@@ -1355,7 +1400,7 @@ void Guardian::UpdateMaxHealth()
     float stamina = std::max<float>(GetStat(STAT_STAMINA) - GetCreateStat(STAT_STAMINA), 0.0f);
 
     float multiplicator;
-    switch (GetEntry())
+    switch (GetStockPetEntry(GetEntry()))
     {
         case NPC_IMP:
             multiplicator = 8.4f;
@@ -1404,7 +1449,7 @@ void Guardian::UpdateMaxPower(Powers power)
     float addValue = (power == POWER_MANA) ? std::max<float>(GetStat(STAT_INTELLECT) - GetCreateStat(STAT_INTELLECT), 0.0f) : 0.0f;
     float multiplicator = 15.0f;
 
-    switch (GetEntry())
+    switch (GetStockPetEntry(GetEntry()))
     {
         case NPC_IMP:
         case NPC_WATER_ELEMENTAL_TEMP:
@@ -1443,7 +1488,7 @@ void Guardian::UpdateAttackPowerAndDamage(bool ranged)
     float val = 0.0f;
     UnitMods unitMod = UNIT_MOD_ATTACK_POWER;
 
-    if (GetEntry() == NPC_IMP)                                     // imp's attack power
+    if (GetStockPetEntry(GetEntry()) == NPC_IMP)                                     // imp's attack power
         val = GetStat(STAT_STRENGTH) - 10.0f;
     else if (IsPetGhoul())                                         // DK's ghoul attack power
         val = 589 /*xinef: base ap!*/ + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY);

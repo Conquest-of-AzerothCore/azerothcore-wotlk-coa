@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Blood-Cursed Armor gives the whole raid its armor bonus (#3705)",
+  "contract": "Blood-Cursed Armor 685028 has a single effect in Spell.dbc: SPELL_EFFECT_APPLY_AREA_AURA_RAID (Spell::EffectApplyAreaAura) with aura 22 SPELL_AURA_MOD_RESISTANCE, MiscValue 1 (SPELL_SCHOOL_MASK_NORMAL, i.e. armor), BasePoints 389, DieSides 1, RealPointsPerLevel 25.0, SpellLevel/BaseLevel 30, radius index 12 (100 yards) and TargetA 1. The native handler is AuraEffect::HandleAuraModResistance. SpellEffectInfo::CalcValue adds (level - max(BaseLevel, SpellLevel)) * RealPointsPerLevel before the DieSides roll, so at level 80 the amount is 389 + 50*25 + 1 = 1640; the snapshot tooltip's 390 is that same record read at level 30. The assertion band is deliberately wider than 1640 because UNIT_MOD_ARMOR's total percentage is applied after the flat amount. The point of the check is the raid half: a solo reading would not tell an area aura from a self-only one.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 20, "level": 80 },
+    { "id": "ally", "race": 1, "class": 20, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "group", "actor": "caster", "target": "ally" },
+    { "action": "snapshot", "actor": "caster", "metric": "armor", "save_as": "caster_armor" },
+    { "action": "snapshot", "actor": "ally", "metric": "armor", "save_as": "ally_armor" },
+    { "action": "learn", "actor": "caster", "spell": 685028 },
+    {
+      "action": "assert", "label": "The caster gains the level-80 armor amount",
+      "actor": "caster", "metric": "armor", "relative_to": "caster_armor",
+      "min": 1600, "max": 1700, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The grouped ally gains it too",
+      "actor": "ally", "metric": "armor", "relative_to": "ally_armor",
+      "min": 1600, "max": 1700, "within_ms": 5000
+    }
+  ]
+}

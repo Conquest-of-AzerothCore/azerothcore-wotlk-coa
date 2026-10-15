@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "name": "Infection stacks only on a bleeding auto-attack target (#2323)",
+  "contract": "Infection 704624 reads 'Auto attacking a bleeding target will now infect the wound, increasing their chance to be critically struck from you by $707867s1% for $707867d, stacking $707867u times'. Its single effect is aura 42 (proc trigger spell) on Infection 707867 (SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER, BasePoints 0 -> +1% per stack, StackAmount 10, duration index 32, TargetA 6). Spell.dbc gives 704624 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and nothing was ever infected. The 'bleeding' half of the tooltip has no spell_proc column and is enforced by the CheckProc handler aura_ascension_bloodmage_infection, so the scenario needs both sides: Taldaram's Torment 800772 applies a periodic-damage effect with Mechanic 15 (MECHANIC_BLEED) to one creature, and a second creature is left unbled. 704624 has Stances 0x8000000 but also SPELL_ATTR2_ALLOW_WHILE_NOT_SHAPESHIFTED, so the passive applies outside any form. Note 707867's own text says 2% where its BasePoints give 1%; the DBC value is what is asserted.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "bleeder",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3,
+      "faction": 7
+    },
+    {
+      "id": "clean",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 8,
+      "faction": 7
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 704624
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 800772
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Infection passive is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 704624,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800772,
+      "target": "bleeder"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the first creature is bleeding",
+      "actor": "bleeder",
+      "metric": "aura",
+      "spell": 800772,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "attack",
+      "actor": "bloodmage",
+      "target": "bleeder"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: auto attacks infect the bleeding target",
+      "actor": "bleeder",
+      "metric": "aura_stacks",
+      "spell": 707867,
+      "caster": "bloodmage",
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Infection grants the DBC value of +1% crit taken per stack",
+      "actor": "bleeder",
+      "metric": "aura_amount",
+      "spell": 707867,
+      "caster": "bloodmage",
+      "equals": 1
+    },
+    {
+      "action": "attack",
+      "actor": "bloodmage",
+      "target": "clean"
+    },
+    {
+      "action": "wait",
+      "label": "Swing at the unbled creature for several auto attacks",
+      "ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: an unbled target is never infected",
+      "actor": "clean",
+      "metric": "aura",
+      "spell": 707867,
+      "caster": "bloodmage",
+      "equals": 0
+    }
+  ]
+}

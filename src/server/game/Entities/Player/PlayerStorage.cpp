@@ -39,6 +39,7 @@
 #include "LFGMgr.h"
 #include "Language.h"
 #include "Log.h"
+#include "LocalLevelScaling.h"
 #include "LootItemStorage.h"
 #include "MailMgr.h"
 #include "MapMgr.h"
@@ -2338,7 +2339,7 @@ InventoryResult Player::CanUseItem(Item* pItem, bool not_loading) const
         //if (isStunned())
         //    return EQUIP_ERR_YOU_ARE_STUNNED;
 
-        ItemTemplate const* pProto = pItem->GetTemplate();
+        ItemTemplate const* pProto = LocalLevelScaling::InstanceTemplateFor(pItem, pItem->GetTemplate());
         if (pProto)
         {
             if (pItem->IsBindedNotWith(this))
@@ -3125,6 +3126,8 @@ void Player::MoveItemToInventory(ItemPosCountVec const& dest, Item* pItem, bool 
 
         if (pLastItem->IsBOPTradable())
             AddTradeableItem(pLastItem);
+
+        LocalLevelScaling::NotifyItemArrival(this, pLastItem);
     }
 }
 
@@ -4144,7 +4147,9 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
             case EQUIP_ERR_CANT_EQUIP_LEVEL_I:
             case EQUIP_ERR_PURCHASE_LEVEL_TOO_LOW:
             {
-                ItemTemplate const* proto = pItem ? pItem->GetTemplate() : sObjectMgr->GetItemTemplate(itemid);
+                ItemTemplate const* proto = pItem ?
+                    LocalLevelScaling::InstanceTemplateFor(pItem, pItem->GetTemplate()) :
+                    sObjectMgr->GetItemTemplate(itemid);
                 data << uint32(proto ? proto->RequiredLevel : 0);
                 break;
             }
@@ -5760,6 +5765,9 @@ bool Player::isAllowedToLoot(Creature const* creature)
     if (loot->loot_type == LOOT_SKINNING)
         return creature->GetLootRecipientGUID() == GetGUID();
 
+    if (creature->IsSharedQuestParticipant(this) && loot->hasItemFor(this))
+        return true;
+
     Group* thisGroup = GetGroup();
     if (!thisGroup)
         return this == creature->GetLootRecipient();
@@ -7329,7 +7337,7 @@ void Player::_SaveActions(CharacterDatabaseTransaction trans)
     {
         uint32 action = itr->second.GetAction();
         if (itr->second.GetType() == ACTION_BUTTON_SPELL)
-            sScriptMgr->OnPlayerNormalizeActionButtonSpell(this, action, false);
+            action = GetSavedActionButtonSpell(action);
 
         switch (itr->second.uState)
         {

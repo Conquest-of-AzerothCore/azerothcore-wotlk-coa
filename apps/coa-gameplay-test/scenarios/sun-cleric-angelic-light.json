@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "name": "Angelic Light cuts Glare's cooldown by 30 seconds (#1251)",
+  "contract": "Angelic Light 560094 is family 33, Attributes 448 (SPELL_ATTR0_PASSIVE), EquippedItemClass -1, no Stances, so it self-applies on learn. Effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 11 (SPELLMOD_COOLDOWN) and EffectSpellClassMask word1 8388608 (0x800000), EffectBasePoints -30001 + DieSides 1 = -30000; Glare (805583 and its higher ranks) carries that exact word1 bit in SpellFamilyFlags_2. Player::AddSpellAndCategoryCooldowns applies ApplySpellMod(id, SPELLMOD_COOLDOWN, ...) unconditionally whenever a matching spell is cast; spell_modifier exercises the same ApplySpellMod path synthetically with no cast. This is not \"no server-side implementation\": the cooldown reduction already applies. Effect 1 reuses the same class mask with SPELLMOD_CASTING_TIME (10) but EffectBasePoints -1 + DieSides 1 = 0, a zero-magnitude leftover in the shipped record; spell_cast_time_ms confirms it changes nothing observable, so it is only pinned here, not treated as part of the tooltip's promise (which names only the cooldown).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 560094
+    },
+    {
+      "action": "assert",
+      "label": "Talent self-applies its passive",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 560094,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control's Glare cooldown is unmodified",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 805583,
+      "op": 11,
+      "base": 100000,
+      "equals": 100000
+    },
+    {
+      "action": "assert",
+      "label": "Talent's Glare cooldown drops by exactly 30s",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 805583,
+      "op": 11,
+      "base": 100000,
+      "equals": 70000
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_cast_time_ms",
+      "spell": 805583,
+      "save_as": "control_cast_time"
+    },
+    {
+      "action": "assert",
+      "label": "Glare's cast time is unchanged (the record's second effect is a zero-magnitude leftover)",
+      "actor": "talent",
+      "metric": "spell_cast_time_ms",
+      "spell": 805583,
+      "relative_to": "control_cast_time",
+      "equals": 0
+    }
+  ]
+}

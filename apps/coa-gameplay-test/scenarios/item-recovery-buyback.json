@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "name": "Item Recovery: the recovery window lists vendor buyback and recovers the sold item for its sale price",
+  "contract": "At login the client is told the Item Recovery window is available (0x58D, CONFIG_RECOVERY_VENDORED_ITEM_ENABLED). Selling five Linen Cloth (item 2589, 9 copper each) to Brother Danil puts the stack in a buyback slot and pays 45 copper. Querying the window (0x5DE) is answered once on 0x5DF. A recovery request (0x5E0) is refused with ID_MISMATCH when its item id does not name the listed entry and with OUT_OF_RANGE when its index is past the list. A request for the listed entry by its item GUID string returns the same five cloth for the 45 copper the vendor paid, leaving the character's money where it was before the sale.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "seller",
+      "race": 1,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "creatures": [
+    {
+      "id": "vendor",
+      "owner": "seller",
+      "entry": 152,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The client was told the recovery window is available",
+      "actor": "seller",
+      "metric": "server_packet_contains",
+      "opcode": 1421,
+      "text": "CONFIG_RECOVERY_VENDORED_ITEM_ENABLED",
+      "equals": 1
+    },
+    {
+      "action": "set_money",
+      "label": "fixture: a known purse",
+      "actor": "seller",
+      "value": 10000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: five Linen Cloth",
+      "actor": "seller",
+      "item": 2589,
+      "count": 5
+    },
+    {
+      "action": "snapshot",
+      "label": "Money before the sale",
+      "actor": "seller",
+      "metric": "carried_money",
+      "save_as": "purse"
+    },
+    {
+      "action": "sell_item",
+      "label": "Sell the stack to Brother Danil",
+      "actor": "seller",
+      "entry": 152,
+      "item": 2589
+    },
+    {
+      "action": "assert",
+      "label": "The cloth is sold",
+      "actor": "seller",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "for 45 copper",
+      "actor": "seller",
+      "metric": "carried_money",
+      "relative_to": "purse",
+      "equals": 45
+    },
+    {
+      "action": "client_packet",
+      "label": "Open the recovery window",
+      "actor": "seller",
+      "opcode": 1502
+    },
+    {
+      "action": "assert",
+      "label": "The window's list is answered once",
+      "actor": "seller",
+      "metric": "server_packets",
+      "opcode": 1503,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "label": "Request the listed entry under a wrong item id",
+      "actor": "seller",
+      "opcode": 1504,
+      "fields": [{"u32": 0}, {"string": "not the sold item"}]
+    },
+    {
+      "action": "assert",
+      "label": "A wrong item id is refused",
+      "actor": "seller",
+      "metric": "server_packet_contains",
+      "opcode": 1505,
+      "text": "VENDORED_ITEM_RECOVERY_ID_MISMATCH",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "label": "Request an entry past the list",
+      "actor": "seller",
+      "opcode": 1504,
+      "fields": [{"u32": 5}, {"buyback_guid": 2589}]
+    },
+    {
+      "action": "assert",
+      "label": "An index past the list is refused",
+      "actor": "seller",
+      "metric": "server_packet_contains",
+      "opcode": 1505,
+      "text": "VENDORED_ITEM_RECOVERY_OUT_OF_RANGE",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Refusals return nothing",
+      "actor": "seller",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 0
+    },
+    {
+      "action": "client_packet",
+      "label": "Recover the listed cloth",
+      "actor": "seller",
+      "opcode": 1504,
+      "fields": [{"u32": 0}, {"buyback_guid": 2589}]
+    },
+    {
+      "action": "assert",
+      "label": "The recovery succeeds",
+      "actor": "seller",
+      "metric": "server_packet_contains",
+      "opcode": 1505,
+      "text": "VENDORED_ITEM_RECOVERY_OK",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The five cloth are back",
+      "actor": "seller",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "for exactly what the vendor paid",
+      "actor": "seller",
+      "metric": "carried_money",
+      "relative_to": "purse",
+      "equals": 0
+    }
+  ]
+}

@@ -16,7 +16,9 @@
  */
 
 #include "GossipDef.h"
+#include "AscensionQuestLog.h"
 #include "Formulas.h"
+#include "LocalLevelScaling.h"
 #include "Object.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
@@ -186,12 +188,66 @@ PlayerMenu::~PlayerMenu()
 
 void PlayerMenu::ClearMenus()
 {
+    ClearDynamicGossipText();
     _gossipMenu.ClearMenu();
     _questMenu.ClearMenu();
 }
 
+void PlayerMenu::ClearDynamicGossipText()
+{
+    std::lock_guard<std::mutex> guard(_dynamicTextMutex);
+    _dynamicTextGUID.Clear();
+    _dynamicText.clear();
+}
+
+void PlayerMenu::SendDynamicGossipMenu(std::string const& text, ObjectGuid objectGUID)
+{
+    uint32 textId;
+    {
+        std::lock_guard<std::mutex> guard(_dynamicTextMutex);
+        _dynamicTextId = _dynamicTextId == 0x7FFF0000 ? 0x7FFF0001 : 0x7FFF0000;
+        textId = _dynamicTextId;
+        _dynamicTextGUID = objectGUID;
+        _dynamicText = text;
+    }
+    SendDynamicGossipText(textId, objectGUID);
+    SendGossipMenu(textId, objectGUID);
+}
+
+bool PlayerMenu::SendDynamicGossipText(uint32 textId, ObjectGuid objectGUID)
+{
+    std::lock_guard<std::mutex> guard(_dynamicTextMutex);
+    if (_dynamicTextGUID.IsEmpty() || textId != _dynamicTextId || objectGUID != _dynamicTextGUID)
+        return false;
+
+    WorldPacket data(SMSG_NPC_TEXT_UPDATE, _dynamicText.size() * 2 + 300);
+    data << textId;
+    for (uint8 i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
+    {
+        data << float(i == 0 ? 1.0f : 0.0f);
+        data << (i == 0 ? _dynamicText : std::string());
+        data << (i == 0 ? _dynamicText : std::string());
+        data << uint32(0);
+        for (uint8 j = 0; j < MAX_GOSSIP_TEXT_EMOTES; ++j)
+        {
+            data << uint32(0);
+            data << uint32(0);
+        }
+    }
+    _session->SendPacket(&data);
+    return true;
+}
+
 void PlayerMenu::SendGossipMenu(uint32 titleTextId, ObjectGuid objectGUID)
 {
+    {
+        std::lock_guard<std::mutex> guard(_dynamicTextMutex);
+        if (titleTextId != _dynamicTextId || objectGUID != _dynamicTextGUID)
+        {
+            _dynamicTextGUID.Clear();
+            _dynamicText.clear();
+        }
+    }
     _gossipMenu.SetSenderGUID(objectGUID);
 
     WorldPacket data(SMSG_GOSSIP_MESSAGE, 24 + _gossipMenu.GetMenuItemCount() * 100 + _questMenu.GetMenuItemCount() * 75);     // guess size
@@ -238,6 +294,7 @@ void PlayerMenu::SendGossipMenu(uint32 titleTextId, ObjectGuid objectGUID)
 
 void PlayerMenu::SendCloseGossip()
 {
+    ClearDynamicGossipText();
     _gossipMenu.SetSenderGUID(ObjectGuid::Empty);
 
     WorldPacket data(SMSG_GOSSIP_COMPLETE, 0);
@@ -428,10 +485,12 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, ObjectGuid npcGU
             if (!quest->RewardChoiceItemId[i])
                 continue;
 
-            data << uint32(quest->RewardChoiceItemId[i]);
+            uint32 const itemId = LocalLevelScaling::QuestRewardItemFor(_session->GetPlayer(),
+                quest->RewardChoiceItemId[i], quest);
+            data << uint32(itemId);
             data << uint32(quest->RewardChoiceItemCount[i]);
 
-            if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(quest->RewardChoiceItemId[i]))
+            if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(itemId))
                 data << uint32(itemTemplate->DisplayInfoID);
             else
                 data << uint32(0x00);
@@ -444,10 +503,12 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, ObjectGuid npcGU
             if (!quest->RewardItemId[i])
                 continue;
 
-            data << uint32(quest->RewardItemId[i]);
+            uint32 const itemId = LocalLevelScaling::QuestRewardItemFor(_session->GetPlayer(),
+                quest->RewardItemId[i], quest);
+            data << uint32(itemId);
             data << uint32(quest->RewardItemIdCount[i]);
 
-            if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(quest->RewardItemId[i]))
+            if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(itemId))
                 data << uint32(itemTemplate->DisplayInfoID);
             else
                 data << uint32(0);
@@ -457,21 +518,12 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* quest, ObjectGuid npcGU
         Player* player = _session->GetPlayer();
         if (player && (player->GetLevel() >= sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) || sScriptMgr->OnPlayerShouldBeRewardedWithMoneyInsteadOfExp(player)))
         {
-            moneyRew = quest->GetRewMoneyMaxLevel();
+            moneyRew = quest->GetRewMoneyMaxLevel(LocalLevelScaling::QuestScalingEnabled(player));
         }
-        moneyRew += quest->GetRewOrReqMoney(player ? player->GetLevel() : 0); // reward money (below max lvl)
+        moneyRew += quest->GetRewOrReqMoney(player ? player->GetLevel() : 0,
+            LocalLevelScaling::QuestScalingEnabled(player)); // reward money (below max lvl)
         data << moneyRew;
-        uint32 questXp;
-        if (player && !sScriptMgr->OnPlayerShouldBeRewardedWithMoneyInsteadOfExp(player))
-        {
-            questXp = player->CalculateQuestRewardXP(quest);
-        }
-        else
-        {
-            questXp = 0;
-        }
-        sScriptMgr->OnPlayerQuestComputeXP(player, quest, questXp);
-        data << questXp;
+        data << AscensionQuestLog::RewardXPForDisplay(player, quest);
     }
 
     // rewarded honor points. Multiply with 10 to satisfy client
@@ -533,7 +585,16 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
 
     data << uint32(quest->GetQuestId());                    // quest id
     data << uint32(quest->GetQuestMethod());                // Accepted values: 0, 1 or 2. 0 == IsAutoComplete() (skip objectives/details)
-    data << uint32(_session->GetPlayer()->GetQuestLevel(quest)); // per-player level; template remains immutable
+    Player const* viewer = _session->GetPlayer();
+    LocalLevelScaling::QuestCurve const* curve = LocalLevelScaling::ScalingCurveFor(
+        LocalLevelScaling::QuestScalingEnabled(viewer), quest->GetQuestId());
+    int32 const questLevel = viewer->GetQuestLevel(quest);
+    int32 const stockLevel = quest->GetQuestLevel() > 0 ? quest->GetQuestLevel() : int32(viewer->GetLevel());
+    bool const lifted = curve && questLevel != stockLevel;
+    int32 const sentLevel = lifted ? questLevel : quest->GetQuestLevel();
+    LOG_DEBUG("entities.player.quest", "SMSG_QUEST_QUERY_RESPONSE quest {} template level {} sent level {} player level {} min level {}",
+        quest->GetQuestId(), quest->GetQuestLevel(), sentLevel, viewer->GetLevel(), quest->GetMinLevel());
+    data << uint32(sentLevel);                              // per-player level; template remains immutable
     data << uint32(quest->GetMinLevel());                   // min level
     data << uint32(quest->GetZoneOrSort());                 // zone or sort to display in quest log
 
@@ -557,13 +618,14 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
         Player* player = _session->GetPlayer();
         if (player && (player->GetLevel() >= sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) || sScriptMgr->OnPlayerShouldBeRewardedWithMoneyInsteadOfExp(player)))
         {
-            moneyRew = quest->GetRewMoneyMaxLevel();
+            moneyRew = quest->GetRewMoneyMaxLevel(LocalLevelScaling::QuestScalingEnabled(player));
         }
-        moneyRew += quest->GetRewOrReqMoney(player ? player->GetLevel() : 0); // reward money (below max lvl)
+        moneyRew += quest->GetRewOrReqMoney(player ? player->GetLevel() : 0,
+            LocalLevelScaling::QuestScalingEnabled(player)); // reward money (below max lvl)
         data << moneyRew;
     }
 
-    data << uint32(quest->GetRewMoneyMaxLevel());           // used in XP calculation at client
+    data << uint32(quest->GetRewMoneyMaxLevel(LocalLevelScaling::QuestScalingEnabled(_session->GetPlayer()))); // used in XP calculation at client
     data << uint32(quest->GetRewSpell());                   // reward spell, this spell will display (icon) (cast if RewSpellCast == 0)
     data << int32(quest->GetRewSpellCast());                // cast spell
 
@@ -571,7 +633,11 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
     data << uint32(quest->GetRewHonorAddition());
     data << float(quest->GetRewHonorMultiplier());
     data << uint32(quest->GetSrcItemId());                  // source item id
-    data << uint32(quest->GetFlags() & 0xFFFF);             // quest flags
+    uint32 flags = quest->GetFlags() & 0xFFFF;
+    if (curve && LocalLevelScaling::QuestClientScalingFlag.load(std::memory_order_relaxed) &&
+        LocalLevelScaling::OnCurve(*curve, viewer->GetLevel()))
+        flags |= AscensionQuestLog::ScaledQuestFlag;
+    data << flags;                                          // quest flags
     data << uint32(quest->GetCharTitleId());                // CharTitleId, new 2.4.0, player gets this title (id from CharTitles)
     data << uint32(quest->GetPlayersSlain());               // players slain
     data << uint32(quest->GetBonusTalents());               // bonus talents
@@ -589,12 +655,14 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* quest) const
     {
         for (uint8 i = 0; i < QUEST_REWARDS_COUNT; ++i)
         {
-            data << uint32(quest->RewardItemId[i]);
+            data << uint32(LocalLevelScaling::QuestRewardItemFor(_session->GetPlayer(), quest->RewardItemId[i],
+                quest));
             data << uint32(quest->RewardItemIdCount[i]);
         }
         for (uint8 i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
         {
-            data << uint32(quest->RewardChoiceItemId[i]);
+            data << uint32(LocalLevelScaling::QuestRewardItemFor(_session->GetPlayer(), quest->RewardChoiceItemId[i],
+                quest));
             data << uint32(quest->RewardChoiceItemCount[i]);
         }
     }
@@ -684,10 +752,12 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, ObjectGuid npcGUI
     data << uint32(quest->GetRewChoiceItemsCount());
     for (uint32 i = 0; i < quest->GetRewChoiceItemsCount(); ++i)
     {
-        data << uint32(quest->RewardChoiceItemId[i]);
+        uint32 const itemId = LocalLevelScaling::QuestRewardItemFor(_session->GetPlayer(),
+            quest->RewardChoiceItemId[i], quest);
+        data << uint32(itemId);
         data << uint32(quest->RewardChoiceItemCount[i]);
 
-        if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(quest->RewardChoiceItemId[i]))
+        if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(itemId))
             data << uint32(itemTemplate->DisplayInfoID);
         else
             data << uint32(0);
@@ -696,10 +766,12 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, ObjectGuid npcGUI
     data << uint32(quest->GetRewItemsCount());
     for (uint32 i = 0; i < quest->GetRewItemsCount(); ++i)
     {
-        data << uint32(quest->RewardItemId[i]);
+        uint32 const itemId = LocalLevelScaling::QuestRewardItemFor(_session->GetPlayer(),
+            quest->RewardItemId[i], quest);
+        data << uint32(itemId);
         data << uint32(quest->RewardItemIdCount[i]);
 
-        if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(quest->RewardItemId[i]))
+        if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(itemId))
             data << uint32(itemTemplate->DisplayInfoID);
         else
             data << uint32(0);
@@ -709,21 +781,12 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* quest, ObjectGuid npcGUI
     Player* player = _session->GetPlayer();
     if (player && (player->GetLevel() >= sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) || sScriptMgr->OnPlayerShouldBeRewardedWithMoneyInsteadOfExp(player)))
     {
-        moneyRew = quest->GetRewMoneyMaxLevel();
+        moneyRew = quest->GetRewMoneyMaxLevel(LocalLevelScaling::QuestScalingEnabled(player));
     }
-    moneyRew += quest->GetRewOrReqMoney(player ? player->GetLevel() : 0); // reward money (below max lvl)
+    moneyRew += quest->GetRewOrReqMoney(player ? player->GetLevel() : 0,
+        LocalLevelScaling::QuestScalingEnabled(player)); // reward money (below max lvl)
     data << moneyRew;
-    uint32 questXp;
-    if (player && !sScriptMgr->OnPlayerShouldBeRewardedWithMoneyInsteadOfExp(player))
-    {
-        questXp = player->CalculateQuestRewardXP(quest);
-    }
-    else
-    {
-        questXp = 0;
-    }
-    sScriptMgr->OnPlayerQuestComputeXP(player, quest, questXp);
-    data << questXp;
+    data << AscensionQuestLog::RewardXPForDisplay(player, quest);
 
     // rewarded honor points. Multiply with 10 to satisfy client
     data << uint32(10 * quest->CalculateHonorGain(_session->GetPlayer()->GetQuestLevel(quest)));

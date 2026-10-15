@@ -1,0 +1,302 @@
+{
+  "schema": 1,
+  "name": "Tome of Lightning's normal interrupt lockout matches its twenty-percent promise (#1678)",
+  "contract": "Current rank-one Tome of Lightning 300606 explicitly reduces interrupt and silence durations by $s1%, whose effect zero resolves to twenty. Effect two is a separate MECHANIC_INTERRUPT duration modifier that resolves to twenty-five. Native Spell::EffectInterruptCast calls ModSpellDuration on the interrupted target before ProhibitSpellSchool, so a real Kick against a normally cast Shock exposes the mismatch without synthetic auras. Both Stormbringers choose Lightning, only one buys entry 34673, and a hostile Rogue interrupts their normally granted Shock. Compare real school cooldowns with the untalented control, preserve critical strike benefit and unrelated-school access, and prove an ordinary Shock succeeds after expiration. The unreachable second record 706308 and its intended acquisition remain outside this partial correction.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "attacker",
+      "race": 1,
+      "class": 4,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "control",
+      "race": 8,
+      "class": 16,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "talented",
+      "race": 8,
+      "class": 16,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "specialization",
+      "actor": "control",
+      "id": 15
+    },
+    {
+      "action": "specialization",
+      "actor": "talented",
+      "id": 15
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 300606,
+      "equals": 0,
+      "label": "The control has no Tome of Lightning"
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_crit_chance",
+      "save_as": "control_crit"
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "talented",
+      "entry": 34673,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 300606,
+      "equals": 1,
+      "label": "Tome of Lightning is acquired through the Lightning advancement entry"
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "spell_crit_chance",
+      "relative_to": "control_crit",
+      "min": 1.99,
+      "max": 2.01,
+      "label": "The talent preserves its two-percent critical strike benefit"
+    },
+    {
+      "action": "learn",
+      "actor": "attacker",
+      "spell": 1766,
+      "label": "The hostile interrupt fixture knows Kick"
+    },
+    {
+      "action": "pvp",
+      "actor": "attacker",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "control",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "talented",
+      "enabled": true
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "talented",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "attacker",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "knows_spell",
+      "spell": 804020,
+      "equals": 1,
+      "label": "The control normally knows Shock"
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "knows_spell",
+      "spell": 804020,
+      "equals": 1,
+      "label": "The talented Stormbringer normally knows Shock"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_cast_time_ms",
+      "spell": 804020,
+      "min": 500,
+      "label": "Shock has a real interruptible cast"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 804020,
+      "target": "attacker"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "casting",
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "attacker",
+      "spell": 1766,
+      "target": "control"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Kick interrupts the untalented Shock"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 804020,
+      "min": 3800,
+      "max": 4000,
+      "label": "The control receives Kick's full four-second Nature school lockout"
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 804020,
+      "save_as": "control_lockout"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 804763,
+      "equals": 0,
+      "label": "The Nature interrupt does not lock the unrelated Physical school"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "attacker",
+      "spell": 1766
+    },
+    {
+      "action": "set_power",
+      "actor": "attacker",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talented",
+      "spell": 804020,
+      "target": "attacker"
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "casting",
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "attacker",
+      "spell": 1766,
+      "target": "talented"
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 500,
+      "label": "Kick interrupts the talented Shock"
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 804020,
+      "ratio_to": "control_lockout",
+      "min": 0.79,
+      "max": 0.81,
+      "label": "Tome of Lightning reduces the actual school lockout by the promised twenty percent"
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 804763,
+      "equals": 0,
+      "label": "The talent does not add a lockout to the unrelated Physical school"
+    },
+    {
+      "action": "wait",
+      "ms": 3300
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "cooldown_ms",
+      "spell": 804020,
+      "equals": 0,
+      "label": "The reduced Nature lockout expires"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "spell_damage_count",
+      "spell": 804020,
+      "save_as": "shock_damage"
+    },
+    {
+      "action": "cast",
+      "actor": "talented",
+      "spell": 804020,
+      "target": "attacker"
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "spell_damage_count",
+      "spell": 804020,
+      "relative_to": "shock_damage",
+      "min": 1,
+      "within_ms": 4000,
+      "label": "A normal Shock succeeds after the lockout"
+    }
+  ]
+}

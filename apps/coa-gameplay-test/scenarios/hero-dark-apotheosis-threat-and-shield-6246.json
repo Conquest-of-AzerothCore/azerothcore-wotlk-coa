@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "name": "A Hero's Dark Apotheosis raises threat and cannot use a shield (#6246)",
+  "contract": [
+    "Dark Apotheosis 275585 (free-pick and Wildcard Heroes) reads 'Your threat generated is significantly increased. Dark Apotheosis cannot cower behind a shield. Shields cannot be equipped while transformed.' The form applied neither.",
+    "The threat increase is Warcraft Reborn's Dark Apotheosis value, +260% (1154322 effect 2), added as the form's third effect.",
+    "While transformed the Hero has Dark Apotheosis - Shield Armor and Block Removal 275587 (-101% shield armor, -100% block) and cannot equip a shield; leaving the form removes 275587 and the shield can be equipped again."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "x",
+      "race": 1,
+      "class": 10,
+      "level": 20
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "x",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "label": "A one-handed weapon, so a shield fits",
+      "actor": "x",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "x",
+      "item": 876
+    },
+    {
+      "action": "learn",
+      "label": "Shield proficiency",
+      "actor": "x",
+      "spell": 9116
+    },
+    {
+      "action": "learn",
+      "actor": "x",
+      "spell": 275585
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "actor": "x",
+      "spell": 275585
+    },
+    {
+      "action": "assert",
+      "label": "Dark Apotheosis is up",
+      "actor": "x",
+      "metric": "aura",
+      "spell": 275585,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Its threat is increased by 260%",
+      "actor": "x",
+      "metric": "aura_amount",
+      "spell": 275585,
+      "effect": 2,
+      "equals": 260
+    },
+    {
+      "action": "assert",
+      "label": "Shield armor and block removal is up",
+      "actor": "x",
+      "metric": "aura",
+      "spell": 275587,
+      "equals": 1
+    },
+    {
+      "action": "equip",
+      "label": "Try to equip a shield while transformed",
+      "actor": "x",
+      "item": 876,
+      "slot": 16,
+      "rejected": true
+    },
+    {
+      "action": "assert",
+      "label": "No shield is equipped",
+      "actor": "x",
+      "metric": "equipped_item",
+      "slot": 16,
+      "equals": 0
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "x",
+      "spell": 275585
+    },
+    {
+      "action": "assert",
+      "label": "Leaving the form removes 275587",
+      "actor": "x",
+      "metric": "aura",
+      "spell": 275587,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "equip",
+      "label": "Equip the shield after leaving the form",
+      "actor": "x",
+      "item": 876,
+      "slot": 16
+    },
+    {
+      "action": "assert",
+      "label": "The shield is equipped",
+      "actor": "x",
+      "metric": "equipped_item",
+      "slot": 16,
+      "equals": 876
+    }
+  ]
+}

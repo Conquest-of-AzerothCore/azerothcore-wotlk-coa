@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "New Day resets Paragon, Chosen of the Light and Judgement Day through a native Ascension effect (#3920)",
+  "contract": "Spell.dbc 800600 (\"New Day\") has three SPELL_EFFECT_ASCENSION_RESET_COOLDOWN (195) effects with EffectMiscValue 680639, 800622 and 806121 and EffectMiscValueB 1 — those three ids resolve (SpellName_1 in Spell.dbc) to 'Paragon', 'Chosen of the Light' and 'Judgement Day', exactly the tooltip's list. SPELL_EFFECT_ASCENSION_RESET_COOLDOWN is a generic Ascension core effect (SharedDefines.h:1016; wired into the effect table at SpellEffects.cpp:267); Spell::EffectAscensionResetCooldown (SpellEffects.cpp:541-550) calls ResetAscensionCooldown(player, effect.MiscValue, effect.MiscValueB != 0), which does player->RemoveSpellCooldown(spellId, true) and, since MiscValueB is nonzero, also clears the spell's category cooldown. This is a fully generic, already-wired native effect handler that reads the exact spell ids straight out of the DBC record; no server script exists or is needed. Paragon (680639) itself carries CasterAuraSpell 807440 ('Dawn'): Spell::CheckCast (Spell.cpp:5855-5856) returns SPELL_FAILED_CASTER_AURASTATE when the caster lacks that aura, so casting Paragon without it never leaves CheckCast, is never applied, and never starts its own 300000 ms RecoveryTime/CategoryRecoveryTime (Category 165) — the scenario grants the Dawn fixture (807440) with 'set_aura' first, exactly as sun-cleric-solar-conduit.json already does for the same prerequisite, applied through the normal Unit::AddAura path rather than a real cast of Dawn.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "cleric", "spell": 680639 },
+    { "action": "learn", "actor": "cleric", "spell": 800622 },
+    { "action": "learn", "actor": "cleric", "spell": 806121 },
+    { "action": "learn", "actor": "cleric", "spell": 800600 },
+    { "action": "set_aura", "label": "Fixture: Paragon's own CasterAuraSpell (Dawn) must be up or the cast never leaves CheckCast", "actor": "cleric", "spell": 807440, "stacks": 1 },
+    { "action": "cast", "actor": "cleric", "spell": 680639 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "cast", "actor": "cleric", "spell": 800622 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "cast", "actor": "cleric", "spell": 806121 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "Paragon is on cooldown", "actor": "cleric", "metric": "cooldown_ms", "spell": 680639, "min": 1 },
+    { "action": "assert", "label": "Chosen of the Light is on cooldown", "actor": "cleric", "metric": "cooldown_ms", "spell": 800622, "min": 1 },
+    { "action": "assert", "label": "Judgement Day is on cooldown", "actor": "cleric", "metric": "cooldown_ms", "spell": 806121, "min": 1 },
+    { "action": "cast", "actor": "cleric", "spell": 800600 },
+    { "action": "assert", "label": "New Day resets Paragon's cooldown", "actor": "cleric", "metric": "cooldown_ms", "spell": 680639, "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "New Day resets Chosen of the Light's cooldown", "actor": "cleric", "metric": "cooldown_ms", "spell": 800622, "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "New Day resets Judgement Day's cooldown", "actor": "cleric", "metric": "cooldown_ms", "spell": 806121, "equals": 0, "within_ms": 3000 }
+  ]
+}

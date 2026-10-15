@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Skin Shedder halves form cost, Hallucinogenic Venom applies its 50",
+  "contract": "#468 and #574: both are native. Skin Shedder (705949) effect 2 is a PCT SPELLMOD_COST (op 14) of -50% with class mask (0,0,0x20), which selects the form spells (Spider 800841, Beetle 803183, Sea Serpent 803212, Weaver 804980, Vizier 800912, both Venomwing rows 520307 and 520330); the modifier and Beetle Form's real spell_power_cost are checked against the same run's baseline. Hallucinogenic Venom (560188) is SPELL_AURA_MOD_MANA_REGEN_INTERRUPT with 50, read by Player::UpdateManaRegen; the harness has no mana regeneration metric, so only the applied aura and its amount are asserted, not the regenerated mana.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "v", "race": 1, "class": 29, "level": 80}
+  ],
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "assert", "label": "BASELINE: Spider Form 800841 cost is unmodified before Skin Shedder", "actor": "v", "metric": "spell_modifier", "spell": 800841, "op": 14, "base": 1000, "equals": 1000},
+    {"action": "assert", "label": "BASELINE: Beetle Form 803183 cost is unmodified before Skin Shedder", "actor": "v", "metric": "spell_modifier", "spell": 803183, "op": 14, "base": 1000, "equals": 1000},
+    {"action": "assert", "label": "BASELINE: Sea Serpent Form 803212 cost is unmodified before Skin Shedder", "actor": "v", "metric": "spell_modifier", "spell": 803212, "op": 14, "base": 1000, "equals": 1000},
+    {"action": "assert", "label": "BASELINE: Weaver Form 804980 cost is unmodified before Skin Shedder", "actor": "v", "metric": "spell_modifier", "spell": 804980, "op": 14, "base": 1000, "equals": 1000},
+    {"action": "assert", "label": "BASELINE: Vizier Form 800912 cost is unmodified before Skin Shedder", "actor": "v", "metric": "spell_modifier", "spell": 800912, "op": 14, "base": 1000, "equals": 1000},
+    {"action": "assert", "label": "BASELINE: Venomwing Form 520307 cost is unmodified before Skin Shedder", "actor": "v", "metric": "spell_modifier", "spell": 520307, "op": 14, "base": 1000, "equals": 1000},
+    {"action": "assert", "label": "BASELINE: Venomwing (second row) Form 520330 cost is unmodified before Skin Shedder", "actor": "v", "metric": "spell_modifier", "spell": 520330, "op": 14, "base": 1000, "equals": 1000},
+    {"action": "snapshot", "actor": "v", "metric": "spell_power_cost", "spell": 803183, "save_as": "beetle_cost_base"},
+    {"action": "assert", "label": "SETUP: Beetle Form costs resource before Skin Shedder", "actor": "v", "metric": "spell_power_cost", "spell": 803183, "min": 1},
+    {"action": "assert", "label": "SETUP: Skin Shedder is not applied yet", "actor": "v", "metric": "aura", "spell": 705949, "equals": 0},
+    {"action": "assert", "label": "SETUP: Hallucinogenic Venom is not applied yet", "actor": "v", "metric": "aura", "spell": 560188, "equals": 0},
+    {"action": "learn", "actor": "v", "spell": 705949},
+    {"action": "assert", "label": "SETUP: Skin Shedder is applied", "actor": "v", "metric": "aura", "spell": 705949, "within_ms": 3000, "equals": 1},
+    {"action": "assert", "label": "Skin Shedder halves Spider Form 800841's cost (1000 -> 500)", "actor": "v", "metric": "spell_modifier", "spell": 800841, "op": 14, "base": 1000, "within_ms": 3000, "equals": 500},
+    {"action": "assert", "label": "Skin Shedder halves Beetle Form 803183's cost (1000 -> 500)", "actor": "v", "metric": "spell_modifier", "spell": 803183, "op": 14, "base": 1000, "within_ms": 3000, "equals": 500},
+    {"action": "assert", "label": "Skin Shedder halves Sea Serpent Form 803212's cost (1000 -> 500)", "actor": "v", "metric": "spell_modifier", "spell": 803212, "op": 14, "base": 1000, "within_ms": 3000, "equals": 500},
+    {"action": "assert", "label": "Skin Shedder halves Weaver Form 804980's cost (1000 -> 500)", "actor": "v", "metric": "spell_modifier", "spell": 804980, "op": 14, "base": 1000, "within_ms": 3000, "equals": 500},
+    {"action": "assert", "label": "Skin Shedder halves Vizier Form 800912's cost (1000 -> 500)", "actor": "v", "metric": "spell_modifier", "spell": 800912, "op": 14, "base": 1000, "within_ms": 3000, "equals": 500},
+    {"action": "assert", "label": "Skin Shedder halves Venomwing Form 520307's cost (1000 -> 500)", "actor": "v", "metric": "spell_modifier", "spell": 520307, "op": 14, "base": 1000, "within_ms": 3000, "equals": 500},
+    {"action": "assert", "label": "Skin Shedder halves Venomwing (second row) Form 520330's cost (1000 -> 500)", "actor": "v", "metric": "spell_modifier", "spell": 520330, "op": 14, "base": 1000, "within_ms": 3000, "equals": 500},
+    {"action": "assert", "label": "Beetle Form's real cost is about half its baseline (integer rounding of one point at most)", "actor": "v", "metric": "spell_power_cost", "spell": 803183, "ratio_to": "beetle_cost_base", "min": 0.45, "max": 0.55},
+    {"action": "assert", "label": "CONTROL: Skin Shedder leaves Chitin Rush's cost alone", "actor": "v", "metric": "spell_modifier", "spell": 803570, "op": 14, "base": 1000, "equals": 1000},
+    {"action": "learn", "actor": "v", "spell": 560188},
+    {"action": "assert", "label": "Hallucinogenic Venom is applied", "actor": "v", "metric": "aura", "spell": 560188, "within_ms": 3000, "equals": 1},
+    {"action": "assert", "label": "Hallucinogenic Venom's regeneration-while-casting effect carries the Spell.dbc amount of 50", "actor": "v", "metric": "aura_amount", "spell": 560188, "effect": 0, "equals": 50}
+  ]
+}

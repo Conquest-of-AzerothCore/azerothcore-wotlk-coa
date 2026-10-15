@@ -1,0 +1,222 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Dark Loa's Incantation works on higher-rank Shadowflare (#4169)",
+  "contract": [
+    "Dark Loa's Incantation 525377 (CharacterAdvancement 6073, Shadowhunting specialization 4) promises: Dealing damage with Shadowflare now applies Hex of Malice if it strikes at least three enemies. Shadowflare 801669 has an 8-yard radius, target UNIT_DEST_AREA_ENEMY and a trigger-with-value effect that the class contract converts to direct SCHOOL_DAMAGE. The converted effect must still hit enemies in its authored area.",
+    "Training dummy 31146 uses npc_training_dummy: native damage is logged, then DamageTaken clamps its health loss to zero. Successful damaging strikes on dummies must count toward the same three-target condition as strikes on mobs. Absorbed or immune hits are not established by this case. Untalented and two-target casts must not apply Hex; three mobs, three dummies, and a mixed set must all receive the caster's Hex. A friendly creature inside and a hostile creature beyond eight yards are controls. Counts belong to a single cast; two-target casts repeated independently must never combine into a three-target proc.",
+    "The talent uses a native specialization and advancement upload. The caster learns the ordinary Shadowflare and Hex rank-one spells as fixtures, preserves cast time, cost and GCD, and uses spell hit rating to exclude random misses. Per-target native damage logs establish delivery even when dummy health is unchanged; Hex auras establish the talent payload.",
+    "The level-80 Shadowflare upgrade 501148 belongs to the same native rank chain and must deliver the same talent behavior as rank one."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy1",
+      "owner": "doctor",
+      "entry": 31146,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "enemy2",
+      "owner": "doctor",
+      "entry": 31146,
+      "level": 80,
+      "health": 1000000,
+      "distance": 4
+    },
+    {
+      "id": "enemy3",
+      "owner": "doctor",
+      "entry": 31146,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5
+    },
+    {
+      "id": "outside",
+      "owner": "doctor",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 25
+    },
+    {
+      "id": "friend",
+      "owner": "doctor",
+      "entry": 36,
+      "faction": 35,
+      "level": 80,
+      "health": 1000000,
+      "distance": 6
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "doctor",
+      "spell": 501148
+    },
+    {
+      "action": "learn",
+      "actor": "doctor",
+      "spell": 801693
+    },
+    {
+      "action": "specialization",
+      "actor": "doctor",
+      "id": 4
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "doctor",
+      "entry": 6073,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "aura",
+      "label": "SETUP: the talent state is correct",
+      "spell": 525377,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "doctor",
+      "spell": 501148
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "cast_failure",
+      "label": "The ordinary Shadowflare cast is accepted",
+      "spell": 501148,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "label": "Shadowflare delivers a native damage log to each nearby enemy",
+      "spell": 501148,
+      "target": "enemy1",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "label": "Shadowflare delivers a native damage log to each nearby enemy",
+      "spell": 501148,
+      "target": "enemy2",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "label": "Shadowflare delivers a native damage log to each nearby enemy",
+      "spell": 501148,
+      "target": "enemy3",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "label": "CONTROL: Shadowflare does not damage a friendly or out-of-area creature",
+      "spell": 501148,
+      "target": "outside",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "spell_damage_count",
+      "label": "CONTROL: Shadowflare does not damage a friendly or out-of-area creature",
+      "spell": 501148,
+      "target": "friend",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy1",
+      "metric": "aura",
+      "label": "Three eligible targets receive Hex; controls remain unhexed",
+      "spell": 801693,
+      "caster": "doctor",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy2",
+      "metric": "aura",
+      "label": "Three eligible targets receive Hex; controls remain unhexed",
+      "spell": 801693,
+      "caster": "doctor",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy3",
+      "metric": "aura",
+      "label": "Three eligible targets receive Hex; controls remain unhexed",
+      "spell": 801693,
+      "caster": "doctor",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "outside",
+      "metric": "aura",
+      "label": "CONTROL: the talent does not Hex a friendly or out-of-area creature",
+      "spell": 801693,
+      "caster": "doctor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "aura",
+      "label": "CONTROL: the talent does not Hex a friendly or out-of-area creature",
+      "spell": 801693,
+      "caster": "doctor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "spell_cast_count",
+      "spell": 801693,
+      "equals": 3,
+      "label": "The talent casts Hex exactly once per eligible target"
+    }
+  ]
+}

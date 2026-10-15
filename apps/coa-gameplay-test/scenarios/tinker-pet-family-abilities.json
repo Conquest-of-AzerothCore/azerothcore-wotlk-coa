@@ -1,0 +1,436 @@
+{
+  "schema": 1,
+  "name": "Tinker pets know their family abilities (#5412, #4741)",
+  "contract": "#5412 reports that Tinker pets have no abilities and #4741 lists ZIGGI-6K's four abilities. Each Tinker pet has a client CreatureFamily (Clockwork Assistant 692, Mechano-Bear 693, Rusthound 694, ZIGGI-6K 695, Scrapmaw 696; AscensionDB client captures of creatures 60070, 60671, 60672, 500481 and 50048) whose SkillLine 10037-10041 lists its abilities in SkillLineAbility: Avoidance and four active abilities each. A pet knows an ability once its level reaches the ability's SpellLevel (Scrapmaw: Flamethrower 20, Drill Smash 30, Flame Jets 35, Missile Swarm 40). Level 80 Tinkers build each pet and the pet spellbooks are read; a level 20 Tinker's Scrapmaw gains Drill Smash at level 30 and still lacks Missile Swarm.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "clock",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    },
+    {
+      "id": "bear",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    },
+    {
+      "id": "hound",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    },
+    {
+      "id": "ziggi",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    },
+    {
+      "id": "scrapmaw",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    },
+    {
+      "id": "apprentice",
+      "race": 1,
+      "class": 28,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks and class synchronisation settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Build: Clockwork Assistant",
+      "actor": "clock",
+      "spell": 803436
+    },
+    {
+      "action": "cast",
+      "label": "Build: Clockwork Assistant",
+      "actor": "clock",
+      "spell": 803436
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Clockwork Assistant is built",
+      "actor": "clock",
+      "metric": "pet_entry",
+      "equals": 60070,
+      "within_ms": 9000
+    },
+    {
+      "action": "learn",
+      "label": "Build: Mechano-Bear",
+      "actor": "bear",
+      "spell": 803405
+    },
+    {
+      "action": "cast",
+      "label": "Build: Mechano-Bear",
+      "actor": "bear",
+      "spell": 803405
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Mechano-Bear is built",
+      "actor": "bear",
+      "metric": "pet_entry",
+      "equals": 60671,
+      "within_ms": 9000
+    },
+    {
+      "action": "learn",
+      "label": "Build: Rusthound",
+      "actor": "hound",
+      "spell": 803437
+    },
+    {
+      "action": "cast",
+      "label": "Build: Rusthound",
+      "actor": "hound",
+      "spell": 803437
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Rusthound is built",
+      "actor": "hound",
+      "metric": "pet_entry",
+      "equals": 60672,
+      "within_ms": 9000
+    },
+    {
+      "action": "learn",
+      "label": "Build: ZIGGI-6K",
+      "actor": "ziggi",
+      "spell": 524840
+    },
+    {
+      "action": "cast",
+      "label": "Build: ZIGGI-6K",
+      "actor": "ziggi",
+      "spell": 524840
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: ZIGGI-6K is built",
+      "actor": "ziggi",
+      "metric": "pet_entry",
+      "equals": 500481,
+      "within_ms": 9000
+    },
+    {
+      "action": "learn",
+      "label": "Build: Scrapmaw",
+      "actor": "scrapmaw",
+      "spell": 500242
+    },
+    {
+      "action": "cast",
+      "label": "Build: Scrapmaw",
+      "actor": "scrapmaw",
+      "spell": 500242
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Scrapmaw is built",
+      "actor": "scrapmaw",
+      "metric": "pet_entry",
+      "equals": 50048,
+      "within_ms": 9000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: Clockwork Assistant knows Avoidance",
+      "actor": "clock",
+      "metric": "pet_knows_spell",
+      "spell": 573359,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: Clockwork Assistant knows Throw Wrench",
+      "actor": "clock",
+      "metric": "pet_knows_spell",
+      "spell": 574359,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: Clockwork Assistant knows Capacity Expansion",
+      "actor": "clock",
+      "metric": "pet_knows_spell",
+      "spell": 578122,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: Clockwork Assistant knows Crowd Controller",
+      "actor": "clock",
+      "metric": "pet_knows_spell",
+      "spell": 578123,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: Clockwork Assistant knows Surprise Dynamite",
+      "actor": "clock",
+      "metric": "pet_knows_spell",
+      "spell": 578124,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: Mechano-Bear knows Avoidance",
+      "actor": "bear",
+      "metric": "pet_knows_spell",
+      "spell": 573360,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: Mechano-Bear knows Recalibrate",
+      "actor": "bear",
+      "metric": "pet_knows_spell",
+      "spell": 578270,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: Mechano-Bear knows Arcanoreflector",
+      "actor": "bear",
+      "metric": "pet_knows_spell",
+      "spell": 578339,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: Mechano-Bear knows Crash & Thrash",
+      "actor": "bear",
+      "metric": "pet_knows_spell",
+      "spell": 578340,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: Mechano-Bear knows Mechano-Growl",
+      "actor": "bear",
+      "metric": "pet_knows_spell",
+      "spell": 806171,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: Rusthound knows Avoidance",
+      "actor": "hound",
+      "metric": "pet_knows_spell",
+      "spell": 573363,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: Rusthound knows Manabite",
+      "actor": "hound",
+      "metric": "pet_knows_spell",
+      "spell": 578254,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: Rusthound knows Seek",
+      "actor": "hound",
+      "metric": "pet_knows_spell",
+      "spell": 581311,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: Rusthound knows Meltdown",
+      "actor": "hound",
+      "metric": "pet_knows_spell",
+      "spell": 581313,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: Rusthound knows Rustbite",
+      "actor": "hound",
+      "metric": "pet_knows_spell",
+      "spell": 712423,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#4741: ZIGGI-6K knows Avoidance",
+      "actor": "ziggi",
+      "metric": "pet_knows_spell",
+      "spell": 573361,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#4741: ZIGGI-6K knows Gear Toss",
+      "actor": "ziggi",
+      "metric": "pet_knows_spell",
+      "spell": 520368,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#4741: ZIGGI-6K knows Revitalizing Aura",
+      "actor": "ziggi",
+      "metric": "pet_knows_spell",
+      "spell": 524839,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#4741: ZIGGI-6K knows Recharge",
+      "actor": "ziggi",
+      "metric": "pet_knows_spell",
+      "spell": 808010,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#4741: ZIGGI-6K knows Minicopter-Z",
+      "actor": "ziggi",
+      "metric": "pet_knows_spell",
+      "spell": 801626,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: Scrapmaw knows Avoidance",
+      "actor": "scrapmaw",
+      "metric": "pet_knows_spell",
+      "spell": 573362,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: Scrapmaw knows Flamethrower",
+      "actor": "scrapmaw",
+      "metric": "pet_knows_spell",
+      "spell": 806168,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: Scrapmaw knows Drill Smash",
+      "actor": "scrapmaw",
+      "metric": "pet_knows_spell",
+      "spell": 806173,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: Scrapmaw knows Flame Jets",
+      "actor": "scrapmaw",
+      "metric": "pet_knows_spell",
+      "spell": 850023,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: Scrapmaw knows Missile Swarm",
+      "actor": "scrapmaw",
+      "metric": "pet_knows_spell",
+      "spell": 807386,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Build: Scrapmaw",
+      "actor": "apprentice",
+      "spell": 500242
+    },
+    {
+      "action": "cast",
+      "label": "Build: Scrapmaw",
+      "actor": "apprentice",
+      "spell": 500242
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: level 20 Scrapmaw is built",
+      "actor": "apprentice",
+      "metric": "pet_entry",
+      "equals": 50048,
+      "within_ms": 9000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: level 20 Scrapmaw knows Flamethrower (level 20)",
+      "actor": "apprentice",
+      "metric": "pet_knows_spell",
+      "spell": 806168,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: level 20 Scrapmaw does not know Drill Smash (level 30) yet",
+      "actor": "apprentice",
+      "metric": "pet_knows_spell",
+      "spell": 806173,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "label": "Tinker reaches level 30",
+      "actor": "apprentice",
+      "value": 30
+    },
+    {
+      "action": "assert",
+      "label": "#5412: level 30 Scrapmaw learns Drill Smash",
+      "actor": "apprentice",
+      "metric": "pet_knows_spell",
+      "spell": 806173,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#5412: level 30 Scrapmaw does not know Missile Swarm (level 40) yet",
+      "actor": "apprentice",
+      "metric": "pet_knows_spell",
+      "spell": 807386,
+      "equals": 0
+    }
+  ]
+}

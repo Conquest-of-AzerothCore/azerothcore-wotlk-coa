@@ -1,0 +1,643 @@
+{
+  "schema": 1,
+  "name": "Primalist Eruption: Earthshaping duration and Firestorm scaling",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "one",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "five",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "fifteen",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "one_target",
+      "owner": "one",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    },
+    {
+      "id": "five_target",
+      "owner": "five",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    },
+    {
+      "id": "fifteen_target",
+      "owner": "fifteen",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "one",
+      "id": 95
+    },
+    {
+      "action": "learn",
+      "actor": "one",
+      "spell": 802335
+    },
+    {
+      "action": "cast",
+      "actor": "one",
+      "spell": 802335,
+      "target": "one_target"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "one",
+      "metric": "cooldown_ms",
+      "spell": 802335,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "one",
+      "metric": "spell_damage_count",
+      "spell": 803140,
+      "target": "one_target",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "one",
+      "metric": "spell_power",
+      "school": 2,
+      "save_as": "base_school2",
+      "label": "base_school2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "one",
+      "metric": "spell_power",
+      "school": 3,
+      "save_as": "base_school3",
+      "label": "base_school3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "one",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "one_target",
+      "save_as": "base_magma",
+      "label": "base_magma"
+    },
+    {
+      "action": "set_aura",
+      "actor": "one",
+      "spell": 9361,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "one",
+      "metric": "spell_power",
+      "school": 2,
+      "save_as": "nature_school2",
+      "label": "nature_school2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "one",
+      "metric": "spell_power",
+      "school": 3,
+      "save_as": "nature_school3",
+      "label": "nature_school3"
+    },
+    {
+      "action": "assert",
+      "actor": "one",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "one_target",
+      "label": "nature_magma",
+      "relative_to": "base_magma",
+      "min": 4,
+      "max": 5
+    },
+    {
+      "action": "set_aura",
+      "actor": "one",
+      "spell": 9361,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "one",
+      "spell": 9298,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "one",
+      "metric": "spell_power",
+      "school": 2,
+      "save_as": "fire_school2",
+      "label": "fire_school2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "one",
+      "metric": "spell_power",
+      "school": 3,
+      "save_as": "fire_school3",
+      "label": "fire_school3"
+    },
+    {
+      "action": "assert",
+      "actor": "one",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "one_target",
+      "label": "fire_magma",
+      "relative_to": "base_magma",
+      "min": 4,
+      "max": 5
+    },
+    {
+      "action": "set_aura",
+      "actor": "one",
+      "spell": 9298,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "one",
+      "spell": 9361,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "one",
+      "spell": 9298,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "one",
+      "metric": "spell_power",
+      "school": 2,
+      "save_as": "both_school2",
+      "label": "both_school2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "one",
+      "metric": "spell_power",
+      "school": 3,
+      "save_as": "both_school3",
+      "label": "both_school3"
+    },
+    {
+      "action": "assert",
+      "actor": "one",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "one_target",
+      "label": "both_magma",
+      "relative_to": "base_magma",
+      "min": 4,
+      "max": 5
+    },
+    {
+      "action": "set_aura",
+      "actor": "one",
+      "spell": 9361,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "one",
+      "spell": 9298,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "one",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "one",
+      "metric": "spell_power",
+      "school": 2,
+      "save_as": "attack_school2",
+      "label": "attack_school2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "one",
+      "metric": "spell_power",
+      "school": 3,
+      "save_as": "attack_school3",
+      "label": "attack_school3"
+    },
+    {
+      "action": "assert",
+      "actor": "one",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "one_target",
+      "label": "attack_magma",
+      "relative_to": "base_magma",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "one",
+      "spell": 18787,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "one",
+      "spell": 680441,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "one",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "one",
+      "metric": "spell_modifier",
+      "spell": 802335,
+      "op": 1,
+      "base": 200,
+      "label": "one_duration_modifier",
+      "equals": 400
+    },
+    {
+      "action": "cast",
+      "actor": "one",
+      "spell": 802335,
+      "target": "one_target"
+    },
+    {
+      "action": "assert",
+      "actor": "one",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "one_target",
+      "min": 1045,
+      "max": 1045,
+      "label": "No hidden 40 percent self damage bonus"
+    },
+    {
+      "action": "assert",
+      "actor": "one_target",
+      "metric": "aura_duration_ms",
+      "spell": 802335,
+      "label": "one_duration",
+      "min": 336,
+      "max": 400
+    },
+    {
+      "action": "wait",
+      "ms": 4200
+    },
+    {
+      "action": "assert",
+      "actor": "one",
+      "metric": "spell_damage_count",
+      "spell": 803140,
+      "target": "one_target",
+      "label": "one_hits",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "one",
+      "metric": "spell_damage_total",
+      "spell": 803140,
+      "target": "one_target",
+      "label": "one_damage",
+      "min": 675,
+      "max": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "one",
+      "metric": "cooldown_ms",
+      "spell": 802335,
+      "min": 25000,
+      "max": 26000
+    },
+    {
+      "action": "assert",
+      "actor": "one_target",
+      "metric": "aura_stacks",
+      "spell": 802335,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "one",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "one",
+      "metric": "aura_stacks",
+      "spell": 680450,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "one",
+      "metric": "aura_stacks",
+      "spell": 680846,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "one",
+      "metric": "aura_stacks",
+      "spell": 532562,
+      "equals": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "five",
+      "id": 95
+    },
+    {
+      "action": "learn",
+      "actor": "five",
+      "spell": 802335
+    },
+    {
+      "action": "set_aura",
+      "actor": "five",
+      "spell": 680441,
+      "stacks": 5
+    },
+    {
+      "action": "assert",
+      "actor": "five",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "actor": "five",
+      "metric": "spell_modifier",
+      "spell": 802335,
+      "op": 1,
+      "base": 200,
+      "label": "five_duration_modifier",
+      "equals": 1200
+    },
+    {
+      "action": "cast",
+      "actor": "five",
+      "spell": 802335,
+      "target": "five_target"
+    },
+    {
+      "action": "assert",
+      "actor": "five",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "five_target",
+      "min": 1045,
+      "max": 1045,
+      "label": "No hidden 40 percent self damage bonus"
+    },
+    {
+      "action": "assert",
+      "actor": "five_target",
+      "metric": "aura_duration_ms",
+      "spell": 802335,
+      "label": "five_duration",
+      "min": 1082,
+      "max": 1200
+    },
+    {
+      "action": "wait",
+      "ms": 4200
+    },
+    {
+      "action": "assert",
+      "actor": "five",
+      "metric": "spell_damage_count",
+      "spell": 803140,
+      "target": "five_target",
+      "label": "five_hits",
+      "equals": 7
+    },
+    {
+      "action": "assert",
+      "actor": "five",
+      "metric": "spell_damage_total",
+      "spell": 803140,
+      "target": "five_target",
+      "label": "five_damage",
+      "min": 1575,
+      "max": 3500
+    },
+    {
+      "action": "assert",
+      "actor": "five",
+      "metric": "cooldown_ms",
+      "spell": 802335,
+      "min": 25000,
+      "max": 26000
+    },
+    {
+      "action": "assert",
+      "actor": "five_target",
+      "metric": "aura_stacks",
+      "spell": 802335,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "five",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "five",
+      "metric": "aura_stacks",
+      "spell": 680450,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "five",
+      "metric": "aura_stacks",
+      "spell": 680846,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "five",
+      "metric": "aura_stacks",
+      "spell": 532562,
+      "equals": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "fifteen",
+      "id": 95
+    },
+    {
+      "action": "learn",
+      "actor": "fifteen",
+      "spell": 802335
+    },
+    {
+      "action": "set_aura",
+      "actor": "fifteen",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "assert",
+      "actor": "fifteen",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "actor": "fifteen",
+      "metric": "spell_modifier",
+      "spell": 802335,
+      "op": 1,
+      "base": 200,
+      "label": "fifteen_duration_modifier",
+      "equals": 3200
+    },
+    {
+      "action": "cast",
+      "actor": "fifteen",
+      "spell": 802335,
+      "target": "fifteen_target"
+    },
+    {
+      "action": "assert",
+      "actor": "fifteen",
+      "metric": "spell_damage_done",
+      "spell": 803140,
+      "target": "fifteen_target",
+      "min": 1045,
+      "max": 1045,
+      "label": "No hidden 40 percent self damage bonus"
+    },
+    {
+      "action": "assert",
+      "actor": "fifteen_target",
+      "metric": "aura_duration_ms",
+      "spell": 802335,
+      "label": "fifteen_duration",
+      "min": 2722,
+      "max": 3200
+    },
+    {
+      "action": "wait",
+      "ms": 4200
+    },
+    {
+      "action": "assert",
+      "actor": "fifteen",
+      "metric": "spell_damage_count",
+      "spell": 803140,
+      "target": "fifteen_target",
+      "label": "fifteen_hits",
+      "equals": 17
+    },
+    {
+      "action": "assert",
+      "actor": "fifteen",
+      "metric": "spell_damage_total",
+      "spell": 803140,
+      "target": "fifteen_target",
+      "label": "fifteen_damage",
+      "min": 3825,
+      "max": 8500
+    },
+    {
+      "action": "assert",
+      "actor": "fifteen",
+      "metric": "cooldown_ms",
+      "spell": 802335,
+      "min": 25000,
+      "max": 26000
+    },
+    {
+      "action": "assert",
+      "actor": "fifteen_target",
+      "metric": "aura_stacks",
+      "spell": 802335,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "fifteen",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "fifteen",
+      "metric": "aura_stacks",
+      "spell": 680450,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "fifteen",
+      "metric": "aura_stacks",
+      "spell": 680846,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "fifteen",
+      "metric": "aura_stacks",
+      "spell": 532562,
+      "equals": 0
+    }
+  ],
+  "contract": "One Magma Geode every 0.2 seconds, including the native initial tick; each Earthshaping stack adds 0.2 seconds. Stones use 20% of the higher Fire/Nature spell power, with no AP term or hidden self damage multiplier."
+}

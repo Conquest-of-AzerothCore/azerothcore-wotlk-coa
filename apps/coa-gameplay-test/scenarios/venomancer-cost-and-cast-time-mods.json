@@ -1,0 +1,198 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Poison for Everyone and Limb Decayer change native cost and cast time (#1934, #2226)",
+  "contract": "#1934 and #2226 report 'Spell Script / Aura Handler Not Implemented' for two passives that are plain spell modifiers (aura 107/108, SpellFamilyName 35) read straight from Spell.dbc. #1934: Poison for Everyone! (504837) effect 0 is aura 107 SPELLMOD_COST, BasePoints -101 DieSides 1 (-100, rage tenths, tooltip 'by $/10;s1' = 10 rage), class mask (0,0,0x800000) = Venomtip Poison 803195 (PowerType rage, ManaCost 200, no ManaCostPercentage), so its native cost goes 200 -> 100. #2226: Limb Decayer (681057) effect 0 is aura 108 SPELLMOD_CASTING_TIME BasePoints -51 (-50%) and effect 1 is aura 108 SPELLMOD_COST BasePoints 49 (+50%), both class mask (0,0,0x8) = Decay 800910 (cast index 19 = 2500 ms, ManaCost 100 plus 25% of create mana), so its cast time goes 2500 -> 1250 and its cost is multiplied by 1.5. Each modifier must leave the other spell untouched, which the masks guarantee and the scenario asserts. Values are the server's own SpellInfo::CalcPowerCost, CalcCastTime and ApplySpellMod, measured before and after learning on the same actor.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "v",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Venomtip Poison cost before Poison for Everyone!",
+      "actor": "v",
+      "metric": "spell_power_cost",
+      "save_as": "venomtip0",
+      "spell": 803195
+    },
+    {
+      "action": "assert",
+      "label": "Venomtip Poison costs 200 (20 rage in tenths) per Spell.dbc",
+      "actor": "v",
+      "metric": "spell_power_cost",
+      "spell": 803195,
+      "equals": 200
+    },
+    {
+      "action": "snapshot",
+      "label": "Decay cast time before Limb Decayer",
+      "actor": "v",
+      "metric": "spell_cast_time_ms",
+      "save_as": "decay_ct0",
+      "spell": 800910
+    },
+    {
+      "action": "assert",
+      "label": "Decay casts in 2500 ms per SpellCastTimes index 19",
+      "actor": "v",
+      "metric": "spell_cast_time_ms",
+      "spell": 800910,
+      "min": 2499,
+      "max": 2501
+    },
+    {
+      "action": "snapshot",
+      "label": "Decay cost before Limb Decayer",
+      "actor": "v",
+      "metric": "spell_power_cost",
+      "save_as": "decay_cost0",
+      "spell": 800910
+    },
+    {
+      "action": "assert",
+      "label": "Decay has a nonzero baseline cost",
+      "actor": "v",
+      "metric": "spell_power_cost",
+      "spell": 800910,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "No cost modifier on Venomtip Poison before learning",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803195,
+      "op": 14,
+      "base": 200,
+      "equals": 200
+    },
+    {
+      "action": "learn",
+      "label": "Learn Poison for Everyone!",
+      "actor": "v",
+      "spell": 504837
+    },
+    {
+      "action": "assert",
+      "label": "Poison for Everyone! is a flat -100 cost modifier on Venomtip Poison",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803195,
+      "op": 14,
+      "base": 200,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Venomtip Poison now costs 100 (10 rage)",
+      "actor": "v",
+      "metric": "spell_power_cost",
+      "spell": 803195,
+      "relative_to": "venomtip0",
+      "equals": -100
+    },
+    {
+      "action": "assert",
+      "label": "Poison for Everyone! leaves Decay's cost untouched",
+      "actor": "v",
+      "metric": "spell_power_cost",
+      "spell": 800910,
+      "relative_to": "decay_cost0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Poison for Everyone! leaves Decay's cast time untouched",
+      "actor": "v",
+      "metric": "spell_cast_time_ms",
+      "spell": 800910,
+      "ratio_to": "decay_ct0",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "learn",
+      "label": "Learn Limb Decayer",
+      "actor": "v",
+      "spell": 681057
+    },
+    {
+      "action": "assert",
+      "label": "Limb Decayer is a -50% casting-time modifier on Decay",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 800910,
+      "op": 10,
+      "base": 2500,
+      "min": 1249,
+      "max": 1251
+    },
+    {
+      "action": "assert",
+      "label": "Limb Decayer is a +50% cost modifier on Decay",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 800910,
+      "op": 14,
+      "base": 100,
+      "min": 149,
+      "max": 151
+    },
+    {
+      "action": "assert",
+      "label": "Decay's cast time is halved",
+      "actor": "v",
+      "metric": "spell_cast_time_ms",
+      "spell": 800910,
+      "ratio_to": "decay_ct0",
+      "min": 0.499,
+      "max": 0.501
+    },
+    {
+      "action": "assert",
+      "label": "Decay's cost is multiplied by 1.5",
+      "actor": "v",
+      "metric": "spell_power_cost",
+      "spell": 800910,
+      "ratio_to": "decay_cost0",
+      "min": 1.49,
+      "max": 1.51
+    },
+    {
+      "action": "assert",
+      "label": "Limb Decayer leaves Venomtip Poison's cast time modifier alone",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803195,
+      "op": 10,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Limb Decayer leaves Venomtip Poison's cost at 100",
+      "actor": "v",
+      "metric": "spell_power_cost",
+      "spell": 803195,
+      "relative_to": "venomtip0",
+      "equals": -100
+    }
+  ]
+}

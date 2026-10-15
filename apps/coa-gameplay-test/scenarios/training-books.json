@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Training books restore eligible class abilities through gossip (#37)",
-  "contract": "Books are interactive; their training action restores missing eligible class abilities without teaching higher-level ranks or unselected abilities. Class abilities also remain automatic on login.",
+  "name": "Training books restore eligible class abilities through the trainer window (#37)",
+  "contract": "A book opens the class trainer window for the viewer's own class instead of a gossip page (mod-spellbook, #4174; npcflag 48 on every class-training book). Training there restores a missing eligible class ability without teaching higher-level ranks: Venom Bolt 800869 (class spell, level 1) is listed as trainable once it is missing and is learned when trained, while its rank 2 502870 (level 8) is listed as unavailable to a level-1 character and is refused. Training again is harmless. A level-20 character holding Alkahest 504342 (the tree's rank) is sold rank 2 504714 (level 20) but not rank 3 504715 (level 26). Class abilities also remain automatic on login. Prices are charged, so both characters are given a purse.",
   "players": [
     {
       "id": "beginner",
@@ -38,6 +38,12 @@
       "spell": 800869,
       "equals": 1,
       "label": "Class starter ability learned automatically"
+    },
+    {
+      "action": "money",
+      "actor": "beginner",
+      "copper": 1000,
+      "label": "fixture: a purse for the book's prices"
     },
     {
       "action": "learn",
@@ -77,36 +83,55 @@
       "action": "assert",
       "actor": "beginner",
       "metric": "gossip_options",
-      "equals": 1
+      "equals": 0,
+      "label": "The book answers with its trainer window"
     },
     {
-      "action": "gossip_select",
+      "action": "assert",
       "actor": "beginner",
-      "option": 0
+      "metric": "trainer_window_state",
+      "spell": 800869,
+      "equals": 0,
+      "label": "The missing class ability is listed as trainable"
+    },
+    {
+      "action": "assert",
+      "actor": "beginner",
+      "metric": "trainer_window_state",
+      "spell": 502870,
+      "equals": 1,
+      "label": "Its level-8 rank is listed as unavailable"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "beginner",
+      "spell": 800869
     },
     {
       "action": "assert",
       "actor": "beginner",
       "metric": "knows_spell",
       "spell": 800869,
-      "equals": 1
+      "equals": 1,
+      "label": "Training restores the missing ability"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "beginner",
+      "spell": 502870
     },
     {
       "action": "assert",
       "actor": "beginner",
       "metric": "knows_spell",
-      "spell": 504714,
+      "spell": 502870,
       "equals": 0,
       "label": "Higher-level rank stays unavailable"
     },
     {
-      "action": "gossip_hello",
-      "actor": "beginner"
-    },
-    {
-      "action": "gossip_select",
+      "action": "trainer_buy",
       "actor": "beginner",
-      "option": 0
+      "spell": 800869
     },
     {
       "action": "assert",
@@ -158,36 +183,55 @@
       "action": "assert",
       "actor": "beginner",
       "metric": "gossip_options",
-      "equals": 1
+      "equals": 0,
+      "label": "The book answers with its trainer window"
     },
     {
-      "action": "gossip_select",
+      "action": "assert",
       "actor": "beginner",
-      "option": 0
+      "metric": "trainer_window_state",
+      "spell": 800869,
+      "equals": 0,
+      "label": "The missing class ability is listed as trainable"
+    },
+    {
+      "action": "assert",
+      "actor": "beginner",
+      "metric": "trainer_window_state",
+      "spell": 502870,
+      "equals": 1,
+      "label": "Its level-8 rank is listed as unavailable"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "beginner",
+      "spell": 800869
     },
     {
       "action": "assert",
       "actor": "beginner",
       "metric": "knows_spell",
       "spell": 800869,
-      "equals": 1
+      "equals": 1,
+      "label": "Training restores the missing ability"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "beginner",
+      "spell": 502870
     },
     {
       "action": "assert",
       "actor": "beginner",
       "metric": "knows_spell",
-      "spell": 504714,
+      "spell": 502870,
       "equals": 0,
       "label": "Higher-level rank stays unavailable"
     },
     {
-      "action": "gossip_hello",
-      "actor": "beginner"
-    },
-    {
-      "action": "gossip_select",
+      "action": "trainer_buy",
       "actor": "beginner",
-      "option": 0
+      "spell": 800869
     },
     {
       "action": "assert",
@@ -239,36 +283,55 @@
       "action": "assert",
       "actor": "beginner",
       "metric": "gossip_options",
-      "equals": 1
+      "equals": 0,
+      "label": "The book answers with its trainer window"
     },
     {
-      "action": "gossip_select",
+      "action": "assert",
       "actor": "beginner",
-      "option": 0
+      "metric": "trainer_window_state",
+      "spell": 800869,
+      "equals": 0,
+      "label": "The missing class ability is listed as trainable"
+    },
+    {
+      "action": "assert",
+      "actor": "beginner",
+      "metric": "trainer_window_state",
+      "spell": 502870,
+      "equals": 1,
+      "label": "Its level-8 rank is listed as unavailable"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "beginner",
+      "spell": 800869
     },
     {
       "action": "assert",
       "actor": "beginner",
       "metric": "knows_spell",
       "spell": 800869,
-      "equals": 1
+      "equals": 1,
+      "label": "Training restores the missing ability"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "beginner",
+      "spell": 502870
     },
     {
       "action": "assert",
       "actor": "beginner",
       "metric": "knows_spell",
-      "spell": 504714,
+      "spell": 502870,
       "equals": 0,
       "label": "Higher-level rank stays unavailable"
     },
     {
-      "action": "gossip_hello",
-      "actor": "beginner"
-    },
-    {
-      "action": "gossip_select",
+      "action": "trainer_buy",
       "actor": "beginner",
-      "option": 0
+      "spell": 800869
     },
     {
       "action": "assert",
@@ -281,6 +344,12 @@
     {
       "action": "wait",
       "ms": 2000
+    },
+    {
+      "action": "money",
+      "actor": "veteran",
+      "copper": 10000,
+      "label": "fixture: a purse for the book's prices"
     },
     {
       "action": "learn",
@@ -315,9 +384,25 @@
       "actor": "veteran"
     },
     {
-      "action": "gossip_select",
+      "action": "assert",
       "actor": "veteran",
-      "option": 0
+      "metric": "trainer_window_state",
+      "spell": 504714,
+      "equals": 0,
+      "label": "The level-20 rank of an owned ability is listed as trainable"
+    },
+    {
+      "action": "assert",
+      "actor": "veteran",
+      "metric": "trainer_window_state",
+      "spell": 504715,
+      "equals": 1,
+      "label": "The level-26 rank is listed as unavailable"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "veteran",
+      "spell": 504714
     },
     {
       "action": "assert",
@@ -326,6 +411,11 @@
       "spell": 504714,
       "equals": 1,
       "label": "Owned ability receives its level-20 rank"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "veteran",
+      "spell": 504715
     },
     {
       "action": "assert",

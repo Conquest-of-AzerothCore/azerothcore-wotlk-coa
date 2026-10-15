@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "name": "The Artificer specialization replaces Unmake with Artificer's Wand (#515)",
+  "contract": "Artificer's Wand 804478 reads that the wand specialization replaces Unmake with the Artificer's Wand chain. The mechanism is data, not a spell effect: AscensionCompatData::TalentReplacements (AscensionTalentReplacementData.h:60) carries the row {22, 33, 804478, 804418, {{561284 at 0, 561354 at 22, 561355 at 32, 561356 at 42, 561357 at 52}}}, and AscensionClassService::SynchronizeTalentReplacements (AscensionCompat.cpp:788-863) grants the highest rank whose required level the character has reached and registers it through Player::SetTemporarySpellReplacement. Three conditions gate it (AscensionCompat.cpp:802): the active local specialization must be 33, the character must know the parent 804478, and it must hold an active spell whose chain root is the original 804418 - spell_ranks makes 804418 the root of 503784-503790, 504574, 574344 and 574345. The replacement is registered against the Unmake rank the character actually has active, not against the root: the loop only assigns to ids for which Player::HasActiveSpell is true, so 574345 - the top rank, AscensionProgression's level-60 entry - is the one that carries it at level 80, and 561357 is the matching Artificer's Wand rank for level 52 and above. Two observations from a diagnostic run on the slot shape the assertions. First, the unreplaced reading of temporary_spell_replacement is the queried spell id, not zero: Player::GetTemporarySpellReplacement (Player.cpp:13780-13784) returns `original` whenever the map has no entry for it, and SetTemporarySpellReplacement stores `original` back as the previous value when a replacement is cleared. Second, the talent cannot be unknown while specialization 33 is active: switching to specialization 33 runs the class service's progression synchronisation, which grants 804478 itself, so the 'talent unknown' baseline has to be taken before the specialization is switched, not after. A level-80 Chronomancer knows the root 804418 at login, but AscensionClassService::SynchronizeProgression learns AscensionProgression::Ranks entries only when CoA.AutoProgression is 1 (default 0, src/server/coa/conf/coa.conf.dist) or on an explicit Book of Ascension request, so GiveLevel(80) leaves 574345 unlearned; the fixture teaches it with a learn step, which also supersedes the lower active rank, and asserts it rather than assuming it. The discriminating assertion is the one taken after the specialization is active: before it, the same metric reads 574345 - Unmake standing in for itself - which the scenario also asserts.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks and class synchronisation settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Progression already granted the Unmake root",
+      "actor": "chronomancer",
+      "metric": "knows_spell",
+      "spell": 804418,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "label": "Fixture teaches Unmake's top rank (CoA.AutoProgression = 0 by default, so GiveLevel(80) does not grant it; real play acquires it from a Book of Ascension)",
+      "actor": "chronomancer",
+      "spell": 574345
+    },
+    {
+      "action": "assert",
+      "label": "Unmake's top rank, the one the replacement has to land on at level 80, is known",
+      "actor": "chronomancer",
+      "metric": "knows_spell",
+      "spell": 574345,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Artificer's Wand talent is not known before the specialization is chosen",
+      "actor": "chronomancer",
+      "metric": "knows_spell",
+      "spell": 804478,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Specialization 33 is not active yet",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 887055,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Nothing replaces Unmake while the specialization is inactive, so the metric reads Unmake itself",
+      "actor": "chronomancer",
+      "metric": "temporary_spell_replacement",
+      "spell": 574345,
+      "equals": 574345
+    },
+    {
+      "action": "assert",
+      "label": "The Artificer's Wand rank is not in the spellbook either",
+      "actor": "chronomancer",
+      "metric": "knows_spell",
+      "spell": 561357,
+      "equals": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "chronomancer",
+      "id": 33
+    },
+    {
+      "action": "assert",
+      "label": "Specialization 33 is active, shown by its own tuning aura",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 887055,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The specialization granted its own Artificer's Wand talent",
+      "actor": "chronomancer",
+      "metric": "knows_spell",
+      "spell": 804478,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The active specialization replaces Unmake with the level-appropriate Artificer's Wand rank",
+      "actor": "chronomancer",
+      "metric": "temporary_spell_replacement",
+      "spell": 574345,
+      "equals": 561357,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The replacement rank was granted to the spellbook as well",
+      "actor": "chronomancer",
+      "metric": "knows_spell",
+      "spell": 561357,
+      "equals": 1
+    }
+  ]
+}

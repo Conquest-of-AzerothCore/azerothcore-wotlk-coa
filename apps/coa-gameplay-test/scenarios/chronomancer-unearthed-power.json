@@ -1,0 +1,208 @@
+{
+  "schema": 1,
+  "name": "Unearthed Power adds 6% damage and crit per Chromatic Shard stack (#1903)",
+  "contract": "The Chromatic Shard stacking buff 503829 describes itself as \"Reduces the cast time of Chromatic Shard by ${-$w1}%$?s503831[ and increases its damage and critical strike chance by $503831s1%][]. Stacks $u times.\" In Spell.dbc 503829 has StackAmount 10; its Effect[1] is SPELL_AURA_ADD_PCT_MODIFIER (108) EffectMiscValue 0 (SPELLMOD_DAMAGE) and its Effect[2] is SPELL_AURA_ADD_FLAT_MODIFIER (107) EffectMiscValue 7 (SPELLMOD_CRITICAL_CHANCE), both EffectBasePoints -1 + DieSides 1 = 0 and both masked [0,4096,0], which inside SpellFamilyName 28 selects the castable Chromatic Shard ranks (501836-501840, 567543, 567544, 574346). Unearthed Power 503831 is two SPELL_AURA_ADD_FLAT_MODIFIER effects, EffectMiscValue 12 (SPELLMOD_EFFECT2) and 23 (SPELLMOD_EFFECT3), EffectBasePoints 5 + DieSides 1 = +6 each, masked [64,0,0], which selects 503829. Unit::ApplyEffectModifiers routes SPELLMOD_EFFECT2/EFFECT3 to effect indexes 1 and 2, and AuraEffect::CalculateAmount ends with amount *= GetStackAmount(), so five stacks carry 30. Generic core machinery. This scenario is a regression guard for behaviour that already works. Anomaly Spikes is the buff's intended in-game stack source and never procs today (see #852), so the stacks are fixtured with set_aura to isolate this talent.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "The buff's damage modifier before the talent",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 503829,
+      "effect": 1,
+      "save_as": "shard_damage"
+    },
+    {
+      "action": "snapshot",
+      "label": "The buff's crit modifier before the talent",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 503829,
+      "effect": 2,
+      "save_as": "shard_crit"
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, the buff's damage effect resolves to zero",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 503829,
+      "effect": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, the buff's crit effect resolves to zero",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 503829,
+      "effect": 2,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 503831
+    },
+    {
+      "action": "assert",
+      "label": "The buff's damage effect resolves to 6 with the talent",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 503829,
+      "effect": 1,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "The buff's crit effect resolves to 6 with the talent",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 503829,
+      "effect": 2,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "The damage effect rose by exactly 6",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 503829,
+      "effect": 1,
+      "relative_to": "shard_damage",
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "The crit effect rose by exactly 6",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 503829,
+      "effect": 2,
+      "relative_to": "shard_crit",
+      "equals": 6
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture five Chromatic Shard stacks on the talented player",
+      "actor": "talent",
+      "spell": 503829,
+      "stacks": 5
+    },
+    {
+      "action": "set_aura",
+      "label": "The same five stacks on the control",
+      "actor": "control",
+      "spell": 503829,
+      "stacks": 5
+    },
+    {
+      "action": "assert",
+      "label": "The control carries the buff too",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 503829,
+      "caster": "control",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The talented player carries the buff at five stacks",
+      "actor": "talent",
+      "metric": "aura_stacks",
+      "spell": 503829,
+      "caster": "talent",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "Five stacks carry 30% damage with the talent",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 503829,
+      "caster": "talent",
+      "effect": 1,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Five stacks carry 30 crit with the talent",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 503829,
+      "caster": "talent",
+      "effect": 2,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent the same five stacks carry nothing",
+      "actor": "control",
+      "metric": "aura_amount",
+      "spell": 503829,
+      "caster": "control",
+      "effect": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Chromatic Shard's damage is multiplied by 1.30 at five stacks",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 501836,
+      "op": 0,
+      "base": 1000,
+      "equals": 1300
+    },
+    {
+      "action": "assert",
+      "label": "The control's five stacks leave Chromatic Shard's damage alone",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 501836,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Chromatic Shard gains 30 flat crit chance at five stacks",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 501836,
+      "op": 7,
+      "base": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "The control's five stacks add no crit chance",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 501836,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    }
+  ]
+}

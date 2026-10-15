@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Resourceful Pursuit cuts the Rage cost of Tormentor and Damnation by 20% (#1307)",
+  "contract": "Resourceful Pursuit 707648 reads 'Reduces the Rage cost of Tormentor and Damnation by $s1%.' In the installed Spell.dbc it is passive, family 21, effect 0 = SPELL_AURA_ADD_PCT_MODIFIER (108), misc 14 = SPELLMOD_COST, BasePoints -21 (DieSides 1, so -20%), class mask (0x10000, 0, 0x10000000). Tormentor (800162, 501344-501355) has flag word 2 0x10000000 and cost 200, Damnation (520062, 520214-520217) has flag word 0 0x10000 and cost 250, both Rage, so SpellInfo::CalcPowerCost applies SPELLMOD_COST through Player::ApplySpellMod (SpellInfo.cpp:3074) and they cost 160 and 200 (Rage is stored in tenths). Smite Evil 802004 (flag word 1 0x40000000, cost 400) is outside the mask and is the control. The costs come from the spell_power_cost probe, which reads the native resource cost without submitting a cast; the pre-talent readings assert the DBC costs first so a drifting baseline fails loudly.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let level scaling settle", "ms": 5000},
+    {"action": "assert", "label": "Tormentor rank 13 costs 200 (DBC)", "actor": "hunter", "metric": "spell_power_cost", "spell": 501355, "equals": 200},
+    {"action": "assert", "label": "Damnation rank 5 costs 250 (DBC)", "actor": "hunter", "metric": "spell_power_cost", "spell": 520217, "equals": 250},
+    {"action": "assert", "label": "Smite Evil costs 400 (DBC)", "actor": "hunter", "metric": "spell_power_cost", "spell": 802004, "equals": 400},
+    {"action": "learn", "label": "Resourceful Pursuit", "actor": "hunter", "spell": 707648},
+    {"action": "assert", "label": "The passive is active", "actor": "hunter", "metric": "aura", "spell": 707648, "equals": 1},
+    {"action": "assert", "label": "Tormentor now costs 160", "actor": "hunter", "metric": "spell_power_cost", "spell": 501355, "min": 159, "max": 160},
+    {"action": "assert", "label": "Damnation now costs 200", "actor": "hunter", "metric": "spell_power_cost", "spell": 520217, "min": 199, "max": 200},
+    {"action": "assert", "label": "Smite Evil is unchanged at 400", "actor": "hunter", "metric": "spell_power_cost", "spell": 802004, "equals": 400},
+    {"action": "unlearn", "label": "Drop Resourceful Pursuit", "actor": "hunter", "spell": 707648},
+    {"action": "assert", "label": "Tormentor returns to 200", "actor": "hunter", "metric": "spell_power_cost", "spell": 501355, "equals": 200},
+    {"action": "assert", "label": "Damnation returns to 250", "actor": "hunter", "metric": "spell_power_cost", "spell": 520217, "equals": 250}
+  ]
+}

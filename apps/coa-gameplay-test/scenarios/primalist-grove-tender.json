@@ -1,0 +1,1393 @@
+{
+  "schema": 1,
+  "name": "Primalist Grove Tender own ground, overlap and Seismic Tremor",
+  "contract": "Bramblepatch lasts twelve seconds normally and twenty-four with Grove Tender. All Seismic families, including first/highest Tremor, receive 80% shorter cooldowns only in the caster own ground. Foreign, overlapping, leave/reenter, expiry and removal controls exercise area ownership.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 58
+    },
+    {
+      "action": "specialization",
+      "actor": "ally",
+      "id": 58
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706148,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 806415
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "ally",
+      "spell": 706148,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "ally",
+      "spell": 806415
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 806415
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 806415
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object",
+      "spell": 806415,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object_duration_ms",
+      "spell": 806415,
+      "min": 10500,
+      "max": 12000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 803981,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 503264,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 804433,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 582532,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 680442,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 681114,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 807432,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 805462,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 300693,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "wait",
+      "ms": 13000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 706148
+    },
+    {
+      "action": "learn",
+      "actor": "ally",
+      "spell": 706148
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ally",
+      "spell": 806415
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "ally",
+      "spell": 806415
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "dynamic_object",
+      "spell": 806415,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 803981,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 503264,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 804433,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 582532,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 680442,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 681114,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 807432,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 805462,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 300693,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_modifier",
+      "spell": 803981,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_modifier",
+      "spell": 503264,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_modifier",
+      "spell": 804433,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_modifier",
+      "spell": 582532,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_modifier",
+      "spell": 680442,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_modifier",
+      "spell": 681114,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_modifier",
+      "spell": 807432,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_modifier",
+      "spell": 805462,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_modifier",
+      "spell": 300693,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9597.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.141593
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 806415
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 806415
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object",
+      "spell": 806415,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object_duration_ms",
+      "spell": 806415,
+      "min": 22500,
+      "max": 24000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 803981,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 503264,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 804433,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 582532,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 680442,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 681114,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 807432,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 805462,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 300693,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681117,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681116,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681115,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681114,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 680442,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 680442
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 680442
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 680442,
+      "target": "target",
+      "save_as": "t680442"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 680442,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 680442,
+      "target": "target",
+      "relative_to": "t680442",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 680442,
+      "min": 200,
+      "max": 1600
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681117,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681116,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681115,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 681114,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 680442,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 681114
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 681114
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681114,
+      "target": "target",
+      "save_as": "t681114"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681114,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681114,
+      "target": "target",
+      "relative_to": "t681114",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 681114,
+      "min": 200,
+      "max": 1600
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 803981,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 503264,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 804433,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 582532,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 680442,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 681114,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 807432,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 805462,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 300693,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9597.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.141593
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 803981,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 503264,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 804433,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 582532,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 680442,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 681114,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 807432,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 805462,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 300693,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 806415
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 806415
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object",
+      "spell": 806415,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 803981,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 503264,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 804433,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 582532,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 680442,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 681114,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 807432,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 805462,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 300693,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_modifier",
+      "spell": 803981,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_modifier",
+      "spell": 503264,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_modifier",
+      "spell": 804433,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_modifier",
+      "spell": 582532,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_modifier",
+      "spell": 680442,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_modifier",
+      "spell": 681114,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_modifier",
+      "spell": 807432,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_modifier",
+      "spell": 805462,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_modifier",
+      "spell": 300693,
+      "op": 11,
+      "base": 8000,
+      "min": 1599,
+      "max": 1601
+    },
+    {
+      "action": "wait",
+      "ms": 24500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 803981,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 503264,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 804433,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 582532,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 680442,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 681114,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 807432,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 805462,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 300693,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706148,
+      "all_specs": true
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 806415
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 806415
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object",
+      "spell": 806415,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 803981,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 503264,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 804433,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 582532,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 680442,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 681114,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 807432,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 805462,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_modifier",
+      "spell": 300693,
+      "op": 11,
+      "base": 8000,
+      "min": 7999,
+      "max": 8001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object_duration_ms",
+      "spell": 806415,
+      "min": 10500,
+      "max": 12000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

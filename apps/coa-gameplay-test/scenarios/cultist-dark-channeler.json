@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Cultist: Dark Channeler extends Psychic Suppression and Eldritch Devastation natively (#1789)",
+  "contract": "301008 has two ADD_FLAT_MODIFIER (107) effects, both MiscValue=1 (SPELLMOD_DURATION). Effect0 EffectBasePoints=999/DieSides=1 gives +1000 ms (classmask dword1=8388608, bit23); effect1 EffectBasePoints=1999/DieSides=1 gives +2000 ms (classmask dword0=64, bit6) (+1 per SpellInfo.cpp:489). Verified against Spell.dbc: 800432 'Psychic Suppression' (dword1=8388608, bit23 set, DurationIndex=28, base 5000 ms) and 802727 'Eldritch Devastation' (dword0=64, bit6 set, DurationIndex=35, base 4000 ms) both have finite base durations, so Player::IsAffectedBySpellmod's permanent-duration guard (Player.cpp:10202) never fires: 5000+1000=6000 ms and 4000+2000=6000 ms, matching the tooltip's '+1 sec' and '+2 sec' exactly. No script needed.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "c", "race": 1, "class": 25, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: Psychic Suppression keeps its 5000 ms base duration",
+      "actor": "c", "metric": "spell_modifier", "spell": 800432, "op": 1, "base": 5000, "min": 5000, "max": 5000
+    },
+    {
+      "action": "assert", "label": "SETUP: Eldritch Devastation keeps its 4000 ms base duration",
+      "actor": "c", "metric": "spell_modifier", "spell": 802727, "op": 1, "base": 4000, "min": 4000, "max": 4000
+    },
+    {
+      "action": "assert", "label": "SETUP: an outside-the-mask spell (Darkwither) is unaffected",
+      "actor": "c", "metric": "spell_modifier", "spell": 800446, "op": 1, "base": 15000, "min": 15000, "max": 15000
+    },
+    { "action": "learn", "actor": "c", "spell": 301008 },
+    {
+      "action": "assert", "label": "Dark Channeler adds 1000 ms to Psychic Suppression's duration",
+      "actor": "c", "metric": "spell_modifier", "spell": 800432, "op": 1, "base": 5000, "min": 6000, "max": 6000
+    },
+    {
+      "action": "assert", "label": "Dark Channeler adds 2000 ms to Eldritch Devastation's duration",
+      "actor": "c", "metric": "spell_modifier", "spell": 802727, "op": 1, "base": 4000, "min": 6000, "max": 6000
+    },
+    {
+      "action": "assert", "label": "Dark Channeler leaves Darkwither's duration alone",
+      "actor": "c", "metric": "spell_modifier", "spell": 800446, "op": 1, "base": 15000, "min": 15000, "max": 15000
+    }
+  ]
+}

@@ -26,10 +26,12 @@
 #include "BattlegroundMgr.h"
 #include "BigNumber.h"
 #include "CliRunnable.h"
+#include "CoAScriptLoader.h"
 #include "Common.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
 #include "DatabaseLoader.h"
+#include "GameTime.h"
 #include "GitRevision.h"
 #include "IoContext.h"
 #include "MapMgr.h"
@@ -91,7 +93,8 @@ class FreezeDetector
 {
 public:
     FreezeDetector(Acore::Asio::IoContext& ioContext, uint32 maxCoreStuckTime)
-        : _timer(ioContext), _worldLoopCounter(0), _lastChangeMsTime(getMSTime()), _maxCoreStuckTimeInMs(maxCoreStuckTime) { }
+        : _timer(ioContext), _worldLoopCounter(0), _lastChangeMsTime(uint32(GetTimeMS().count())),
+        _maxCoreStuckTimeInMs(maxCoreStuckTime) { }
 
     static void Start(std::shared_ptr<FreezeDetector> const& freezeDetector)
     {
@@ -181,7 +184,7 @@ int main(int argc, char** argv)
 #endif
 
     // Add file and args in config
-    sConfigMgr->Configure(configFile.generic_string(), {argv, argv + argc}, CONFIG_FILE_LIST);
+    sConfigMgr->Configure(configFile.generic_string(), {argv, argv + argc}, COA_CONFIG_FILE_LIST CONFIG_FILE_LIST);
 
     if (!sConfigMgr->LoadAppConfigs())
         return 1;
@@ -269,7 +272,11 @@ int main(int argc, char** argv)
     // Loading modules configs before scripts
     sConfigMgr->LoadModulesConfigs();
 
-    sScriptMgr->SetScriptLoader(AddScripts);
+    sScriptMgr->SetScriptLoader([]
+    {
+        AddScripts();
+        AddCoAScripts();
+    });
     sScriptMgr->SetModulesLoader(AddModulesScripts);
 
     std::shared_ptr<void> sScriptMgrHandle(nullptr, [](void*)
@@ -437,7 +444,8 @@ bool StartDB()
     MySQL::Library_Init();
 
     // Load databases
-    DatabaseLoader loader("server.worldserver", DatabaseLoader::DATABASE_MASK_ALL, AC_MODULES_LIST);
+    DatabaseLoader loader("server.worldserver", DatabaseLoader::DATABASE_MASK_ALL,
+        COA_DATABASE_MODULE_LIST AC_MODULES_LIST);
     loader
         .AddDatabase(LoginDatabase, "Login")
         .AddDatabase(CharacterDatabase, "Character")
@@ -580,7 +588,7 @@ void WorldUpdateLoop()
 {
     uint32 minUpdateDiff = uint32(sConfigMgr->GetOption<int32>("MinWorldUpdateTime", 1));
     uint32 realCurrTime = 0;
-    uint32 realPrevTime = getMSTime();
+    uint32 realPrevTime = uint32(GetTimeMS().count());
 
     uint32 maxCoreStuckTime = uint32(sConfigMgr->GetOption<int32>("MaxCoreStuckTime", 60)) * 1000;
     uint32 halfMaxCoreStuckTime = maxCoreStuckTime / 2;
@@ -597,10 +605,15 @@ void WorldUpdateLoop()
     while (!World::IsStopped())
     {
         ++World::m_worldLoopCounter;
-        realCurrTime = getMSTime();
+        realCurrTime = uint32(GetTimeMS().count());
 
         uint32 diff = getMSTimeDiff(realPrevTime, realCurrTime);
-        if (diff < minUpdateDiff)
+        bool const simulated = GameTime::IsSimulated();
+        uint32 worldDiff = diff;
+        if (simulated)
+            worldDiff = uint32(GameTime::TakeStep(Milliseconds(diff), Milliseconds(minUpdateDiff)).count());
+
+        if (simulated ? worldDiff == 0 : diff < minUpdateDiff)
         {
             uint32 sleepTime = minUpdateDiff - diff;
             if (sleepTime >= halfMaxCoreStuckTime)
@@ -610,7 +623,7 @@ void WorldUpdateLoop()
             continue;
         }
 
-        sWorld->Update(diff);
+        sWorld->Update(worldDiff);
         realPrevTime = realCurrTime;
 
 #ifdef _WIN32
@@ -641,7 +654,7 @@ void FreezeDetector::Handler(std::weak_ptr<FreezeDetector> freezeDetectorRef, bo
     {
         if (std::shared_ptr<FreezeDetector> freezeDetector = freezeDetectorRef.lock())
         {
-            uint32 curtime = getMSTime();
+            uint32 curtime = uint32(GetTimeMS().count());
 
             uint32 worldLoopCounter = World::m_worldLoopCounter;
             if (freezeDetector->_worldLoopCounter != worldLoopCounter)

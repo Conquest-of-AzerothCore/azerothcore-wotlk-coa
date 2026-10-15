@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Invigoration grants the Air Elemental a stack from Aeroblast (#2805)",
+  "timeout_ms": 180000,
+  "players": [
+    { "id": "p1", "race": 8, "class": 16, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "t1", "owner": "p1", "entry": 36, "level": 80, "health": 500000, "distance": 5 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and local level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "p1", "spell": 804019 },
+    { "action": "cast", "actor": "p1", "spell": 804019 },
+    {
+      "action": "assert", "label": "SETUP: the Air Elemental is the current pet",
+      "actor": "p1", "metric": "pet_entry", "equals": 500941, "within_ms": 15000
+    },
+    { "action": "learn", "actor": "p1", "spell": 501455 },
+    {
+      "action": "assert", "label": "BASELINE: Invigoration is not known yet",
+      "actor": "p1", "metric": "knows_spell", "spell": 705700, "equals": 0
+    },
+    {
+      "action": "assert", "label": "BASELINE: no Invigoration proc has fired yet",
+      "actor": "p1", "metric": "spell_proc_count", "spell": 705700, "equals": 0
+    },
+    { "action": "set_aura", "actor": "p1", "spell": 803102, "stacks": 100 },
+    { "action": "snapshot", "actor": "t1", "metric": "health", "save_as": "health_before_untalented" },
+    { "action": "cast", "actor": "p1", "spell": 501455, "target": "t1" },
+    {
+      "action": "assert", "label": "BASELINE: Aeroblast lands without the talent",
+      "actor": "t1", "metric": "health", "relative_to": "health_before_untalented",
+      "max": -1, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "BASELINE: Aeroblast alone triggers no Invigoration proc",
+      "actor": "p1", "metric": "spell_proc_count", "spell": 705700, "equals": 0
+    },
+    {
+      "action": "assert", "label": "BASELINE: Aeroblast alone casts no pet trigger (681273)",
+      "actor": "p1", "metric": "spell_cast_count", "spell": 681273, "equals": 0
+    },
+    { "action": "learn", "actor": "p1", "spell": 705700 },
+    {
+      "action": "assert", "label": "SETUP: the talent is now known",
+      "actor": "p1", "metric": "knows_spell", "spell": 705700, "equals": 1
+    },
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_aura", "actor": "p1", "spell": 803102, "stacks": 100 },
+    { "action": "snapshot", "actor": "t1", "metric": "health", "save_as": "health_before_talented" },
+    { "action": "cast", "actor": "p1", "spell": 501455, "target": "t1" },
+    {
+      "action": "assert", "label": "SETUP: the talented Aeroblast lands",
+      "actor": "t1", "metric": "health", "relative_to": "health_before_talented",
+      "max": -1, "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Aeroblast hit procs aura 705700 (0 before the fix, 1 after)",
+      "actor": "p1", "metric": "spell_proc_count", "spell": 705700, "min": 1, "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the proc casts the pet trigger 681273 (0 before the fix, 1 after)",
+      "actor": "p1", "metric": "spell_cast_count", "spell": 681273, "min": 1, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "SUPPORTING: the Air Elemental holds Invigoration (680918)",
+      "actor": "p1", "metric": "pet_aura_stacks", "spell": 680918, "min": 1, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "SUPPORTING: each Invigoration stack is worth 3% pet damage",
+      "actor": "p1", "metric": "pet_aura_amount", "spell": 680918, "effect": 0, "equals": 3
+    }
+  ],
+  "contract": "#2805: Invigoration (705700) reads \"Your Aeroblast now grants your Air Elemental a stack of Invigoration\" and embeds 680918's tooltip, \"Increases the damage of your Air Elemental by 3% for 15 sec, stacking 10 times. Additional applications do not refresh duration.\" Every number is read from this client's Spell.dbc: 705700 is a passive SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) with EffectTriggerSpell[0] 681273 and ProcChance 100 but ProcFlags 0; 681273 is SPELL_EFFECT_FORCE_CAST on TARGET_UNIT_PET triggering 680918; 680918 is SPELL_AURA_MOD_DAMAGE_PERCENT_DONE with EffectBasePoints[0] 2 + EffectDieSides[0] 1 = 3 percent, StackAmount 10 and DurationIndex 8 = SpellDuration.dbc row (8, 15000, 0, 15000) = 15000 ms. With ProcFlags 0 and no spell_proc row, SpellMgr::LoadSpellProcs skips the record and Aura::GetProcEffectMask returns 0, so the talent grants nothing; the fix is a spell_proc row restricted to SpellFamilyName 22 / SpellFamilyMask0 8388608, which in this Spell.dbc is set only by the ten Aeroblast records. The two DISCRIMINATING assertions count casts triggered by aura 705700 on the player, so they cannot be satisfied by the Air Elemental's own Invigoration source (806020 -> 500348 -> 680918), which is why the two SUPPORTING pet assertions are labelled as corroboration rather than proof; the highest Aeroblast rank at level 80 is 501455 per src/server/coa/AscensionTalentReplacementData.h. Expected before the fix: both DISCRIMINATING assertions read 0 and the scenario fails. Expected after: both read at least 1."
+}

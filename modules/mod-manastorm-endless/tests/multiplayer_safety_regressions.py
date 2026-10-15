@@ -5,7 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
-COMPAT = ROOT.parent / "mod-ascension-compat" / "src"
+COMPAT = ROOT.parents[1] / "src/server/coa"
 
 
 def main() -> None:

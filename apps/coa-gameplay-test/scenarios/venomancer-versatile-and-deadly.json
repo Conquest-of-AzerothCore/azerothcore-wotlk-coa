@@ -1,0 +1,227 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Versatile and Deadly adjusts Beetle Form and Spider Form",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "spider_ctl",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "spider_tal",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "beetle_ctl",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "beetle_tal",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "spider_tal",
+      "spell": 681052
+    },
+    {
+      "action": "learn",
+      "actor": "beetle_tal",
+      "spell": 681052
+    },
+    {
+      "action": "assert",
+      "label": "Versatile and Deadly is applied",
+      "actor": "spider_tal",
+      "metric": "aura",
+      "spell": 681052,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Beetle helper effect 0 is 0 without the talent",
+      "actor": "beetle_ctl",
+      "metric": "spell_effect_value",
+      "spell": 803216,
+      "effect": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Versatile and Deadly makes the Beetle helper effect 0 -3",
+      "actor": "beetle_tal",
+      "metric": "spell_effect_value",
+      "spell": 803216,
+      "effect": 0,
+      "equals": -3
+    },
+    {
+      "action": "assert",
+      "label": "Spider Form speed effect is 20 without the talent",
+      "actor": "spider_ctl",
+      "metric": "spell_effect_value",
+      "spell": 800841,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "Versatile and Deadly makes the Spider Form speed effect 25",
+      "actor": "spider_tal",
+      "metric": "spell_effect_value",
+      "spell": 800841,
+      "effect": 0,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "Versatile and Deadly does not touch Spider Form for a player without it",
+      "actor": "spider_ctl",
+      "metric": "spell_modifier",
+      "spell": 800841,
+      "op": 3,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "spider_ctl",
+      "metric": "run_speed_rate",
+      "save_as": "run_ctl0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "spider_tal",
+      "metric": "run_speed_rate",
+      "save_as": "run_tal0"
+    },
+    {
+      "action": "set_aura",
+      "label": "Enter Spider Form without the talent",
+      "actor": "spider_ctl",
+      "spell": 800841,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Enter Spider Form with the talent",
+      "actor": "spider_tal",
+      "spell": 800841,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control Spider Form aura carries speed 20",
+      "actor": "spider_ctl",
+      "metric": "aura_amount",
+      "spell": 800841,
+      "effect": 0,
+      "equals": 20,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Talent Spider Form aura carries speed 25",
+      "actor": "spider_tal",
+      "metric": "aura_amount",
+      "spell": 800841,
+      "effect": 0,
+      "equals": 25,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Spider Form raises run speed by 20% without the talent",
+      "actor": "spider_ctl",
+      "metric": "run_speed_rate",
+      "ratio_to": "run_ctl0",
+      "min": 1.199,
+      "max": 1.201,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Spider Form raises run speed by 25% with the talent",
+      "actor": "spider_tal",
+      "metric": "run_speed_rate",
+      "ratio_to": "run_tal0",
+      "min": 1.249,
+      "max": 1.251,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Enter Beetle Form without the talent",
+      "actor": "beetle_ctl",
+      "spell": 803183,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Enter Beetle Form with the talent",
+      "actor": "beetle_tal",
+      "spell": 803183,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control Beetle helper is applied",
+      "actor": "beetle_ctl",
+      "metric": "aura",
+      "spell": 803216,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Talent Beetle helper is applied",
+      "actor": "beetle_tal",
+      "metric": "aura",
+      "spell": 803216,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Control Beetle helper effect 0 (damage taken) is 0",
+      "actor": "beetle_ctl",
+      "metric": "aura_amount",
+      "spell": 803216,
+      "effect": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Talent Beetle helper effect 0 (damage taken) is -3",
+      "actor": "beetle_tal",
+      "metric": "aura_amount",
+      "spell": 803216,
+      "effect": 0,
+      "equals": -3
+    }
+  ],
+  "contract": "#736: Versatile and Deadly (681052) is two flat SPELLMOD_EFFECT1 (aura 107, misc 3) modifiers. Effect 0 is -3 with class mask word0 0x100, which selects the Beetle Form helper 803216 (SpellFamilyFlags 256; its effect 0 is aura 87 with BasePoints -1 DieSides 1, i.e. 0). Effect 1 is +5 with mask word0 0x400, which selects Spider Form 800841 (SpellFamilyFlags 1024; its effect 0 is aura 31 MOD_INCREASE_SPEED, BasePoints 19 DieSides 1, i.e. 20). The Beetle helper is applied by AscensionVenomancer::Refresh through Cast with the player as caster, and Refresh only rewrites helper effect 1, so effect 0 keeps the modifier. Each form is applied to its own control (without the talent) and its own talent player so nothing but the talent differs."
+}

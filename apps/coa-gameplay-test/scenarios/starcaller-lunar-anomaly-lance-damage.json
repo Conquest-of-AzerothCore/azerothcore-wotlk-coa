@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "name": "Lunar Anomaly increases Lunar Lance damage by 50% (#1786)",
+  "contract": "Lunar Anomaly 300989 (Spell.dbc, SpellFamilyName 32, passive) carries one effect: SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue 0 = SPELLMOD_DAMAGE, EffectBasePoints 49 with DieSides 1 resolving to +50, and EffectSpellClassMask word1 0x2000000. That bit is carried by every Lunar Lance rank (801132 rank 1, 502333-502340 ranks 2-9; SpellFamilyFlags word1 0x2000000, Attributes3 0x80 which is only the DoT stacking rule, not IGNORE_CASTER_MODIFIERS). The tooltip reads 'Increases the damage of Lunar Lance by $s1%.' Native path only: AuraEffect::CalculateSpellMod registers the modifier and Unit::SpellDamageBonusDone ends with Player::ApplySpellMod(SPELLMOD_DAMAGE) on the (base + coefficient bonus) total, which for SPELLMOD_DAMAGE percent mods is multiplicative (1 + 50/100). No module code mentions 300989, and the module's Starcaller hooks act on the actual hit, not on the SpellDamageBonusDone query used by the spell_damage_done metric. The metric feeds a fixed base of 1000 and reads direct-damage effect 0; the Burning DoT of effect 1 is a SPELLMOD_DOT op and is not promised by this tooltip, so it is not asserted. Both fixtures are the same race, class and level with no gear, so their attack power and spell power terms are equal and the talented/control ratio must be 1.5 within the integer rounding of a value near 1000 (band 1.498-1.502).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "control",
+      "entry": 36,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Lunar Lance rank 1 damage calculation without the passive",
+      "actor": "control",
+      "metric": "spell_damage_done",
+      "spell": 801132,
+      "target": "dummy",
+      "save_as": "lance_r1"
+    },
+    {
+      "action": "snapshot",
+      "label": "Lunar Lance rank 9 damage calculation without the passive",
+      "actor": "control",
+      "metric": "spell_damage_done",
+      "spell": 502340,
+      "target": "dummy",
+      "save_as": "lance_r9"
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 300989
+    },
+    {
+      "action": "assert",
+      "label": "Learning the passive applies its aura",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 300989,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Lunar Lance rank 1 deals 50% more with the passive (1.5x, band covers integer rounding of a 1000 base)",
+      "actor": "talent",
+      "metric": "spell_damage_done",
+      "spell": 801132,
+      "target": "dummy",
+      "ratio_to": "lance_r1",
+      "min": 1.498,
+      "max": 1.502
+    },
+    {
+      "action": "assert",
+      "label": "Lunar Lance rank 9 deals 50% more with the passive (1.5x, band covers integer rounding of a 1000 base)",
+      "actor": "talent",
+      "metric": "spell_damage_done",
+      "spell": 502340,
+      "target": "dummy",
+      "ratio_to": "lance_r9",
+      "min": 1.498,
+      "max": 1.502
+    }
+  ]
+}

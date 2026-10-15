@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "name": "Duskwood Renegade shortens Burrow Bolt's cooldown by 5 and 10 seconds (#1012)",
+  "contract": "Duskwood Renegade 504677 / 504891 have E0 aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER), MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -5001 / -10001 with DieSides 1 = -5000 / -10000 ms, class mask (0, 0, 0x40000000); the description reads 'Reduces the cooldown of Burrow Bolt by $/1000;s1 sec'. Burrow Bolt 802269 has SpellFamilyFlags C 0x40000000 and a 40000 ms cooldown in Spell.dbc, and Player::ApplySpellMod applies SPELLMOD_COOLDOWN flat to the recovery. Expected cooldowns: 40000 -> 35000 -> 30000 ms. The ranks are learned one at a time (rank 1 is removed before rank 2) so the scenario does not depend on rank replacement. Darkslayer 804179 (flags C 0x20) is the control.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 504677,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 504891,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "label": "Baseline Burrow Bolt cooldown is the DBC's 40000 ms",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 802269,
+      "op": 11,
+      "base": 40000,
+      "equals": 40000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 504677,
+      "label": "Learn rank 1"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 aura is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 504677,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 shortens the cooldown by 5 seconds",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 802269,
+      "op": 11,
+      "base": 40000,
+      "equals": 35000
+    },
+    {
+      "action": "assert",
+      "label": "Darkslayer's cooldown modifier is untouched",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 804179,
+      "op": 11,
+      "base": 40000,
+      "equals": 40000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 504677,
+      "all_specs": true,
+      "label": "Replace rank 1"
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 504891,
+      "label": "Learn rank 2"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 aura is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 504891,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 shortens the cooldown by 10 seconds",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 802269,
+      "op": 11,
+      "base": 40000,
+      "equals": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Darkslayer still untouched",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 804179,
+      "op": 11,
+      "base": 40000,
+      "equals": 40000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 504891,
+      "all_specs": true,
+      "label": "Remove rank 2"
+    },
+    {
+      "action": "assert",
+      "label": "The cooldown returns to 40000 ms",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 802269,
+      "op": 11,
+      "base": 40000,
+      "equals": 40000
+    }
+  ]
+}

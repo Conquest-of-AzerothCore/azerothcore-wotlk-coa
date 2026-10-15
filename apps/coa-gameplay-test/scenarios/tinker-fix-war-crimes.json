@@ -1,0 +1,316 @@
+{
+  "schema": 1,
+  "name": "Tinker War Crimes only procs from the sources it names (#3115)",
+  "contract": "#3115: War Crimes (707239) reads 'Damage dealt by Explosive Augmentation and Tracer Augmentation now has a 50% chance to apply an additional stack of Napalm to enemies'. Spell.dbc row 707239 carries ProcFlags 0x15510 - every direct Tinker spell hit of any source - an empty effect class mask and ProcChance 50, and nothing in the repository bound it, so the generated proc entry applied Napalm (805315) from any Tinker spell instead. Fail-before proof: Overload (705798), a Tinker damage spell that is neither named source, must never apply Napalm. It is SPELL_DAMAGE_CLASS_MELEE, so each landed hit raises PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS, one of the flags in 0x15510, and is an independent 50% roll on the current code; 20 hits inside Napalm's 8000 ms duration (SpellDuration row 31) leave a 1 in 2^20 chance of a clean target. After the fix the script restricts the proc to 653238 and 653247 and this assertion is deterministic. The other half of the report - that the two named sources now reach the proc - is not asserted here: both deliver their damage at the 1500 ms global cooldown at best, Napalm lives only 8000 ms, and the harness has no any-of-N assertion, so a 50% roll cannot be observed without a false-failure rate of several percent.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "t",
+      "entry": 36,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 705798
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 707239
+    },
+    {
+      "action": "assert",
+      "label": "War Crimes is active on the Tinker",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 707239,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The target carries no Napalm before any hit",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 805315,
+      "caster": "t",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "metric": "health",
+      "save_as": "dummy_health"
+    },
+    {
+      "action": "cast",
+      "label": "Overload hit 1 of 20",
+      "actor": "t",
+      "spell": 705798,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "cast",
+      "label": "Overload hit 2 of 20",
+      "actor": "t",
+      "spell": 705798,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "cast",
+      "label": "Overload hit 3 of 20",
+      "actor": "t",
+      "spell": 705798,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "cast",
+      "label": "Overload hit 4 of 20",
+      "actor": "t",
+      "spell": 705798,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "cast",
+      "label": "Overload hit 5 of 20",
+      "actor": "t",
+      "spell": 705798,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "cast",
+      "label": "Overload hit 6 of 20",
+      "actor": "t",
+      "spell": 705798,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "cast",
+      "label": "Overload hit 7 of 20",
+      "actor": "t",
+      "spell": 705798,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "cast",
+      "label": "Overload hit 8 of 20",
+      "actor": "t",
+      "spell": 705798,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "cast",
+      "label": "Overload hit 9 of 20",
+      "actor": "t",
+      "spell": 705798,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "cast",
+      "label": "Overload hit 10 of 20",
+      "actor": "t",
+      "spell": 705798,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "cast",
+      "label": "Overload hit 11 of 20",
+      "actor": "t",
+      "spell": 705798,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "cast",
+      "label": "Overload hit 12 of 20",
+      "actor": "t",
+      "spell": 705798,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "cast",
+      "label": "Overload hit 13 of 20",
+      "actor": "t",
+      "spell": 705798,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "cast",
+      "label": "Overload hit 14 of 20",
+      "actor": "t",
+      "spell": 705798,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "cast",
+      "label": "Overload hit 15 of 20",
+      "actor": "t",
+      "spell": 705798,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "cast",
+      "label": "Overload hit 16 of 20",
+      "actor": "t",
+      "spell": 705798,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "cast",
+      "label": "Overload hit 17 of 20",
+      "actor": "t",
+      "spell": 705798,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "cast",
+      "label": "Overload hit 18 of 20",
+      "actor": "t",
+      "spell": 705798,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "cast",
+      "label": "Overload hit 19 of 20",
+      "actor": "t",
+      "spell": 705798,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "cast",
+      "label": "Overload hit 20 of 20",
+      "actor": "t",
+      "spell": 705798,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "The Overload hits landed, so each one was a real proc opportunity",
+      "actor": "dummy",
+      "metric": "health",
+      "relative_to": "dummy_health",
+      "max": -10
+    },
+    {
+      "action": "assert",
+      "label": "The target is still alive, so every hit resolved on a valid proc target",
+      "actor": "dummy",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "War Crimes never applied Napalm from a spell it does not name",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 805315,
+      "caster": "t",
+      "equals": 0
+    }
+  ]
+}

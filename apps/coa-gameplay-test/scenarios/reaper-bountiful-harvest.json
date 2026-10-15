@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Bountiful Harvest raises Reap and Murder damage by 25% (#3073)",
+  "contract": "Bountiful Harvest 706576 (Spell.dbc: single Apply Aura effect, EffectApplyAuraName 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectBasePoints 24 (+1 display = 25), EffectSpellClassMask[1] 65 = (1<<0)|(1<<6)) reads 'Increases the damage of Reap and Murder by $s1%.' Reap 500357 has native SpellFamilyFlags[1] 1 (bit 0) and Murder 500376 has SpellFamilyFlags[1] 64 (bit 6), both family 36, exactly matching the aura's class mask, so the native generic SpellMod system (AuraEffect::CalculateSpellMod, SPELLMOD_DAMAGE) applies the +25% with no CoA script needed. The spell_modifier metric applies the player's native spell modifiers for a given SpellModOp directly, so it is used here instead of a live damage roll.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "reaper", "race": 10, "class": 30, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "assert", "label": "CONTROL Reap has no damage modifier before the talent", "actor": "reaper", "metric": "spell_modifier", "spell": 500357, "op": 0, "base": 1000, "equals": 1000 },
+    { "action": "assert", "label": "CONTROL Murder has no damage modifier before the talent", "actor": "reaper", "metric": "spell_modifier", "spell": 500376, "op": 0, "base": 1000, "equals": 1000 },
+    { "action": "learn", "actor": "reaper", "spell": 706576 },
+    { "action": "assert", "label": "Bountiful Harvest is active", "actor": "reaper", "metric": "aura", "spell": 706576, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "REGRESSION Reap gains a 25% damage modifier", "actor": "reaper", "metric": "spell_modifier", "spell": 500357, "op": 0, "base": 1000, "equals": 1250 },
+    { "action": "assert", "label": "REGRESSION Murder gains a 25% damage modifier", "actor": "reaper", "metric": "spell_modifier", "spell": 500376, "op": 0, "base": 1000, "equals": 1250 }
+  ]
+}

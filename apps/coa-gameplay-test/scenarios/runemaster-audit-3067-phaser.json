@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Runemaster audit: Phaser cuts Phase Out's cooldown by 30s and removes its mana cost (#3067)",
+  "contract": "Phaser 706518 effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 11 (SPELLMOD_COOLDOWN), EffectBasePoints -30001 + DieSides 1 = -30000; effect 1 is SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 14 (SPELLMOD_COST), EffectBasePoints -101 + 1 = -100%. Both effects' EffectSpellClassMask word 0 is 64. Phase Out 500671 has SpellFamilyName 38, SpellFamilyFlags word 0 bit 6 (64) - an exact classmask match. Player::ApplySpellMod must therefore subtract 30000ms from any op-11 query and zero out any op-14 query against 500671 once 706518 is learned.",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "assert", "label": "before: 500671 has no cooldown modifier (op 11)", "actor": "rm",
+      "metric": "spell_modifier", "spell": 500671, "op": 11, "base": 100000, "min": 99998, "max": 100002},
+    {"action": "assert", "label": "before: 500671 has no cost modifier (op 14)", "actor": "rm",
+      "metric": "spell_modifier", "spell": 500671, "op": 14, "base": 100000, "min": 99998, "max": 100002},
+    {"action": "learn", "actor": "rm", "spell": 706518},
+    {"action": "assert", "label": "Phaser (706518) is active", "actor": "rm",
+      "metric": "aura", "spell": 706518, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "706518 op 11 flat -30000 reaches 500671 (classmask matches Phase Out's family flags)",
+      "actor": "rm", "metric": "spell_modifier", "spell": 500671, "op": 11, "base": 100000, "min": 69998, "max": 70002},
+    {"action": "assert", "label": "706518 op 14 percent -100 zeroes 500671's cost",
+      "actor": "rm", "metric": "spell_modifier", "spell": 500671, "op": 14, "base": 100000, "min": -2, "max": 2}
+  ]
+}

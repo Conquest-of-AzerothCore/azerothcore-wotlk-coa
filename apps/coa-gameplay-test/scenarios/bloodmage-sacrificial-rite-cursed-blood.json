@@ -1,0 +1,245 @@
+{
+  "schema": 1,
+  "name": "Sacrificial Rite's haste, attacker proc, and expiry contract (#3188)",
+  "contract": "Sacrificial Rite 800785 applies native 20% melee and spell haste for 15 seconds. While active, its spell_proc row curses a unit that hits the Bloodmage with Cursed Blood 573250. On natural expiration, the tooltip grants the caster 15% increased healing and a 15-second periodic heal through aura 800786. This scenario verifies the attacker proc on an opposing player fixture, the end-aura amount, its periodic healing tick and that manual cancellation does not grant it.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "attacker",
+      "race": 2,
+      "class": 1,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "pvp",
+      "actor": "bloodmage",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "attacker",
+      "enabled": true
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 800785
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Sacrificial Rite is known",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 800785,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Main-hand swing time before the ritual",
+      "actor": "bloodmage",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "save_as": "swing_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Probe cast time before the ritual",
+      "actor": "bloodmage",
+      "metric": "spell_cast_time_ms",
+      "spell": 116,
+      "save_as": "cast_before"
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800785
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Sacrificial Rite is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 800785,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Effect 0 grants 20% melee haste",
+      "actor": "bloodmage",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "ratio_to": "swing_before",
+      "min": 0.825,
+      "max": 0.842
+    },
+    {
+      "action": "attack",
+      "label": "A hostile player fixture hits the active Sacrificial Rite",
+      "actor": "attacker",
+      "target": "bloodmage"
+    },
+    {
+      "action": "assert",
+      "label": "The attacker receives Cursed Blood from the Bloodmage",
+      "actor": "attacker",
+      "metric": "aura",
+      "spell": 573250,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 7000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "attacker"
+    },
+    {
+      "action": "assert",
+      "label": "Effect 2 grants 20% spell haste",
+      "actor": "bloodmage",
+      "metric": "spell_cast_time_ms",
+      "spell": 116,
+      "ratio_to": "cast_before",
+      "min": 0.825,
+      "max": 0.842
+    },
+    {
+      "action": "wait",
+      "label": "Wait for Sacrificial Rite's 15-second duration to expire",
+      "ms": 15500
+    },
+    {
+      "action": "assert",
+      "label": "Sacrificial Rite has expired",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 800785,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Natural expiration applies the healing aura to its caster",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 800786,
+      "caster": "bloodmage",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The end aura grants 15% increased healing",
+      "actor": "bloodmage",
+      "metric": "aura_amount",
+      "spell": 800786,
+      "effect": 0,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "The end aura ticks every 1500 ms",
+      "actor": "bloodmage",
+      "metric": "aura_amplitude_ms",
+      "spell": 800786,
+      "effect": 1,
+      "equals": 1500
+    },
+    {
+      "action": "set_health",
+      "label": "Create room to observe the periodic heal",
+      "actor": "bloodmage",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "label": "Health before the end aura ticks",
+      "actor": "bloodmage",
+      "metric": "health",
+      "save_as": "health_before_end_aura_tick"
+    },
+    {
+      "action": "assert",
+      "label": "The end aura heals the Bloodmage",
+      "actor": "bloodmage",
+      "metric": "health",
+      "relative_to": "health_before_end_aura_tick",
+      "min": 1,
+      "within_ms": 3500
+    },
+    {
+      "action": "set_aura",
+      "label": "Remove the completed healing aura",
+      "actor": "bloodmage",
+      "spell": 800786,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "bloodmage",
+      "spell": 800785
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown clear",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800785
+    },
+    {
+      "action": "assert",
+      "label": "Sacrificial Rite can be cast again",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 800785,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Cancel Sacrificial Rite before it expires",
+      "actor": "bloodmage",
+      "spell": 800785,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Cancellation does not grant the end aura",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 800786,
+      "equals": 0
+    }
+  ]
+}

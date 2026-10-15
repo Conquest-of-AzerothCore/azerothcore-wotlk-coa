@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Heart of Xoroth allows Demon's Blood to stack 5 additional times (#1297)",
+  "contract": "Heart of Xoroth 704956 reads 'Allows Demon's Blood to stack 5 additional times' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z; matches the client's own moa_description). Its own baked effect is already the native aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER), MiscValue 31 (SPELLMOD_MAX_AURA_STACKS), BasePoints 4 (+1 from DieSides 1 rounding = 5) - the same mechanism Necromancer's Capacity() (AscensionNecromancer.cpp) uses for spell 805011 - but its SpellClassMask ([536870912,0,16]) does not overlap Demon's Blood's (500906) actual family flags (dword1 bit4 / 16) in any of the three words. AscensionXorothContracts.cpp corrects the classmask to flag96(0, 16, 0); AscensionXoroth.cpp's Gain() replaces its hardcoded 6-stack cap with player->ApplySpellMod(500906, SPELLMOD_MAX_AURA_STACKS, cap) starting from a base of 6, so SpellInfo::CalcMaxAuraStacks (also read by the CoAGameplayTest set_aura fixture and the spell_max_stacks metric) reports 11 once the talent is known.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_max_stacks", "spell": 500906, "save_as": "cap_before" },
+    {
+      "action": "assert", "label": "SETUP: Demon's Blood's base cap is 6 stacks",
+      "actor": "knight", "metric": "spell_max_stacks", "spell": 500906, "equals": 6
+    },
+    {
+      "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 6,
+      "label": "SETUP: the base cap holds exactly 6 stacks"
+    },
+    {
+      "action": "assert", "label": "SETUP: Demon's Blood sits at the base cap",
+      "actor": "knight", "metric": "aura_stacks", "spell": 500906, "equals": 6
+    },
+    { "action": "learn", "actor": "knight", "spell": 704956 },
+    { "action": "set_aura", "actor": "knight", "spell": 704956, "stacks": 1, "label": "Force the Heart of Xoroth passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Heart of Xoroth passive is active",
+      "actor": "knight", "metric": "aura", "spell": 704956, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Demon's Blood's cap rises to 11 (6 base + 5 from the talent)",
+      "actor": "knight", "metric": "spell_max_stacks", "spell": 500906, "equals": 11
+    },
+    {
+      "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 11,
+      "label": "CONTRACT: the corrected cap accepts the full 11 stacks in practice"
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Demon's Blood holds all 11 stacks",
+      "actor": "knight", "metric": "aura_stacks", "spell": 500906, "equals": 11
+    }
+  ]
+}

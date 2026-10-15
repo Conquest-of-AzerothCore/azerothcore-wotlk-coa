@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "name": "A WildCard Hero Imp attacks using the normal pet command (#6291)",
+  "contract": "A level-one WildCard Hero normally summons an Imp. Firebolt begins with native autocast disabled; the normal pet-autocast opcode enables it, and the ordinary pet attack command must then produce positive Firebolt damage. A real relog preserves the saved autocast choice and accepts another attack command. This does not establish whether the reporting client had enabled Firebolt autocast.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 10,
+      "level": 1,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "p",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 688
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 10040,
+      "stacks": 3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "max_power",
+      "power": 0,
+      "min": 20000,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "power": 0,
+      "value": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 688
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "pet_entry",
+      "equals": 416,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "pet_knows_spell",
+      "spell": 3110,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "pet_autocast_enabled",
+      "spell": 3110,
+      "equals": 0
+    },
+    {
+      "action": "pet_autocast",
+      "actor": "p",
+      "spell": 3110,
+      "enabled": true
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "pet_autocast_enabled",
+      "spell": 3110,
+      "equals": 1
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "enemy",
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 3110,
+      "pet": true,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "relog",
+      "actor": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "pet_entry",
+      "equals": 416
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "pet_autocast_enabled",
+      "spell": 3110,
+      "equals": 1
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "enemy",
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 3110,
+      "pet": true,
+      "target": "enemy",
+      "min": 2,
+      "within_ms": 10000
+    }
+  ]
+}

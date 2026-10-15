@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Healing Ward heals and Spirit Idol restores mana through their explicit targets (#265)",
+  "contract": [
+    "Healing Ward 500957 drops creature 50104, 'healing 8 nearby allies ... every $500956T1 sec' with Healing",
+    "Ward 805403. Spirit Idol 500961 drops creature 50106: 'Allies ... regenerate $805282s1% maximum mana' with",
+    "Energize 805282, EffectBasePoints 3 + 1 = 4% of maximum mana per tick. The summons cast these helpers at",
+    "each ally as an explicit unit target. Spell.dbc gives the helpers area targets only (805403",
+    "TARGET_SRC_CASTER/TARGET_UNIT_SRC_AREA_ALLY, 805282 TARGET_UNIT_CASTER_AREA_PARTY); CoA retargets them to",
+    "TARGET_UNIT_TARGET_ALLY in the spell-attribute hook. #265 counted thousands of skipped helper casts on",
+    "release feb155c82, whose explicit-target mask was cached before that hook and dropped the ally. A wounded,",
+    "drained Witch Doctor next to both summons must receive an 805403 heal and exactly one 4% mana tick.",
+    "Ordinary regeneration is disabled, so health and mana change only through the summons."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "doctor", "race": 1, "class": 13, "level": 20, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the world settle", "ms": 5000 },
+    { "action": "learn", "actor": "doctor", "spell": 500957 },
+    { "action": "learn", "actor": "doctor", "spell": 500961 },
+    { "action": "set_health", "actor": "doctor", "value": 50 },
+    { "action": "snapshot", "actor": "doctor", "metric": "health", "save_as": "health_before_ward" },
+    { "action": "cast", "actor": "doctor", "spell": 500957 },
+    {
+      "action": "assert", "label": "Healing Ward is summoned", "actor": "doctor", "metric": "owned_creature_count",
+      "entry": 50104, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Healing Ward heals its wounded owner", "actor": "doctor",
+      "metric": "spell_heal_count", "spell": 805403, "target": "doctor", "min": 1, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "The ward heal raises the owner's health", "actor": "doctor",
+      "metric": "health", "relative_to": "health_before_ward", "min": 1, "within_ms": 4000
+    },
+    { "action": "cast", "actor": "doctor", "spell": 500961 },
+    {
+      "action": "assert", "label": "Spirit Idol is summoned", "actor": "doctor", "metric": "owned_creature_count",
+      "entry": 50106, "equals": 1, "within_ms": 2000
+    },
+    { "action": "set_power", "actor": "doctor", "power": 0, "value": 0 },
+    { "action": "snapshot", "actor": "doctor", "metric": "power", "power": 0, "save_as": "mana_before_idol" },
+    { "action": "snapshot", "actor": "doctor", "metric": "max_power", "power": 0, "save_as": "max_mana" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: one Spirit Idol tick restores 4% of maximum mana",
+      "actor": "doctor", "metric": "power", "power": 0, "relative_to": "mana_before_idol", "ratio_to": "max_mana",
+      "min": 0.035, "max": 0.045, "within_ms": 4500
+    },
+    { "action": "assert", "actor": "doctor", "metric": "alive", "equals": 1 }
+  ]
+}

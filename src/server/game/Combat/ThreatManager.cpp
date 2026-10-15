@@ -29,6 +29,7 @@
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "CreatureGroups.h"
+#include "LocalLevelScaling.h"
 #include "MotionMaster.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
@@ -41,6 +42,7 @@
 #include "WorldPacket.h"
 #include <algorithm>
 #include <boost/heap/fibonacci_heap.hpp>
+#include <cmath>
 
 const CompareThreatLessThan ThreatManager::CompareThreat;
 
@@ -773,7 +775,10 @@ void ThreatManager::ForwardThreatForAssistingMe(Unit* assistant, float baseAmoun
     {
         float const perTarget = baseAmount / canBeThreatened.size();
         for (Creature* threatened : canBeThreatened)
-            threatened->GetThreatMgr().AddThreat(assistant, perTarget, spell, ignoreModifiers);
+        {
+            float const amount = LocalLevelScaling::PoolThreatFor(assistant, threatened, perTarget);
+            threatened->GetThreatMgr().AddThreat(assistant, amount, spell, ignoreModifiers);
+        }
     }
 
     for (Creature* threatened : cannotBeThreatened)
@@ -805,10 +810,12 @@ void ThreatManager::UpdateMyTempModifiers()
         return;
 
     auto it = _threatenedByMe.begin();
-    bool const isIncrease = (it->second->_tempModifier < mod);
     do
     {
-        it->second->_tempModifier = mod;
+        float const converted = LocalLevelScaling::PoolThreatFor(_owner, it->second->GetOwner(), float(mod));
+        int32 const referenceMod = int32(std::lround(converted));
+        bool const isIncrease = (it->second->_tempModifier < referenceMod);
+        it->second->_tempModifier = referenceMod;
         if (isIncrease)
             it->second->HeapNotifyIncreased();
         else

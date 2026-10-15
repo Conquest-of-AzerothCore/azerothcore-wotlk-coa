@@ -1,0 +1,327 @@
+{
+  "schema": 1,
+  "name": "Hellknight grants five percent movement speed per stack (#5599)",
+  "contract": "Spell.dbc 800703 states that movement speed increases by the same $s1 percentage that reduces global cooldowns. Effect 0 supplies -5 percent per stack (BasePoints -6, DieSides 1), and StackAmount is 5. The expected movement rates are 1.05 at one stack, 1.25 at five, and 1.10 at two; removal and the authored 20-second expiration restore 1.0. The existing critical chance effect still grants one percentage point at one stack. A physical autoattack while above 75 percent health exercises the authored Hellknight passive 800702 and its proc to 800703. The fixture grants aura stacks directly only for exact lifecycle and stack coverage; run_speed_rate reads the native movement rate. Applying and removing the buff initializes the fixture's native combat totals before taking its critical-chance baseline. Sprint 2983 supplies a standard +50-percent run-speed aura and Hamstring 1715 supplies a -50-percent snare. The stronger speed bonus takes precedence, its removal restores Hellknight, the snare halves the boosted rate, and removing Hellknight retains the snare. The native minimum weapon damage retains the authored one-percent-per-stack increase. Aura 79 updates the weapon damage field, so the five-stack comparison reads that field rather than applying outgoing bonuses again to an arbitrary damage input.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 1000,
+      "expertise_rating": 1000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "knight",
+      "entry": 31146,
+      "level": 60,
+      "health": 1000000,
+      "distance": 2,
+      "faction": 14,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "knight",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "knight",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "set_aura",
+      "label": "Initialize the native combat totals before sampling them",
+      "actor": "knight",
+      "spell": 800703,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 800703,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "run_speed_rate",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "knight",
+      "metric": "weapon_damage_min",
+      "save_as": "physical_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "knight",
+      "metric": "melee_crit_chance",
+      "save_as": "crit_before"
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 800703,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_stacks",
+      "spell": 800703,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "melee_crit_chance",
+      "relative_to": "crit_before",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "assert",
+      "label": "One Hellknight stack increases movement by five percent",
+      "actor": "knight",
+      "metric": "run_speed_rate",
+      "min": 1.049,
+      "max": 1.051
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 800703,
+      "stacks": 5
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_amount",
+      "spell": 800703,
+      "effect": 0,
+      "equals": -25
+    },
+    {
+      "action": "assert",
+      "label": "Five stacks increase movement by twenty-five percent",
+      "actor": "knight",
+      "metric": "run_speed_rate",
+      "min": 1.249,
+      "max": 1.251
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "weapon_damage_min",
+      "ratio_to": "physical_before",
+      "min": 1.049,
+      "max": 1.051,
+      "label": "Five stacks retain the authored five-percent physical damage bonus"
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 800703,
+      "stacks": 2
+    },
+    {
+      "action": "assert",
+      "label": "Reducing stacks recalculates the movement bonus",
+      "actor": "knight",
+      "metric": "run_speed_rate",
+      "min": 1.099,
+      "max": 1.101
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 800703,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Removing Hellknight restores movement speed",
+      "actor": "knight",
+      "metric": "run_speed_rate",
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 2983,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_amount",
+      "spell": 2983,
+      "effect": 0,
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "run_speed_rate",
+      "min": 1.499,
+      "max": 1.501,
+      "label": "A stronger normal movement buff takes precedence"
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 800703,
+      "stacks": 5
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "run_speed_rate",
+      "min": 1.499,
+      "max": 1.501,
+      "label": "Hellknight stacks do not overwrite the stronger movement buff"
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 2983,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "run_speed_rate",
+      "min": 1.249,
+      "max": 1.251,
+      "label": "Normal speed recalculation preserves Hellknight"
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 1715,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura_amount",
+      "spell": 1715,
+      "effect": 0,
+      "equals": -50
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "run_speed_rate",
+      "min": 0.624,
+      "max": 0.626,
+      "label": "A fifty-percent snare applies to the increased movement rate"
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 800703,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "run_speed_rate",
+      "min": 0.499,
+      "max": 0.501,
+      "label": "Hellknight removal preserves the remaining snare"
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 1715,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "run_speed_rate",
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "knight",
+      "spell": 800703,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 21000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura",
+      "spell": 800703,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Natural expiration restores movement speed",
+      "actor": "knight",
+      "metric": "run_speed_rate",
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "knight",
+      "spell": 800702
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "aura",
+      "spell": 800702,
+      "equals": 1
+    },
+    {
+      "action": "attack",
+      "actor": "knight",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Physical damage procs Hellknight",
+      "actor": "knight",
+      "metric": "aura",
+      "spell": 800703,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "knight"
+    },
+    {
+      "action": "assert",
+      "label": "The naturally procced buff increases movement",
+      "actor": "knight",
+      "metric": "run_speed_rate",
+      "min": 1.049
+    }
+  ]
+}

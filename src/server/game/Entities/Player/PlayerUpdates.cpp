@@ -27,6 +27,7 @@
 #include "Guild.h"
 #include "InstanceScript.h"
 #include "Language.h"
+#include "LocalLevelScaling.h"
 #include "OutdoorPvPMgr.h"
 #include "Pet.h"
 #include "Player.h"
@@ -40,6 +41,7 @@
 #include "WeatherMgr.h"
 #include "WorldState.h"
 #include "WorldStatePackets.h"
+#include <limits>
 
 /// @todo: this import is not necessary for compilation and marked as unused by the IDE
 //  however, for some reasons removing it would cause a damn linking issue
@@ -49,6 +51,7 @@
 
 // Zone Interval should be 1 second
 constexpr auto ZONE_UPDATE_INTERVAL = 1000;
+constexpr int32 XP_SOURCE_MASK_PROFESSION = 4;
 
 void Player::Update(uint32 p_time)
 {
@@ -800,6 +803,56 @@ inline int SkillGainChance(uint32 SkillValue, uint32 GrayLevel,
     return sWorld->getIntConfig(CONFIG_SKILL_CHANCE_ORANGE) * 10;
 }
 
+void Player::RewardProfessionXP(uint32 skillId, uint32 current, uint32 gray, uint32 green, uint32 yellow,
+    bool disenchanting)
+{
+    if (!IsInWorld() || !GetPureSkillValue(skillId) || !sScriptMgr->OnPlayerCanUpdateSkill(this, skillId))
+        return;
+
+    ServerConfigs profession;
+    switch (skillId)
+    {
+        case SKILL_MINING: profession = RATE_XP_PROFESSION_MINING; break;
+        case SKILL_HERBALISM: profession = RATE_XP_PROFESSION_HERBALISM; break;
+        case SKILL_SKINNING: profession = RATE_XP_PROFESSION_SKINNING; break;
+        case SKILL_FISHING: profession = RATE_XP_PROFESSION_FISHING; break;
+        case SKILL_BLACKSMITHING: profession = RATE_XP_PROFESSION_BLACKSMITHING; break;
+        case SKILL_JEWELCRAFTING: profession = RATE_XP_PROFESSION_JEWELCRAFTING; break;
+        case SKILL_ALCHEMY: profession = RATE_XP_PROFESSION_ALCHEMY; break;
+        case SKILL_LEATHERWORKING: profession = RATE_XP_PROFESSION_LEATHERWORKING; break;
+        case SKILL_FIRST_AID: profession = RATE_XP_PROFESSION_FIRST_AID; break;
+        case SKILL_COOKING: profession = RATE_XP_PROFESSION_COOKING; break;
+        case SKILL_ENGINEERING: profession = RATE_XP_PROFESSION_ENGINEERING; break;
+        case SKILL_TAILORING: profession = RATE_XP_PROFESSION_TAILORING; break;
+        case SKILL_LOCKPICKING: profession = RATE_XP_PROFESSION_LOCKPICKING; break;
+        case SKILL_INSCRIPTION: profession = RATE_XP_PROFESSION_INSCRIPTION; break;
+        case SKILL_ENCHANTING:
+            profession = disenchanting ? RATE_XP_PROFESSION_DISENCHANTING : RATE_XP_PROFESSION_ENCHANTING;
+            break;
+        default: return;
+    }
+
+    ServerConfigs const difficulty = current >= gray ? RATE_XP_PROFESSION_GRAY
+        : current >= green ? RATE_XP_PROFESSION_GREEN
+        : current >= yellow ? RATE_XP_PROFESSION_YELLOW : RATE_XP_PROFESSION_ORANGE;
+    double const rates = double(sObjectMgr->GetXPForLevel(GetLevel()))
+        * sWorld->getRate(RATE_XP_PROFESSION_BASE_FRACTION) * sWorld->getRate(RATE_XP_PROFESSION)
+        * sWorld->getRate(profession) * sWorld->getRate(difficulty);
+    bool const noBonusExperience = sScriptMgr->OnPlayerHasNoBonusExperience(this);
+    double const auraMultiplier = GetTotalAuraMultiplier(SPELL_AURA_MOD_XP_PCT, [noBonusExperience](AuraEffect const* effect)
+    {
+        // CoA's MOD_XP_PCT MiscValue is a mask of XP sources: 1 kills, 2 quests, 4 professions.
+        if ((effect->GetMiscValue() & XP_SOURCE_MASK_PROFESSION) == 0)
+            return false;
+        // A NO_BONUS_EXPERIENCE challenge keeps penalties but drops the bonuses.
+        return !noBonusExperience || effect->GetAmount() <= 0;
+    });
+    double const reward = rates * auraMultiplier;
+    uint32 xp = static_cast<uint32>(std::min(reward, double(std::numeric_limits<uint32>::max())));
+    sScriptMgr->OnPlayerGiveXP(this, xp, nullptr, XPSOURCE_PROFESSION);
+    GiveXP(xp, nullptr);
+}
+
 bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue,
                                uint32 RedLevel, uint32 Multiplicator)
 {
@@ -811,6 +864,8 @@ bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue,
         sWorld->getIntConfig(CONFIG_SKILL_GAIN_GATHERING);
     sScriptMgr->OnPlayerUpdateGatheringSkill(this, SkillId, SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25, gathering_skill_gain);
 
+    RewardProfessionXP(SkillId, SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25);
+
     // For skinning and Mining chance decrease with level. 1-74 - no decrease,
     // 75-149 - 2 times, 225-299 - 8 times
     switch (SkillId)
@@ -819,6 +874,7 @@ bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue,
     case SKILL_LOCKPICKING:
     case SKILL_JEWELCRAFTING:
     case SKILL_INSCRIPTION:
+    case SKILL_WOODCUTTING:
         return UpdateSkillPro(SkillId,
                               SkillGainChance(SkillValue, RedLevel + 100,
                                               RedLevel + 50, RedLevel + 25) *
@@ -888,6 +944,12 @@ bool Player::UpdateCraftSkill(uint32 spellid)
             uint32 craft_skill_gain =
                 sWorld->getIntConfig(CONFIG_SKILL_GAIN_CRAFTING);
             sScriptMgr->OnPlayerUpdateCraftingSkill(this, _spell_idx->second, SkillValue, craft_skill_gain);
+
+            RewardProfessionXP(_spell_idx->second->SkillLine, SkillValue,
+                _spell_idx->second->TrivialSkillLineRankHigh,
+                (_spell_idx->second->TrivialSkillLineRankHigh + _spell_idx->second->TrivialSkillLineRankLow) / 2,
+                _spell_idx->second->TrivialSkillLineRankLow,
+                spellInfo && spellInfo->HasEffect(SPELL_EFFECT_DISENCHANT));
 
             return UpdateSkillPro(
                 _spell_idx->second->SkillLine,
@@ -1084,6 +1146,10 @@ void Player::UpdateCombatSkills(Unit* victim, WeaponAttackType attType, bool def
 
     uint8 greylevel = Acore::XP::GetGrayLevel(playerLevel);
     uint8 moblevel = defence ? victim->getLevelForTarget(this) : victim->GetLevel(); // if defense than victim == attacker
+    if (!defence)
+        if (Creature const* creature = victim->ToCreature())
+            if (uint8 const view = LocalLevelScaling::ViewLevelFor(this, creature))
+                moblevel = view;
     /*if (moblevel < greylevel)
         return;*/
     // Patch 3.0.8 (2009-01-20): You can no longer skill up weapons on mobs that are immune to damage.
@@ -1886,6 +1952,19 @@ void Player::UpdateForQuestWorldObjects()
 
 void Player::UpdateTitansGrip()
 {
+    constexpr uint32 TitansGrip = 46917;
+    constexpr uint32 TitansGripStaffPenalty = 818047;
+    Item const* main = GetWeaponForAttack(BASE_ATTACK);
+    bool const staff = getClass() == CLASS_HERO && HasActiveSpell(TitansGrip) && CanTitanGrip() && main &&
+        main->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_STAFF;
+    if (staff)
+    {
+        if (!HasAura(TitansGripStaffPenalty))
+            CastSpell(this, TitansGripStaffPenalty, TRIGGERED_FULL_MASK);
+    }
+    else
+        RemoveAurasDueToSpell(TitansGripStaffPenalty);
+
     // 10% damage reduce if 2x2h weapons are used
     if (HasBurningCommander() || !CanTitanGrip())
         RemoveAurasDueToSpell(49152);

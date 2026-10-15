@@ -1,0 +1,37 @@
+-- Shadow Strength (801960), second clause only: "triggering Call of the Darkwing now reduces the cooldown
+-- of all Howl spells by $/1000;556239S1 sec. Can only occur once per sec." Effects 0 and 1 are two aura 42
+-- (SPELL_AURA_PROC_TRIGGER_SPELL) effects on Shadow Strength Trigger 556239 and Shadow Strength Trigger2
+-- 556238. Between them they carry six SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN effects, all BasePoints -1001
+-- (-1000 ms) and TargetA 1 = caster: 556239 on 806177 (Shadow Howl), 500124 (Night Hunter's Howl) and
+-- 804207 (Wicked Howl); 556238 on 804195, 800782 (Blood Howl) and 804811 (Monstrous Howl). But Spell.dbc
+-- gives 801960 ProcFlags 0 and no `spell_proc` row existed, so SpellMgr::LoadSpellProcs skipped the record
+-- ("Skip if no proc flags in DBC") and Aura::GetProcEffectMask returned a zero mask: neither trigger could
+-- ever fire. Same reasoning and shape as rev_20260918_32_bloodmage_council_assembled_proc.
+--
+-- Proc source is Call of the Darkwing 801958, the only family-26 record carrying SpellFamilyFlags
+-- (0, 268435456, 0), hence SpellFamilyMask1 268435456. 801958 is never cast directly - it only ever
+-- arrives as the triggered payload of an aura 42 (Grim Omen 800154, Monstrous Howl 804811) - which forces
+-- two columns:
+--   * `AttributesMask` 2 (PROC_ATTR_TRIGGERED_CAN_PROC). Aura::GetProcEffectMask rejects any proc caused
+--     by a triggered spell unless the aura carries SPELL_ATTR3_CAN_PROC_FROM_PROCS (801960's
+--     AttributesEx3 is 0) or the entry carries this attribute, and 801958 does not carry
+--     SPELL_ATTR3_NOT_A_PROC (0x200) either.
+--   * `SpellPhaseMask` 4 (PROC_SPELL_PHASE_FINISH). Spell::cast skips the CAST-phase proc entirely for
+--     triggered spells, and 801958's only effect is a summon at a destination (TargetA 22) with no unit
+--     target, so there is no per-target HIT proc; Spell::finish still raises the FINISH-phase proc.
+-- `ProcFlags` 5120 = DONE_SPELL_NONE_DMG_CLASS_POS 0x400 | DONE_SPELL_NONE_DMG_CLASS_NEG 0x1000: 801958
+-- has DmgClass NONE, and Spell::finish picks the POS or NEG flag from SpellInfo::IsPositive() at runtime,
+-- so both polarities are set; the family mask is what restricts the proc to Call of the Darkwing.
+-- `Cooldown` 1000 is the tooltip's "Can only occur once per sec". `Chance` is the record's own ProcChance
+-- (100). `HitMask`/`SchoolMask`/`SpellTypeMask` are 0: a summon is neither damage nor healing and the
+-- tooltip restricts neither school nor hit result.
+--
+-- NOT fixed here, and deliberately: the tooltip's FIRST clause, "Casting Howl spells now deal
+-- ${$536277m1+$536277ppl1+$STA*.25+$AGI*.25+$AP*.1} Shadow damage to all nearby enemies", has no effect
+-- slot on 801960 at all - 801960 has exactly two effects, both accounted for above. Shadow Strength 536277
+-- (SPELL_EFFECT_SCHOOL_DAMAGE, BasePoints 64, SchoolMask 32, TargetA 22 / TargetB 16, radius index 13) is
+-- referenced only by the tooltip's own formula and is triggered by nothing, and its STA/AGI/AP terms exist
+-- in no DBC field. That clause needs a separate decision and is not covered by this migration.
+DELETE FROM `spell_proc` WHERE `SpellId` = 801960;
+INSERT INTO `spell_proc` (`SpellId`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `ProcFlags`, `SpellTypeMask`, `SpellPhaseMask`, `HitMask`, `AttributesMask`, `DisableEffectsMask`, `ProcsPerMinute`, `Chance`, `Cooldown`, `Charges`) VALUES
+(801960, 0, 26, 0, 268435456, 0, 5120, 0, 4, 0, 2, 0, 0, 100, 1000, 0);

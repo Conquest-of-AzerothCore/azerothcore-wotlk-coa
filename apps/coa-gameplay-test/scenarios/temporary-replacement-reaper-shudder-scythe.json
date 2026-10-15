@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Shudder Scythe on the action bar is saved as Murder (#5469)",
+  "contract": "AscensionCompatData::TalentReplacements (AscensionTalentReplacementData.h:63) carries {30, 56, 805708, 500376, {{572382 at 0}}}: in specialization 56, knowing the Shudder Scythe talent 805708 turns Murder 500376 into Shudder Scythe 572382. AscensionClassService::SynchronizeTalentReplacements (AscensionCompat.cpp:884-953), run from OnPlayerLearnSpell (AscensionCompat.cpp:5782-5784), teaches 572382 with learnSpell(572382, true) (AscensionCompat.cpp:945), a temporary spell never written to character_spell, and registers it over the active Murder rank with Player::SetTemporarySpellReplacement (AscensionCompat.cpp:951). Before the fix Player::_SaveActions wrote 572382, and Player::_LoadActions at the next login runs before the class service teaches it again, so the button was refused and deleted. persisted_action_button reads Player::GetSavedActionButtonSpell, the id _SaveActions writes. A button holding Shudder Scythe must be saved as Murder; a button holding Murder is saved unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "reaper", "race": 10, "class": 30, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "specialization", "actor": "reaper", "id": 56 },
+    { "action": "learn", "actor": "reaper", "spell": 500376 },
+    { "action": "learn", "label": "Pick the Shudder Scythe talent", "actor": "reaper", "spell": 805708 },
+    {
+      "action": "assert",
+      "label": "The talent replaces Murder with Shudder Scythe",
+      "actor": "reaper",
+      "metric": "temporary_spell_replacement",
+      "spell": 500376,
+      "equals": 572382,
+      "within_ms": 3000
+    },
+    { "action": "set_action_button", "actor": "reaper", "button": 2, "spell": 572382 },
+    { "action": "set_action_button", "actor": "reaper", "button": 3, "spell": 500376 },
+    {
+      "action": "assert",
+      "label": "The bar holds Shudder Scythe",
+      "actor": "reaper",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 572382
+    },
+    {
+      "action": "assert",
+      "label": "The Shudder Scythe button is saved as Murder",
+      "actor": "reaper",
+      "metric": "persisted_action_button",
+      "button": 2,
+      "equals": 500376
+    },
+    {
+      "action": "assert",
+      "label": "Control: an ordinary known spell is saved unchanged",
+      "actor": "reaper",
+      "metric": "persisted_action_button",
+      "button": 3,
+      "equals": 500376
+    }
+  ]
+}

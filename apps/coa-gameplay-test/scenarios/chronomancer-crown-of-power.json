@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "name": "Crown of Power shortens Melt Reality's tick interval by a quarter (#3582)",
+  "contract": "Crown of Power 805854's tooltip reads \"Increases the tick rate of Melt Reality by $s1%.\" In Spell.dbc it is a single SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue 19 (SPELLMOD_ACTIVATION_TIME), EffectBasePoints -26 + DieSides 1 = -25%, EffectSpellClassMask [0,512,0], which inside SpellFamilyName 28 selects Melt Reality (503895-503899, 572835, 806335) and nothing else. Melt Reality 503895 carries EffectAmplitude 4000 on both its SPELL_AURA_PERIODIC_DAMAGE effect and its SPELL_AURA_PERIODIC_TRIGGER_SPELL effect, and its duration is fixed (DurationIndex 325), so a shorter interval means more ticks. AuraEffect::CalculatePeriodic applies SPELLMOD_ACTIVATION_TIME straight to m_amplitude (SpellAuraEffects.cpp), giving 3000 ms. Generic core machinery. This scenario is a regression guard for behaviour that already works. The client renders $s1 as -25, so the shipped tooltip says \"by -25%\"; that is a text artefact, not a server defect.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Melt Reality's 4000 ms interval before the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 503895,
+      "op": 19,
+      "base": 4000,
+      "save_as": "melt_amplitude"
+    },
+    {
+      "action": "assert",
+      "label": "Untalented, the interval is unmodified",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 503895,
+      "op": 19,
+      "base": 4000,
+      "equals": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 805854
+    },
+    {
+      "action": "assert",
+      "label": "Crown of Power self-applies its passive",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 805854,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The interval drops to 3000 ms",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 503895,
+      "op": 19,
+      "base": 4000,
+      "equals": 3000
+    },
+    {
+      "action": "assert",
+      "label": "That is exactly -1000 ms against the baseline",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 503895,
+      "op": 19,
+      "base": 4000,
+      "relative_to": "melt_amplitude",
+      "equals": -1000
+    },
+    {
+      "action": "assert",
+      "label": "The top Melt Reality rank shortens the same way",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 806335,
+      "op": 19,
+      "base": 4000,
+      "equals": 3000
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Cultist: Void-Enchanted Armor resists dispel instead of weakening it (#787)",
+  "contract": "Spell 804633: \"Increases your chance to resist dispel effects by 20%.\" It is a passive (SPELL_ATTR0_PASSIVE) with a single effect: Apply Aura (6), AuraName 235 (SPELL_AURA_MOD_DISPEL_RESIST), TargetA 1 (self). Aura::CalcDispelChance (SpellAuras.cpp:1152-1158) sums SPELL_AURA_MOD_DISPEL_RESIST straight into resistChance before returning `100 - resistChance`, so a positive amount must raise dispel resistance. The shipped Spell.dbc row carries EffectBasePoints_1 = -21, DieSides_1 = 1; SpellEffectInfo::CalcValue (SpellInfo.cpp:468-496) adds 1 for DieSides=1, giving -20 (a table scan of every Spell.dbc row using this aura type, 21 total, found only two other negative rows: 525063, unrelated, and 706650, already explicitly guarded in CalcDispelChance by caster class). This asserts the live aura_amount, the exact value the native formula consumes; a fixed spell_dbc row keeps every other field and sets EffectBasePoints_1 = 19 so CalcValue yields +20.",
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 25,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "c",
+      "spell": 804633
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura",
+      "spell": 804633,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "Void-Enchanted Armor is a passive and auto-applies on learn"
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "metric": "aura_amount",
+      "spell": 804633,
+      "effect": 0,
+      "equals": 20,
+      "label": "The stored amount must be +20 (dispel resistance), not -20 (dispel weakness)"
+    }
+  ]
+}

@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "name": "Mending Surge cuts Stellar Convergence's cooldown by 30 seconds (#2379)",
+  "contract": "Mending Surge 704732 (SpellFamilyName 32) reads \"Reduces the cooldown of Stellar Convergence by $/1000;s1 sec\". Its effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 11 = SPELLMOD_COOLDOWN, EffectBasePoints -30001 with DieSides 1 resolving to -30000, and EffectSpellClassMask word1 0x10, which selects Stellar Convergence 572784 (SpellFamilyFlags word1 0x10, RecoveryTime 90000, CategoryRecoveryTime 0). Native path: Player::AddSpellAndCategoryCooldowns applies SPELLMOD_COOLDOWN to the recovery time before starting the cooldown. Two proofs: the metric spell_modifier with op 11 and base 90000 runs Player::ApplySpellMod (flat, no clamp for this op) and must give 60000 with the talent and 90000 without; then the scenario casts Stellar Convergence for real on both fixtures and compares the started cooldowns. The two casts are consecutive steps, so the cooldowns differ by 30000 ms plus at most a short real-time skew; the window -31000..-29000 covers it. The module's cast handler for 572784 only casts the helper 574154 on nearby allies and resets Prayer of Elune if 707637 is known; it does not touch this cooldown. The same mask (word1 0x10) also selects the Moonwater Blessing ranks, which is not asserted here.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 572784
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 572784
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 704732
+    },
+    {
+      "action": "assert",
+      "label": "The passive self-applies once learned",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 704732,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent a 90 s recovery is unchanged",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 572784,
+      "op": 11,
+      "base": 90000,
+      "equals": 90000
+    },
+    {
+      "action": "assert",
+      "label": "With the talent a 90 s recovery becomes 60 s",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 572784,
+      "op": 11,
+      "base": 90000,
+      "equals": 60000
+    },
+    {
+      "action": "cast",
+      "label": "Control casts Stellar Convergence",
+      "actor": "control",
+      "spell": 572784
+    },
+    {
+      "action": "cast",
+      "label": "Talented caster casts Stellar Convergence",
+      "actor": "talent",
+      "spell": 572784
+    },
+    {
+      "action": "assert",
+      "label": "The control cooldown started near the full 90 s",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 572784,
+      "min": 85000
+    },
+    {
+      "action": "snapshot",
+      "label": "Control's remaining Stellar Convergence cooldown",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 572784,
+      "save_as": "stellar_control_cd"
+    },
+    {
+      "action": "assert",
+      "label": "The talented cooldown is 30 s shorter than the control's",
+      "actor": "talent",
+      "metric": "cooldown_ms",
+      "spell": 572784,
+      "relative_to": "stellar_control_cd",
+      "min": -31000,
+      "max": -29000
+    }
+  ]
+}

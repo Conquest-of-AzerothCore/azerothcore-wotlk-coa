@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "name": "Skulltaker gains 20% and Flames of Xoroth 50% damage per Demonfire consumed (#1383, #1402)",
+  "contract": "Issues #1383/#1402 report that at level 8 a 6-Demonfire Skulltaker hits one target for less than a 6-Demonfire Flames of Xoroth hits each target. Neither tooltip states a per-stack number ('Deals increased damage per Demonfire consumed'). The official Ascension changelog record 66622 (2025-12-22, realm 4, archived api.ascension.gg/api/v3/article/changelog?realm_type=4&page=12) reads '[Knight of Xoroth] Skulltaker and Warbringer benefit from Demonfire reduced to 20/18% from 35/25% per stack', and the same patch lowered Skulltaker's base weapon percent by 5% (66632) and its rank 6 base damage (66631); no later archived record (through 2026-06-14) changes either. Flames of Xoroth's bonus is the client aura 704195 'Demonfire Hidden' effect 1: SPELL_AURA_ADD_PCT_MODIFIER, SPELLMOD_DAMAGE, +50 (BasePoints 49, DieSides 1) per stack on SpellFamily 23 class mask word1 0x2, which is exactly Flames of Xoroth's family flags; the sibling Hellstorm, Suffuse and Hellmaw tooltips quote their per-stack values from these Demonfire auras. The client Demonfire aura 500906 effect 1 still carries +100% for Skulltaker's mask (word1 0x1), a value that neither the pre-patch 35% nor the patched 20% matches, so it is not the live contract. Skulltaker rank 9 803900 (70% weapon damage plus 136) and Flames of Xoroth rank 1 801059 are both cast at 1 and at 6 Demonfire on the same level-80 golem, with the Dull Shortsword equipped, hit, expertise and crit ratings forcing every hit to land and crit, so weapon rolls, armor and crits cancel in the ratio. Expected ratios of the 6-stack to the 1-stack hit: Skulltaker (1+6*0.20)/(1+0.20) = 1.833 (35% would give 2.30, 100% 3.5); Flames of Xoroth (1+6*0.5)/(1+0.5) = 2.667. So at equal stacks Flames of Xoroth gains 4x per target against Skulltaker's 2.2x, which is what the report observed at level 8. #1402's numbers are the client's own: Skulltaker rank 2 802416 effect 0 SPELL_EFFECT_WEAPON_PERCENT_DAMAGE BasePoints 69 and effect 2 SPELL_EFFECT_NORMALIZED_WEAPON_DMG BasePoints 9 (DieSides 1: 70% plus 10), Warbringer rank 1 802581 effect 1 BasePoints 64 and effect 0 BasePoints 1 (65% plus 2); the server must apply them unchanged.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "melee_crit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "knight", "entry": 36, "level": 80, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 803900 },
+    { "action": "learn", "actor": "knight", "spell": 801059 },
+    { "action": "assert", "label": "SETUP: the knight knows Skulltaker rank 9", "actor": "knight", "metric": "knows_spell", "spell": 803900, "equals": 1 },
+    { "action": "assert", "label": "SETUP: the knight knows Flames of Xoroth rank 1", "actor": "knight", "metric": "knows_spell", "spell": 801059, "equals": 1 },
+    { "action": "assert", "label": "#1402: Skulltaker rank 2 deals 70% weapon damage (802416 effect 0)", "actor": "knight", "metric": "spell_effect_value", "spell": 802416, "effect": 0, "equals": 70 },
+    { "action": "assert", "label": "#1402: plus 10 (802416 effect 2)", "actor": "knight", "metric": "spell_effect_value", "spell": 802416, "effect": 2, "equals": 10 },
+    { "action": "assert", "label": "#1402: Warbringer rank 1 deals 65% weapon damage (802581 effect 1)", "actor": "knight", "metric": "spell_effect_value", "spell": 802581, "effect": 1, "equals": 65 },
+    { "action": "assert", "label": "#1402: plus 2 (802581 effect 0)", "actor": "knight", "metric": "spell_effect_value", "spell": 802581, "effect": 0, "equals": 2 },
+    { "action": "add_item", "actor": "knight", "item": 629951 },
+    { "action": "equip", "label": "Skulltaker requires a main-hand weapon", "actor": "knight", "item": 629951, "slot": 15 },
+    { "action": "wait", "ms": 500 },
+
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000 },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 1, "label": "Skulltaker requires and spends Demonfire" },
+    { "action": "cast", "label": "Warm-up Skulltaker so every measured hit meets the same target state", "actor": "knight", "spell": 803900, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: the warm-up Skulltaker hit", "actor": "knight", "metric": "spell_damage_count", "spell": 803900, "target": "dummy", "equals": 1, "within_ms": 2000 },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000 },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 1, "label": "One Demonfire" },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_damage_total", "spell": 803900, "target": "dummy", "save_as": "skulltaker_before_one" },
+    { "action": "cast", "label": "Skulltaker with 1 Demonfire", "actor": "knight", "spell": 803900, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: the 1-Demonfire Skulltaker hit", "actor": "knight", "metric": "spell_damage_count", "spell": 803900, "target": "dummy", "equals": 2, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: Skulltaker consumed the Demonfire", "actor": "knight", "metric": "aura_stacks", "spell": 500906, "equals": 0 },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_damage_total", "spell": 803900, "target": "dummy", "relative_to": "skulltaker_before_one", "save_as": "skulltaker_one" },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000 },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 6, "label": "Six Demonfire" },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_damage_total", "spell": 803900, "target": "dummy", "save_as": "skulltaker_before_six" },
+    { "action": "cast", "label": "Skulltaker with 6 Demonfire", "actor": "knight", "spell": 803900, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: the 6-Demonfire Skulltaker hit", "actor": "knight", "metric": "spell_damage_count", "spell": 803900, "target": "dummy", "equals": 3, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: every Skulltaker hit was a critical strike", "actor": "knight", "metric": "spell_damage_count", "spell": 803900, "target": "dummy", "critical": true, "equals": 3 },
+    {
+      "action": "assert", "label": "CONTRACT: 6 Demonfire give Skulltaker (1+6*0.20)/(1+0.20) = 1.833x the 1-Demonfire hit",
+      "actor": "knight", "metric": "spell_damage_total", "spell": 803900, "target": "dummy",
+      "relative_to": "skulltaker_before_six", "ratio_to": "skulltaker_one", "min": 1.75, "max": 1.92
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000, "label": "Flames of Xoroth costs 15 Rage" },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 1, "label": "One Demonfire" },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_damage_total", "spell": 801059, "target": "dummy", "save_as": "flames_before_one" },
+    { "action": "cast", "label": "Flames of Xoroth with 1 Demonfire", "actor": "knight", "spell": 801059, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: the 1-Demonfire Flames of Xoroth hit", "actor": "knight", "metric": "spell_damage_count", "spell": 801059, "target": "dummy", "equals": 1, "within_ms": 2000 },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_damage_total", "spell": 801059, "target": "dummy", "relative_to": "flames_before_one", "save_as": "flames_one" },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000 },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 6, "label": "Six Demonfire" },
+    { "action": "snapshot", "actor": "knight", "metric": "spell_damage_total", "spell": 801059, "target": "dummy", "save_as": "flames_before_six" },
+    { "action": "cast", "label": "Flames of Xoroth with 6 Demonfire", "actor": "knight", "spell": 801059, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: the 6-Demonfire Flames of Xoroth hit", "actor": "knight", "metric": "spell_damage_count", "spell": 801059, "target": "dummy", "equals": 2, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: both Flames of Xoroth hits were critical strikes", "actor": "knight", "metric": "spell_damage_count", "spell": 801059, "target": "dummy", "critical": true, "equals": 2 },
+    {
+      "action": "assert", "label": "CONTRACT: 6 Demonfire give Flames of Xoroth (1+6*0.5)/(1+0.5) = 2.667x the 1-Demonfire hit",
+      "actor": "knight", "metric": "spell_damage_total", "spell": 801059, "target": "dummy",
+      "relative_to": "flames_before_six", "ratio_to": "flames_one", "min": 2.55, "max": 2.78
+    }
+  ]
+}

@@ -1,0 +1,232 @@
+{
+  "schema": 1,
+  "name": "Finishing a level 60 Dungeon Finder dungeon rewards the Classic Random 56-60 completion (#6326)",
+  "contract": "At level 60 the Dungeon Finder offers Random Classic Dungeon (its maximum level is raised to the level cap). Finishing the final boss of the assigned level 60 dungeon, Blackrock Depths - Prison, pays every member the Classic Random 56-60 completion quest and its Adventurer's Cache.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p1",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "p2",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "p3",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "p4",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "p5",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p2"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p3"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p4"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p5"
+    },
+    {
+      "action": "lfg_dungeon",
+      "label": "The group is assigned Blackrock Depths - Prison",
+      "actor": "p1",
+      "dungeon": 30
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p1"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p2"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p3"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p4"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p5"
+    },
+    {
+      "action": "assert",
+      "label": "p1 enters Blackrock Depths",
+      "actor": "p1",
+      "metric": "map_id",
+      "equals": 230,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p2 enters Blackrock Depths",
+      "actor": "p2",
+      "metric": "map_id",
+      "equals": 230,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p3 enters Blackrock Depths",
+      "actor": "p3",
+      "metric": "map_id",
+      "equals": 230,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p4 enters Blackrock Depths",
+      "actor": "p4",
+      "metric": "map_id",
+      "equals": 230,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p5 enters Blackrock Depths",
+      "actor": "p5",
+      "metric": "map_id",
+      "equals": 230,
+      "within_ms": 15000
+    },
+    {
+      "action": "encounter_credit",
+      "label": "High Interrogator Gerstahn, final boss of Blackrock Depths - Prison, is credited",
+      "actor": "p1",
+      "entry": 9018
+    },
+    {
+      "action": "assert",
+      "label": "p1 is rewarded the Classic Random 56-60 quest",
+      "actor": "p1",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p2 is rewarded the Classic Random 56-60 quest",
+      "actor": "p2",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p3 is rewarded the Classic Random 56-60 quest",
+      "actor": "p3",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p4 is rewarded the Classic Random 56-60 quest",
+      "actor": "p4",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p5 is rewarded the Classic Random 56-60 quest",
+      "actor": "p5",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p1 holds the Adventurer's Cache from the completion",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 1397886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p2 holds the Adventurer's Cache from the completion",
+      "actor": "p2",
+      "metric": "item_count",
+      "item": 1397886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p3 holds the Adventurer's Cache from the completion",
+      "actor": "p3",
+      "metric": "item_count",
+      "item": 1397886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p4 holds the Adventurer's Cache from the completion",
+      "actor": "p4",
+      "metric": "item_count",
+      "item": 1397886,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p5 holds the Adventurer's Cache from the completion",
+      "actor": "p5",
+      "metric": "item_count",
+      "item": 1397886,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

@@ -28,6 +28,7 @@
 #include "SpellAuraEffects.h"
 #include "SpellMgr.h"
 #include <algorithm>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -365,6 +366,14 @@ bool SpellEffectInfo::IsEffect(SpellEffects effectName) const
 
 uint32 SpellEffectInfo::GetItemArmorSubclassMask() const
 {
+    if (_spellInfo && _spellInfo->SpellFamilyName == 37 &&
+        (_spellInfo->Id == 706161 || _spellInfo->Id == 707808))
+        return EffectIndex == EFFECT_2 && IsAura(SPELL_AURA_MOD_BASE_RESISTANCE_PCT) &&
+            MiscValue == SPELL_SCHOOL_MASK_NORMAL && MiscValueB == 24 ? 24 : 0;
+    if (_spellInfo && _spellInfo->SpellFamilyName == 36 &&
+        (_spellInfo->Id == 300560 || _spellInfo->Id == 301352))
+        return EffectIndex == EFFECT_0 && IsAura(SPELL_AURA_MOD_BASE_RESISTANCE_PCT) &&
+            MiscValue == SPELL_SCHOOL_MASK_NORMAL && MiscValueB == 24 ? 24 : 0;
     if (_spellInfo && _spellInfo->SpellFamilyName == 35 &&
         (_spellInfo->Id == 706955 || _spellInfo->Id == 707872))
         return EffectIndex == EFFECT_0 && IsAura(SPELL_AURA_MOD_BASE_RESISTANCE_PCT) &&
@@ -842,7 +851,7 @@ std::array<SpellEffectInfo::StaticData, TOTAL_SPELL_EFFECTS> SpellEffectInfo::_d
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 165 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 166 SPELL_EFFECT_ASCENSION_RESTORE_BASE_MANA_PCT
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 167 unknown Ascension effect
-    {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 168 unknown Ascension effect
+    {EFFECT_IMPLICIT_TARGET_CASTER,   TARGET_OBJECT_TYPE_UNIT}, // 168 SPELL_EFFECT_ASCENSION_PLAY_SPELL_VISUAL_KIT
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 169 SPELL_EFFECT_ASCENSION_SPREAD_AURA
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 170 SPELL_EFFECT_ASCENSION_SPREAD_AURA_2
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 171 unknown Ascension effect
@@ -890,8 +899,9 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry)
     AttributesEx6 = spellEntry->AttributesEx6;
     AttributesEx7 = spellEntry->AttributesEx7;
     AttributesCu = 0;
-    Stances = spellEntry->Stances;
-    StancesNot = spellEntry->StancesNot;
+    // Form masks are 64-bit in the client (forms 33-64 in the high words); CoA's own forms are numbered above 32.
+    Stances = uint64(spellEntry->Stances) | (uint64(spellEntry->StancesHigh) << 32);
+    StancesNot = uint64(spellEntry->StancesNot) | (uint64(spellEntry->StancesNotHigh) << 32);
     Targets = spellEntry->Targets;
     TargetCreatureType = spellEntry->TargetCreatureType;
     RequiresSpellFocus = spellEntry->RequiresSpellFocus;
@@ -1242,6 +1252,16 @@ bool SpellInfo::ComputeIsStackableWithRanks() const
     if (Id == AspectOfTheStarsRank1 || Id == AspectOfTheStarsRank2 || Id == AspectOfTheStarsRank3)
         return false;
 
+    // Runemaster tattoos are stance-bar spells whose ranks replace each other, like the Aspects above.
+    constexpr std::string_view RunicTattoos = "Runic Tattoos:";
+    if (SpellName[0] && std::string_view(SpellName[0]).starts_with(RunicTattoos))
+        return false;
+
+    // Pyromancer Ascensions (Executus, Ragnaros) are stance-bar spells whose ranks replace each other.
+    constexpr std::string_view Ascensions = "Ascension of ";
+    if (SpellName[0] && std::string_view(SpellName[0]).starts_with(Ascensions))
+        return false;
+
     if (IsPassive())
         return false;
     if (PowerType != POWER_MANA && PowerType != POWER_HEALTH)
@@ -1453,14 +1473,15 @@ uint8 SpellInfo::CalcMaxAuraStacks(Unit* caster) const
 
 namespace
 {
-    // Build once after DBC loading; avoid scanning the table on every modifier check.
+    // Ascension names the targets of a modifier without a class mask in SpellAffect.dbc; a negative target
+    // stands for every rank of the chain that starts with that spell.
     std::unordered_map<uint32, std::vector<int32>> const& SpellAffectTargets()
     {
         static std::unordered_map<uint32, std::vector<int32>> const targets = []
         {
             std::unordered_map<uint32, std::vector<int32>> byModifier;
             for (SpellAffectEntry const* entry : sSpellAffectStore)
-                byModifier[entry->ModifierSpellID].push_back(entry->AffectedSpellID);
+                byModifier[entry->ModifierSpellID].push_back(int32(entry->AffectedSpellID));
             return byModifier;
         }();
         return targets;
@@ -1481,8 +1502,21 @@ bool SpellInfo::IsAffectedBySpellMod(SpellModifier const* mod) const
         mod->spellId == 705780 && mod->op == SPELLMOD_JUMP_TARGETS && mod->type == SPELLMOD_FLAT &&
         mod->mask == flag96(128, 0, 0);
 
+    bool const windSurgeTargets = Id == 653226 && SpellFamilyName == 38 &&
+        mod->spellId == 805750 && mod->op == SPELLMOD_JUMP_TARGETS && mod->type == SPELLMOD_FLAT &&
+        mod->mask == flag96(0, 0x40000, 0);
+
+    bool const bloodFueledAbsorb = Id == 560361 && mod->spellId == 705416 && mod->op == SPELLMOD_EFFECT1 &&
+        mod->type == SPELLMOD_PCT;
+
+    // Spirit Eclipse's splash damage is snapshotted from its parent aura, so the splash ignores caster
+    // modifiers. Bwonsamdi's Edge names only the splash; the snapshot applies it explicitly.
+    bool const bwonsamdisEdgeSplash = Id == 802712 && mod->spellId == 712435 && mod->op == SPELLMOD_DAMAGE &&
+        mod->type == SPELLMOD_PCT;
+
     // xinef: dont check duration mod
-    if (mod->op != SPELLMOD_DURATION && !bandageGunTargets)
+    if (mod->op != SPELLMOD_DURATION && !bandageGunTargets && !windSurgeTargets &&
+        !bloodFueledAbsorb && !bwonsamdisEdgeSplash)
         if (!IsAffectedBySpellMods())
             return false;
 
@@ -1502,7 +1536,12 @@ bool SpellInfo::IsAffectedBySpellMod(SpellModifier const* mod) const
         switch (mod->spellId)
         {
             case 520682: case 520810: return Id == 520345;
-            case 680600: case 802047: return root == 805116 || root == 804152;
+            case 680600: return root == 805116 || root == 804152;
+            // Unlike 680600, this modifier's two effects are not interchangeable: effect 0
+            // (SPELLMOD_EFFECT1) carries only Hammer of Twilight's classmask, effect 1
+            // (SPELLMOD_EFFECT2) only Entropic Slam's. Route each op to its own root only,
+            // or the other op's SpellModifier instance also matches the wrong target spell.
+            case 802047: return mod->op == SPELLMOD_EFFECT1 ? root == 805116 : root == 804152;
             case 805115: return root == 500720 || root == 806222 || root == 805116;
             case 681102: case 681389: case 806768: return Id == 300277;
             default: break;
@@ -1564,7 +1603,9 @@ bool SpellInfo::IsAffectedBySpellMod(SpellModifier const* mod) const
         }
     }
 
-    return IsAffected(affectSpell->SpellFamilyName, mod->mask);
+    bool affected = IsAffected(affectSpell->SpellFamilyName, mod->mask);
+    sScriptMgr->OnSpellModFamilyMask(affectSpell, this, mod, affected);
+    return affected;
 }
 
 bool SpellInfo::CanPierceImmuneAura(SpellInfo const* auraSpellInfo) const
@@ -1657,7 +1698,7 @@ SpellCastResult SpellInfo::CheckShapeshift(uint32 form) const
             (Effects[0].Effect == SPELL_EFFECT_LEARN_SPELL || Effects[1].Effect == SPELL_EFFECT_LEARN_SPELL || Effects[2].Effect == SPELL_EFFECT_LEARN_SPELL))
         return SPELL_CAST_OK;
 
-    uint32 stanceMask = (form ? 1 << (form - 1) : 0);
+    uint64 stanceMask = (form ? uint64(1) << (form - 1) : 0);
 
     if (stanceMask & StancesNot)                 // can explicitly not be casted in this stance
         return SPELL_FAILED_NOT_SHAPESHIFT;
@@ -1896,7 +1937,7 @@ SpellCastResult SpellInfo::CheckTarget(Unit const* caster, WorldObject const* ta
             if (caster->IsPlayer())
             {
                 // Do not allow these spells to target creatures not tapped by us (Banish, Polymorph, many quest spells)
-                if (AttributesEx2 & SPELL_ATTR2_CANNOT_CAST_ON_TAPPED)
+                if ((AttributesEx2 & SPELL_ATTR2_CANNOT_CAST_ON_TAPPED) && !HasEffect(SPELL_EFFECT_SKINNING))
                     if (Creature const* targetCreature = unitTarget->ToCreature())
                         if (targetCreature->hasLootRecipient() && !targetCreature->isTappedBy(caster->ToPlayer()))
                             return SPELL_FAILED_CANT_CAST_ON_TAPPED;
@@ -2633,6 +2674,7 @@ void SpellInfo::_LoadImmunityInfo()
                     case 34471: // The Beast Within
                     case 19574: // Bestial Wrath
                     case 42292: // PvP trinket
+                    case 1142292: // PvP Trinket (Ascension)
                     case 46227: // Medallion of Immunity
                     case 59752: // Every Man for Himself
                     case 53490: // Bullheaded
@@ -2974,7 +3016,16 @@ uint32 SpellInfo::CalcCastTime(Unit* caster, Spell* spell) const
         return 0;
 
     int32 castTime = serpent ? 1000 : CastTimeEntry->CastTime;
-    if (HasAttribute(SPELL_ATTR0_USES_RANGED_SLOT) && (!IsAutoRepeatRangedSpell()))
+    // Ascension channels ranged-slot spells without a base cast time, such as Tinker's Gatling Gun, at once.
+    bool const artificersWand = SpellFamilyName == 28 && (Id == 561284 || (Id >= 561354 && Id <= 561357));
+    bool tinkerShot = false;
+    if (SpellFamilyName == 34)
+    {
+        uint32 const firstRank = GetFirstRankSpell()->Id;
+        tinkerShot = firstRank == 500549 || firstRank == 500235;
+    }
+    if (HasAttribute(SPELL_ATTR0_USES_RANGED_SLOT) && !artificersWand && !tinkerShot &&
+        (!IsAutoRepeatRangedSpell()) && (castTime || !IsChanneled()))
         castTime += 500;
 
     if (caster)
@@ -3054,9 +3105,11 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask, S
             case POWER_MANA:
                 powerCost += int32(CalculatePct(UsesMaxManaForCost ? caster->GetMaxPower(POWER_MANA) : caster->GetCreateMana(), ManaCostPercentage));
                 break;
+            case POWER_ENERGY:
+                powerCost += int32(CalculatePct(caster->GetCreatePowers(POWER_ENERGY), ManaCostPercentage));
+                break;
             case POWER_RAGE:
             case POWER_FOCUS:
-            case POWER_ENERGY:
             case POWER_HAPPINESS:
                 powerCost += int32(CalculatePct(caster->GetMaxPower(Powers(PowerType)), ManaCostPercentage));
                 break;

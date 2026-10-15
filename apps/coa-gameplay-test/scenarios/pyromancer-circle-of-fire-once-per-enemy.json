@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Circle of Fire hits each enemy once (#471)",
+  "contract": "#471: Circle of Fire 800807 is a 10 s PERSISTENT_AREA_AURA (radius 10 yd) with a 500 ms periodic trigger of 680842. 680842 deals fire damage, confuses and casts marker 681265 (10 s, 'Cannot be affected by Circle of Fire again.') after about 50 ms. Expected: an enemy kept inside the circle for its full 10 s takes exactly one hit of 680842. The investigator's static trace predicts about 20 hits on the current binary (ExcludeCasterAuraSpell is skipped for triggered casts and the marker sits on the enemy), so this scenario is expected to FAIL until fixed. Metric: spell_damage_count of 680842 on the enemy, counting positive damage events from the caster's combat packets. Assumption: the enemy stays inside the 10 yd circle despite the confusion (fixture creatures have passive reaction), and a cast targeted at the creature centers the circle on it.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "p",
+      "entry": 36,
+      "health": 10000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 800807
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 680842,
+      "target": "d",
+      "save_as": "hits0"
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 800807,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "First hit lands and marks the enemy",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 680842,
+      "target": "d",
+      "relative_to": "hits0",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Marker aura 681265 is on the enemy",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 681265,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Keep the enemy in the circle through its full 10 s",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "label": "Enemy was hit by 680842 exactly once over the circle's lifetime",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 680842,
+      "target": "d",
+      "relative_to": "hits0",
+      "equals": 1
+    }
+  ]
+}

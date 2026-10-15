@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "name": "Fleshbending shares critical strike chance with the party (#2209)",
+  "contract": "Fleshbending 680684 reads 'Your critical strikes now increase the critical strike chance of all party and raid members by $582766s1% for $582766d'. Its single effect is aura 42 (proc trigger spell) on Fleshbending 582766 (SPELL_EFFECT_APPLY_AREA_AURA_RAID, SPELL_AURA_MOD_CRIT_PCT, BasePoints 4 -> +5%, radius index 12, TargetA 1). The aura-42 effect's own BasePoints 49 is dead data: AuraEffect::HandleProcTriggerSpellAuraProc ignores the amount. Spell.dbc gives 680684 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and no party member ever received the buff. Bloodbolt is cast as rank 578305 (the rank a level-80 character owns; 578304 is only granted up to level 52 and gets no server response) and spell_crit_rating 100000 makes the critical strike deterministic instead of hoping for one.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 100000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "bloodmage",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 680684
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 578305
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Fleshbending passive is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 680684,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "No Fleshbending buff on the party member before the cast",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 582766,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 578305,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the party member gains Fleshbending 582766",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 582766,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Fleshbending grants the DBC value of +5% critical strike chance",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 582766,
+      "equals": 5
+    }
+  ]
+}

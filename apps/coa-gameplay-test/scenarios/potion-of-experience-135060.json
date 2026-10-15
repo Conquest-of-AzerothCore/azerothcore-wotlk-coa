@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Potion of Experience 135060 grants the experience buff (#4900)",
+  "contract": "Both Potion of Experience items, 135060 and 818046, cast Potion of Experience (818046) when used, which leaves the experience buff 818046 on the drinker and consumes the potion. Item 135060 must not cast Petrification (17624), the spell of the Potion of Petrification (13506) whose row it was copied from, and a level-1 character can drink it.",
+  "players": [
+    {
+      "id": "drinker",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    },
+    {
+      "id": "reference",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    }
+  ],
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "add_item", "actor": "drinker", "item": 135060 },
+    { "action": "add_item", "actor": "reference", "item": 818046 },
+    {
+      "action": "assert", "label": "no experience buff before drinking",
+      "actor": "drinker", "metric": "aura", "spell": 818046, "equals": 0
+    },
+    { "action": "use_item", "label": "drink item 135060", "actor": "drinker", "item": 135060, "spell": 818046 },
+    { "action": "use_item", "label": "drink item 818046", "actor": "reference", "item": 818046, "spell": 818046 },
+    {
+      "action": "assert", "label": "item 135060 grants the experience buff",
+      "actor": "drinker", "metric": "aura", "spell": 818046, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "item 135060 does not petrify",
+      "actor": "drinker", "metric": "aura", "spell": 17624, "equals": 0
+    },
+    {
+      "action": "assert", "label": "item 135060 is consumed",
+      "actor": "drinker", "metric": "item_count", "item": 135060, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "item 818046 grants the same buff",
+      "actor": "reference", "metric": "aura", "spell": 818046, "equals": 1, "within_ms": 3000
+    }
+  ]
+}

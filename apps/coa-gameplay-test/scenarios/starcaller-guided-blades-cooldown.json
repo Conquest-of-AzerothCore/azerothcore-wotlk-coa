@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "Guided Blades reduces Warden's Blade's cooldown by 5 sec (#1063)",
+  "contract": "Guided Blades 680738 (Spell.dbc, SpellFamilyName 32, passive) effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 11 (SPELLMOD_COOLDOWN), EffectBasePoints -5001 with DieSides 1 -> -5000 ms, EffectSpellClassMask word1 0x4000000. Warden's Blade ranks 1-6 (805508, 806812-806816) carry SpellFamilyFlags word1 0x4000000 and RecoveryTime 20000, so the mask selects every rank; the tooltip is 'Reduces the cooldown of Warden's Blade by 5 sec.'. The module never edits the cooldown (AscensionStarcallerAbilities.cpp only reads 805508 after the hit). Native consumer: Player::AddSpellAndCategoryCooldowns (Player.cpp:11452) calls ApplySpellMod(spellId, SPELLMOD_COOLDOWN, rec, spell) on the spell's RecoveryTime, which computes basevalue * totalmul + totalflat. The spell_modifier metric calls the same Player::ApplySpellMod for op 11 on the base value 20000 for spell 806816 (rank 6), so no cast, target or range is needed and no hit roll can interfere. Expected: 20000 on the control, 15000 (-5000) with the talent. A real cast is not used because Warden's Blade needs a hostile target inside 10 yards and its cooldown read would race the harness's miss rolls.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 680738
+    },
+    {
+      "action": "assert",
+      "label": "Learning the talent applies its passive aura",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 680738,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Warden's Blade rank 6 cooldown (20000 ms) without the talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "save_as": "cd_base",
+      "spell": 806816,
+      "op": 11,
+      "base": 20000
+    },
+    {
+      "action": "assert",
+      "label": "Control keeps the authored 20000 ms",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 806816,
+      "op": 11,
+      "base": 20000,
+      "equals": 20000
+    },
+    {
+      "action": "assert",
+      "label": "Guided Blades removes 5000 ms",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 806816,
+      "op": 11,
+      "base": 20000,
+      "relative_to": "cd_base",
+      "equals": -5000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 is covered by the same mask",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 805508,
+      "op": 11,
+      "base": 20000,
+      "equals": 15000
+    }
+  ]
+}

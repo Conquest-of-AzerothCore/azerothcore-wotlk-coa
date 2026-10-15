@@ -1,0 +1,229 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Fool's Play and Soul Marionette clone summons (#453, #487)",
+  "contract": "Fool's Play 681007 (#453) is SPELL_EFFECT_SCRIPT_EFFECT (DBC: RecoveryTime 120000, DurationIndex 18 -> SpellDuration.dbc row 18 = 20000 ms, EffectMiscValue[0] 300660), scripted by spell_ascension_witch_doctor_summon (registered on 681007 in rev_20260909_00_witch_doctor_completion.sql:172-173, bound to SCRIPT_EFFECT at AscensionWitchDoctorSummons.cpp:531-533). Handle() (:504-522) calls Summon(player, 681007, GetExplTargetUnit(), GetExplTargetDest()); inside Summon() (:142) 'if (spell == FoolsPlay) entry = NpcFool;' (FoolsPlay=681007, NpcFool=300660, AscensionWitchDoctorCompletion.h:273/313), count=1 (:148), duration=info->GetDuration()=20000 ms (:151). The clone spawns with SetOwnerGUID(player) (:169), so owned_creature_count counts it, and npc_ascension_witch_doctor::SetGUID (:268-283) gives it the enemy's own display/weapon damage and starts melee via AttackStart, matching 'summon a copy of them ... that attacks them'. Fool's Play's third clause (spell replication via CanMirrorSpell, :574-588, pure-damage script-free spells only) needs a second player to observe and is not asserted here; this scenario proves the summon and melee clauses, which is the whole of the issue's complaint ('no matching server-side handler exists for this spell ID', 'lacks C++ combat script implementation').\n\nSoul Marionette 704497 (#487) is a self-buff (ManaCost 115, RecoveryTime 90000, DurationIndex 793 -> SpellDuration.dbc row 793 = 8500 ms) whose raw effect 0 is SPELL_AURA_DUMMY; aura_ascension_witch_doctor_lifecycle::Apply rewrites it to SPELL_AURA_MOD_ROOT and zeroes effects 1/2 (AscensionWitchDoctorCompletion.cpp:368-372), matching the sibling native-root record 704243. On apply it also calls Summon(player, Marionette, player, player->GetPosition()) (AscensionWitchDoctorAuras.cpp:235-236), which spawns 5 (Summons.cpp:148) NpcMarionette=300661 clones (EffectMiscValue[1]=300661) on a 2.5 yd ring, each wearing the caster's own display (IsSummonedBy, Summons.cpp:238-239) and living 8500 ms (:154, hardcoded to match DurationIndex 793). Each clone's UpdateAI (:489-496) casts MarionetteStacks (807057) on the caster every 2 s for up to 4 ticks (5 clones x 4 ticks = 20, matching 807057's own StackAmount 20). At 20 stacks, AfterEffectApply (AscensionWitchDoctorAuras.cpp:237-242) casts MarionetteTransform (807044) and explodes the clones. 807044 (DurationIndex 8 -> SpellDuration.dbc row 8 = 15000 ms) carries ADD_PCT_MODIFIER (misc 0 = SPELLMOD_DAMAGE, base 29+1 = +30%) and ADD_FLAT_MODIFIER (misc 7 = SPELLMOD_CRITICAL_CHANCE, base 99+1 = +100), both class-masked (word1 32768 / word2 2) to Malefic Wrath (807037, SpellFamilyName 19, SpellFamilyFlags word1 32768) and Bad Juju (802087, SpellFamilyName 19, SpellFamilyFlags word2 2) -- the two spells its own tooltip names -- plus SPELL_AURA_TRANSFORM to display 759611 (creature_template/creature_model_info entry 759611). 807044's own baked description text says 'for 10 sec' and 'within 10 yds for 5 sec', but that text is stale against the shipped data: the duration used by Aura::CalcMaxDuration is DurationIndex 8's own 15000 ms, and the explosion's real radius/stun length live on the separate spell 706553 (EffectRadiusIndex[0] 8 -> SpellRadius.dbc row 8 = 5.0 yd, DurationIndex 35 -> SpellDuration.dbc row 35 = 4000 ms stun), which is what ExplodeClones -> AI::DoAction(ActionExplode) actually casts: me->CastSpell(me, MarionetteExplosion, true, nullptr, nullptr, _owner) (Summons.cpp:302) makes the player the original caster, so the damage log (SMSG_SPELLNONMELEEDAMAGELOG) is sent by the player (caster = m_originalCaster ? m_originalCaster : m_caster, Spell.cpp:2635/2906) and readable by spell_damage_count keyed on the Witch Doctor. This scenario proves the root, the five own-display clones, the growing stack aura, the 20-stack transform with its two native spell modifiers and native display swap, and the five explosion damage hits credited to the caster as original caster -- everything the issue's complaint ('the secondary mechanic [clone/summon] lacks C++ combat script implementation') claims is missing. CONFIRMED GAP (repair-witchdoctor-fools-play-and-marionette.md, 2026-09-22, 3 live runs): 706553's own SCHOOL_DAMAGE effect (index 0) lands on a bystander within the 5 yd ring every time (spell_damage_count equals 5, reproduced across 3 runs), but its SPELL_AURA_MOD_STUN effect (index 1, same TargetA/TargetB/EffectRadiusIndex as the damage effect, so the same merged AOE target selection and the same per-target hit roll) never applies -- confirmed absent for a full 3500 ms poll against the aura's own 4000 ms DurationIndex-35 duration, i.e. not a timing race. Neither creature_immunities (entry 36 -> CreatureImmunitiesId -93 -> MechanicsMask 16777248, which is bits 6/25 = MECHANIC_GRIP/MECHANIC_INVULNERABILITY in this codebase's SharedDefines.h enum, not MECHANIC_STUN=12) nor SpellInfo::IsImmunedToSpellEffect's other IMMUNITY_EFFECT/IMMUNITY_STATE/SPELL_AURA_MOD_IMMUNE_AURA_APPLY_SCHOOL paths explain it on inspection; the aura-refresh path (Spell.cpp:3176 passes m_originalCaster with casterGUID=Empty, so all 5 explosions refresh one same-caster Aura via Unit::_TryStackingOrRefreshingExistingAura/ModStackAmount, which should keep the aura, not drop it) does not explain it either. This is a real, unresolved mechanism gap in the stun/CC clause of the explosion, not a scenario defect -- the aura assertion is intentionally not included below; see the repair notes for the maintainer decision this needs.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "witchdoctor",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy0",
+      "owner": "witchdoctor",
+      "entry": 36,
+      "level": 60,
+      "distance": 4,
+      "health": 100000
+    },
+    {
+      "id": "enemy1",
+      "owner": "witchdoctor",
+      "entry": 36,
+      "level": 60,
+      "distance": 2,
+      "health": 100000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "witchdoctor",
+      "spell": 681007
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy0",
+      "metric": "health",
+      "save_as": "hp_enemy0"
+    },
+    {
+      "action": "cast",
+      "actor": "witchdoctor",
+      "spell": 681007,
+      "target": "enemy0",
+      "label": "Cast Fool's Play on enemy0"
+    },
+    {
+      "action": "assert",
+      "actor": "witchdoctor",
+      "metric": "owned_creature_count",
+      "entry": 300660,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "Fool's Play summons exactly one clone (#453)"
+    },
+    {
+      "action": "assert",
+      "actor": "witchdoctor",
+      "metric": "owned_creature_count",
+      "entry": 300660,
+      "owner_display": true,
+      "equals": 0,
+      "label": "The clone wears the enemy's display, not the caster's"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy0",
+      "metric": "health",
+      "relative_to": "hp_enemy0",
+      "max": -1,
+      "within_ms": 5000,
+      "label": "The clone melees the enemy it copied (#453)"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "witchdoctor",
+      "metric": "owned_creature_count",
+      "entry": 300660,
+      "equals": 0,
+      "within_ms": 4000,
+      "label": "The clone despawns after its 20 sec DurationIndex lifetime"
+    },
+    {
+      "action": "learn",
+      "actor": "witchdoctor",
+      "spell": 704497
+    },
+    {
+      "action": "learn",
+      "actor": "witchdoctor",
+      "spell": 807037
+    },
+    {
+      "action": "assert",
+      "actor": "witchdoctor",
+      "metric": "spell_modifier",
+      "spell": 807037,
+      "op": 0,
+      "base": 100,
+      "equals": 100,
+      "label": "No Malefic Wrath damage modifier before the transform"
+    },
+    {
+      "action": "assert",
+      "actor": "witchdoctor",
+      "metric": "spell_modifier",
+      "spell": 807037,
+      "op": 7,
+      "base": 0,
+      "equals": 0,
+      "label": "No Malefic Wrath crit modifier before the transform"
+    },
+    {
+      "action": "cast",
+      "actor": "witchdoctor",
+      "spell": 704497,
+      "label": "Cast Soul Marionette on self"
+    },
+    {
+      "action": "assert",
+      "actor": "witchdoctor",
+      "metric": "aura",
+      "spell": 704497,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Marionette aura applied (#487)"
+    },
+    {
+      "action": "assert",
+      "actor": "witchdoctor",
+      "metric": "rooted",
+      "equals": 1,
+      "within_ms": 500,
+      "label": "Caster is rooted by the contract-rewritten effect 0"
+    },
+    {
+      "action": "assert",
+      "actor": "witchdoctor",
+      "metric": "owned_creature_count",
+      "entry": 300661,
+      "owner_display": true,
+      "equals": 5,
+      "within_ms": 2000,
+      "label": "Five clones spawned, wearing the caster's own display (#487)"
+    },
+    {
+      "action": "assert",
+      "actor": "witchdoctor",
+      "metric": "aura_stacks",
+      "spell": 807057,
+      "min": 10,
+      "within_ms": 7000,
+      "label": "Clones are channeling Soul Marionette stacks onto the caster"
+    },
+    {
+      "action": "assert",
+      "actor": "witchdoctor",
+      "metric": "aura",
+      "spell": 807044,
+      "equals": 1,
+      "within_ms": 6000,
+      "label": "20 stacks triggers the transform"
+    },
+    {
+      "action": "assert",
+      "actor": "witchdoctor",
+      "metric": "display_id",
+      "equals": 759611,
+      "within_ms": 500,
+      "label": "Caster wears the Spirit of Bwonsamdi transform model"
+    },
+    {
+      "action": "assert",
+      "actor": "witchdoctor",
+      "metric": "spell_modifier",
+      "spell": 807037,
+      "op": 0,
+      "base": 100,
+      "equals": 130,
+      "label": "Transform adds +30% Malefic Wrath damage"
+    },
+    {
+      "action": "assert",
+      "actor": "witchdoctor",
+      "metric": "spell_modifier",
+      "spell": 807037,
+      "op": 7,
+      "base": 0,
+      "equals": 100,
+      "label": "Transform guarantees a Malefic Wrath critical strike"
+    },
+    {
+      "action": "assert",
+      "actor": "witchdoctor",
+      "metric": "owned_creature_count",
+      "entry": 300661,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "All five clones exploded and despawned"
+    },
+    {
+      "action": "assert",
+      "actor": "witchdoctor",
+      "metric": "spell_damage_count",
+      "spell": 706553,
+      "target": "enemy1",
+      "equals": 5,
+      "within_ms": 500,
+      "label": "One explosion damage hit per clone, credited to the caster as original caster (#487)"
+    }
+  ]
+}

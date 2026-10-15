@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "name": "Coagulation dispels one bleed and only while Blood Shield is up (#587)",
+  "contract": "Spell.dbc gives Coagulation 706258 Attributes 0x800001C0 (SPELL_ATTR0_PASSIVE), DurationIndex 21 (infinite) and effect 0 = aura 23 (SPELL_AURA_PERIODIC_TRIGGER_SPELL) at Amplitude 5000 triggering 504102, whose single effect is 108 (SPELL_EFFECT_DISPEL_MECHANIC) with MiscValue 15 (MECHANIC_BLEED) and TargetA 1 (TARGET_UNIT_CASTER). Its tooltip is 'Your Blood Shield now also dispels 1 bleed effect from you every 5 sec'. Two things had no implementation: Spell::EffectDispelMechanic stops after the first match only when the effect's raw EffectBasePoints are exactly 1 and Spell.dbc ships 0, so every bleed was removed at once; and nothing bound the tick to Blood Shield 504296, the only family-26 spell of that name in Spell.dbc, self-cast and granted to class 20 at level 4. Which bleed survives is deterministic: Unit::GetOwnedAuras is a flat_multimap keyed by spell id, so EffectDispelMechanic reaches the lowest id first and stops there. The two bleed fixtures are QA Test 3x Bleed stacks 0 damage 10044 (Mechanic 15, DurationIndex 5 = 300000 ms) and Shanked! 13318 (Mechanic 15, DurationIndex 9 = 30000 ms), so 10044 is the one that must come off. Aura::CalcDispelChance returns 100 here: the dispel is self-targeted, so it is not offensive and no dispel-resistance modifier applies.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling and login settle", "ms": 5000 },
+    { "action": "learn", "actor": "bloodmage", "spell": 706258 },
+    { "action": "learn", "actor": "bloodmage", "spell": 504296 },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 10044, "stacks": 1 },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 13318, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "Both bleed fixtures landed",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 10044,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Both bleed fixtures landed",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 13318,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Fixture precondition: Blood Shield is not up",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 504296,
+      "equals": 0
+    },
+    { "action": "wait", "label": "Two Coagulation ticks would land here", "ms": 11000 },
+    {
+      "action": "assert",
+      "label": "Without Blood Shield the first bleed survives",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 10044,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Without Blood Shield the second bleed survives",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 13318,
+      "equals": 1
+    },
+    { "action": "cast", "actor": "bloodmage", "spell": 504296 },
+    {
+      "action": "assert",
+      "label": "Blood Shield is up",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 504296,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 10044, "stacks": 1 },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 13318, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "With Blood Shield the lowest-id bleed is dispelled",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 10044,
+      "equals": 0,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "Only one bleed comes off: the second one is still there",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 13318,
+      "equals": 1
+    }
+  ]
+}

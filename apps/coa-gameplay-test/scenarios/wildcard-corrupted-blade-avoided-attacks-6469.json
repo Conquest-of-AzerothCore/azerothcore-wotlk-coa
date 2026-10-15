@@ -1,0 +1,571 @@
+{
+  "schema": 1,
+  "name": "Corrupted Blade spreads only after a landed blade attack (#6469, PR #6790 P2)",
+  "contract": [
+    "Corrupted Blade 281492 spreads owned Corruption from the struck target through helper 281493. A failed hit",
+    "has no struck target. Submit ordinary Sinister Strike 1752 and Gloomblade 760050 to a hostile player facing",
+    "the attacker with native 100-percent dodge 10020, parry 10019, and school immunity 1022 plus 6356. The",
+    "attacker has hit rating but no expertise. Observe completed native spell-go packets and zero direct damage",
+    "before requiring the nearby enemy to remain uncorrupted. Reapply owned Corruption before each defense, and",
+    "prove the immunity auras retain it. The separate native-spread scenario supplies landed attacks, ownership,",
+    "amount, duration and range controls. This fixture proves combat behavior, not roll acquisition or client",
+    "rendering."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "defender",
+      "race": 2,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "near",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 9,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "pvp",
+      "actor": "hero",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "defender",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "set_health",
+      "actor": "defender",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "teleport",
+      "actor": "defender",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159
+    },
+    {
+      "action": "set_skill",
+      "label": "Use level-appropriate defense for deterministic avoidance",
+      "actor": "defender",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 1752
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 760050
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 172
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 281492
+    },
+    {
+      "action": "set_skill",
+      "actor": "hero",
+      "skill": 173,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 2092,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Corrupted Blade is active",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 281492,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the attacker has no expertise to suppress avoidance",
+      "actor": "hero",
+      "metric": "expertise",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the recipient is within ten yards of the source",
+      "actor": "defender",
+      "metric": "distance",
+      "target": "near",
+      "min": 1,
+      "max": 9
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 172,
+      "target": "defender"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "defender",
+      "spell": 10020,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: dodge chance exceeds 100 percent",
+      "actor": "defender",
+      "metric": "dodge_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: dodge retains the owned source Corruption",
+      "actor": "defender",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the recipient has no Corruption before dodge",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "defender"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Sinister Strike completed against dodge",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 1752,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: dodge prevents Sinister Strike damage",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 1752,
+      "target": "defender",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Sinister Strike cannot spread Corruption through dodge",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 760050,
+      "target": "defender"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Gloomblade completed against dodge",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 760050,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: dodge prevents Gloomblade damage",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 760050,
+      "target": "defender",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Gloomblade cannot spread Corruption through dodge",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "defender",
+      "spell": 10020,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 172,
+      "target": "defender"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "defender",
+      "spell": 10019,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: parry chance exceeds 100 percent",
+      "actor": "defender",
+      "metric": "parry_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: parry retains the owned source Corruption",
+      "actor": "defender",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the recipient has no Corruption before parry",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "defender"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Sinister Strike completed against parry",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 1752,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: parry prevents Sinister Strike damage",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 1752,
+      "target": "defender",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Sinister Strike cannot spread Corruption through parry",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 760050,
+      "target": "defender"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Gloomblade completed against parry",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 760050,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: parry prevents Gloomblade damage",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 760050,
+      "target": "defender",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Gloomblade cannot spread Corruption through parry",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "defender",
+      "spell": 10019,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 172,
+      "target": "defender"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "defender",
+      "spell": 1022,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "defender",
+      "spell": 6356,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: spell 1752 is immune",
+      "actor": "defender",
+      "metric": "spell_immune",
+      "spell": 1752,
+      "target": "hero",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: spell 760050 is immune",
+      "actor": "defender",
+      "metric": "spell_immune",
+      "spell": 760050,
+      "target": "hero",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: immunity retains the owned source Corruption",
+      "actor": "defender",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the recipient has no Corruption before immunity",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "defender"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Sinister Strike completed against immunity",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 1752,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: immunity prevents Sinister Strike damage",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 1752,
+      "target": "defender",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Sinister Strike cannot spread Corruption through immunity",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 760050,
+      "target": "defender"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Gloomblade completed against immunity",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 760050,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: immunity prevents Gloomblade damage",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 760050,
+      "target": "defender",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Gloomblade cannot spread Corruption through immunity",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "defender",
+      "spell": 1022,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "defender",
+      "spell": 6356,
+      "stacks": 0
+    }
+  ]
+}

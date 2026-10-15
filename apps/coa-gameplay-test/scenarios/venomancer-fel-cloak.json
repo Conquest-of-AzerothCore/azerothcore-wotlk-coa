@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Fel Cloak purges harmful magic and grants magic immunity (#3469)",
+  "contract": "#3469. Fel Cloak 804988 (Spell.dbc, family 25): effect 0 is aura 39 SCHOOL_IMMUNITY with misc 126 (holy, fire, nature, frost, shadow, arcane), AttributesEx1 0x8000 (IMMUNITY_PURGES_EFFECT). AuraEffect::HandleAuraModSchoolImmunity (SpellAuraEffects.cpp:4093) removes every non-passive, non-positive aura of a covered school on apply. Asserted with a shadow curse (702) and a nature debuff (770) placed on the player through set_aura, removed by a real cast, and with spell_immune before/after against a hostile dummy. Only magic schools are asserted: physical harmful auras (bleeds, stuns) are outside misc 126 and are left alone by the native path, which is recorded in the audit observations, not asserted here. Fel Cloak costs Energy (power 3, 25). Generic core machinery: a regression guard for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "f",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "f",
+      "entry": 36,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "f",
+      "spell": 804988
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the shadow curse is not blocked before the cloak",
+      "actor": "f",
+      "metric": "spell_immune",
+      "spell": 702,
+      "target": "d",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the nature debuff is not blocked before the cloak",
+      "actor": "f",
+      "metric": "spell_immune",
+      "spell": 770,
+      "target": "d",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "f",
+      "spell": 702,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "f",
+      "spell": 770,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: shadow curse (Curse of Weakness) is on the player",
+      "actor": "f",
+      "metric": "aura",
+      "spell": 702,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: nature debuff (Faerie Fire) is on the player",
+      "actor": "f",
+      "metric": "aura",
+      "spell": 770,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "f",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: enough Energy for Fel Cloak",
+      "actor": "f",
+      "metric": "power",
+      "power": 3,
+      "min": 25
+    },
+    {
+      "action": "cast",
+      "actor": "f",
+      "spell": 804988
+    },
+    {
+      "action": "assert",
+      "label": "Fel Cloak is up",
+      "actor": "f",
+      "metric": "aura",
+      "spell": 804988,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Fel Cloak dispelled the shadow curse",
+      "actor": "f",
+      "metric": "aura",
+      "spell": 702,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Fel Cloak dispelled the nature debuff",
+      "actor": "f",
+      "metric": "aura",
+      "spell": 770,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Fel Cloak now blocks the shadow curse",
+      "actor": "f",
+      "metric": "spell_immune",
+      "spell": 702,
+      "target": "d",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Fel Cloak now blocks the nature debuff",
+      "actor": "f",
+      "metric": "spell_immune",
+      "spell": 770,
+      "target": "d",
+      "equals": 1
+    }
+  ]
+}

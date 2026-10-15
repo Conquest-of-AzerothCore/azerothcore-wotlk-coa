@@ -1,16 +1,4 @@
 #!/usr/bin/env python3
-"""
-Socket Stress Test for AzerothCore
-Tests authserver and worldserver connection handling under heavy load.
-
-Usage:
-    python3 socket_stress_heavy.py [duration_seconds] [auth_threads] [world_threads]
-
-Defaults:
-    duration: 300 seconds (5 minutes)
-    auth_threads: 100
-    world_threads: 150
-"""
 
 import socket
 import time
@@ -26,7 +14,6 @@ running = True
 
 
 def stress_auth():
-    """Flood authserver with login challenge packets."""
     global stats
     while running:
         try:
@@ -34,21 +21,20 @@ def stress_auth():
             s.settimeout(1)
             s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
             s.connect((HOST, AUTH_PORT))
-            # AUTH_LOGON_CHALLENGE packet
             packet = bytes([
-                0x00,  # cmd: AUTH_LOGON_CHALLENGE
-                0x00,  # error
-                0x24, 0x00,  # size (36)
-                0x57, 0x6F, 0x57, 0x00,  # 'WoW\0'
-                0x03, 0x03, 0x05,  # version 3.3.5
-                0x30, 0x30,  # build 12340
-                0x78, 0x38, 0x36, 0x00,  # 'x86\0'
-                0x6E, 0x69, 0x57, 0x00,  # 'niW\0' (Win reversed)
-                0x53, 0x55, 0x6E, 0x65,  # 'SUne' (enUS reversed)
-                0x3C, 0x00, 0x00, 0x00,  # timezone
-                0x7F, 0x00, 0x00, 0x01,  # IP 127.0.0.1
-                0x04,  # account name length
-                0x54, 0x45, 0x53, 0x54  # 'TEST'
+                0x00,
+                0x00,
+                0x24, 0x00,
+                0x57, 0x6F, 0x57, 0x00,
+                0x03, 0x03, 0x05,
+                0x30, 0x30,
+                0x78, 0x38, 0x36, 0x00,
+                0x6E, 0x69, 0x57, 0x00,
+                0x53, 0x55, 0x6E, 0x65,
+                0x3C, 0x00, 0x00, 0x00,
+                0x7F, 0x00, 0x00, 0x01,
+                0x04,
+                0x54, 0x45, 0x53, 0x54
             ])
             s.sendall(packet)
             s.close()
@@ -58,7 +44,6 @@ def stress_auth():
 
 
 def stress_world():
-    """Flood worldserver with connection attempts."""
     global stats
     while running:
         try:
@@ -66,7 +51,6 @@ def stress_world():
             s.settimeout(1)
             s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
             s.connect((HOST, WORLD_PORT))
-            # Wait for SMSG_AUTH_CHALLENGE
             s.recv(64)
             s.close()
             stats['world_ok'] += 1
@@ -77,7 +61,6 @@ def stress_world():
 def main():
     global running
 
-    # Parse arguments
     duration = int(sys.argv[1]) if len(sys.argv) > 1 else 300
     auth_threads = int(sys.argv[2]) if len(sys.argv) > 2 else 100
     world_threads = int(sys.argv[3]) if len(sys.argv) > 3 else 150

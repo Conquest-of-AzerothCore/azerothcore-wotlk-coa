@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "name": "Phoenix Egg supplies a following controllable pet with an empty ability bar (#5796)",
+  "contract": [
+    "Original Phoenix Egg800796 summons50258 as SUMMON_CATEGORY_PET. The report requires a following pet with no abilities. Observe its native controllable pet slot, movement toward its owner, and zero nonempty spell entries in CharmInfo; command/reaction buttons are excluded.",
+    "A normally built original Clockwork Assistant60070 is a positive control for the same bar-count observation, with its native SkillLineAbility spells learned by its pet AI. No expected pet aura or spell bar is injected. Rendered client UI remains outside this headless test."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    },
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 803436
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 803436
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "pet_entry",
+      "equals": 60070,
+      "within_ms": 9000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "pet_spell_bar_count",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800796
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800796,
+      "destination": {
+        "x": -8907.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "owned_creature_count",
+      "entry": 50258,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "pet_entry",
+      "equals": 50258,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "pet_distance",
+      "min": 6
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "pet_spell_bar_count",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "pet_distance",
+      "max": 5,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "pet_spell_bar_count",
+      "equals": 0
+    }
+  ]
+}

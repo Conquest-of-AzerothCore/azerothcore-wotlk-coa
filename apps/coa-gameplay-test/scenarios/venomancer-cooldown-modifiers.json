@@ -1,0 +1,124 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Improved Harden and Shedder reduce cooldowns (#2911, #2923)",
+  "contract": "#2911 and #2923: Improved Harden (705971/705972) is a flat SPELLMOD_COOLDOWN (11) of -20000/-40000 ms on family 35 word0 0x40000 = Harden (800892, RecoveryTime 180000). Shedder (705990) is a PCT SPELLMOD_COOLDOWN of -20% on word2 0x4 = every Expulsion rank (CategoryRecoveryTime 10000; Player::AddSpellAndCategoryCooldowns applies the modifier to the category cooldown). Native modifier queries only; no cast is submitted. Barbed Stinger (803196) and Regrow Exoskeleton (803197) also clear Exposed Flesh but are outside Shedder's mask (asserted unchanged so the current data is pinned).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "v",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Harden cooldown is 180 s without Improved Harden",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 800892,
+      "op": 11,
+      "base": 180000,
+      "equals": 180000
+    },
+    {
+      "action": "assert",
+      "label": "Expulsion cooldown is 10 s without Shedder",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 805094,
+      "op": 11,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 705971
+    },
+    {
+      "action": "assert",
+      "label": "Improved Harden rank 1 gives a 160 s Harden cooldown",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 800892,
+      "op": 11,
+      "base": 180000,
+      "equals": 160000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 705972
+    },
+    {
+      "action": "assert",
+      "label": "Improved Harden rank 2 gives a 140 s Harden cooldown",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 800892,
+      "op": 11,
+      "base": 180000,
+      "equals": 140000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 705990
+    },
+    {
+      "action": "assert",
+      "label": "Shedder gives an 8 s Expulsion cooldown",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 805094,
+      "op": 11,
+      "base": 10000,
+      "min": 7999.9,
+      "max": 8000.1
+    },
+    {
+      "action": "assert",
+      "label": "Shedder reaches the top Expulsion rank",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 807599,
+      "op": 11,
+      "base": 10000,
+      "min": 7999.9,
+      "max": 8000.1
+    },
+    {
+      "action": "assert",
+      "label": "Shedder does not change Barbed Stinger's cooldown",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803196,
+      "op": 11,
+      "base": 20000,
+      "equals": 20000
+    },
+    {
+      "action": "assert",
+      "label": "Shedder does not change Regrow Exoskeleton's cooldown",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803197,
+      "op": 11,
+      "base": 60000,
+      "equals": 60000
+    }
+  ]
+}

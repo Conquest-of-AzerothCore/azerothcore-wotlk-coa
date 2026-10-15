@@ -21,13 +21,18 @@
 
 enum Spells
 {
-    SPELL_WAR_STOMP = 16727,
-    SPELL_HATCH_EGG = 15746
+    // Ascension's kit (db.exil.es/npc/10264), which records no timers
+    SPELL_THUNDER_CLAP = 2102619,
+    SPELL_UPPERCUT     = 2102513,
+    SPELL_FIERCE_BLOW  = 975011,
+    SPELL_HATCH_EGG    = 15746
 };
 
-enum Timer
+enum SolakarEvents
 {
-    TIMER_WAR_STOMP = 20000
+    EVENT_THUNDER_CLAP = 1,
+    EVENT_UPPERCUT     = 2,
+    EVENT_FIERCE_BLOW  = 3
 };
 
 constexpr float RANGE_SPELL_HATCH_EGG = 3.0f; // needed because the eggs seem to hatch if the mobs goes too close
@@ -158,7 +163,9 @@ struct boss_solakar_flamewreath : public BossAI
     void JustEngagedWith(Unit* /*who*/) override
     {
         _JustEngagedWith();
-        events.ScheduleEvent(SPELL_WAR_STOMP, 17s, 20s);
+        events.ScheduleEvent(EVENT_THUNDER_CLAP, 8s, 10s);
+        events.ScheduleEvent(EVENT_UPPERCUT, 10s, 14s);
+        events.ScheduleEvent(EVENT_FIERCE_BLOW, 5s, 7s);
         resetTimer = 0;
     }
 
@@ -172,11 +179,18 @@ struct boss_solakar_flamewreath : public BossAI
     {
         switch (eventId)
         {
-            case SPELL_WAR_STOMP:
-                DoCastVictim(SPELL_WAR_STOMP);
-                events.ScheduleEvent(SPELL_WAR_STOMP, 17s, 20s);
+            case EVENT_THUNDER_CLAP:
+                DoCastAOE(SPELL_THUNDER_CLAP);
+                events.ScheduleEvent(EVENT_THUNDER_CLAP, 15s, 20s);
                 break;
-
+            case EVENT_UPPERCUT:
+                DoCastVictim(SPELL_UPPERCUT);
+                events.ScheduleEvent(EVENT_UPPERCUT, 10s, 14s);
+                break;
+            case EVENT_FIERCE_BLOW:
+                DoCastVictim(SPELL_FIERCE_BLOW);
+                events.ScheduleEvent(EVENT_FIERCE_BLOW, 6s, 8s);
+                break;
             default:
                 break;
         }
@@ -202,6 +216,8 @@ struct boss_solakar_flamewreath : public BossAI
         while (uint32 eventId = events.ExecuteEvent())
         {
             ExecuteEvent(eventId);
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
         }
 
         DoMeleeAttackIfReady();

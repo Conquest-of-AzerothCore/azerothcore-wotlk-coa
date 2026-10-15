@@ -1,0 +1,1108 @@
+{
+  "schema": 1,
+  "name": "Primalist Nature's Will: four-second Earthshaping extension per Seismic cast",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "enemy",
+      "race": 5,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "pvp",
+      "actor": "primalist",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9612.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 95
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 582532
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 681114
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 503264
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 572878
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 300693
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 807432
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 803138
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7000
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "baseline_582532_b680441",
+      "label": "baseline_582532_b680441",
+      "spell": 680441
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 5697,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 5697,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "baseline_582532_b5697",
+      "label": "baseline_582532_b5697",
+      "spell": 5697
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "baseline_582532_hits",
+      "label": "baseline_582532_hits",
+      "spell": 582532,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 582532,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "target": "enemy",
+      "relative_to": "baseline_582532_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "baseline_582532_d680441",
+      "label": "baseline_582532_d680441",
+      "spell": 680441,
+      "relative_to": "baseline_582532_b680441"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "baseline_582532_d5697",
+      "label": "baseline_582532_d5697",
+      "spell": 5697,
+      "relative_to": "baseline_582532_b5697"
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 560140
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7000
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_582532_b680441",
+      "label": "talented_582532_b680441",
+      "spell": 680441
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 5697,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 5697,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_582532_b5697",
+      "label": "talented_582532_b5697",
+      "spell": 5697
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_582532_hits",
+      "label": "talented_582532_hits",
+      "spell": 582532,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 582532,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "target": "enemy",
+      "relative_to": "talented_582532_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_582532_d680441",
+      "label": "talented_582532_d680441",
+      "spell": 680441,
+      "relative_to": "talented_582532_b680441"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_582532_d5697",
+      "label": "talented_582532_d5697",
+      "spell": 5697,
+      "relative_to": "talented_582532_b5697"
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7000
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_681114_b680441",
+      "label": "talented_681114_b680441",
+      "spell": 680441
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 5697,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 5697,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_681114_b5697",
+      "label": "talented_681114_b5697",
+      "spell": 5697
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_681114_hits",
+      "label": "talented_681114_hits",
+      "spell": 681114,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681114,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 681114,
+      "target": "enemy",
+      "relative_to": "talented_681114_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_681114_d680441",
+      "label": "talented_681114_d680441",
+      "spell": 680441,
+      "relative_to": "talented_681114_b680441"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_681114_d5697",
+      "label": "talented_681114_d5697",
+      "spell": 5697,
+      "relative_to": "talented_681114_b5697"
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7000
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_503264_b680441",
+      "label": "talented_503264_b680441",
+      "spell": 680441
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 5697,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 5697,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_503264_b5697",
+      "label": "talented_503264_b5697",
+      "spell": 5697
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_503264_hits",
+      "label": "talented_503264_hits",
+      "spell": 503264,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 503264,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "target": "enemy",
+      "relative_to": "talented_503264_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_503264_d680441",
+      "label": "talented_503264_d680441",
+      "spell": 680441,
+      "relative_to": "talented_503264_b680441"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_503264_d5697",
+      "label": "talented_503264_d5697",
+      "spell": 5697,
+      "relative_to": "talented_503264_b5697"
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7000
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_572878_b680441",
+      "label": "talented_572878_b680441",
+      "spell": 680441
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 5697,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 5697,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_572878_b5697",
+      "label": "talented_572878_b5697",
+      "spell": 5697
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "save_as": "talented_572878_heals",
+      "label": "talented_572878_heals",
+      "spell": 572878,
+      "target": "primalist"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 572878
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 572878,
+      "target": "primalist",
+      "relative_to": "talented_572878_heals",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_572878_d680441",
+      "label": "talented_572878_d680441",
+      "spell": 680441,
+      "relative_to": "talented_572878_b680441"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_572878_d5697",
+      "label": "talented_572878_d5697",
+      "spell": 5697,
+      "relative_to": "talented_572878_b5697"
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7000
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_300693_b680441",
+      "label": "talented_300693_b680441",
+      "spell": 680441
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 5697,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 5697,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_300693_b5697",
+      "label": "talented_300693_b5697",
+      "spell": 5697
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_300693_hits",
+      "label": "talented_300693_hits",
+      "spell": 300693,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_hit_chance",
+      "min": 100,
+      "within_ms": 1000,
+      "label": "The physical Seismic Smash fixture has native melee hit ready"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 300693
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 300693,
+      "target": "enemy",
+      "relative_to": "talented_300693_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_300693_d680441",
+      "label": "talented_300693_d680441",
+      "spell": 680441,
+      "relative_to": "talented_300693_b680441"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_300693_d5697",
+      "label": "talented_300693_d5697",
+      "spell": 5697,
+      "relative_to": "talented_300693_b5697"
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7000
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_807432_b680441",
+      "label": "talented_807432_b680441",
+      "spell": 680441
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 5697,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 5697,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_807432_b5697",
+      "label": "talented_807432_b5697",
+      "spell": 5697
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 807432,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 807432,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_807432_d680441",
+      "label": "talented_807432_d680441",
+      "spell": 680441,
+      "relative_to": "talented_807432_b680441"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_807432_d5697",
+      "label": "talented_807432_d5697",
+      "spell": 5697,
+      "relative_to": "talented_807432_b5697"
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7000
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_803138_b680441",
+      "label": "talented_803138_b680441",
+      "spell": 680441
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 5697,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 5697,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_803138_b5697",
+      "label": "talented_803138_b5697",
+      "spell": 5697
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "talented_803138_hits",
+      "label": "talented_803138_hits",
+      "spell": 803138,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "enemy",
+      "relative_to": "talented_803138_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_803138_d680441",
+      "label": "talented_803138_d680441",
+      "spell": 680441,
+      "relative_to": "talented_803138_b680441"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "talented_803138_d5697",
+      "label": "talented_803138_d5697",
+      "spell": 5697,
+      "relative_to": "talented_803138_b5697"
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 560140
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 7000
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "removed_582532_b680441",
+      "label": "removed_582532_b680441",
+      "spell": 680441
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 5697,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 5697,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "removed_582532_b5697",
+      "label": "removed_582532_b5697",
+      "spell": 5697
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "save_as": "removed_582532_hits",
+      "label": "removed_582532_hits",
+      "spell": 582532,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 582532,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 582532,
+      "target": "enemy",
+      "relative_to": "removed_582532_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "removed_582532_d680441",
+      "label": "removed_582532_d680441",
+      "spell": 680441,
+      "relative_to": "removed_582532_b680441"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "save_as": "removed_582532_d5697",
+      "label": "removed_582532_d5697",
+      "spell": 5697,
+      "relative_to": "removed_582532_b5697"
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    }
+  ],
+  "contract": [
+    "Each completed Seismic Spike, Tremor, Crash, Wave, Smash or Grasp extends Earthshaping once by four",
+    "seconds. A same-actor timer removes elapsed-time drift; baseline, unlearning and unrelated Geode casts",
+    "do not extend it."
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Guardian Standard of Recovery heals the amount its buff advertises, including Strength scaling (#6604)",
+  "contract": "Standard of Recovery 500260 summons creature 50053, which casts 500266 on itself: an APPLY_AREA_AURA_FRIEND whose effect 0 is aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL with EffectBasePoints 79 (amount 80) and Amplitude 3000, triggering the direct heal 500248. The buff's own aura tooltip (Spell.dbc column 187) is the client-visible contract and reads 'A nearby Standard of Recovery is causing you to regenerate ${$w1+$STR*.25} health every $t1 sec', i.e. the aura's own effect amount plus 0.25 x the owner's Strength. Effect 1 is the '+$s2% healing received' half, aura 319 with BasePoints 5. The tick is script-driven: aura_ascension_guardian_recovery::Tick prevents the native trigger and re-casts 500248 with an explicit amount. The bug (#6604, level 30, core 4666cd9941c0) is that the script built that amount from the triggered spell 500248's own EffectBasePoints (79 -> base 2), not from the standard aura's effect amount (80): at the reporter's 124 Strength the buff advertised 80 + 31 = 111 health but the tick healed 2 + 31 = 33. This scenario pins the contract at level 1, where the Strength term is at most a few points, so the ratio of one tick's effective healing to the aura's own advertised amount is 1 for a correct tick and ~0.03 for the defect. The heal target's health is fixtured low with a large pool so nothing is overhealed. The three inputs of that cast text's own formula are asserted exactly here, so the published text cannot drift from the spell it describes: the aura's effect 0 amount, which is the value the client renders as $500266m1, must read 80; the owner's Strength, which is its $STR term, must read 27; and one tick must land at (80 + floor(0.25 x 27)) x the buff's own +6% healing received = 91, i.e. 1.1375 of that advertised 80.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "players": [
+    { "id": "g", "race": 1, "class": 18, "level": 1, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "g", "spell": 500260 },
+    {
+      "action": "assert", "label": "SETUP: the starter Hearthstone satisfies 500260's TotemCategory 5",
+      "actor": "g", "metric": "item_count", "item": 6948, "equals": 1
+    },
+    { "action": "set_power", "actor": "g", "power": 3, "value": 100 },
+    {
+      "action": "cast", "actor": "g", "spell": 500260,
+      "destination": { "x": -8946.95, "y": -132.493, "z": 83.5312 }
+    },
+    {
+      "action": "assert", "label": "The Standard of Recovery banner summons",
+      "actor": "g", "metric": "owned_creature_count", "entry": 50053, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The owner carries the Standard's periodic buff",
+      "actor": "g", "metric": "aura", "spell": 500266, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the buff's advertised amount $w1 is the Standard aura's own 80, which is the $500266m1 the cast tooltip now bills",
+      "actor": "g", "metric": "aura_amount", "spell": 500266, "effect": 0, "equals": 80
+    },
+    {
+      "action": "snapshot", "label": "Remember the buff's advertised amount $w1",
+      "actor": "g", "metric": "aura_amount", "spell": 500266, "effect": 0, "save_as": "w1"
+    },
+    {
+      "action": "assert", "label": "SETUP: the owner's Strength is the fixed 27 the tooltip's $STR term multiplies by 0.25, so the tick's amount is determinate",
+      "actor": "g", "metric": "stat", "stat": 0, "equals": 27
+    },
+    {
+      "action": "set_health", "actor": "g", "value": 1, "maximum": 100000,
+      "label": "Fixture a low health inside a large pool so the tick is never overhealed"
+    },
+    {
+      "action": "assert",
+      "label": "One tick heals exactly (80 + floor(0.25 x 27)) x the buff's own +6% = 91, i.e. 1.1375 of the advertised 80; the band admits one tick and rejects both the pre-fix 0.2 and a second tick at 2.275",
+      "actor": "g", "metric": "spell_effective_heal_total", "spell": 500248, "target": "g",
+      "ratio_to": "w1", "min": 1.13, "max": 1.2, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "The heal lands through the native heal log",
+      "actor": "g", "metric": "spell_heal_count", "spell": 500248, "min": 1, "within_ms": 8000
+    }
+  ]
+}

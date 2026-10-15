@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Vampyr Bite resurrects a dead party member who accepts (#3994)",
+  "contract": "#3994: 'Vampyr Bite doesn't work' (level 80, GM island). Vampyr Bite rank 8 803587 (level 80; ranks 803581..803587 in AscensionSpellProgressionData) is SPELL_EFFECT_RESURRECT (18) on a dead ally (Targets 0x8000), 8 s cast; effect 1 transforms the target into creature 27616 and effect 2 applies +50% healing taken for 20 s. Spell::EffectResurrect restores CountPctFromMaxHealth(damage) health and mana, stores the request and sends SMSG_RESURRECT_REQUEST; the target accepts with CMSG_RESURRECT_RESPONSE (0x15C, caster guid + u8 1). Expected: a dead, unreleased party member who accepts the request is alive afterwards. A released ghost cannot be targeted by effect 18 (Spell::CheckCast has the corpse LOS fallback only for SPELL_EFFECT_RESURRECT_NEW); that case is outside this scenario. The run decides the classification: a pass means the unreleased case already works; a fail confirms a defect in the resurrect path.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 20, "level": 80 },
+    { "id": "ally", "race": 1, "class": 1, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 3000 },
+    { "action": "group", "actor": "caster", "target": "ally" },
+    { "action": "learn", "actor": "caster", "spell": 803587 },
+    { "action": "die", "label": "The ally dies and stays at the corpse", "actor": "ally" },
+    { "action": "assert", "label": "SETUP: the ally is dead", "actor": "ally", "metric": "alive", "equals": 0 },
+    { "action": "cast", "label": "Vampyr Bite the dead ally", "actor": "caster", "spell": 803587, "target": "ally" },
+    { "action": "assert", "label": "The cast was not refused", "actor": "caster", "metric": "cast_failure", "spell": 803587, "equals": 0 },
+    { "action": "assert", "label": "The 8 s cast completes", "actor": "caster", "metric": "spell_go_count", "spell": 803587, "min": 1, "within_ms": 12000 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "client_packet", "label": "The ally accepts the resurrection", "actor": "ally", "opcode": 348,
+      "fields": [ { "actor_guid": "caster" }, { "u8": 1 } ], "consumed": false
+    },
+    { "action": "assert", "label": "DISCRIMINATING: the ally is alive", "actor": "ally", "metric": "alive", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "The ally came back with health", "actor": "ally", "metric": "health_pct", "min": 1 }
+  ]
+}

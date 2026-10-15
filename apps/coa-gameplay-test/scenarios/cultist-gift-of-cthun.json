@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Gift of C'Thun applies its authored Shadow damage and healing bonuses natively (#999)",
+  "contract": "Gift of C'Thun 706189 (Spell.dbc, read for this scenario) is a passive with two SPELL_EFFECT_APPLY_AURA effects, target caster. Effect 0 is aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, EffectMiscValue 32 (SPELL_SCHOOL_MASK_SHADOW), BasePoints 3 DieSides 1 (+4) -- matches 'Increases your Shadow damage dealt by 4%'. Effect 1 is aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, BasePoints 3 DieSides 1 (+4), no misc filter (this aura applies to all healing by design, matching the tooltip's unqualified 'healing done'). The issue's own DBC evidence ('Effect_132450', 'Mod School Immunity (79)') does not match a direct re-read of Spell.dbc id 706189 with coa-dbc-viewer and is unreliable; aura 79 is in fact SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, not school immunity. Both auras are stock 3.3.5a mechanics read generically wherever damage/healing bonuses are computed (Unit::SpellDamageBonusDone, Unit::SpellHealingBonusDone) -- no per-spell script is needed, and grep confirms zero occurrences of 706189 in src/server/coa or src/server/game, matching only that absence, not a missing mechanic. spell_damage_done/spell_healing_done compute against the actor's live aura state without submitting a cast.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 20 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "cultist", "entry": 36, "health": 1000000 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+
+    { "action": "snapshot", "label": "Baseline Shadow damage bonus (Eldritch Smite, Shadow school)", "actor": "cultist",
+      "metric": "spell_damage_done", "spell": 500111, "target": "dummy", "save_as": "damage_before" },
+    { "action": "snapshot", "label": "Baseline healing bonus (Gaze of C'Thun's heal effect)", "actor": "cultist",
+      "metric": "spell_healing_done", "spell": 520333, "target": "dummy", "save_as": "heal_before" },
+
+    { "action": "snapshot", "actor": "cultist", "metric": "alive", "save_as": "before_learn_alive" },
+    { "action": "snapshot", "actor": "cultist", "metric": "level", "save_as": "before_learn_level" },
+    { "action": "snapshot", "actor": "cultist", "metric": "knows_spell", "save_as": "before_learn_knows_spell",
+      "spell": 706189 },
+    { "action": "snapshot", "actor": "cultist", "metric": "aura", "save_as": "before_learn_aura", "spell": 706189 },
+    { "action": "snapshot", "actor": "cultist", "metric": "casting", "save_as": "before_learn_casting" },
+    { "action": "snapshot", "actor": "cultist", "metric": "global_cooldown_ms",
+      "save_as": "before_learn_global_cooldown_ms", "spell": 706189 },
+    { "action": "snapshot", "actor": "cultist", "metric": "spell_immune", "spell": 706189,
+      "save_as": "passive_immune_before_learn", "target": "cultist" },
+    { "action": "learn", "actor": "cultist", "spell": 706189 },
+    { "action": "snapshot", "actor": "cultist", "metric": "knows_spell", "save_as": "after_learn_knows_spell",
+      "spell": 706189 },
+    { "action": "snapshot", "actor": "cultist", "metric": "aura", "save_as": "after_learn_aura", "spell": 706189 },
+    { "action": "snapshot", "actor": "cultist", "metric": "alive", "save_as": "after_learn_alive" },
+    { "action": "snapshot", "actor": "cultist", "metric": "casting", "save_as": "after_learn_casting" },
+    { "action": "assert", "label": "Learning the passive applies its own self-aura", "actor": "cultist", "metric": "aura", "spell": 706189, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Effect 0 carries the authored +4% Shadow damage", "actor": "cultist", "metric": "aura_amount", "spell": 706189, "effect": 0, "equals": 4 },
+    { "action": "assert", "label": "Effect 1 carries the authored +4% healing done", "actor": "cultist", "metric": "aura_amount", "spell": 706189, "effect": 1, "equals": 4 },
+
+    { "action": "assert", "label": "CONTRACT: Shadow damage bonus rises by exactly 4% (1000 -> 1040)", "actor": "cultist",
+      "metric": "spell_damage_done", "spell": 500111, "target": "dummy", "ratio_to": "damage_before", "min": 1.039, "max": 1.041 },
+    { "action": "assert", "label": "CONTRACT: healing bonus rises by exactly 4%", "actor": "cultist",
+      "metric": "spell_healing_done", "spell": 520333, "target": "dummy", "ratio_to": "heal_before", "min": 1.039, "max": 1.041 },
+
+    { "action": "unlearn", "actor": "cultist", "spell": 706189 },
+    { "action": "assert", "label": "Unlearning removes the self-aura", "actor": "cultist", "metric": "aura", "spell": 706189, "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "Shadow damage bonus returns to baseline", "actor": "cultist",
+      "metric": "spell_damage_done", "spell": 500111, "target": "dummy", "ratio_to": "damage_before", "min": 0.999, "max": 1.001 },
+    { "action": "assert", "label": "Healing bonus returns to baseline", "actor": "cultist",
+      "metric": "spell_healing_done", "spell": 520333, "target": "dummy", "ratio_to": "heal_before", "min": 0.999, "max": 1.001 }
+  ]
+}

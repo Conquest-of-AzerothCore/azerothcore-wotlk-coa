@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "Improved Eclipse of Fury raises the effectiveness of Eclipse of Fury by 40% (#2399)",
+  "contract": "Improved Eclipse of Fury 704793 (Spell.dbc, SpellFamilyName 32) reads \"Increases the effectiveness of Eclipse of Fury by $s1%\". Its effect 0 is SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue 8 = SPELLMOD_ALL_EFFECTS, EffectBasePoints 39 with DieSides 1 resolving to 40, and EffectSpellClassMask word0 0x200, which is the SpellFamilyFlags word0 of every Eclipse of Fury rank 570217..570221 (SpellFamilyName 32). Eclipse of Fury's effect 0 is SPELL_AURA_344 (an Ascension aura, EffectBasePoints -36 on rank 1, -141 on rank 5). Native path only: SpellEffectInfo::CalcValue calls Unit::ApplyEffectModifiers, which applies SPELLMOD_ALL_EFFECTS then the per-index op through Player::ApplySpellMod, where an ADD_PCT_MODIFIER adds 40/100 to the multiplier (totalmul 1.4) for any op other than DAMAGE and DOT. The metric spell_effect_value returns exactly SpellEffectInfo::CalcValue(player), the value the aura effect is built from, so the talented amount over the untalented amount is 1.4 up to int32 truncation of the product (rank 1 -36*1.4 = -50.4 truncates to -50, ratio 1.389; larger magnitudes approach 1.4), hence the 1.38..1.42 window. No module hook touches these ranks (the only Eclipse of Fury entries in module data are the mana-cost table). The mana-cost helper 570243 is a separate spell and is not asserted. Both fixtures are the same race, class and level, so only the passive can move the ratio.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 570217
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 570217
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 570221
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 570221
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 704793,
+      "label": "Learn Improved Eclipse of Fury on the talented fixture only"
+    },
+    {
+      "action": "assert",
+      "label": "The passive self-applies once learned",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 704793,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Eclipse of Fury rank 1 effect 0 without the talent",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 570217,
+      "effect": 0,
+      "save_as": "eclipse_r1_base"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 effect 0 is 40% larger with the talent",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 570217,
+      "effect": 0,
+      "ratio_to": "eclipse_r1_base",
+      "min": 1.38,
+      "max": 1.42
+    },
+    {
+      "action": "snapshot",
+      "label": "Eclipse of Fury rank 5 effect 0 without the talent",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 570221,
+      "effect": 0,
+      "save_as": "eclipse_r5_base"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 5 effect 0 is 40% larger with the talent",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 570221,
+      "effect": 0,
+      "ratio_to": "eclipse_r5_base",
+      "min": 1.38,
+      "max": 1.42
+    }
+  ]
+}

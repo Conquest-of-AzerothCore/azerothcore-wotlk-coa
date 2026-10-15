@@ -1,0 +1,303 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Waterfall shortens cooldowns on critical strikes (#3638)",
+  "contract": "#3638 Waterfall (806412) is SPELL_ATTR0_PASSIVE with ProcChance 100, Spell.dbc ProcFlags 0 and one effect: SPELL_EFFECT_APPLY_AURA with EffectApplyAuraName 42 (SPELL_AURA_PROC_TRIGGER_SPELL) on EffectTriggerSpell 807661. With no spell_proc row, SpellMgr::LoadSpellProcs skipped it ('Skip if no proc flags in DBC') and Aura::GetProcEffectMask returned 0 ('only auras with spell proc entry can trigger proc'), so 807661 was never cast. 807661 itself is already implemented: its three effects are 165 (SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN, handled by Spell::EffectAscensionModifyCooldown, which reads EffectMiscValue as the spell id and the effect value as the delta) on TARGET_UNIT_CASTER, each with EffectBasePoints -501 / EffectDieSides 1 -> -500 ms, on EffectMiscValue 707365 (Overload Mechanical), 500932 (Gust of Wind) and 503352 (Torrential Wrath). The fix is one spell_proc row with ProcFlags 65536 (PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG), SpellTypeMask 1, SpellPhaseMask 2, HitMask 2 (PROC_HIT_CRITICAL alone, because the mechanic is critical strikes only) and Chance 0, which makes the engine use the record's own ProcChance of 100. Gust of Wind 500932 has RecoveryTime and CategoryRecoveryTime 35000, so a critical Shock takes 500 ms off it. Elapsed time is removed from the measurement by a second Stormbringer who starts the same cooldown at the same moment and never learns Waterfall, as in chronomancer-a-ripple-in-time-cooldown. The enemy is a Harvest Golem (36) 20 yd ahead, outside Gust of Wind's 12 yd cone (EffectRadiusIndex 32) and inside Shock's 35 yd range, so the two setup casts touch nothing and start their cooldowns in adjacent world updates. With a Rabbit (721) 3 yd ahead, the control's Gust of Wind knocked it back and it evaded for about 850 ms; the harness runs no step while a fixture evades, so the Waterfall caster started the same cooldown that much later and the BASELINE delta read 846 ms before any Shock. A damaged Rabbit also flees in random directions (CritterAI), which can carry it out of Shock's range or arc. The 10000 spell_crit_rating fixture only guarantees the DONE-side chance (Unit::SpellDoneCritChance, asserted at SETUP): the roll actually used by Spell::CalculateDamageDoneForAllTargets also runs the target through Unit::SpellTakenCritChance, which applies Unit::ApplyResilience(CR_CRIT_TAKEN_SPELL) against whoever GetOwner() resolves to for a creature victim; the fixture dummy is summoned via Player::SummonCreature, which sets its OwnerGUID to the attacking caster, so that reduction is sourced from the caster's own combat rating rather than being unconditionally zero like a plain NPC's. A live run recorded 3 of 4 critical Shocks proccing Waterfall, so the fixture's crit chance is very high but not the hard 100% the DONE-side number alone suggests. The block below casts five Shocks and requires at least four Waterfall procs, and the final cooldown-delta band is widened to also accept a fifth proc, rather than demanding a perfect 4-for-4 the engine does not actually promise. PARTIAL: the tooltip on 806412 says 'all of your cooldowns' while the shipped trigger names exactly three spell ids and Spell.dbc has only three effect slots, and 806412 says 'critical damage' while 807661 says 'critical Froststorm Damage'. Neither question is resolved here, so the scenario asserts only the named Gust of Wind cooldown and the rows apply no school restriction.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "control",
+      "race": 8,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "wf",
+      "race": 8,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "wf",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 20
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 500932
+    },
+    {
+      "action": "learn",
+      "actor": "wf",
+      "spell": 500932
+    },
+    {
+      "action": "learn",
+      "actor": "wf",
+      "spell": 804020
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "set_power",
+      "actor": "wf",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "SETUP: both casters start the same 35000 ms Gust of Wind cooldown",
+      "actor": "control",
+      "spell": 500932
+    },
+    {
+      "action": "cast",
+      "actor": "wf",
+      "spell": 500932
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Gust of Wind is on cooldown for the control caster",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 500932,
+      "min": 30000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Gust of Wind is on cooldown for the Waterfall caster",
+      "actor": "wf",
+      "metric": "cooldown_ms",
+      "spell": 500932,
+      "min": 30000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the 10000 spell crit rating makes every Shock a critical strike",
+      "actor": "wf",
+      "metric": "spell_done_crit_chance",
+      "spell": 804020,
+      "target": "dummy",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the enemy stands outside Gust of Wind's 12 yard cone and inside Shock's 35 yard range",
+      "actor": "wf",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 13,
+      "max": 34
+    },
+    {
+      "action": "set_power",
+      "actor": "wf",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "wf",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "wf",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "wf",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the second Shock land (1500 ms cast plus 500 ms flight over 20 yd) before Waterfall is learned",
+      "ms": 2500
+    },
+    {
+      "action": "snapshot",
+      "label": "Control caster's remaining Gust of Wind cooldown after the untalented crits",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 500932,
+      "save_as": "control_before"
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: two critical strikes without Waterfall move the cooldown by nothing but elapsed time",
+      "actor": "wf",
+      "metric": "cooldown_ms",
+      "spell": 500932,
+      "relative_to": "control_before",
+      "min": -600,
+      "max": 600
+    },
+    {
+      "action": "learn",
+      "actor": "wf",
+      "spell": 806412
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Waterfall proc has happened yet",
+      "actor": "wf",
+      "metric": "spell_proc_count",
+      "spell": 806412,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "wf",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "wf",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "wf",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "wf",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "wf",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "wf",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "wf",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "wf",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1900
+    },
+    {
+      "action": "set_power",
+      "actor": "wf",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Fifth Shock: the DONE-side crit chance is not the whole roll (see contract), so this gives one spare attempt",
+      "actor": "wf",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the fifth Shock land (1500 ms cast plus 500 ms flight over 20 yd)",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: at least four of the five critical strikes procced Waterfall (806412 ProcChance 100)",
+      "actor": "wf",
+      "metric": "spell_proc_count",
+      "spell": 806412,
+      "min": 4
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the proc cast the cooldown-reduction spell 807661",
+      "actor": "wf",
+      "metric": "spell_cast_count",
+      "spell": 807661,
+      "min": 4
+    },
+    {
+      "action": "snapshot",
+      "label": "Control caster's remaining Gust of Wind cooldown, with no Waterfall contribution",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 500932,
+      "save_as": "control_after"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: at least four critical strikes took 4-5 * 500 = 2000-2500 ms more off Gust of Wind than elapsed time (807661 EffectBasePoints -501 / EffectDieSides 1 on SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN with EffectMiscValue 500932)",
+      "actor": "wf",
+      "metric": "cooldown_ms",
+      "spell": 500932,
+      "relative_to": "control_after",
+      "min": -3400,
+      "max": -1100
+    }
+  ]
+}

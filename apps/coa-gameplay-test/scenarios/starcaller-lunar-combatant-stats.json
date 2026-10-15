@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "name": "lunar-combatant-stats|Lunar Combatant grants Intellect equal to 20% of Strength and adds Spell Power to weapon damage (#1267)",
+  "contract": "Lunar Combatant 805828 (Spell.dbc, SpellFamilyName 32, Level 50 passive) has effect 0 = SPELL_AURA_ASCENSION_MOD_STAT_FROM_STAT (327) with EffectMiscValue 3 (destination Intellect), EffectMiscValueB 0 (source Strength) and EffectBasePoints 19, resolving to 20 with DieSides 1, matching 'gain Intellect equal to $s1% of your Strength'. Native path (this fork's core): AuraEffect::HandleAscensionModStatFromStat calls Player::UpdateAllStats, whose second pass adds GetAscensionStatFromStatBonus (CalculatePct(GetStat(Strength), 20)) to Intellect. Control and talent are the same race, class and level with no gear, so Strength is identical (asserted unchanged) and the Intellect gained divided by the control's Strength must be 0.20; the snapshot of Strength is compared with an Intellect reading because the runner only checks that both snapshots use the same metric (stat), and the 0.18 to 0.22 window absorbs int32 truncation. Second clause, 'weapon damage is increased by your Spell Power': Player::CalculateMinMaxDamage adds SpellBaseDamageBonusDone(Arcane) x 0.2 to the weapon base value while aura 805828 is present (StatSystem.cpp). The 0.2 factor is the documented local choice in docs/coa/starcaller-completion.md, not a value the tooltip states, so this scenario only asserts the direction: with the same +2000 damage-done aura (44505, aura 13 misc 127) on both fixtures, the talent's main-hand minimum damage is higher than the control's. Order matters for the weapon clause: the talent is learned first and the damage aura is applied afterwards, because applying SPELL_AURA_MOD_DAMAGE_DONE with the physical bit runs Unit::UpdateAllDamageDoneMods and hence UpdateDamagePhysical, which is what re-evaluates the weapon range. If the Intellect steps pass and only that last step fails, the finding is a stale weapon-damage refresh, not a missing passive.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 805828
+    },
+    {
+      "action": "snapshot",
+      "label": "Strength without the talent",
+      "actor": "control",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "str_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Intellect without the talent",
+      "actor": "control",
+      "metric": "stat",
+      "stat": 3,
+      "save_as": "int_base"
+    },
+    {
+      "action": "assert",
+      "label": "The talent leaves Strength unchanged",
+      "actor": "talent",
+      "metric": "stat",
+      "stat": 0,
+      "relative_to": "str_base",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The talent adds Intellect equal to 20% of Strength",
+      "actor": "talent",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "int_base",
+      "ratio_to": "str_base",
+      "min": 0.18,
+      "max": 0.22
+    },
+    {
+      "action": "set_aura",
+      "label": "Spell power fixture on control",
+      "actor": "control",
+      "spell": 44505,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Spell power fixture on talent",
+      "actor": "talent",
+      "spell": 44505,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Fixture grants at least 2000 Arcane spell power to control",
+      "actor": "control",
+      "metric": "spell_power",
+      "school": 6,
+      "min": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Fixture grants at least 2000 Arcane spell power to talent",
+      "actor": "talent",
+      "metric": "spell_power",
+      "school": 6,
+      "min": 2000
+    },
+    {
+      "action": "snapshot",
+      "label": "Main-hand minimum damage without the talent",
+      "actor": "control",
+      "metric": "weapon_damage_min",
+      "save_as": "weapon_base"
+    },
+    {
+      "action": "assert",
+      "label": "Main-hand damage is raised by Spell Power with the talent",
+      "actor": "talent",
+      "metric": "weapon_damage_min",
+      "relative_to": "weapon_base",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

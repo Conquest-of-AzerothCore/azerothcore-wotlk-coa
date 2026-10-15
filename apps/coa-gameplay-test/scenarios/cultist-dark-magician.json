@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Dark Magician raises critical damage 50% and spell power by 30% of Intellect (#696)",
+  "contract": "Dark Magician 563123 reads 'Increases your critical damage dealt by 50% and your spell power by 30% of your Intellect.' In the installed Spell.dbc it is passive, family 31, with two Apply Aura (6) effects and no class mask (both apply unconditionally by school). Effect 0 is SPELL_AURA_MOD_CRIT_DAMAGE_BONUS (163), MiscValue 126 = every magic school bit (Holy..Arcane, bits 1-6, no Physical), BasePoints 49 / DieSides 1 = +50%. Effect 1 is SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT (174), MiscValue 127 (all schools), MiscValueB 3 = Intellect, BasePoints 29 / DieSides 1 = +30%. Unit::SpellBaseDamageBonusDone (Unit.cpp:9560-9592) adds int32(CalculatePct(Intellect, amount)) per matching MOD_SPELL_DAMAGE_OF_STAT_PERCENT aura (line 9590), recomputed from the player's CURRENT total Intellect every time the metric is queried -- it is not an incremental delta tied to whichever stat change triggered the read. The fixture must therefore measure the marginal effect against a baseline taken with the passive already learned but before the Intellect buff, not against a baseline from before either existed: base Intellect 99 with the passive gives int32(99*30/100)=29 spell power; +100 Intellect from Arcane Intellect 36880 raises total Intellect to 199, giving int32(199*30/100)=59; the marginal rise is exactly 59-29=30, matching the tooltip. (The first native run, which diffed against a pre-passive/pre-buff baseline of 0, read 59 -- 30% of the TOTAL 199 Intellect, not of the buff's own 100 -- confirming this fixture-ordering bug.) Unit::SpellCriticalDamageBonus (Unit.cpp:9926-9965) starts a magic spell's crit_bonus at 1.5x the base (1000 -> 1500), folds GetTotalAuraModifierByMiscMask(163, schoolMask) into crit_mod (line 9945), then AddPct's crit_bonus by crit_mod (line 9954) before subtracting and re-adding the base (lines 9956/9962). For Eldritch Shock 808043 (SchoolMask 32 = Shadow, inside the 126 mask), without the talent crit_mod is 0 so AddPct is skipped and the total stays 1500; with Dark Magician's crit_mod=50, 1500 is AddPct'd by 50% to 2250, so the total rises to 2250 -- a delta of exactly 750, unaffected by the Intellect buff's presence or absence.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "c", "race": 1, "class": 25, "level": 80}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "c", "entry": 36, "level": 80, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the fixtures settle", "ms": 5000},
+    {"action": "snapshot", "label": "Shadow spell power before", "actor": "c", "metric": "spell_power", "school": 5, "save_as": "sp_before"},
+    {"action": "snapshot", "label": "Eldritch Shock crit total before", "actor": "c", "metric": "spell_critical_damage", "spell": 808043, "target": "dummy", "save_as": "crit_before"},
+    {"action": "assert", "label": "SETUP: Eldritch Shock's real crit total (1000 base) is 1500 without the talent", "actor": "c", "metric": "spell_critical_damage", "spell": 808043, "target": "dummy", "min": 1499, "max": 1501},
+    {"action": "set_aura", "label": "Apply +100 Intellect", "actor": "c", "spell": 36880, "stacks": 1},
+    {"action": "assert", "label": "Spell power is unaffected by Intellect alone", "actor": "c", "metric": "spell_power", "school": 5, "relative_to": "sp_before", "equals": 0},
+    {"action": "set_aura", "label": "Remove the Intellect buff before learning the passive, to isolate its marginal contribution", "actor": "c", "spell": 36880, "stacks": 0},
+    {"action": "learn", "label": "Learn Dark Magician", "actor": "c", "spell": 563123},
+    {"action": "assert", "label": "The passive is active", "actor": "c", "metric": "aura", "spell": 563123, "equals": 1},
+    {"action": "snapshot", "label": "Shadow spell power with the passive on base (unbuffed) Intellect", "actor": "c", "metric": "spell_power", "school": 5, "save_as": "sp_passive_unbuffed"},
+    {"action": "set_aura", "label": "Reapply +100 Intellect", "actor": "c", "spell": 36880, "stacks": 1},
+    {"action": "assert", "label": "Shadow spell power rises by exactly 30% of the buff's Intellect (30)", "actor": "c", "metric": "spell_power", "school": 5, "relative_to": "sp_passive_unbuffed", "equals": 30},
+    {"action": "assert", "label": "Eldritch Shock's crit total rises by exactly 750 (1500 -> 2250, AddPct'd by 50%)", "actor": "c", "metric": "spell_critical_damage", "spell": 808043, "target": "dummy", "relative_to": "crit_before", "min": 749, "max": 751}
+  ]
+}

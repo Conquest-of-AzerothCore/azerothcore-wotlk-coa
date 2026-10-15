@@ -1,0 +1,6 @@
+{
+  "configuration": {
+    "CoALegendaryItems.Enable": false
+  },
+  "disabled_scenarios": ["client-sql-patches-opt-in"]
+}

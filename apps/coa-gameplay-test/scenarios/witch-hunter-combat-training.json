@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "name": "Combat Training raises physical damage and parry chance by 3% (#825)",
+  "contract": "Combat Training 680529 (installed Spell.dbc) is a passive family-21 spell with effect 0 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79, misc 1 = Physical) base 2 die 1 -> +3% and effect 1 SPELL_AURA_MOD_PARRY_PERCENT (47) base 2 die 1 -> +3%; the Description reads 'Increases your Physical damage dealt and parry chance by 3%.' Physical damage is read as the calculated main-hand minimum damage (UNIT_FIELD_MINDAMAGE): Player::CalculateMinMaxDamage multiplies ((weapon + attack power term) * base pct + flat) by the TOTAL_PCT unit mod that this aura feeds (StatSystem.cpp:737), so with a weapon equipped the ratio is a plain 1.03. The melee_damage_done query cannot see it: Unit::MeleeDamageBonusDone skips SPELL_AURA_MOD_DAMAGE_PERCENT_DONE for the physical school because 'mods for SPELL_SCHOOL_MASK_NORMAL are already factored in base melee damage calculation' (Unit.cpp:10782), and measured 1.000 with the talent active. Player::UpdateParryPercentage adds the aura amount to the parry field, but a class that could not parry before also gets the flat 5% base once its first parry aura flips CanParry (same reason the Nether Disciple scenario uses a band), so the parry gain is asserted as at least the aura's own 3 with a ceiling that covers that flip.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "wh",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Learn One-Handed Swords",
+      "actor": "wh",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "wh",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "label": "Equip a main-hand sword",
+      "actor": "wh",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "wait",
+      "label": "Let the equipment settle",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "label": "Main-hand minimum damage before the talent",
+      "actor": "wh",
+      "metric": "weapon_damage_min",
+      "save_as": "melee_base"
+    },
+    {
+      "action": "assert",
+      "label": "Precondition: the weapon deals damage",
+      "actor": "wh",
+      "metric": "weapon_damage_min",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "wh",
+      "metric": "parry_chance",
+      "save_as": "parry_base",
+      "label": "Parry chance before the talent"
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 680529,
+      "label": "Learn Combat Training rank 1"
+    },
+    {
+      "action": "assert",
+      "label": "Effect 0 is +3% physical damage",
+      "actor": "wh",
+      "metric": "aura_amount",
+      "spell": 680529,
+      "effect": 0,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Effect 1 is +3% parry",
+      "actor": "wh",
+      "metric": "aura_amount",
+      "spell": 680529,
+      "effect": 1,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Physical damage dealt rises by 3%",
+      "actor": "wh",
+      "metric": "weapon_damage_min",
+      "ratio_to": "melee_base",
+      "min": 1.029,
+      "max": 1.031
+    },
+    {
+      "action": "assert",
+      "label": "Parry chance rises by at least the 3% the aura grants",
+      "actor": "wh",
+      "metric": "parry_chance",
+      "relative_to": "parry_base",
+      "min": 2.99,
+      "max": 9.0
+    }
+  ]
+}

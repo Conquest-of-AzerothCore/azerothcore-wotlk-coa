@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "A CoA-class character missing its racial gets it back when progression synchronizes (#4971, #3952)",
+  "contract": "Racial abilities are granted at creation for free and are not purchased progression. Characters created before a class's racial variant was mapped are missing it, so SynchronizeProgression (run at login and on level change) must restore the race's racial spells even with the shipped CoA.AutoProgression = 0. The fixture removes the Orc Barbarian's Blood Fury 814283 and raises the level through native GiveLevel.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "barbarian", "race": 2, "class": 12, "level": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 2000 },
+    {
+      "action": "assert", "label": "Blood Fury is granted at creation", "actor": "barbarian",
+      "metric": "knows_spell", "spell": 814283, "equals": 1
+    },
+    { "action": "unlearn", "label": "Remove Blood Fury as an older character lacks it", "actor": "barbarian", "spell": 814283,
+      "all_specs": true },
+    {
+      "action": "assert", "label": "Blood Fury is missing", "actor": "barbarian",
+      "metric": "knows_spell", "spell": 814283, "equals": 0
+    },
+    { "action": "set_level", "label": "Reach level 2", "actor": "barbarian", "value": 2 },
+    {
+      "action": "assert", "label": "Blood Fury is restored", "actor": "barbarian",
+      "metric": "knows_spell", "spell": 814283, "equals": 1, "within_ms": 2000
+    }
+  ]
+}

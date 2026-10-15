@@ -1,0 +1,132 @@
+{
+  "schema": 1,
+  "name": "Tinker: Mechsuit effectiveness passives modify the suit's own effect values",
+  "contract": "#668, #501: Turbo Upgrade (707115) and Augmechtation (503568) are ordinary family-34 spell modifiers on the Mechsuit helper auras and need no script. Turbo Upgrade carries SPELLMOD_ALL_EFFECTS at 100%, so every effect value of Mechsuit 801385 and Mechsuit 803329 doubles for a Tinker who knows it. Augmechtation carries SPELLMOD_EFFECT3 at a flat 10, so it adds exactly 10 to effect index 2 of 801385 (the MOD_DAMAGE_PERCENT_DONE amount) and leaves effect index 0 of 803329 untouched. The values are read through the native effect calculation for this caster, which is what AscensionTinker's SetHelper casts use, so a lost modifier fails the run.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Mechsuit damage-done effect without either passive",
+      "actor": "t",
+      "metric": "spell_effect_value",
+      "spell": 801385,
+      "effect": 2,
+      "save_as": "dmg0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Mechsuit movement-speed effect without either passive",
+      "actor": "t",
+      "metric": "spell_effect_value",
+      "spell": 803329,
+      "effect": 0,
+      "save_as": "speed0"
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 503568
+    },
+    {
+      "action": "assert",
+      "label": "Augmechtation adds its flat 10 to the Mechsuit damage effect",
+      "actor": "t",
+      "metric": "spell_effect_value",
+      "spell": 801385,
+      "effect": 2,
+      "relative_to": "dmg0",
+      "equals": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Augmechtation is an effect-index-2 modifier and leaves the movement effect alone",
+      "actor": "t",
+      "metric": "spell_effect_value",
+      "spell": 803329,
+      "effect": 0,
+      "relative_to": "speed0",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "t",
+      "spell": 503568
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning Augmechtation restores the Mechsuit damage effect",
+      "actor": "t",
+      "metric": "spell_effect_value",
+      "spell": 801385,
+      "effect": 2,
+      "relative_to": "dmg0",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 707115
+    },
+    {
+      "action": "assert",
+      "label": "Turbo Upgrade doubles the Mechsuit damage effect",
+      "actor": "t",
+      "metric": "spell_effect_value",
+      "spell": 801385,
+      "effect": 2,
+      "ratio_to": "dmg0",
+      "min": 1.99,
+      "max": 2.01,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Turbo Upgrade doubles the Mechsuit movement-speed effect",
+      "actor": "t",
+      "metric": "spell_effect_value",
+      "spell": 803329,
+      "effect": 0,
+      "ratio_to": "speed0",
+      "min": 1.99,
+      "max": 2.01
+    },
+    {
+      "action": "unlearn",
+      "actor": "t",
+      "spell": 707115
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning Turbo Upgrade restores the Mechsuit damage effect",
+      "actor": "t",
+      "metric": "spell_effect_value",
+      "spell": 801385,
+      "effect": 2,
+      "ratio_to": "dmg0",
+      "min": 0.99,
+      "max": 1.01,
+      "within_ms": 3000
+    }
+  ]
+}

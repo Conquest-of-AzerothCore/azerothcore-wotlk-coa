@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Vitality adds 10% Stamina to Eternal Curse (#1162)",
+  "contract": "Vitality 704166 is one effect: aura 107 with MiscValue 3 (SPELLMOD_EFFECT1, which Unit::ApplyEffectModifiers maps to effect index 0) and BasePoints 9 + DieSides 1 = +10, over EffectSpellClassMask (0, 0, 32) = word 2 bit 5 = Eternal Curse 800157 and Hemal Excision 803681. Eternal Curse's effect 0 is aura 137 MOD_TOTAL_STAT_PERCENTAGE with MiscValue 2 (STAT_STAMINA) and value 25, so it becomes 35. Eternal Curse's AttributesEx3 is 0x100000 (SPELL_ATTR3_ALLOW_AURA_WHILE_DEAD), not 0x20000000 (SPELL_ATTR3_IGNORE_CASTER_MODIFIERS), so caster modifiers are not blocked. Tooltip: \"Increases your Stamina while in Eternal Curse by an additional $s1%.\" Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Eternal Curse grants its authored 25% Stamina before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 800157,
+      "op": 3,
+      "base": 25,
+      "equals": 25
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 704166
+    },
+    {
+      "action": "assert",
+      "label": "Vitality raises Eternal Curse's Stamina effect to 35%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 800157,
+      "op": 3,
+      "base": 25,
+      "equals": 35
+    },
+    {
+      "action": "assert",
+      "label": "Vitality does not touch Bloodbolt",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 3,
+      "base": 25,
+      "equals": 25
+    }
+  ]
+}

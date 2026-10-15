@@ -176,9 +176,9 @@
       "448970c594149edd5d4b02805c5b95da8e05c10b",
     "data/sql/updates/pending_db_world/rev_20260911_01_live_starter_templates.sql":
       "51bb134b32bd9e9ffc8907c721605f686c9fb4d7",
-    "modules/mod-ascension-compat/data/sql/db-world/2026_08_26_01_ascension_appearance_item_templates.sql":
+    "modules/mod-ascension/data/sql/db-world/2026_08_26_01_ascension_appearance_item_templates.sql":
       "ec1b200fda9c234431a90717d347f6a42444676f",
-    "modules/mod-ascension-compat/data/sql/db-world/2026_08_27_00_ascension_custom_classes.sql":
+    "modules/mod-ascension/data/sql/db-world/2026_08_27_00_ascension_custom_classes.sql":
       "c10420814fdf39df020e0e9b91b194ad2d19770d"
   },
   "tables": {

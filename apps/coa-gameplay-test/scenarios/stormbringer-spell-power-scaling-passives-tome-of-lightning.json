@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Tome of Lightning rank 1 works natively (#1678)",
+  "contract": "Rank-one Tome of Lightning 300606 promises two-percent critical strike chance and twenty-percent interrupt/silence duration reduction. Raw effect zero is a MECHANIC_SILENCE duration modifier resolving to -20, effect one is native MOD_CRIT_PCT resolving to +2, and raw effect two is a MECHANIC_INTERRUPT modifier resolving to -25. AscensionStormbringer::ApplyContracts aligns effect two's base points with the authored silence reduction. Unit::ModSpellDuration reads the recipient's mechanic-duration modifiers both when resolving a negative aura and from Spell::EffectInterruptCast before the real school lockout is applied. This scenario verifies silence using an ordinary hostile Spell Lock debuff 24259 and an untalented control, plus critical chance; stormbringer-tome-of-lightning-interrupt-duration-1678 separately verifies real interrupts after normal Lightning advancement acquisition. The attacker and targets are outside sanctuary with opposing factions. Record 706308 lacks a passive flag and any current acquisition path, so neither scenario claims that record is restored or that the whole report is resolved.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "attacker",
+      "race": 1,
+      "class": 9,
+      "level": 80
+    },
+    {
+      "id": "control",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    },
+    {
+      "id": "talented",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "pvp", "actor": "attacker", "enabled": true },
+    { "action": "pvp", "actor": "control", "enabled": true },
+    { "action": "pvp", "actor": "talented", "enabled": true },
+    { "action": "learn", "label": "Attacker learns Spell Lock's silence debuff fixture", "actor": "attacker", "spell": 24259 },
+    { "action": "cast", "label": "BASELINE: attacker silences the untalented control", "actor": "attacker", "spell": 24259, "target": "control" },
+    { "action": "assert", "label": "The control is silenced", "actor": "control", "metric": "aura", "spell": 24259, "caster": "attacker", "equals": 1, "within_ms": 3000 },
+    { "action": "snapshot", "label": "BASELINE: silence duration on the untalented control", "actor": "control", "metric": "aura_duration_ms", "spell": 24259, "caster": "attacker", "save_as": "silence_base" },
+    { "action": "snapshot", "label": "BASELINE: spell crit chance before either rank", "actor": "talented", "metric": "spell_crit_chance", "save_as": "crit0" },
+    { "action": "learn", "label": "Learn Tome of Lightning rank 1", "actor": "talented", "spell": 300606 },
+    { "action": "assert", "label": "Tome of Lightning rank 1's aura is applied", "actor": "talented", "metric": "aura", "spell": 300606, "equals": 1, "within_ms": 3000 },
+    { "action": "cast", "label": "DISCRIMINATING: attacker silences the talented Stormbringer", "actor": "attacker", "spell": 24259, "target": "talented" },
+    { "action": "assert", "label": "The talented Stormbringer is silenced", "actor": "talented", "metric": "aura", "spell": 24259, "caster": "attacker", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: Tome of Lightning rank 1 cuts the silence duration by 20%", "actor": "talented", "metric": "aura_duration_ms", "spell": 24259, "caster": "attacker", "ratio_to": "silence_base", "min": 0.78, "max": 0.82 },
+    { "action": "assert", "label": "DISCRIMINATING: Tome of Lightning rank 1 adds 2 crit chance", "actor": "talented", "metric": "spell_crit_chance", "relative_to": "crit0", "min": 1.9, "max": 2.1 }
+  ]
+}

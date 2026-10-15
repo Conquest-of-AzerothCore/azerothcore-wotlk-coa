@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "name": "Dark Mark reduces nearby enemies' chance to hit (#2822)",
+  "contract": "Dark Mark 705731 is a single aura 4 (SPELL_AURA_DUMMY) marker with BasePoints -1; its tooltip takes every number from 707375: 'Reduces the chance to hit for enemies within $707375a1 yds of you by $707375s1%.' 707375 is Effect 129 SPELL_EFFECT_APPLY_AREA_AURA_ENEMY with aura 54 SPELL_AURA_MOD_HIT_CHANCE, BasePoints -4 / DieSides 1 (i.e. -3) and RadiusIndex 8. No row in Spell.dbc triggers 707375 through EffectTriggerSpell, CasterAuraSpell, TargetAuraSpell or EffectMiscValue, and coa-obtainable --class 20 (222/222 identical between the shipped CharacterAdvancement.dbc and the live-client capture) reports advancement=none and live_capture=False for it, so nothing ever applied it. The talent's own marker now applies it. The radius is not hard-coded here: the enemy stands 3 yards away, inside any radius the record can carry.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 705731
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The enemy carries no Dark Mark before the talent",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 707375,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 705731
+    },
+    {
+      "action": "assert",
+      "label": "Learning Dark Mark applies its area aura to the nearby enemy",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 707375,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The applied effect carries 707375's own -3% hit chance",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 707375,
+      "effect": 0,
+      "equals": -3
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 705731
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning removes the area aura",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 707375,
+      "equals": 0,
+      "within_ms": 5000
+    }
+  ]
+}

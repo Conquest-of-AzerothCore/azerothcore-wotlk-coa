@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "name": "Rapid makes Witchbane channel one second shorter with a 250 ms shorter tick (#2193)",
+  "contract": "Rapid 680323 has E0 aura 107 MiscValue 1 (SPELLMOD_DURATION) BasePoints -1001 / DieSides 1 = -1000 ms and E1 aura 107 MiscValue 19 (SPELLMOD_ACTIVATION_TIME) BasePoints -251 = -250 ms, both on class mask (0, 0x400000, 0); the description reads 'Your Witchbane now deals its full damage over $/1000;s1 second shorter period'. Every Witchbane channel rank (800165, 520211, 520212, 520213, 578297, 574319, 574320) has SpellFamilyFlags B 0x400000, a 3000 ms duration (index 27) and a 750 ms tick, so the channel becomes 2000 ms with a 500 ms tick: the same four ticks over one second less. Sixfold Shot 807364 (B 0x80000) is the control.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 680323,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "label": "Baseline channel duration is 3000 ms",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 800165,
+      "op": 1,
+      "base": 3000,
+      "equals": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Baseline tick interval is 750 ms",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 800165,
+      "op": 19,
+      "base": 750,
+      "equals": 750
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 680323
+    },
+    {
+      "action": "assert",
+      "label": "The passive aura is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 680323,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 channel is 1 second shorter",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 800165,
+      "op": 1,
+      "base": 3000,
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 tick is 250 ms shorter",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 800165,
+      "op": 19,
+      "base": 750,
+      "equals": 500
+    },
+    {
+      "action": "assert",
+      "label": "Rank 4 channel is 1 second shorter",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 520213,
+      "op": 1,
+      "base": 3000,
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 7 channel is 1 second shorter",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 574320,
+      "op": 1,
+      "base": 3000,
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 7 tick is 250 ms shorter",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 574320,
+      "op": 19,
+      "base": 750,
+      "equals": 500
+    },
+    {
+      "action": "assert",
+      "label": "Sixfold Shot's channel is unchanged",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 807364,
+      "op": 1,
+      "base": 1500,
+      "equals": 1500
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 680323,
+      "all_specs": true,
+      "label": "Remove the passive"
+    },
+    {
+      "action": "assert",
+      "label": "The channel returns to 3000 ms",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 800165,
+      "op": 1,
+      "base": 3000,
+      "equals": 3000
+    }
+  ]
+}

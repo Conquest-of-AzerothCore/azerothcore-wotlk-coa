@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "name": "Vishas' Memoir shortens every Brand cooldown by 25 percent (#1770)",
+  "contract": "Vishas' Memoir 300795 is SpellFamily 21, passive (Attributes 0xc0), with one SPELL_AURA_ADD_PCT_MODIFIER (108) effect: MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -26 + DieSides 1 = -25 percent, EffectSpellClassMask word 1 = 0x2, the bit carried by the Brands (Brand of the Damned 807682 and its ranks, RecoveryTime and CategoryRecoveryTime 60000; Brand of the Unworthy 501380, 60000; Brand of the Profane 562390, 8000). Player::AddSpellAndCategoryCooldowns applies SPELLMOD_COOLDOWN to both the spell and the category recovery (Player.cpp:11446-11456) and none of those records carries SPELL_ATTR6_NO_CATEGORY_COOLDOWN_MODS. 60000 * 0.75 = 45000. Burrow Bolt 802269 (word 1 = 0) is the untouched control. The final steps cast Brand of the Damned on a hostile creature and read the cooldown the server actually started; a miss does not matter because the cooldown starts on the cast.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "hunter",
+      "entry": 36,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Brand of the Damned rank 1 so the cooldown path can be exercised end to end",
+      "actor": "hunter",
+      "spell": 807682
+    },
+    {
+      "action": "assert",
+      "label": "Before the talent: Brand of the Damned cooldown is untouched",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 807682,
+      "op": 11,
+      "base": 60000,
+      "min": 59999.4,
+      "max": 60000.6
+    },
+    {
+      "action": "learn",
+      "label": "Learn 300795",
+      "actor": "hunter",
+      "spell": 300795
+    },
+    {
+      "action": "assert",
+      "label": "Vishas' Memoir is applied as a passive",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 300795,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Brand of the Damned cooldown is 25 percent shorter (op 11, -26+1 percent)",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 807682,
+      "op": 11,
+      "base": 60000,
+      "min": 44999.4,
+      "max": 45000.6
+    },
+    {
+      "action": "assert",
+      "label": "Brand of the Damned rank 7 cooldown is 25 percent shorter",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 807710,
+      "op": 11,
+      "base": 60000,
+      "min": 44999.4,
+      "max": 45000.6
+    },
+    {
+      "action": "assert",
+      "label": "Brand of the Unworthy cooldown is 25 percent shorter",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 501380,
+      "op": 11,
+      "base": 60000,
+      "min": 44999.4,
+      "max": 45000.6
+    },
+    {
+      "action": "assert",
+      "label": "Brand of the Profane cooldown is 25 percent shorter",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 562390,
+      "op": 11,
+      "base": 8000,
+      "min": 5999.4,
+      "max": 6000.6
+    },
+    {
+      "action": "assert",
+      "label": "Burrow Bolt is not a Brand and keeps its cooldown",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 802269,
+      "op": 11,
+      "base": 40000,
+      "min": 39999.4,
+      "max": 40000.6
+    },
+    {
+      "action": "cast",
+      "label": "Cast Brand of the Damned",
+      "actor": "hunter",
+      "spell": 807682,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "The real cooldown started by the cast is 45 seconds, not 60",
+      "actor": "hunter",
+      "metric": "cooldown_ms",
+      "spell": 807682,
+      "min": 43500,
+      "max": 45000,
+      "within_ms": 4000
+    }
+  ]
+}

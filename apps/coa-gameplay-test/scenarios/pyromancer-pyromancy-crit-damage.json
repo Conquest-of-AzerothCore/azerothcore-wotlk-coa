@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Pyromancy doubles critical damage bonus (#1190)",
+  "contract": "#1190: Pyromancy 704831 is a family 30 passive, e1 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS (163) misc 126 (all schools but physical), BasePoints 99 = +100%. Aura 163 has a no-op handler and is read in Unit::SpellCriticalDamageBonus (Unit.cpp:9943) via GetTotalAuraModifierByMiscMask, then AddPct(crit_bonus, crit_mod) (Unit.cpp:9952). Explode 800792 is Fire (mask 0x4), DmgClass 1 (magic), so the core crit bonus on a 1000 base is 1500 and +100% makes it 3000, a delta of +1500. spell_critical_damage calculates a critical hit from a fixed base of 1000 through that function. The +1500 assumes a clean character with no other crit-damage source (group report caveat); the assertion is a delta against a snapshot taken before learning the passive.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "p",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Explode critical hit from a base of 1000 before Pyromancy",
+      "actor": "p",
+      "metric": "spell_critical_damage",
+      "spell": 800792,
+      "target": "d",
+      "save_as": "crit0"
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 704831
+    },
+    {
+      "action": "assert",
+      "label": "Pyromancy adds 1500 to the critical hit of a 1000 base",
+      "actor": "p",
+      "metric": "spell_critical_damage",
+      "spell": 800792,
+      "target": "d",
+      "relative_to": "crit0",
+      "min": 1495,
+      "max": 1505
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 704831
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning Pyromancy restores the base critical damage",
+      "actor": "p",
+      "metric": "spell_critical_damage",
+      "spell": 800792,
+      "target": "d",
+      "relative_to": "crit0",
+      "min": -1,
+      "max": 1
+    }
+  ]
+}

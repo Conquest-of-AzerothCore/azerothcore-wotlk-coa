@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Moon Runner strengthens Aspect of the Cosmos's slow by 5% per stack (#1801)",
+  "contract": "Moon Runner 301236 (Spell.dbc, family 32) tooltip: \"Increases the movement slowing effect of Aspect of the Cosmos by $s1% per stack.\" Effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107), EffectMiscValue SPELLMOD_EFFECT2 (12), EffectBasePoints -6 with DieSides 1 (=-5), mask word2 0x800. Aspect of the Cosmos 801124 has SpellFamilyFlags word2 0x40000800 (so the mask matches) and its Effect 1 is SPELL_AURA_MOD_DECREASE_SPEED (33) with EffectBasePoints -21 (=-20 per stack, TargetA 6). Native path: SpellEffectInfo::CalcValue calls Unit::ApplyEffectModifiers, which applies SPELLMOD_ALL_EFFECTS and then SPELLMOD_EFFECT2 for effect index 1, so the -5 flat is added to the slow amount (-20 -> -25). The slow is cast by the Starcaller module through a normal Cast (AscensionStarcaller.cpp Aspect, spell 801124), and the aura amount is computed from that same CalcValue. spell_effect_value returns CalcValue for the fixture as caster, so the differential against the untalented twin must be exactly -5 (the slow is stronger by 5). Side effect not asserted, only noted: word2 0x800 is a shared Aspect flag, so the modifier also reaches Effect 1 of other Aspect spells. Values read 2026-09-21 from the shipped /srv/coa/server-data/dbc/Spell.dbc.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 301236
+    },
+    {
+      "action": "snapshot",
+      "label": "Aspect of the Cosmos slow value without the talent",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "save_as": "slow_base",
+      "spell": 801124,
+      "effect": 1
+    },
+    {
+      "action": "assert",
+      "label": "Each stack of the slow is 5 points stronger with the talent",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 801124,
+      "effect": 1,
+      "relative_to": "slow_base",
+      "min": -5.01,
+      "max": -4.99
+    }
+  ]
+}

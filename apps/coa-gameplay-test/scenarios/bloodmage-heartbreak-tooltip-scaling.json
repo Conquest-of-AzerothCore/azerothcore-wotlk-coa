@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Heartbreak's damage base carries the tooltip's $sps*0.5 + $spi*1 terms (#6453)",
+  "contract": "Heartbreak 520314 (ranks 520836-520838, 572895-572898) reads '${$m1+0+$sps*0.5+$spi*1} Shadow damage' on effect 0, a SPELL_EFFECT_HEALTH_LEECH with DieSides 1, so SpellEffectInfo::CalcValue is deterministic and the two additive terms are the whole difference. In this client's tooltip dialect $spi is Spirit (Blood Veil 504263 implements its $SPI*1.5 term as caster->GetStat(STAT_SPIRIT) in AscensionBloodmageTalents.cpp), and $sps is the spell's own school spell power (Heartbreak is SchoolMask 32, and Blood Shard scaling in AscensionBloodmageBloodShards.cpp reads its $SP terms as SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) * coefficient). bloodmage_vitality_scaling::ModifySpellEffectBaseValue (AscensionBloodmageVitality.cpp) already adds stat terms to Bloodmage bases through this exact hook, but its guard only accepted SPELL_EFFECT_HEAL effects, so Heartbreak's HEALTH_LEECH damage read as the bare DBC base: the level-80 fixture measured spell_effect_value 781 and the landed spell_damage_total was also 781 - neither term applied. The fix accepts HEALTH_LEECH for the Heartbreak ranks and adds shadow spell power * 0.5 + Spirit * 1 to the base value. This scenario measures the base value across two gear changes with ratio assertions that are 0 before the fix. Phase A equips Maghia's Misguided Quill 49686 (+1000 Spirit, base item_template, already the fixture in bloodmage-vitality-for-later-spirit-heal.json); the hidden spell power is unchanged, so the base-value delta must be exactly 1.0x the Spirit gained. Phase B equips QA Test +2000 Spell Power Ring 38484 (+10000 spell power to every school); it adds no Spirit, so the base-value delta must be exactly 0.5x the spell power gained. Each phase takes its own before/after snapshots, so the terms are isolated from one another, and the +-1 int32 truncation on each subtraction moves either ratio by at most ~0.002, far inside the 0.95..1.05 and 0.49..0.51 windows. spell_effect_value calls SpellEffectInfo::CalcValue(caster) directly (CoAGameplayTest.cpp), which runs this hook, so it is the exact function under test; the damage pipeline carries it to the hit unchanged because no spell_bonus_data row or EffectBonusMultiplier exists for Heartbreak (the earlier probe measured spell_damage_total == spell_effect_value == 781 exactly). The Empowered rider is untouched: HeartbreakPower only runs on effect 1 and only when the cast is empowered. Expected before the fix: both ratios are 0 (the base value does not depend on either stat). Expected after: Phase A 1.0, Phase B 0.5.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "bm", "race": 1, "class": 20, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "bm", "spell": 572898 },
+    { "action": "snapshot", "label": "Baseline Spirit", "actor": "bm", "metric": "stat", "stat": 4, "save_as": "spirit0" },
+    { "action": "snapshot", "label": "Baseline shadow spell power", "actor": "bm", "metric": "spell_power", "school": 5, "save_as": "sp0" },
+    { "action": "snapshot", "label": "Baseline Heartbreak damage base value", "actor": "bm", "metric": "spell_effect_value", "spell": 572898, "effect": 0, "save_as": "val0" },
+
+    { "action": "add_item", "actor": "bm", "item": 49686 },
+    { "action": "equip", "label": "Maghia's Misguided Quill: +1000 Spirit", "actor": "bm", "item": 49686, "slot": 12 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "SETUP: the quill raised Spirit enough to dominate int32 truncation", "actor": "bm", "metric": "stat", "stat": 4, "relative_to": "spirit0", "min": 900 },
+    { "action": "assert", "label": "SETUP: the quill did not move shadow spell power", "actor": "bm", "metric": "spell_power", "school": 5, "relative_to": "sp0", "equals": 0 },
+    { "action": "snapshot", "label": "Spirit gained from the quill", "actor": "bm", "metric": "stat", "stat": 4, "relative_to": "spirit0", "save_as": "spirit_delta" },
+    { "action": "assert", "label": "DISCRIMINATING: the base value rises by exactly 1x the Spirit gained", "actor": "bm", "metric": "spell_effect_value", "spell": 572898, "effect": 0, "relative_to": "val0", "ratio_to": "spirit_delta", "min": 0.95, "max": 1.05 },
+
+    { "action": "snapshot", "label": "Shadow spell power before the ring", "actor": "bm", "metric": "spell_power", "school": 5, "save_as": "sp1" },
+    { "action": "snapshot", "label": "Base value before the ring", "actor": "bm", "metric": "spell_effect_value", "spell": 572898, "effect": 0, "save_as": "val1" },
+    { "action": "add_item", "actor": "bm", "item": 38484 },
+    { "action": "equip", "label": "QA Test +2000 Spell Power Ring: +10000 spell power", "actor": "bm", "item": 38484, "slot": 11 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "SETUP: the ring raised shadow spell power enough to dominate int32 truncation", "actor": "bm", "metric": "spell_power", "school": 5, "relative_to": "sp1", "min": 9000 },
+    { "action": "snapshot", "label": "Shadow spell power gained from the ring", "actor": "bm", "metric": "spell_power", "school": 5, "relative_to": "sp1", "save_as": "sp_delta" },
+    { "action": "assert", "label": "DISCRIMINATING: the base value rises by exactly half the spell power gained", "actor": "bm", "metric": "spell_effect_value", "spell": 572898, "effect": 0, "relative_to": "val1", "ratio_to": "sp_delta", "min": 0.49, "max": 0.51 }
+  ]
+}

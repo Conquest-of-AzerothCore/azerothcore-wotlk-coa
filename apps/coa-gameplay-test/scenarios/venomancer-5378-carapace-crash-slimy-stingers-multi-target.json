@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Slimy Stingers puddles every enemy struck by Carapace Crash rank 58 (#5378)",
+  "contract": "#5378 reports Slimy Stingers only affecting one enemy, not all enemies in 8yd, when Carapace Crash hits a group. This is the same mechanism as #5548 (Fixes in c84e5aa3b, already on origin/main): Slimy Stingers (706001) procs Beetle Slime (704347) per struck target via AscensionVenomancerEvents.cpp's Check() `damage && Named(info,803199)` and Proc() `player->CastSpell(target,704347,true)` (the Unit* overload, required because 704347's EffectImplicitTargetA[0]=53=TARGET_DEST_TARGET_ENEMY resolves its destination from the spell's unit target). The original #5548 scenario proved this at level 60 casting 803199 literally. #5378's reporter is level 59, so their learned ability is rank 573063 (level 58 per AscensionSpellProgressionData.h:2302), not the literal 803199 anchor. `Named(info,803199)` resolves via `sSpellMgr->GetFirstSpellInChain`, which is DB-driven; rev_20260903_01_live_class_baseline.sql:1934-1942 inserts spell_ranks rows linking 803199 (rank 1) through 573063 (rank 9), so GetFirstSpellInChain(573063) should equal GetFirstSpellInChain(803199) and the already-fixed per-target Beetle Slime cast should apply identically to rank 573063. This scenario reproduces #5378's exact setup (Carapace Crash rank 573063, two dummies within the 8yd/5yd AoE radius) to confirm the already-merged fix covers this rank too.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "d1", "owner": "v", "entry": 36, "level": 60, "health": 500000, "distance": 3 },
+    { "id": "d2", "owner": "v", "entry": 36, "level": 60, "health": 500000, "distance": 6 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn settle", "ms": 3000 },
+    { "action": "learn", "actor": "v", "spell": 706001 },
+    { "action": "learn", "actor": "v", "spell": 573063 },
+    { "action": "learn", "actor": "v", "spell": 803183 },
+    { "action": "cast", "actor": "v", "spell": 803183, "label": "Enter Beetle Form: Carapace Crash carries CasterAuraSpell 803183" },
+    { "action": "assert", "label": "SETUP: Beetle Form is active", "actor": "v", "metric": "aura", "spell": 803183, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Clear the GCD from entering Beetle Form", "ms": 1500 },
+    { "action": "assert", "label": "BASELINE: d1 has not taken any Beetle Slime damage yet",
+      "actor": "v", "metric": "spell_damage_count", "spell": 704347, "target": "d1", "equals": 0 },
+    { "action": "assert", "label": "BASELINE: d2 has not taken any Beetle Slime damage yet",
+      "actor": "v", "metric": "spell_damage_count", "spell": 704347, "target": "d2", "equals": 0 },
+    { "action": "set_power", "actor": "v", "power": 1, "value": 1000, "label": "Fill Rage: Carapace Crash costs 250 raw Rage" },
+    { "action": "cast", "actor": "v", "spell": 573063, "target": "d1" },
+    { "action": "assert", "label": "SETUP: Carapace Crash rank 58 cast succeeded", "actor": "v",
+      "metric": "cast_failure", "spell": 573063, "equals": 0 },
+    { "action": "assert", "label": "SETUP: Carapace Crash hit d1", "actor": "v",
+      "metric": "spell_damage_count", "spell": 573063, "target": "d1", "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: Carapace Crash hit d2 (same AoE cast)", "actor": "v",
+      "metric": "spell_damage_count", "spell": 573063, "target": "d2", "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "d1 takes Beetle Slime puddle damage", "actor": "v",
+      "metric": "spell_damage_count", "spell": 704347, "target": "d1", "min": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "DISCRIMINATING: d2 also takes Beetle Slime puddle damage", "actor": "v",
+      "metric": "spell_damage_count", "spell": 704347, "target": "d2", "min": 1, "within_ms": 5000 }
+  ]
+}

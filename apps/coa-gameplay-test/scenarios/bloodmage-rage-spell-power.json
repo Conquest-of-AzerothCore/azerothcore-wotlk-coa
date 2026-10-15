@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Rage turns attack power into spell damage and boosts Reave (#1348)",
+  "contract": "Rage 504241 (20% / 10%) and 504895 (40% / 20%): \"Increases your spell damage by $s1% of your attack power and the damage dealt by Reave by $s2%.\" Effect 0 is aura 237 SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER with MiscValue 127 (all seven schools), consumed in Unit::SpellBaseDamageBonusDone at Unit.cpp:9523 as CalculatePct(GetTotalAttackPowerValue(BASE_ATTACK), GetTotalAuraModifierByMiscMask(...)), which is precisely what the spell_power metric reads. Effect 1 is aura 108 with MiscValue 0 = SPELLMOD_DAMAGE and EffectSpellClassMask [4194304, 0, 0], which over SpellFamilyName 26 selects exactly the eight Reave ranks (800490 and 802463-802469) and nothing else. A level 80 character's attack power is far above 50, so 20% of it is comfortably above the 10 point floor asserted here; the attack power is recorded in the result for the exact relation. No source or SQL change is involved.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Attack power the 20%/40% is taken from",
+      "actor": "b",
+      "metric": "attack_power",
+      "save_as": "attack_power"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_power",
+      "school": 5,
+      "save_as": "sp_base"
+    },
+    {
+      "action": "assert",
+      "label": "Reave carries no damage modifier yet",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 800490,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 504241
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 504241,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds 20% of attack power to Shadow spell power",
+      "actor": "b",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "sp_base",
+      "min": 10
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises Reave damage by 10%",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 800490,
+      "op": 0,
+      "base": 1000,
+      "equals": 1100
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 504241
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 504895
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 adds 40% of attack power to Shadow spell power",
+      "actor": "b",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "sp_base",
+      "min": 20
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises Reave damage by 20%",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 800490,
+      "op": 0,
+      "base": 1000,
+      "equals": 1200
+    }
+  ]
+}

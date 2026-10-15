@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "name": "Cursed Strikes lengthens Rotclaw and Hypovolemic Shock (#1784)",
+  "contract": "Cursed Strikes ships two ranks, 300982 and 301363, each one effect: aura 108 with MiscValue 1 (SPELLMOD_DURATION), BasePoints 49 + DieSides 1 = +50% (rank 1) and 99 + 1 = +100% (rank 2), over EffectSpellClassMask (1048576, 512, 0) = word 0 bit 20 Hypovolemic Shock (572305, 572409-572412) and word 1 bit 9 Rotclaw (503476-503486, 804197) - exactly the two spells the tooltip names. Aura::CalcMaxDuration applies SPELLMOD_DURATION. Rotclaw has DurationIndex 35 = 4000 ms and Hypovolemic Shock DurationIndex 8 = 15000 ms. Tooltip: \"Increases the duration of Rotclaw and Hypovolemic Shock by $s1%.\" The first rank is unlearned before the second so the two modifiers never coexist. Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Rotclaw keeps its authored 4000 ms before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 503486,
+      "op": 1,
+      "base": 4000,
+      "equals": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Hypovolemic Shock keeps its authored 15000 ms before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 572412,
+      "op": 1,
+      "base": 15000,
+      "equals": 15000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 300982
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 lengthens Rotclaw by 50%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 503486,
+      "op": 1,
+      "base": 4000,
+      "equals": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 lengthens Hypovolemic Shock by 50%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 572412,
+      "op": 1,
+      "base": 15000,
+      "equals": 22500
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 300982
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 301363
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 doubles Rotclaw's duration",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 503486,
+      "op": 1,
+      "base": 4000,
+      "equals": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 doubles Hypovolemic Shock's duration",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 572412,
+      "op": 1,
+      "base": 15000,
+      "equals": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Cursed Strikes does not touch Bloodbolt's duration",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 1,
+      "base": 4000,
+      "equals": 4000
+    }
+  ]
+}

@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "name": "Magic Sensitivity applies its debuff on a Shatter Echo critical strike (#1944)",
+  "contract": "Magic Sensitivity 520171 applies aura 42 (proc trigger spell) on 520177, a target debuff whose single effect is SPELL_AURA_MOD_DAMAGE_FROM_CASTER with EffectBasePoints 9 / DieSides 1 (+10%), EffectMiscValue 127 (all schools) and DurationIndex 31 (8000 ms); its empty EffectSpellClassMask makes SpellInfo::IsAffected accept every family 28 spell of that caster, which is the tooltip's \"damage taken from you\". Spell.dbc gives 520171's record ProcFlags 0 and no spell_proc row existed, so the debuff could never be applied. The fix is a spell_proc row on the ranged class damage of Shatter Echo (family 28, word2 0x10) with HitMask 2 (PROC_HIT_CRITICAL) for the tooltip's \"Critical strikes with\", at the record's own 100% ProcChance. The critical strike is made deterministic, not the proc chance: Shatter Echo is Spell.dbc DmgClass 3, so Unit::SpellDoneCritChance reads PLAYER_RANGED_CRIT_PERCENTAGE, and Ideal Time 807210 (SPELL_AURA_MOD_CRIT_PCT, EffectBasePoints 99 / DieSides 1 = +100) is added to that field's flat mod by Player::UpdateWeaponDependentCritAuras, which sums SPELL_AURA_MOD_CRIT_PCT into CRIT_PERCENTAGE, OFFHAND_CRIT_PERCENTAGE and RANGED_CRIT_PERCENTAGE alike with no weapon requirement. The scenario asserts the resulting chance is at least 100 before casting, so the fixture is self-verifying and roll_chance_f cannot fail; the same 807210 fixture is used by the sibling chronomancer-a-ripple-in-time-cooldown.json scenario. Achieved false-failure probability: 0% - a single cast, with both the critical strike and the proc chance pinned at 100%. Shatter Echo carries CasterAuraSpell 804455 (Echo Fragment), fixtured with set_aura, and ranged_hit_rating removes any chance of a miss.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 520171
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 804503
+    },
+    {
+      "action": "assert",
+      "label": "No Magic Sensitivity debuff before any cast",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 520177,
+      "caster": "chronomancer",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Ideal Time pins the critical strike chance",
+      "actor": "chronomancer",
+      "spell": 807210,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Echo Fragments satisfy Shatter Echo's CasterAuraSpell",
+      "actor": "chronomancer",
+      "spell": 804455,
+      "stacks": 5
+    },
+    {
+      "action": "assert",
+      "label": "The fixture really does guarantee a critical strike",
+      "actor": "chronomancer",
+      "metric": "spell_done_crit_chance",
+      "spell": 804503,
+      "target": "dummy",
+      "min": 100
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 804503,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "A critical Shatter Echo applies Magic Sensitivity",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 520177,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

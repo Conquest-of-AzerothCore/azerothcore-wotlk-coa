@@ -1,0 +1,747 @@
+{
+  "schema": 1,
+  "name": "Primalist Natures Blessing: three ticks from each resolved Wave heal",
+  "contract": "Each Seismic Wave heal, including critical healing and overhealing, yields three noncritical ticks at 20% each; unrelated healing and talent removal do not proc. Seismic Wave 572878 also carries a Nature damage effect, so the engine treats the whole spell as negative and rolls spell hit even against the allies it heals; an ally or the full-health target missed that way got neither the heal nor the tick, so the primalist carries spell_hit_rating.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "full",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 58
+    },
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "full"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 572878
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502808
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 100
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 572878,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "health",
+      "min": 101
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_stacks",
+      "spell": 807561,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 8200
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 807466
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 317707,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 317707,
+      "equals": 92
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 572878,
+      "target": "ally",
+      "save_as": "normal_ally_wave_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 807561,
+      "target": "ally",
+      "save_as": "normal_ally_hot_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 807561,
+      "target": "ally",
+      "save_as": "normal_ally_count_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 572878,
+      "target": "full",
+      "save_as": "normal_full_wave_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 807561,
+      "target": "full",
+      "save_as": "normal_full_hot_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 807561,
+      "target": "full",
+      "save_as": "normal_full_count_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 572878,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effective_heal_total",
+      "spell": 572878,
+      "target": "full",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 572878,
+      "target": "ally",
+      "relative_to": "normal_ally_wave_before",
+      "save_as": "normal_ally_heal"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_stacks",
+      "spell": 807561,
+      "caster": "primalist",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amplitude_ms",
+      "spell": 807561,
+      "equals": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_duration_ms",
+      "spell": 807561,
+      "min": 8700,
+      "max": 9000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 572878,
+      "target": "full",
+      "relative_to": "normal_full_wave_before",
+      "save_as": "normal_full_heal"
+    },
+    {
+      "action": "assert",
+      "actor": "full",
+      "metric": "aura_stacks",
+      "spell": 807561,
+      "caster": "primalist",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "full",
+      "metric": "aura_amplitude_ms",
+      "spell": 807561,
+      "equals": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "full",
+      "metric": "aura_duration_ms",
+      "spell": 807561,
+      "min": 8700,
+      "max": 9000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 807561,
+      "target": "ally",
+      "relative_to": "normal_ally_count_before",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 807561,
+      "target": "ally",
+      "relative_to": "normal_ally_count_before",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 807561,
+      "target": "ally",
+      "relative_to": "normal_ally_hot_before",
+      "ratio_to": "normal_ally_heal",
+      "min": 0.198,
+      "max": 0.201
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 807561,
+      "target": "full",
+      "relative_to": "normal_full_count_before",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 807561,
+      "target": "full",
+      "relative_to": "normal_full_hot_before",
+      "ratio_to": "normal_full_heal",
+      "min": 0.198,
+      "max": 0.201
+    },
+    {
+      "action": "wait",
+      "ms": 6200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 807561,
+      "target": "ally",
+      "relative_to": "normal_ally_count_before",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 807561,
+      "target": "ally",
+      "relative_to": "normal_ally_hot_before",
+      "ratio_to": "normal_ally_heal",
+      "min": 0.594,
+      "max": 0.601
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_stacks",
+      "spell": 807561,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 807561,
+      "target": "full",
+      "relative_to": "normal_full_count_before",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 807561,
+      "target": "full",
+      "relative_to": "normal_full_hot_before",
+      "ratio_to": "normal_full_heal",
+      "min": 0.594,
+      "max": 0.601
+    },
+    {
+      "action": "assert",
+      "actor": "full",
+      "metric": "aura_stacks",
+      "spell": 807561,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 807561,
+      "critical": true,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 317707,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 317707,
+      "equals": 92
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 82888,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 572878,
+      "target": "ally",
+      "critical": true,
+      "save_as": "critical_wave_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 572878,
+      "target": "ally",
+      "save_as": "critical_ally_wave_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 807561,
+      "target": "ally",
+      "save_as": "critical_ally_hot_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 807561,
+      "target": "ally",
+      "save_as": "critical_ally_count_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 572878,
+      "target": "full",
+      "save_as": "critical_full_wave_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 807561,
+      "target": "full",
+      "save_as": "critical_full_hot_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 807561,
+      "target": "full",
+      "save_as": "critical_full_count_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 572878,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effective_heal_total",
+      "spell": 572878,
+      "target": "full",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 572878,
+      "target": "ally",
+      "critical": true,
+      "relative_to": "critical_wave_before",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 572878,
+      "target": "ally",
+      "relative_to": "critical_ally_wave_before",
+      "save_as": "critical_ally_heal"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_stacks",
+      "spell": 807561,
+      "caster": "primalist",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amplitude_ms",
+      "spell": 807561,
+      "equals": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_duration_ms",
+      "spell": 807561,
+      "min": 8700,
+      "max": 9000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 572878,
+      "target": "full",
+      "relative_to": "critical_full_wave_before",
+      "save_as": "critical_full_heal"
+    },
+    {
+      "action": "assert",
+      "actor": "full",
+      "metric": "aura_stacks",
+      "spell": 807561,
+      "caster": "primalist",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "full",
+      "metric": "aura_amplitude_ms",
+      "spell": 807561,
+      "equals": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "full",
+      "metric": "aura_duration_ms",
+      "spell": 807561,
+      "min": 8700,
+      "max": 9000
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 807561,
+      "target": "ally",
+      "relative_to": "critical_ally_count_before",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 807561,
+      "target": "ally",
+      "relative_to": "critical_ally_count_before",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 807561,
+      "target": "ally",
+      "relative_to": "critical_ally_hot_before",
+      "ratio_to": "critical_ally_heal",
+      "min": 0.198,
+      "max": 0.201
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 807561,
+      "target": "full",
+      "relative_to": "critical_full_count_before",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 807561,
+      "target": "full",
+      "relative_to": "critical_full_hot_before",
+      "ratio_to": "critical_full_heal",
+      "min": 0.198,
+      "max": 0.201
+    },
+    {
+      "action": "wait",
+      "ms": 6200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 807561,
+      "target": "ally",
+      "relative_to": "critical_ally_count_before",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 807561,
+      "target": "ally",
+      "relative_to": "critical_ally_hot_before",
+      "ratio_to": "critical_ally_heal",
+      "min": 0.594,
+      "max": 0.601
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_stacks",
+      "spell": 807561,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 807561,
+      "target": "full",
+      "relative_to": "critical_full_count_before",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 807561,
+      "target": "full",
+      "relative_to": "critical_full_hot_before",
+      "ratio_to": "critical_full_heal",
+      "min": 0.594,
+      "max": 0.601
+    },
+    {
+      "action": "assert",
+      "actor": "full",
+      "metric": "aura_stacks",
+      "spell": 807561,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 807561,
+      "critical": true,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502808,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 502808,
+      "target": "primalist",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 807561,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 807466
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 572878,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_stacks",
+      "spell": 807561,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 807561,
+      "target": "ally",
+      "equals": 6
+    }
+  ]
+}

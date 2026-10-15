@@ -41,7 +41,9 @@ enum ConnectionFlags
 
 struct AC_DATABASE_API MySQLConnectionInfo
 {
-    explicit MySQLConnectionInfo(std::string_view infoString);
+    explicit MySQLConnectionInfo(std::string_view infoString, std::string_view transactionIsolationLevel = {});
+
+    [[nodiscard]] static bool IsTransactionIsolationLevel(std::string_view level);
 
     std::string user;
     std::string password;
@@ -49,6 +51,7 @@ struct AC_DATABASE_API MySQLConnectionInfo
     std::string host;
     std::string port_or_socket;
     std::string ssl;
+    std::string transactionIsolation;
 };
 
 class AC_DATABASE_API MySQLConnection
@@ -113,6 +116,8 @@ private:
     MySQLConnectionInfo& m_connectionInfo;              //! Connection info (used for logging)
     ConnectionFlags m_connectionFlags;                  //! Connection flags (for preparing relevant statements)
     std::mutex m_Mutex;
+
+    uint32 CheckBinaryLogFormat();
 
     MySQLConnection(MySQLConnection const& right) = delete;
     MySQLConnection& operator=(MySQLConnection const& right) = delete;

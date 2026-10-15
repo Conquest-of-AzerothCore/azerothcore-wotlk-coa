@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "name": "Templar: paid removal and explicit native repurchase at level35 (#5513)",
+  "contract": "Current CharacterAdvancement7024 is Templar class19 Runes tab51, displayed as Crusader by ChrSpecs24. It\ncosts one specialization point, requires no prior entry and has no extra level gate. A level35 Crusader\nmust be able to buy rank1 through the native0x0727 upload, receive705291, remove it and repurchase it.\nSwitching to22 must remove it and switching back to24 must leave the omitted purchase absent until an\nexplicit repurchase. This proves native acquisition and persistence; a live client's talent-window\nclick/render path is not observed. Native removals and resets retain their original prices; fixture\nactors have 100 gold to pay them.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 19,
+      "level": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_money",
+      "label": "Fund the original native removal and purge prices",
+      "actor": "t",
+      "value": 1000000
+    },
+    {
+      "action": "specialization",
+      "actor": "t",
+      "id": 24
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "t",
+      "entry": 7024,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "knows_spell",
+      "spell": 705291,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 705291,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "t",
+      "entry": 7024,
+      "rank": 0
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "knows_spell",
+      "spell": 705291,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 705291,
+      "equals": 0
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "t",
+      "entry": 7024,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 705291,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "specialization",
+      "actor": "t",
+      "id": 22
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 705291,
+      "equals": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "t",
+      "id": 24
+    },
+    {
+      "action": "assert",
+      "label": "The returning upload grants no omitted purchase",
+      "actor": "t",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 705291
+    },
+    {
+      "action": "assert",
+      "label": "The omitted passive stays inactive",
+      "actor": "t",
+      "metric": "aura",
+      "equals": 0,
+      "spell": 705291
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Repurchase through the complete native upload",
+      "actor": "t",
+      "entry": 7024,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "knows_spell",
+      "spell": 705291,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 705291,
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "name": "Moonwell Acuity chains Moonwell Splash to 3 targets under Lunar Eclipse (#2216)",
+  "contract": "Moonwell Acuity 680809 (Spell.dbc, family 32) has SPELL_AURA_ADD_FLAT_MODIFIER (107), EffectMiscValue 12 (SPELLMOD_EFFECT2), base 2 with DieSides 1 (+3) and EffectSpellClassMask word0 0x10, the SpellFamilyFlags of Lunar Eclipse 800386, so it changes 800386's effect index 1. In Spell.dbc that effect is SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 17 (SPELLMOD_JUMP_TARGETS), base -1 (0) and EffectSpellClassMask word1 0x8, the SpellFamilyFlags of Moonwell Splash 800370. Spell::SelectImplicitChainTargets reads SPELLMOD_JUMP_TARGETS into maxTargets, so a base of 0 plus 3 chains Splash to 3 targets, as the tooltip says. AscensionStarcallerContracts.cpp used to overwrite that effect with the Silverstream cost doubling, so no jump modifier existed and Acuity's +3 landed on the cost modifier instead (100 -> 103). The fix moves the cost doubling to effect 2, which the DBC and the module leave as an unread dummy. The scenario learns Acuity before Lunar Eclipse's aura is applied (the modifier value is calculated at application), then asserts through spell_modifier (native Player::ApplySpellMod) that the jump-target modifier on Moonwell Splash is 3 on the talent fixture and 0 on the control, and that Silverstream rank 6 (575052, family flags word0 0x20000000) costs exactly what it does on the control, so the doubled cost is not disturbed. Before the fix the talent fixture is expected to fail the modifier assertion outright; its cost would also drift (from the code path, a 103% instead of 100% cost modification, unmeasured).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Moonwell Acuity before Lunar Eclipse",
+      "actor": "talent",
+      "spell": 680809
+    },
+    {
+      "action": "learn",
+      "label": "Learn Moonwell Splash",
+      "actor": "talent",
+      "spell": 800370
+    },
+    {
+      "action": "learn",
+      "label": "Learn Moonwell Splash",
+      "actor": "control",
+      "spell": 800370
+    },
+    {
+      "action": "learn",
+      "label": "Learn Silverstream rank 6",
+      "actor": "talent",
+      "spell": 575052
+    },
+    {
+      "action": "learn",
+      "label": "Learn Silverstream rank 6",
+      "actor": "control",
+      "spell": 575052
+    },
+    {
+      "action": "set_aura",
+      "label": "Lunar Eclipse active on the talent fixture",
+      "actor": "talent",
+      "spell": 800386,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Lunar Eclipse active on the control",
+      "actor": "control",
+      "spell": 800386,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Eclipse is up on the talent fixture",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 800386,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Eclipse is up on the control",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 800386,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "label": "Silverstream cost under Eclipse, control",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 575052,
+      "save_as": "silverstream_cost"
+    },
+    {
+      "action": "assert",
+      "label": "Control has no jump-target modifier on Moonwell Splash",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 800370,
+      "op": 17,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Acuity gives Moonwell Splash 3 chain targets under Eclipse",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 800370,
+      "op": 17,
+      "base": 0,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Silverstream keeps its exact doubled cost with Acuity",
+      "actor": "talent",
+      "metric": "spell_power_cost",
+      "spell": 575052,
+      "ratio_to": "silverstream_cost",
+      "equals": 1
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Electrifying Aura grants raid crit natively (#992)",
+  "contract": "#992 Electrifying Aura 560568 (SpellFamilyName 22): Spell.dbc Effect[0] is SPELL_EFFECT_APPLY_AREA_AURA_RAID (65), TargetA 1 TARGET_UNIT_CASTER, RadiusIndex 12 (100 yd), ApplyAuraName 290 SPELL_AURA_MOD_CRIT_PCT, EffectBasePoints 2 with EffectDieSides 1 so SpellEffectInfo::CalcValue resolves the amount to 3 (SpellInfo.cpp:337 plus the DieSides==1 -> +1 branch). Handler AuraEffect::HandleAuraModCritPct (SpellAuraEffects.cpp:4892, dispatch entry line 355) calls Player::UpdateAllWeaponDependentCritAuras and UpdateAllSpellCritChances; the amount is summed back in Player::UpdateSpellCritChance (StatSystem.cpp:981, a pure per-school sum of aura modifiers plus a rating bonus, safe for a before/after delta) and in the melee/ranged chain at Player.cpp:7345-7348, whose predicate explicitly lets aura 290 through with no weapon-type check. Non-stacking is native: spell_group 2000181 carries (2000181, 560568) at data/sql/updates/pending_db_world/rev_20260908_05_guardian_completion.sql:327, the group's aura-type set {SPELL_AURA_MOD_CRIT_PCT, SPELL_AURA_MOD_WEAPON_CRIT_PERCENT, SPELL_AURA_MOD_SPELL_CRIT_CHANCE} is hard-coded at src/server/game/Spells/SpellMgr.cpp:1874, stack_rule 3 = SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT (SpellMgr.h:365), applied by Unit::GetTotalAuraModifier (Unit.cpp:6559-6576) which keeps only the highest member per group. 560533 (Fel Infusion) and 560535 are also group 2000181 members whose own effect 0 likewise resolves EffectBasePoints 2 + DieSides 1 = 3, read directly from Spell.dbc for this file, so the DISCRIMINATING step proves the ally's crit stays at +3 (the max of two equal amounts), not +6. This scenario asserts the raid aura's own resolved amount via aura_amount (AuraEffect::GetAmount(), no other term mixed in) and the spell_crit_chance delta (a pure sum, StatSystem.cpp:975-988), but does not assert a raw melee_crit_chance/PLAYER_CRIT_PERCENTAGE before/after delta: apps/coa-gameplay-test/scenarios/starcaller-vigil-of-the-watchers-party-crit.json documents, from an actual harness run, that Player::UpdateCritPercentage (StatSystem.cpp:762-799) recomputes PLAYER_CRIT_PERCENTAGE from FLAT_MOD + PCT_MOD + CR_CRIT_MELEE + a weapon-skill-vs-cap term every time the aura group is (re)applied, so a before/after delta on that field is not a pure +3 and a fresh character's baseline can read 0 before the field is first recomputed. HandleAuraModCritPct is the single function that drives both the melee/ranged chain and the spell chain from the same aura amount, so the aura_amount assertion plus the spell_crit_chance delta together are sufficient evidence that the melee path also receives the aura; a raw melee_crit_chance metric would only add noise, not information, given the documented recompute behavior.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "caster", "race": 8, "class": 16, "level": 80 },
+    { "id": "ally", "race": 8, "class": 16, "level": 80 },
+    { "id": "rival", "race": 8, "class": 16, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+
+    { "action": "group", "label": "Group the ally with the caster", "actor": "caster", "target": "ally" },
+    { "action": "group", "label": "Group the rival with the caster", "actor": "caster", "target": "rival" },
+
+    { "action": "snapshot", "label": "BASELINE #992: ally spell crit chance before Electrifying Aura", "actor": "ally", "metric": "spell_crit_chance", "save_as": "crit_base" },
+
+    { "action": "learn", "label": "Caster learns Electrifying Aura (passive, applies on learn)", "actor": "caster", "spell": 560568 },
+
+    { "action": "assert", "label": "BASELINE #992: the grouped ally receives Electrifying Aura from the caster", "actor": "ally", "metric": "aura", "spell": 560568, "caster": "caster", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "BASELINE #992: the delivered amount is EffectBasePoints 2 + DieSides 1 = 3", "actor": "ally", "metric": "aura_amount", "spell": 560568, "caster": "caster", "effect": 0, "equals": 3 },
+    { "action": "assert", "label": "BASELINE #992: the ally's spell crit chance rises by exactly 3", "actor": "ally", "metric": "spell_crit_chance", "relative_to": "crit_base", "min": 2.99, "max": 3.01, "within_ms": 3000 },
+
+    { "action": "learn", "label": "DISCRIMINATING #992: rival learns Fel Infusion, another group 2000181 member with the same +3 crit amount", "actor": "rival", "spell": 560533 },
+
+    { "action": "assert", "label": "DISCRIMINATING #992: the ally also receives Fel Infusion's raid aura", "actor": "ally", "metric": "aura", "spell": 560533, "caster": "rival", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING #992: the group's exclusive-same-effect rule keeps the ally's spell crit chance at +3, not +6", "actor": "ally", "metric": "spell_crit_chance", "relative_to": "crit_base", "min": 2.99, "max": 3.01 }
+  ]
+}

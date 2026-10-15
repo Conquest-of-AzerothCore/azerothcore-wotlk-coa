@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Eternal Grasp lengthens Tentacle summon durations by 25% (#719)",
+  "contract": "Eternal Grasp 704878 reads 'Increases the duration of your Tentacles by 25%.' In the installed Spell.dbc it is passive, family 31, effect 0 is SPELL_AURA_ADD_PCT_MODIFIER (108), misc 1 = SPELLMOD_DURATION, BasePoints 24 / DieSides 1 = +25%, class mask [32, 4194432, 536870912] = dword 0 bit 5, dword 1 bits 7 and 22, dword 2 bit 29 -- a deliberately wide mask covering every Old-God tentacle summon the Cultist can cast. Tentacle of N'Zoth 572103 (family 31) carries SpellFamilyFlags[0] 32 (bit 5, matches dword 0) and DurationIndex 31 (SpellDuration.dbc: 8000 ms, verified directly). Tentacle of Yogg-Saron 802042 carries SpellFamilyFlags[1] 128 (bit 7, matches dword 1) and DurationIndex 9 (SpellDuration.dbc: 30000 ms, verified directly). Player::ApplySpellMod (Player.cpp:10219-10323) computes SPELLMOD_DURATION as (base+totalflat)*totalmul (line 10323); with only the 25% PCT mod, 8000*1.25=10000 and 30000*1.25=37500. Grasp of Zek'voz 573028 (family 31, SpellFamilyFlags = [2,0,0]) shares none of the three mask words and is the control. The scenario probes the duration modifier on both tentacle spells' real base durations and does not summon them.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "c", "race": 1, "class": 25, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the fixtures settle", "ms": 5000},
+    {"action": "assert", "label": "SETUP: Tentacle of N'Zoth's real 8000 ms duration is unmodified", "actor": "c", "metric": "spell_modifier", "spell": 572103, "op": 1, "base": 8000, "equals": 8000},
+    {"action": "assert", "label": "SETUP: Tentacle of Yogg-Saron's real 30000 ms duration is unmodified", "actor": "c", "metric": "spell_modifier", "spell": 802042, "op": 1, "base": 30000, "equals": 30000},
+    {"action": "assert", "label": "SETUP: control spell unmodified", "actor": "c", "metric": "spell_modifier", "spell": 573028, "op": 1, "base": 8000, "equals": 8000},
+    {"action": "learn", "label": "Learn Eternal Grasp", "actor": "c", "spell": 704878},
+    {"action": "assert", "label": "The passive is active", "actor": "c", "metric": "aura", "spell": 704878, "equals": 1},
+    {"action": "assert", "label": "Tentacle of N'Zoth's duration rises to 10000 ms (+25%, dword 0 bit 5)", "actor": "c", "metric": "spell_modifier", "spell": 572103, "op": 1, "base": 8000, "equals": 10000},
+    {"action": "assert", "label": "Tentacle of Yogg-Saron's duration rises to 37500 ms (+25%, dword 1 bit 7)", "actor": "c", "metric": "spell_modifier", "spell": 802042, "op": 1, "base": 30000, "equals": 37500},
+    {"action": "assert", "label": "Grasp of Zek'voz is outside the mask", "actor": "c", "metric": "spell_modifier", "spell": 573028, "op": 1, "base": 8000, "equals": 8000},
+    {"action": "unlearn", "label": "Drop Eternal Grasp", "actor": "c", "spell": 704878},
+    {"action": "assert", "label": "Tentacle of N'Zoth returns to 8000 ms", "actor": "c", "metric": "spell_modifier", "spell": 572103, "op": 1, "base": 8000, "equals": 8000}
+  ]
+}

@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "moonlit-impaler-arcane-hit|Moonlit Impaler raises Arcane damage and hit chance per rank (#2045)",
+  "contract": "Moonlit Impaler rank 1 561222 and rank 2 706235 (Spell.dbc, SpellFamilyName 32, both carrying the passive bit 0x40) each have effect 0 = SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79, not a school immunity) with EffectMiscValue 64 (Arcane) and EffectBasePoints 4 and 9, which resolve to 5% and 10% with DieSides 1, and effect 1 = SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT (333) with EffectBasePoints 1 and 3, resolving to 2% and 4%, matching 'Increases your Arcane damage by $s1% and your hit chance by $s2%'. Native path: Unit::SpellDamageBonusDone multiplies by GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, schoolMask); HandleAscensionModHitChanceAll calls HandleModHitChance and HandleModSpellHitChance and Player::UpdateMeleeHitChances, UpdateRangedHitChances and UpdateSpellHitChances include aura 333 (StatSystem.cpp), so both m_modMeleeHitChance and m_modSpellHitChance rise. Two talented fixtures (one rank each) are compared with an untalented control of the same race, class and level. Scattered Star 804995 (school mask 0x40) scales 1.05 and 1.10 through spell_damage_done; Fireball 133 (school mask 0x4) must not move, because the aura's misc mask is Arcane only; hit chance rises by exactly 2 and 4 percentage points through melee_hit_chance and spell_hit_chance. Damage results are integers derived from a base of 1000, so the ratio windows are tight.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "rank_one",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "rank_two",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "control",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "rank_one",
+      "spell": 561222
+    },
+    {
+      "action": "learn",
+      "actor": "rank_two",
+      "spell": 706235
+    },
+    {
+      "action": "snapshot",
+      "label": "Scattered Star damage without the talent",
+      "actor": "control",
+      "metric": "spell_damage_done",
+      "spell": 804995,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "arcane_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Fireball damage without the talent",
+      "actor": "control",
+      "metric": "spell_damage_done",
+      "spell": 133,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "fire_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Spell hit chance without the talent",
+      "actor": "control",
+      "metric": "spell_hit_chance",
+      "save_as": "spell_hit_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Melee hit chance without the talent",
+      "actor": "control",
+      "metric": "melee_hit_chance",
+      "save_as": "melee_hit_base"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises Arcane damage by 5%",
+      "actor": "rank_one",
+      "metric": "spell_damage_done",
+      "spell": 804995,
+      "effect": 0,
+      "target": "dummy",
+      "ratio_to": "arcane_base",
+      "min": 1.049,
+      "max": 1.051
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises Arcane damage by 10%",
+      "actor": "rank_two",
+      "metric": "spell_damage_done",
+      "spell": 804995,
+      "effect": 0,
+      "target": "dummy",
+      "ratio_to": "arcane_base",
+      "min": 1.099,
+      "max": 1.101
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 leaves Fire damage unchanged",
+      "actor": "rank_two",
+      "metric": "spell_damage_done",
+      "spell": 133,
+      "effect": 0,
+      "target": "dummy",
+      "relative_to": "fire_base",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises spell hit chance by 2 points",
+      "actor": "rank_one",
+      "metric": "spell_hit_chance",
+      "relative_to": "spell_hit_base",
+      "min": 1.99,
+      "max": 2.01
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises spell hit chance by 4 points",
+      "actor": "rank_two",
+      "metric": "spell_hit_chance",
+      "relative_to": "spell_hit_base",
+      "min": 3.99,
+      "max": 4.01
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises melee hit chance by 2 points",
+      "actor": "rank_one",
+      "metric": "melee_hit_chance",
+      "relative_to": "melee_hit_base",
+      "min": 1.99,
+      "max": 2.01
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises melee hit chance by 4 points",
+      "actor": "rank_two",
+      "metric": "melee_hit_chance",
+      "relative_to": "melee_hit_base",
+      "min": 3.99,
+      "max": 4.01
+    }
+  ]
+}

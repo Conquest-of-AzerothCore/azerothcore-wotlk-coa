@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Hail of Gunfire grants 10% ranged haste (#3358)",
+  "contract": "Hail of Gunfire 804187 reads 'Increases your ranged haste by $s1%.' In the installed Spell.dbc it is a passive, family 21, with one effect: SPELL_AURA_MOD_RANGED_HASTE (140), BasePoints 9 (DieSides 1, so 10%), self target, no class mask. AuraEffect::HandleAuraModRangedHaste (SpellAuraEffects.cpp:5012) calls Unit::ApplyAttackTimePercentMod(RANGED_ATTACK), which divides the ranged attack time by 1.10 (Unit.cpp:14145), so the expected ratio 1/1.10 = 0.9091 comes from the DBC amount. The module never touches 804187. The stale hidden-aura tooltip that mentions Quickdraw is client-only and not asserted.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Crossbows skill, as in shadowblast-shadow-rage.json", "actor": "hunter", "spell": 5011},
+    {"action": "add_item", "actor": "hunter", "item": 15807},
+    {"action": "equip", "actor": "hunter", "item": 15807, "slot": 17},
+    {"action": "wait", "label": "Let the weapon swap cooldown expire", "ms": 2000},
+    {"action": "snapshot", "label": "Ranged swing time before any haste", "actor": "hunter", "metric": "attack_time_ms", "hand": 2, "save_as": "ranged_base"},
+    {"action": "learn", "label": "Hail of Gunfire", "actor": "hunter", "spell": 804187},
+    {"action": "assert", "label": "Effect 0 is the authored 10%", "actor": "hunter", "metric": "aura_amount", "spell": 804187, "effect": 0, "equals": 10},
+    {"action": "assert", "label": "Ranged swing time is 1/1.10 of the base", "actor": "hunter", "metric": "attack_time_ms", "hand": 2, "ratio_to": "ranged_base", "min": 0.905, "max": 0.913, "within_ms": 3000},
+    {"action": "unlearn", "label": "Drop Hail of Gunfire", "actor": "hunter", "spell": 804187},
+    {"action": "assert", "label": "Swing time returns to the base", "actor": "hunter", "metric": "attack_time_ms", "hand": 2, "ratio_to": "ranged_base", "min": 0.999, "max": 1.001, "within_ms": 3000}
+  ]
+}

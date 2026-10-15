@@ -191,10 +191,10 @@ Lessons from the Guardian correction; these are source/test findings, not a clai
 - `C:/Ascension/tools/Audit-BarbarianDamage.py` — pinned pre-fix contract audit, not a post-fix health check.
 - `C:/Ascension/tools/Test-BarbarianDamageFix.py` — native block and x86/x64 launcher fixtures.
 - `C:/Ascension/tools/Generate-BarbarianDamageFix.py` — policy-owned SQL and description-only DBC generation.
-- `C:/Ascension/azerothcore-wotlk-coa/modules/mod-ascension-compat/src/AscensionBarbarianScaling.cpp` — guarded RAP exception.
+- `C:/Ascension/azerothcore-wotlk-coa/src/server/coa/AscensionBarbarianScaling.cpp` — guarded RAP exception.
 - `C:/Ascension/runtime/validation/barbarian-damage-20260906/implemented.md` — deployment facts and limits.
 - `C:/Ascension/tools/Test-GuardianStandards.py` — actual-source summon/scaling/armor cases and model checks.
-- `C:/Ascension/azerothcore-wotlk-coa/modules/mod-ascension-compat/src/AscensionGuardianStandards.cpp` — stationary standards.
+- `C:/Ascension/azerothcore-wotlk-coa/src/server/coa/AscensionGuardianStandards.cpp` — stationary standards.
 
 ## Pyromancer follow-up lessons
 
@@ -264,10 +264,35 @@ Lessons from the Guardian correction; these are source/test findings, not a clai
   existing Shattrath portal 23719 as an explicit local substitute; dependency resolution and
   controlled movement fixtures do not establish rendered appearance or live navigation.
 
+Lessons from the second audit round, 2026-09-21:
+
+- An audit report saying "zero occurrences of the spell ID in the source" is not a defect report.
+  Of 125 reports, 55 described a mechanic the core already delivers through native spell modifiers,
+  stat auras or a generic engine path. Trace the spell to the value the server uses before writing
+  code; close those with a scenario, not with a handler.
+- A metric can be structurally blind to the mechanic under test. `melee_damage_done` calls
+  `MeleeDamageBonusDone` with `SPELL_SCHOOL_MASK_NORMAL`, and that path deliberately skips
+  `SPELL_AURA_MOD_DAMAGE_PERCENT_DONE` because normal-school percent mods are already folded into
+  `UNIT_MOD_DAMAGE_MAINHAND` by `UpdateDamagePctDoneMods`. A raid damage aura reads as "no effect"
+  there while working; `weapon_damage_min` sees it.
+- `learn` is not a talent change: it does not auto-cast a spell that lacks `SPELL_ATTR0_PASSIVE`,
+  and it does not strip the lower rank, so two ranks stack and a "rank 2 is worth 6" assertion reads
+  9. Give a passive its attribute at load time, and raise a buff with `set_aura` rather than
+  assuming `learn` applied it.
+- The Sun Cleric's legacy-class mapping is Priest, whose `parry_cap` is 0 in
+  `Player::UpdateParryPercentage`, so every parry aura was discarded before reaching the stat. Class
+  27 now takes the Paladin curve, as the Starcaller already did. The curve is a local engineering
+  choice, not a value read from the tooltip or the DBC.
+- Pinning an effect amount to a constant to carry an unrelated flag costs the effect. Dawn's
+  effect-1 amount is forced to 1 so `ActivateDawn` can read it as the Sunrise/Sunset school choice,
+  which silently erases anything a talent adds to that effect (#1562).
+- Two fixtures do not share a baseline: the same character reads 1000 for `spell_damage_done` and
+  800 for `spell_healing_done`, so "+10% on both" is +100 and +80, not +100 twice.
+
 ## Venomancer completion, 2026-09-10
 
 Source package: `runtime/validation/venomancer-completion-20260910`; new SQL14 only. See its
-190 individual dispositions and `modules/mod-ascension-compat/docs/venomancer-completion.md`.
+190 individual dispositions and `docs/coa/venomancer-completion.md`.
 Preserve the pending Pyromancer, Cultist and Sun Cleric packages and current native-file launcher.
 
 - Distinguish an obsolete zero-flag proc field from a functioning native effect: Venomancy Expert
@@ -292,7 +317,7 @@ Preserve the pending Pyromancer, Cultist and Sun Cleric packages and current nat
 
 ## Tinker completion, 2026-09-10
 
-The pending Tinker policy is `modules/mod-ascension-compat/docs/tinker-completion.md`; individual
+The pending Tinker policy is `docs/coa/tinker-completion.md`; individual
 dispositions are in `runtime/validation/tinker-completion-20260910/findings.md`. Source reconstruction
 does not establish linked runtime behavior or official parity. Nanobot Reconstruction scaling remains
 unresolved; keep its current first/higher-rank coefficients until evidence establishes a stat term.

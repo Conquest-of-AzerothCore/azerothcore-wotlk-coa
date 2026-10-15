@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "name": "Waves of Time knocks back on cast, not only two seconds later (#3729)",
+  "contract": "Waves of Time 801277 reads \"Blast enemies in a frontal cone with time fractals, knocking them back slightly. The knockback repeats 1 additional time after 2 sec.\" - two knockbacks, the first at cast time. Spell.dbc ships only the second: Effect[0] is Effect=183 SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED with EffectBasePoints 1999 / DieSides 1 (a 2000 ms delay), EffectTriggerSpell 802600 and EffectImplicitTargetA 1 (caster), and Spell::EffectAscensionTriggerSpellDelayed schedules exactly one delayed cast, so that effect is the \"repeats 1 additional time after 2 sec\" half and it already works. Effect[1] is Effect=64 SPELL_EFFECT_TRIGGER_SPELL on EffectImplicitTargetA 24 (TARGET_UNIT_CONE_ENEMY_24) but its EffectTriggerSpell is 65633, Arcane Cast Visual - SpellFamilyName 3, one SPELL_EFFECT_DUMMY, no handler and no script anywhere in src/ - so nothing whatsoever happens at cast time. The knockback itself is 802600: Effect=98 SPELL_EFFECT_KNOCK_BACK, EffectBasePoints 69, EffectMiscValue 150, EffectImplicitTargetA 24 with EffectRadiusIndex 13 = 10 yards in SpellRadius.dbc, which selects its own cone from the caster. The fix casts 802600 at cast time exactly as the delayed half does. Only timing discriminates: the assertions are bounded in time, because the target's total displacement after 2.5 seconds is the same with or without the fix. The dummy starts 3 yards in front of the caster and MotionMaster::MoveKnockbackFrom carries it 2 * (7 / 19.29) * 15 = 10.9 yards in about 0.73 s, which puts it past 802600's 10-yard cone radius; the second, delayed knockback therefore has no target left and is deliberately not asserted here. Unit::KnockbackFrom moves a creature server-side through MoveKnockbackFrom, while a player would only be sent SMSG_MOVE_KNOCK_BACK and would not move without a client acknowledgement, so the knocked-back actor has to be the creature.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 530,
+    "x": 7633.86,
+    "y": -6810.22,
+    "z": 79.5987,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 801277
+    },
+    {
+      "action": "assert",
+      "label": "The dummy starts inside the cone, three yards in front of the caster",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.5,
+      "max": 3.5
+    },
+    {
+      "action": "snapshot",
+      "label": "Separation before the cast",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "save_as": "before_cast"
+    },
+    {
+      "action": "cast",
+      "label": "Waves of Time, cone-targeted from the caster",
+      "actor": "chronomancer",
+      "spell": 801277
+    },
+    {
+      "action": "assert",
+      "label": "The cone knocks the dummy back immediately, well before the two-second repeat",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "relative_to": "before_cast",
+      "min": 2,
+      "within_ms": 900
+    },
+    {
+      "action": "wait",
+      "label": "Let the first knockback's 0.73 s arc finish, still short of the 2 s repeat",
+      "ms": 700
+    },
+    {
+      "action": "assert",
+      "label": "The whole first knockback has landed before the delayed one could have fired",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "relative_to": "before_cast",
+      "min": 6
+    }
+  ]
+}

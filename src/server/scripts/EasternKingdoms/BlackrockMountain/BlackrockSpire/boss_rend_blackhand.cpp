@@ -22,9 +22,12 @@
 
 enum Spells
 {
-    SPELL_WHIRLWIND                 = 13736, // sniffed
-    SPELL_CLEAVE                    = 15284,
-    SPELL_MORTAL_STRIKE             = 16856,
+    // Ascension's kit (db.exil.es/npc/10429), which records no timers
+    SPELL_AUTO_SHOT                 = 2102841,
+    SPELL_REND                      = 2102842,
+    SPELL_MORTAL_STRIKE             = 2102846,
+    SPELL_BLADESTORM                = 2102847,
+    SPELL_FIERCE_BLOW               = 975011,
     SPELL_FRENZY                    = 8269,
     SPELL_KNOCKDOWN                 = 13360  // On spawn during Gyth fight
 };
@@ -94,14 +97,17 @@ enum Events
     EVENT_PATH_NEFARIUS             = 27,
     EVENT_TELEPORT_1                = 28,
     EVENT_TELEPORT_2                = 29,
-    EVENT_WHIRLWIND                 = 30,
-    EVENT_CLEAVE                    = 31,
+    EVENT_BLADESTORM                = 30,
+    EVENT_REND                      = 31,
     EVENT_MORTAL_STRIKE             = 32,
+    EVENT_FIERCE_BLOW               = 33,
+    EVENT_AUTO_SHOT                 = 34,
 };
 
 struct boss_rend_blackhand : public BossAI
 {
-    boss_rend_blackhand(Creature* creature) : BossAI(creature, DATA_WARCHIEF_REND_BLACKHAND) { }
+    boss_rend_blackhand(Creature* creature) : BossAI(creature, DATA_WARCHIEF_REND_BLACKHAND),
+        _gythEvent(false), _currentWave(0) { }
 
     void Reset() override
     {
@@ -135,7 +141,7 @@ struct boss_rend_blackhand : public BossAI
     void SummonedCreatureDies(Creature* /*creature*/, Unit* /*killer*/) override
     {
         if (!summons.IsAnyCreatureAlive())
-            events.ScheduleEvent(EVENT_WAVES_TEXT_1 + _currentWave, 10s);
+            events.ScheduleEvent(EVENT_WAVES_TEXT_1 + _currentWave - 1, 10s);
     }
 
     void JustSummoned(Creature* summon) override
@@ -154,9 +160,11 @@ struct boss_rend_blackhand : public BossAI
     void JustEngagedWith(Unit* /*who*/) override
     {
         _JustEngagedWith();
-        events.ScheduleEvent(EVENT_WHIRLWIND, 13s, 15s);
-        events.ScheduleEvent(EVENT_CLEAVE, 15s, 17s);
-        events.ScheduleEvent(EVENT_MORTAL_STRIKE, 17s, 19s);
+        events.ScheduleEvent(EVENT_REND, 3s, 5s);
+        events.ScheduleEvent(EVENT_FIERCE_BLOW, 5s, 7s);
+        events.ScheduleEvent(EVENT_MORTAL_STRIKE, 8s, 10s);
+        events.ScheduleEvent(EVENT_BLADESTORM, 20s, 25s);
+        events.ScheduleEvent(EVENT_AUTO_SHOT, 2s);
     }
 
     void EnterEvadeMode(EvadeReason why) override
@@ -384,26 +392,38 @@ struct boss_rend_blackhand : public BossAI
 
         events.Update(diff);
 
-        if (me->HasUnitState(UNIT_STATE_CASTING))
+        if (me->HasUnitState(UNIT_STATE_CASTING) || me->HasAura(SPELL_BLADESTORM))
             return;
 
         while (uint32 eventId = events.ExecuteEvent())
         {
             switch (eventId)
             {
-                case EVENT_WHIRLWIND:
-                    DoCast(SPELL_WHIRLWIND);
-                    events.ScheduleEvent(EVENT_WHIRLWIND, 13s, 18s);
+                case EVENT_BLADESTORM:
+                    DoCastSelf(SPELL_BLADESTORM);
+                    events.ScheduleEvent(EVENT_BLADESTORM, 30s, 35s);
                     break;
-                case EVENT_CLEAVE:
-                    DoCastVictim(SPELL_CLEAVE);
-                    events.ScheduleEvent(EVENT_CLEAVE, 10s, 14s);
+                case EVENT_REND:
+                    DoCastVictim(SPELL_REND);
+                    events.ScheduleEvent(EVENT_REND, 15s, 18s);
                     break;
                 case EVENT_MORTAL_STRIKE:
                     DoCastVictim(SPELL_MORTAL_STRIKE);
-                    events.ScheduleEvent(EVENT_MORTAL_STRIKE, 14s, 18s);
+                    events.ScheduleEvent(EVENT_MORTAL_STRIKE, 10s, 14s);
+                    break;
+                case EVENT_FIERCE_BLOW:
+                    DoCastVictim(SPELL_FIERCE_BLOW);
+                    events.ScheduleEvent(EVENT_FIERCE_BLOW, 6s, 8s);
+                    break;
+                case EVENT_AUTO_SHOT:
+                    if (!me->IsWithinMeleeRange(me->GetVictim()))
+                        DoCastVictim(SPELL_AUTO_SHOT);
+                    events.ScheduleEvent(EVENT_AUTO_SHOT, 2s);
                     break;
             }
+
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
         }
         DoMeleeAttackIfReady();
     }

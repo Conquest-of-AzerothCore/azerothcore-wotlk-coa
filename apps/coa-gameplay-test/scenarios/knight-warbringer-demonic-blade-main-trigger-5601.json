@@ -1,0 +1,130 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth: current-main Warbringer triggers Demonic Blade after normal talent purchase (#5601)",
+  "contract": [
+    "The reported Warbringer trigger is implemented on current main. A normal War specialization transforms",
+    "the owned level60 Flames573448 to Warbringer802586. Its native hit without Demonic Blade must grant",
+    "no681184 aura. A paid CA29519 purchase enables704957; the same actual Warbringer rank must then",
+    "apply681184 with the two internal Gore uses independently authored by its description. Visible charges",
+    "are covered separately by issue5602; this scenario isolates whether the proc appears. Both measured",
+    "casts require native cooldown readiness and acceptance before their hit or proc is assessed."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "k",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "k",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "add_item", "actor": "k", "item": 629951},
+    {"action": "equip", "actor": "k", "item": 629951, "slot": 15},
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 573448,
+      "label": "Fixture: own the level60 Flames of Xoroth rank that War transforms"
+    },
+    {"action": "specialization", "actor": "k", "id": 18},
+    {"action": "assert", "actor": "k", "metric": "knows_spell", "spell": 802586, "equals": 1},
+    {"action": "set_aura", "actor": "k", "spell": 500906, "stacks": 1},
+    {"action": "set_power", "actor": "k", "power": 1, "value": 1000},
+    {
+      "action": "assert",
+      "label": "Warbringer native cooldown is ready",
+      "actor": "k",
+      "metric": "cooldown_ms",
+      "spell": 802586,
+      "equals": 0,
+      "within_ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "Warbringer native global cooldown is ready",
+      "actor": "k",
+      "metric": "global_cooldown_ms",
+      "spell": 802586,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {"action": "cast", "actor": "k", "spell": 802586, "target": "enemy"},
+    {
+      "action": "assert",
+      "label": "Normal Warbringer cast was accepted",
+      "actor": "k",
+      "metric": "cast_failure",
+      "spell": 802586,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 802586,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {"action": "stop_attack", "actor": "k"},
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura",
+      "spell": 681184,
+      "equals": 0,
+      "label": "Warbringer without Demonic Blade grants no proc"
+    },
+    {"action": "advancement_rank", "actor": "k", "entry": 29519, "rank": 1},
+    {"action": "assert", "actor": "k", "metric": "aura", "spell": 704957, "equals": 1, "within_ms": 2000},
+    {"action": "wait", "ms": 1600},
+    {"action": "reset_cooldown", "actor": "k", "spell": 802586},
+    {"action": "set_aura", "actor": "k", "spell": 500906, "stacks": 1},
+    {"action": "set_power", "actor": "k", "power": 1, "value": 1000},
+    {
+      "action": "assert",
+      "label": "Warbringer native cooldown is ready",
+      "actor": "k",
+      "metric": "cooldown_ms",
+      "spell": 802586,
+      "equals": 0,
+      "within_ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "Warbringer native global cooldown is ready",
+      "actor": "k",
+      "metric": "global_cooldown_ms",
+      "spell": 802586,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {"action": "cast", "actor": "k", "spell": 802586, "target": "enemy"},
+    {
+      "action": "assert",
+      "label": "Normal Warbringer cast was accepted",
+      "actor": "k",
+      "metric": "cast_failure",
+      "spell": 802586,
+      "equals": 0
+    },
+    {"action": "assert", "actor": "k", "metric": "aura", "spell": 681184, "equals": 1, "within_ms": 3000},
+    {"action": "stop_attack", "actor": "k"},
+    {"action": "assert", "actor": "k", "metric": "aura_script_value", "spell": 681184, "key": 681184, "equals": 2}
+  ]
+}

@@ -1,0 +1,197 @@
+{
+  "schema": 1,
+  "name": "Deal With The Devil guarantees Quickdraw critical hits (#2192)",
+  "contract": [
+    "Deal With The Devil (680255) explicitly guarantees Quickdraw critical strikes. Both Quickdraw ranks",
+    "must have a 100% critical chance while the talent is active, and an ordinary player-submitted rank-1",
+    "cast must land as a critical hit. Shadowblast, Sixfold Shot child hits, another hunter and the",
+    "untalented state retain their normal chance. The readiness aura and crossbow are fixtures; cast",
+    "costs and the native hit and critical resolution remain enabled. This regression does not assert",
+    "client rendering or random proc rates."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 60,
+      "distance": 12,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Quickdraw is not guaranteed without Deal With The Devil",
+      "actor": "hunter",
+      "metric": "spell_done_crit_chance_scripted",
+      "spell": 804193,
+      "target": "dummy",
+      "max": 99
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 680255
+    },
+    {
+      "action": "assert",
+      "label": "Deal With The Devil is active",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 680255,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The talent guarantees Quickdraw rank 1 critical strikes",
+      "actor": "hunter",
+      "metric": "spell_done_crit_chance_scripted",
+      "spell": 804193,
+      "target": "dummy",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "The talent guarantees Quickdraw rank 2 critical strikes",
+      "actor": "hunter",
+      "metric": "spell_done_crit_chance_scripted",
+      "spell": 806846,
+      "target": "dummy",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "An unrelated Shadowblast retains its ordinary critical chance",
+      "actor": "hunter",
+      "metric": "spell_done_crit_chance_scripted",
+      "spell": 680264,
+      "target": "dummy",
+      "max": 99
+    },
+    {
+      "action": "assert",
+      "label": "Sixfold Shot child hits retain their ordinary critical chance",
+      "actor": "hunter",
+      "metric": "spell_done_crit_chance_scripted",
+      "spell": 807527,
+      "target": "dummy",
+      "max": 99
+    },
+    {
+      "action": "assert",
+      "label": "Another hunter does not inherit the guarantee",
+      "actor": "control",
+      "metric": "spell_done_crit_chance_scripted",
+      "spell": 804193,
+      "target": "dummy",
+      "max": 99
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 5011
+    },
+    {
+      "action": "add_item",
+      "actor": "hunter",
+      "item": 15807
+    },
+    {
+      "action": "equip",
+      "actor": "hunter",
+      "item": 15807,
+      "slot": 17
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 804193
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "hunter",
+      "spell": 680244,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "hunter",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 804193,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "A submitted Quickdraw lands as a critical hit",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 804193,
+      "target": "dummy",
+      "critical": true,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The cast produces no ordinary noncritical hit",
+      "actor": "hunter",
+      "metric": "spell_damage_count",
+      "spell": 804193,
+      "target": "dummy",
+      "critical": false,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 680255
+    },
+    {
+      "action": "assert",
+      "label": "Removing the talent restores ordinary Quickdraw critical chance",
+      "actor": "hunter",
+      "metric": "spell_done_crit_chance_scripted",
+      "spell": 804193,
+      "target": "dummy",
+      "max": 99
+    }
+  ]
+}

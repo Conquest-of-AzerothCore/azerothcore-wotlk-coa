@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Blood Pact grants 50 dodge and its conditional healing clause (#3245)",
+  "contract": "Blood Pact 801955 ships three SPELL_EFFECT_APPLY_AURA effects in Spell.dbc. Effect 0 is aura 185 SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE with BasePoints -51 + DieSides 1 = -50, live in Unit::RollMeleeOutcomeAgainst. Effect 2 is aura 49 SPELL_AURA_MOD_DODGE_PERCENT with BasePoints 49 + DieSides 1 = +50 (AuraEffect::HandleAuraModDodgePercent). Effect 1 is aura 118 SPELL_AURA_MOD_HEALING_PCT with BasePoints -1 + DieSides 1 = 0, which is the description's conditional $?s560257[...] clause: Blood Runs Cold 560257 is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER with MiscValue 3 = SPELLMOD_EFFECT1, BasePoints 19 + DieSides 1 = +20 and SpellClassMask (0, 0, 65536), which matches Blood Pact's own SpellFamilyFlags (0, 0, 65536), so SpellEffectInfo::CalcValue raises effect 1 to 20% once it is learned. Both halves are native. NOT covered here: the description's closing sentence \"While active you can dodge or parry while casting.\" Unit::RollMeleeOutcomeAgainst (Unit.cpp:3099/3131) and Unit::RollMeleeOutcomeAgainst's spell variant (Unit.cpp:3533/3552) zero dodge and parry through victim->IsNonMeleeSpellCast(false, victim->CanDefendDuringChannel(), true), and Unit::CanDefendDuringChannel exempts only a Demon Hunter channeling 800206. The harness reads dodge_chance and parry_chance as field values and counts melee packets, but has no per-swing outcome metric, so that clause cannot be discriminated here and is left to a Ghost e2e combat-log test. 801955 is not passive (Attributes 0x0), so WorldSession::HandleCastSpellOpcode (SpellHandler.cpp:460) discards the cast unless the caster holds the spell (HasActiveSpell); the scenario learns it first. Learning it does not disturb the two spell_effect_value assertions above, which read SpellEffectInfo::CalcValue and submit nothing.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 20, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "The healing clause is 0 until Blood Runs Cold is learned",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 801955, "effect": 1, "equals": 0
+    },
+    { "action": "learn", "actor": "caster", "spell": 560257 },
+    {
+      "action": "assert", "label": "Blood Runs Cold raises it to the shipped 20%",
+      "actor": "caster", "metric": "spell_effect_value", "spell": 801955, "effect": 1, "equals": 20
+    },
+    { "action": "snapshot", "actor": "caster", "metric": "dodge_chance", "save_as": "dodge_before" },
+    { "action": "learn", "label": "Know the pact before casting it", "actor": "caster", "spell": 801955 },
+    { "action": "set_power", "actor": "caster", "power": 1, "value": 1000 },
+    { "action": "cast", "actor": "caster", "spell": 801955 },
+    {
+      "action": "assert", "label": "Blood Pact is active on its caster",
+      "actor": "caster", "metric": "aura", "spell": 801955, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Dodge chance rises by 50 percentage points",
+      "actor": "caster", "metric": "dodge_chance", "relative_to": "dodge_before",
+      "min": 49.9, "max": 50.1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The ranged-hit penalty carries the shipped -50",
+      "actor": "caster", "metric": "aura_amount", "spell": 801955, "effect": 0, "equals": -50
+    }
+  ]
+}

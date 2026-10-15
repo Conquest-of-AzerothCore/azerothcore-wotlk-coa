@@ -1,0 +1,684 @@
+{
+  "schema": 1,
+  "name": "Primalist Nature Call rank-specific incoming healing",
+  "contract": "Both ranks add their authored outgoing healing and healing received from others. Rank one also increases self-healing received by 6%; rank two explicitly excludes self-healing from the incoming 12% bonus. Real heals to self, to an ally and from an ally complete successfully; removal restores baseline.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 58
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 2050
+    },
+    {
+      "action": "learn",
+      "actor": "ally",
+      "spell": 2050
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 707807,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706150,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_healing_done",
+      "spell": 2050,
+      "target": "ally",
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_healing_taken",
+      "spell": 2050,
+      "target": "ally",
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_healing_taken",
+      "spell": 2050,
+      "target": "primalist",
+      "equals": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "ally",
+      "save_as": "baseline_pa"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2050,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "ally",
+      "relative_to": "baseline_pa",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "primalist",
+      "save_as": "baseline_ap"
+    },
+    {
+      "action": "cast",
+      "actor": "ally",
+      "spell": 2050,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "primalist",
+      "relative_to": "baseline_ap",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "primalist",
+      "save_as": "baseline_pp"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2050,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "primalist",
+      "relative_to": "baseline_pp",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 707807,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706150,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 706150
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_healing_done",
+      "spell": 2050,
+      "target": "ally",
+      "equals": 1060
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_healing_taken",
+      "spell": 2050,
+      "target": "ally",
+      "equals": 1060
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_healing_taken",
+      "spell": 2050,
+      "target": "primalist",
+      "equals": 1060
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "ally",
+      "save_as": "first_pa"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2050,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "ally",
+      "relative_to": "first_pa",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "primalist",
+      "save_as": "first_ap"
+    },
+    {
+      "action": "cast",
+      "actor": "ally",
+      "spell": 2050,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "primalist",
+      "relative_to": "first_ap",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "primalist",
+      "save_as": "first_pp"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2050,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "primalist",
+      "relative_to": "first_pp",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 707807,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706150,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 707807
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_healing_done",
+      "spell": 2050,
+      "target": "ally",
+      "equals": 1120
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_healing_taken",
+      "spell": 2050,
+      "target": "ally",
+      "equals": 1120
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_healing_taken",
+      "spell": 2050,
+      "target": "primalist",
+      "equals": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "ally",
+      "save_as": "highest_pa"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2050,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "ally",
+      "relative_to": "highest_pa",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "primalist",
+      "save_as": "highest_ap"
+    },
+    {
+      "action": "cast",
+      "actor": "ally",
+      "spell": 2050,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "primalist",
+      "relative_to": "highest_ap",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "primalist",
+      "save_as": "highest_pp"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2050,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "primalist",
+      "relative_to": "highest_pp",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 707807,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 706150,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_healing_done",
+      "spell": 2050,
+      "target": "ally",
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_healing_taken",
+      "spell": 2050,
+      "target": "ally",
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_healing_taken",
+      "spell": 2050,
+      "target": "primalist",
+      "equals": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "ally",
+      "save_as": "removed_pa"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2050,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "ally",
+      "relative_to": "removed_pa",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "primalist",
+      "save_as": "removed_ap"
+    },
+    {
+      "action": "cast",
+      "actor": "ally",
+      "spell": 2050,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "primalist",
+      "relative_to": "removed_ap",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "primalist",
+      "save_as": "removed_pp"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 2050,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 2050,
+      "target": "primalist",
+      "relative_to": "removed_pp",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    }
+  ]
+}

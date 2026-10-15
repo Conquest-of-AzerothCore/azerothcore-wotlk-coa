@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Nozdormu's Gaze restores extra mana when Time Out! is cast (#3690)",
+  "contract": "Nozdormu's Gaze 807691's tooltip is \"Your Time Out! now regenerates $s1% less mana per tick, but casting it now instantly restores an additional $504838s1% of your maximum mana\". Its effect 1 is aura 42 (SPELL_AURA_PROC_TRIGGER_SPELL) on 504838, whose single effect is the native SPELL_EFFECT_ENERGIZE_PCT for 15% of maximum mana. Spell.dbc gives 807691 ProcFlags 0x0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and Aura::GetProcEffectMask returned 0: the additional restore never happened. Time Out! 803897 already restores 15% by itself (its own effect 2 is SPELL_EFFECT_ENERGIZE_PCT with BasePoints 14), so an absolute mana reading cannot separate the two; a second, otherwise identical Chronomancer without the talent supplies the baseline, and the difference is the talent's contribution. Both casters are drained to the same starting mana first. This scenario covers only the restore half of the issue: 807691's effect 0 uses SpellModOp 3 (SPELLMOD_EFFECT1), which Unit::ApplyEffectModifiers applies to Time Out!'s effect index 0 (its damage reduction) instead of effect index 1 (its mana per tick), and no assertion is made about that here.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 22, "level": 80 },
+    { "id": "talent", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "control", "spell": 803897 },
+    { "action": "learn", "actor": "talent", "spell": 803897 },
+    { "action": "learn", "actor": "talent", "spell": 807691 },
+    { "action": "set_power", "actor": "control", "power": 0, "value": 100 },
+    { "action": "set_power", "actor": "talent", "power": 0, "value": 100 },
+    { "action": "cast", "actor": "control", "spell": 803897 },
+    { "action": "cast", "actor": "talent", "spell": 803897 },
+    { "action": "wait", "label": "Let both instant casts resolve", "ms": 600 },
+    {
+      "action": "snapshot",
+      "label": "Control caster's mana after Time Out!'s own 15% restore",
+      "actor": "control",
+      "metric": "power",
+      "power": 0,
+      "save_as": "control_mana"
+    },
+    {
+      "action": "assert",
+      "label": "The talented caster restored measurably more mana than the untalented one",
+      "actor": "talent",
+      "metric": "power",
+      "power": 0,
+      "relative_to": "control_mana",
+      "min": 500
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Dismay adds 20 percentage points to Grasp of Zek'voz's slow (#766)",
+  "contract": "Dismay 704885 reads 'Increases the movement speed slowed by Grasp of Zek'voz by 20%.' In the installed Spell.dbc it is passive, family 31, effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107), misc 3 = SPELLMOD_EFFECT1, BasePoints -21 / DieSides 1 = -20, class mask dword 0 = 2 = bit 1. Grasp of Zek'voz 573028 (family 31) carries SpellFamilyFlags[0] 2 (bit 1) -- exact match -- and its own effect 0 is SPELL_AURA_MOD_DECREASE_SPEED (33), BasePoints -31 / DieSides 1 = -30 (verified directly; a decrease is stored as a negative amount by convention). SPELLMOD_EFFECT1 modifies effect 1 (index 0) of a matching spell's own stored base value directly rather than a named op like duration or cost; SpellEffectInfo::CalcValue applies it through the normal Player::ApplySpellMod path. Player::ApplySpellMod computes non-duration ops as base*totalmul+totalflat (Player.cpp:10324); with only the flat -20 mod, -30*1+(-20)=-50: a 50% total slow, 20 percentage points more than the base 30% -- exactly the tooltip's '+20%'. Both the base snare and the modifier are negative because MOD_DECREASE_SPEED's own convention stores decreases as negative numbers; this is not a sign inversion (contrast Void-Enchanted Armor #787, filed separately as a real bug, where the target aura type expects a positive amount and the DBC's stored amount is negative). Dark Veil 520345 (family 31, SpellFamilyFlags dword 0 = 0) does not carry bit 1 and is the control. The scenario probes the effect-1 modifier on Grasp of Zek'voz's real stored base value (-30) and does not cast it.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "c", "race": 1, "class": 25, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the fixtures settle", "ms": 5000},
+    {"action": "assert", "label": "SETUP: Grasp of Zek'voz's real -30 (30%) snare effect is unmodified", "actor": "c", "metric": "spell_modifier", "spell": 573028, "op": 3, "base": -30, "equals": -30},
+    {"action": "assert", "label": "SETUP: control spell unmodified", "actor": "c", "metric": "spell_modifier", "spell": 520345, "op": 3, "base": -30, "equals": -30},
+    {"action": "learn", "label": "Learn Dismay", "actor": "c", "spell": 704885},
+    {"action": "assert", "label": "The passive is active", "actor": "c", "metric": "aura", "spell": 704885, "equals": 1},
+    {"action": "assert", "label": "Grasp of Zek'voz's snare effect becomes -50 (50% total slow)", "actor": "c", "metric": "spell_modifier", "spell": 573028, "op": 3, "base": -30, "equals": -50},
+    {"action": "assert", "label": "Dark Veil is outside the mask", "actor": "c", "metric": "spell_modifier", "spell": 520345, "op": 3, "base": -30, "equals": -30},
+    {"action": "unlearn", "label": "Drop Dismay", "actor": "c", "spell": 704885},
+    {"action": "assert", "label": "Grasp of Zek'voz returns to -30", "actor": "c", "metric": "spell_modifier", "spell": 573028, "op": 3, "base": -30, "equals": -30}
+  ]
+}

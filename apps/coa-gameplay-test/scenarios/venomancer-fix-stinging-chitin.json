@@ -1,0 +1,194 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Protogenesis raises healing received, Stinging Chitin raises Carapace Crash and Hivebreak (#2913, #2915)",
+  "contract": "#2913 and #2915: Protogenesis (705974) is SPELL_AURA_MOD_HEALING_PCT with value 5+1 = 6, read by Unit::SpellHealingBonusTaken. Stinging Chitin (705977) is a PCT SPELLMOD_DAMAGE (0) of +10% on family 35 word0 0x200002 = Carapace Crash (all ranks) and Hivebreak (all ranks), read by Unit::SpellDamageBonusDone. Each is measured against its own baseline in the same run through the native incoming-healing and outgoing-damage queries. Spell 2050 is only the healing carrier for the incoming-healing query.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "v",
+      "race": 8,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "v",
+      "entry": 28168,
+      "level": 80,
+      "health": 500000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Healing received before Protogenesis",
+      "actor": "v",
+      "metric": "spell_healing_taken",
+      "spell": 2050,
+      "save_as": "heal_base",
+      "target": "v"
+    },
+    {
+      "action": "snapshot",
+      "label": "Carapace Crash damage before Stinging Chitin",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "spell": 803199,
+      "save_as": "cc_base",
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "label": "Hivebreak damage before Stinging Chitin",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "spell": 803193,
+      "save_as": "hb_base",
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "label": "Expulsion damage before Stinging Chitin",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "spell": 805094,
+      "save_as": "ex_base",
+      "target": "dummy",
+      "periodic": true
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 705974
+    },
+    {
+      "action": "assert",
+      "label": "Protogenesis raises healing received by 6%",
+      "actor": "v",
+      "metric": "spell_healing_taken",
+      "spell": 2050,
+      "target": "v",
+      "ratio_to": "heal_base",
+      "min": 1.0599,
+      "max": 1.0601
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 705977
+    },
+    {
+      "action": "assert",
+      "label": "Stinging Chitin adds 10% to Carapace Crash rank 1",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803199,
+      "op": 0,
+      "base": 1000,
+      "min": 1099.9,
+      "max": 1100.1
+    },
+    {
+      "action": "assert",
+      "label": "Stinging Chitin adds 10% to Carapace Crash rank 9",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 573063,
+      "op": 0,
+      "base": 1000,
+      "min": 1099.9,
+      "max": 1100.1
+    },
+    {
+      "action": "assert",
+      "label": "Stinging Chitin adds 10% to Hivebreak rank 1",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 803193,
+      "op": 0,
+      "base": 1000,
+      "min": 1099.9,
+      "max": 1100.1
+    },
+    {
+      "action": "assert",
+      "label": "Stinging Chitin adds 10% to Hivebreak rank 11",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 572039,
+      "op": 0,
+      "base": 1000,
+      "min": 1099.9,
+      "max": 1100.1
+    },
+    {
+      "action": "assert",
+      "label": "Stinging Chitin leaves Expulsion untouched",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 805094,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Carapace Crash deals 10% more damage in the native calculation",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "spell": 803199,
+      "target": "dummy",
+      "ratio_to": "cc_base",
+      "min": 1.0999,
+      "max": 1.1001
+    },
+    {
+      "action": "assert",
+      "label": "Hivebreak deals 10% more damage in the native calculation",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "spell": 803193,
+      "target": "dummy",
+      "ratio_to": "hb_base",
+      "min": 1.0999,
+      "max": 1.1001
+    },
+    {
+      "action": "assert",
+      "label": "Expulsion damage is unchanged",
+      "actor": "v",
+      "metric": "spell_damage_done",
+      "spell": 805094,
+      "target": "dummy",
+      "periodic": true,
+      "ratio_to": "ex_base",
+      "min": 0.9999,
+      "max": 1.0001
+    },
+    {
+      "action": "assert",
+      "label": "Protogenesis still applies",
+      "actor": "v",
+      "metric": "spell_healing_taken",
+      "spell": 2050,
+      "target": "v",
+      "ratio_to": "heal_base",
+      "min": 1.0599,
+      "max": 1.0601
+    }
+  ]
+}

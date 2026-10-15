@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Warning Fairbreeze Village opens after Amani Invasion (#1488)",
+  "contract": [
+    "Warning Fairbreeze Village 9363 starts at Lieutenant Dawnrunner 15399 (spawn 55355, Farstrider Retreat) and has",
+    "PrevQuestID 9360. Amani Invasion 9360 is started by Amani Invasion Plans 23249, which Chieftain Zul'Marosh 15407",
+    "drops for the Horde, and ends at Dawnrunner. Expected: a level 10 blood elf cannot take 9363 before 9360 is",
+    "rewarded and can take it afterwards."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 530, "x": 8978.5, "y": -7456.0, "z": 86.7743, "o": 5.5},
+  "players": [{"id": "ranger", "race": 10, "class": 1, "level": 10}],
+  "steps": [
+    {"action": "wait", "label": "Let login settle", "ms": 3000},
+    {"action": "assert", "label": "Warning Fairbreeze Village waits for Amani Invasion", "actor": "ranger",
+     "metric": "quest_takeable", "quest": 9363, "equals": 0},
+    {"action": "prepare_quest", "label": "Fixture: the ranger carries the Amani plans", "actor": "ranger",
+     "quest": 9360},
+    {"action": "reward_quest", "label": "Deliver the plans to Lieutenant Dawnrunner", "actor": "ranger",
+     "quest": 9360},
+    {"action": "assert", "label": "Amani Invasion is rewarded", "actor": "ranger", "metric": "quest_rewarded",
+     "quest": 9360, "equals": 1},
+    {"action": "assert", "label": "Warning Fairbreeze Village can now be taken", "actor": "ranger",
+     "metric": "quest_takeable", "quest": 9363, "equals": 1}
+  ]
+}

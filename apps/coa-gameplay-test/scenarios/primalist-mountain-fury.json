@@ -1,0 +1,372 @@
+{
+  "schema": 1,
+  "name": "Primalist Mountain Fury: cone hits and pulls, per-enemy defense, and SP/AP/Stamina coefficients",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "empty",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "behind",
+      "race": 5,
+      "class": 1,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "front0",
+      "owner": "primalist",
+      "entry": 12142,
+      "level": 80,
+      "health": 100000,
+      "distance": 8.0
+    },
+    {
+      "id": "front1",
+      "owner": "primalist",
+      "entry": 12142,
+      "level": 80,
+      "health": 100000,
+      "distance": 8.01
+    },
+    {
+      "id": "front2",
+      "owner": "primalist",
+      "entry": 12142,
+      "level": 80,
+      "health": 100000,
+      "distance": 8.02
+    },
+    {
+      "id": "far",
+      "owner": "primalist",
+      "entry": 12142,
+      "level": 80,
+      "health": 100000,
+      "distance": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "pvp",
+      "actor": "primalist",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "empty",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "behind",
+      "enabled": true
+    },
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 806185
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "specialization",
+      "actor": "empty",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "empty",
+      "spell": 806185
+    },
+    {
+      "action": "set_power",
+      "actor": "empty",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "behind",
+      "map": 0,
+      "x": -9622.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "empty",
+      "map": 0,
+      "x": -9517.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "cast",
+      "actor": "empty",
+      "spell": 806185
+    },
+    {
+      "action": "wait",
+      "ms": 4300
+    },
+    {
+      "action": "assert",
+      "actor": "empty",
+      "metric": "aura_stacks",
+      "spell": 807434,
+      "label": "empty_dr",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "empty",
+      "metric": "spell_damage_count",
+      "spell": 806186,
+      "label": "empty_hits",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 806186,
+      "effect": 1,
+      "target": "far",
+      "save_as": "base_damage",
+      "label": "base_damage"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 806186,
+      "effect": 1,
+      "target": "far",
+      "relative_to": "base_damage",
+      "label": "ap100",
+      "min": 14,
+      "max": 16
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 806186,
+      "effect": 1,
+      "save_as": "base_effect",
+      "label": "base_effect"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "base_stamina"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 706305,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "base_stamina",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 806186,
+      "effect": 1,
+      "relative_to": "base_effect",
+      "label": "stamina100",
+      "min": 110,
+      "max": 140
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 706305,
+      "stacks": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 12930
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 12930,
+      "slot": 12
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power",
+      "school": 3,
+      "equals": 23
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 806186,
+      "effect": 1,
+      "target": "far",
+      "relative_to": "base_damage",
+      "label": "sp23",
+      "equals": 10
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "front0",
+      "metric": "distance_2d",
+      "target": "primalist",
+      "save_as": "before_distance",
+      "label": "before_distance"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 806185
+    },
+    {
+      "action": "wait",
+      "ms": 750
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 806186,
+      "label": "first_hits",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 807434,
+      "label": "first_dr",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "front0",
+      "metric": "distance_2d",
+      "target": "primalist",
+      "label": "after_distance",
+      "max": 4
+    },
+    {
+      "action": "wait",
+      "ms": 3600
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 806186,
+      "label": "total_hits",
+      "equals": 9
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 807434,
+      "label": "last_dr",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 806186,
+      "target": "far",
+      "label": "far_hits",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 806186,
+      "target": "behind",
+      "label": "behind_hits",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 807434,
+      "equals": 0
+    }
+  ],
+  "contract": "Mountain Fury uses 65% SP, 17% AP and 125% Stamina. At fixture level 80 the native level-58/max-60 helper retains its 64/80 downrank multiplier on SP: floor(23 * .65 * .8) = 11. AP and Stamina do not use that multiplier. A creature starts eight yards away and is pulled within four yards; normal creature combat movement can then close the remaining gap. The coefficient probes query the unpulled creature 'far', so normal class 887019 (-15%) and Mountain King 887085 (+1%) tuning multiply them by 0.8585: the 100 AP increase of 16-18 reads 14-16 and the 11 SP increase reads 10 (1034 x 0.8585 = 887, 1045 x 0.8585 = 897)."
+}

@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Glaring Rays is a native raid haste aura, exclusive with the same effect (#1196)",
+  "contract": "Spell.dbc 804257 (\"Glaring Rays\", SpellFamilyName 33, Passive) effect 0 is SPELL_EFFECT_APPLY_AREA_AURA_RAID (65, a native, generic raid-aura delivery effect) applying SPELL_AURA_HASTE_SPELLS (216) at EffectBasePoints 2 (amount 3) over SpellRadius.dbc row 287 (100 yards); effect 1 is a self SPELL_EFFECT_APPLY_AURA (6) of the same aura type and amount, target A 1 (self). AuraEffect::HandleModCastingSpeed (SpellAuraEffects.cpp:281) is a pure native handler that sets UNIT_MOD_CAST_SPEED to 1/GetTotalAuraMultiplier(SPELL_AURA_HASTE_SPELLS); with both effects present on the caster, the multiplier is 1.03*1.03 = 1.0609, so cast_speed_multiplier should read about 1/1.0609 = 0.9427 on the caster and about 1/1.03 = 0.9709 on a party member who only gets the raid effect. The world DB already carries 804257 in spell_group 2000182, whose stack rule is SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT (3); SpellMgr.cpp:1867 explicitly unions {SPELL_AURA_MOD_MELEE_RANGED_HASTE, SPELL_AURA_HASTE_SPELLS} for that group ('CoA's raid auras encode the same statistic with several aura types'), which is exactly the tooltip's 'does not stack with similar effects' clause. All of this is native/DB-driven; no server script exists or is needed.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 27, "level": 80 },
+    { "id": "partymate", "race": 1, "class": 27, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "group", "actor": "caster", "target": "partymate" },
+    { "action": "snapshot", "actor": "caster", "metric": "cast_speed_multiplier", "save_as": "caster_base" },
+    { "action": "snapshot", "actor": "partymate", "metric": "cast_speed_multiplier", "save_as": "party_base" },
+    { "action": "learn", "actor": "caster", "spell": 804257 },
+    { "action": "wait", "label": "Let the raid aura apply", "ms": 1000 },
+    {
+      "action": "assert", "label": "The party member gains the raid-wide 3% spell haste",
+      "actor": "partymate", "metric": "cast_speed_multiplier", "ratio_to": "party_base", "min": 0.9700, "max": 0.9715
+    },
+    {
+      "action": "assert", "label": "The caster gains 3% raid haste plus an additional 3% self haste (multiplicative)",
+      "actor": "caster", "metric": "cast_speed_multiplier", "ratio_to": "caster_base", "min": 0.9420, "max": 0.9435
+    }
+  ]
+}

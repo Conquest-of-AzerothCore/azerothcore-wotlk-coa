@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: a Vow procs once when the Sun Cleric heals itself",
+  "contract": "Vow of Radiance 803489 reads 'Direct ability damage or healing generates 2 Solar Power and damages or heals for an additional 25% of the amount.' Vow of Light 807547 reads 'Direct damage taken or direct healing taken by you generates 1 Solar Power and heals the nearest nearby ally equal to 9% of the amount.' One heal is one event, so it generates the Solar Power once whoever its target is. Solar Power is the 500149 caster aura (StackAmount 20). Illumination 500143 is a direct SPELL_EFFECT_HEAL on an ally (TARGET_UNIT_TARGET_ALLY), which the Sun Cleric may aim at itself. Unit::TriggerAurasProcOnEvent evaluates the actor's auras with the done flags (PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS for this heal) and then the action target's auras with the taken flags (PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS); on a self-heal both passes read the same aura. The Vow spell_proc rows from rev_20260909_13_sun_cleric_completion.sql carry ProcFlags 1048575, every done and taken flag, and aura_ascension_sun_cleric_event accepts both passes (the heal's actor is the Sun Cleric in both, and for Vow of Light so is its action target), so a self-heal ran each Vow twice. Expected: a self-heal under Vow of Radiance leaves exactly 2 Solar Power and a following heal on an ally adds exactly 2 more; under Vow of Light a self-heal leaves exactly 1 and a heal received from another Sun Cleric adds exactly 1 more.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "radiance", "race": 1, "class": 27, "level": 10 },
+    { "id": "light", "race": 1, "class": 27, "level": 10 },
+    { "id": "healer", "race": 1, "class": 27, "level": 10 },
+    { "id": "ally", "race": 1, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "learn", "actor": "radiance", "spell": 803489 },
+    { "action": "learn", "actor": "radiance", "spell": 500143 },
+    { "action": "learn", "actor": "light", "spell": 807547 },
+    { "action": "learn", "actor": "light", "spell": 500143 },
+    { "action": "learn", "actor": "healer", "spell": 500143 },
+    { "action": "cast", "label": "Take Vow of Radiance", "actor": "radiance", "spell": 803489 },
+    { "action": "cast", "label": "Take Vow of Light", "actor": "light", "spell": 807547 },
+    {
+      "action": "assert", "label": "SETUP: Vow of Radiance is active", "actor": "radiance",
+      "metric": "aura", "spell": 803489, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: Vow of Light is active", "actor": "light",
+      "metric": "aura", "spell": 807547, "equals": 1, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let the Vows' global cooldown expire", "ms": 1600 },
+    {
+      "action": "assert", "label": "BASELINE: no Solar Power on the Vow of Radiance cleric", "actor": "radiance",
+      "metric": "aura_stacks", "spell": 500149, "equals": 0
+    },
+    {
+      "action": "assert", "label": "BASELINE: no Solar Power on the Vow of Light cleric", "actor": "light",
+      "metric": "aura_stacks", "spell": 500149, "equals": 0
+    },
+    { "action": "set_health", "label": "Leave room for an effective self-heal", "actor": "radiance", "value": 10 },
+    { "action": "cast", "label": "Vow of Radiance: heal yourself", "actor": "radiance", "spell": 500143, "target": "radiance" },
+    {
+      "action": "assert", "label": "SETUP: the self-heal lands", "actor": "radiance",
+      "metric": "spell_heal_count", "spell": 500143, "min": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let every proc of that heal resolve", "ms": 500 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: one self-heal under Vow of Radiance generates 2 Solar Power, not 4",
+      "actor": "radiance", "metric": "aura_stacks", "spell": 500149, "equals": 2
+    },
+    { "action": "wait", "label": "Let the global cooldown expire", "ms": 1600 },
+    { "action": "set_health", "label": "Leave room for an effective heal on the ally", "actor": "ally", "value": 10 },
+    { "action": "cast", "label": "Vow of Radiance: heal an ally", "actor": "radiance", "spell": 500143, "target": "ally" },
+    {
+      "action": "assert", "label": "SETUP: the ally heal lands", "actor": "radiance",
+      "metric": "spell_heal_count", "spell": 500143, "target": "ally", "min": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let every proc of that heal resolve", "ms": 500 },
+    {
+      "action": "assert", "label": "CONTROL: a heal on an ally still generates 2 Solar Power", "actor": "radiance",
+      "metric": "aura_stacks", "spell": 500149, "equals": 4
+    },
+    { "action": "set_health", "label": "Leave room for an effective self-heal", "actor": "light", "value": 10 },
+    { "action": "cast", "label": "Vow of Light: heal yourself", "actor": "light", "spell": 500143, "target": "light" },
+    {
+      "action": "assert", "label": "SETUP: the self-heal lands", "actor": "light",
+      "metric": "spell_heal_count", "spell": 500143, "min": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let every proc of that heal resolve", "ms": 500 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: one self-heal under Vow of Light generates 1 Solar Power, not 2",
+      "actor": "light", "metric": "aura_stacks", "spell": 500149, "equals": 1
+    },
+    { "action": "set_health", "label": "Leave room for an effective received heal", "actor": "light", "value": 10 },
+    { "action": "cast", "label": "Another Sun Cleric heals the Vow of Light cleric", "actor": "healer", "spell": 500143, "target": "light" },
+    {
+      "action": "assert", "label": "SETUP: the received heal lands", "actor": "healer",
+      "metric": "spell_heal_count", "spell": 500143, "target": "light", "min": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let every proc of that heal resolve", "ms": 500 },
+    {
+      "action": "assert", "label": "CONTROL: healing received from another still generates 1 Solar Power", "actor": "light",
+      "metric": "aura_stacks", "spell": 500149, "equals": 2
+    }
+  ]
+}

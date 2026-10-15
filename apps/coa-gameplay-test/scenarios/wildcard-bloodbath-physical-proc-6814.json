@@ -1,0 +1,247 @@
+{
+  "schema": 1,
+  "name": "Bloodbath physical abilities trigger a bleed and thirty-percent slow",
+  "contract": [
+    "Bloodbath954814 lasts5000ms and applies954815 bleed for5000ms and954816 slow for3000ms on Physical",
+    "melee abilities. Fireball and white melee attacks are ineligible. The authored total bleed is level-",
+    "scaled child base plus AP*.026, spread over five one-second ticks rather than dealt six times.",
+    "QA stat fixture10031 supplies a measurable1000 attack power to distinguish the advertised2.6%AP total from an",
+    "unscaled bleed."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 201
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 1752
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 133
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 954814
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 954814,
+      "target": "hero"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 954814,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 133,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 954815,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 10031,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "attack_power",
+      "min": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "attack_power",
+      "label": "bloodbath_ap",
+      "save_as": "bloodbath_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_effect_value",
+      "label": "bloodbath_base",
+      "save_as": "bloodbath_base",
+      "spell": 954815
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 1752,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 954815,
+      "caster": "hero",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "label": "bloodbath_tick",
+      "save_as": "bloodbath_tick",
+      "spell": 954815,
+      "effect": 0,
+      "caster": "hero"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 954816,
+      "caster": "hero",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 954816,
+      "effect": 0,
+      "equals": -30
+    },
+    {
+      "action": "wait",
+      "ms": 6500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 954815,
+      "target": "enemy",
+      "equals": 5
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_damage_total",
+      "label": "bloodbath_total",
+      "save_as": "bloodbath_total",
+      "spell": 954815,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 954816,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 954814,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 954815,
+      "equals": 0
+    }
+  ]
+}

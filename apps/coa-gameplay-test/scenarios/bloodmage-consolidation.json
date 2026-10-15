@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Consolidation grants 5% spell and melee/ranged haste (#3074)",
+  "contract": "Consolidation 706603 ships two SPELL_EFFECT_APPLY_AURA effects in Spell.dbc, both with BasePoints 4 + DieSides 1 = 5%: aura 216 SPELL_AURA_HASTE_SPELLS (AuraEffect::HandleModCastingSpeed) and aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE (AuraEffect::HandleModMeleeRangedSpeedPct). Together those are the tooltip's \"your haste\". cast_speed_multiplier reads the native cast-time multiplier and attack_time_ms the hasted swing time, so both are divided by 1.05. Two sibling records also named Consolidation exist (706604, 706609); this scenario covers only the 706603 the issue names.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 20, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "caster", "metric": "cast_speed_multiplier", "save_as": "cast_before" },
+    { "action": "snapshot", "actor": "caster", "metric": "attack_time_ms", "hand": 0, "save_as": "swing_before" },
+    { "action": "learn", "actor": "caster", "spell": 706603 },
+    {
+      "action": "assert", "label": "Casts get 5% faster",
+      "actor": "caster", "metric": "cast_speed_multiplier", "ratio_to": "cast_before",
+      "min": 0.951, "max": 0.953, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "Melee swings get 5% faster",
+      "actor": "caster", "metric": "attack_time_ms", "hand": 0, "ratio_to": "swing_before",
+      "min": 0.951, "max": 0.953, "within_ms": 5000
+    }
+  ]
+}

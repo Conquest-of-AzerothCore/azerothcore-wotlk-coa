@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Runemaster Runebound Surge speeds up the caster when Runeshroud is cast (#532)",
+  "contract": [
+    "Tooltip 707423: casting Runeshroud increases movement speed by $707426s1% for $707426d.",
+    "Effect 0 is PROC_TRIGGER_SPELL 707426: aura 31 (MOD_INCREASE_SPEED) BasePoints 74 (75%), 3 sec.",
+    "Spell.dbc gives the passive ProcFlags 0, so no proc entry exists without spell_proc data.",
+    "Runeshroud 500288 is the only family 38 spell with mask0 0x8000; one cast yields one surge.",
+    "While Runeshroud stays active, the surge's end divides run speed by 1.75 (0.571).",
+    "A player without the talent gets no surge."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 20},
+    {"id": "plain", "race": 1, "class": 32, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the characters settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 500288},
+    {"action": "learn", "actor": "rm", "spell": 707423},
+    {"action": "learn", "actor": "plain", "spell": 500288},
+    {
+      "action": "assert", "label": "Runebound Surge passive is active", "actor": "rm", "metric": "aura",
+      "spell": 707423, "equals": 1, "within_ms": 2000
+    },
+    {"action": "cast", "actor": "rm", "spell": 500288},
+    {
+      "action": "assert", "label": "Runeshroud is cast", "actor": "rm", "metric": "aura", "spell": 500288, "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Casting Runeshroud triggers Runebound Surge", "actor": "rm", "metric": "aura",
+      "spell": 707426, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Runebound Surge increases movement speed by 75%", "actor": "rm",
+      "metric": "aura_amount", "spell": 707426, "effect": 0, "equals": 75
+    },
+    {
+      "action": "assert", "label": "Runebound Surge lasts 3 sec", "actor": "rm", "metric": "aura_duration_ms",
+      "spell": 707426, "min": 2000, "max": 3000
+    },
+    {
+      "action": "snapshot", "label": "Run speed during the surge", "actor": "rm", "metric": "run_speed_rate",
+      "save_as": "surged_speed"
+    },
+    {
+      "action": "assert", "label": "The surge expires", "actor": "rm", "metric": "aura", "spell": 707426, "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "Runeshroud outlasts the surge", "actor": "rm", "metric": "aura", "spell": 500288,
+      "equals": 1
+    },
+    {
+      "action": "assert", "label": "The surge had raised run speed by exactly 75%", "actor": "rm",
+      "metric": "run_speed_rate", "ratio_to": "surged_speed", "min": 0.565, "max": 0.578
+    },
+    {
+      "action": "assert", "label": "Runebound Surge fires once per Runeshroud cast", "actor": "rm",
+      "metric": "spell_proc_count", "spell": 707423, "equals": 1
+    },
+    {"action": "cast", "actor": "plain", "spell": 500288},
+    {
+      "action": "assert", "label": "Control: Runeshroud is cast without the talent", "actor": "plain",
+      "metric": "aura", "spell": 500288, "equals": 1, "within_ms": 1000
+    },
+    {"action": "wait", "label": "Allow any proc to land", "ms": 500},
+    {
+      "action": "assert", "label": "Control: no surge without the talent", "actor": "plain", "metric": "aura",
+      "spell": 707426, "equals": 0
+    }
+  ]
+}

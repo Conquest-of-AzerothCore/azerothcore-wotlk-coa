@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Storm Synergy lets Electrocute run through Stormflow and apply Conductive (#1360)",
+  "contract": "#1360: Storm Synergy (578300) reads 'Your Electrocute can now be used while channeling Stormflow and causes it to apply Conductive'. Neither clause is delivered. Clause A: the core's only 'cast while channeling' gate is Unit::CanCastDuringChannel (src/server/game/Entities/Unit/Unit.cpp), consulted by Unit::SetCurrentCastedSpell, which otherwise calls InterruptSpell(CURRENT_CHANNELED_SPELL); it whitelists Tinker, Cultist, Starcaller, Necromancer, Demon Hunter and Witch Doctor and had no CLASS_STORMBRINGER branch. Stormflow's own allow-list is its Effect[1] aura 353, whose handler slot is 'nullptr' (SpellAuraEffects.cpp:418), and its class mask (6144, 128, 128) covers Shock (SpellFamilyFlags[0] 2048) and Brine (SpellFamilyFlags[1] 128) but not Electrocute (33554432, 2097152, 32). Clause B: 578300 is SPELL_AURA_PROC_TRIGGER_SPELL -> 567559 with ProcFlags 0 and no spell_proc row, so SpellMgr::LoadSpellProcs skips it (SpellMgr.cpp:2257) and Conductive is never cast. Conductive 567559 has DurationIndex 9 = 30000 ms and all three effects on TARGET_UNIT_CASTER. Ranks used are the ones a level-80 Stormbringer owns: Stormflow 572867 (from level 68) and Electrocute 501432 (from level 80). Electrocute has CastingTimeIndex 1 = 0 ms, so it is instant with or without the fix and its cast time is not a discriminator; the discriminators are that the channel survives and that Conductive appears. The dummy is dropped below 35 % health because Electrocute's own description restricts it to enemies below 35 % health. Postfix debug (session 1): the DISCRIMINATING Electrocute cast is protocol cast #4 in this scenario (Stormflow, Electrocute, Stormflow, Electrocute); result.json's cast_failures reports cast_count 4 for spell 501432 with reason 67 (SPELL_FAILED_NOT_READY, SharedDefines.h). This was first misattributed to the second Stormflow cast's shared 1.5 s GCD (category 133) and 'fixed' by bumping the pre-Electrocute wait from 1500 ms to 1700 ms; the failure persisted. Postfix debug (session 2): re-running with the 1700 ms wait still reproduced cast_count 4 / reason 67, and DBC lookup (Spell.dbc via coa-dbc-viewer) showed the real gate is Electrocute's own ability cooldown -- Category 978, CategoryRecoveryTime 6000 ms -- completely independent of its StartRecoveryCategory 133 / StartRecoveryTime 1500 ms GCD entry; Stormflow (572867) has Category 0 and does not share or extend that cooldown. Summing this scenario's actual step elapsed_ms from the BASELINE Electrocute cast (index 9) to the DISCRIMINATING Electrocute cast (index 21) gave only ~4706 ms of real gap (1000 + 2001 + 1705 from the three intervening waits) against a 6000 ms requirement, so the recast was correctly rejected as not ready. The 'Electrocute landed' spell_damage_count assertion still passed regardless because it is not scoped to a time window and was satisfied by the earlier, successful BASELINE Electrocute hit against the same dummy. The pre-Electrocute wait was increased to 3600 ms so the cumulative real gap since the BASELINE cast is ~6601 ms, >600 ms clear of the 6000 ms cooldown. The shared-GCD pattern fixed the same day for stormbringer-fix-static-electricity.json (commit 3c13018f3) and the Evergale cluster (commit dc8290b7f) is a different, unrelated mechanism (shared GCD, not a spell's own ability-cooldown category) and does not apply to this scenario's actual defect.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "s",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "s", "spell": 572867 },
+    { "action": "learn", "actor": "s", "spell": 501432 },
+    { "action": "set_health", "actor": "dummy", "value": 100000 },
+    { "action": "set_aura", "actor": "s", "spell": 803102, "stacks": 100 },
+    { "action": "assert", "label": "SETUP: Storm Synergy is not known yet",
+      "actor": "s", "metric": "aura", "spell": 578300, "equals": 0 },
+    { "action": "cast", "actor": "s", "spell": 572867, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: the baseline Stormflow channel is running",
+      "actor": "s", "metric": "cast_remaining_ms", "spell": 572867, "min": 1, "within_ms": 4000 },
+    { "action": "wait", "label": "Let the channel tick before interrupting it", "ms": 1500 },
+    { "action": "cast", "actor": "s", "spell": 501432, "target": "dummy" },
+    { "action": "wait", "label": "Let the Electrocute cast resolve", "ms": 1000 },
+    { "action": "assert", "label": "BASELINE: without Storm Synergy, Electrocute ends the Stormflow channel",
+      "actor": "s", "metric": "cast_remaining_ms", "spell": 572867, "equals": 0 },
+    { "action": "assert", "label": "BASELINE: without Storm Synergy, Electrocute applies no Conductive",
+      "actor": "s", "metric": "aura", "spell": 567559, "equals": 0 },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 2000 },
+    { "action": "learn", "actor": "s", "spell": 578300 },
+    { "action": "assert", "label": "SETUP: Storm Synergy is an active passive",
+      "actor": "s", "metric": "aura", "spell": 578300, "equals": 1 },
+    { "action": "set_health", "actor": "dummy", "value": 100000 },
+    { "action": "set_aura", "actor": "s", "spell": 803102, "stacks": 100 },
+    { "action": "cast", "actor": "s", "spell": 572867, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: the second Stormflow channel is running",
+      "actor": "s", "metric": "cast_remaining_ms", "spell": 572867, "min": 1, "within_ms": 4000 },
+    { "action": "wait", "label": "Let Electrocute's own 6 s ability cooldown clear before recasting it", "ms": 3600 },
+    { "action": "cast", "actor": "s", "spell": 501432, "target": "dummy" },
+    { "action": "wait", "label": "Let the Electrocute cast resolve", "ms": 1000 },
+    { "action": "assert", "label": "DISCRIMINATING: Electrocute landed while the channel was running",
+      "actor": "s", "metric": "spell_damage_count", "spell": 501432, "target": "dummy", "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: Storm Synergy keeps the Stormflow channel alive through Electrocute",
+      "actor": "s", "metric": "cast_remaining_ms", "spell": 572867, "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: that Electrocute applies Conductive to the caster",
+      "actor": "s", "metric": "aura", "spell": 567559, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Conductive runs within its DBC duration (SpellDuration 9 = 30000 ms)",
+      "actor": "s", "metric": "aura_duration_ms", "spell": 567559, "min": 1, "max": 30000 }
+  ]
+}

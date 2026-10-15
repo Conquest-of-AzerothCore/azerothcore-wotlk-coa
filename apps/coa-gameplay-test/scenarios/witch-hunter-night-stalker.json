@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "name": "Night Stalker raises critical strike chance 3 and 6 percent (#1769)",
+  "contract": "Night Stalker 300792 (rank 1) and 300793 (rank 2) are SpellFamily 21 passives. Effect 0 is an inert dummy (effect 3, BasePoints -1, no aura). Effect 1 is SPELL_AURA_MOD_CRIT_PCT (290), BasePoints 2 / 5 with DieSides 1 = +3 / +6 percent. AuraEffect::HandleAuraModCritPct (SpellAuraEffects.cpp:4892) recalculates the weapon-dependent crit fields (Player::UpdateWeaponDependentCritAuras, Player.cpp:7354, which sums SPELL_AURA_MOD_CRIT_PCT into the base flat crit) and every spell school's crit field (Player::UpdateSpellCritChance sums SPELL_AURA_MOD_CRIT_PCT, StatSystem.cpp:981), which is what the tooltip 'increases your critical strike chance by 3/6 percent' promises. The scenario snapshots PLAYER_CRIT_PERCENTAGE and the Shadow spell crit field before, then asserts the exact delta for each rank; the rank 1 passive is unlearned before rank 2 so the two never overlap. A fresh character's melee crit field reads 0 until a crit aura first recomputes it (measured on slot 3: Houndfeeder gave 4.664 from a 0 baseline, and exactly 4.000 after a learn and unlearn of the same passive, the primed baseline being 0.664), so the baselines are snapshotted after a priming learn and unlearn.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Prime the crit fields with a learn",
+      "actor": "hunter",
+      "spell": 300792
+    },
+    {
+      "action": "unlearn",
+      "label": "Prime the crit fields with an unlearn",
+      "actor": "hunter",
+      "spell": 300792
+    },
+    {
+      "action": "wait",
+      "label": "Let the recomputed fields settle",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "label": "Melee critical chance before the talent",
+      "actor": "hunter",
+      "metric": "melee_crit_chance",
+      "save_as": "melee_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Shadow spell critical chance before the talent",
+      "actor": "hunter",
+      "metric": "spell_crit_chance",
+      "save_as": "spell_before"
+    },
+    {
+      "action": "learn",
+      "label": "Learn 300792",
+      "actor": "hunter",
+      "spell": 300792
+    },
+    {
+      "action": "assert",
+      "label": "Night Stalker rank 1 is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 300792,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: melee critical chance is 3 percentage points higher (BasePoints 2 + 1)",
+      "actor": "hunter",
+      "metric": "melee_crit_chance",
+      "relative_to": "melee_before",
+      "min": 2.99,
+      "max": 3.01
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: spell critical chance is 3 percentage points higher",
+      "actor": "hunter",
+      "metric": "spell_crit_chance",
+      "relative_to": "spell_before",
+      "min": 2.99,
+      "max": 3.01
+    },
+    {
+      "action": "unlearn",
+      "label": "Unlearn 300792",
+      "actor": "hunter",
+      "spell": 300792
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning rank 1 restores the melee baseline",
+      "actor": "hunter",
+      "metric": "melee_crit_chance",
+      "relative_to": "melee_before",
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning rank 1 restores the spell baseline",
+      "actor": "hunter",
+      "metric": "spell_crit_chance",
+      "relative_to": "spell_before",
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "learn",
+      "label": "Learn 300793",
+      "actor": "hunter",
+      "spell": 300793
+    },
+    {
+      "action": "assert",
+      "label": "Night Stalker rank 2 is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 300793,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: melee critical chance is 6 percentage points higher (BasePoints 5 + 1)",
+      "actor": "hunter",
+      "metric": "melee_crit_chance",
+      "relative_to": "melee_before",
+      "min": 5.99,
+      "max": 6.01
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: spell critical chance is 6 percentage points higher",
+      "actor": "hunter",
+      "metric": "spell_crit_chance",
+      "relative_to": "spell_before",
+      "min": 5.99,
+      "max": 6.01
+    }
+  ]
+}

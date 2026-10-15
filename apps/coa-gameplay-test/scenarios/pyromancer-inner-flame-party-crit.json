@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Inner Flame gives the party 3% crit (#3914)",
+  "contract": "#3914: Inner Flame 301974 is a family 30 infinite passive whose e1 is SPELL_EFFECT_APPLY_AREA_AURA_RAID (65) with aura 290 (SPELL_AURA_MOD_CRIT_PCT), BasePoints 2 + DieSides 1 = 3, TargetA caster, radius 100 yd. Spell::EffectApplyAreaAura (SpellEffects.cpp:137) applies it to grouped players in range and AuraEffect::HandleAuraModCritPct (SpellAuraEffects.cpp:4890) raises spell crit (StatSystem.cpp:981). Asserts that a grouped second Pyromancer gains the aura 301974 and +3 Fire spell crit points, and that the caster gains +3 as well. The 'does not stack' rule (spell_group 2000181, pending SQL) is not asserted: no second raid crit aura id is recorded in the group report.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    },
+    {
+      "id": "m",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "label": "Put both Pyromancers in one party",
+      "actor": "p",
+      "target": "m"
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spell_crit_chance",
+      "school": 2,
+      "save_as": "p0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "m",
+      "metric": "spell_crit_chance",
+      "school": 2,
+      "save_as": "m0"
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 301974
+    },
+    {
+      "action": "assert",
+      "label": "The party member receives the area aura",
+      "actor": "m",
+      "metric": "aura",
+      "spell": 301974,
+      "caster": "p",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The party member gains 3 Fire spell crit points",
+      "actor": "m",
+      "metric": "spell_crit_chance",
+      "school": 2,
+      "relative_to": "m0",
+      "min": 2.9,
+      "max": 3.1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The caster gains 3 Fire spell crit points",
+      "actor": "p",
+      "metric": "spell_crit_chance",
+      "school": 2,
+      "relative_to": "p0",
+      "min": 2.9,
+      "max": 3.1,
+      "within_ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 301974
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning removes the party member's aura",
+      "actor": "m",
+      "metric": "aura",
+      "spell": 301974,
+      "caster": "p",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The party member returns to the base crit chance",
+      "actor": "m",
+      "metric": "spell_crit_chance",
+      "school": 2,
+      "relative_to": "m0",
+      "min": -0.1,
+      "max": 0.1,
+      "within_ms": 5000
+    }
+  ]
+}

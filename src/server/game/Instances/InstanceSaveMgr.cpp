@@ -21,6 +21,7 @@
 #include "GameTime.h"
 #include "GridNotifiers.h"
 #include "Group.h"
+#include "InstanceResetSchedule.h"
 #include "InstanceScript.h"
 #include "Log.h"
 #include "Map.h"
@@ -300,6 +301,17 @@ void InstanceSaveMgr::LoadInstances()
     LOG_INFO("server.loading", " ");
 }
 
+uint32 InstanceSaveMgr::GetResetDelayFor(uint32 mapid, Difficulty d)
+{
+    MapDifficulty const* mapDiff = GetMapDifficultyData(mapid, d);
+    if (!mapDiff)
+        return 0;
+
+    MapEntry const* entry = sMapStore.LookupEntry(mapid);
+    MapTypes mapType = entry ? MapTypes(entry->map_type) : MAP_COMMON;
+    return InstanceResetSchedule::GetResetDelay(mapDiff->resetTime, mapid, mapType, d);
+}
+
 void InstanceSaveMgr::LoadResetTimes()
 {
     time_t now = GameTime::GetGameTime().count();
@@ -336,12 +348,12 @@ void InstanceSaveMgr::LoadResetTimes()
         uint32 map_diff_pair = itr->first;
         uint32 mapid = PAIR32_LOPART(map_diff_pair);
         Difficulty difficulty = Difficulty(PAIR32_HIPART(map_diff_pair));
-        MapDifficulty const* mapDiff = &itr->second;
-        if (!mapDiff->resetTime)
+        uint32 resetDelay = GetResetDelayFor(mapid, difficulty);
+        if (!resetDelay)
             continue;
 
         // the reset_delay must be at least one day
-        uint32 period = uint32(((mapDiff->resetTime * sWorld->getRate(RATE_INSTANCE_RESET_TIME)) / DAY) * DAY);
+        uint32 period = uint32(((resetDelay * sWorld->getRate(RATE_INSTANCE_RESET_TIME)) / DAY) * DAY);
         if (period < DAY)
             period = DAY;
 
@@ -356,11 +368,10 @@ void InstanceSaveMgr::LoadResetTimes()
 
         if (t < now)
         {
-            // assume that expired instances have already been cleaned
-            // calculate the next reset time
-            t = (t / DAY) * DAY;
-            t += ((today - t) / period + 1) * period + diff;
-            CharacterDatabase.DirectExecute("UPDATE instance_reset SET resettime = '{}' WHERE mapid = '{}' AND difficulty = '{}'", (uint32)t, mapid, difficulty);
+            // A reset that passed while the server was down is replayed on the first update, after the saves
+            // and binds are loaded, so expired and extended binds leave on time and the next reset is scheduled.
+            ScheduleReset(now, InstResetEvent(5, mapid, difficulty));
+            continue;
         }
 
         SetExtendedResetTimeFor(mapid, difficulty, t);
@@ -540,11 +551,15 @@ void InstanceSaveMgr::MergeWithNewInstanceSaves(InstanceMapLoadRows const& loadR
             continue;
         }
 
+        time_t resetTime = row.resetTime;
         time_t extendedResetTime = 0;
         if (entry->IsRaid() || row.difficulty > DUNGEON_DIFFICULTY_NORMAL)
+        {
+            resetTime = GetResetTimeFor(row.mapId, Difficulty(row.difficulty));
             extendedResetTime = GetExtendedResetTimeFor(row.mapId, Difficulty(row.difficulty));
+        }
 
-        InstanceSave* save = new InstanceSave(row.mapId, row.instanceId, Difficulty(row.difficulty), row.resetTime, extendedResetTime);
+        InstanceSave* save = new InstanceSave(row.mapId, row.instanceId, Difficulty(row.difficulty), resetTime, extendedResetTime);
         save->SetCompletedEncounterMask(row.completedEncounters);
         save->SetInstanceData(row.data);
         if (row.resetTime > 0)
@@ -724,8 +739,8 @@ void InstanceSaveMgr::_ResetOrWarnAll(uint32 mapid, Difficulty difficulty, bool 
 
     if (!warn)
     {
-        MapDifficulty const* mapDiff = GetMapDifficultyData(mapid, difficulty);
-        if (!mapDiff || !mapDiff->resetTime)
+        uint32 resetDelay = GetResetDelayFor(mapid, difficulty);
+        if (!resetDelay)
         {
             LOG_ERROR("instance.save", "InstanceSaveMgr::ResetOrWarnAll: not valid difficulty or no reset delay for map {}", mapid);
             return;
@@ -734,7 +749,7 @@ void InstanceSaveMgr::_ResetOrWarnAll(uint32 mapid, Difficulty difficulty, bool 
         // calculate the next reset time
         uint32 diff = sWorld->getIntConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR;
 
-        uint32 period = uint32(((mapDiff->resetTime * sWorld->getRate(RATE_INSTANCE_RESET_TIME)) / DAY) * DAY);
+        uint32 period = uint32(((resetDelay * sWorld->getRate(RATE_INSTANCE_RESET_TIME)) / DAY) * DAY);
         if (period < DAY)
             period = DAY;
 

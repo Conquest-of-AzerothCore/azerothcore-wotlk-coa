@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Tinker Efficiency reduces resolved power costs (#2850)",
+  "contract": "Efficiency (705806) is a passive MOD_POWER_COST_SCHOOL_PCT aura of -10 over MiscValue 127, i.e. all seven schools, and needs no module binding: the stock handler writes -0.10 into UNIT_FIELD_POWER_COST_MULTIPLIER per school and SpellInfo::CalcPowerCost multiplies the resolved cost by (1 + multiplier). Its Stances field names form 28 but SPELL_ATTR2_ALLOW_WHILE_NOT_SHAPESHIFTED is set, so learning it out of form must still apply it. Measured on two percentage-cost Tinker abilities of different schools, Build: Shield Beacon (801799, physical) and Emergency Heal (802684, shadow), the cost after learning must be about 90 percent of the cost before; the band allows the integer truncation of the float product.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "tink", "race": 1, "class": 28, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "snapshot", "actor": "tink", "metric": "spell_power_cost", "spell": 801799,
+      "save_as": "beacon_cost" },
+    { "action": "snapshot", "actor": "tink", "metric": "spell_power_cost", "spell": 802684,
+      "save_as": "heal_cost" },
+    { "action": "learn", "actor": "tink", "spell": 705806 },
+    { "action": "assert", "label": "Efficiency applies itself out of form",
+      "actor": "tink", "metric": "aura", "spell": 705806, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Efficiency carries its -10 percent amount",
+      "actor": "tink", "metric": "aura_amount", "spell": 705806, "effect": 0, "equals": -10 },
+    { "action": "assert", "label": "Shield Beacon costs about 90 percent of its unbuffed cost",
+      "actor": "tink", "metric": "spell_power_cost", "spell": 801799, "ratio_to": "beacon_cost",
+      "min": 0.89, "max": 0.901, "within_ms": 3000 },
+    { "action": "assert", "label": "Emergency Heal costs about 90 percent of its unbuffed cost",
+      "actor": "tink", "metric": "spell_power_cost", "spell": 802684, "ratio_to": "heal_cost",
+      "min": 0.89, "max": 0.901, "within_ms": 3000 }
+  ]
+}

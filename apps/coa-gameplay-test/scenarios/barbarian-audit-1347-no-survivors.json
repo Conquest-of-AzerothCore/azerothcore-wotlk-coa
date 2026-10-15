@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Barbarian audit: No Survivors spell modifier reaches its target spells (#1347)",
+  "contract": "Audit report #1347 asked for a script for a passive whose effects are native spell-mod auras (107 flat, 108 percent). The effect BasePoints and EffectSpellClassMask in Spell.dbc name the spell-mod operation, amount and affected Barbarian spells; Player::ApplySpellMod, which the spell_modifier metric calls, must deliver base+flat or base*(100+pct)/100. Expected values are computed from the DBC amount, not from the implementation.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "before: 560881 has no modifier for op 1",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 560881,
+      "op": 1,
+      "base": 100000,
+      "min": 99998,
+      "max": 100002
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 805864
+    },
+    {
+      "action": "assert",
+      "label": "No Survivors (805864) is active",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 805864,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "805864 op 1 flat +5000 reaches 560881 (mask selects 2 Barbarian spell(s))",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 560881,
+      "op": 1,
+      "base": 100000,
+      "min": 104998,
+      "max": 105002
+    }
+  ]
+}

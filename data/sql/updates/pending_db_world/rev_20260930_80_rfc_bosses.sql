@@ -1,0 +1,37 @@
+-- Ragefire Chasm Heroic/Mythic boss fixes after ingame check (30.09.2026)
+
+-- Massive Fire Nova (Taragaman): cover behind the Earth Pillars (CoADungeonBossSpells.cpp)
+DELETE FROM `spell_script_names` WHERE `spell_id` BETWEEN 2102516 AND 2102519;
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(2102516, 'spell_coa_massive_fire_nova'), (2102517, 'spell_coa_massive_fire_nova'),
+(2102518, 'spell_coa_massive_fire_nova'), (2102519, 'spell_coa_massive_fire_nova');
+-- Earth Pillar (Ascension "Rumbling Earth - Visual Indicator", 663030; missing here): Taragaman summons three near him.
+-- Each shows the earth ground zone (256852, chosen ingame; 3 s aura, refreshed once) for 5 s, then the earth spike breaks out
+-- (Earth Break, 800 in 4 yards with knockback) and stands as cover until the Massive Fire Nova is over (nova 7-13 s); at 13.5 s
+-- it crumbles (Debris 2132349) and is gone.
+-- Look: the pillar creature itself morphs into the bone guard rock spike (127473, chosen ingame). Collision: a cave stalagmite
+-- game object (663043) inside it; the client has no game object model for the rock spike (the newer models show as cubes).
+-- Zelemar Rain of Fire (663031; missing here): invisible anchor Rain of Fire summons, nothing else.
+
+INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_flight`, `detection_range`, `rank`, `dmgschool`, `DamageModifier`, `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`, `RegenHealth`, `CreatureImmunitiesId`, `flags_extra`, `ScriptName`, `VerifiedBuild`)
+VALUES
+(663030, 0, 0, 0, 0, 0, 'Rumbling Earth', NULL, NULL, 0, 61, 61, 0, 14, 0, 0.0, 0.0, 1.0, 1.0, 20.0, 0, 0, 1.0, 2000, 2000, 1.0, 1.0, 1, 33554438, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1.0, 1.0, 1.0, 1.0, 1.0, 0, 0, 0, 0, 2, '', 0),
+(663031, 0, 0, 0, 0, 0, 'Zelemar Rain of Fire', NULL, NULL, 0, 61, 61, 0, 14, 0, 0.0, 0.0, 1.0, 1.0, 20.0, 0, 0, 1.0, 2000, 2000, 1.0, 1.0, 1, 33554438, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1.0, 1.0, 1.0, 1.0, 1.0, 0, 0, 0, 0, 130, '', 0)
+ON DUPLICATE KEY UPDATE `difficulty_entry_1` = VALUES(`difficulty_entry_1`), `difficulty_entry_2` = VALUES(`difficulty_entry_2`), `difficulty_entry_3` = VALUES(`difficulty_entry_3`), `KillCredit1` = VALUES(`KillCredit1`), `KillCredit2` = VALUES(`KillCredit2`), `name` = VALUES(`name`), `subname` = VALUES(`subname`), `IconName` = VALUES(`IconName`), `gossip_menu_id` = VALUES(`gossip_menu_id`), `minlevel` = VALUES(`minlevel`), `maxlevel` = VALUES(`maxlevel`), `exp` = VALUES(`exp`), `faction` = VALUES(`faction`), `npcflag` = VALUES(`npcflag`), `speed_walk` = VALUES(`speed_walk`), `speed_run` = VALUES(`speed_run`), `speed_swim` = VALUES(`speed_swim`), `speed_flight` = VALUES(`speed_flight`), `detection_range` = VALUES(`detection_range`), `rank` = VALUES(`rank`), `dmgschool` = VALUES(`dmgschool`), `DamageModifier` = VALUES(`DamageModifier`), `BaseAttackTime` = VALUES(`BaseAttackTime`), `RangeAttackTime` = VALUES(`RangeAttackTime`), `BaseVariance` = VALUES(`BaseVariance`), `RangeVariance` = VALUES(`RangeVariance`), `unit_class` = VALUES(`unit_class`), `unit_flags` = VALUES(`unit_flags`), `unit_flags2` = VALUES(`unit_flags2`), `dynamicflags` = VALUES(`dynamicflags`), `family` = VALUES(`family`), `type` = VALUES(`type`), `type_flags` = VALUES(`type_flags`), `lootid` = VALUES(`lootid`), `pickpocketloot` = VALUES(`pickpocketloot`), `skinloot` = VALUES(`skinloot`), `PetSpellDataId` = VALUES(`PetSpellDataId`), `VehicleId` = VALUES(`VehicleId`), `mingold` = VALUES(`mingold`), `maxgold` = VALUES(`maxgold`), `AIName` = VALUES(`AIName`), `MovementType` = VALUES(`MovementType`), `HoverHeight` = VALUES(`HoverHeight`), `HealthModifier` = VALUES(`HealthModifier`), `ManaModifier` = VALUES(`ManaModifier`), `ArmorModifier` = VALUES(`ArmorModifier`), `ExperienceModifier` = VALUES(`ExperienceModifier`), `RacialLeader` = VALUES(`RacialLeader`), `movementId` = VALUES(`movementId`), `RegenHealth` = VALUES(`RegenHealth`), `CreatureImmunitiesId` = VALUES(`CreatureImmunitiesId`), `flags_extra` = VALUES(`flags_extra`), `ScriptName` = VALUES(`ScriptName`), `VerifiedBuild` = VALUES(`VerifiedBuild`);
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `size`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `Data6`, `Data7`, `Data8`, `Data9`, `Data10`, `Data11`, `Data12`, `Data13`, `Data14`, `Data15`, `Data16`, `Data17`, `Data18`, `Data19`, `Data20`, `Data21`, `Data22`, `Data23`, `AIName`, `ScriptName`, `VerifiedBuild`)
+VALUES
+(663043, 5, 5073, 'Earth Spike', '', '', '', 1.0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0)
+ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`), `IconName` = VALUES(`IconName`), `castBarCaption` = VALUES(`castBarCaption`), `unk1` = VALUES(`unk1`), `size` = VALUES(`size`), `Data0` = VALUES(`Data0`), `Data1` = VALUES(`Data1`), `Data2` = VALUES(`Data2`), `Data3` = VALUES(`Data3`), `Data4` = VALUES(`Data4`), `Data5` = VALUES(`Data5`), `Data6` = VALUES(`Data6`), `Data7` = VALUES(`Data7`), `Data8` = VALUES(`Data8`), `Data9` = VALUES(`Data9`), `Data10` = VALUES(`Data10`), `Data11` = VALUES(`Data11`), `Data12` = VALUES(`Data12`), `Data13` = VALUES(`Data13`), `Data14` = VALUES(`Data14`), `Data15` = VALUES(`Data15`), `Data16` = VALUES(`Data16`), `Data17` = VALUES(`Data17`), `Data18` = VALUES(`Data18`), `Data19` = VALUES(`Data19`), `Data20` = VALUES(`Data20`), `Data21` = VALUES(`Data21`), `Data22` = VALUES(`Data22`), `Data23` = VALUES(`Data23`), `AIName` = VALUES(`AIName`), `ScriptName` = VALUES(`ScriptName`), `VerifiedBuild` = VALUES(`VerifiedBuild`);
+DELETE FROM `creature_template_model` WHERE `CreatureID` IN (663030, 663031);
+INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, `VerifiedBuild`) VALUES
+(663030, 0, 11686, 1.0, 1.0, 0),
+(663031, 0, 11686, 1.0, 1.0, 0);
+
+-- Jergosh the Invoker: Ascension position placed ingame on Mythic (9780131), Heroic copy (9780132); vanilla spawn stays Normal
+DELETE FROM `creature` WHERE `guid` IN (9780131, 9780132);
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`,
+  `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`,
+  `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`, `CreateObject`, `Comment`) VALUES
+(9780131, 11518, 389, 0, 0, 4, 1, 1, -369.31, 164.843, -21.3015, 4.42987, 604800, 0, 0, 1, 0, 0, 0, 0, 0, '', 0, 0, 'Jergosh the Invoker - Mythic'),
+(9780132, 11518, 389, 0, 0, 2, 1, 1, -369.31, 164.843, -21.3015, 4.42987, 604800, 0, 0, 1, 0, 0, 0, 0, 0, '', 0, 0, 'Jergosh the Invoker - Heroic');
+UPDATE `creature` SET `spawnMask` = 1 WHERE `guid` = 48740 AND `id` = 11518;

@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "name": "Blood Parasites debuffs the target of Taldaram's Torment (#3287)",
+  "contract": "Blood Parasites 802315 reads 'Your Taldaram's Torment now generates $/10;s1 additional Rage per tick and increases spell critical strike chance against the target by $800988s1% for $800988d'. Effect 1 is aura 42 (proc trigger spell) on Blood Parasites 800988 (MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, BasePoints 2 -> +3%, TargetA 6). Spell.dbc gives 802315 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and the debuff never landed. Effect 0 is the Rage clause (aura 107 SPELLMOD_EFFECT1 +30 on EffectSpellClassMask (0, 128, 0)) and is not exercised here. Taldaram's Torment is cast as 800772 itself, SpellFamilyFlags (0, 0, 2097152), the mask the new row uses.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 802315
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 800772
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Blood Parasites passive is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 802315,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "No Blood Parasites debuff before the cast",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 800988,
+      "caster": "bloodmage",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800772,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Taldaram's Torment is applied to the target",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 800772,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the target gains Blood Parasites 800988",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 800988,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Blood Parasites grants the DBC value of +3% crit taken",
+      "actor": "dummy",
+      "metric": "aura_amount",
+      "spell": 800988,
+      "caster": "bloodmage",
+      "equals": 3
+    }
+  ]
+}

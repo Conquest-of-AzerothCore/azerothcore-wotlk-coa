@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Everlasting Invigoration extends the Air Elemental buff natively (#3078)",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "p1", "race": 8, "class": 16, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn and level scaling settle", "ms": 3000 },
+    { "action": "assert", "label": "BASELINE: Invigoration (680918) keeps its native 15000 ms duration with no Everlasting Invigoration rank known",
+      "actor": "p1", "metric": "spell_modifier", "spell": 680918, "op": 1, "base": 15000, "equals": 15000 },
+    { "action": "learn", "actor": "p1", "spell": 706628 },
+    { "action": "assert", "label": "DISCRIMINATING: Everlasting Invigoration rank 1 (706628) adds 5000 ms via the native SPELLMOD_DURATION family-22 mask",
+      "actor": "p1", "metric": "spell_modifier", "spell": 680918, "op": 1, "base": 15000, "equals": 20000 },
+    { "action": "unlearn", "actor": "p1", "spell": 706628 },
+    { "action": "learn", "actor": "p1", "spell": 707800 },
+    { "action": "assert", "label": "DISCRIMINATING: Everlasting Invigoration rank 2 (707800) adds 10000 ms via the same native mask",
+      "actor": "p1", "metric": "spell_modifier", "spell": 680918, "op": 1, "base": 15000, "equals": 25000 }
+  ],
+  "contract": "#3078: Everlasting Invigoration rank 1 (706628, tooltip 'Increases the duration of Invigoration by 5 sec') and rank 2 (707800, '...by 10 sec') are both SPELL_AURA_ADD_FLAT_MODIFIER (aura 107) with EffectMiscValue[0]=1 (SPELLMOD_DURATION) and EffectSpellClassMask[0]=1, SpellFamilyName 22, targeting the caster. Invigoration (680918) has SpellFamilyName 22, SpellFamilyFlags (1,0,0) and DurationIndex 8 -> SpellDuration.dbc row (8,15000,0,15000) = 15000 ms base. Aura::CalcMaxDuration resolves the pet-cast 680918's spell-mod owner to the owning Stormbringer (Unit::GetSpellModOwner) and applies the player's SPELLMOD_DURATION, and SpellInfo::IsAffectedBySpellMod explicitly skips the attribute gate for SPELLMOD_DURATION, so 680918's SPELL_ATTR3_ONLY_ON_PLAYER does not block the match; the family/class mask check (IsAffected(22, flag96(1,0,0))) passes because 680918 carries exactly that family mask. Expected values: 15000 ms unmodified, 20000 ms with 706628 (4999 base points + 1 die side = 5000), 25000 ms with 707800 (9999 + 1 = 10000). No module code implements or blocks this; the assertion exercises player->ApplySpellMod with the same op Aura::CalcMaxDuration uses, so it proves the exact native path the tooltip promises."
+}

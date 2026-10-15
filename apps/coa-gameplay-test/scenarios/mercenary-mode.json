@@ -1,0 +1,142 @@
+{
+  "schema": 1,
+  "name": "Mercenary for Hire!: same-faction hostility under a PvP ruleset",
+  "contract": "A level 20 High-Risk player can cast Mercenary for Hire! and then attack a same-faction High-Risk player; the native attack request is refused for the same pair before the status, which the harness reports as an invalid target, so that refusal is not part of this scenario. A player without a PvP ruleset cannot cast it. Guards, teleports and queues are untested.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "mercenary",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    },
+    {
+      "id": "victim",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    },
+    {
+      "id": "peaceful",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "mercenary",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "mercenary",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "mercenary",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "victim",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "victim",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "victim",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Level 20 learns the ability",
+      "actor": "mercenary",
+      "metric": "knows_spell",
+      "spell": 9930874,
+      "equals": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "mercenary",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "victim",
+      "enabled": true
+    },
+    {
+      "action": "cast",
+      "actor": "peaceful",
+      "spell": 9930874
+    },
+    {
+      "action": "wait",
+      "ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "Without a PvP ruleset the cast is refused",
+      "actor": "peaceful",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "Cast grants the status",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "attack",
+      "actor": "mercenary",
+      "target": "victim"
+    },
+    {
+      "action": "assert",
+      "label": "The mercenary can now attack the same-faction player",
+      "actor": "mercenary",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mercenary"
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "name": "Issue 733: Blightbreaker halves Mercy's tick interval and doubles its cost",
+  "contract": "#733: Blightbreaker 707433 reads 'Increases the tick rate of Mercy by $s1%, but increases its mana cost by $s2%.' Effect 0 is aura 108 SPELLMOD_ACTIVATION_TIME (19) at -50 and effect 1 is aura 108 SPELLMOD_COST (14) at +100, both on EffectSpellClassMask [32, 0, 0] in family 33, which is Mercy 504848's SpellFamilyFlags word 0. Mercy's effect 0 is aura 23 with a 3000 ms amplitude, so a fresh Mercy should tick every 1500 ms (the repo's tick-rate convention, as for Fearmonger and Explosive) and cost twice as much. A previous live run found the applied Mercy still at 3000 ms. Each link is asserted separately so the first failing step names the broken one: the passive's aura, the modifier query without a cast, the cost, then the amplitude of a real self-cast. Only the Blightbreaker caster casts Mercy, and every aura read names its caster: Mercy chains to nearby allies (sun-cleric-mercy), so a second caster's Mercy on the same player would otherwise be read instead.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    },
+    {
+      "id": "breaker",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 504848
+    },
+    {
+      "action": "learn",
+      "actor": "breaker",
+      "spell": 504848
+    },
+    {
+      "action": "learn",
+      "actor": "breaker",
+      "spell": 707433
+    },
+    {
+      "action": "assert",
+      "label": "Blightbreaker's passive aura is on the caster",
+      "actor": "breaker",
+      "metric": "aura",
+      "spell": 707433,
+      "caster": "breaker",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Control's Mercy tick modifier is untouched",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 504848,
+      "op": 19,
+      "base": 3000,
+      "equals": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Blightbreaker halves Mercy's tick interval in the modifier query",
+      "actor": "breaker",
+      "metric": "spell_modifier",
+      "spell": 504848,
+      "op": 19,
+      "base": 3000,
+      "equals": 1500
+    },
+    {
+      "action": "snapshot",
+      "label": "Control's Mercy mana cost",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 504848,
+      "save_as": "control_cost"
+    },
+    {
+      "action": "assert",
+      "label": "Blightbreaker doubles Mercy's mana cost",
+      "actor": "breaker",
+      "metric": "spell_power_cost",
+      "spell": 504848,
+      "ratio_to": "control_cost",
+      "min": 1.99,
+      "max": 2.01
+    },
+    {
+      "action": "cast",
+      "actor": "breaker",
+      "spell": 504848
+    },
+    {
+      "action": "assert",
+      "label": "Blightbreaker caster's Mercy is applied",
+      "actor": "breaker",
+      "metric": "aura",
+      "spell": 504848,
+      "caster": "breaker",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Blightbreaker caster's Mercy ticks every 1500 ms",
+      "actor": "breaker",
+      "metric": "aura_amplitude_ms",
+      "spell": 504848,
+      "caster": "breaker",
+      "effect": 0,
+      "equals": 1500
+    }
+  ]
+}

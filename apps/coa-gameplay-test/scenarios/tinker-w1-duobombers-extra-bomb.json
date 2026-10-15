@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "name": "Tinker Duobombers builds a second Spider Bomb (#3120)",
+  "contract": "Duobombers 707258 is SPELL_AURA_ADD_FLAT_MODIFIER +1 on SPELLMOD_EFFECT2 (DBC EffectBasePoints 0, DieSides 1) with class mask word1 0x08000004, which covers Build: Spider Bomb 500535 (SpellFamilyFlags[1] 0x08000004). AscensionTinkerSummons.cpp:135-136 reads count = max(1, Effects[EFFECT_1].CalcValue(player)), and Unit::ApplyEffectModifiers applies SPELLMOD_EFFECT2 to effect index 1, so effect 1's value goes from 1 to 2 and the loop at AscensionTinkerSummons.cpp:151 summons creature entry 226012 twice instead of once. Spider Bombs despawn after 15 s and 500535 has an 18 s cooldown, so the second cast starts from an empty field.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "t",
+      "entry": 36,
+      "level": 80,
+      "distance": 25
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 500535
+    },
+    {
+      "action": "assert",
+      "label": "Build: Spider Bomb asks for one bomb",
+      "actor": "t",
+      "metric": "spell_effect_value",
+      "spell": 500535,
+      "effect": 1,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500535,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "One Spider Bomb without the talent",
+      "actor": "t",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 707258
+    },
+    {
+      "action": "assert",
+      "label": "Duobombers raises the summon count to two",
+      "actor": "t",
+      "metric": "spell_effect_value",
+      "spell": 500535,
+      "effect": 1,
+      "equals": 2
+    },
+    {
+      "action": "wait",
+      "ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "The build is off cooldown again",
+      "actor": "t",
+      "metric": "cooldown_ms",
+      "spell": 500535,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The first bomb is gone",
+      "actor": "t",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500535,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Two Spider Bombs with the talent",
+      "actor": "t",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 2,
+      "within_ms": 5000
+    }
+  ]
+}

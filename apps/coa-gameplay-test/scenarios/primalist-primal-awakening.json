@@ -1,0 +1,345 @@
+{
+  "schema": 1,
+  "name": "Primalist Primal Awakening haste and shared Worn Out lockout",
+  "contract": "A normal cast grants 30% melee and spell haste for twenty seconds to nearby group members, applies five-minute Worn Out, and excludes already affected recipients from a Stellar Alignment, a different raid haste ability. Stellar Alignment has different copied target selectors: its melee haste reaches the outsider, while its spell haste is group-only. Both still exclude the Primalist carrying Worn Out.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "outsider",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "timeout_ms": 120000,
+  "steps": [
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "ally"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 807560,
+      "all_specs": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "cast_speed_multiplier",
+      "save_as": "primalist_cast_speed_multiplier"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "save_as": "primalist_attack_time_ms"
+    },
+    {
+      "action": "unlearn",
+      "actor": "ally",
+      "spell": 807560,
+      "all_specs": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "cast_speed_multiplier",
+      "save_as": "ally_cast_speed_multiplier"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "attack_time_ms",
+      "save_as": "ally_attack_time_ms"
+    },
+    {
+      "action": "unlearn",
+      "actor": "outsider",
+      "spell": 807560,
+      "all_specs": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "outsider",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "cast_speed_multiplier",
+      "save_as": "outsider_cast_speed_multiplier"
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "attack_time_ms",
+      "save_as": "outsider_attack_time_ms"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 807560
+    },
+    {
+      "action": "learn",
+      "actor": "ally",
+      "spell": 807564
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 807560
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "primalist_cast_speed_multiplier",
+      "min": 0.7682307692307692,
+      "max": 0.7702307692307692
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "ratio_to": "primalist_attack_time_ms",
+      "min": 0.7682307692307692,
+      "max": 0.7702307692307692
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "ally_cast_speed_multiplier",
+      "min": 0.7682307692307692,
+      "max": 0.7702307692307692
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "attack_time_ms",
+      "ratio_to": "ally_attack_time_ms",
+      "min": 0.7682307692307692,
+      "max": 0.7702307692307692
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "outsider_cast_speed_multiplier",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "attack_time_ms",
+      "ratio_to": "outsider_attack_time_ms",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807560,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "spell": 804457,
+      "min": 298000,
+      "max": 300000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 807560,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_duration_ms",
+      "spell": 804457,
+      "min": 298000,
+      "max": 300000
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "aura",
+      "spell": 804457,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 20500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "primalist_cast_speed_multiplier",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "ratio_to": "primalist_attack_time_ms",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "ally_cast_speed_multiplier",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "attack_time_ms",
+      "ratio_to": "ally_attack_time_ms",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "outsider_cast_speed_multiplier",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "attack_time_ms",
+      "ratio_to": "outsider_attack_time_ms",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 804457,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "ally",
+      "spell": 807564
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "primalist_cast_speed_multiplier",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_time_ms",
+      "ratio_to": "primalist_attack_time_ms",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "ally_cast_speed_multiplier",
+      "min": 0.7682307692307692,
+      "max": 0.7702307692307692
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "attack_time_ms",
+      "ratio_to": "ally_attack_time_ms",
+      "min": 0.7682307692307692,
+      "max": 0.7702307692307692
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "outsider_cast_speed_multiplier",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "attack_time_ms",
+      "ratio_to": "outsider_attack_time_ms",
+      "min": 0.7682307692307692,
+      "max": 0.7702307692307692,
+      "label": "Comparison ability has a copied area-allies melee target"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807564,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 807564,
+      "equals": 1
+    }
+  ]
+}

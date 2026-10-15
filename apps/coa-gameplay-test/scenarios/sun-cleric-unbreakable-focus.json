@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "name": "Unbreakable Focus cuts the cooldown of Gavels and Horusath Blast by 20% (#1138)",
+  "contract": "Unbreakable Focus 704945 (SpellFamilyName 33) has one live effect: SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue 11 (SPELLMOD_COOLDOWN) and EffectBasePoints -21 -> real -20, and EffectSpellClassMask word 2 bits 0x20|0x40 (96). Every 'Gavel' (Gavel of Light 800611, Gavel of Grace 800614, Gavel of Wrath 800617) carries SpellFamilyFlags_2 0x20, and Horusath Blast (500154) carries SpellFamilyFlags_2 0x40 -- together exactly the shipped mask, so both named abilities are affected. Gavel of Light has no RecoveryTime, only CategoryRecoveryTime 5000 (its own tooltip: 'Shares a cooldown with other Gavels'); Horusath Blast has RecoveryTime and CategoryRecoveryTime both 25000. Player::SendSpellCooldown applies SPELLMOD_COOLDOWN to whichever of rec/catrec is nonzero via ApplySpellMod, a PCT-type op that multiplies the base by (100 + mod)/100 -- 25000 -> 20000 and 5000 -> 4000. The 'spell_modifier' query metric calls this same native Player::ApplySpellMod(spell, SPELLMOD_COOLDOWN, base) path directly, without casting or needing a target. Native handlers only; regression scenario for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 27, "level": 80 },
+    { "id": "talent", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talent", "spell": 704945 },
+    {
+      "action": "assert",
+      "label": "Without the talent Horusath Blast keeps its full 25 second cooldown",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 500154,
+      "op": 11,
+      "base": 25000,
+      "equals": 25000
+    },
+    {
+      "action": "assert",
+      "label": "Unbreakable Focus cuts Horusath Blast's cooldown by 20% to 20 seconds",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 500154,
+      "op": 11,
+      "base": 25000,
+      "equals": 20000
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent Gavel of Light keeps its full 5 second shared cooldown",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 800611,
+      "op": 11,
+      "base": 5000,
+      "equals": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Unbreakable Focus cuts Gavel of Light's shared cooldown by 20% to 4 seconds",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 800611,
+      "op": 11,
+      "base": 5000,
+      "equals": 4000
+    }
+  ]
+}

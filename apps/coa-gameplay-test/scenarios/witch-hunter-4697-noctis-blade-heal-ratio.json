@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Noctis Blade heals for 100% of the damage dealt, not the reported ~13% (#4697)",
+  "contract": "Report #4697 (2026-09-22T11:03:25Z): 'dealt 153 damage with Noctis Blade but only got healed for 20 health' (~13%). The reporter's own Core revision has PR #4676's merge commit (which fixed this exact ratio, Fixes-family commit 3352a459d) as an ancestor, so the report was filed against a build that should already carry the fix; this scenario re-verifies the live worktree independently of that history reasoning. AscensionWitchHunterAbilities.cpp's Hit() reads the heal percent from the live passive 574336 ('Noctis Blade Heal Passive') Effect 0 (BasePoints 99 + DieSides 1 = 100 in Spell.dbc), not a hardcoded 50% or 25%, and casts 574337 with SPELLVALUE_BASE_POINT0 = dealt * percent / 100. 574337 is SPELL_DAMAGE_CLASS_NONE (AscensionWitchHunterCompletion.cpp converts its target to TARGET_UNIT_TARGET_ALLY and, alongside 574335, strips crit/caster/taken-damage modifiers and armor), so SpellHealingBonusDone and the crit roll leave the custom base value untouched: the caster's health gain should equal the cast's dealt damage exactly, not ~13% of it. The scenario measures the enemy's health loss and the caster's health gain with the same 'health' metric and asserts gain / loss = 1.0; the reported symptom would read close to 0.13.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "caster", "entry": 36, "level": 60, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "caster", "spell": 197 },
+    { "action": "learn", "actor": "caster", "spell": 802280 },
+    { "action": "add_item", "actor": "caster", "item": 12282 },
+    { "action": "equip", "actor": "caster", "item": 12282, "slot": 15 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "set_health", "label": "Wound the caster so the heal is not clipped", "actor": "caster", "value": 100 },
+    { "action": "snapshot", "actor": "caster", "metric": "health", "save_as": "caster_before" },
+    { "action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "enemy_before" },
+    { "action": "cast", "actor": "caster", "spell": 802280, "target": "enemy" },
+    {
+      "action": "assert", "label": "Noctis Blade damages the enemy",
+      "actor": "enemy", "metric": "health", "relative_to": "enemy_before", "max": -1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let the heal land", "ms": 1000 },
+    {
+      "action": "snapshot", "label": "Damage dealt, as a negative health change",
+      "actor": "enemy", "metric": "health", "relative_to": "enemy_before", "save_as": "damage_dealt"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the caster heals for 100% of the damage dealt, not ~13%",
+      "actor": "caster", "metric": "health", "relative_to": "caster_before", "ratio_to": "damage_dealt",
+      "min": -1.01, "max": -0.99
+    }
+  ]
+}

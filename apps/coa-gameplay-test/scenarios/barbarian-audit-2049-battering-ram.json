@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Barbarian audit: Battering Ram's periodic armor-penetration trigger fires with the right value (#2049)",
+  "contract": "Battering Ram rank 1 (561326, EffectBasePoints 9 DieSides 1 = 10) and rank 2 (561331, EffectBasePoints 19 DieSides 1 = 20) are each a single SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE (227, EffectAmplitude 10000 ms, EffectTriggerSpell 561362). AuraEffect::HandlePeriodicTriggerSpellWithValueAuraTick (SpellAuraEffects.cpp) fires every 10 s and casts 561362 with CustomSpellValues SPELLVALUE_BASE_POINT0 = GetAmount(), overriding 561362's own effect 0 base points (which are otherwise a placeholder EffectBasePoints -1 -> 0) with the parent's amount. 561362 effect 0 carries SPELL_AURA_MOD_ARMOR_PENETRATION_PCT (280 -- the array comment in SpellAuraEffects.cpp mislabels it MOD_TARGET_ARMOR_PCT, but SpellAuraDefines.h names index 280 SPELL_AURA_MOD_ARMOR_PENETRATION_PCT), which Unit::CalcArmorReducedDamage reads via GetTotalAuraModifier(SPELL_AURA_MOD_ARMOR_PENETRATION_PCT, ...) to reduce the victim's effective armor -- exactly the tooltip's 'bypass $s1% of enemy armor'. 561362 also carries EquippedItemClass 2 / EquippedItemSubClassMask 354 (two-handed Axe/Mace/Polearm/Sword), so inside CalcArmorReducedDamage's lambda the bonus is gated on Player::HasItemFitToSpellRequirements(561362), i.e. the attacker must have a two-handed weapon equipped -- this generically implements 'while a two-handed weapon is equipped' and needs no script. That gear-dependent damage-formula outcome is not exercised here (it would require equipping a specific weapon); this scenario instead proves the trigger mechanism itself: the periodic tick fires on schedule and transplants the correct override value into 561362's live aura.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+
+    { "action": "learn", "actor": "b", "spell": 561326 },
+    { "action": "assert", "label": "Rank 1 (561326) is active", "actor": "b", "metric": "aura", "spell": 561326, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Rank 1's trigger value resolves to 10", "actor": "b", "metric": "aura_amount", "spell": 561326, "effect": 0, "equals": 10 },
+    { "action": "assert", "label": "Rank 1's amplitude is the documented 10 s", "actor": "b", "metric": "aura_amplitude_ms", "spell": 561326, "effect": 0, "equals": 10000 },
+    { "action": "assert", "label": "The periodic tick applies 561362 with the overridden value 10",
+      "actor": "b", "metric": "aura_amount", "spell": 561362, "effect": 0, "equals": 10, "within_ms": 13000 },
+    { "action": "unlearn", "actor": "b", "spell": 561326 },
+    { "action": "assert", "label": "Unlearning removes rank 1", "actor": "b", "metric": "aura", "spell": 561326, "equals": 0, "within_ms": 3000 },
+
+    { "action": "learn", "actor": "b", "spell": 561331 },
+    { "action": "assert", "label": "Rank 2 (561331) is active", "actor": "b", "metric": "aura", "spell": 561331, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Rank 2's trigger value resolves to 20", "actor": "b", "metric": "aura_amount", "spell": 561331, "effect": 0, "equals": 20 },
+    { "action": "assert", "label": "The periodic tick applies 561362 with the overridden value 20",
+      "actor": "b", "metric": "aura_amount", "spell": 561362, "effect": 0, "equals": 20, "within_ms": 13000 },
+    { "action": "unlearn", "actor": "b", "spell": 561331 }
+  ]
+}

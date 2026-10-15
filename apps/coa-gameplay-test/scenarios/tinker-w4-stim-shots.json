@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Tinker: Stim Shots raises Stim Augmentation's copied healing",
+  "contract": "#1140: Stim Shots (808009) is a flat SPELLMOD_EFFECT1 of +10 whose class mask (0,0,0x4000000) selects only Stim Augmentation (653240). The scripted aura reads its own effect amount, so the effect value the Tinker would cast must move from 20 to 30 and the applied aura must carry 30.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "t", "race": 1, "class": 28, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "No effect-1 modifier on Stim Augmentation before Stim Shots",
+      "actor": "t", "metric": "spell_modifier", "spell": 653240, "op": 3, "base": 0, "equals": 0 },
+    { "action": "assert", "label": "Stim Augmentation copies 20% of the heal without Stim Shots",
+      "actor": "t", "metric": "spell_effect_value", "spell": 653240, "effect": 0, "equals": 20 },
+    { "action": "learn", "actor": "t", "spell": 808009 },
+    { "action": "assert", "label": "Stim Shots adds a flat 10 to Stim Augmentation's first effect",
+      "actor": "t", "metric": "spell_modifier", "spell": 653240, "op": 3, "base": 0, "equals": 10 },
+    { "action": "assert", "label": "Stim Augmentation now copies 30% of the heal",
+      "actor": "t", "metric": "spell_effect_value", "spell": 653240, "effect": 0, "equals": 30 },
+    { "action": "learn", "actor": "t", "spell": 653240 },
+    { "action": "assert", "label": "Stim Augmentation is applied",
+      "actor": "t", "metric": "aura", "spell": 653240, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "The applied aura stores the boosted amount the script reads",
+      "actor": "t", "metric": "aura_amount", "spell": 653240, "effect": 0, "equals": 30 }
+  ]
+}

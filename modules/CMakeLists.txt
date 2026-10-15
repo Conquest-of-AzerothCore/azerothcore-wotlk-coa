@@ -13,6 +13,11 @@
 # Make the script module list available in the current scope
 GetModuleSourceList(MODULES_MODULE_LIST)
 
+# CoA is built from src/server/coa; its SQL directory and its former module directory
+# are not modules, even when an old checkout left a stale src/ in either of them
+get_property(COA_SQL_DIRECTORY GLOBAL PROPERTY COA_SQL_DIRECTORY)
+list(REMOVE_ITEM MODULES_MODULE_LIST ${COA_SQL_DIRECTORY} mod-ascension-compat)
+
 # Make the native install offset available in this scope
 GetInstallOffset(INSTALL_OFFSET)
 
@@ -239,7 +244,8 @@ foreach(SOURCE_MODULE ${MODULES_MODULE_LIST})
       PRIVATE
         acore-core-interface
       PUBLIC
-        game)
+        game
+        coa-interface)
 
     target_include_directories(${MODULE_SOURCE_PROJECT_NAME}
       PUBLIC
@@ -302,7 +308,8 @@ target_link_libraries(modules
     acore-core-interface
     mysql
   PUBLIC
-    game-interface)
+    game-interface
+    coa)
 
 target_include_directories(modules
   PUBLIC
@@ -318,6 +325,10 @@ set_target_properties(modules
   PROPERTIES
     FOLDER
       "modules")
+
+if (USE_COREPCH AND CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND NOT MSVC)
+  set_target_properties(modules PROPERTIES PRECOMPILE_HEADERS_REUSE_FROM game)
+endif()
 
 # Generate precompiled header
 # if (USE_SCRIPTPCH)

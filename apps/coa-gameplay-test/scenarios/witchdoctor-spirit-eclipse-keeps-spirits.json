@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Spirit Eclipse keeps Spirits",
+  "contract": "Spirit Eclipse unleashes the Spirits on the enemy without consuming them; Frenzied Spirits consumes them.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy0",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "distance": 5,
+      "health": 100000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801607
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 560748
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 561136,
+      "stacks": 3
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_stacks",
+      "spell": 561136,
+      "equals": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy0",
+      "metric": "health",
+      "save_as": "hp0"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801607,
+      "target": "enemy0"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy0",
+      "metric": "health",
+      "relative_to": "hp0",
+      "max": -1,
+      "within_ms": 6000,
+      "label": "Eclipse damages the enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_stacks",
+      "spell": 561136,
+      "equals": 3,
+      "label": "Spirits are kept"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 560748
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 561136,
+      "equals": 0,
+      "within_ms": 3000,
+      "label": "Frenzied Spirits consumes them"
+    }
+  ]
+}

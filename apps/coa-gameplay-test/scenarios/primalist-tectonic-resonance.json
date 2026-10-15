@@ -1,0 +1,338 @@
+{
+  "schema": 1,
+  "name": "Primalist Tectonic Resonance: stronger slow without an Earthquake damage penalty",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "enemy",
+      "race": 5,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "pvp",
+      "actor": "primalist",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9612.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 95
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 520745
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 520696
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 520745,
+      "effect": 0,
+      "save_as": "baseline_520745",
+      "label": "baseline_520745"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 520696,
+      "effect": 0,
+      "save_as": "baseline_520696",
+      "label": "baseline_520696"
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520745,
+      "destination": {
+        "x": -9612.06,
+        "y": -288.949,
+        "z": 57.3053
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 520696,
+      "caster": "primalist",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 520696,
+      "effect": 0,
+      "save_as": "baseline_slow",
+      "label": "baseline_slow"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 520696,
+      "effect": 0,
+      "caster": "primalist",
+      "equals": -30
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "save_as": "baseline_speed",
+      "label": "baseline_speed"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "min": 0.699,
+      "max": 0.701
+    },
+    {
+      "action": "wait",
+      "ms": 9000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 707173
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 520745,
+      "effect": 0,
+      "save_as": "talented_520745",
+      "label": "talented_520745"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 520745,
+      "effect": 0,
+      "relative_to": "baseline_520745",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 520696,
+      "effect": 0,
+      "save_as": "talented_520696",
+      "label": "talented_520696"
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520745,
+      "destination": {
+        "x": -9612.06,
+        "y": -288.949,
+        "z": 57.3053
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 520696,
+      "caster": "primalist",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 520696,
+      "effect": 0,
+      "save_as": "talented_slow",
+      "label": "talented_slow"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 520696,
+      "effect": 0,
+      "caster": "primalist",
+      "equals": -60
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "save_as": "talented_speed",
+      "label": "talented_speed"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "min": 0.399,
+      "max": 0.401
+    },
+    {
+      "action": "wait",
+      "ms": 9000
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 707173
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 520745,
+      "effect": 0,
+      "save_as": "removed_520745",
+      "label": "removed_520745"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 520745,
+      "effect": 0,
+      "relative_to": "baseline_520745",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_effect_value",
+      "spell": 520696,
+      "effect": 0,
+      "save_as": "removed_520696",
+      "label": "removed_520696"
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520745,
+      "destination": {
+        "x": -9612.06,
+        "y": -288.949,
+        "z": 57.3053
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 520696,
+      "caster": "primalist",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 520696,
+      "effect": 0,
+      "save_as": "removed_slow",
+      "label": "removed_slow"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 520696,
+      "effect": 0,
+      "caster": "primalist",
+      "equals": -30
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "save_as": "removed_speed",
+      "label": "removed_speed"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "min": 0.699,
+      "max": 0.701
+    },
+    {
+      "action": "wait",
+      "ms": 9000
+    }
+  ],
+  "contract": "Tectonic Resonance increases Earthquake slow from 30% to 60%, without changing its damage. Removing the talent restores the native slow. All three stages cast Earthquake through the normal handler."
+}

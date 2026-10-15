@@ -1,0 +1,197 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth: paid Brimstone Bludgeon replaces known Sever ranks and survives refresh (#5589)",
+  "contract": "Current CharacterAdvancement7891 buys Brimstone Bludgeon800710 for one War specialization point. Its\nindependent description promises to transform Sever500904 into520005, scaling with modifiers to Sever. A\nreal War purchase must establish replacement mappings for the active level58 Sever501505, and a normal\ncast through the player's highest Sever button must actually hit as520005. Removing the talent must clear\nthe mapping and restore native Sever. Client action-bar rendering is not observed.\nPlayer::GetTemporarySpellReplacement returns the original spell when no usable replacement exists;\ninactive lower ranks are therefore not treated as castable buttons. Native removals and resets retain\ntheir original prices; fixture actors have 100 gold to pay them.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "k",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "k",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_money",
+      "label": "Fund the original native removal and purge prices",
+      "actor": "k",
+      "value": 1000000
+    },
+    {
+      "action": "add_item",
+      "actor": "k",
+      "item": 629951
+    },
+    {
+      "action": "equip",
+      "actor": "k",
+      "item": 629951,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 500904
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 501505
+    },
+    {
+      "action": "specialization",
+      "actor": "k",
+      "id": 18
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "temporary_spell_replacement",
+      "spell": 501505,
+      "equals": 501505
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "knows_spell",
+      "spell": 520005,
+      "equals": 0
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "k",
+      "entry": 7891,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura",
+      "spell": 800710,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "knows_spell",
+      "spell": 520005,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "temporary_spell_replacement",
+      "spell": 501505,
+      "equals": 520005
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 501505,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 501505,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "k",
+      "entry": 7891,
+      "rank": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "knows_spell",
+      "spell": 520005,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "temporary_spell_replacement",
+      "spell": 501505,
+      "equals": 501505
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 501505,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 501505,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    }
+  ]
+}

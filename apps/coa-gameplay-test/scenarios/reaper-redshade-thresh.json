@@ -1,0 +1,348 @@
+{
+  "schema": 1,
+  "name": "Redshade turns Reap into Thresh and then Bloodshatter",
+  "contract": [
+    "Redshade owns temporary spellbook entries, but native casts of Thresh and Bloodshatter require their",
+    "respective transform auras. Bloodshatter takes priority while both auras exist. Expiry and talent",
+    "removal revoke access. Reap forwarding grants the intended resources without rewriting saved action",
+    "buttons. Thresh and Bloodshatter use the original melee damage class; this fixture supplies melee hit",
+    "and expertise so their required successful-hit resource grants cannot be lost to unrelated miss, dodge",
+    "or parry rolls. A native fixture stun prevents independent target blocks, and Runic Power starts at zero",
+    "with regeneration disabled; a landed forwarded Thresh and its resource grants are required explicitly."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80,
+      "melee_hit_rating": 100000,
+      "expertise_rating": 100000,
+      "allow_regeneration": false,
+      "spell_hit_rating": 100000
+    }
+  ],
+  "location": { "map": 530, "x": 10349.6, "y": -6357.29, "z": 33.4026, "o": 5.31605 },
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "reaper",
+      "entry": 1601,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 573303
+    },
+    {
+      "action": "set_action_button",
+      "actor": "reaper",
+      "spell": 573303,
+      "button": 1
+    },
+    {
+      "action": "assert",
+      "label": "Thresh is not in the spellbook without the talent",
+      "actor": "reaper",
+      "metric": "knows_spell",
+      "spell": 505170,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 524735
+    },
+    {
+      "action": "assert",
+      "label": "The talent owns Thresh",
+      "actor": "reaper",
+      "metric": "knows_spell",
+      "spell": 505170,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The talent owns Bloodshatter",
+      "actor": "reaper",
+      "metric": "knows_spell",
+      "spell": 505326,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 505170,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 505170,
+      "equals": 22
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 505326,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 505326,
+      "equals": 22
+    },
+    {
+      "action": "assert",
+      "label": "Reap is on the bar",
+      "actor": "reaper",
+      "metric": "action_button",
+      "button": 1,
+      "equals": 573303
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 23775
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "target": "enemy",
+      "spell": 23775,
+      "label": "Hold the passive target still and prevent independent blocks"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "stunned",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the fixture stun global cooldown"
+    },
+    {
+      "action": "set_power",
+      "actor": "reaper",
+      "power": 6,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 505170,
+      "target": "enemy",
+      "save_as": "thresh_before"
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 525058,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Thresh step is up",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 525058,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The transform redraws the bar without rewriting it: the saved button is still Reap",
+      "actor": "reaper",
+      "metric": "action_button",
+      "button": 1,
+      "equals": 573303
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 573303,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Reap sent Thresh, which left the Bloodshatter step",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 525299,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Thresh step is spent",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 525058,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 505170,
+      "target": "enemy",
+      "relative_to": "thresh_before",
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "The forwarded Thresh actually deals damage before generating resources"
+    },
+    {
+      "action": "assert",
+      "label": "Thresh generated a Soul Fragment",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 805077,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Thresh generated Runic Power",
+      "actor": "reaper",
+      "metric": "power",
+      "power": 6,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Bloodshatter is castable in its own right, which is what the second step needs",
+      "actor": "reaper",
+      "metric": "knows_spell",
+      "spell": 505326,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 505326,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 505326,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Bloodshatter grants the next Reliquary cooldown reduction",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 525304,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Bloodshatter window expire",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 525299,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 505326,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 505326,
+      "equals": 22
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 525058,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 525299,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 505170,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 505170,
+      "equals": 22
+    },
+    {
+      "action": "unlearn",
+      "actor": "reaper",
+      "spell": 524735,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 525058,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 525299,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "knows_spell",
+      "spell": 505170,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "knows_spell",
+      "spell": 505326,
+      "equals": 0
+    }
+  ]
+}

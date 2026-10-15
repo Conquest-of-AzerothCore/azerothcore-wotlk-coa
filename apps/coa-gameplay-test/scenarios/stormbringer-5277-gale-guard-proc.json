@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Gale Guard triggers its knockback on taken damage, up to 3 attacks (#5277)",
+  "contract": "Gale Guard (500923) tooltip: 'enemies who damage you [are] struck with a gust of wind and knocked back... Lasts for $d or 3 attacks.' It carries a live SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) effect (EffectTriggerSpell 504872), but Spell.dbc gives it ProcFlags 0 and no spell_proc row existed, so it never proc'd: no knockback on any hit taken. Physical knockback motion is not assertable by this harness, so this proves the triggered cast instead (spell_proc_count, which the README defines as counting the casts an aura's own proc fired). The new spell_proc row (PROC_FLAG_TAKEN_DAMAGE, Charges 3, since Spell.dbc's own ProcCharges is 0/unlimited) makes it reachable and caps it at 3 attacks, matching the tooltip. Self-applied Corruption rank 8 (27216) supplies controlled 150-damage ticks every 3 sec as taken damage, the same fixture stormbringer-fix-stormcloak-family.json uses for the same PROC_FLAG_TAKEN_DAMAGE class.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "storm", "race": 1, "class": 16, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "storm", "spell": 500923 },
+    { "action": "cast", "actor": "storm", "spell": 500923 },
+    { "action": "assert", "label": "SETUP: Gale Guard's cast succeeds",
+      "actor": "storm", "metric": "cast_failure", "spell": 500923, "equals": 0, "within_ms": 1500 },
+    { "action": "assert", "label": "SETUP: Gale Guard is up",
+      "actor": "storm", "metric": "aura", "spell": 500923, "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "BASELINE: no proc has fired yet",
+      "actor": "storm", "metric": "spell_proc_count", "spell": 500923, "equals": 0 },
+    { "action": "set_aura", "label": "Self Corruption rank 8: a 150 damage tick every 3 sec",
+      "actor": "storm", "spell": 27216, "stacks": 1 },
+    { "action": "wait", "label": "First Corruption tick", "ms": 3500 },
+    { "action": "assert", "label": "DISCRIMINATING: the first taken hit procs the knockback (fails today: stays 0)",
+      "actor": "storm", "metric": "spell_proc_count", "spell": 500923, "min": 1 },
+    { "action": "wait", "label": "Second Corruption tick", "ms": 3200 },
+    { "action": "assert", "label": "DISCRIMINATING: the second taken hit procs it again",
+      "actor": "storm", "metric": "spell_proc_count", "spell": 500923, "min": 2 },
+    { "action": "wait", "label": "Third Corruption tick", "ms": 3200 },
+    { "action": "assert", "label": "DISCRIMINATING: the third taken hit is the last charge",
+      "actor": "storm", "metric": "spell_proc_count", "spell": 500923, "equals": 3 },
+    { "action": "assert", "label": "DISCRIMINATING: Gale Guard falls off once its 3 charges are spent, matching 'or 3 attacks'",
+      "actor": "storm", "metric": "aura", "spell": 500923, "equals": 0, "within_ms": 1500 }
+  ]
+}

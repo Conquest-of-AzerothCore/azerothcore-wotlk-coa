@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Unbound Elementalist strengthens Unshackle by 20% (#2807)",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "s", "spell": 804019 },
+    { "action": "cast", "actor": "s", "spell": 804019 },
+    { "action": "assert", "label": "SETUP: the Air Elemental Unshackle buffs is present",
+      "actor": "s", "metric": "pet_entry", "equals": 500941, "within_ms": 24000 },
+    { "action": "learn", "actor": "s", "spell": 706625 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "BASELINE: no all-effects modifier applies to Unshackle without the passive",
+      "actor": "s", "metric": "spell_modifier", "spell": 706625, "op": 8, "base": 100, "equals": 100 },
+    { "action": "assert", "label": "BASELINE: Unshackle's damage effect is its own 25% (EffectBasePoints[1] 24 + EffectDieSides[1] 1)",
+      "actor": "s", "metric": "spell_effect_value", "spell": 706625, "effect": 1, "equals": 25 },
+    { "action": "assert", "label": "BASELINE: Unshackle's haste effect is its own 30% (EffectBasePoints[2] 29 + EffectDieSides[2] 1)",
+      "actor": "s", "metric": "spell_effect_value", "spell": 706625, "effect": 2, "equals": 30 },
+    { "action": "set_aura", "actor": "s", "spell": 803102, "stacks": 100 },
+    { "action": "set_aura", "actor": "s", "spell": 707050, "stacks": 1 },
+    { "action": "cast", "actor": "s", "spell": 706625 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "assert", "label": "BASELINE: the applied pet aura carries the unmodified 25%",
+      "actor": "s", "metric": "pet_aura_amount", "spell": 706625, "effect": 1, "equals": 25 },
+    { "action": "learn", "actor": "s", "spell": 705702 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "DISCRIMINATING: Unbound Elementalist applies its tooltip's 20% to Unshackle as a caster-side all-effects modifier",
+      "actor": "s", "metric": "spell_modifier", "spell": 706625, "op": 8, "base": 100, "min": 119.9, "max": 120.1 },
+    { "action": "assert", "label": "DISCRIMINATING: Unshackle's damage effect becomes 25 + 20% = 30",
+      "actor": "s", "metric": "spell_effect_value", "spell": 706625, "effect": 1, "equals": 30 },
+    { "action": "assert", "label": "DISCRIMINATING: Unshackle's haste effect becomes 30 + 20% = 36",
+      "actor": "s", "metric": "spell_effect_value", "spell": 706625, "effect": 2, "equals": 36 },
+    { "action": "reset_cooldown", "actor": "s", "spell": 706625 },
+    { "action": "set_aura", "actor": "s", "spell": 803102, "stacks": 100 },
+    { "action": "set_aura", "actor": "s", "spell": 707050, "stacks": 1 },
+    { "action": "cast", "actor": "s", "spell": 706625 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "assert", "label": "DISCRIMINATING: the strengthened value reaches the aura applied to the Air Elemental",
+      "actor": "s", "metric": "pet_aura_amount", "spell": 706625, "effect": 1, "equals": 30 }
+  ],
+  "contract": "#2807: Unbound Elementalist rank 1 (705702) reads \"Increases the effectiveness of your Unshackle by $s2%\", and $s2 quotes its Effect[1] amount, 20 (EffectBasePoints[1] 19 + EffectDieSides[1] 1). Both of its SPELL_AURA_ADD_PCT_MODIFIER effects use EffectMiscValue 8 (SPELLMOD_ALL_EFFECTS) and class mask {16,0,0}, which addresses Unshackle (706625) and, per a full Spell.dbc scan of SpellFamilyName 22, nothing else. The caster-side Effect[0] ships with EffectBasePoints -1 + EffectDieSides 1 = 0 while the 20 sits on the pet-targeted Effect[1], and spell modifiers are ignored on non-players, so the shipped record delivers nothing. Unshackle's own effects are 25% damage and 30% haste, which the modifier raises to 30 and 36. Rank 2 (705703) is not obtainable and is not exercised here."
+}

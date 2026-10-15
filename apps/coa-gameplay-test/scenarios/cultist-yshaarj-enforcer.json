@@ -1,0 +1,125 @@
+{
+  "schema": 1,
+  "name": "Cultist: Y'Shaarj's Enforcer doubles Twilight Shieldtoss damage and removes its bounce (#1277)",
+  "contract": "803236 effect 0 is ADD_PCT_MODIFIER (aura 108), EffectMiscValue 0 = SPELLMOD_DAMAGE, EffectBasePoints 99 + DieSides 1 = +100%; effect 1 is ADD_FLAT_MODIFIER (aura 107), EffectMiscValue 17 = SPELLMOD_JUMP_TARGETS, EffectBasePoints -4 + DieSides 1 = -3; both share EffectSpellClassMask word1 bit 16384. Twilight Shieldtoss rank 804208 (the rank AscensionSpellProgressionData.h grants a level-18..25 Cultist for base id 524876) is SpellFamilyName 31 with SpellFamilyFlags (0, 16384, 0) - exact match - Effect 0 SPELL_EFFECT_SCHOOL_DAMAGE and EffectChainTarget 3. Unit::SpellDamageBonusDone (Unit.cpp:9365-9369, what the spell_damage_done metric queries with a fixed base of 1000) applies SPELLMOD_DAMAGE to the computed damage at the very end, so a caster with 803236 known must see exactly double the damage bonus of a caster without it. Spell::SelectImplicitChainTargets (Spell.cpp:1884-1906) reads ChainTarget (3), applies SPELLMOD_JUMP_TARGETS through the same spell_modifier path, and only chains when the modified value exceeds 1; 3 + (-3) = 0, so Twilight Shieldtoss no longer bounces at all. 803236 is not in SpellInfo::IsAffectedBySpellMod's family-31 collision table, so the plain classmask match applies directly to every Twilight Shieldtoss rank, including 804208. 500712 (Ancient Curse, SpellFamilyFlags all zero, itself a Cultist SPELL_EFFECT_SCHOOL_DAMAGE spell) is the negative control for both the damage percent and the chain-target flat modifier. Numbers read from Spell.dbc via coa-dbc-viewer, and the collision-table absence was confirmed by reading SpellInfo::IsAffectedBySpellMod directly (SpellInfo.cpp ~1494-1509). No script or SQL references 803236. This scenario never casts Twilight Shieldtoss (avoiding its own damage-roll randomness, EffectBasePoints 125 + DieSides 11): both halves are queried directly through native calculation entry points. Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 25,
+      "level": 20
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "cultist",
+      "entry": 36,
+      "faction": 7,
+      "health": 1000000,
+      "distance": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Twilight Shieldtoss keeps its native chain target of 3 before the talent",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 804208,
+      "op": 17,
+      "base": 3,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the control spell's chain target of 1 is unaffected before the talent",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 500712,
+      "op": 17,
+      "base": 1,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "cultist",
+      "metric": "spell_damage_done",
+      "spell": 804208,
+      "target": "dummy",
+      "effect": 0,
+      "save_as": "shieldtoss_dmg_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cultist",
+      "metric": "spell_damage_done",
+      "spell": 500712,
+      "target": "dummy",
+      "effect": 0,
+      "save_as": "control_dmg_base"
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 803236
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "knows_spell",
+      "spell": 803236,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Y'Shaarj's Enforcer doubles Twilight Shieldtoss's damage bonus (#1277)",
+      "actor": "cultist",
+      "metric": "spell_damage_done",
+      "spell": 804208,
+      "target": "dummy",
+      "effect": 0,
+      "ratio_to": "shieldtoss_dmg_base",
+      "min": 1.95,
+      "max": 2.05
+    },
+    {
+      "action": "assert",
+      "label": "Y'Shaarj's Enforcer removes Twilight Shieldtoss's bounce entirely (#1277)",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 804208,
+      "op": 17,
+      "base": 3,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The control spell's damage is unaffected (negative control)",
+      "actor": "cultist",
+      "metric": "spell_damage_done",
+      "spell": 500712,
+      "target": "dummy",
+      "effect": 0,
+      "ratio_to": "control_dmg_base",
+      "min": 0.98,
+      "max": 1.02
+    },
+    {
+      "action": "assert",
+      "label": "The control spell's chain target is unaffected (negative control)",
+      "actor": "cultist",
+      "metric": "spell_modifier",
+      "spell": 500712,
+      "op": 17,
+      "base": 1,
+      "equals": 1
+    }
+  ]
+}

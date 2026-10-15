@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "name": "Solar Champion increases the range of Piety spells by 20% and cuts their threat by 20% (#1932)",
+  "contract": "Solar Champion 504734 is family 33, Attributes 192 (SPELL_ATTR0_PASSIVE), EquippedItemClass -1, no Stances, so it self-applies on learn. Effect 0 is SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue 5 (SPELLMOD_RANGE), EffectBasePoints 19 + DieSides 1 = 20; effect 1 is the same aura with EffectMiscValue 2 (SPELLMOD_THREAT), EffectBasePoints -21 + DieSides 1 = -20. Both effects share EffectSpellClassMask word0 134217728 (bit 0x8000000) and word1 17302850, whose bits (0x2, 0x40, 0x100, 0x400, 0x80000, 0x1000000) and word0 bit cover Dawnsear (500146, word1 0x2), Rapture (806477, word1 0x80000) and Radiant Flame (560862-560867/806060, word0 0x8000000) among other spells -- all confirmed Piety-spec abilities (bindmysoul spec Piety for Dawnsear and Rapture), matching the tooltip's 'your Piety spells'. SpellInfo::GetMaxRange/Spell range resolution and ThreatManager::AddThreat both apply ApplySpellMod (SPELLMOD_RANGE, SPELLMOD_THREAT) unconditionally; this is not \"no server-side implementation\", both effects already apply to the named spec's spells. spell_max_range reads the modified native range with no cast; spell_modifier exercises the same ApplySpellMod path used for threat, synthetically, with no cast.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 504734
+    },
+    {
+      "action": "assert",
+      "label": "Talent self-applies its passive",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 504734,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_max_range",
+      "spell": 500146,
+      "save_as": "control_dawnsear_range"
+    },
+    {
+      "action": "assert",
+      "label": "Dawnsear's range grows by 20%",
+      "actor": "talent",
+      "metric": "spell_max_range",
+      "spell": 500146,
+      "ratio_to": "control_dawnsear_range",
+      "min": 1.15,
+      "max": 1.25
+    },
+    {
+      "action": "assert",
+      "label": "Control's Dawnsear threat is unmodified",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 500146,
+      "op": 2,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Talent's Dawnsear threat drops by exactly 20%",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 500146,
+      "op": 2,
+      "base": 1000,
+      "equals": 800
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_max_range",
+      "spell": 806477,
+      "save_as": "control_rapture_range"
+    },
+    {
+      "action": "assert",
+      "label": "Rapture's range grows by 20% too",
+      "actor": "talent",
+      "metric": "spell_max_range",
+      "spell": 806477,
+      "ratio_to": "control_rapture_range",
+      "min": 1.15,
+      "max": 1.25
+    },
+    {
+      "action": "assert",
+      "label": "Talent's Rapture threat also drops by exactly 20%",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 806477,
+      "op": 2,
+      "base": 1000,
+      "equals": 800
+    }
+  ]
+}

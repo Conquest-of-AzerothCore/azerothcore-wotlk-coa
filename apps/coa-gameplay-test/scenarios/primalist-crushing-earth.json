@@ -1,0 +1,197 @@
+{
+  "schema": 1,
+  "name": "Primalist Crushing the Earth dynamic rating conversion",
+  "contract": "The active specialization grants spell power equal to 50% of armor penetration rating. A controlled +612 rating yields +306 SP, follows rating removal/reapplication on its two-second timer, and disappears on unlearning. The hidden helper is derived state.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 500000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 60
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 300697,
+      "all_specs": true
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_power",
+      "school": 3,
+      "save_as": "base_sp"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 60437,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "combat_rating",
+      "rating": 24,
+      "equals": 612
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power",
+      "school": 3,
+      "relative_to": "base_sp",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 300697
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power",
+      "school": 1,
+      "relative_to": "base_sp",
+      "equals": 306,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power",
+      "school": 2,
+      "relative_to": "base_sp",
+      "equals": 306,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power",
+      "school": 3,
+      "relative_to": "base_sp",
+      "equals": 306,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power",
+      "school": 4,
+      "relative_to": "base_sp",
+      "equals": 306,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "base_sp",
+      "equals": 306,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power",
+      "school": 6,
+      "relative_to": "base_sp",
+      "equals": 306,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 301353,
+      "effect": 0,
+      "equals": 306
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 60437,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power",
+      "school": 3,
+      "relative_to": "base_sp",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 60437,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power",
+      "school": 3,
+      "relative_to": "base_sp",
+      "equals": 306,
+      "within_ms": 3000
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 300697,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 301353,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power",
+      "school": 3,
+      "relative_to": "base_sp",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 301353,
+      "equals": 0
+    }
+  ]
+}

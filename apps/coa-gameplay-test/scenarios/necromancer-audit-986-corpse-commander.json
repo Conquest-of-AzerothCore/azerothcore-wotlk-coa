@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Necromancer audit: Corpse Commander cuts Corpse Explosion's cost by 20 Runic Power (#986)",
+  "contract": "Corpse Commander 707739 (CharacterAdvancement 12381, Class tab, class 23) reads 'Reduces the Runic Power cost of Corpse Explosion by $/10;s1.' Spell.dbc: a passive whose effect 0 is aura 107 (ADD_FLAT_MODIFIER) op 14 (SPELLMOD_COST), BasePoints -201 + DieSides 1 = -200 (Runic Power is stored in tenths, so -20 Runic Power), class mask word 1 0x100 in family 29. Every Corpse Explosion rank 533236-533239 is family 29 with SpellFamilyFlags word 1 0x100, PowerType 6 (Runic Power) and ManaCost 400 (40 Runic Power). SpellInfo::CalcPowerCost applies SPELLMOD_COST natively, so the talented cost is 200 (20 Runic Power) and an untalented caster pays 400. From 100 Runic Power a real cast leaves 80 with the talent and 60 without (out-of-combat decay can remove at most one 3-point tick in the window).",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "plain", "race": 5, "class": 23, "level": 80 },
+    { "id": "commander", "race": 5, "class": 23, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "learn", "actor": "plain", "spell": 533236 },
+    { "action": "learn", "actor": "commander", "spell": 533236 },
+    { "action": "learn", "actor": "commander", "spell": 707739 },
+    {
+      "action": "assert", "label": "SETUP: the Corpse Commander passive is active", "actor": "commander",
+      "metric": "aura", "spell": 707739, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the plain caster has no Corpse Commander", "actor": "plain",
+      "metric": "aura", "spell": 707739, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: Corpse Explosion costs 40 Runic Power", "actor": "plain",
+      "metric": "spell_power_cost", "spell": 533236, "equals": 400
+    },
+    {
+      "action": "assert", "label": "Corpse Commander makes Corpse Explosion cost 20 Runic Power", "actor": "commander",
+      "metric": "spell_power_cost", "spell": 533236, "equals": 200
+    },
+    {
+      "action": "assert", "label": "The reduction covers the highest Corpse Explosion rank", "actor": "commander",
+      "metric": "spell_power_cost", "spell": 533239, "equals": 200
+    },
+    { "action": "set_power", "actor": "plain", "power": 6, "value": 1000 },
+    { "action": "set_power", "actor": "commander", "power": 6, "value": 1000 },
+    { "action": "cast", "actor": "plain", "spell": 533236 },
+    { "action": "cast", "actor": "commander", "spell": 533236 },
+    {
+      "action": "assert", "label": "A talented Corpse Explosion spends 20 Runic Power", "actor": "commander",
+      "metric": "power", "power": 6, "min": 740, "max": 800, "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "CONTROL: an untalented Corpse Explosion spends 40 Runic Power", "actor": "plain",
+      "metric": "power", "power": 6, "min": 540, "max": 600, "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "The talented cast completed and started its cooldown", "actor": "commander",
+      "metric": "cooldown_ms", "spell": 533236, "min": 50000
+    }
+  ]
+}

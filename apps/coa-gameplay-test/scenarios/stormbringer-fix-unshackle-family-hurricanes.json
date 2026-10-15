@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Hurricanes buffs the caster when Unshackle is cast (#1773)",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "s",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "s", "spell": 804019 },
+    { "action": "cast", "actor": "s", "spell": 804019 },
+    { "action": "assert", "label": "SETUP: Unshackle needs the Air Elemental, its only target",
+      "actor": "s", "metric": "pet_entry", "equals": 500941, "within_ms": 24000 },
+    { "action": "learn", "actor": "s", "spell": 706625 },
+    { "action": "learn", "actor": "s", "spell": 300839 },
+    { "action": "learn", "actor": "s", "spell": 804020 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "set_aura", "actor": "s", "spell": 803102, "stacks": 100 },
+    { "action": "set_aura", "actor": "s", "spell": 707050, "stacks": 1 },
+    { "action": "assert", "label": "BASELINE: Hurricanes' buff 570129 is absent before Unshackle is cast",
+      "actor": "s", "metric": "aura", "spell": 570129, "equals": 0 },
+    { "action": "snapshot", "actor": "s", "metric": "spell_damage_done", "spell": 804020,
+      "target": "dummy", "save_as": "shock_base" },
+    { "action": "cast", "actor": "s", "spell": 706625 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "assert", "label": "SETUP: Unshackle reached its target and applied its aura",
+      "actor": "s", "metric": "pet_aura_stacks", "spell": 706625, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: casting Unshackle procs Hurricanes, applying 570129 to the caster",
+      "actor": "s", "metric": "aura", "spell": 570129, "equals": 1 },
+    { "action": "assert", "label": "SETUP: 570129 carries its own 15% (EffectBasePoints[0] 14 + EffectDieSides[0] 1)",
+      "actor": "s", "metric": "aura_amount", "spell": 570129, "effect": 0, "equals": 15 },
+    { "action": "assert", "label": "SETUP: 570129 lasts its own 15000 ms (DurationIndex 8)",
+      "actor": "s", "metric": "aura_duration_ms", "spell": 570129, "min": 12000, "max": 15000 },
+    { "action": "assert", "label": "DISCRIMINATING: the 15% reaches damage done, so Shock hits for 1.15x its unbuffed value",
+      "actor": "s", "metric": "spell_damage_done", "spell": 804020, "target": "dummy",
+      "ratio_to": "shock_base", "min": 1.145, "max": 1.155 }
+  ],
+  "contract": "#1773: Hurricanes (300839) reads \"Casting Unshackle now unshackles you, increasing your damage dealt by $570129s1% for $570129d\", i.e. 15% for 15 sec: 570129 has EffectBasePoints[0] 14 + EffectDieSides[0] 1 = 15 on SPELL_AURA_MOD_DAMAGE_PERCENT_DONE and DurationIndex 8 = 15000 ms. Unshackle (706625) is the only SpellFamilyName 22 record with SpellFamilyFlags[0] bit 16, is SPELL_DAMAGE_CLASS_NONE and positive, so its cast raises PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS with SpellTypeMask PROC_SPELL_TYPE_NO_DMG_HEAL in the hit phase. The buff's school mask is empty in Spell.dbc, so the tooltip's unqualified \"damage dealt\" is delivered as SPELL_SCHOOL_MASK_ALL, the same value Unshackle's own damage aura uses. Shock (804020) is a Nature Stormbringer nuke and the ratio makes the assertion independent of the character's stats."
+}

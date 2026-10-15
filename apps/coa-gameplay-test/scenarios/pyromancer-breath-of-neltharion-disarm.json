@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "name": "Pyromancer Breath of Neltharion disarms enemies in its cone (#3734)",
+  "contract": "#3734: Breath of Neltharion (511109) is already native: TRIGGER_SPELL 301235 (Melt Weapon: disarm main hand, off hand and ranged for 6000 ms) on TARGET_UNIT_CONE_ENEMY_104, radius 10 yd. An enemy 3 yd in front is disarmed, one 15 yd away is not. Targets are entry 46 (Murloc Forager, creature_equip_template main hand 1897): SpellInfo::CheckTarget (SpellInfo.cpp, Mechanic == MECHANIC_DISARM) rejects a disarm on a target with no equipped weapon (SPELL_FAILED_TARGET_NO_WEAPONS), so an unarmed dummy such as Harvest Golem (36) can never be disarmed. A target behind the caster cannot be placed by the harness (creature distance is X-only, min 0), so the rear side of the cone is not covered.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "near",
+      "owner": "caster",
+      "entry": 46,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    },
+    {
+      "id": "far",
+      "owner": "caster",
+      "entry": 46,
+      "level": 80,
+      "health": 100000,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 511109
+    },
+    {
+      "action": "assert",
+      "label": "Nothing is disarmed before the cast",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 301235,
+      "caster": "caster",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 511109
+    },
+    {
+      "action": "assert",
+      "label": "Enemy in the cone is disarmed by Melt Weapon (301235)",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 301235,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Melt Weapon lasts at most its 6000 ms duration",
+      "actor": "near",
+      "metric": "aura_duration_ms",
+      "spell": 301235,
+      "caster": "caster",
+      "max": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Melt Weapon has a real remaining duration",
+      "actor": "near",
+      "metric": "aura_duration_ms",
+      "spell": 301235,
+      "caster": "caster",
+      "min": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Enemy beyond the 10 yd cone radius is not disarmed",
+      "actor": "far",
+      "metric": "aura",
+      "spell": 301235,
+      "caster": "caster",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Melt Weapon expires",
+      "actor": "near",
+      "metric": "aura",
+      "spell": 301235,
+      "caster": "caster",
+      "equals": 0,
+      "within_ms": 12000
+    }
+  ]
+}

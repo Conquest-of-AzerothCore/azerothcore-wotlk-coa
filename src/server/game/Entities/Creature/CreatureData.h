@@ -266,9 +266,11 @@ struct CreatureTemplate
         return (type_flags & CREATURE_TYPE_FLAG_TAMEABLE_EXOTIC) != 0;
     }
 
+    // Ascension tames undead, demons, elementals and dragonkin too; each taming spell names the creature type it
+    // takes in its TargetCreatureType, so the creature's own type is not tested here.
     [[nodiscard]] bool IsTameable(bool exotic) const
     {
-        if (type != CREATURE_TYPE_BEAST || family == 0 || (type_flags & CREATURE_TYPE_FLAG_TAMEABLE) == 0)
+        if (family == 0 || (type_flags & CREATURE_TYPE_FLAG_TAMEABLE) == 0)
             return false;
 
         // if can tame exotic then can tame any tameable

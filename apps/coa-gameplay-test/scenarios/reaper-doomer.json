@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "Doomer increases Doomrend and Slaughter damage by 30% (#2308)",
+  "contract": [
+    "Doomer 704556 is a native SPELL_AURA_ADD_PCT_MODIFIER (op 0, SPELLMOD_DAMAGE) aura.",
+    "EffectBasePoints (29) yields a +30% modifier via the die-roll convention (base + random(1, DieSides=1)).",
+    "EffectSpellClassMask matches Doomrend 502668 (SpellFamilyFlags[2] bit 4194304) and Slaughter 500373",
+    "(SpellFamilyFlags[1] bit 33554432), both SpellFamilyName 36. No server script is registered for 704556;",
+    "Player::ApplySpellMod, which the spell_modifier metric calls, applies the aura without one."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 5,
+      "class": 30,
+      "level": 80
+    },
+    {
+      "id": "doomer",
+      "race": 5,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "control",
+      "spell": 704556
+    },
+    {
+      "action": "learn",
+      "actor": "doomer",
+      "spell": 704556
+    },
+    {
+      "action": "assert",
+      "actor": "doomer",
+      "metric": "aura",
+      "spell": 704556,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "doomer",
+      "metric": "aura_amount",
+      "spell": 704556,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "control Doomrend damage modifier",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 502668,
+      "op": 0,
+      "base": 100000,
+      "min": 99998,
+      "max": 100002
+    },
+    {
+      "action": "assert",
+      "label": "doomer Doomrend damage modifier (+30%)",
+      "actor": "doomer",
+      "metric": "spell_modifier",
+      "spell": 502668,
+      "op": 0,
+      "base": 100000,
+      "min": 129998,
+      "max": 130002
+    },
+    {
+      "action": "assert",
+      "label": "control Slaughter damage modifier",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 500373,
+      "op": 0,
+      "base": 100000,
+      "min": 99998,
+      "max": 100002
+    },
+    {
+      "action": "assert",
+      "label": "doomer Slaughter damage modifier (+30%)",
+      "actor": "doomer",
+      "metric": "spell_modifier",
+      "spell": 500373,
+      "op": 0,
+      "base": 100000,
+      "min": 129998,
+      "max": 130002
+    }
+  ]
+}

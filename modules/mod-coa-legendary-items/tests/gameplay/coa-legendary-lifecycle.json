@@ -1,0 +1,260 @@
+{
+  "schema": 1,
+  "name": "CoA Legendary Items: timed buffs and saved equipment lifecycle",
+  "contract": "Requires CoALegendaryItems.Enable=1, DestinyWeaver.Enable=1, LevelScaling=1 and CoA.SendDisplayPatches=1. A non-gray kill grants a visible native eight-second item buff; another kill refreshes its duration and it expires normally. Continuous passives stay hidden. Equipped powers are reconstructed after a real save/logout/login, removed below required level or on death, and reactivated after leveling back.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "viewer",
+      "race": 1,
+      "class": 12,
+      "level": 32
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_xp_enabled",
+      "actor": "viewer",
+      "enabled": false
+    },
+    {
+      "action": "add_item",
+      "actor": "viewer",
+      "item": 9700029
+    },
+    {
+      "action": "equip",
+      "actor": "viewer",
+      "item": 9700029,
+      "slot": 10
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "aura",
+      "spell": 9710000,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "viewer",
+      "entry": 1501,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "aura_amount",
+      "spell": 9710000,
+      "equals": 82
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "aura_visible",
+      "spell": 9710000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "aura_duration_ms",
+      "spell": 9710000,
+      "min": 7975,
+      "max": 8000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "aura_duration_ms",
+      "spell": 9710000,
+      "min": 3975,
+      "max": 4025
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "viewer",
+      "entry": 1501,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "aura_duration_ms",
+      "spell": 9710000,
+      "min": 7975,
+      "max": 8000
+    },
+    {
+      "action": "wait",
+      "ms": 8025
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "aura",
+      "spell": 9710000,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "viewer",
+      "item": 9700129
+    },
+    {
+      "action": "equip",
+      "actor": "viewer",
+      "item": 9700129,
+      "slot": 7
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "aura",
+      "spell": 9710001,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "aura_visible",
+      "spell": 9710001,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "viewer",
+      "item": 9700229
+    },
+    {
+      "action": "equip",
+      "actor": "viewer",
+      "item": 9700229,
+      "slot": 12
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "spell_modifier",
+      "spell": 805808,
+      "op": 0,
+      "base": 1000,
+      "equals": 1120
+    },
+    {
+      "action": "relog",
+      "actor": "viewer"
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "aura",
+      "spell": 9710001,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "spell_modifier",
+      "spell": 805808,
+      "op": 0,
+      "base": 1000,
+      "equals": 1120
+    },
+    {
+      "action": "set_level",
+      "actor": "viewer",
+      "value": 28
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "aura",
+      "spell": 9710001,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "spell_modifier",
+      "spell": 805808,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "set_level",
+      "actor": "viewer",
+      "value": 32
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "aura",
+      "spell": 9710001,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "spell_modifier",
+      "spell": 805808,
+      "op": 0,
+      "base": 1000,
+      "equals": 1120
+    },
+    {
+      "action": "die",
+      "actor": "viewer"
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "aura",
+      "spell": 9710001,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "spell_modifier",
+      "spell": 805808,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "wolf1",
+      "owner": "viewer",
+      "entry": 1501,
+      "level": 10,
+      "health": 1000,
+      "distance": 3
+    },
+    {
+      "id": "wolf2",
+      "owner": "viewer",
+      "entry": 1501,
+      "level": 10,
+      "health": 1000,
+      "distance": 4
+    }
+  ]
+}

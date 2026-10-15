@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Celestial Divination adds 5% dodge (#1043)",
+  "contract": "Celestial Divination 560319 (Spell.dbc, SpellFamilyName 32 (Starcaller). Effect 0 SPELL_AURA_MOD_DODGE_PERCENT (49), EffectBasePoints 4 with DieSides 1 resolves to 5; the EffectSpellClassMask on it is not read by this aura. This matches the tooltip 'Increases your chance to dodge by $s1%'. Native path: Player::UpdateDodgePercentage adds GetTotalAuraModifier(SPELL_AURA_MOD_DODGE_PERCENT) to the non-diminishing part, and PLAYER_DODGE_PERCENTAGE is what the dodge_chance metric reads. Same assertion shape as the merged Felsworn dodge scenario. Both fixtures are the same race, class and level with no ratings or gear, so only the learned passive can move the difference. Nothing in AscensionStarcallerContracts.cpp touches this spell id, and the scenario is a regression guard: it is expected to pass on the shipped data.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 560319
+    },
+    {
+      "action": "assert",
+      "label": "Effect 0 resolves to 5% dodge",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 560319,
+      "effect": 0,
+      "equals": 5
+    },
+    {
+      "action": "snapshot",
+      "label": "Dodge chance without the passive",
+      "actor": "control",
+      "metric": "dodge_chance",
+      "save_as": "dodge_base"
+    },
+    {
+      "action": "assert",
+      "label": "Dodge chance rises by 5",
+      "actor": "talent",
+      "metric": "dodge_chance",
+      "relative_to": "dodge_base",
+      "min": 4.99,
+      "max": 5.01
+    }
+  ]
+}

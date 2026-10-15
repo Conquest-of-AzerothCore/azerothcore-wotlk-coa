@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Starburst Invigoration adds 15% Energy regeneration (#2398)",
+  "contract": "Starburst Invigoration 704792 (Spell.dbc, SpellFamilyName 32 (Starcaller). Effect 0 SPELL_AURA_MOD_POWER_REGEN_PERCENT (110), EffectMiscValue 3 (POWER_ENERGY), EffectBasePoints 14 with DieSides 1 resolves to 15, the same +1 resolution as the merged Felsworn Demonborn scenario. This matches the tooltip 'Increases your Energy regeneration by $s1%'. Native path: HandleModPowerRegen calls Player::UpdateEnergyRegen, which multiplies the 10 per second base by GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_POWER_REGEN_PERCENT, POWER_ENERGY), and Player::Regenerate(POWER_ENERGY) consumes it. The scenario asserts the resolved aura amount and that the fixture has an Energy pool at all (Regenerate returns at max 0). It deliberately does not compare regenerated Energy over a time window: regeneration is applied on a two-second player tick whose phase differs per fixture, so a 15% effect on roughly 50 Energy sits inside that noise and would give false failures; no harness metric reads the regen modifier itself and none was added. Both fixtures are the same race, class and level with no ratings or gear, so only the learned passive can move the difference. Nothing in AscensionStarcallerContracts.cpp touches this spell id, and the scenario is a regression guard: it is expected to pass on the shipped data.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 704792
+    },
+    {
+      "action": "assert",
+      "label": "Starburst Invigoration is applied",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 704792,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Effect 0 resolves to +15% Energy regeneration",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 704792,
+      "effect": 0,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "The Starcaller has an Energy pool for the regeneration to act on",
+      "actor": "talent",
+      "metric": "max_power",
+      "power": 3,
+      "min": 1
+    }
+  ]
+}

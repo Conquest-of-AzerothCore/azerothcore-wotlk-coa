@@ -762,7 +762,7 @@ ObjectGuid::LowType ChatHandler::extractLowGuidFromLink(char* text, HighGuid& gu
 std::string ChatHandler::extractPlayerNameFromLink(char* text)
 {
     // |color|Hplayer:name|h[name]|h|r
-    char* name_str = extractKeyFromLink(text, "Hplayer");
+    char* name_str = text && (*text == '"') ? extractQuotedArg(text) : extractKeyFromLink(text, "Hplayer");
     if (!name_str)
         return "";
 

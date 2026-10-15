@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Necromancer Withering lets Crypt Plague stack 15 times (#1804)",
+  "contract": "Withering 301250 is the Necromancer's level 40 Death passive (CharacterAdvancement 4623, ClassType 25 = class 23, Tab 59 Death, RequiredLevel 40); its description reads 'Level 40 Passive: Allows Crypt Plague to stack $s1 additional times.' Its only effect is SPELL_AURA_ADD_FLAT_MODIFIER (107) MiscValue 31 (SPELLMOD_MAX_AURA_STACKS), BasePoints 4 + DieSides 1 = 5, EffectSpellClassMask (0, 0x800000, 0) in SpellFamilyName 29, which matches only the Crypt Plague debuff 570131 (family flags 0, 0x800000, 0; StackAmount 10; 'stacking $u times'). SpellInfo::CalcMaxAuraStacks applies the modifier, so the cap must rise from 10 to 15. Every Crypt Plague application (Crypt Swarm ticks with the level 10 passive 92121, Lichfrost, Command talents, 'Add 1 Crypt Plague' 570132) adds stacks through the shared AscensionNecromancer::Plague helper, which must honour that cap instead of the raw DBC StackAmount. The helper spell 570132 (bound to spell_ascension_necromancer_ability, no cooldown or global cooldown) adds one stack per cast, so the cap is observed independently of proc chances; each target's stacks are built well inside Crypt Plague's 10 second duration, which additional applications do not refresh.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "control", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 8 },
+    { "id": "golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 12 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "necro", "spell": 570132 },
+    {
+      "action": "assert", "label": "CONTROL: Crypt Plague stacks 10 times without Withering", "actor": "necro",
+      "metric": "spell_max_stacks", "spell": 570131, "equals": 10
+    },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "control" },
+    {
+      "action": "assert", "label": "SETUP: the helper applies Crypt Plague", "actor": "control",
+      "metric": "aura_stacks", "spell": 570131, "caster": "necro", "equals": 1, "within_ms": 2000
+    },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "control" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "control" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "control" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "control" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "control" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "control" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "control" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "control" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "control" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "control" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "control" },
+    { "action": "wait", "ms": 300 },
+    {
+      "action": "assert", "label": "CONTROL: twelve applications cap at 10 stacks without Withering",
+      "actor": "control", "metric": "aura_stacks", "spell": 570131, "caster": "necro", "equals": 10
+    },
+    { "action": "learn", "actor": "necro", "spell": 301250 },
+    {
+      "action": "assert", "label": "The Withering passive aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 301250, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Withering raises the Crypt Plague stack limit to 15", "actor": "necro",
+      "metric": "spell_max_stacks", "spell": 570131, "equals": 15
+    },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "golem" },
+    {
+      "action": "assert", "label": "SETUP: the helper applies Crypt Plague to the second target", "actor": "golem",
+      "metric": "aura_stacks", "spell": 570131, "caster": "necro", "equals": 1, "within_ms": 2000
+    },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "golem" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "golem" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "golem" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "golem" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "golem" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "golem" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "golem" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "golem" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "golem" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "golem" },
+    { "action": "wait", "ms": 300 },
+    {
+      "action": "assert", "label": "SETUP: eleven applications pass the unmodified cap", "actor": "golem",
+      "metric": "aura_stacks", "spell": 570131, "caster": "necro", "min": 10
+    },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "golem" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "golem" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "golem" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "golem" },
+    { "action": "wait", "ms": 300 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: fifteen applications reach 15 stacks with Withering",
+      "actor": "golem", "metric": "aura_stacks", "spell": 570131, "caster": "necro", "equals": 15
+    },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "golem" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "necro", "spell": 570132, "target": "golem" },
+    { "action": "wait", "ms": 300 },
+    {
+      "action": "assert", "label": "Crypt Plague caps at 15 stacks with Withering", "actor": "golem",
+      "metric": "aura_stacks", "spell": 570131, "caster": "necro", "equals": 15
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Issue 663: Fists of Power makes auto attacks grant Earthen Fists",
+  "contract": [
+    "Fists of Power 805796 (Runic talent, 45 sec cooldown) reads 'Engrave your fists for $d (15 sec), causing auto",
+    "attacks to grant Earthen Fists for $806982d (10 sec), increasing melee haste by $806982s1% (3%) and the chance to",
+    "trigger Weapon Engraving: Earth by $806982s2% (10%), stacking $806982u (5) times.' Its only effect is aura 42",
+    "triggering 806982, but the record carries ProcFlags 0, so SpellMgr generated no proc entry and auto attacks never",
+    "granted anything. Earthen Fists 806982: StackAmount 5; effect 0 aura 138 melee haste 3 per stack; effect 1 aura",
+    "107 SPELLMOD_CHANCE_OF_SUCCESS (18) +10 per stack on family 38 mask2 0x2000000, which only Earth Engraving's proc",
+    "aura 653221 (ProcChance 15) carries. Expected: auto attacks alone grant nothing; while Fists of Power lasts,",
+    "landed auto attacks stack Earthen Fists to 5 (15% haste: swing time x 100/115 = 0.8696; Earth Engraving proc",
+    "chance 15 -> 65); after Fists of Power ends, further auto attacks do not refresh it and it expires."
+  ],
+  "timeout_ms": 150000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 60, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 1180},
+    {"action": "add_item", "actor": "rm", "item": 2092},
+    {"action": "equip", "label": "A fast dagger lands five swings inside the 15 sec window", "actor": "rm",
+      "item": 2092, "slot": 15},
+    {"action": "wait", "ms": 1000},
+    {"action": "learn", "actor": "rm", "spell": 805796},
+    {"action": "snapshot", "actor": "rm", "metric": "attack_time_ms", "hand": 0, "save_as": "swing_base"},
+    {"action": "assert", "label": "SETUP: Earth Engraving's proc chance is unmodified", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653221, "op": 18, "base": 15, "equals": 15},
+
+    {"action": "snapshot", "actor": "rm", "metric": "melee_damage_count", "hand": 0, "save_as": "swings_bare"},
+    {"action": "attack", "actor": "rm", "target": "dummy"},
+    {"action": "assert", "label": "SETUP: auto attacks land", "actor": "rm", "metric": "melee_damage_count",
+      "hand": 0, "relative_to": "swings_bare", "min": 2, "within_ms": 8000},
+    {"action": "assert", "label": "Auto attacks alone grant no Earthen Fists", "actor": "rm", "metric": "aura",
+      "spell": 806982, "equals": 0},
+
+    {"action": "cast", "actor": "rm", "spell": 805796},
+    {"action": "assert", "label": "Fists of Power is active", "actor": "rm", "metric": "aura", "spell": 805796,
+      "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "An auto attack grants Earthen Fists", "actor": "rm", "metric": "aura",
+      "spell": 806982, "equals": 1, "within_ms": 5000},
+    {"action": "assert", "label": "Further auto attacks stack Earthen Fists to 5", "actor": "rm",
+      "metric": "aura_stacks", "spell": 806982, "equals": 5, "within_ms": 12000},
+    {"action": "wait", "ms": 2500},
+    {"action": "assert", "label": "Earthen Fists stays capped at 5 stacks", "actor": "rm", "metric": "aura_stacks",
+      "spell": 806982, "equals": 5},
+    {"action": "assert", "label": "Five stacks give 15% melee haste", "actor": "rm", "metric": "aura_amount",
+      "spell": 806982, "effect": 0, "equals": 15},
+    {"action": "assert", "label": "Five stacks give +50 Earth Engraving proc chance", "actor": "rm",
+      "metric": "aura_amount", "spell": 806982, "effect": 1, "equals": 50},
+    {"action": "assert", "label": "Swing time is 100/115 of the base", "actor": "rm", "metric": "attack_time_ms",
+      "hand": 0, "ratio_to": "swing_base", "min": 0.862, "max": 0.877},
+    {"action": "assert", "label": "Weapon Engraving: Earth proc chance rises from 15 to 65", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653221, "op": 18, "base": 15, "equals": 65},
+
+    {"action": "assert", "label": "Fists of Power ends after 15 sec", "actor": "rm", "metric": "aura",
+      "spell": 805796, "equals": 0, "within_ms": 15000},
+    {"action": "snapshot", "actor": "rm", "metric": "melee_damage_count", "hand": 0, "save_as": "swings_after"},
+    {"action": "assert", "label": "Without Fists of Power auto attacks no longer refresh Earthen Fists",
+      "actor": "rm", "metric": "aura", "spell": 806982, "equals": 0, "within_ms": 12000},
+    {"action": "assert", "label": "SETUP: auto attacks continued while Earthen Fists expired", "actor": "rm",
+      "metric": "melee_damage_count", "hand": 0, "relative_to": "swings_after", "min": 2},
+    {"action": "stop_attack", "actor": "rm"},
+    {"action": "assert", "label": "Haste returns to the base swing time", "actor": "rm",
+      "metric": "attack_time_ms", "hand": 0, "ratio_to": "swing_base", "min": 0.999, "max": 1.001}
+  ]
+}

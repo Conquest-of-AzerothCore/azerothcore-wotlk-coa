@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Death Manual: Troes takes the quest back and Valerius Thorne opens no empty shop (#6118)",
+  "contract": [
+    "Quest 49987 Death Manual (Reaper only, AllowableClasses 536870912) ends at Troes the Remover 50289,",
+    "who stands in Northshire Valley at -8925.75 -199.67 80.66 (rev_20260930_99) with npcflag 51",
+    "(rev_20261003_00). Valerius Thorne 501266, 1.5 yards from him, has no vendor items, no trainer and no",
+    "gossip menu; the Northshire baseline restore (rev_20260930_98) gave him npcflag 179, whose vendor bit draws",
+    "the merchant bag over a trainer that sells nothing. rev_20261007_90 restores the gossip-only flag of",
+    "rev_20260929_92. Expected: a real vendor (Brother Danil 152) opens its shop, asking Valerius for his wares",
+    "opens nothing, and in the world phase a Reaper carrying the completed Death Manual sees the turn-in marker",
+    "on Troes and can hand it in."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8923.5, "y": -201.0, "z": 80.66, "o": 2.8},
+  "players": [{"id": "reaper", "race": 1, "class": 30, "level": 4}],
+  "creatures": [
+    {"id": "danil", "owner": "reaper", "entry": 152, "faction": 35, "distance": 3},
+    {"id": "valerius", "owner": "reaper", "entry": 501266, "faction": 35, "distance": 2}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login settle", "ms": 3000},
+    {"action": "client_packet", "label": "Ask Brother Danil for his wares", "actor": "reaper", "opcode": 414,
+     "fields": [{"actor_guid": "danil"}], "consumed": false},
+    {"action": "assert", "label": "SETUP: a real vendor opens its shop", "actor": "reaper",
+     "metric": "vendor_list_packets", "equals": 1, "within_ms": 2000},
+    {"action": "client_packet", "label": "Ask Valerius Thorne for his wares", "actor": "reaper", "opcode": 414,
+     "fields": [{"actor_guid": "valerius"}], "consumed": false},
+    {"action": "wait", "ms": 2000},
+    {"action": "assert", "label": "Valerius Thorne is no vendor and opens no shop", "actor": "reaper",
+     "metric": "vendor_list_packets", "equals": 1},
+    {"action": "set_phase", "actor": "reaper", "value": 1},
+    {"action": "assert", "label": "Troes the Remover stands here in the world phase", "actor": "reaper",
+     "metric": "nearby_creature_count", "entry": 50289, "equals": 1, "within_ms": 10000},
+    {"action": "prepare_quest", "label": "Fixture: the Reaper has read the Death Manual", "actor": "reaper",
+     "quest": 49987},
+    {"action": "assert", "label": "Troes shows the turn-in marker", "actor": "reaper", "metric": "dialog_status",
+     "entry": 50289, "equals": 10, "within_ms": 5000},
+    {"action": "reward_quest", "label": "Hand in the Death Manual", "actor": "reaper", "quest": 49987},
+    {"action": "assert", "label": "Death Manual is rewarded", "actor": "reaper", "metric": "quest_rewarded",
+     "quest": 49987, "equals": 1}
+  ]
+}

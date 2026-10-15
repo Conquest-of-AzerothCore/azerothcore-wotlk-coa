@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Barbarian audit: Tavern Brawl! and War Cry apply their aura effects natively on cast (#1200, #1365)",
+  "contract": "Both are active-cast shouts (Attributes bit 0x40 SPELL_ATTR0_PASSIVE is unset for 804456 and 500995), not learned passives, so they are proven by casting rather than by learning. Radius-based target selection (both tooltips say 'nearby allies'/'party and raid members within radius') is generic Spell::SetTargetMap behaviour and is out of scope here; only the caster's own resulting aura and its effect amounts are asserted. #1200 Tavern Brawl! (804456) effect 0 is SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK (65, amount 30) via AuraEffect::HandleModCastingSpeed, which Unit::ApplyCastTimePercentMod reads into cast_speed_multiplier; effect 1 is SPELL_AURA_MOD_MELEE_RANGED_HASTE (192, amount 30) via HandleModMeleeRangedSpeedPct dividing the swing timer; effect 2 is SPELL_EFFECT_TRIGGER_SPELL (Spell::EffectTriggerSpell, fully generic) firing 804457, the icd/dummy marker aura from the tooltip's 'cannot benefit from this spell again' clause -- 804457's own EffectBasePoints resolves to 0 (SPELL_AURA_DUMMY, no numeric payload), so only its presence is asserted. #1365 War Cry (500995) effect 0 is SPELL_AURA_MOD_MELEE_RANGED_HASTE (192, amount 20); effect 1 is the fork's SPELL_AURA_ASCENSION_MOD_ATTACK_POWER_FLAT (344, amount 150), whose handler AuraEffect::HandleAscensionModAttackPowerFlat calls both HandleAuraModAttackPower and HandleAuraModRangedAttackPower, raising attack_power and ranged_attack_power by the flat amount; effect 2 is SPELL_AURA_PERIODIC_ENERGIZE (24, MiscValue 3 = Energy) but its EffectBasePoints resolves to exactly 0, so it is an inert leftover row (matching the same DBC pattern seen on other Barbarian talents in this audit) and is only asserted to still be 0.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+
+    { "action": "snapshot", "label": "Baseline cast speed multiplier", "actor": "b", "metric": "cast_speed_multiplier", "save_as": "cast0" },
+    { "action": "snapshot", "label": "Baseline main-hand swing time", "actor": "b", "metric": "attack_time_ms", "hand": 0, "save_as": "swing0" },
+
+    { "action": "learn", "actor": "b", "spell": 804456 },
+    { "action": "cast", "actor": "b", "spell": 804456 },
+    { "action": "assert", "label": "Tavern Brawl! applies its aura to the caster", "actor": "b", "metric": "aura", "spell": 804456, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "Effect 0 (casting speed) resolves to 30", "actor": "b", "metric": "aura_amount", "spell": 804456, "effect": 0, "equals": 30 },
+    { "action": "assert", "label": "Effect 1 (melee/ranged haste) resolves to 30", "actor": "b", "metric": "aura_amount", "spell": 804456, "effect": 1, "equals": 30 },
+    { "action": "assert", "label": "Casts are 30% faster (1/1.30 = 0.769)", "actor": "b", "metric": "cast_speed_multiplier", "ratio_to": "cast0", "min": 0.75, "max": 0.79, "within_ms": 5000 },
+    { "action": "assert", "label": "Swings are 30% faster", "actor": "b", "metric": "attack_time_ms", "hand": 0, "ratio_to": "swing0", "min": 0.75, "max": 0.79, "within_ms": 5000 },
+    { "action": "assert", "label": "The triggered icd marker (804457) reaches the caster", "actor": "b", "metric": "aura", "spell": 804457, "equals": 1, "within_ms": 5000 },
+
+    { "action": "wait", "ms": 2000 },
+
+    { "action": "snapshot", "label": "Baseline attack power before War Cry", "actor": "b", "metric": "attack_power", "save_as": "ap0" },
+    { "action": "snapshot", "label": "Baseline ranged attack power before War Cry", "actor": "b", "metric": "ranged_attack_power", "save_as": "rap0" },
+    { "action": "snapshot", "label": "Baseline swing time before War Cry", "actor": "b", "metric": "attack_time_ms", "hand": 0, "save_as": "swing1" },
+
+    { "action": "learn", "actor": "b", "spell": 500995 },
+    { "action": "cast", "actor": "b", "spell": 500995 },
+    { "action": "assert", "label": "War Cry applies its aura to the caster", "actor": "b", "metric": "aura", "spell": 500995, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "Effect 0 (melee/ranged haste) resolves to 20", "actor": "b", "metric": "aura_amount", "spell": 500995, "effect": 0, "equals": 20 },
+    { "action": "assert", "label": "Effect 1 (flat attack power) resolves to 150", "actor": "b", "metric": "aura_amount", "spell": 500995, "effect": 1, "equals": 150 },
+    { "action": "assert", "label": "Effect 2 (energize) is inert at 0", "actor": "b", "metric": "aura_amount", "spell": 500995, "effect": 2, "equals": 0 },
+    { "action": "assert", "label": "Attack power rises by 150", "actor": "b", "metric": "attack_power", "relative_to": "ap0", "equals": 150, "within_ms": 5000 },
+    { "action": "assert", "label": "Ranged attack power rises by 150", "actor": "b", "metric": "ranged_attack_power", "relative_to": "rap0", "equals": 150, "within_ms": 5000 },
+    { "action": "assert", "label": "Swings are 20% faster (1/1.20 = 0.833)", "actor": "b", "metric": "attack_time_ms", "hand": 0, "ratio_to": "swing1", "min": 0.81, "max": 0.855, "within_ms": 5000 }
+  ]
+}

@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "name": "Dark Mind grants critical strike rating equal to 25% of Intellect (#1291)",
+  "contract": "Dark Mind 574148 has E0 aura 220 (SPELL_AURA_MOD_RATING_FROM_STAT), MiscValue 1792 = 0x700 (combat ratings 8, 9 and 10: melee, ranged and spell critical strike), MiscValueB 3 (Intellect), BasePoints 24 / DieSides 1 = 25%; the description reads 'Increases your critical strike rating by $s1% of your Intellect'. Player::UpdateRating adds int(CalculatePct(Intellect, 25)) to every masked rating and Unit::UpdateStats re-runs it when Intellect changes. The scenario applies Arcane Intellect 36880 (aura 29, MiscValue 3, +100 Intellect), so each of the three ratings must rise by 25 with the passive and none may rise without it; the hit rating (5) is the control. A fixture assumption is asserted first: the aura adds exactly 100 Intellect.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 574148,
+      "all_specs": true,
+      "label": "Start without the passive"
+    },
+    {
+      "action": "snapshot",
+      "label": "Intellect before",
+      "actor": "hunter",
+      "metric": "stat",
+      "save_as": "int_before",
+      "stat": 3
+    },
+    {
+      "action": "snapshot",
+      "label": "Melee crit rating before",
+      "actor": "hunter",
+      "metric": "combat_rating",
+      "save_as": "melee_before",
+      "rating": 8
+    },
+    {
+      "action": "snapshot",
+      "label": "Ranged crit rating before",
+      "actor": "hunter",
+      "metric": "combat_rating",
+      "save_as": "ranged_before",
+      "rating": 9
+    },
+    {
+      "action": "snapshot",
+      "label": "Spell crit rating before",
+      "actor": "hunter",
+      "metric": "combat_rating",
+      "save_as": "spell_before",
+      "rating": 10
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply +100 Intellect",
+      "actor": "hunter",
+      "spell": 36880,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Fixture assumption: the aura adds exactly 100 Intellect",
+      "actor": "hunter",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "int_before",
+      "min": 99.5,
+      "max": 100.5
+    },
+    {
+      "action": "assert",
+      "label": "Fixture assumption: melee crit rating does not move without the passive",
+      "actor": "hunter",
+      "metric": "combat_rating",
+      "rating": 8,
+      "relative_to": "melee_before",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "set_aura",
+      "label": "Remove the Intellect aura",
+      "actor": "hunter",
+      "spell": 36880,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 574148
+    },
+    {
+      "action": "assert",
+      "label": "The passive aura is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 574148,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Melee crit rating with the passive",
+      "actor": "hunter",
+      "metric": "combat_rating",
+      "save_as": "melee_with",
+      "rating": 8
+    },
+    {
+      "action": "snapshot",
+      "label": "Ranged crit rating with the passive",
+      "actor": "hunter",
+      "metric": "combat_rating",
+      "save_as": "ranged_with",
+      "rating": 9
+    },
+    {
+      "action": "snapshot",
+      "label": "Spell crit rating with the passive",
+      "actor": "hunter",
+      "metric": "combat_rating",
+      "save_as": "spell_with",
+      "rating": 10
+    },
+    {
+      "action": "snapshot",
+      "label": "Melee hit rating with the passive",
+      "actor": "hunter",
+      "metric": "combat_rating",
+      "save_as": "hit_with",
+      "rating": 5
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply +100 Intellect again",
+      "actor": "hunter",
+      "spell": 36880,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Melee crit rating rises by 25",
+      "actor": "hunter",
+      "metric": "combat_rating",
+      "rating": 8,
+      "relative_to": "melee_with",
+      "min": 24.5,
+      "max": 25.5
+    },
+    {
+      "action": "assert",
+      "label": "Ranged crit rating rises by 25",
+      "actor": "hunter",
+      "metric": "combat_rating",
+      "rating": 9,
+      "relative_to": "ranged_with",
+      "min": 24.5,
+      "max": 25.5
+    },
+    {
+      "action": "assert",
+      "label": "Spell crit rating rises by 25",
+      "actor": "hunter",
+      "metric": "combat_rating",
+      "rating": 10,
+      "relative_to": "spell_with",
+      "min": 24.5,
+      "max": 25.5
+    },
+    {
+      "action": "assert",
+      "label": "Hit rating is not in the mask and is unchanged",
+      "actor": "hunter",
+      "metric": "combat_rating",
+      "rating": 5,
+      "relative_to": "hit_with",
+      "min": -0.5,
+      "max": 0.5
+    }
+  ]
+}

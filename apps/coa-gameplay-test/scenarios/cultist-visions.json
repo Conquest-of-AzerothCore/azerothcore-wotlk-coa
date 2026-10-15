@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Visions hastes the party and buffs only the caster's own Shadow damage natively (#1016)",
+  "contract": "Visions 560526 (Spell.dbc, read for this scenario) is a passive with two effects, both targeting the caster. Effect 0 is SPELL_EFFECT_APPLY_AREA_AURA_RAID (65) carrying aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 2 DieSides 1 (+3), radius index 287 (100 yd), MaxAffectedTargets 0 (unlimited, so no truncation risk of the kind seen in other Ascension raid auras) -- matches 'Increases the spell haste of all party and raid members by 3%'. SPELL_EFFECT_APPLY_AREA_AURA_RAID is a stock area-aura effect type (Spell::EffectApplyAreaAura, SpellEffects.cpp:137) whose native target selection gathers the caster's raid/group within radius; aura 216 (AuraEffect::HandleModCastingSpeed) is a stock cast-speed aura. Effect 1 is a plain SPELL_EFFECT_APPLY_AURA (not an area-aura type) carrying aura 79 MOD_DAMAGE_PERCENT_DONE, EffectMiscValue 32 (Shadow), BasePoints 2 DieSides 1 (+3), target caster only -- matches 'in addition, your Shadow damage is increased by 3%' (self only, as the tooltip literally reads). No script is needed; grep confirms zero occurrences of 560526 in src/server/coa or src/server/game, matching only that absence. The harness spawns all fixtures at the same shared location, so range is not independently tested here; the party member is the positive control and the ungrouped bystander (same distance, same aura, just not grouped) is the negative control on SPELL_EFFECT_APPLY_AREA_AURA_RAID's group-membership requirement, mirroring venomancer-fungal-link-party-haste-rot.json's proven pattern for the same effect type.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 20 },
+    { "id": "mate", "race": 1, "class": 25, "level": 20 },
+    { "id": "outsider", "race": 1, "class": 25, "level": 20 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "cultist", "entry": 36, "health": 1000000 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "group", "label": "Party the cultist and the mate; the outsider stays ungrouped", "actor": "cultist", "target": "mate" },
+
+    { "action": "snapshot", "label": "Baseline cast speed of the cultist", "actor": "cultist", "metric": "cast_speed_multiplier", "save_as": "speed_c0" },
+    { "action": "snapshot", "label": "Baseline cast speed of the party member", "actor": "mate", "metric": "cast_speed_multiplier", "save_as": "speed_m0" },
+    { "action": "snapshot", "label": "Baseline cast speed of the outsider", "actor": "outsider", "metric": "cast_speed_multiplier", "save_as": "speed_o0" },
+    { "action": "snapshot", "label": "Baseline Shadow damage bonus", "actor": "cultist", "metric": "spell_damage_done", "spell": 500111, "target": "dummy", "save_as": "damage_c0" },
+    { "action": "snapshot", "label": "Baseline Shadow damage bonus of the party member (no aura on them)", "actor": "mate", "metric": "spell_damage_done", "spell": 500111, "target": "dummy", "save_as": "damage_m0" },
+
+    { "action": "learn", "actor": "cultist", "spell": 560526 },
+
+    { "action": "assert", "label": "The cultist carries Visions with +3 spell haste on effect 0", "actor": "cultist", "metric": "aura_amount", "spell": 560526, "effect": 0, "caster": "cultist", "equals": 3, "within_ms": 5000 },
+    { "action": "assert", "label": "The party member receives the raid-wide aura from the cultist", "actor": "mate", "metric": "aura_amount", "spell": 560526, "effect": 0, "caster": "cultist", "equals": 3, "within_ms": 5000 },
+    { "action": "assert", "label": "CONTROL: the ungrouped bystander does not carry the raid aura", "actor": "outsider", "metric": "aura", "spell": 560526, "equals": 0 },
+
+    { "action": "assert", "label": "The cultist's cast time shrinks by 3%", "actor": "cultist", "metric": "cast_speed_multiplier", "ratio_to": "speed_c0", "min": 0.968, "max": 0.974 },
+    { "action": "assert", "label": "The party member's cast time shrinks by 3%", "actor": "mate", "metric": "cast_speed_multiplier", "ratio_to": "speed_m0", "min": 0.968, "max": 0.974 },
+    { "action": "assert", "label": "CONTROL: the bystander's cast speed is unchanged", "actor": "outsider", "metric": "cast_speed_multiplier", "ratio_to": "speed_o0", "min": 0.999, "max": 1.001 },
+
+    { "action": "assert", "label": "CONTRACT: the cultist's own Shadow damage bonus rises by exactly 3%", "actor": "cultist",
+      "metric": "spell_damage_done", "spell": 500111, "target": "dummy", "ratio_to": "damage_c0", "min": 1.029, "max": 1.031 },
+    { "action": "assert", "label": "CONTROL: effect 1 does not propagate -- the party member's Shadow damage is unchanged", "actor": "mate",
+      "metric": "spell_damage_done", "spell": 500111, "target": "dummy", "ratio_to": "damage_m0", "min": 0.999, "max": 1.001 },
+
+    { "action": "unlearn", "actor": "cultist", "spell": 560526 },
+    { "action": "assert", "label": "Unlearning removes the raid aura from the party member", "actor": "mate", "metric": "aura", "spell": 560526, "equals": 0, "within_ms": 5000 },
+    { "action": "assert", "label": "The party member's cast speed returns to baseline", "actor": "mate", "metric": "cast_speed_multiplier", "ratio_to": "speed_m0", "min": 0.999, "max": 1.001 }
+  ]
+}

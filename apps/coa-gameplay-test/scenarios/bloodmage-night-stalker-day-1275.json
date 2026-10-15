@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Night Stalker grants no bonus outdoors in the open world during the day (#1275)",
+  "contract": [
+    "Spell.dbc 807774 triggers 808013 every 10000 ms; 808013 grants +5% damage and +5% healing for 11000 ms.",
+    "808013 carries SPELL_ATTR0 0x2000, labelled 'Only usable during nighttime' in SharedDefines.h:459.",
+    "Every text source limits the bonus: installed DBC 'at night, while indoors, or in a dungeon'; snapshots 'at night'.",
+    "Daytime, outdoors, outside any dungeon is excluded under every reading, so 808013 must never be cast there.",
+    "hour 12 starts the case in 12:00-12:59 realm-local time, the Witch Hunter Night() clock; the default human start is outdoors.",
+    "Before the fix the parent casts 808013 on its first tick; after the fix the tick is suppressed in daylight."
+  ],
+  "timeout_ms": 60000,
+  "hour": 12,
+  "players": [{ "id": "stalker", "race": 1, "class": 20, "level": 80 }],
+  "steps": [
+    { "action": "wait", "label": "Let character setup settle", "ms": 5000 },
+    { "action": "set_aura", "actor": "stalker", "spell": 808013, "stacks": 0 },
+    {
+      "action": "snapshot", "actor": "stalker", "metric": "spell_cast_count", "spell": 808013,
+      "save_as": "bonus_casts_before"
+    },
+    { "action": "learn", "actor": "stalker", "spell": 807774 },
+    {
+      "action": "assert", "label": "The learned parent is active",
+      "actor": "stalker", "metric": "aura", "spell": 807774, "equals": 1
+    },
+    { "action": "wait", "label": "Cross two parent ticks", "ms": 21000 },
+    {
+      "action": "assert", "label": "The parent never granted the bonus in daylight",
+      "actor": "stalker", "metric": "spell_cast_count", "spell": 808013,
+      "relative_to": "bonus_casts_before", "equals": 0
+    },
+    {
+      "action": "assert", "label": "No Night Stalker bonus is active in daylight",
+      "actor": "stalker", "metric": "aura", "spell": 808013, "equals": 0
+    }
+  ]
+}

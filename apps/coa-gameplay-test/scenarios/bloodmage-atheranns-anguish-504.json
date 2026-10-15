@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Atherann's Anguish explodes for 30% of the caster's damage to the enemy (#504)",
+  "contract": "Atherann's Anguish 680680 applies a 10 s (DurationIndex 1) hemoplague to enemies in the target area: effect 0 is a dummy aura with EffectTriggerSpell 680681, effect 1 is aura 69 with MiscValue 127 and MiscValueB 30. The description states the rate literally: \"accumulating 30% of the damage you deal to affected enemies for $d, and then exploding for that amount of Shadow damage\", matching MiscValueB 30. The payload 680681 is a single SPELL_EFFECT_SCHOOL_DAMAGE (Shadow, DmgClass MAGIC, CANT_CRIT). 680680 has ProcFlags 0, no spell_proc row and no script, so the aura is inert and 680681 never lands. The metric is the damage the caster deals with 680681 against the enemy compared with the Bloodbolt 578305 damage the caster dealt to it while the hemoplague was active. Expected before the fix: no 680681 hit. Expected after the fix: exactly one 680681 hit on expiry worth 30% of that Bloodbolt total. The payload's 0.25 multipliers are shared with the 25% twin 570146 and are not the rate of 680680.",
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "caster", "race": 1, "class": 20, "level": 80, "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "enemy", "owner": "caster", "entry": 36, "level": 80, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "set_health", "actor": "enemy", "value": 999999},
+    {"action": "wait", "label": "Injured fixture avoids full-health level rescaling", "ms": 5000},
+    {"action": "assert", "actor": "enemy", "metric": "max_health", "equals": 1000000},
+    {"action": "learn", "actor": "caster", "spell": 680680},
+    {"action": "learn", "actor": "caster", "spell": 578305},
+    {"action": "set_power", "actor": "caster", "power": 1, "value": 1000},
+    {"action": "cast", "actor": "caster", "spell": 680680, "destination": {"x": -8946.95, "y": -132.493, "z": 83.5312}},
+    {
+      "action": "assert", "label": "The hemoplague lands on the enemy", "actor": "enemy",
+      "metric": "aura", "spell": 680680, "equals": 1, "within_ms": 2000
+    },
+    {"action": "set_power", "actor": "caster", "power": 1, "value": 1000},
+    {"action": "cast", "actor": "caster", "spell": 578305, "target": "enemy"},
+    {"action": "wait", "ms": 1500},
+    {"action": "set_power", "actor": "caster", "power": 1, "value": 1000},
+    {"action": "cast", "actor": "caster", "spell": 578305, "target": "enemy"},
+    {"action": "wait", "ms": 1500},
+    {"action": "set_power", "actor": "caster", "power": 1, "value": 1000},
+    {"action": "cast", "actor": "caster", "spell": 578305, "target": "enemy"},
+    {"action": "wait", "ms": 1500},
+    {
+      "action": "assert", "label": "The hemoplague is still active after the Bloodbolts", "actor": "enemy",
+      "metric": "aura", "spell": 680680, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Bloodbolt hit the enemy during the window", "actor": "caster",
+      "metric": "spell_damage_count", "spell": 578305, "target": "enemy", "min": 3
+    },
+    {
+      "action": "snapshot", "label": "Bloodbolt damage dealt while the hemoplague was active", "actor": "caster",
+      "metric": "spell_damage_total", "spell": 578305, "target": "enemy", "save_as": "bolt_total"
+    },
+    {
+      "action": "assert", "label": "No explosion before expiry", "actor": "caster",
+      "metric": "spell_damage_count", "spell": 680681, "target": "enemy", "equals": 0
+    },
+    {
+      "action": "assert", "label": "The hemoplague explodes once on expiry", "actor": "caster",
+      "metric": "spell_damage_count", "spell": 680681, "target": "enemy", "equals": 1, "within_ms": 8000
+    },
+    {
+      "action": "assert", "label": "The explosion is 30% of the damage dealt to the enemy", "actor": "caster",
+      "metric": "spell_damage_total", "spell": 680681, "target": "enemy", "ratio_to": "bolt_total",
+      "min": 0.29, "max": 0.31
+    },
+    {
+      "action": "assert", "label": "The hemoplague is gone after the explosion", "actor": "enemy",
+      "metric": "aura", "spell": 680680, "equals": 0
+    }
+  ]
+}

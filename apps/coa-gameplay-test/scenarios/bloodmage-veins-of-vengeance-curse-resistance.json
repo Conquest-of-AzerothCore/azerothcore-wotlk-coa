@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Veins of Vengeance grants 15% curse resistance (#1993)",
+  "contract": "Veins of Vengeance 560074: 'Increases your chance to resist curse effects by $s1%.' Effect 0 is aura 178 SPELL_AURA_MOD_DEBUFF_RESISTANCE with MiscValue 2 (DISPEL_CURSE, SharedDefines.h:1466) and BasePoints 14 / DieSides 1, i.e. 15. The handler is generic: SpellAuraEffects.cpp:243 registers it as HandleNoImmediateEffect implemented in Unit::MagicSpellHitResult, and the two consumers are Unit.cpp:3688-3689 (GetMaxPositiveAuraModifierByMiscValue with the incoming spell's Dispel) and Spell.cpp:3044-3045. Effect 1 is an inert aura 4 marker with no tooltip clause. The harness exposes no resist-chance metric and a resist-rate assertion would be probabilistic, so this regression reads the amount the core feeds into those two sites.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 560074
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The passive is absent before learning it",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 560074,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 560074
+    },
+    {
+      "action": "assert",
+      "label": "Learning applies the passive",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 560074,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The debuff resistance effect resolves to 15",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 560074,
+      "effect": 0,
+      "equals": 15
+    }
+  ]
+}

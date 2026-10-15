@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "Enchanted Water raises Touch of Moonlight's healing by 10% and cuts pushback by 35% (#1394)",
+  "contract": "Enchanted Water rank 1 704755 (SpellFamilyName 32) reads \"Increases the healing of Touch of Moonlight by $s1% and reduces spell pushback suffered from damaging attacks by $s2%\". Effect 0 is SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue 0 = SPELLMOD_DAMAGE, EffectBasePoints 9 with DieSides 1 resolving to 10, and EffectSpellClassMask word0 0x40000, which selects Touch of Moonlight 574328 (SpellFamilyFlags word0 0x40000). Unit::SpellHealingBonusDone ends with ApplySpellMod(SPELLMOD_DAMAGE, heal), and for a SPELLMOD_DAMAGE percent modifier Player::ApplySpellMod multiplies by 1 + 10/100. The metric spell_healing_done calls SpellHealingBonusDone with a fixed base of 1000 and no bonus healing, so the talented fixture must read 1100 (ratio window 1.09..1.11 covers float truncation) against 1000. Effect 1 is SPELL_AURA_REDUCE_PUSHBACK (149) with EffectBasePoints 34 resolving to 35; Spell::Delayed and Spell::DelayedChannel read GetTotalAuraModifier(SPELL_AURA_REDUCE_PUSHBACK) as the percentage, so the applied aura's effect amount 35 is the value they consume. The pushback path itself is not driven (that needs a hostile hit on a casting player); the amount assertion reads the aura effect that the stock code sums. Rank 2 707893 (10 -> 20 and 35 -> 70) is a separate spell and is not in this issue. Both fixtures are the same race, class and level.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "patient",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 574328
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 574328
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 704755
+    },
+    {
+      "action": "assert",
+      "label": "The passive self-applies once learned",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 704755,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Touch of Moonlight healing without the talent",
+      "actor": "control",
+      "metric": "spell_healing_done",
+      "spell": 574328,
+      "target": "patient",
+      "save_as": "touch_base"
+    },
+    {
+      "action": "assert",
+      "label": "Touch of Moonlight heals 10% more with the talent",
+      "actor": "talent",
+      "metric": "spell_healing_done",
+      "spell": 574328,
+      "target": "patient",
+      "ratio_to": "touch_base",
+      "min": 1.09,
+      "max": 1.11
+    },
+    {
+      "action": "assert",
+      "label": "The pushback reduction effect resolves to 35",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 704755,
+      "caster": "talent",
+      "effect": 1,
+      "equals": 35
+    }
+  ]
+}

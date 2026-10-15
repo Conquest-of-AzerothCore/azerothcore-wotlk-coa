@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Entropy Overload applies a 20% snare-resistance aura natively (#572)",
+  "contract": "Spell.dbc gives Entropy Overload 706084 a single self-targeted APPLY_AURA effect: aura 117 SPELL_AURA_MOD_MECHANIC_RESISTANCE, EffectMiscValue 11 (MECHANIC_SNARE), EffectBasePoints 19 with DieSides 1 -> 20. The tooltip reads 'Increases your chance to resist movement slowing effects by 20%'. The aura type has a real consumer: Unit::GetMechanicResistChance walks the incoming spell's effect mechanics and takes GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_MECHANIC_RESISTANCE, mechanic); both Unit::MeleeSpellHitResult and Unit::MagicSpellHitResult add it to the miss roll as SPELL_MISS_RESIST. No script or SQL is needed; this is a regression scenario for behaviour that already works. COVERAGE LIMIT: this scenario proves the DATA half only - that the passive applies and that its mechanic-resistance amount is 20. The resistance roll itself is victim-side and consumed inside Unit::M{elee,agic}SpellHitResult; the harness exposes no victim mechanic-resist or miss-outcome metric (spell_hit_chance reads the ATTACKER's modifiers), so the 20% resist rate is NOT asserted here. Proving it needs either a new mechanic_resist_chance metric in CoAGameplayTest.cpp or a statistical Ghost e2e test in which a hostile actor repeatedly casts a MECHANIC_SNARE spell at the talented Chronomancer.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "chronomancer", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert",
+      "label": "No Entropy Overload aura before the passive is learned",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 706084,
+      "equals": 0
+    },
+    { "action": "learn", "actor": "chronomancer", "spell": 706084 },
+    {
+      "action": "assert",
+      "label": "Learning the passive applies its aura",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 706084,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Snare mechanic resistance resolves to 20 (data only, see contract)",
+      "actor": "chronomancer",
+      "metric": "aura_amount",
+      "spell": 706084,
+      "effect": 0,
+      "equals": 20
+    }
+  ]
+}

@@ -1,0 +1,471 @@
+{
+  "schema": 1,
+  "name": "Primalist Sacred Grove instant healing and ground recovery",
+  "contract": "The instant group heal adds one hundred percent AP and no SP. The sixteen-second, fifteen-yard grove grants twenty-five percent incoming healing to friendly occupants and recovers three percent missing health, Mana and Rage every two seconds. Leaving and expiry stop the bonuses and recovery; reentry restores them.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "outsider",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 100000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 58
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9617.06,
+      "y": -285.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800180
+    },
+    {
+      "action": "teleport",
+      "actor": "outsider",
+      "map": 0,
+      "x": -9617.06,
+      "y": -278.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "outsider",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "outsider",
+      "maximum": 20000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "save_as": "baseap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_healing_done",
+      "spell": 800180,
+      "target": "ally",
+      "save_as": "basequery"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 47436,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "save_as": "apap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_healing_done",
+      "spell": 800180,
+      "target": "ally",
+      "save_as": "apquery"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 26395,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "save_as": "spap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_healing_done",
+      "spell": 800180,
+      "target": "ally",
+      "save_as": "spquery"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "max_power",
+      "power": 0,
+      "save_as": "ally_max_mana"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800180
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object",
+      "spell": 800180,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800180,
+      "target": "ally",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800180,
+      "target": "outsider",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 800180,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "aura",
+      "spell": 800180,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_healing_taken",
+      "spell": 800179,
+      "target": "primalist",
+      "equals": 1250
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amplitude_ms",
+      "spell": 800180,
+      "effect": 1,
+      "equals": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 20000,
+      "value": 5000
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 1,
+      "value": 400
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 800179,
+      "target": "ally",
+      "save_as": "before_hp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 800179,
+      "target": "ally",
+      "save_as": "before_mp",
+      "power": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 800179,
+      "target": "ally",
+      "save_as": "before_rage",
+      "power": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 800179,
+      "target": "ally",
+      "relative_to": "before_hp",
+      "equals": 562,
+      "within_ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 800179,
+      "target": "ally",
+      "power": 0,
+      "relative_to": "before_mp",
+      "min": 1,
+      "label": "Positive Mana recovery; exact missing-Mana percentage checked from native maximum"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 800179,
+      "target": "ally",
+      "power": 0,
+      "relative_to": "before_mp",
+      "save_as": "mana_recovery"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "spell": 800179,
+      "target": "ally",
+      "power": 1,
+      "relative_to": "before_rage",
+      "equals": 18
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9617.06,
+      "y": -268.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 800180,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_healing_taken",
+      "spell": 800179,
+      "target": "primalist",
+      "equals": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800179,
+      "target": "ally",
+      "save_as": "outside"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800179,
+      "target": "ally",
+      "relative_to": "outside",
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9617.06,
+      "y": -285.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 800180,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 17000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object",
+      "spell": 800180,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 800180,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_healing_taken",
+      "spell": 800179,
+      "target": "primalist",
+      "equals": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800179,
+      "target": "ally",
+      "save_as": "expired"
+    },
+    {
+      "action": "wait",
+      "ms": 2100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800179,
+      "target": "ally",
+      "relative_to": "expired",
+      "equals": 0
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

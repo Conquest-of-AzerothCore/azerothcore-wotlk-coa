@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: nuke crit, cast speed and damage spellmods (#955, #1085, #2000, #1049)",
+  "contract": "Jin'do's Wrath (707505, #955), Dark Magic (705922, #1085), It's Da Voodoo (560278, #2000) and Loa Communion (705907, #1049) are all SPELL_EFFECT_APPLY_AURA passives (SpellFamilyName 19) carrying SPELL_AURA_ADD_FLAT_MODIFIER/ADD_PCT_MODIFIER effects whose EffectSpellClassMask already matches their target spell's own SpellFamilyFlags. The stock engine (AuraEffect::CalculateSpellMod, SpellInfo::IsAffected, Player::ApplySpellMod) registers and applies each modifier with no Witch Doctor script needed; this scenario proves the registration and the exact modified value for each, and fails if a future change stops the modifier from matching. Jin'do's Wrath/Dark Magic/It's Da Voodoo target spells that deal their own direct SCHOOL_DAMAGE; Loa Communion's target (Veil of Darkness) forwards through SPELL_EFFECT_APPLY_AURA's periodic trigger to VeilDamage (806473), whose own SpellFamilyFlags equal the modifier's class mask, so the metric queries 806473 directly. EffectBasePoints are read from Spell.dbc via coa-dbc-viewer and include the DieSides=1 (+1) roll SpellEffectInfo::CalcValue always applies for a fixed 1..1 die.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 4000 },
+
+    { "action": "assert", "actor": "caster", "metric": "spell_modifier", "spell": 807042, "op": 7, "base": 100, "equals": 100, "label": "#955 baseline: no crit-chance modifier on Hexfire yet" },
+    { "action": "assert", "actor": "caster", "metric": "spell_modifier", "spell": 807042, "op": 15, "base": 100, "equals": 100, "label": "#955 baseline: no crit-damage-bonus modifier on Hexfire yet" },
+    { "action": "learn", "actor": "caster", "spell": 707505, "label": "#955 learn Jin'do's Wrath" },
+    { "action": "assert", "actor": "caster", "metric": "spell_modifier", "spell": 807042, "op": 7, "base": 100, "equals": 125, "within_ms": 2000, "label": "#955 Jin'do's Wrath adds +25 flat crit chance to Hexfire (24 base + 1 die roll)" },
+    { "action": "assert", "actor": "caster", "metric": "spell_modifier", "spell": 807042, "op": 15, "base": 100, "equals": 125, "label": "#955 Jin'do's Wrath adds +25% crit damage bonus to Hexfire" },
+
+    { "action": "snapshot", "actor": "caster", "metric": "spell_cast_time_ms", "spell": 802087, "save_as": "badjuju_cast0", "label": "#1085 baseline Bad Juju cast time" },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_cast_time_ms", "spell": 807037, "save_as": "malefic_cast0", "label": "#1085 baseline Malefic Wrath cast time" },
+    { "action": "learn", "actor": "caster", "spell": 705922, "label": "#1085 learn Dark Magic" },
+    { "action": "assert", "actor": "caster", "metric": "spell_cast_time_ms", "spell": 802087, "relative_to": "badjuju_cast0", "equals": -500, "within_ms": 2000, "label": "#1085 Dark Magic reduces Bad Juju cast time by 0.5s" },
+    { "action": "assert", "actor": "caster", "metric": "spell_cast_time_ms", "spell": 807037, "relative_to": "malefic_cast0", "equals": -500, "label": "#1085 Dark Magic reduces Malefic Wrath cast time by 0.5s" },
+
+    { "action": "assert", "actor": "caster", "metric": "spell_modifier", "spell": 802704, "op": 0, "base": 100, "equals": 100, "label": "#2000 baseline: no damage modifier on ShadowflareHit yet" },
+    { "action": "learn", "actor": "caster", "spell": 560278, "label": "#2000 learn It's Da Voodoo" },
+    { "action": "assert", "actor": "caster", "metric": "spell_modifier", "spell": 802704, "op": 0, "base": 100, "equals": 125, "within_ms": 2000, "label": "#2000 It's Da Voodoo adds +25% damage to ShadowflareHit (Shadowflare's actual damage-dealing spell)" },
+
+    { "action": "assert", "actor": "caster", "metric": "spell_modifier", "spell": 806473, "op": 0, "base": 100, "equals": 100, "label": "#1049 baseline: no damage modifier on VeilDamage yet" },
+    { "action": "learn", "actor": "caster", "spell": 705907, "label": "#1049 learn Loa Communion" },
+    { "action": "assert", "actor": "caster", "metric": "spell_modifier", "spell": 806473, "op": 0, "base": 100, "equals": 200, "within_ms": 2000, "label": "#1049 Loa Communion doubles VeilDamage's damage (Veil of Darkness's actual damage-dealing spell)" }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Login sends one complete client config and the account's character list",
+  "contract": "SMSG_UPDATE_CONFIGS (0x058D) replaces the DLL's integer, boolean, float and rate maps wholesale, so every value must travel in one packet: the XP rates, the Help menu's CONFIG_ALLOW_TICKETS, the inspect frame's CONFIG_CHARACTER_ADVANCEMENT_BUILD_INSPECT_ENABLED and the Item Recovery flag. SMSG_ACCOUNT_INFO (0x09BB) fills C_AccountInfo, which the ticket window lists characters from: u32 unused, u32 GM level, u8 newcomer, u8 guide, then per character its name, GENDER_ token, u32 level, CLASS_ and RACE_ tokens and faction. Expected: one config packet at login holding all of those keys, and an account info packet naming the character's class, race and faction.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "player", "race": 1, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 1000 },
+    {
+      "action": "assert", "label": "Login sends exactly one config packet", "actor": "player",
+      "metric": "server_packets", "opcode": 1421, "equals": 1
+    },
+    {
+      "action": "assert", "label": "It carries the XP rates", "actor": "player",
+      "metric": "server_packet_contains", "opcode": 1421, "text": "RATE_XP_GLOBAL", "equals": 1
+    },
+    {
+      "action": "assert", "label": "It enables the ticket window", "actor": "player",
+      "metric": "server_packet_contains", "opcode": 1421, "text": "CONFIG_ALLOW_TICKETS", "equals": 1
+    },
+    {
+      "action": "assert", "label": "It enables the inspect Build tab", "actor": "player",
+      "metric": "server_packet_contains", "opcode": 1421,
+      "text": "CONFIG_CHARACTER_ADVANCEMENT_BUILD_INSPECT_ENABLED", "equals": 1
+    },
+    {
+      "action": "assert", "label": "It keeps the Item Recovery flag", "actor": "player",
+      "metric": "server_packet_contains", "opcode": 1421, "text": "CONFIG_RECOVERY_VENDORED_ITEM_ENABLED",
+      "equals": 1
+    },
+    {
+      "action": "assert", "label": "Account info names the warrior class", "actor": "player",
+      "metric": "server_packet_contains", "opcode": 2491, "text": "CLASS_WARRIOR", "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "and the human race", "actor": "player",
+      "metric": "server_packet_contains", "opcode": 2491, "text": "RACE_HUMAN", "equals": 1
+    },
+    {
+      "action": "assert", "label": "and the Alliance", "actor": "player",
+      "metric": "server_packet_contains", "opcode": 2491, "text": "Alliance", "equals": 1
+    }
+  ]
+}

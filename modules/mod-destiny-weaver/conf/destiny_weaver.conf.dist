@@ -1,0 +1,92 @@
+###################################################################################################
+#  mod-destiny-weaver
+#
+#  The Destiny Weaver NPC and the two per-character choices it offers: open-world level scaling
+#  and experience bonus control. Both are stored in `character_settings` under "core.destiny_weaver".
+#
+#  Both choices are per character. Creatures are scaled for the character who asked for it, and only
+#  for them: the level, pool, mana, armor and damage of a creature are delivered per recipient, so two
+#  characters can fight the same one at two different levels while everybody else sees it authored.
+#  Quest levels and the tuning of what a scaled quest pays are per character as well.
+#
+#  This module is the only open-world creature scaling: with it or its scaling service switched off,
+#  every creature keeps its authored level.
+#
+#  This code is part of the AzerothCore project. See AUTHORS file for Copyright information.
+###################################################################################################
+
+#    DestinyWeaver.Enable
+#        Description: Enable the Destiny Weaver menu and both of its services.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+DestinyWeaver.Enable = 1
+
+#    DestinyWeaver.LevelScaling
+#        Description: Whether the scaling service exists at all - open-world creature scaling and
+#                     quest scaling together. 0 leaves the choice in the menu without effect: every
+#                     creature is met at its authored level and every quest plays at its authored
+#                     level.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+#        Reloadable:  yes (.reload config)
+DestinyWeaver.LevelScaling = 1
+
+#    DestinyWeaver.LevelScaling.Default
+#        Description: What a character that has never made the choice gets. 1 scales the world and its
+#                     quests to the character's own level, 0 leaves both at their authored level until
+#                     the character asks for scaling.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+#        Reloadable:  yes (.reload config)
+DestinyWeaver.LevelScaling.Default = 1
+
+#    DestinyWeaver.Scaling.Offset
+#        Description: How far below the character a scaled open-world creature sits. A level 40
+#                     character pulls creatures up to level 36 with the default, so the world stays a
+#                     step behind. There is no ceiling on the lift: a view is delivered to one client,
+#                     so there is nobody else for a high view to be wrong for. Dungeons do not use it:
+#                     a scaled dungeon's creatures stand at the character's own level, held inside the
+#                     dungeon's band.
+#        Default:     4
+#        Reloadable:  yes (.reload config)
+
+DestinyWeaver.Scaling.Offset = 4
+
+#    DestinyWeaver.Scaling.WorldMaps
+#        Description: The open-world maps whose creatures scale, as space-separated map ids. Raids,
+#                     battlegrounds and arenas never scale, whatever is listed.
+#        Default:     "0 1" - (Eastern Kingdoms, Kalimdor)
+#        Reloadable:  yes (.reload config)
+
+DestinyWeaver.Scaling.WorldMaps = "0 1"
+
+#    DestinyWeaver.Scaling.DungeonIds
+#        Description: The dungeon finder entries (LFGDungeons.dbc ids) whose dungeons scale, on their
+#                     regular difficulty. A dungeon's creatures stand at the character's level, held
+#                     inside the entry's TargetLevelMin-MaxLevel band; an entry whose levels lie outside
+#                     1-60 uses 15-59, and a map listed by several entries covers all of them. A
+#                     dungeon that is not listed keeps its authored levels.
+#        Default:     "1 4 6 8 10 12 14 16 18 20 22 24 26 28 163 164 165 272 273"
+#        Reloadable:  yes (.reload config)
+
+DestinyWeaver.Scaling.DungeonIds = "1 4 6 8 10 12 14 16 18 20 22 24 26 28 163 164 165 272 273"
+
+#    DestinyWeaver.ExperienceBonusControl
+#        Description: Whether the Experience Bonus Control service exists at all. A character who
+#                     turns it on stops receiving the bonus experience sources - Potions of
+#                     Experience, Auras of Experience and the recruit-a-friend bonus - and
+#                     progresses at the base rate.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+DestinyWeaver.ExperienceBonusControl = 1
+
+#    DestinyWeaver.DisplayStream.Enable
+#        Description: Whether a client is told the rows behind this module's character models when
+#                     it logs in. The live service streamed them (its client has handlers for
+#                     SMSG_PATCH_CREATURE_DISPLAY_INFO and ..._EXTRA and no such rows on disk);
+#                     this realm does the same, so the tables here are the single source of truth
+#                     and a model change never needs a client patch. 0 leaves whatever the client
+#                     already has on disk as its only source, i.e. the patched tables.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+DestinyWeaver.DisplayStream.Enable = 1

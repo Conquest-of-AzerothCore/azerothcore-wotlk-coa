@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "name": "Evil Never Sleeps makes Hunt's slow last 2 seconds longer (#1364)",
+  "contract": "Evil Never Sleeps 561210 has E0 aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER) MiscValue 1 (SPELLMOD_DURATION), BasePoints 1999 / DieSides 1 = +2000 ms, class mask (0x800, 0, 0); its description reads 'Hunt now slows movement speed by an additional $/1000;s1 sec'. Hunt 802006 and its slow aura Being Hunted 802111 (SPELL_AURA_MOD_DECREASE_SPEED, duration index 39 = 2000 ms in SpellDuration.dbc) both carry SpellFamilyFlags A 0x800, and Aura::CalcMaxDuration applies the caster's SPELLMOD_DURATION. Expected slow duration: 2000 + 2000 = 4000 ms. Burrow Bolt 802269 and Darkslayer 804179 (no A flags) are the controls. This is not the different Evil Never Sleeps 804185 of the Night/Day Hunter talent.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 561210,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "label": "Baseline Being Hunted duration is the DBC's 2000 ms",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 802111,
+      "op": 1,
+      "base": 2000,
+      "equals": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 561210
+    },
+    {
+      "action": "assert",
+      "label": "The passive aura is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 561210,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Being Hunted lasts 2 seconds longer",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 802111,
+      "op": 1,
+      "base": 2000,
+      "equals": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Hunt itself is covered by the same mask",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 802006,
+      "op": 1,
+      "base": 2000,
+      "equals": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Burrow Bolt's duration is unchanged",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 802269,
+      "op": 1,
+      "base": 2000,
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Darkslayer's duration is unchanged",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 804179,
+      "op": 1,
+      "base": 2000,
+      "equals": 2000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 561210,
+      "all_specs": true,
+      "label": "Remove the passive"
+    },
+    {
+      "action": "assert",
+      "label": "Being Hunted returns to 2000 ms",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 802111,
+      "op": 1,
+      "base": 2000,
+      "equals": 2000
+    }
+  ]
+}

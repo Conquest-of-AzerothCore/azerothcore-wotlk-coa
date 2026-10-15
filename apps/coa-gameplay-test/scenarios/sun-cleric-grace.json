@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "name": "Grace increases Dawnsear's and Sunflare's spell-power scaling by 20%/10% (#1910)",
+  "contract": "Grace 504070 is family 33, Attributes 192 (SPELL_ATTR0_PASSIVE), EquippedItemClass -1, no Stances, so it self-applies on learn. Effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 24 (SPELLMOD_BONUS_MULTIPLIER) and EffectSpellClassMask word1 2 (0x2, matching Dawnsear), EffectBasePoints 19 + DieSides 1 = 20; effect 1 is the same aura with word1 256 (0x100, matching Sunflare), EffectBasePoints 9 + DieSides 1 = 10. On live spell_bonus_data (read from the world database), every Dawnsear/Sunflare rank (500146, 502366-502371, 800231, 502386-502397) has direct_bonus 0. Unit::SpellDamageBonusDone sets `coeff = bonus->direct_damage` whenever a spell_bonus_data row exists, forcing coeff to 0, then only calls ApplySpellMod(id, SPELLMOD_BONUS_MULTIPLIER, coeff) inside `if ((coeff || unleashedFrostGlyph) && DoneAdvertisedBenefit)` — with coeff pinned at 0, that block, and Grace's own native aura, can never run. Dawnsear/Sunflare's real spell-power scaling instead runs through the ModifySpellEffectBaseValue hook via SunClericCoefficients (sun_cleric_scaling in AscensionSunClericContracts.cpp): Dawnsear's row has sp 1.0, Sunflare's has sp 0.25. The fix (sun_cleric_devotion_scaling in AscensionSunClericDevotion.cpp) adds a second, independent ModifySpellEffectBaseValue hook that, only for a caster with Grace, adds row.sp * SpellBaseDamageBonusDone(schoolMask) * (Grace's own effect amount / 100) to the same effect value, reusing SunClericCoefficients rather than inventing a new coefficient. spell_effect_value (which calls SpellEffectInfo::CalcValue, the same function this hook feeds) rolls DieSides 12/5 randomly on every call, so this is proved as a delta against a fixed +2000 spell-power fixture (44505, all schools) rather than an exact value: Dawnsear's expected marginal gain is 1.0 * 2000 * 0.20 = 400, Sunflare's is 0.25 * 2000 * 0.10 = 50, both far outside the +-12/+-5 dice-roll noise band. A separate control actor with the same fixture but no Grace proves the two successive readings differ only by that same dice noise.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Grant a fixed +2000 all-school spell power fixture",
+      "actor": "control",
+      "spell": 44505,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Grant the same fixture to the talent actor",
+      "actor": "talent",
+      "spell": 44505,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_power",
+      "school": 2,
+      "min": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "talent",
+      "metric": "spell_power",
+      "school": 2,
+      "min": 2000
+    },
+    {
+      "action": "snapshot",
+      "label": "Control Dawnsear reading before any Grace learn",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 500146,
+      "effect": 0,
+      "save_as": "control_dawnsear_1"
+    },
+    {
+      "action": "snapshot",
+      "label": "Talent Dawnsear reading before Grace",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 500146,
+      "effect": 0,
+      "save_as": "talent_dawnsear_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Talent Sunflare reading before Grace",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 800231,
+      "effect": 0,
+      "save_as": "talent_sunflare_before"
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 504070
+    },
+    {
+      "action": "assert",
+      "label": "Talent self-applies Grace",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 504070,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Dawnsear gains ~400 from Grace's 20% spell-power-scaling bonus",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 500146,
+      "effect": 0,
+      "relative_to": "talent_dawnsear_before",
+      "min": 385,
+      "max": 415
+    },
+    {
+      "action": "assert",
+      "label": "Sunflare gains ~50 from Grace's 10% spell-power-scaling bonus",
+      "actor": "talent",
+      "metric": "spell_effect_value",
+      "spell": 800231,
+      "effect": 0,
+      "relative_to": "talent_sunflare_before",
+      "min": 40,
+      "max": 60
+    },
+    {
+      "action": "assert",
+      "label": "Without Grace, a second Dawnsear reading only moves by dice-roll noise",
+      "actor": "control",
+      "metric": "spell_effect_value",
+      "spell": 500146,
+      "effect": 0,
+      "relative_to": "control_dawnsear_1",
+      "min": -12,
+      "max": 12
+    }
+  ]
+}

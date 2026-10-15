@@ -1,0 +1,153 @@
+{
+  "schema": 1,
+  "name": "necromancer-petless-command-crypt-explosion-4063",
+  "contract": [
+    "Crypt Explosion 500572 explicitly promises casting Command spells applies Crypt Plague near the target; its",
+    "paid Death node 29241 is acquired normally. A Necromancer with no raised minions must be able to cast",
+    "Command: Undead 504868 and apply one Crypt Plague 570131 stack to the target and a nearby enemy. The cast",
+    "must not summon a minion. Preserve ordinary resource payment and commanded-minion paths."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 29,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "n",
+      "id": 34
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "n",
+      "entry": 29241,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 500572,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 504868
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "n",
+      "power": 6,
+      "value": 500
+    },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 504868,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "cast_failure",
+      "spell": 504868,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura_stacks",
+      "spell": 570131,
+      "caster": "n",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "nearby",
+      "metric": "aura_stacks",
+      "spell": 570131,
+      "caster": "n",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "n",
+      "spell": 500983,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "n",
+      "spell": 504868
+    },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 504868,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "cast_failure",
+      "spell": 504868,
+      "equals": 173,
+      "label": "Pacify still refuses Command"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "n",
+      "entry": 36,
+      "level": 29,
+      "health": 1000000,
+      "distance": 5
+    },
+    {
+      "id": "nearby",
+      "owner": "n",
+      "entry": 36,
+      "level": 29,
+      "health": 1000000,
+      "distance": 8
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  }
+}

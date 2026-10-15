@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "name": "Easy Prey adds one second to Hemostasis (#958)",
+  "contract": "Easy Prey 704621 is one effect: aura 107 with MiscValue 1 (SPELLMOD_DURATION), BasePoints 999 + DieSides 1 = +1000 ms, over EffectSpellClassMask (0, 0, 8) = word 2 bit 3 = Hemostasis 681304 (the ability), Hemostasis 302895 (the re-activation window) and Blood Burst 803326. Both Hemostasis records have DurationIndex 35 = 4000 ms, and Aura::CalcMaxDuration applies SPELLMOD_DURATION. AscensionBloodmageHemostasis.cpp drives the window with AddAura/RemoveAurasDueToSpell and never overrides a duration, so it does not bypass the modifier. Tooltip: \"Increases the duration of Hemostasis by $/1000;s1 sec.\" Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Hemostasis keeps its authored 4000 ms before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 681304,
+      "op": 1,
+      "base": 4000,
+      "equals": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 704621
+    },
+    {
+      "action": "assert",
+      "label": "Easy Prey lengthens Hemostasis to 5000 ms",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 681304,
+      "op": 1,
+      "base": 4000,
+      "equals": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Easy Prey lengthens the re-activation window the same way",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 302895,
+      "op": 1,
+      "base": 4000,
+      "equals": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Easy Prey does not touch Bloodbolt's duration",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 1,
+      "base": 4000,
+      "equals": 4000
+    }
+  ]
+}

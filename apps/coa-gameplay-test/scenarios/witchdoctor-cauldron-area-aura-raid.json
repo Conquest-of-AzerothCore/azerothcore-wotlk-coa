@@ -1,0 +1,198 @@
+{
+  "schema": 1,
+  "name": "Ingredient: Frog Bones cauldron/potion clauses and Spice: Peacebloom CC reduction (#519, #712)",
+  "contract": "Both passives deliver their party-wide clause through the same generic core path, SPELL_EFFECT_APPLY_AREA_AURA_RAID (Aura::FillTargetMap, SpellAuras.cpp:2855-2863), which always includes the caster before the grouped-unit search, so each still works solo. Frog Bones 801663 (family 19, flags [0,0,128], SpellFamilyName mismatch means ApplyContracts, AscensionWitchDoctorCompletion.cpp:191-340, never touches it) has Effect0 = DUMMY (BasePoints -4/DieSides1 -> -3, the tooltip's 3%) and Effect1 = PERIODIC_TRIGGER_SPELL (Amplitude 1500, TriggerSpell 803697); AttributesEx5 carries SPELL_ATTR5_EXTRA_INITIAL_PERIOD, so the first Cauldron tick fires effectively immediately (SpellAuraEffects.cpp:737-745: periodicTimer stays 0 for a non-totem caster) rather than waiting a full 1500 ms. 803697 'Frog Bones' is a bare SPELL_EFFECT_APPLY_AREA_AURA_RAID / SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN (BasePoints -4/DieSides1 -> -3), EffectRadiusIndex 23 = 40 yd, matching the tooltip's $803697a1. The Potion clause is scripted: witch_doctor_casts::OnSpellPrepare (AscensionWitchDoctorAbilities.cpp:53-60) snapshots IngredientMask(player) (AscensionWitchDoctorBrewing.cpp:79-84, populated from state.ingredients via IngredientChanged/SyncIngredients, AscensionWitchDoctorAuras.cpp:96 lifecycle Apply() at IsIngredient(id) branch, :210-211 approx); OnSpellHitResult (AscensionWitchDoctorAbilities.cpp:236-245) sees IsPotion(801661) (Family(info,1,2048); 801661 flags[1]=526336 has bit 2048) and calls PotionEffects, which casts PotionBones 802971 on the target. 802971 is a plain APPLY_AURA/SPELL_AURA_SCHOOL_ABSORB, BasePoints 99/DieSides1/RealPointsPerLevel 5.0/BaseLevel 10/SpellLevel 10, DurationIndex 31 = 8000 ms; CalcValue at level 80 gives 99 + (80-10)*5.0 + 1 = 450 before any Spirit/SP bonus from AscensionWitchDoctorCoefficients.h:140, so 'min 450' is the pure-DBC floor. Spice: Peacebloom 803700 (flags [0,0,0], so no ApplyContracts branch matches either) is three identical SPELL_EFFECT_APPLY_AREA_AURA_RAID / SPELL_AURA_MECHANIC_DURATION_MOD (BasePoints -26/DieSides1 -> -25%) effects with EffectMiscValue 7/12/11 = MECHANIC_ROOT/STUN/SNARE (SharedDefines.h) and EffectRadiusIndex 23 = 40 yd; Unit::ModSpellDuration (Unit.cpp:12193-12241) reads SPELL_AURA_MECHANIC_DURATION_MOD off the CC's own target for its exact mechanic and AddPct's the duration. Frost Nova 122 (DurationIndex 31 = 8000 ms, Effect1 mechanic 7 = MECHANIC_ROOT, radius index 13 = 10 yd around the caster) proves the ratio: 8000 ms baseline, then 8000*0.75=6000 ms once Peacebloom is known. The 26 s gap between casts clears diminishing returns (Unit::GetDiminishing, Unit.cpp:12341-12364, resets once stack==0 and >15000 ms have passed since the group's last hit; Unit::ApplyDiminishingAura, Unit.cpp:12459-12475, only stamps that hitTime when the aura's stack drops to 0 on removal, i.e. at the root's own ~8000 ms natural expiry, so the wait must clear 8000+15000 ms measured from the cast, not just 15000 ms), so both casts land at DIMINISHING_LEVEL_1 and only the mechanic-duration-mod difference shows. Doctor and Mage are opposite factions (race 1 Alliance Human vs race 8 Horde Troll) so mutual pvp flags make them hostile; the shared top-level location co-locates every fixture regardless of race so no separate teleport is needed. The root target (doctor) must not itself be a Troll: Troll racial 'Da Voodoo Shuffle' 58943 (SPELL_ATTR0_PASSIVE, always active, no learn step) carries its own SPELL_AURA_MECHANIC_DURATION_MOD effect on MECHANIC_ROOT, EffectBasePoints -16/DieSides1 -> -15%, EffectImplicitTargetA TARGET_UNIT_CASTER (verified via coa-dbc-viewer id 58943) which silently confounds the '#712 baseline: no duration mod yet' assertion (a Troll doctor measures ~6800 ms, 8000*0.85, not 8000); putting the Troll on the mage side instead (already proven valid by witchdoctor-fix-jungle-booms.json's race-8 mage) keeps the same faction opposition without the racial ever landing on the rooted unit. All DBC fields verified via coa-dbc-viewer against /home/fab/CoaServer/dbc_clientset (Spell.dbc sha256 9d77d79e...4cfda234) on branch fix/coa-witchdoctor-audit.",
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "mage",
+      "race": 8,
+      "class": 8,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "doctor",
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "No Cauldron buff on the ally before the ingredient is brewed",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 803697,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "doctor",
+      "spell": 92085
+    },
+    {
+      "action": "learn",
+      "actor": "doctor",
+      "spell": 801663
+    },
+    {
+      "action": "cast",
+      "actor": "doctor",
+      "spell": 801663
+    },
+    {
+      "action": "wait",
+      "label": "Let the Cauldron's periodic trigger tick",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "#519: the Cauldron clause applies to the caster",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 803697,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "#519: the Cauldron clause reaches the grouped ally 40 yd area-raid aura",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 803697,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "#519: the Cauldron clause reduces damage taken by 3%",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 803697,
+      "equals": -3
+    },
+    {
+      "action": "learn",
+      "actor": "doctor",
+      "spell": 801661
+    },
+    {
+      "action": "cast",
+      "actor": "doctor",
+      "spell": 801661,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "#519: the Potion clause applies the Frog Bones absorb shield",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 802971,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#519: the absorb shield lasts 8 sec",
+      "actor": "ally",
+      "metric": "aura_duration_ms",
+      "spell": 802971,
+      "min": 7000,
+      "max": 8000
+    },
+    {
+      "action": "assert",
+      "label": "#519: the absorb shield meets the pure-DBC floor (99 + (80-10)*5.0 + 1)",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 802971,
+      "min": 450
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "spell": 122
+    },
+    {
+      "action": "pvp",
+      "actor": "doctor",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "mage",
+      "enabled": true
+    },
+    {
+      "action": "cast",
+      "label": "#712 baseline: Frost Nova roots the co-located doctor",
+      "actor": "mage",
+      "spell": 122
+    },
+    {
+      "action": "assert",
+      "label": "#712 baseline: the root lasts the full 8 sec (no duration mod yet)",
+      "actor": "doctor",
+      "metric": "aura_duration_ms",
+      "spell": 122,
+      "min": 7500,
+      "max": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Let the root expire and diminishing returns reset (Unit::ApplyDiminishingAura, Unit.cpp:12474, resets hitTime only when the aura's stack reaches 0 on removal, i.e. at the root's natural 8000 ms expiry, not at cast time; Unit::GetDiminishing, Unit.cpp:12355, then needs >15000 ms after that expiry, so the wait must exceed 8000+15000 ms measured from the first cast)",
+      "ms": 26000
+    },
+    {
+      "action": "learn",
+      "actor": "doctor",
+      "spell": 803700
+    },
+    {
+      "action": "assert",
+      "label": "Spice: Peacebloom applies on learn (passive)",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 803700,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "#712 discriminating: Frost Nova again, now against Peacebloom",
+      "actor": "mage",
+      "spell": 122
+    },
+    {
+      "action": "assert",
+      "label": "#712: the root is cut by 25% to 6 sec (fails if the passive stopped working)",
+      "actor": "doctor",
+      "metric": "aura_duration_ms",
+      "spell": 122,
+      "min": 5500,
+      "max": 6000
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Life Cycles cuts Babify's cast time by 250ms and its mana cost by 15% (#2215)",
+  "contract": "Life Cycles 680808 carries SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue SPELLMOD_CASTING_TIME (10) and EffectBasePoints -251, plus SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue SPELLMOD_COST (14) and EffectBasePoints -16; both use EffectSpellClassMask word0 bit 0x200000 and resolve to -250 and -15% with DieSides 1, matching the tooltip \"Reduces the cast time of your Babify by 0.25 sec and its mana cost by $s2%.\" Babify 804461 has SpellFamilyFlags word0 2097152, CastingTimeIndex 16 (SpellCastTimes.dbc row 16 = 1500ms), ManaCost 25 with ManaCostPercentage 17, DmgClass 1 and AttributesEx3 0. Native path only: Unit::ModSpellCastTime applies the flat modifier inside SpellInfo::CalcCastTime before the haste multiplier, and SpellInfo::CalcPowerCost applies SPELLMOD_COST after summing the percentage-of-base-mana component. Both fixtures share race, class and level, so their haste and base mana are identical.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 22, "level": 80 },
+    { "id": "talent", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talent", "spell": 680808 },
+    {
+      "action": "snapshot",
+      "label": "Babify cast time without the talent",
+      "actor": "control",
+      "metric": "spell_cast_time_ms",
+      "spell": 804461,
+      "save_as": "babify_cast"
+    },
+    {
+      "action": "snapshot",
+      "label": "Babify mana cost without the talent",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 804461,
+      "save_as": "babify_cost"
+    },
+    {
+      "action": "assert",
+      "label": "Babify casts 250ms faster with the talent",
+      "actor": "talent",
+      "metric": "spell_cast_time_ms",
+      "spell": 804461,
+      "relative_to": "babify_cast",
+      "equals": -250
+    },
+    {
+      "action": "assert",
+      "label": "Babify costs 15% less mana with the talent",
+      "actor": "talent",
+      "metric": "spell_power_cost",
+      "spell": 804461,
+      "ratio_to": "babify_cost",
+      "min": 0.84,
+      "max": 0.86
+    }
+  ]
+}

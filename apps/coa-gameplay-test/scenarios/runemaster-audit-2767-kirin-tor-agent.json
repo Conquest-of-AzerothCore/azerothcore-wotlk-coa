@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Runemaster Kirin Tor Agent grants its rune-cooldown buff on Eye of the Beholder cast (#2767)",
+  "contract": [
+    "Kirin Tor Agent 705634 Effect0 is SPELL_AURA_PROC_TRIGGER_SPELL, ProcChance 100, trigger 706422. Spell.dbc",
+    "ProcFlags is 0 and, before the fix, no spell_proc row existed, so casting Eye of the Beholder never granted",
+    "706422. Eye of the Beholder 500121 (the Runemaster family 38 record, per runemaster-eye-of-the-beholder.json)",
+    "is a positive self-buff (ADD_PCT_MODIFIER on the caster), DmgClass magic, SpellFamilyFlags1 4: at cast phase",
+    "Spell.cpp only sets PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS (0x4000) for a beneficial magic-class cast, so",
+    "the fix scopes the row to ProcFlags 0x4000, cast phase, family 38 mask1 4. Expected: without the talent",
+    "casting Eye of the Beholder never applies 706422; with it, the very next cast applies it immediately."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80, "spell_hit_rating": 10000}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 500121},
+    {"action": "cast", "actor": "rm", "spell": 500121},
+    {"action": "assert", "label": "SETUP: Eye of the Beholder is active", "actor": "rm", "metric": "aura",
+      "spell": 500121, "equals": 1, "within_ms": 1500},
+    {"action": "assert", "label": "SETUP: without the talent, no Kirin Tor Agent buff", "actor": "rm",
+      "metric": "aura", "spell": 706422, "equals": 0},
+
+    {"action": "reset_cooldown", "actor": "rm", "spell": 500121},
+    {"action": "learn", "actor": "rm", "spell": 705634},
+    {"action": "assert", "label": "SETUP: Kirin Tor Agent is active", "actor": "rm", "metric": "aura",
+      "spell": 705634, "equals": 1, "within_ms": 1500},
+    {"action": "cast", "actor": "rm", "spell": 500121},
+    {"action": "assert", "label": "CONTRACT: casting Eye of the Beholder grants the Kirin Tor Agent buff",
+      "actor": "rm", "metric": "aura", "spell": 706422, "equals": 1, "within_ms": 1000}
+  ]
+}

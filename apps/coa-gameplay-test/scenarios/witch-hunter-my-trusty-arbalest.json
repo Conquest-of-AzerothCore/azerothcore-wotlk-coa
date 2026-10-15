@@ -1,0 +1,180 @@
+{
+  "schema": 1,
+  "name": "My Trusty Arbalest cheapens Witchbane and Shadowblast and adds hit (#1897)",
+  "contract": "My Trusty Arbalest 503682 (rank 1) and 504892 (rank 2) are SpellFamily 21, passive (Attributes 0x1c0). Effect 0 is SPELL_AURA_ADD_PCT_MODIFIER (108), MiscValue 14 (SPELLMOD_COST), BasePoints -11 / -21 with DieSides 1 = -10 / -20 percent, EffectSpellClassMask word 1 = 0x400000 (Witchbane 800165) and word 2 = 0x10 (Shadowblast 804191); both targets cost 400 Rage (stored x10) and SpellInfo::CalcPowerCost applies ApplySpellMod(SPELLMOD_COST) (SpellInfo.cpp:3074), so 400 becomes 360 / 320. Effect 1 is SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT (333), BasePoints 1 / 3 + 1 = 2 / 4 percent, which HandleAscensionModHitChanceAll routes to both the melee and the spell hit fields (SpellAuraEffects.cpp:4845, StatSystem.cpp:999-1011). The scenario reads Player::m_modMeleeHitChance and m_modSpellHitChance through melee_hit_chance and spell_hit_chance. Dawn Blade (Rage 300, outside both masks) is the control.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Witchbane Rage cost before the talent",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "save_as": "witchbane_before",
+      "spell": 800165
+    },
+    {
+      "action": "snapshot",
+      "label": "Shadowblast Rage cost before the talent",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "save_as": "shadowblast_before",
+      "spell": 804191
+    },
+    {
+      "action": "snapshot",
+      "label": "Dawn Blade cost before the talent",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "save_as": "dawn_before",
+      "spell": 802024
+    },
+    {
+      "action": "snapshot",
+      "label": "Melee hit modifier before the talent",
+      "actor": "hunter",
+      "metric": "melee_hit_chance",
+      "save_as": "melee_hit_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Spell hit modifier before the talent",
+      "actor": "hunter",
+      "metric": "spell_hit_chance",
+      "save_as": "spell_hit_before"
+    },
+    {
+      "action": "learn",
+      "label": "Learn 503682",
+      "actor": "hunter",
+      "spell": 503682
+    },
+    {
+      "action": "assert",
+      "label": "My Trusty Arbalest rank 1 is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 503682,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: Witchbane costs 10 percent less (400 to 360)",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "spell": 800165,
+      "relative_to": "witchbane_before",
+      "min": -40.6,
+      "max": -39.4
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: Shadowblast costs 10 percent less (400 to 360)",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "spell": 804191,
+      "relative_to": "shadowblast_before",
+      "min": -40.6,
+      "max": -39.4
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: melee hit is 2 percent higher (BasePoints 1 + 1)",
+      "actor": "hunter",
+      "metric": "melee_hit_chance",
+      "relative_to": "melee_hit_before",
+      "min": 1.99,
+      "max": 2.01
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: spell hit is 2 percent higher",
+      "actor": "hunter",
+      "metric": "spell_hit_chance",
+      "relative_to": "spell_hit_before",
+      "min": 1.99,
+      "max": 2.01
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: Dawn Blade keeps its cost",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "spell": 802024,
+      "relative_to": "dawn_before",
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "label": "Unlearn 503682",
+      "actor": "hunter",
+      "spell": 503682
+    },
+    {
+      "action": "learn",
+      "label": "Learn 504892",
+      "actor": "hunter",
+      "spell": 504892
+    },
+    {
+      "action": "assert",
+      "label": "My Trusty Arbalest rank 2 is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 504892,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: Witchbane costs 20 percent less (400 to 320)",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "spell": 800165,
+      "relative_to": "witchbane_before",
+      "min": -80.6,
+      "max": -79.4
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: Shadowblast costs 20 percent less (400 to 320)",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "spell": 804191,
+      "relative_to": "shadowblast_before",
+      "min": -80.6,
+      "max": -79.4
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: melee hit is 4 percent higher (BasePoints 3 + 1)",
+      "actor": "hunter",
+      "metric": "melee_hit_chance",
+      "relative_to": "melee_hit_before",
+      "min": 3.99,
+      "max": 4.01
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: spell hit is 4 percent higher",
+      "actor": "hunter",
+      "metric": "spell_hit_chance",
+      "relative_to": "spell_hit_before",
+      "min": 3.99,
+      "max": 4.01
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Void Blessing grants the promised Mp5 buff and 30-minute duration through the native power-regen aura (#2096)",
+  "contract": "800194 Effect[0] is Aura 85 = SPELL_AURA_MOD_POWER_REGEN, EffectMiscValue=0=POWER_MANA, BasePoints 9+1=10 (deterministic, DieSides=1). AuraEffect::HandleModPowerRegen (SpellAuraEffects.cpp:150, 'implemented in Player::Regenerate') adds this flat amount to the target's mana-per-5-seconds stat -- the same mechanism WotLK's stock Mp5 buffs use, which is why the client renders it as 'restoring N mana every 5 seconds' even though EffectAmplitude=0 (not a literal periodic tick: SPELL_AURA_PERIODIC_ENERGIZE, aura 24, is a different aura entirely). DurationIndex=30, SpellDuration.dbc id 30 = 1,800,000 ms = 30 min, matching the tooltip's '$d' exactly. The harness has no mana-regen-rate metric and exercising the real Mp5 tick would need real-time waits sensitive to other regen sources, so this asserts the installed aura and its carried modifier amount directly (aura, aura_duration_ms, aura_amount) per prior-audit convention, not a live regen measurement. Effect[2] (effect type 168, an unnamed Ascension custom effect dispatched to Spell::EffectNULL) is outside this issue's tooltip contract and is not asserted (see report Observations). Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 20 },
+    { "id": "ally", "race": 1, "class": 5, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "cultist", "spell": 800194 },
+    { "action": "cast", "actor": "cultist", "spell": 800194, "target": "ally" },
+    {
+      "action": "assert", "label": "Void Blessing applies to the ally (#2096)",
+      "actor": "ally", "metric": "aura", "spell": 800194, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Void Blessing's Mp5 modifier amount matches the tooltip's 10 mana (#2096)",
+      "actor": "ally", "metric": "aura_amount", "spell": 800194, "effect": 0, "equals": 10
+    },
+    {
+      "action": "assert", "label": "Void Blessing lasts the promised 30 minutes (#2096)",
+      "actor": "ally", "metric": "aura_duration_ms", "spell": 800194,
+      "min": 1795000, "max": 1800000, "within_ms": 2000
+    }
+  ]
+}

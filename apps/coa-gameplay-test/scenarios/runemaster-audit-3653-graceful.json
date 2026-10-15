@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Runemaster audit: Graceful grants 10% spell and melee/ranged haste at rank 2 (#3653)",
+  "contract": "Graceful rank 2 (807922) effect 0 is SPELL_AURA_HASTE_SPELLS (216), EffectBasePoints 9 + DieSides 1 = +10; effect 1 is SPELL_AURA_MOD_MELEE_RANGED_HASTE (192), same +10. Both are native, generic aura handlers (SpellAuraEffects.cpp HandleModCastingSpeed and HandleModMeleeRangedSpeedPct), so learning 807922 should raise cast speed and swing speed by 10% with no CoA script needed.",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "snapshot", "label": "Baseline cast speed multiplier", "actor": "rm",
+      "metric": "cast_speed_multiplier", "save_as": "cast0"},
+    {"action": "snapshot", "label": "Baseline main-hand swing time", "actor": "rm",
+      "metric": "attack_time_ms", "hand": 0, "save_as": "swing0"},
+    {"action": "learn", "actor": "rm", "spell": 807922},
+    {"action": "assert", "label": "Graceful rank 2 (807922) is active", "actor": "rm",
+      "metric": "aura", "spell": 807922, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "Effect 0 (spell haste) resolves to 10", "actor": "rm",
+      "metric": "aura_amount", "spell": 807922, "effect": 0, "equals": 10},
+    {"action": "assert", "label": "Effect 1 (melee/ranged haste) resolves to 10", "actor": "rm",
+      "metric": "aura_amount", "spell": 807922, "effect": 1, "equals": 10},
+    {"action": "assert", "label": "Casts are 10% faster (1/1.10 = 0.909)", "actor": "rm",
+      "metric": "cast_speed_multiplier", "ratio_to": "cast0", "min": 0.895, "max": 0.925, "within_ms": 5000},
+    {"action": "assert", "label": "Swings are 10% faster", "actor": "rm",
+      "metric": "attack_time_ms", "hand": 0, "ratio_to": "swing0", "min": 0.895, "max": 0.925, "within_ms": 5000}
+  ]
+}

@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth: Decimation visible uses preserve the single-use PvP rule (#5602)",
+  "contract": "Current Spell.dbc524913 specifies five Skulltaker or Warbringer uses against creatures and one against players. Buy Decimation through real War entry7810 and cast it normally, publishing five initial uses. Enable PvP normally on hostile human Knight and orc Warrior actors. One normal highest Warbringer802586 must hit both the hostile player and a nearby creature, critically strike both recipients, and completely exhaust the aura, its internal remaining-use state and its visible charges. The separate PvE scenario proves five uses and single consumption per multi-creature cast. Weapon, owned Flames573448 and Demonfire/Rage are fixtures; Decimation itself is never injected. This tests native server combat and aura fields, not client icon rendering. Both players are explicitly moved to the established outdoor Elwynn PvP fixture; AreaTable12 flags64 have no sanctuary bit, whereas Northshire AreaTable9 flags18496 forbid player attacks.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "k",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "v",
+      "race": 2,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "k",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "pvp",
+      "actor": "k",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "v",
+      "enabled": true
+    },
+    {
+      "action": "add_item",
+      "actor": "k",
+      "item": 629951
+    },
+    {
+      "action": "equip",
+      "actor": "k",
+      "item": 629951,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 573448,
+      "label": "Fixture: own the normal Flames rank that War transforms"
+    },
+    {
+      "action": "specialization",
+      "actor": "k",
+      "id": 18
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "knows_spell",
+      "spell": 802586,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "k",
+      "entry": 7810,
+      "rank": 1
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 524913
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura",
+      "spell": 524913,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 524913,
+      "equals": 5,
+      "label": "Decimation publishes the five PvE uses from its description"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "k",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 802586,
+      "target": "v"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 802586,
+      "target": "v",
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "The normal Warbringer cast reaches the hostile PvP player"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 802586,
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "The same normal AoE cast also reaches a creature"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 802586,
+      "target": "v",
+      "critical": true,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 802586,
+      "target": "enemy",
+      "critical": true,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura",
+      "spell": 524913,
+      "equals": 0,
+      "label": "One cast against a player exhausts Decimation even when a creature is also hit"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 524913,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_script_value",
+      "spell": 524913,
+      "key": 524913,
+      "equals": 0
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

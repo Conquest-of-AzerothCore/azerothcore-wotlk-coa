@@ -1,0 +1,248 @@
+{
+  "schema": 1,
+  "name": "Tinker: Explosive Personality and Flexible Thinking scale the Tinker's stats",
+  "contract": "#953, #1083: both passives are stock WotLK aura types with live handlers and need no script. Explosive Personality (704111 rank 1, 707833 rank 2) is SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT at 50% and 100% of Intellect; Tinker is class 28, which CLASSMASK_WAND_USERS does not exclude, so ranged attack power must rise on learning, return on unlearning, and rank 2 must grant exactly twice rank 1's bonus. Flexible Thinking (705825 rank 1, 705826 rank 2) is SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE with amount 4 and 6 on MiscValue 3 (Intellect) and MiscValue 1 (Agility), so exactly those two stats must move and Strength, Stamina and Spirit must not.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Ranged attack power without Explosive Personality",
+      "actor": "t",
+      "metric": "ranged_attack_power",
+      "save_as": "rap0"
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 704111
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises ranged attack power",
+      "actor": "t",
+      "metric": "ranged_attack_power",
+      "relative_to": "rap0",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Rank 1's ranged attack power bonus, which is 50% of Intellect",
+      "actor": "t",
+      "metric": "ranged_attack_power",
+      "relative_to": "rap0",
+      "save_as": "rap1"
+    },
+    {
+      "action": "unlearn",
+      "actor": "t",
+      "spell": 704111
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning rank 1 restores ranged attack power",
+      "actor": "t",
+      "metric": "ranged_attack_power",
+      "relative_to": "rap0",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 707833
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 grants twice rank 1's bonus, being 100% of Intellect instead of 50%",
+      "actor": "t",
+      "metric": "ranged_attack_power",
+      "relative_to": "rap0",
+      "ratio_to": "rap1",
+      "min": 1.95,
+      "max": 2.15,
+      "within_ms": 3000
+    },
+    {
+      "action": "unlearn",
+      "actor": "t",
+      "spell": 707833
+    },
+    {
+      "action": "snapshot",
+      "label": "Strength without Flexible Thinking",
+      "actor": "t",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "str0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Agility without Flexible Thinking",
+      "actor": "t",
+      "metric": "stat",
+      "stat": 1,
+      "save_as": "agi0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Stamina without Flexible Thinking",
+      "actor": "t",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "sta0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Intellect without Flexible Thinking",
+      "actor": "t",
+      "metric": "stat",
+      "stat": 3,
+      "save_as": "int0"
+    },
+    {
+      "action": "snapshot",
+      "label": "Spirit without Flexible Thinking",
+      "actor": "t",
+      "metric": "stat",
+      "stat": 4,
+      "save_as": "spi0"
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 705825
+    },
+    {
+      "action": "assert",
+      "label": "Flexible Thinking raises Agility",
+      "actor": "t",
+      "metric": "stat",
+      "stat": 1,
+      "relative_to": "agi0",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Flexible Thinking raises Intellect",
+      "actor": "t",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "int0",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "It leaves Strength alone",
+      "actor": "t",
+      "metric": "stat",
+      "stat": 0,
+      "relative_to": "str0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "It leaves Stamina alone",
+      "actor": "t",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "sta0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "It leaves Spirit alone",
+      "actor": "t",
+      "metric": "stat",
+      "stat": 4,
+      "relative_to": "spi0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1's Intellect percentage is 4",
+      "actor": "t",
+      "metric": "aura_amount",
+      "spell": 705825,
+      "effect": 0,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1's Agility percentage is 4",
+      "actor": "t",
+      "metric": "aura_amount",
+      "spell": 705825,
+      "effect": 1,
+      "equals": 4
+    },
+    {
+      "action": "unlearn",
+      "actor": "t",
+      "spell": 705825
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning rank 1 restores Intellect",
+      "actor": "t",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "int0",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 705826
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2's Intellect percentage is 6",
+      "actor": "t",
+      "metric": "aura_amount",
+      "spell": 705826,
+      "effect": 0,
+      "equals": 6,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2's Agility percentage is 6",
+      "actor": "t",
+      "metric": "aura_amount",
+      "spell": 705826,
+      "effect": 1,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises Intellect as well",
+      "actor": "t",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "int0",
+      "min": 1
+    }
+  ]
+}

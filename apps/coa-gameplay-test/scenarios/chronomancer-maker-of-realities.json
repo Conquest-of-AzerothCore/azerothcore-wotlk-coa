@@ -1,0 +1,205 @@
+{
+  "schema": 1,
+  "name": "Maker of Realities speeds the caster's healing after Hasten (#3151)",
+  "contract": "With Maker of Realities, casting Hasten reduces healing cast times by 20% for 12 seconds.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "maker", "race": 1, "class": 22, "level": 80 },
+    { "id": "ally", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "maker", "spell": 801304 },
+    { "action": "learn", "actor": "ally", "spell": 801304 },
+    {
+      "action": "unlearn", "label": "Select a fixed Reverse Wound rank regardless of automatic progression",
+      "actor": "maker", "spell": 801303, "all_specs": true
+    },
+    { "action": "unlearn", "actor": "maker", "spell": 801270, "all_specs": true },
+    { "action": "learn", "actor": "maker", "spell": 501806 },
+    { "action": "learn", "actor": "maker", "spell": 801270 },
+    { "action": "learn", "actor": "maker", "spell": 707656 },
+    {
+      "action": "assert", "label": "Learning the passive applies its actual proc aura",
+      "actor": "maker", "metric": "aura", "spell": 707656, "equals": 1
+    },
+    {
+      "action": "snapshot", "actor": "maker", "metric": "spell_cast_time_ms",
+      "spell": 501806, "save_as": "reverse_base"
+    },
+    {
+      "action": "snapshot", "actor": "maker", "metric": "spell_cast_time_ms",
+      "spell": 801303, "save_as": "reverse_rank_one_base"
+    },
+    {
+      "action": "snapshot", "actor": "maker", "metric": "spell_cast_time_ms",
+      "spell": 801270, "save_as": "epoch_base"
+    },
+    {
+      "action": "snapshot", "actor": "maker", "metric": "spell_cast_time_ms",
+      "spell": 804418, "save_as": "unmake_base"
+    },
+    { "action": "cast", "actor": "maker", "spell": 501806, "target": "ally" },
+    {
+      "action": "assert", "label": "Baseline Reverse Wound really starts a 2.5-second cast",
+      "actor": "maker", "metric": "cast_remaining_ms", "spell": 501806, "min": 2250, "max": 2500
+    },
+    { "action": "wait", "ms": 2700 },
+    {
+      "action": "assert", "actor": "maker", "metric": "spell_heal_count",
+      "spell": 501806, "target": "ally", "equals": 1
+    },
+    { "action": "cast", "actor": "maker", "spell": 801270, "target": "ally" },
+    { "action": "wait", "ms": 2200 },
+    {
+      "action": "assert", "actor": "maker", "metric": "spell_heal_count",
+      "spell": 801270, "target": "ally", "equals": 1
+    },
+    {
+      "action": "set_aura", "label": "Clear the baseline Epoch's Sands of Time cast-time modifier",
+      "actor": "maker", "spell": 804488, "stacks": 0
+    },
+    {
+      "action": "assert", "label": "An unrelated completed heal does not activate Maker",
+      "actor": "maker", "metric": "aura", "spell": 712454, "equals": 0
+    },
+    { "action": "cast", "actor": "ally", "spell": 801304, "target": "maker" },
+    {
+      "action": "assert", "actor": "maker", "metric": "aura", "spell": 801304,
+      "caster": "ally", "equals": 1, "within_ms": 1000
+    },
+    { "action": "wait", "ms": 200 },
+    {
+      "action": "assert", "label": "Receiving Hasten does not activate the recipient's Maker talent",
+      "actor": "maker", "metric": "aura", "spell": 712454, "equals": 0
+    },
+    {
+      "action": "assert", "label": "A caster without Maker also gets no personal healing buff",
+      "actor": "ally", "metric": "aura", "spell": 712454, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Received Hasten supplies only its ordinary haste",
+      "actor": "maker", "metric": "spell_cast_time_ms", "spell": 501806,
+      "ratio_to": "reverse_base", "min": 0.832, "max": 0.834
+    },
+    { "action": "set_aura", "actor": "maker", "spell": 801304, "stacks": 0 },
+    {
+      "action": "assert", "actor": "maker", "metric": "spell_cast_time_ms",
+      "spell": 501806, "ratio_to": "reverse_base", "equals": 1
+    },
+    { "action": "cast", "actor": "maker", "spell": 801304, "target": "ally" },
+    {
+      "action": "assert", "label": "The normal Hasten cast reaches its ally",
+      "actor": "ally", "metric": "aura", "spell": 801304, "caster": "maker",
+      "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Casting Hasten grants Maker to its caster",
+      "actor": "maker", "metric": "aura", "spell": 712454, "caster": "maker",
+      "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "actor": "maker", "metric": "spell_cast_count",
+      "spell": 712454, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The Hasten recipient does not inherit Maker",
+      "actor": "ally", "metric": "aura", "spell": 712454, "equals": 0
+    },
+    { "action": "assert", "actor": "maker", "metric": "aura", "spell": 801304, "equals": 0 },
+    {
+      "action": "assert", "actor": "maker", "metric": "spell_cast_time_ms", "spell": 501806,
+      "ratio_to": "reverse_base", "equals": 0.8
+    },
+    {
+      "action": "assert", "label": "The same healing mask covers the first Reverse Wound rank",
+      "actor": "maker", "metric": "spell_cast_time_ms", "spell": 801303,
+      "ratio_to": "reverse_rank_one_base", "equals": 0.8
+    },
+    {
+      "action": "assert", "actor": "maker", "metric": "spell_cast_time_ms", "spell": 801270,
+      "ratio_to": "epoch_base", "equals": 0.8
+    },
+    {
+      "action": "assert", "label": "Maker does not shorten the damage spell Unmake",
+      "actor": "maker", "metric": "spell_cast_time_ms", "spell": 804418,
+      "ratio_to": "unmake_base", "equals": 1
+    },
+    { "action": "cast", "actor": "maker", "spell": 501806, "target": "ally" },
+    {
+      "action": "assert", "label": "The actual healing cast now starts at two seconds",
+      "actor": "maker", "metric": "cast_remaining_ms", "spell": 501806, "min": 1750, "max": 2000
+    },
+    { "action": "wait", "ms": 2200 },
+    {
+      "action": "assert", "actor": "maker", "metric": "spell_heal_count",
+      "spell": 501806, "target": "ally", "equals": 2
+    },
+    { "action": "cast", "actor": "maker", "spell": 801270, "target": "ally" },
+    {
+      "action": "assert", "label": "Epoch's actual cast is shortened too",
+      "actor": "maker", "metric": "cast_remaining_ms", "spell": 801270, "min": 1350, "max": 1600
+    },
+    { "action": "wait", "ms": 1800 },
+    {
+      "action": "assert", "actor": "maker", "metric": "spell_heal_count",
+      "spell": 801270, "target": "ally", "equals": 2
+    },
+    { "action": "assert", "actor": "maker", "metric": "aura", "spell": 712454, "equals": 1 },
+    { "action": "set_aura", "actor": "maker", "spell": 712454, "stacks": 0 },
+    {
+      "action": "assert", "label": "Removing the earned buff restores healing cast time",
+      "actor": "maker", "metric": "spell_cast_time_ms", "spell": 501806,
+      "ratio_to": "reverse_base", "equals": 1
+    },
+    { "action": "cast", "label": "Hasten is still on cooldown", "actor": "maker", "spell": 801304 },
+    { "action": "wait", "ms": 200 },
+    {
+      "action": "assert", "label": "A rejected Hasten cast must not grant Maker",
+      "actor": "maker", "metric": "aura", "spell": 712454, "equals": 0
+    },
+    { "action": "assert", "actor": "maker", "metric": "spell_cast_count", "spell": 712454, "equals": 1 },
+    { "action": "reset_cooldown", "actor": "maker", "spell": 801304 },
+    { "action": "cast", "actor": "maker", "spell": 801304 },
+    {
+      "action": "assert", "actor": "maker", "metric": "aura", "spell": 801304,
+      "caster": "maker", "equals": 1, "within_ms": 1000
+    },
+    { "action": "assert", "actor": "maker", "metric": "spell_cast_count", "spell": 712454, "equals": 2 },
+    {
+      "action": "assert", "label": "Self-cast Hasten combines ordinary haste and the healing modifier",
+      "actor": "maker", "metric": "spell_cast_time_ms", "spell": 501806,
+      "ratio_to": "reverse_base", "min": 0.666, "max": 0.667
+    },
+    {
+      "action": "assert", "label": "Damage spells still receive only Hasten's ordinary haste",
+      "actor": "maker", "metric": "spell_cast_time_ms", "spell": 804418,
+      "ratio_to": "unmake_base", "min": 0.832, "max": 0.834
+    },
+    { "action": "wait", "label": "Let the twelve-second buffs expire naturally", "ms": 13000 },
+    { "action": "assert", "actor": "maker", "metric": "aura", "spell": 712454, "equals": 0 },
+    { "action": "assert", "actor": "maker", "metric": "aura", "spell": 801304, "equals": 0 },
+    {
+      "action": "assert", "label": "Expiry restores the baseline healing cast time",
+      "actor": "maker", "metric": "spell_cast_time_ms", "spell": 501806,
+      "ratio_to": "reverse_base", "equals": 1
+    },
+    { "action": "unlearn", "actor": "maker", "spell": 707656 },
+    { "action": "assert", "actor": "maker", "metric": "aura", "spell": 707656, "equals": 0 },
+    { "action": "reset_cooldown", "actor": "maker", "spell": 801304 },
+    { "action": "cast", "actor": "maker", "spell": 801304 },
+    {
+      "action": "assert", "actor": "maker", "metric": "aura", "spell": 801304,
+      "equals": 1, "within_ms": 1000
+    },
+    { "action": "wait", "ms": 200 },
+    {
+      "action": "assert", "label": "Unlearning Maker stops subsequent Hasten casts granting its buff",
+      "actor": "maker", "metric": "aura", "spell": 712454, "equals": 0
+    },
+    { "action": "assert", "actor": "maker", "metric": "spell_cast_count", "spell": 712454, "equals": 2 },
+    {
+      "action": "assert", "actor": "maker", "metric": "spell_cast_time_ms", "spell": 501806,
+      "ratio_to": "reverse_base", "min": 0.832, "max": 0.834
+    }
+  ]
+}

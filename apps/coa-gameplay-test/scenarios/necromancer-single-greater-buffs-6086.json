@@ -1,0 +1,1558 @@
+{
+  "schema": 1,
+  "name": "Necromancer: strongest ordinary/Greater buffs and exclusive Chill (#6086)",
+  "contract": [
+    "Foul Mandate 800199/573295-573298 and Greater 680286 grant stamina; level-58 rank5 and Greater grant",
+    "54.",
+    "Grim Mandate 572787-572789 and Greater 572790 grant flat spell power; rank 3 grants49 and Greater",
+    "62.",
+    "Chill of the Tomb 572173-572176 and Greater 572177 grant Frost resistance; rank 4 and Greater grant",
+    "60.",
+    "Razorice 500967/501960-501968 and Greater 572214 grant Frost damage shields; level-58 rank 7 and",
+    "Greater grant 21.",
+    "Native trainer 900023 offers roots at levels 12/38/26/8, Greater at 60/58/60/58, and the tested",
+    "ordinary ranks at 58/52/50/58.",
+    "Foul, Grim and Razorice pairs have matching additive effects but no spell-group relationship on",
+    "frozen main c391c878db4a.",
+    "Chill uses aura143, MOD_RESISTANCE_EXCLUSIVE: its native handler already keeps the highest",
+    "resistance amount. It is a control and receives no new group.",
+    "The strongest-buff contract is independently established by the shipped same-effect data and",
+    "existing",
+    "native Ranger Adaptation and Bloodmage Sanguinary Offering behavior. Each additive buff pair must",
+    "retain one strongest",
+    "buff per target, across casters, while buffs of different effects remain independent. A weaker cast",
+    "must",
+    "not downgrade a Greater buff. These are normally obtainable level-60 class spells initialized",
+    "directly;",
+    "Mana is refilled to 1000 for each cast to isolate stacking from resource exhaustion; native level-60",
+    "Necromancer base mana 1373 makes the highest tested cost Greater Foul 69% (947). All tested",
+    "applications are normal casts to grouped players. Stamina, spell power, Frost resistance and",
+    "live aura amounts/presence are measured. This does not establish an exclusion between Foul and Grim",
+    "Mandates, nor client icon rendering or bot rotation behavior."
+  ],
+  "timeout_ms": 240000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "first",
+      "race": 1,
+      "class": 23,
+      "level": 60
+    },
+    {
+      "id": "second",
+      "race": 1,
+      "class": 23,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "first",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "first",
+      "target": "second"
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000,
+      "label": "Caster has enough native mana capacity for the controlled buff casts"
+    },
+    {
+      "action": "learn",
+      "actor": "first",
+      "spell": 800199
+    },
+    {
+      "action": "learn",
+      "actor": "first",
+      "spell": 573298
+    },
+    {
+      "action": "learn",
+      "actor": "first",
+      "spell": 680286
+    },
+    {
+      "action": "learn",
+      "actor": "first",
+      "spell": 572787
+    },
+    {
+      "action": "learn",
+      "actor": "first",
+      "spell": 572789
+    },
+    {
+      "action": "learn",
+      "actor": "first",
+      "spell": 572790
+    },
+    {
+      "action": "learn",
+      "actor": "first",
+      "spell": 572173
+    },
+    {
+      "action": "learn",
+      "actor": "first",
+      "spell": 572176
+    },
+    {
+      "action": "learn",
+      "actor": "first",
+      "spell": 572177
+    },
+    {
+      "action": "learn",
+      "actor": "first",
+      "spell": 500967
+    },
+    {
+      "action": "learn",
+      "actor": "first",
+      "spell": 501965
+    },
+    {
+      "action": "learn",
+      "actor": "first",
+      "spell": 572214
+    },
+    {
+      "action": "assert",
+      "actor": "second",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000,
+      "label": "Caster has enough native mana capacity for the controlled buff casts"
+    },
+    {
+      "action": "learn",
+      "actor": "second",
+      "spell": 800199
+    },
+    {
+      "action": "learn",
+      "actor": "second",
+      "spell": 573298
+    },
+    {
+      "action": "learn",
+      "actor": "second",
+      "spell": 680286
+    },
+    {
+      "action": "learn",
+      "actor": "second",
+      "spell": 572787
+    },
+    {
+      "action": "learn",
+      "actor": "second",
+      "spell": 572789
+    },
+    {
+      "action": "learn",
+      "actor": "second",
+      "spell": 572790
+    },
+    {
+      "action": "learn",
+      "actor": "second",
+      "spell": 572173
+    },
+    {
+      "action": "learn",
+      "actor": "second",
+      "spell": 572176
+    },
+    {
+      "action": "learn",
+      "actor": "second",
+      "spell": 572177
+    },
+    {
+      "action": "learn",
+      "actor": "second",
+      "spell": 500967
+    },
+    {
+      "action": "learn",
+      "actor": "second",
+      "spell": 501965
+    },
+    {
+      "action": "learn",
+      "actor": "second",
+      "spell": 572214
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "foul_before"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_active",
+      "spell": 573298,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 573298,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "foul: ordinary trained rank is active",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 573298,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "first"
+    },
+    {
+      "action": "assert",
+      "label": "foul: ordinary rank supplies its authored effect",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "foul_before",
+      "equals": 54
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "second",
+      "metric": "spell_active",
+      "spell": 680286,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "second",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "second",
+      "spell": 680286
+    },
+    {
+      "action": "assert",
+      "label": "foul: Greater version reaches the grouped ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 680286,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "second"
+    },
+    {
+      "action": "assert",
+      "label": "foul: Greater version removes the competing single-target rank",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 573298,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "foul: one Greater effect remains, with no duplicated stats",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "foul_before",
+      "equals": 54
+    },
+    {
+      "action": "assert",
+      "label": "foul: Greater retains its authored aura amount",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 680286,
+      "effect": 0,
+      "equals": 54
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_active",
+      "spell": 800199,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 800199,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "foul: a weaker ordinary rank cannot replace the Greater version",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 800199,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "foul: weaker cast preserves the Greater version",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 680286,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "second"
+    },
+    {
+      "action": "assert",
+      "label": "foul: weaker cast does not change the effect total",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "foul_before",
+      "equals": 54
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_active",
+      "spell": 573298,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 573298,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "foul: an equal-strength ordinary rank replaces Greater",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 573298,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "first"
+    },
+    {
+      "action": "assert",
+      "label": "foul: reverse equal-strength replacement removes Greater",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 680286,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "foul: reverse replacement preserves one effect",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "foul_before",
+      "equals": 54
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "second",
+      "metric": "spell_active",
+      "spell": 573298,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "second",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "second",
+      "spell": 573298,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "foul: an equal rank from another caster replaces the old caster",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 573298,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "second"
+    },
+    {
+      "action": "assert",
+      "label": "foul: the first caster cannot retain a second identical buff",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 573298,
+      "equals": 0,
+      "within_ms": 3000,
+      "caster": "first"
+    },
+    {
+      "action": "assert",
+      "label": "foul: different casters cannot double the ordinary effect",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "foul_before",
+      "equals": 54
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 573298,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 680286,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "foul: ordinary version can be removed",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 573298,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "foul: Greater version can be removed",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 680286,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "foul: removing both forms restores the measured baseline",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "foul_before",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_active",
+      "spell": 800199,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 800199,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "foul: low rank still works on an unbuffed ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 800199,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "first"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "second",
+      "metric": "spell_active",
+      "spell": 680286,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "second",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "second",
+      "spell": 680286
+    },
+    {
+      "action": "assert",
+      "label": "foul: Greater replaces an existing lower rank",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 680286,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "second"
+    },
+    {
+      "action": "assert",
+      "label": "foul: lower rank is removed after upgrade",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 800199,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "foul: upgrade leaves exactly the Greater effect",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "foul_before",
+      "equals": 54
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "spell_power",
+      "school": 5,
+      "save_as": "grim_before"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_active",
+      "spell": 572789,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 572789,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "grim: ordinary trained rank is active",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572789,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "first"
+    },
+    {
+      "action": "assert",
+      "label": "grim: ordinary rank supplies its authored effect",
+      "actor": "ally",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "grim_before",
+      "equals": 49
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "second",
+      "metric": "spell_active",
+      "spell": 572790,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "second",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "second",
+      "spell": 572790
+    },
+    {
+      "action": "assert",
+      "label": "grim: Greater version reaches the grouped ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572790,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "second"
+    },
+    {
+      "action": "assert",
+      "label": "grim: Greater version removes the competing single-target rank",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572789,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "grim: one Greater effect remains, with no duplicated stats",
+      "actor": "ally",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "grim_before",
+      "equals": 62
+    },
+    {
+      "action": "assert",
+      "label": "grim: Greater retains its authored aura amount",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 572790,
+      "effect": 0,
+      "equals": 62
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_active",
+      "spell": 572787,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 572787,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "grim: a weaker ordinary rank cannot replace the Greater version",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572787,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "grim: weaker cast preserves the Greater version",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572790,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "second"
+    },
+    {
+      "action": "assert",
+      "label": "grim: weaker cast does not change the effect total",
+      "actor": "ally",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "grim_before",
+      "equals": 62
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_active",
+      "spell": 572789,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 572789,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "grim: rank 3 is weaker than Greater and is refused",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572789,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "grim: Greater survives a lower max-level-60 rank",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572790,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 572789,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 572790,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "grim: ordinary version can be removed",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572789,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "grim: Greater version can be removed",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572790,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "grim: removing both forms restores the measured baseline",
+      "actor": "ally",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "grim_before",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_active",
+      "spell": 572787,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 572787,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "grim: low rank still works on an unbuffed ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572787,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "first"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "second",
+      "metric": "spell_active",
+      "spell": 572790,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "second",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "second",
+      "spell": 572790
+    },
+    {
+      "action": "assert",
+      "label": "grim: Greater replaces an existing lower rank",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572790,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "second"
+    },
+    {
+      "action": "assert",
+      "label": "grim: lower rank is removed after upgrade",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572787,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "grim: upgrade leaves exactly the Greater effect",
+      "actor": "ally",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "grim_before",
+      "equals": 62
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "resistance",
+      "school": 4,
+      "save_as": "chill_before"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_active",
+      "spell": 572176,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 572176,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: ordinary Chill of the Tomb is active",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572176,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "first"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: ordinary Chill grants 60 Frost resistance",
+      "actor": "ally",
+      "metric": "resistance",
+      "school": 4,
+      "relative_to": "chill_before",
+      "equals": 60
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "second",
+      "metric": "spell_active",
+      "spell": 572177,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "second",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "second",
+      "spell": 572177
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Greater Chill reaches the grouped ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572177,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "second"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the exclusive-resistance handler keeps 60 instead of adding another 60",
+      "actor": "ally",
+      "metric": "resistance",
+      "school": 4,
+      "relative_to": "chill_before",
+      "equals": 60
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_active",
+      "spell": 572173,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 572173,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Greater Chill remains after a lower rank is cast",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572177,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "second"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a lower Chill rank cannot reduce or increase the highest resistance",
+      "actor": "ally",
+      "metric": "resistance",
+      "school": 4,
+      "relative_to": "chill_before",
+      "equals": 60
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 572173,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 572176,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 572177,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: removing all Chill forms restores baseline resistance",
+      "actor": "ally",
+      "metric": "resistance",
+      "school": 4,
+      "relative_to": "chill_before",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_active",
+      "spell": 572173,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 572173,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: ordinary Chill rank1 still works without a stronger effect",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572173,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "first"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "second",
+      "metric": "spell_active",
+      "spell": 572177,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "second",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "second",
+      "spell": 572177
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Greater Chill supplies the highest resistance again",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572177,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "second"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: upgrading Chill keeps the exclusive amount, without a new stacking group",
+      "actor": "ally",
+      "metric": "resistance",
+      "school": 4,
+      "relative_to": "chill_before",
+      "equals": 60
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_active",
+      "spell": 501965,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 501965,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "razorice: ordinary trained rank is active",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 501965,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "first"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "second",
+      "metric": "spell_active",
+      "spell": 572214,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "second",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "second",
+      "spell": 572214
+    },
+    {
+      "action": "assert",
+      "label": "razorice: Greater version reaches the grouped ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572214,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "second"
+    },
+    {
+      "action": "assert",
+      "label": "razorice: Greater version removes the competing single-target rank",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 501965,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "razorice: Greater retains its authored aura amount",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 572214,
+      "effect": 0,
+      "equals": 21
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_active",
+      "spell": 500967,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 500967,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "razorice: a weaker ordinary rank cannot replace the Greater version",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 500967,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "razorice: weaker cast preserves the Greater version",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572214,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "second"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_active",
+      "spell": 501965,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 501965,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "razorice: an equal-strength ordinary rank replaces Greater",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 501965,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "first"
+    },
+    {
+      "action": "assert",
+      "label": "razorice: reverse equal-strength replacement removes Greater",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572214,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "second",
+      "metric": "spell_active",
+      "spell": 501965,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "second",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "second",
+      "spell": 501965,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "razorice: an equal rank from another caster replaces the old caster",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 501965,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "second"
+    },
+    {
+      "action": "assert",
+      "label": "razorice: the first caster cannot retain a second identical buff",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 501965,
+      "equals": 0,
+      "within_ms": 3000,
+      "caster": "first"
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 501965,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 572214,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "razorice: ordinary version can be removed",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 501965,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "razorice: Greater version can be removed",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572214,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "spell_active",
+      "spell": 500967,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "first",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "first",
+      "spell": 500967,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "razorice: low rank still works on an unbuffed ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 500967,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "first"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "second",
+      "metric": "spell_active",
+      "spell": 572214,
+      "equals": 1,
+      "label": "The tested buff rank is a normally active spell"
+    },
+    {
+      "action": "set_power",
+      "actor": "second",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "second",
+      "spell": 572214
+    },
+    {
+      "action": "assert",
+      "label": "razorice: Greater replaces an existing lower rank",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572214,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "second"
+    },
+    {
+      "action": "assert",
+      "label": "razorice: lower rank is removed after upgrade",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 500967,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "foul: independent Greater buffs can coexist",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 680286,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "second"
+    },
+    {
+      "action": "assert",
+      "label": "foul: another buff pair does not remove or duplicate this effect",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "foul_before",
+      "equals": 54
+    },
+    {
+      "action": "assert",
+      "label": "grim: independent Greater buffs can coexist",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572790,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "second"
+    },
+    {
+      "action": "assert",
+      "label": "grim: another buff pair does not remove or duplicate this effect",
+      "actor": "ally",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "grim_before",
+      "equals": 62
+    },
+    {
+      "action": "assert",
+      "label": "chill: independent Greater buffs can coexist",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572177,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "second"
+    },
+    {
+      "action": "assert",
+      "label": "chill: another buff pair does not remove or duplicate this effect",
+      "actor": "ally",
+      "metric": "resistance",
+      "school": 4,
+      "relative_to": "chill_before",
+      "equals": 60
+    },
+    {
+      "action": "assert",
+      "label": "razorice: independent Greater buffs can coexist",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572214,
+      "equals": 1,
+      "within_ms": 3000,
+      "caster": "second"
+    }
+  ]
+}

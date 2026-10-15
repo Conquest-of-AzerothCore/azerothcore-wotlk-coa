@@ -1,0 +1,205 @@
+{
+  "schema": 1,
+  "name": "Teachings of Elune raises Hand of Elune, Moonflow and Silverstream healing by 10% / 20% (#2388)",
+  "contract": "Teachings of Elune rank 1 704759 and rank 2 707554 (SpellFamilyName 32) read \"Increases the healing of Hand of Elune, Moonflow, and Silverstream by $s1%\". Effect 0 of each is SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue 0 = SPELLMOD_DAMAGE, EffectBasePoints 9 and 19 with DieSides 1 (10 and 20), and EffectSpellClassMask {0x20020000, 0x40000, 0}, which selects Moonflow (family flag 0x20000 word0; ranks 575030..575038), Silverstream (0x20000000 word0; 575039, 575048..575052) and Hand of Elune (0x40000 word1; 801990). The two ranks are separate passives, and the fixtures learn one each. Unit::SpellHealingBonusDone applies ApplySpellMod(SPELLMOD_DAMAGE, heal) at the end; for the DAMAGE op Player::ApplySpellMod multiplies by 1 + value/100. spell_healing_done uses a fixed base of 1000 with no bonus healing, so the talented reading is 1100 (rank 1) and 1200 (rank 2) and the control reads 1000; the windows 1.09..1.11 and 1.19..1.21 cover float truncation. The module's Silverstream Lunar Eclipse doubling only applies while that Eclipse is active and is multiplicative, so it is neutral here. The mask also matches Quell 560952 and Starshatter Placer 707724, which are not heals. All fixtures are the same race, class and level and share one healing target.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "rank1",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "rank2",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "patient",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 801990
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 575030
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 575039
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 801990
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 575030
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 575039
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 801990
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 575030
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 575039
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 704759
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 707554
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 self-applies",
+      "actor": "rank1",
+      "metric": "aura",
+      "spell": 704759,
+      "caster": "rank1",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 self-applies",
+      "actor": "rank2",
+      "metric": "aura",
+      "spell": 707554,
+      "caster": "rank2",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Hand of Elune healing without the talent",
+      "actor": "control",
+      "metric": "spell_healing_done",
+      "spell": 801990,
+      "target": "patient",
+      "save_as": "base_801990"
+    },
+    {
+      "action": "assert",
+      "label": "Hand of Elune heals 10% more at rank 1",
+      "actor": "rank1",
+      "metric": "spell_healing_done",
+      "spell": 801990,
+      "target": "patient",
+      "ratio_to": "base_801990",
+      "min": 1.09,
+      "max": 1.11
+    },
+    {
+      "action": "assert",
+      "label": "Hand of Elune heals 20% more at rank 2",
+      "actor": "rank2",
+      "metric": "spell_healing_done",
+      "spell": 801990,
+      "target": "patient",
+      "ratio_to": "base_801990",
+      "min": 1.19,
+      "max": 1.21
+    },
+    {
+      "action": "snapshot",
+      "label": "Moonflow rank 1 healing without the talent",
+      "actor": "control",
+      "metric": "spell_healing_done",
+      "spell": 575030,
+      "target": "patient",
+      "save_as": "base_575030"
+    },
+    {
+      "action": "assert",
+      "label": "Moonflow rank 1 heals 10% more at rank 1",
+      "actor": "rank1",
+      "metric": "spell_healing_done",
+      "spell": 575030,
+      "target": "patient",
+      "ratio_to": "base_575030",
+      "min": 1.09,
+      "max": 1.11
+    },
+    {
+      "action": "assert",
+      "label": "Moonflow rank 1 heals 20% more at rank 2",
+      "actor": "rank2",
+      "metric": "spell_healing_done",
+      "spell": 575030,
+      "target": "patient",
+      "ratio_to": "base_575030",
+      "min": 1.19,
+      "max": 1.21
+    },
+    {
+      "action": "snapshot",
+      "label": "Silverstream rank 1 healing without the talent",
+      "actor": "control",
+      "metric": "spell_healing_done",
+      "spell": 575039,
+      "target": "patient",
+      "save_as": "base_575039"
+    },
+    {
+      "action": "assert",
+      "label": "Silverstream rank 1 heals 10% more at rank 1",
+      "actor": "rank1",
+      "metric": "spell_healing_done",
+      "spell": 575039,
+      "target": "patient",
+      "ratio_to": "base_575039",
+      "min": 1.09,
+      "max": 1.11
+    },
+    {
+      "action": "assert",
+      "label": "Silverstream rank 1 heals 20% more at rank 2",
+      "actor": "rank2",
+      "metric": "spell_healing_done",
+      "spell": 575039,
+      "target": "patient",
+      "ratio_to": "base_575039",
+      "min": 1.19,
+      "max": 1.21
+    }
+  ]
+}

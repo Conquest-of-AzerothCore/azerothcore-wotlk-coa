@@ -1,0 +1,304 @@
+{
+  "schema": 1,
+  "name": "Eater of Souls triggers at three souls without refreshing while active",
+  "contract": "Eater of Souls 805181 promises a ten-second physical damage reduction and a one-percent maximum-health heal every two seconds when the Reaper reaches three Reaped Souls. It cannot retrigger while its child aura 805182 is active. A grant at the three-soul resource cap is not a generation.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "attacker",
+      "race": 10,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the world settle",
+      "ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline physical damage taken",
+      "actor": "reaper",
+      "metric": "melee_damage_taken",
+      "target": "attacker",
+      "save_as": "physical_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline Frost damage taken",
+      "actor": "reaper",
+      "metric": "spell_damage_taken",
+      "spell": 116,
+      "target": "attacker",
+      "save_as": "frost_before"
+    },
+    {
+      "action": "assert",
+      "label": "Deathwind healing multiplier is unchanged before learning Eater",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 502994,
+      "op": 27,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 805181
+    },
+    {
+      "action": "assert",
+      "label": "Eater of Souls talent is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 805181,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Eater doubles Deathwind's native healing multiplier",
+      "actor": "reaper",
+      "metric": "spell_modifier",
+      "spell": 502994,
+      "op": 27,
+      "base": 1000,
+      "equals": 2000
+    },
+    {
+      "action": "grant_resource",
+      "actor": "reaper",
+      "spell": 500363,
+      "amount": 1
+    },
+    {
+      "action": "assert",
+      "label": "One soul is below the Eater threshold",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 805182,
+      "equals": 0
+    },
+    {
+      "action": "grant_resource",
+      "actor": "reaper",
+      "spell": 500363,
+      "amount": 1
+    },
+    {
+      "action": "assert",
+      "label": "Two souls are below the Eater threshold",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 805182,
+      "equals": 0
+    },
+    {
+      "action": "grant_resource",
+      "actor": "reaper",
+      "spell": 500363,
+      "amount": 1
+    },
+    {
+      "action": "assert",
+      "label": "Third soul activates Eater of Souls",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 805182,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Eater child carries ten percent physical reduction",
+      "actor": "reaper",
+      "metric": "aura_amount",
+      "spell": 805182,
+      "effect": 1,
+      "equals": -10
+    },
+    {
+      "action": "assert",
+      "label": "Eater reduces physical damage taken by ten percent",
+      "actor": "reaper",
+      "metric": "melee_damage_taken",
+      "target": "attacker",
+      "ratio_to": "physical_before",
+      "min": 0.89,
+      "max": 0.91
+    },
+    {
+      "action": "assert",
+      "label": "Eater does not reduce Frost damage taken",
+      "actor": "reaper",
+      "metric": "spell_damage_taken",
+      "spell": 116,
+      "target": "attacker",
+      "ratio_to": "frost_before",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "assert",
+      "label": "Eater heals every two seconds",
+      "actor": "reaper",
+      "metric": "aura_amplitude_ms",
+      "spell": 805182,
+      "effect": 0,
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Eater lasts ten seconds",
+      "actor": "reaper",
+      "metric": "aura_duration_ms",
+      "spell": 805182,
+      "min": 8000,
+      "max": 10000
+    },
+    {
+      "action": "set_health",
+      "actor": "reaper",
+      "maximum": 10000,
+      "value": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The child triggers its periodic heal",
+      "actor": "reaper",
+      "metric": "spell_heal_count",
+      "spell": 805183,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The first tick heals one percent of maximum health",
+      "actor": "reaper",
+      "metric": "spell_heal_total",
+      "spell": 805183,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "The threshold cast the child once",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 805182,
+      "equals": 1
+    },
+    {
+      "action": "grant_resource",
+      "actor": "reaper",
+      "spell": 500363,
+      "amount": 1
+    },
+    {
+      "action": "grant_resource",
+      "actor": "reaper",
+      "spell": 500363,
+      "amount": -1
+    },
+    {
+      "action": "grant_resource",
+      "actor": "reaper",
+      "spell": 500363,
+      "amount": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let an active threshold regain settle",
+      "ms": 250
+    },
+    {
+      "action": "assert",
+      "label": "Eater does not retrigger while the child is active",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 805182,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Wait past the original ten-second child duration",
+      "ms": 8500
+    },
+    {
+      "action": "assert",
+      "label": "Eater heals five times during its ten-second duration",
+      "actor": "reaper",
+      "metric": "spell_heal_count",
+      "spell": 805183,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "Five ticks each heal one percent of maximum health",
+      "actor": "reaper",
+      "metric": "spell_heal_total",
+      "spell": 805183,
+      "equals": 500
+    },
+    {
+      "action": "assert",
+      "label": "Eater child expired instead of being refreshed",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 805182,
+      "equals": 0
+    },
+    {
+      "action": "grant_resource",
+      "actor": "reaper",
+      "spell": 500363,
+      "amount": 1
+    },
+    {
+      "action": "assert",
+      "label": "A capped grant after expiry cannot trigger Eater",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 805182,
+      "equals": 0
+    },
+    {
+      "action": "grant_resource",
+      "actor": "reaper",
+      "spell": 500363,
+      "amount": -1
+    },
+    {
+      "action": "grant_resource",
+      "actor": "reaper",
+      "spell": 500363,
+      "amount": 1
+    },
+    {
+      "action": "assert",
+      "label": "A new rise to three after expiry triggers Eater again",
+      "actor": "reaper",
+      "metric": "spell_cast_count",
+      "spell": 805182,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The new Eater child is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 805182,
+      "equals": 1
+    }
+  ]
+}

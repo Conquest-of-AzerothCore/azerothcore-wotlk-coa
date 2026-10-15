@@ -1,0 +1,242 @@
+{
+  "schema": 1,
+  "name": "Darkfallen Lament scales actual leech ticks with bonus healing",
+  "contract": [
+    "Darkfallen Lament 680828 gives each 630874 leech tick a coefficient of one bonus healing, every 500",
+    "ms for eight seconds.",
+    "Normally cast QA aura 51041 adds 2000 bonus healing for magic schools and no spell damage.",
+    "It isolates the parent Shadow bonus-healing source from the physically classified child.",
+    "The native effect value must increase by exactly 2000, followed by 16 actual damage and",
+    "leech-healing events.",
+    "Net health gain after paying the native channel cost must equal the recorded effective leech",
+    "healing.",
+    "This does not reconstruct the reporters gear or promise the same damage against different dungeon",
+    "defenses.",
+    "Six nearby enemies reproduce the reported group size; each must take all sixteen ticks, with",
+    "ninety-six leech heals.",
+    "Flat coefficient modifiers use percentage points: +20 changes the 2000 bonus-healing term to",
+    "2400 and -20 changes it to 1600. Removing the temporary modifier must restore the 2000 term."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "mage",
+      "race": 1,
+      "class": 20,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 0,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "mage",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "enemy2",
+      "owner": "mage",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3.4,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "enemy3",
+      "owner": "mage",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3.6,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "enemy4",
+      "owner": "mage",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3.8,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "enemy5",
+      "owner": "mage",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 4.0,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "enemy6",
+      "owner": "mage",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 4.2,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "learn", "actor": "mage", "spell": 680828},
+    {"action": "learn", "actor": "mage", "spell": 51041},
+    {"action": "set_health", "actor": "mage", "maximum": 1000000, "value": 10000},
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "spell_effect_value",
+      "spell": 630874,
+      "effect": 0,
+      "save_as": "base_leech"
+    },
+    {"action": "snapshot", "actor": "mage", "metric": "spell_power", "school": 5, "save_as": "damage_power"},
+    {"action": "cast", "actor": "mage", "spell": 51041},
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "aura_amount",
+      "spell": 51041,
+      "effect": 0,
+      "equals": 2000,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "damage_power",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "spell_effect_value",
+      "spell": 630874,
+      "effect": 0,
+      "relative_to": "base_leech",
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "spell_effect_value",
+      "spell": 630874,
+      "effect": 0,
+      "flat_coefficient_modifier": 20,
+      "relative_to": "base_leech",
+      "equals": 2400
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "spell_effect_value",
+      "spell": 630874,
+      "effect": 0,
+      "flat_coefficient_modifier": -20,
+      "relative_to": "base_leech",
+      "equals": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "spell_effect_value",
+      "spell": 630874,
+      "effect": 0,
+      "relative_to": "base_leech",
+      "equals": 2000
+    },
+    {"action": "wait", "ms": 1600},
+    {"action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "before_channel"},
+    {"action": "cast", "actor": "mage", "spell": 680828},
+    {"action": "assert", "actor": "mage", "metric": "cast_failure", "spell": 680828, "equals": 0},
+    {"action": "assert", "actor": "mage", "metric": "aura", "spell": 680828, "equals": 1, "within_ms": 1000},
+    {"action": "snapshot", "actor": "mage", "metric": "health", "save_as": "health_after_channel_cost"},
+    {"action": "wait", "ms": 8500},
+    {"action": "assert", "actor": "mage", "metric": "spell_cast_count", "spell": 630874, "equals": 96},
+    {"action": "assert", "actor": "enemy", "metric": "health", "relative_to": "before_channel", "max": -30000},
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "spell_damage_count",
+      "spell": 630874,
+      "target": "enemy",
+      "equals": 16
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "spell_damage_count",
+      "spell": 630874,
+      "target": "enemy2",
+      "equals": 16
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "spell_damage_count",
+      "spell": 630874,
+      "target": "enemy3",
+      "equals": 16
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "spell_damage_count",
+      "spell": 630874,
+      "target": "enemy4",
+      "equals": 16
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "spell_damage_count",
+      "spell": 630874,
+      "target": "enemy5",
+      "equals": 16
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "spell_damage_count",
+      "spell": 630874,
+      "target": "enemy6",
+      "equals": 16
+    },
+    {
+      "action": "assert", "actor": "mage", "metric": "spell_heal_count",
+      "spell": 630874, "target": "mage", "equals": 96
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "spell_effective_heal_total",
+      "spell": 630874,
+      "target": "mage",
+      "save_as": "leech_healing"
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "health",
+      "relative_to": "health_after_channel_cost",
+      "ratio_to": "leech_healing",
+      "equals": 1
+    }
+  ]
+}

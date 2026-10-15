@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Will of Elune makes Aspect of the Stars strike 2 additional enemies (#884)",
+  "contract": "Will of Elune 680788 (Spell.dbc, SpellFamilyName 32 (Starcaller). Effect 0 SPELL_AURA_ADD_FLAT_MODIFIER (107), EffectMiscValue 17 = SPELLMOD_JUMP_TARGETS (SpellDefines.h), EffectBasePoints 1 with DieSides 1 resolves to 2, EffectSpellClassMask word1 0x8000000. Aspect of the Stars 800507 has SpellFamilyFlags word1 0x8000000 and Effect 0 SPELL_EFFECT_SCHOOL_DAMAGE with EffectChainTarget 1 and EffectDamageMultiplier 1.0, so the description 'Damage dealt by Aspect of the Stars now strikes $s1 additional nearby enemies' means 1 + 2 = 3 targets. Native path: Spell::SelectImplicitChainTargets applies ApplySpellMod(SPELLMOD_JUMP_TARGETS) to the chain count, and the spell_modifier metric calls Player::ApplySpellMod for the spell with a base of 1 (its EffectChainTarget). The scenario proves the modifier, not a live chain: training dummies are neutral and an in-world chain would need three hostile creatures. The 680788 aura tooltip also mentions healing and a Blanket of Stars cooldown that this record does not deliver; that stale text is out of scope. Both fixtures are the same race, class and level with no ratings or gear, so only the learned passive can move the difference. Nothing in AscensionStarcallerContracts.cpp touches this spell id, and the scenario is a regression guard: it is expected to pass on the shipped data.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 680788
+    },
+    {
+      "action": "assert",
+      "label": "Effect 0 resolves to 2 additional targets (EffectBasePoints 1 + 1)",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 680788,
+      "effect": 0,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Without the passive Aspect of the Stars keeps its 1 chain target",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 800507,
+      "op": 17,
+      "base": 1,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "With Will of Elune the chain count is 3",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 800507,
+      "op": 17,
+      "base": 1,
+      "equals": 3
+    }
+  ]
+}

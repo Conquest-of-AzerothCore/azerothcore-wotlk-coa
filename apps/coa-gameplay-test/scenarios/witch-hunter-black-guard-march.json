@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "name": "Black Guard adds 25% to March of the Black King (#1160)",
+  "contract": "Black Guard 680523 effect 1 is SPELL_AURA_ADD_PCT_MODIFIER op 22 (SPELLMOD_DOT) base 24 (+1 = 25%) on class mask word2 0x4, the flags of every March of the Black King rank in the client Spell.dbc (2026-09-17), and its text reads '... increases the damage dealt by March of the Black King by $s2%'. March's damage is the amount of a SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE effect (aura 227, trigger 681094 cast with BASE_POINT0 = the aura amount), which the core never runs through SpellDamageBonusDone(DOT), the only consumer of SPELLMOD_DOT. So the amount must grow by the authored 25% once the module routes it through the mod: 25% of the amount the same rank has without the talent, tolerance 1.24..1.26 for integer truncation of the amount. The Guard Strike half of the tooltip (rage cost) is native and not part of this scenario.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wh",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 681217
+    },
+    {
+      "action": "assert",
+      "label": "Black Guard is not known yet",
+      "actor": "wh",
+      "metric": "knows_spell",
+      "spell": 680523,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "March of the Black King without Black Guard",
+      "actor": "wh",
+      "spell": 681217
+    },
+    {
+      "action": "assert",
+      "label": "March is running",
+      "actor": "wh",
+      "metric": "aura",
+      "spell": 681217,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Tick damage of the base March (aura effect 0 amount)",
+      "actor": "wh",
+      "metric": "aura_amount",
+      "spell": 681217,
+      "effect": 0,
+      "save_as": "base_tick"
+    },
+    {
+      "action": "assert",
+      "label": "The base tick is a real damage amount",
+      "actor": "wh",
+      "metric": "aura_amount",
+      "spell": 681217,
+      "effect": 0,
+      "min": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "End the first March",
+      "actor": "wh",
+      "spell": 681217,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "label": "Reset the March cooldown",
+      "actor": "wh",
+      "spell": 681217
+    },
+    {
+      "action": "learn",
+      "label": "Learn Black Guard",
+      "actor": "wh",
+      "spell": 680523
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 2500
+    },
+    {
+      "action": "cast",
+      "label": "March of the Black King with Black Guard",
+      "actor": "wh",
+      "spell": 681217
+    },
+    {
+      "action": "assert",
+      "label": "March is running again",
+      "actor": "wh",
+      "metric": "aura",
+      "spell": 681217,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Black Guard adds 25% to March's damage (aura effect 1 of 680523, op DOT, +24+1 = 25%)",
+      "actor": "wh",
+      "metric": "aura_amount",
+      "spell": 681217,
+      "effect": 0,
+      "ratio_to": "base_tick",
+      "min": 1.24,
+      "max": 1.26
+    }
+  ]
+}

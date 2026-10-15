@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Xorothian Strength raises Strength by 10% at rank 2 (#1057)",
+  "contract": "Xorothian Strength has two ranks, 300382 (+5%) and 570100 (+10%); rank 2 reads 'Increases your Strength by $s1%' (installed moa_description: '10%'). Its sole effect is native aura 137 (SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE), MiscValue 0 (STAT_STRENGTH), EffectBasePoints 9 with DieSides 1 -> resolved 10, verified via csv.DictReader against /home/fab/CoaServer/reference/snapshots/ascension-data/tables/spell.csv.gz. Handler AuraEffect::HandleModTotalPercentStat (SpellAuraEffects.cpp:202,4510) is the same native generic stat-percent aura already proven for Demonfire Plating's Stamina effect -- an exact 1:1 match with the tooltip, no script required. No script anywhere references 300382 or 570100 (repo-wide grep). Obtainability (advancement.tsv: KnightOfXoroth 'Class' 'Ability' node, no acquire gate beyond spending advancement points) was already confirmed by the classification-phase investigation; this scenario proves only the native mechanic delivers the tooltip contract.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "knight", "metric": "stat", "stat": 0, "save_as": "str_before" },
+    { "action": "learn", "actor": "knight", "spell": 570100 },
+    { "action": "set_aura", "actor": "knight", "spell": 570100, "stacks": 1, "label": "Force rank 2 of the Xorothian Strength passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: rank 2 of Xorothian Strength is active",
+      "actor": "knight", "metric": "aura", "spell": 570100, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Strength rises by ~10%",
+      "actor": "knight", "metric": "stat", "stat": 0, "ratio_to": "str_before", "min": 1.09, "max": 1.11
+    },
+    {
+      "action": "assert", "label": "CONTRACT: the stat-percent effect resolves to exactly 10",
+      "actor": "knight", "metric": "aura_amount", "spell": 570100, "effect": 0, "equals": 10
+    }
+  ]
+}

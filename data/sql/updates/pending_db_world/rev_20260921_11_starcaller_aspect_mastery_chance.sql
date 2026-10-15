@@ -1,0 +1,12 @@
+-- Aspect Mastery 704389 / 572416 E2 is SPELL_AURA_ADD_FLAT_MODIFIER (107) on SPELLMOD_CHANCE_OF_SUCCESS (18),
+-- EffectBasePoints 4 / 9 (+5 / +10), EffectSpellClassMask word2 0x800, the SpellFamilyFlags word2 bit shared by the
+-- Aspect records (801123 carries [0x4000, 0, 0x800]; 801128 carries [8, 0, 0x40800]).
+-- The Aspects proc through aura_ascension_starcaller_event -> Aspect(), whose script rolls Chance(player, id) on the
+-- record's own ProcChance, and Chance() now applies SPELLMOD_CHANCE_OF_SUCCESS. rev_20260919_20 cleared
+-- spell_proc.Chance for these ids, so Aura::CalcProcChance rolled the DBC ProcChance a second time, natively, in front
+-- of the script's roll (P x P instead of P). Chance 100 leaves the script roll as the only roll.
+-- Ids: 801128 Aspect of the Warden, 805356 Aspect of the Huntress, 801123 Aspect of the Cosmos and the three
+-- Aspect of the Stars records 800510, 803887, 803888 (the ids Aspect() iterates).
+-- The row keeps the ProcFlags, masks and hit mask rev_20260909_06 wrote; only Chance changes, and the UPDATE is
+-- idempotent. This file sorts after rev_20260919_20, so its value is the one that stays.
+UPDATE `spell_proc` SET `Chance` = 100 WHERE `SpellId` IN (800510, 801123, 801128, 803887, 803888, 805356);

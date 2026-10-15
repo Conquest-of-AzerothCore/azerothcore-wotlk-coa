@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "name": "Shieldgore talent turns Infernal Strike into Shieldgore (#4930)",
+  "contract": "Shieldgore 301302 (Defiance, CharacterAdvancement tab 47 = ChrSpecs 17) reads 'Transforms your Infernal Strike into Shieldgore' (804353). Player::SetTemporarySpellReplacement refuses a replacement the player does not know, and nothing taught 804353, so Infernal Strike never changed and Shieldgore never reached the spellbook. AscensionCompatData::TalentReplacements now carries the row, so SynchronizeTalentReplacements teaches the Shieldgore rank for the character's level (804353 at 0, 806869 at 18, 806870 at 26, 806871 at 34, 806872 at 42, 806873 at 50, 806874 at 58, the ranks' spellLevel) and registers it over the active Infernal Strike rank. The same row shape covers Impcaller 706755, which turns Call: Hellfire Imp 804883 into Impcaller 707666. spell_ranks chains the Shieldgore ranks to 804353 so the Knight of Xoroth scripts that test the Shieldgore family, such as Impcaller's summon, also fire for rank 2.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 11
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "knight",
+      "entry": 36,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 5000 },
+    { "action": "specialization", "label": "Choose Defiance", "actor": "knight", "id": 17 },
+    { "action": "learn", "actor": "knight", "spell": 801016 },
+    { "action": "learn", "label": "Pick the Shieldgore talent", "actor": "knight", "spell": 301302 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "SETUP: the Shieldgore talent is active", "actor": "knight", "metric": "aura", "spell": 301302, "equals": 1 },
+    { "action": "assert", "label": "CONTRACT: Shieldgore Rank 1 is in the spellbook", "actor": "knight", "metric": "knows_spell", "spell": 804353, "equals": 1 },
+    { "action": "assert", "label": "CONTRACT: Infernal Strike shows as Shieldgore Rank 1", "actor": "knight", "metric": "temporary_spell_replacement", "spell": 801016, "equals": 804353 },
+
+    { "action": "set_level", "actor": "knight", "value": 19 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "CONTRACT: level 19 teaches Shieldgore Rank 2", "actor": "knight", "metric": "knows_spell", "spell": 806869, "equals": 1 },
+    { "action": "assert", "label": "CONTRACT: Infernal Strike shows as Shieldgore Rank 2", "actor": "knight", "metric": "temporary_spell_replacement", "spell": 801016, "equals": 806869 },
+
+    { "action": "learn", "actor": "knight", "spell": 804883 },
+    { "action": "learn", "label": "Pick the Impcaller talent", "actor": "knight", "spell": 706755 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "CONTRACT: Call: Hellfire Imp shows as Impcaller", "actor": "knight", "metric": "temporary_spell_replacement", "spell": 804883, "equals": 707666 },
+
+    { "action": "add_item", "actor": "knight", "item": 629951 },
+    { "action": "equip", "label": "One-hander so a shield fits", "actor": "knight", "item": 629951, "slot": 15 },
+    { "action": "add_item", "actor": "knight", "item": 2362 },
+    { "action": "equip", "label": "Shieldgore requires a shield", "actor": "knight", "item": 2362, "slot": 16 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000 },
+    { "action": "cast", "label": "Shieldgore Rank 2 with Impcaller", "actor": "knight", "spell": 806869, "target": "enemy" },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "SETUP: Shieldgore Rank 2 cast completed", "actor": "knight", "metric": "spell_cast_count", "spell": 806869, "equals": 1 },
+    { "action": "assert", "label": "CONTRACT: Shieldgore Rank 2 summons a Hellfire Imp", "actor": "knight", "metric": "owned_creature_count", "entry": 50301, "equals": 1, "within_ms": 1500 }
+  ]
+}

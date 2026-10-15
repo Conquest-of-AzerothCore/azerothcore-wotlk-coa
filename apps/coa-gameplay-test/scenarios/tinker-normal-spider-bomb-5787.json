@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "name": "Tinker normal Spider Bomb damages a distant target (#5787)",
+  "contract": [
+    "Original Build: Spider Bomb sends its device to the selected target and detonates. Drive the ordinary",
+    "500535 cast and its native twenty-yard pursuit, then require actual explosion dispatch, target damage",
+    "and device removal. Original Spider Bomb Explosion 801982 uses the magic hit table. Owner hit ratings",
+    "do not give the summoned device spell accuracy; a dispatched explosion can legitimately miss.",
+    "After the actual device appears, snapshot its native spell hit modifier and supply original Krosh Hit",
+    "Buff 2132158 to that owned creature. Its sole effect adds 100 percentage points of spell hit. Require",
+    "that exact native increase before judging target damage. Keep the original explosion, cooldown, target",
+    "selection and movement handlers; the accuracy fixture does not provide movement or explosion effects."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 500535
+    },
+    {
+      "action": "client_packet",
+      "actor": "tinker",
+      "opcode": 317,
+      "fields": [
+        {
+          "actor_guid": "dummy"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "metric": "health",
+      "save_as": "before_build"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500535,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "owned_creature_spell_hit_chance",
+      "entry": 226012,
+      "save_as": "bomb_hit_before_fixture"
+    },
+    {
+      "action": "set_aura",
+      "actor": "tinker",
+      "owned_entry": 226012,
+      "spell": 2132158,
+      "stacks": 1,
+      "label": "Original native accuracy applies to the actual summoned bomb"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_spell_hit_chance",
+      "entry": 226012,
+      "relative_to": "bomb_hit_before_fixture",
+      "equals": 100,
+      "label": "Krosh Hit Buff adds exactly 100 percentage points to the bomb caster"
+    },
+    {
+      "action": "assert",
+      "label": "The actual bomb reaches native explosion dispatch before judging damage",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The bomb travels to the selected target and detonates",
+      "actor": "dummy",
+      "metric": "health",
+      "relative_to": "before_build",
+      "max": -1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

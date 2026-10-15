@@ -1,0 +1,178 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Alacrity raises all five primary stats (#1919)",
+  "contract": "Alacrity 504285 (4%) and 504893 (8%): \"Increases all primary stats by $s1%.\" Each has a single effect, aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE with MiscValue -1, handled by AuraEffect::HandleModTotalPercentStat (SpellAuraEffects.cpp:202), whose body accepts -1 as \"all stats\" (range check GetMiscValue() < -1, per-stat test GetMiscValue() == i || GetMiscValue() == -1). The point the record buys is that all five stats move, not one, so all five are asserted. The bounds allow for the integer truncation of a percentage applied to a small base stat. Player::UpdateStat stores SetStat(stat, int32(GetTotalStatValue(stat))), so both readings are truncations of a float base Bf and the observed ratio is floor(Bf*r)/int32(Bf), not r. Run 20260920T150504687197984Z recorded the level-80 bases as strength 87, agility 82, stamina 106, intellect 141, spirit 164 and the rank-1 ratios as 1.0345, 1.0366, 1.0377, 1.0355 and 1.0427, which pins each Bf tightly enough that rank 2 can only land between 1.069 (strength: floor(87*1.08) = 93, 93/87) and about 1.086. A lower bound of 1.07 is therefore unreachable on strength, so rank 2 uses 1.06, which still excludes rank 1 (at most 1.043) and no aura at all (1.0); 1.09 still excludes a doubled application (1.08 squared is 1.1664). No source or SQL change is involved.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "strength"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "stat",
+      "stat": 1,
+      "save_as": "agility"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "stamina"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "stat",
+      "stat": 3,
+      "save_as": "intellect"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "stat",
+      "stat": 4,
+      "save_as": "spirit"
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 504285
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 504285,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises strength by 4%",
+      "actor": "b",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "strength",
+      "min": 1.03,
+      "max": 1.05
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises agility by 4%",
+      "actor": "b",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "agility",
+      "min": 1.03,
+      "max": 1.05
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises stamina by 4%",
+      "actor": "b",
+      "metric": "stat",
+      "stat": 2,
+      "ratio_to": "stamina",
+      "min": 1.03,
+      "max": 1.05
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises intellect by 4%",
+      "actor": "b",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "intellect",
+      "min": 1.03,
+      "max": 1.05
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises spirit by 4%",
+      "actor": "b",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "spirit",
+      "min": 1.03,
+      "max": 1.05
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 504285
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 504893
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises strength by 8%",
+      "actor": "b",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "strength",
+      "min": 1.06,
+      "max": 1.09
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises agility by 8%",
+      "actor": "b",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "agility",
+      "min": 1.06,
+      "max": 1.09
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises stamina by 8%",
+      "actor": "b",
+      "metric": "stat",
+      "stat": 2,
+      "ratio_to": "stamina",
+      "min": 1.06,
+      "max": 1.09
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises intellect by 8%",
+      "actor": "b",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "intellect",
+      "min": 1.06,
+      "max": 1.09
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises spirit by 8%",
+      "actor": "b",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "spirit",
+      "min": 1.06,
+      "max": 1.09
+    }
+  ]
+}

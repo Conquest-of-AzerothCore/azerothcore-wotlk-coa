@@ -1,0 +1,220 @@
+{
+  "schema": 1,
+  "name": "Spirit Realm in rank-one Deathwind radius (#493)",
+  "contract": "At level 16, Spirit Realm adds 10% healing taken and 10 parry inside Deathwind rank one.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 5,
+      "class": 30,
+      "level": 16
+    },
+    {
+      "id": "talented",
+      "race": 5,
+      "class": 30,
+      "level": 16
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "talented",
+      "entry": 36,
+      "level": 16,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "control",
+      "spell": 705404
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 705404
+    },
+    {
+      "action": "learn",
+      "actor": "talented",
+      "spell": 800174
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 705404,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 705404,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 582526,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "parry_chance",
+      "save_as": "talented_parry_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "parry_chance",
+      "save_as": "control_parry_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "talented",
+      "metric": "spell_healing_taken",
+      "spell": 2050,
+      "target": "talented",
+      "save_as": "talented_heal_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_healing_taken",
+      "spell": 2050,
+      "target": "control",
+      "save_as": "control_heal_base"
+    },
+    {
+      "action": "cast",
+      "actor": "talented",
+      "spell": 800174,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "cast_failure",
+      "spell": 800174,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 800174,
+      "caster": "talented",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 582526,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "aura_amount",
+      "spell": 582526,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "aura_amount",
+      "spell": 582526,
+      "effect": 1,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "parry_chance",
+      "relative_to": "talented_parry_base",
+      "min": 9.99,
+      "max": 10.01
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "spell_healing_taken",
+      "spell": 2050,
+      "target": "talented",
+      "relative_to": "talented_heal_base",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 582526,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "parry_chance",
+      "relative_to": "control_parry_base",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_healing_taken",
+      "spell": 2050,
+      "target": "control",
+      "relative_to": "control_heal_base",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 13500
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "aura",
+      "spell": 582526,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "parry_chance",
+      "relative_to": "talented_parry_base",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "talented",
+      "metric": "spell_healing_taken",
+      "spell": 2050,
+      "target": "talented",
+      "relative_to": "talented_heal_base",
+      "equals": 0
+    }
+  ]
+}

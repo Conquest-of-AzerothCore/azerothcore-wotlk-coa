@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Book of Ascension: a rank below one the character holds is not sold, and the rank sold is announced",
+  "contract": "A ladder rank the character already holds above a row is not an upgrade: Player::addSpell only moves the spell into the active spec, announces nothing for it, and announces the rank it pulls into the active spec instead - so the window used to sell a rank and name a different one in chat. The window must treat that row as known, and the only cue a granted purchase produces must name the rank that was bought.",
+  "timeout_ms": 180000,
+  "players": [
+    { "id": "wh", "race": 1, "class": 15, "level": 60 }
+  ],
+  "steps": [
+    { "action": "money", "actor": "wh", "copper": 400000, "label": "fixture: a purse deep enough for a ladder" },
+    { "action": "learn", "actor": "wh", "spell": 680494, "label": "fixture: the tree granted Witchblight's first rank" },
+    { "action": "learn", "actor": "wh", "spell": 681218, "label": "fixture: the character holds a higher rank of the ladder" },
+    { "action": "learn", "actor": "wh", "spell": 97930, "label": "learn the book companion spell" },
+    { "action": "cast", "actor": "wh", "spell": 97930, "label": "summon the Book of Ascension" },
+    { "action": "assert", "actor": "wh", "metric": "owned_creature_count", "entry": 75115, "equals": 1, "within_ms": 5000, "label": "the book is out" },
+    { "action": "gossip_hello", "actor": "wh", "label": "open the book" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_list_packets", "equals": 1, "label": "one window was sent" },
+
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_state", "spell": 681540, "equals": 2, "label": "the rank under the one the character holds is not offered" },
+    { "action": "assert", "actor": "wh", "metric": "trainer_window_state", "spell": 681219, "equals": 0, "label": "the rank above the one it holds is offered" },
+
+    { "action": "trainer_buy", "actor": "wh", "spell": 681540, "label": "try to buy the closed rank" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_buy_failed", "spell": 681540, "equals": 1, "label": "the closed rank was refused" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_cues_in_last_buy", "equals": 0, "label": "and it announced nothing" },
+
+    { "action": "trainer_buy", "actor": "wh", "spell": 681219, "label": "buy the rank above the one held" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_buy_succeeded", "spell": 681219, "equals": 1, "label": "the upgrade was granted" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_cues_in_last_buy", "equals": 1, "label": "it produced one cue" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_last_buy_cued", "spell": 681219, "equals": 1, "label": "and the cue named the rank that was bought" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_last_buy_cued", "spell": 681218, "equals": 0, "label": "and no cue named another rank" },
+    { "action": "assert", "actor": "wh", "metric": "spellbook_last_buy_cued", "spell": 681540, "equals": 0, "label": "and none named a lower one" }
+  ]
+}

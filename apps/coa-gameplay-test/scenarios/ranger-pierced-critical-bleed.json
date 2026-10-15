@@ -1,0 +1,148 @@
+{
+  "schema": 1,
+  "name": "Ranger Pierced: a critical Skullpiercer bleeds the enemy for 15% plus 35% over 4 sec (#1041)",
+  "contract": "Pierced 705033 reads 'Critical strikes with Skullpiercer and Precision Shot cause the enemy to bleed for an additional 15% damage of the damage dealt, plus an additional 35% over $782754d.' ($782754d = DurationIndex 35 = 4 sec). 705033's only effect is aura 354 (BasePoints 14 = 15%) with TriggerSpell 782754; the core has no handler for aura 354, so nothing ever happened. 782754 'Pierced' is a Physical bleed (Mechanic 15) SPELL_AURA_PERIODIC_DAMAGE on the enemy with amplitude 2000 and SPELL_ATTR5_EXTRA_INITIAL_PERIOD, i.e. one tick on application and one at 2 and 4 sec, and it ignores caster and taken modifiers and cannot crit. Expected: without the talent a critical Skullpiercer applies no 782754; with it, a critical Skullpiercer applies 782754 owned by the Ranger, which ticks three times for 15% of the hit on application and 17.5% at each later tick, 50% of the hit in total (window 0.45-0.58: integer rounding, and room for the ~1.11 damage multiplier some fixtures carry, while excluding both no bleed and a doubled one). Instinctual Combatant 520572 (+100% critical chance on Skullpiercer, three charges) makes both Skullpiercers crit. Before the fix no 782754 ever appears.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 6000 },
+    { "action": "learn", "actor": "ranger", "spell": 264 },
+    { "action": "learn", "actor": "ranger", "spell": 802036 },
+    { "action": "add_item", "actor": "ranger", "item": 2504 },
+    { "action": "equip", "actor": "ranger", "item": 2504, "slot": 17 },
+    { "action": "wait", "label": "Let the equipment settle", "ms": 1500 },
+    { "action": "set_aura", "label": "Instinctual Combatant: Skullpiercer is guaranteed to crit", "actor": "ranger", "spell": 520572, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "SETUP: Skullpiercer is guaranteed to crit",
+      "actor": "ranger",
+      "metric": "spell_done_crit_chance",
+      "spell": 802036,
+      "target": "dummy",
+      "min": 100
+    },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_damage_count", "spell": 802036, "target": "dummy", "critical": true, "save_as": "control_crits_before" },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "set_aura", "label": "Skullpiercer needs Advantage", "actor": "ranger", "spell": 804329, "stacks": 1 },
+    { "action": "cast", "label": "Control critical Skullpiercer without Pierced", "actor": "ranger", "spell": 802036, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "SETUP: the control Skullpiercer crit",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 802036,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "control_crits_before",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let any bleed land", "ms": 1500 },
+    {
+      "action": "assert",
+      "label": "Control: without Pierced a critical Skullpiercer causes no bleed",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 782754,
+      "equals": 0
+    },
+    { "action": "learn", "actor": "ranger", "spell": 705033 },
+    {
+      "action": "assert",
+      "label": "SETUP: Pierced is active on the Ranger",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 705033,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_damage_count", "spell": 802036, "target": "dummy", "critical": true, "save_as": "crits_before" },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_damage_total", "spell": 802036, "target": "dummy", "critical": true, "save_as": "crit_damage_before" },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_damage_count", "spell": 782754, "target": "dummy", "save_as": "bleed_ticks_before" },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_damage_total", "spell": 782754, "target": "dummy", "save_as": "bleed_damage_before" },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "set_aura", "label": "Skullpiercer needs Advantage", "actor": "ranger", "spell": 804329, "stacks": 1 },
+    { "action": "cast", "label": "Critical Skullpiercer with Pierced", "actor": "ranger", "spell": 802036, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "SETUP: the Skullpiercer crit",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 802036,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "crits_before",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The critical strike makes the enemy bleed from Pierced",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 782754,
+      "caster": "ranger",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_damage_total", "spell": 802036, "target": "dummy", "critical": true, "relative_to": "crit_damage_before", "save_as": "crit_damage" },
+    {
+      "action": "assert",
+      "label": "The bleed runs out after 4 sec",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 782754,
+      "caster": "ranger",
+      "equals": 0,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The bleed ticks on application and at 2 and 4 sec",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 782754,
+      "target": "dummy",
+      "relative_to": "bleed_ticks_before",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "The bleed deals 15% plus 35% of the critical hit",
+      "actor": "ranger",
+      "metric": "spell_damage_total",
+      "spell": 782754,
+      "target": "dummy",
+      "relative_to": "bleed_damage_before",
+      "ratio_to": "crit_damage",
+      "min": 0.45,
+      "max": 0.58
+    }
+  ]
+}

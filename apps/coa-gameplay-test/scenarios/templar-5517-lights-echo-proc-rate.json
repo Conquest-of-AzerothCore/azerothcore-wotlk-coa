@@ -1,0 +1,601 @@
+{
+ "schema": 1,
+ "name": "Light's Echo triggers an extra Argent Blade cast at its authored 20% chance (#5517)",
+ "contract": "Light's Echo 520883's Description reads \"Argent Blade now has a $h% chance to strike an additional time\", rendered from its own DBC ProcChance = 20. Its native spell_proc row was deleted (rev_20260909_04_templar_completion.sql), but AscensionTemplarAbilities.cpp's OnSpellHitResult recasts Argent Blade directly via Chance(player, 520883), which reads SpellInfo::ProcChance from the DBC (unaffected by the spell_proc deletion). Over 25 real Argent Blade casts, spell_cast_count(807268) (triggered casts included, per the README) must exceed the 25 explicit casts, proving at least one Light's Echo recast fired.",
+ "timeout_ms": 180000,
+ "players": [
+  {
+   "id": "t",
+   "race": 1,
+   "class": 19,
+   "level": 80,
+   "melee_hit_rating": 10000,
+   "spell_hit_rating": 10000,
+   "expertise_rating": 10000,
+   "allow_regeneration": false
+  }
+ ],
+ "creatures": [
+  {
+   "id": "dummy",
+   "owner": "t",
+   "entry": 36,
+   "health": 100000000,
+   "distance": 3
+  }
+ ],
+ "steps": [
+  {
+   "action": "wait",
+   "label": "Let spawn AI and level scaling settle",
+   "ms": 5000
+  },
+  {
+   "action": "learn",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "learn",
+   "actor": "t",
+   "spell": 520883
+  },
+  {
+   "action": "add_item",
+   "actor": "t",
+   "item": 2495
+  },
+  {
+   "action": "equip",
+   "actor": "t",
+   "item": 2495,
+   "slot": 15
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "reset_cooldown",
+   "actor": "t",
+   "spell": 807268
+  },
+  {
+   "action": "set_power",
+   "actor": "t",
+   "power": 3,
+   "value": 100
+  },
+  {
+   "action": "cast",
+   "actor": "t",
+   "spell": 807268,
+   "target": "dummy"
+  },
+  {
+   "action": "wait",
+   "ms": 1100
+  },
+  {
+   "action": "wait",
+   "label": "Let the last hit results resolve",
+   "ms": 1000
+  },
+  {
+   "action": "assert",
+   "label": "SETUP: 25 explicit Argent Blade casts completed",
+   "actor": "t",
+   "metric": "spell_cast_count",
+   "spell": 807268,
+   "min": 25
+  },
+  {
+   "action": "assert",
+   "label": "DISCRIMINATING: Light's Echo triggered at least one extra Argent Blade cast beyond the explicit ones",
+   "actor": "t",
+   "metric": "spell_cast_count",
+   "spell": 807268,
+   "min": 26
+  }
+ ]
+}

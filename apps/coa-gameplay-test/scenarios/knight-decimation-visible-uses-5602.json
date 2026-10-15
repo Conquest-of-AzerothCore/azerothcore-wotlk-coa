@@ -1,0 +1,439 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth: Decimation displays five uses and consumes one per AoE cast (#5602)",
+  "contract": "Current Spell.dbc524913 independently specifies the next5 Skulltakers or Warbringers against creatures,1 against players. A manual Decimation cast must publish five remaining uses. Five normal two-creature Warbringer casts must crit both recipients, decrement once per cast and exhaust the aura. Resetting the six-second Warbringer cooldown between independent casts keeps all five inside Decimation's duration; it does not reset the proc or its counter. This scenario covers the PvE five-use path; the one-use PvP path is a separate contract. War is selected normally and Decimation is bought through entry7810; casts use current highest Warbringer802586.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "k",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "k",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "second",
+      "owner": "k",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "k",
+      "item": 629951
+    },
+    {
+      "action": "equip",
+      "actor": "k",
+      "item": 629951,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 573448,
+      "label": "Fixture: own the normal Flames rank that War transforms"
+    },
+    {
+      "action": "specialization",
+      "actor": "k",
+      "id": 18
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "knows_spell",
+      "spell": 802586,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "k",
+      "entry": 7810,
+      "rank": 1
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 524913
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura",
+      "spell": 524913,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 524913,
+      "equals": 5,
+      "label": "Decimation publishes the five PvE uses from its description"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 802586
+    },
+    {
+      "action": "set_aura",
+      "actor": "k",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 802586,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 802586,
+      "target": "enemy",
+      "critical": true,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 802586,
+      "target": "second",
+      "critical": true,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 524913,
+      "equals": 4,
+      "label": "A two-target AoE consumes one visible use per cast"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_script_value",
+      "spell": 524913,
+      "key": 524913,
+      "equals": 4
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 802586
+    },
+    {
+      "action": "set_aura",
+      "actor": "k",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 802586,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 802586,
+      "target": "enemy",
+      "critical": true,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 802586,
+      "target": "second",
+      "critical": true,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 524913,
+      "equals": 3,
+      "label": "A two-target AoE consumes one visible use per cast"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_script_value",
+      "spell": 524913,
+      "key": 524913,
+      "equals": 3
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 802586
+    },
+    {
+      "action": "set_aura",
+      "actor": "k",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 802586,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 802586,
+      "target": "enemy",
+      "critical": true,
+      "equals": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 802586,
+      "target": "second",
+      "critical": true,
+      "equals": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 524913,
+      "equals": 2,
+      "label": "A two-target AoE consumes one visible use per cast"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_script_value",
+      "spell": 524913,
+      "key": 524913,
+      "equals": 2
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 802586
+    },
+    {
+      "action": "set_aura",
+      "actor": "k",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 802586,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 802586,
+      "target": "enemy",
+      "critical": true,
+      "equals": 4,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 802586,
+      "target": "second",
+      "critical": true,
+      "equals": 4,
+      "within_ms": 2000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 524913,
+      "equals": 1,
+      "label": "A two-target AoE consumes one visible use per cast"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_script_value",
+      "spell": 524913,
+      "key": 524913,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 802586
+    },
+    {
+      "action": "set_aura",
+      "actor": "k",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 802586,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 802586,
+      "target": "enemy",
+      "critical": true,
+      "equals": 5,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 802586,
+      "target": "second",
+      "critical": true,
+      "equals": 5,
+      "within_ms": 2000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 524913,
+      "equals": 0,
+      "label": "A two-target AoE consumes one visible use per cast"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_script_value",
+      "spell": 524913,
+      "key": 524913,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura",
+      "spell": 524913,
+      "equals": 0
+    }
+  ]
+}

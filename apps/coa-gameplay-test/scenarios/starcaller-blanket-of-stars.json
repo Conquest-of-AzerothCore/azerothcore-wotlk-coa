@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "name": "Blanket of Stars doubles block chance and block value while a shield is equipped (#3379)",
+  "contract": "Blanket of Stars 804381 (SpellFamilyName 32, RecoveryTime 35000, DurationIndex 31 = 8 s) reads \"Cover your shield in a blanket of stars for $d, increasing your block chance and block value by $s1%. Requires Shields\". Effect 0 is SPELL_AURA_MOD_BLOCK_PERCENT (51) with EffectBasePoints 99 (DieSides 1) resolving to +100; Player::UpdateBlockPercentage adds GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_PERCENT) to the block percentage, and AuraEffect::HandleAuraModBlockPercent calls it on apply. Effect 1 is SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT (150), same 99 -> +100, which multiplies m_auraBasePctMod[SHIELD_BLOCK_VALUE] used by Player::GetShieldBlockValue, so block value doubles. EquippedItemClass 4 with EquippedItemSubClassMask 0x40 (shield) is the tooltip's \"Requires Shields\", checked by the native cast check, which is why the fixture equips Worn Wooden Shield 2362 (item_template class 4 subclass 6, required level 1) in slot 16 and the scenario casts the spell for real. Preconditions written into the fixture: Block 107 and Shield proficiency 9116 (both granted to class 26 by rev_20260903_01_live_class_baseline.sql) are learned explicitly so CanBlock is true. The same actor is measured before the cast and while the 8 s aura is up (asserts run within a second of the cast), so gear and level effects cancel: block chance must rise by 100 points (window 90..101 tolerates the optional Stats.Limits.Block cap of 95 from StatSystem.cpp, which is off unless configured), and block value must double (ratio window 1.95..2.05 covers float truncation). Block value from strength/2 - 10 + the shield's block stat is positive for a level-80 character, so the ratio base is non-zero. The cast is a self-buff, so there is no hit roll.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 107,
+      "label": "Block, needed for CanBlock"
+    },
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 9116,
+      "label": "Shield proficiency"
+    },
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 804381
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 2362
+    },
+    {
+      "action": "equip",
+      "label": "Equip a shield in the off hand",
+      "actor": "tank",
+      "item": 2362,
+      "slot": 16
+    },
+    {
+      "action": "wait",
+      "label": "Let the equipment update settle",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "label": "Block chance without the aura",
+      "actor": "tank",
+      "metric": "block_chance",
+      "save_as": "block_chance_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Block value without the aura",
+      "actor": "tank",
+      "metric": "block_value",
+      "save_as": "block_value_base"
+    },
+    {
+      "action": "assert",
+      "label": "The baseline block value is positive",
+      "actor": "tank",
+      "metric": "block_value",
+      "min": 1
+    },
+    {
+      "action": "cast",
+      "label": "Cast Blanket of Stars with the shield equipped",
+      "actor": "tank",
+      "spell": 804381
+    },
+    {
+      "action": "assert",
+      "label": "Blanket of Stars is up",
+      "actor": "tank",
+      "metric": "aura",
+      "spell": 804381,
+      "caster": "tank",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Block chance rises by 100 points",
+      "actor": "tank",
+      "metric": "block_chance",
+      "relative_to": "block_chance_base",
+      "min": 90,
+      "max": 101
+    },
+    {
+      "action": "assert",
+      "label": "Block value doubles",
+      "actor": "tank",
+      "metric": "block_value",
+      "ratio_to": "block_value_base",
+      "min": 1.95,
+      "max": 2.05
+    }
+  ]
+}

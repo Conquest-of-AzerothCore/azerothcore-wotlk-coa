@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Noctis Blade heals for the percent its tooltip reads from the passive (#4578)",
+  "contract": "Every Noctis Blade rank's tooltip reads 'healing you for ${$574336m1}% of the damage dealt'. In the client's Spell.dbc (2026-09-17) spell 574336 'Noctis Blade Heal Passive' effect 0 has BasePoints 99 and DieSides 1, so $m1 is 100: the heal equals the damage dealt. Heal spell 574337 is SPELL_DAMAGE_CLASS_NONE, which SpellHealingBonusDone and the crit calculation both leave untouched, so the caster's health gain is exactly the cast's dealt damage times the passive's percent. The scenario measures the enemy's health loss and the caster's health gain with the same 'health' metric and asserts gain / loss = 1.0; a hardcoded 50% (the pre-2026-09-17 value) reads 0.5.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "caster", "entry": 36, "level": 60, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "caster", "spell": 197 },
+    { "action": "learn", "actor": "caster", "spell": 802280 },
+    { "action": "add_item", "actor": "caster", "item": 12282 },
+    { "action": "equip", "actor": "caster", "item": 12282, "slot": 15 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "set_health", "label": "Wound the caster so the heal is not clipped", "actor": "caster", "value": 100 },
+    { "action": "snapshot", "actor": "caster", "metric": "health", "save_as": "caster_before" },
+    { "action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "enemy_before" },
+    { "action": "cast", "actor": "caster", "spell": 802280, "target": "enemy" },
+    {
+      "action": "assert", "label": "Noctis Blade damages the enemy",
+      "actor": "enemy", "metric": "health", "relative_to": "enemy_before", "max": -1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let the heal land", "ms": 1000 },
+    {
+      "action": "snapshot", "label": "Damage dealt, as a negative health change",
+      "actor": "enemy", "metric": "health", "relative_to": "enemy_before", "save_as": "damage_dealt"
+    },
+    {
+      "action": "assert", "label": "The caster heals for 100% of the damage dealt (passive 574336 effect 0)",
+      "actor": "caster", "metric": "health", "relative_to": "caster_before", "ratio_to": "damage_dealt",
+      "min": -1.01, "max": -0.99
+    }
+  ]
+}

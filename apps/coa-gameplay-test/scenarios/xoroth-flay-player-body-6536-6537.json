@@ -1,0 +1,203 @@
+{
+  "schema": 1,
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "name": "Xoroth Flay restores Rage and heals a dead PvP player once (#6536, #6537)",
+  "contract": "Original Flay801042 restores20 Rage and heals from a humanoid corpse once. PvP bodies remain usable after release.",
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 19,
+      "allow_regeneration": false
+    },
+    {
+      "id": "enemy",
+      "race": 2,
+      "class": 1,
+      "level": 19,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "pvp",
+      "actor": "knight",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "learn",
+      "actor": "knight",
+      "spell": 801042
+    },
+    {
+      "action": "die",
+      "actor": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "knight",
+      "value": 100
+    },
+    {
+      "action": "set_power",
+      "actor": "knight",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 801042,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 801042,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_energize_total",
+      "spell": 801042,
+      "equals": 200,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "health",
+      "min": 101,
+      "within_ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "knight",
+      "spell": 801042
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 801042,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 801042,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_energize_total",
+      "spell": 801042,
+      "equals": 200
+    },
+    {
+      "action": "release_spirit",
+      "actor": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "knight",
+      "spell": 801042
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 801042
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 801042,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_energize_total",
+      "spell": 801042,
+      "equals": 200
+    },
+    {
+      "action": "console",
+      "command": "revive Harnessb"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -8915.41,
+      "y": -115.853,
+      "z": 82.3711,
+      "o": 0
+    },
+    {
+      "action": "die",
+      "actor": "enemy"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "knight",
+      "spell": 801042
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 801042,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "cast_failure",
+      "spell": 801042,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spell_energize_total",
+      "spell": 801042,
+      "equals": 400
+    }
+  ]
+}

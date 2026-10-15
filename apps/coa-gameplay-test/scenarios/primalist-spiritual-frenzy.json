@@ -1,0 +1,1632 @@
+{
+  "schema": 1,
+  "name": "Primalist Spiritual Frenzy pet auto-attack target cap",
+  "contract": [
+    "First/highest Primal Shred applies a twenty-one-second pet window. Native pet auto-attacks damage their",
+    "original victim and exactly three of five other melee enemies; a farther enemy stays untouched.",
+    "Baseline, expiry and talent removal stop cleaving. After checking each native Primal Shred application,",
+    "wait for its bleed and buff to expire before seeding a separate cleave window; health deltas then",
+    "contain only pet attacks."
+  ],
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "spirit",
+      "owner": "primalist",
+      "entry": 1188,
+      "level": 19,
+      "health": 100000,
+      "distance": 5
+    },
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    },
+    {
+      "id": "extra1",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3.2
+    },
+    {
+      "id": "extra2",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3.4
+    },
+    {
+      "id": "extra3",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3.6
+    },
+    {
+      "id": "extra4",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 3.8
+    },
+    {
+      "id": "extra5",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 4.0
+    },
+    {
+      "id": "far",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 20
+    }
+  ],
+  "timeout_ms": 300000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 196
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 674
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 2490
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 2490,
+      "slot": 16
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 100000,
+      "value": 90000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 574301
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 574301,
+      "target": "spirit"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_entry",
+      "equals": 1188,
+      "within_ms": 24000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 61017,
+      "effect": 0,
+      "min": 100,
+      "within_ms": 4000,
+      "label": "Native pet hit scaling has settled"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_amount",
+      "spell": 61017,
+      "effect": 2,
+      "min": 100,
+      "within_ms": 4000,
+      "label": "Native pet expertise scaling has settled"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 707367,
+      "all_specs": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 707367
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504684,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504676,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504675,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504674,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504673,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504672,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504671,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504670,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504669,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502733,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502732,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502731,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502730,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502729,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502728,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502727,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502726,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502725,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500940,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500940
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 707369,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "pet": true,
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 500940
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500940,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 707369,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 21500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 707369,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "baseline_target_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "extra1",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra1",
+      "metric": "health",
+      "save_as": "baseline_extra1_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "extra2",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra2",
+      "metric": "health",
+      "save_as": "baseline_extra2_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "extra3",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra3",
+      "metric": "health",
+      "save_as": "baseline_extra3_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "extra4",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra4",
+      "metric": "health",
+      "save_as": "baseline_extra4_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "extra5",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra5",
+      "metric": "health",
+      "save_as": "baseline_extra5_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "far",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "far",
+      "metric": "health",
+      "save_as": "baseline_far_before"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 0
+    },
+    {
+      "action": "attack",
+      "actor": "primalist",
+      "pet": true,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "baseline_target_before",
+      "save_as": "baseline_target_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra1",
+      "metric": "health",
+      "relative_to": "baseline_extra1_before",
+      "save_as": "baseline_extra1_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra2",
+      "metric": "health",
+      "relative_to": "baseline_extra2_before",
+      "save_as": "baseline_extra2_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra3",
+      "metric": "health",
+      "relative_to": "baseline_extra3_before",
+      "save_as": "baseline_extra3_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra4",
+      "metric": "health",
+      "relative_to": "baseline_extra4_before",
+      "save_as": "baseline_extra4_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra5",
+      "metric": "health",
+      "relative_to": "baseline_extra5_before",
+      "save_as": "baseline_extra5_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "far",
+      "metric": "health",
+      "relative_to": "baseline_far_before",
+      "save_as": "baseline_far_delta"
+    },
+    {
+      "action": "wait",
+      "ms": 13500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 707369,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 707367
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504684,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504676,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504675,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504674,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504673,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504672,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504671,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504670,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504669,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502733,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502732,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502731,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502730,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502729,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502728,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502727,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502726,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502725,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500940,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500940
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 707369,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "pet": true,
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 500940
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500940,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 707369,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 21500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 707369,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 707369,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "first_target_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "extra1",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra1",
+      "metric": "health",
+      "save_as": "first_extra1_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "extra2",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra2",
+      "metric": "health",
+      "save_as": "first_extra2_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "extra3",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra3",
+      "metric": "health",
+      "save_as": "first_extra3_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "extra4",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra4",
+      "metric": "health",
+      "save_as": "first_extra4_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "extra5",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra5",
+      "metric": "health",
+      "save_as": "first_extra5_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "far",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "far",
+      "metric": "health",
+      "save_as": "first_far_before"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 0
+    },
+    {
+      "action": "attack",
+      "actor": "primalist",
+      "pet": true,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "first_target_before",
+      "save_as": "first_target_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra1",
+      "metric": "health",
+      "relative_to": "first_extra1_before",
+      "save_as": "first_extra1_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra2",
+      "metric": "health",
+      "relative_to": "first_extra2_before",
+      "save_as": "first_extra2_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra3",
+      "metric": "health",
+      "relative_to": "first_extra3_before",
+      "save_as": "first_extra3_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra4",
+      "metric": "health",
+      "relative_to": "first_extra4_before",
+      "save_as": "first_extra4_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra5",
+      "metric": "health",
+      "relative_to": "first_extra5_before",
+      "save_as": "first_extra5_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "far",
+      "metric": "health",
+      "relative_to": "first_far_before",
+      "save_as": "first_far_delta"
+    },
+    {
+      "action": "wait",
+      "ms": 13500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 707369,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 707367
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504684,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504676,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504675,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504674,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504673,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504672,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504671,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504670,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504669,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502733,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502732,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502731,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502730,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502729,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502728,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502727,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502726,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502725,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500940,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502733
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 707369,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "pet": true,
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 502733
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502733,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 707369,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 21500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 707369,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 707369,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "highest_target_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "extra1",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra1",
+      "metric": "health",
+      "save_as": "highest_extra1_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "extra2",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra2",
+      "metric": "health",
+      "save_as": "highest_extra2_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "extra3",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra3",
+      "metric": "health",
+      "save_as": "highest_extra3_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "extra4",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra4",
+      "metric": "health",
+      "save_as": "highest_extra4_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "extra5",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra5",
+      "metric": "health",
+      "save_as": "highest_extra5_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "far",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "far",
+      "metric": "health",
+      "save_as": "highest_far_before"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 0
+    },
+    {
+      "action": "attack",
+      "actor": "primalist",
+      "pet": true,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "highest_target_before",
+      "save_as": "highest_target_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra1",
+      "metric": "health",
+      "relative_to": "highest_extra1_before",
+      "save_as": "highest_extra1_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra2",
+      "metric": "health",
+      "relative_to": "highest_extra2_before",
+      "save_as": "highest_extra2_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra3",
+      "metric": "health",
+      "relative_to": "highest_extra3_before",
+      "save_as": "highest_extra3_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra4",
+      "metric": "health",
+      "relative_to": "highest_extra4_before",
+      "save_as": "highest_extra4_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra5",
+      "metric": "health",
+      "relative_to": "highest_extra5_before",
+      "save_as": "highest_extra5_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "far",
+      "metric": "health",
+      "relative_to": "highest_far_before",
+      "save_as": "highest_far_delta"
+    },
+    {
+      "action": "wait",
+      "ms": 13500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 707369,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 707367
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504684,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504676,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504675,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504674,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504673,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504672,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504671,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504670,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504669,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502733,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502732,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502731,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502730,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502729,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502728,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502727,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502726,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 502725,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 500940,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502733
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 707369,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "pet": true,
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 502733
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502733,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 700
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 707369,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 21500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 707369,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "removed_target_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "extra1",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra1",
+      "metric": "health",
+      "save_as": "removed_extra1_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "extra2",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra2",
+      "metric": "health",
+      "save_as": "removed_extra2_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "extra3",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra3",
+      "metric": "health",
+      "save_as": "removed_extra3_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "extra4",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra4",
+      "metric": "health",
+      "save_as": "removed_extra4_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "extra5",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra5",
+      "metric": "health",
+      "save_as": "removed_extra5_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "far",
+      "value": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "far",
+      "metric": "health",
+      "save_as": "removed_far_before"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 0
+    },
+    {
+      "action": "attack",
+      "actor": "primalist",
+      "pet": true,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 3618,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "removed_target_before",
+      "save_as": "removed_target_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra1",
+      "metric": "health",
+      "relative_to": "removed_extra1_before",
+      "save_as": "removed_extra1_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra2",
+      "metric": "health",
+      "relative_to": "removed_extra2_before",
+      "save_as": "removed_extra2_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra3",
+      "metric": "health",
+      "relative_to": "removed_extra3_before",
+      "save_as": "removed_extra3_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra4",
+      "metric": "health",
+      "relative_to": "removed_extra4_before",
+      "save_as": "removed_extra4_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "extra5",
+      "metric": "health",
+      "relative_to": "removed_extra5_before",
+      "save_as": "removed_extra5_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "far",
+      "metric": "health",
+      "relative_to": "removed_far_before",
+      "save_as": "removed_far_delta"
+    },
+    {
+      "action": "wait",
+      "ms": 13500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 707369,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 707367
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "pet": true,
+      "spell": 707369,
+      "stacks": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 707367,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "pet_aura_stacks",
+      "spell": 707369,
+      "equals": 0
+    }
+  ]
+}

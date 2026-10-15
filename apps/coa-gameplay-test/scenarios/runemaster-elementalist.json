@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Runemaster Elementalist raises Weapon Engraving damage by 10% (#1662)",
+  "contract": [
+    "Elementalist 300583 reads 'Increases the damage dealt by your Weapon Engravings by $s1%.' Its one effect is a",
+    "native percent SPELLMOD_DAMAGE modifier, BasePoints 9 with DieSides 1 = +10%, on family 38 mask0 0x8000000:",
+    "Fire Engraving 'Damage' 653212 (the Firebrand explosion), Water Engraving 'Damage' 653215 and 'Slow' 653230,",
+    "Earth Engraving 'Damage' 653220 and Air Engraving 'Damage' 653224. The passive needs no script. No",
+    "CharacterAdvancement entry grants 300583 (only SkillLineAbility 91170 with AcquireMethod 0 lists it), so it is",
+    "learned here as a fixture. The Earth Engraving proc damage Weapon Engraving: Earth 653272 carries mask0",
+    "0x20000 and is outside the modifier's data scope. Expected: the four engraving damage spells deal 10% more,",
+    "653272 is unchanged, and the bonus leaves with the passive."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80}
+  ],
+  "creatures": [
+    {"id": "golem", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_damage_done", "spell": 653212, "target": "golem",
+      "save_as": "fire_base"},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_damage_done", "spell": 653215, "target": "golem",
+      "save_as": "water_base"},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_damage_done", "spell": 653220, "target": "golem",
+      "save_as": "earth_base"},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_damage_done", "spell": 653272, "target": "golem",
+      "save_as": "earth_proc_base"},
+    {"action": "learn", "actor": "rm", "spell": 300583},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 300583, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "CONTRACT: the modifier is +10% damage", "actor": "rm",
+      "metric": "spell_modifier", "spell": 653212, "op": 0, "base": 1000, "min": 1099.99, "max": 1100.01},
+    {"action": "assert", "label": "CONTRACT: Fire Engraving damage rises by 10%", "actor": "rm",
+      "metric": "spell_damage_done", "spell": 653212, "target": "golem", "ratio_to": "fire_base",
+      "min": 1.095, "max": 1.105},
+    {"action": "assert", "label": "CONTRACT: Water Engraving damage rises by 10%", "actor": "rm",
+      "metric": "spell_damage_done", "spell": 653215, "target": "golem", "ratio_to": "water_base",
+      "min": 1.095, "max": 1.105},
+    {"action": "assert", "label": "CONTRACT: Earth Engraving damage rises by 10%", "actor": "rm",
+      "metric": "spell_damage_done", "spell": 653220, "target": "golem", "ratio_to": "earth_base",
+      "min": 1.095, "max": 1.105},
+    {"action": "assert", "label": "CONTRACT: the melee-class Air Engraving damage takes the same modifier",
+      "actor": "rm", "metric": "spell_modifier", "spell": 653224, "op": 0, "base": 1000, "min": 1099.99,
+      "max": 1100.01},
+    {"action": "assert", "label": "CONTRACT: the Earth Engraving proc is outside the modifier's mask", "actor": "rm",
+      "metric": "spell_damage_done", "spell": 653272, "target": "golem", "ratio_to": "earth_proc_base",
+      "min": 0.999, "max": 1.001},
+    {"action": "unlearn", "actor": "rm", "spell": 300583},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 300583, "equals": 0, "within_ms": 1000},
+    {"action": "assert", "label": "CONTRACT: the bonus leaves with the passive", "actor": "rm",
+      "metric": "spell_damage_done", "spell": 653212, "target": "golem", "ratio_to": "fire_base",
+      "min": 0.999, "max": 1.001}
+  ]
+}

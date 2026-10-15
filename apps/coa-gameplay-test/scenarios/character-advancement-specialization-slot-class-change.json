@@ -1,0 +1,178 @@
+{
+  "schema": 1,
+  "name": "Class changes invalidate old specialization presets while retaining purchased slot unlocks",
+  "contract": "The Class Change Potion (97858) changes Necromancer class 23 to Guardian class 18 through native item-use and gossip option 11. Presets belong to their original class and must not be restored after changing class. The Tome unlock spell is character-owned and remains available; using it after the change enters a fresh Guardian slot without the Necromancer's saved action bar.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "changer",
+      "race": 1,
+      "class": 23,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "actor": "changer",
+      "opcode": 618,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "changer"
+        }
+      ],
+      "label": "Initialize native advancement after the local player is ready"
+    },
+    {
+      "action": "learn",
+      "actor": "changer",
+      "spell": 979994
+    },
+    {
+      "action": "client_packet",
+      "actor": "changer",
+      "opcode": 296,
+      "early": true,
+      "fields": [
+        {
+          "u8": 143
+        },
+        {
+          "u32": 1073741825
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "cast",
+      "actor": "changer",
+      "spell": 979994
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "changer",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "actor": "changer",
+      "opcode": 296,
+      "early": true,
+      "fields": [
+        {
+          "u8": 143
+        },
+        {
+          "u32": 1073741826
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "cast",
+      "actor": "changer",
+      "spell": 979993
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "changer",
+      "metric": "action_button_packed",
+      "button": 143,
+      "equals": 1073741825
+    },
+    {
+      "action": "add_item",
+      "actor": "changer",
+      "item": 97858
+    },
+    {
+      "action": "use_item",
+      "actor": "changer",
+      "item": 97858,
+      "spell": 93216
+    },
+    {
+      "action": "gossip_select",
+      "actor": "changer",
+      "option": 11
+    },
+    {
+      "action": "assert",
+      "actor": "changer",
+      "metric": "player_class",
+      "equals": 18
+    },
+    {
+      "action": "assert",
+      "actor": "changer",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "changer",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.1",
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "changer",
+      "metric": "knows_spell",
+      "spell": 979994,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "changer",
+      "spell": 979994
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "changer",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "changer",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.1",
+      "index": 1,
+      "equals": 18
+    },
+    {
+      "action": "assert",
+      "actor": "changer",
+      "metric": "action_button_packed",
+      "button": 143,
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,324 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Windsurf intercepts the next attack and frees Shock while moving (#3717)",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "wind",
+      "race": 2,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "striker",
+      "race": 1,
+      "class": 16,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "wind",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "wind",
+      "spell": 804019,
+      "label": "Learn Summon: Air Elemental"
+    },
+    {
+      "action": "cast",
+      "label": "SETUP: summon the pet Windsurf force-casts through (5000 ms, SpellCastTimes 6)",
+      "actor": "wind",
+      "spell": 804019
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pet is the Air Elemental, entry 500941 (804019 EffectMiscValue[0])",
+      "actor": "wind",
+      "metric": "pet_entry",
+      "equals": 500941,
+      "within_ms": 20000
+    },
+    {
+      "action": "learn",
+      "actor": "wind",
+      "spell": 503326,
+      "label": "Learn Shock (1700 ms cast, SpellCastTimes 90)"
+    },
+    {
+      "action": "learn",
+      "actor": "wind",
+      "spell": 500042,
+      "label": "Learn Windsurf"
+    },
+    {
+      "action": "set_power",
+      "actor": "wind",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "set_moving",
+      "label": "BASELINE: start moving",
+      "actor": "wind",
+      "enabled": true
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the fixture is moving",
+      "actor": "wind",
+      "metric": "moving",
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "BASELINE: Shock while moving without Windsurf",
+      "actor": "wind",
+      "spell": 503326,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "label": "Let a cast that was allowed complete",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Shock InterruptFlags 15 include movement, so the moving cast deals nothing",
+      "actor": "wind",
+      "metric": "spell_damage_count",
+      "spell": 503326,
+      "target": "target",
+      "equals": 0
+    },
+    {
+      "action": "set_moving",
+      "label": "Stop moving",
+      "actor": "wind",
+      "enabled": false
+    },
+    {
+      "action": "set_power",
+      "actor": "wind",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "label": "DISCRIMINATING: cast Windsurf",
+      "actor": "wind",
+      "spell": 500042
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: SPELL_EFFECT_FORCE_CAST on TARGET_UNIT_PET put 537152 on the master",
+      "actor": "wind",
+      "metric": "aura",
+      "spell": 537152,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 537152 lasts 15000 ms (SpellDuration 8)",
+      "actor": "wind",
+      "metric": "aura_duration_ms",
+      "spell": 537152,
+      "min": 14000,
+      "max": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: one redirect charge (537152 ProcCharges 1)",
+      "actor": "wind",
+      "metric": "aura_charges",
+      "spell": 537152,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the redirect always fires (EffectBasePoints[1] 99 + EffectDieSides[1] 1 = 100)",
+      "actor": "wind",
+      "metric": "aura_amount",
+      "spell": 537152,
+      "effect": 1,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Windsurf's own aura 313 carrier is up (effect 1, SpellDuration 8)",
+      "actor": "wind",
+      "metric": "aura",
+      "spell": 500042,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "wind",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "set_moving",
+      "label": "Start moving again",
+      "actor": "wind",
+      "enabled": true
+    },
+    {
+      "action": "cast",
+      "label": "DISCRIMINATING: the same Shock while moving, with Windsurf up",
+      "actor": "wind",
+      "spell": 503326,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: mask word 0 2048 selects Shock (SpellFamilyFlags[0] 2048), so the moving cast lands",
+      "actor": "wind",
+      "metric": "spell_damage_count",
+      "spell": 503326,
+      "target": "target",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "set_moving",
+      "actor": "wind",
+      "enabled": false
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Stormbringer's own casting does not spend the redirect charge",
+      "actor": "wind",
+      "metric": "aura_charges",
+      "spell": 537152,
+      "equals": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "wind",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "striker",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "label": "INTERCEPT: the fixture spawn point is a sanctuary (Unit::_IsValidAttackTarget rejects any PvP attack there regardless of faction); move the Stormbringer out first",
+      "actor": "wind",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "INTERCEPT: put the attacker in melee range, facing the Stormbringer",
+      "actor": "striker",
+      "map": 0,
+      "x": -9620.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "wind",
+      "spell": 500042,
+      "label": "INTERCEPT: Windsurf RecoveryTime is 90000 ms; reset it for the second case"
+    },
+    {
+      "action": "set_power",
+      "actor": "wind",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "label": "INTERCEPT: recast Windsurf for a full 15000 ms window",
+      "actor": "wind",
+      "spell": 500042
+    },
+    {
+      "action": "assert",
+      "label": "INTERCEPT: the redirect aura is up again",
+      "actor": "wind",
+      "metric": "aura",
+      "spell": 537152,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "INTERCEPT: refreshed to a full 15000 ms, so any loss below is the charge and not expiry",
+      "actor": "wind",
+      "metric": "aura_duration_ms",
+      "spell": 537152,
+      "min": 14000,
+      "max": 15000
+    },
+    {
+      "action": "attack",
+      "label": "INTERCEPT: a hostile melee attacker swings at the Stormbringer",
+      "actor": "striker",
+      "target": "wind"
+    },
+    {
+      "action": "assert",
+      "label": "INTERCEPT: the attacker did swing",
+      "actor": "striker",
+      "metric": "melee_attack_count",
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "INTERCEPT: Unit::GetMeleeHitRedirectTarget drops the single charge on the first melee hit",
+      "actor": "wind",
+      "metric": "aura",
+      "spell": 537152,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "striker"
+    }
+  ],
+  "contract": "#3717: Windsurf (500042) reads in Spell.dbc as effect 0 SPELL_EFFECT_FORCE_CAST (140) on EffectImplicitTargetA 5 TARGET_UNIT_PET with EffectTriggerSpell 537152, and effect 1 SPELL_EFFECT_APPLY_AURA (6) on the caster with EffectApplyAuraName 313 and EffectSpellClassMask (2048, 16, 0); SpellFamilyName 22, CastingTimeIndex 1 (instant), RangeIndex 5 (40 yd), RecoveryTime 90000, DurationIndex 8 (15000 ms). Its enUS description promises 'Command your Air Elemental to windsurf to you, intercepting the next melee or ranged attack made against you, and allowing you to cast Shock and Call Lightning while moving for $d.' Both clauses are delivered by native paths and no script or SQL exists or is needed. Spell::EffectForceCast (SpellEffects.cpp:1311) makes the pet cast 537152 with its master as the unit target; 537152 applies aura 111 SPELL_AURA_ADD_CASTER_HIT_TRIGGER on TARGET_UNIT_MASTER with amount 100 (EffectBasePoints 99 + EffectDieSides 1) and ProcCharges 1, which Unit::GetMeleeHitRedirectTarget (Unit.cpp:8563) consumes on the next melee or ranged attack. Aura 313's handler slot is HandleNULL, but the effect is registered in m_modAuras before handler dispatch, and Unit::CanCastSpellWhileMoving ends with HasAuraTypeWithAffectMask(SPELL_AURA_313, info), lifting SPELL_FAILED_MOVING for the spells the mask selects: Shock 503326 carries SpellFamilyFlags[0] 2048 against mask word 0 2048. The scenario shows in the same run that a moving Shock deals nothing without Windsurf and completes with it, and that the redirect charge survives the Stormbringer's own casts but is spent by one incoming melee attack. The issue body misquotes the record (effect 140 with trigger 1 in slot 2) and omits the aura-313 effect; the shipped row is as stated above."
+}

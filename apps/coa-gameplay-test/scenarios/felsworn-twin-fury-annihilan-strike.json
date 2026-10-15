@@ -1,0 +1,124 @@
+{
+  "schema": 1,
+  "name": "Twin Fury grants extra Felfury on a critical Annihilan Strike (#4720)",
+  "contract": "Twin Fury 801892 reads 'Critically striking with Twin Slice or Annihilan Strike now generates an additional 1 Felfury.' felsworn_casts::OnSpellHitResult (AscensionFelswornAbilities.cpp) gates this on Twin(info) && Direct(info) && crit. Twin() previously matched only Named(info, 801901) (Twin Slice) or family-20 SpellFamilyFlags[0] bit 1048576; Annihilan Strike's own weapon-hit sub-spells (801913 main hand, 801914 off hand, confirmed via coa-dbc-viewer) carry SpellFamilyFlags[0] = 0, SpellFamilyFlags[1] = 65536 instead - a bit unique to this ability's 9-spell rank chain within family 20 (verified against every family-20 Spell.dbc record). Twin() was therefore unconditionally false for every Annihilan Strike hit, so the Twin Fury bonus never applied to it. The fix adds the SpellFamilyFlags[1] & 65536 check. Annihilan Strike is DmgClass 2 (SPELL_DAMAGE_CLASS_MELEE, confirmed via coa-dbc-viewer), so its crit roll runs through Unit::MeleeSpellHitResult and Unit::SpellDoneCritChance's SPELL_DAMAGE_CLASS_MELEE branch, which reads PLAYER_CRIT_PERCENTAGE (fed by melee_crit_rating/melee_hit_rating/expertise_rating), not the SPELL_DAMAGE_CLASS_MAGIC branch's PLAYER_SPELL_CRIT_PERCENTAGE (fed by spell_crit_rating) - the original fixture's spell_crit_rating: 100000 had no effect on this ability's crit chance, leaving Twin Fury's bonus inconsistently applied at base melee crit. Both fixtures now carry melee_hit_rating, expertise_rating and melee_crit_rating at 100000 to guarantee the hit and the crit deterministically. Baseline Felfury generation for Annihilan Strike (rev_20260928 #4665 fix, 1 Felfury per landed weapon hit, unconditional on crit) is identical for both fixtures, so the difference between them isolates Twin Fury's own contribution: with a guaranteed crit on both weapon hits, the control fixture (no 801892) ends with 2 Felfury (baseline only) and the Twin Fury fixture ends with 4 (baseline 2 plus 1 extra per crit weapon hit).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 14,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 100000,
+      "expertise_rating": 100000,
+      "melee_crit_rating": 100000
+    },
+    {
+      "id": "twin_fury",
+      "race": 1,
+      "class": 14,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 100000,
+      "expertise_rating": 100000,
+      "melee_crit_rating": 100000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_control",
+      "owner": "control",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "dummy_twin",
+      "owner": "twin_fury",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 801903
+    },
+    {
+      "action": "learn",
+      "actor": "twin_fury",
+      "spell": 801903
+    },
+    {
+      "action": "learn",
+      "actor": "twin_fury",
+      "spell": 801892
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_power",
+      "actor": "twin_fury",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Felfury before any cast",
+      "actor": "control",
+      "metric": "aura_stacks",
+      "spell": 800058,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Felfury before any cast",
+      "actor": "twin_fury",
+      "metric": "aura_stacks",
+      "spell": 800058,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 801903,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "twin_fury",
+      "spell": 801903,
+      "target": "dummy_twin"
+    },
+    {
+      "action": "assert",
+      "label": "Baseline: Annihilan Strike's own weapon hits generate 2 Felfury without Twin Fury",
+      "actor": "control",
+      "metric": "aura_stacks",
+      "spell": 800058,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Twin Fury adds 1 extra Felfury per crit weapon hit (2 baseline + 2 bonus = 4)",
+      "actor": "twin_fury",
+      "metric": "aura_stacks",
+      "spell": 800058,
+      "equals": 4,
+      "within_ms": 3000
+    }
+  ]
+}

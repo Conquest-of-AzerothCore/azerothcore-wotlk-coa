@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "name": "Witch Hunter: Vampiric Tonic heals 40% of the Physical damage dealt",
+  "contract": [
+    "Vampiric Tonic 802276 reads 'Drink a vampiric tonic, allowing Physical damage dealt to heal you equal to $s1%",
+    "of the damage dealt for $d.' Effect 0 (aura 354, BasePoints 39 + DieSides 1 = 40%) names the heal 802271",
+    "'Steals $s1 Health.' (SPELL_EFFECT_HEAL, BasePoints 0, SPELL_ATTR3_IGNORE_CASTER_MODIFIERS, SPELL_ATTR2_CANT_CRIT);",
+    "SpellDuration 1 = 10 s. So each Physical auto attack under the Tonic heals the hunter for 40% of its damage",
+    "(floored per hit), and nothing heals once the Tonic is gone. The Tonic contract turns aura 354 into a dummy",
+    "handled by spell_ascension_witch_hunter_vampiric_tonic, but its Load read GetTarget(), which is null outside",
+    "effect hooks (AuraScript::GetTarget), so the script never attached and the native dummy proc cast 802271 at its",
+    "DBC value, 1 health per hit. The heal total is compared with the auto attack damage dealt while the Tonic is",
+    "up, both read from the combat logs with the attack stopped. Ratings remove melee misses, dodges and parries."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "hunter", "race": 1, "class": 15, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "hunter", "entry": 36, "level": 60, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "hunter", "spell": 201 },
+    { "action": "learn", "actor": "hunter", "spell": 802276 },
+    { "action": "add_item", "actor": "hunter", "item": 25 },
+    { "action": "equip", "actor": "hunter", "item": 25, "slot": 15 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "set_health", "label": "Leave room so every heal is effective", "actor": "hunter",
+      "maximum": 100000, "value": 10000
+    },
+    { "action": "attack", "actor": "hunter", "target": "enemy" },
+    {
+      "action": "assert", "label": "SETUP: auto attacks land", "actor": "hunter",
+      "metric": "melee_damage_count", "min": 1, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "Control: no Vampiric Tonic heal before the Tonic", "actor": "hunter",
+      "metric": "spell_heal_count", "spell": 802271, "equals": 0
+    },
+    { "action": "stop_attack", "actor": "hunter" },
+    { "action": "cast", "label": "Drink Vampiric Tonic", "actor": "hunter", "spell": 802276 },
+    {
+      "action": "assert", "label": "SETUP: the Tonic is active", "actor": "hunter", "metric": "aura",
+      "spell": 802276, "equals": 1, "within_ms": 1000
+    },
+    { "action": "snapshot", "actor": "hunter", "metric": "melee_damage_total", "save_as": "melee_before" },
+    {
+      "action": "snapshot", "actor": "hunter", "metric": "spell_heal_total", "spell": 802271,
+      "save_as": "heal_before"
+    },
+    { "action": "attack", "actor": "hunter", "target": "enemy" },
+    {
+      "action": "assert", "label": "Physical auto attacks under the Tonic heal the hunter", "actor": "hunter",
+      "metric": "spell_heal_count", "spell": 802271, "min": 3, "within_ms": 8000
+    },
+    { "action": "stop_attack", "actor": "hunter" },
+    { "action": "wait", "label": "Let the last swing's heal land", "ms": 500 },
+    {
+      "action": "snapshot", "actor": "hunter", "metric": "melee_damage_total", "relative_to": "melee_before",
+      "save_as": "melee_under_tonic"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the heals are 40% of the Physical damage dealt",
+      "actor": "hunter", "metric": "spell_heal_total", "spell": 802271, "relative_to": "heal_before",
+      "ratio_to": "melee_under_tonic", "min": 0.3, "max": 0.45
+    },
+    { "action": "cancel_aura", "label": "End the Tonic", "actor": "hunter", "spell": 802276 },
+    {
+      "action": "assert", "label": "SETUP: the Tonic is gone", "actor": "hunter", "metric": "aura",
+      "spell": 802276, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "snapshot", "actor": "hunter", "metric": "spell_heal_count", "spell": 802271,
+      "save_as": "heals_after_tonic"
+    },
+    { "action": "snapshot", "actor": "hunter", "metric": "melee_damage_count", "save_as": "swings_after_tonic" },
+    { "action": "attack", "actor": "hunter", "target": "enemy" },
+    { "action": "wait", "ms": 4500 },
+    {
+      "action": "assert", "label": "SETUP: auto attacks continue after the Tonic", "actor": "hunter",
+      "metric": "melee_damage_count", "relative_to": "swings_after_tonic", "min": 1
+    },
+    {
+      "action": "assert", "label": "No heal once the Tonic has ended", "actor": "hunter",
+      "metric": "spell_heal_count", "spell": 802271, "relative_to": "heals_after_tonic", "equals": 0
+    },
+    { "action": "stop_attack", "actor": "hunter" },
+    { "action": "assert", "actor": "hunter", "metric": "alive", "equals": 1 }
+  ]
+}

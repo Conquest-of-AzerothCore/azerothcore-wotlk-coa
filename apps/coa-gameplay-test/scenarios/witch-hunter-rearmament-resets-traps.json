@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "name": "Rearmament resets the cooldown of the Traps (#1086)",
+  "contract": "Rearmament 805738 reads 'resetting the cooldown of all Traps and Decimate, and causing your Traps to not incur a cooldown for the duration' (Spell.dbc 2026-09-17). Effect 0 is SPELL_EFFECT_ASCENSION_RESET_COOLDOWN on Decimate 804194 (native, EffectAscensionResetCooldown), effect 2 a -101% SPELLMOD_COOLDOWN on the Trap class mask (native). Effect 1 is effect id 197 with class mask (0, 0, 0x840000), BasePoints -100000: in the core Spell::EffectNULL handles 197 ('unknown Ascension effect') and no module handled it, so the Traps kept their cooldowns. What effect 197 means is not documented in the source; that it reduces the cooldowns of the spells matching its class mask is inferred from the many other spells that carry it with a class mask and a negative millisecond amount and are named or worded as cooldown reductions. This scenario therefore rests on Rearmament's own text: after it is cast, both the Trap (Shadow Trap 680238, 60 s cooldown, mask word2 0x840000) and Decimate (120 s) report no cooldown. Only Rearmament's own cast is covered; the no-cooldown-for-the-duration clause is native and not asserted.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wh",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 680238
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 804194
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 805738
+    },
+    {
+      "action": "cast",
+      "label": "Set a Shadow Trap",
+      "actor": "wh",
+      "spell": 680238
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Trap is on its 60 s cooldown",
+      "actor": "wh",
+      "metric": "cooldown_ms",
+      "spell": 680238,
+      "min": 30000,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Decimate",
+      "actor": "wh",
+      "spell": 804194
+    },
+    {
+      "action": "assert",
+      "label": "Decimate is on its 120 s cooldown",
+      "actor": "wh",
+      "metric": "cooldown_ms",
+      "spell": 804194,
+      "min": 60000,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 2500
+    },
+    {
+      "action": "cast",
+      "label": "Rearmament",
+      "actor": "wh",
+      "spell": 805738
+    },
+    {
+      "action": "assert",
+      "label": "Rearmament is active",
+      "actor": "wh",
+      "metric": "aura",
+      "spell": 805738,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rearmament resets Decimate (effect 0)",
+      "actor": "wh",
+      "metric": "cooldown_ms",
+      "spell": 804194,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Rearmament resets the Traps (effect 1)",
+      "actor": "wh",
+      "metric": "cooldown_ms",
+      "spell": 680238,
+      "equals": 0
+    }
+  ]
+}

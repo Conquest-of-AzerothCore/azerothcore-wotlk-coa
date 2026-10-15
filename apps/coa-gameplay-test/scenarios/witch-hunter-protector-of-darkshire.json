@@ -1,0 +1,194 @@
+{
+  "schema": 1,
+  "name": "Protector of Darkshire raises Dawn Blade and Dusk Blade damage 15 percent (#1657)",
+  "contract": "Protector of Darkshire 300575 is SpellFamily 21, passive (Attributes 0x1c0), with one SPELL_AURA_ADD_PCT_MODIFIER (108) effect: MiscValue 0 (SPELLMOD_DAMAGE), BasePoints 14 + DieSides 1 = +15 percent, EffectSpellClassMask word 0 = 0x600, i.e. bit 0x400 (Dawn Blade 802024, 802248) and bit 0x200 (Dusk Blade 802020, 802253, off-hand 803502). Both blades' SpellFamilyFlags word 0 carry those bits and neither has SPELL_ATTR3_IGNORE_CASTER_MODIFIERS. Unit::SpellDamageBonusDone applies ApplySpellMod(SPELLMOD_DAMAGE) (Unit.cpp:9369) and Unit::MeleeDamageBonusDone does the same for weapon strikes (Unit.cpp:10914); SPELLMOD_DAMAGE is multiplicative for pct mods (Player.cpp:10272), so 1000 becomes 1150 and the damage-path ratio is 1.15. The scenario pins the raw modifier and the two native damage calculations, with Shadow Trap (not in the mask) as the control.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "hunter",
+      "entry": 36,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Dawn Blade effect 0 damage before the talent",
+      "actor": "hunter",
+      "metric": "spell_damage_done",
+      "save_as": "dawn_before",
+      "spell": 802024,
+      "target": "dummy",
+      "effect": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Dawn Blade weapon-strike bonus before the talent",
+      "actor": "hunter",
+      "metric": "melee_spell_damage_done",
+      "save_as": "dawn_weapon_before",
+      "spell": 802024,
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "label": "Dusk Blade weapon-strike bonus before the talent",
+      "actor": "hunter",
+      "metric": "melee_spell_damage_done",
+      "save_as": "dusk_weapon_before",
+      "spell": 802020,
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "label": "Shadow Trap damage probe before the talent",
+      "actor": "hunter",
+      "metric": "spell_damage_done",
+      "save_as": "trap_before",
+      "spell": 680238,
+      "target": "dummy",
+      "effect": 0
+    },
+    {
+      "action": "assert",
+      "label": "Before the talent: Dawn Blade damage modifier is neutral",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 802024,
+      "op": 0,
+      "base": 1000,
+      "min": 999.4,
+      "max": 1000.6
+    },
+    {
+      "action": "learn",
+      "label": "Learn 300575",
+      "actor": "hunter",
+      "spell": 300575
+    },
+    {
+      "action": "assert",
+      "label": "Protector of Darkshire is applied as a passive",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 300575,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Dawn Blade deals 15 percent more damage (op 0 damage, 14+1 percent)",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 802024,
+      "op": 0,
+      "base": 1000,
+      "min": 1149.4,
+      "max": 1150.6
+    },
+    {
+      "action": "assert",
+      "label": "Dusk Blade deals 15 percent more damage",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 802020,
+      "op": 0,
+      "base": 1000,
+      "min": 1149.4,
+      "max": 1150.6
+    },
+    {
+      "action": "assert",
+      "label": "Dusk Blade rank 2 deals 15 percent more damage",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 802253,
+      "op": 0,
+      "base": 1000,
+      "min": 1149.4,
+      "max": 1150.6
+    },
+    {
+      "action": "assert",
+      "label": "Dusk Blade off-hand strike deals 15 percent more damage",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 803502,
+      "op": 0,
+      "base": 1000,
+      "min": 1149.4,
+      "max": 1150.6
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Trap is outside the mask",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 680238,
+      "op": 0,
+      "base": 1000,
+      "min": 999.4,
+      "max": 1000.6
+    },
+    {
+      "action": "assert",
+      "label": "Dawn Blade's school-damage effect is 15 percent higher through the native damage path",
+      "actor": "hunter",
+      "metric": "spell_damage_done",
+      "spell": 802024,
+      "target": "dummy",
+      "effect": 0,
+      "ratio_to": "dawn_before",
+      "min": 1.14,
+      "max": 1.16
+    },
+    {
+      "action": "assert",
+      "label": "Dawn Blade's weapon strike is 15 percent higher",
+      "actor": "hunter",
+      "metric": "melee_spell_damage_done",
+      "spell": 802024,
+      "target": "dummy",
+      "ratio_to": "dawn_weapon_before",
+      "min": 1.14,
+      "max": 1.16
+    },
+    {
+      "action": "assert",
+      "label": "Dusk Blade's weapon strike is 15 percent higher",
+      "actor": "hunter",
+      "metric": "melee_spell_damage_done",
+      "spell": 802020,
+      "target": "dummy",
+      "ratio_to": "dusk_weapon_before",
+      "min": 1.14,
+      "max": 1.16
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Trap damage is unchanged",
+      "actor": "hunter",
+      "metric": "spell_damage_done",
+      "spell": 680238,
+      "target": "dummy",
+      "effect": 0,
+      "ratio_to": "trap_before",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

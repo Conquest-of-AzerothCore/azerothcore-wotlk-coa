@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "Timemage cuts the duration of harmful magic auras on the Chronomancer by 30% (#3656)",
+  "contract": "Timemage 806753 is a passive whose only effect is SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL (245) with EffectMiscValue 1 = DISPEL_MAGIC and EffectBasePoints -31, resolving to -30 with DieSides 1. Unit::ModSpellDuration consumes it as target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL, spellProto->Dispel) followed by AddPct(duration, durationMod) (Unit.cpp), inside the 'if (!positive)' branch that exists to cut the duration of negative effects only; 'target' is the unit receiving the aura, which is the Chronomancer, matching the tooltip's 'on you'. Spell::ApplyAura calls it with positive taken from the aura application's own flag (Spell.cpp). The fixture debuff is Enlarged 84003: Dispel 1 (magic), Attributes 0x2C000000 including SPELL_ATTR0_AURA_IS_DEBUFF, which makes SpellInfo::_IsPositiveEffect return false for every effect, so AuraApplication::_InitFlags marks the self-cast application negative; both its effects are EffectImplicitTargetA 1 (TARGET_UNIT_CASTER), so SpellInfo::CheckExplicitTarget needs no hostile target; DurationIndex 25 is a flat 180000 ms with no per-level scaling; its mechanic mask is empty, so GetDiminishingReturnsGroupForSpell returns DIMINISHING_NONE and no diminishing cap interferes. A self-cast is the harness's only way to land a harmful aura on a player, since there is no player-versus-player combat here; Unit::ModSpellDuration reaches the same branch either way ('xinef: also calculate self casts'). 180000 ms becomes 126000 ms with the talent. Native handlers only. Regression scenario for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 22, "level": 80 },
+    { "id": "talent", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talent", "spell": 806753 },
+    {
+      "action": "assert",
+      "label": "Timemage's duration reduction resolves to -30",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 806753,
+      "caster": "talent",
+      "effect": 0,
+      "equals": -30
+    },
+    { "action": "learn", "actor": "control", "spell": 84003 },
+    { "action": "learn", "actor": "talent", "spell": 84003 },
+    { "action": "cast", "label": "Control takes the magic debuff", "actor": "control", "spell": 84003 },
+    { "action": "cast", "label": "Talented Chronomancer takes the same debuff", "actor": "talent", "spell": 84003 },
+    {
+      "action": "assert",
+      "label": "The debuff lands on the control",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 84003,
+      "caster": "control",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The debuff lands on the talented Chronomancer",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 84003,
+      "caster": "talent",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent the debuff keeps its full 180 second duration",
+      "actor": "control",
+      "metric": "aura_duration_ms",
+      "spell": 84003,
+      "caster": "control",
+      "min": 170000,
+      "max": 180000
+    },
+    {
+      "action": "assert",
+      "label": "With the talent the same debuff is cut to 126 seconds",
+      "actor": "talent",
+      "metric": "aura_duration_ms",
+      "spell": 84003,
+      "caster": "talent",
+      "min": 116000,
+      "max": 126000
+    }
+  ]
+}

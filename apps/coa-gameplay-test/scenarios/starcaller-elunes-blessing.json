@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "name": "Elune's Blessing gives Hand of Elune 30% more of your bonus healing (#1341)",
+  "contract": "Elune's Blessing 681407 (SpellFamilyName 32, passive Attributes 0x40) reads \"Your Hand of Elune now gains an additional $s1% of your bonus healing\". Its effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 24 = SPELLMOD_BONUS_MULTIPLIER, EffectBasePoints 29 with DieSides 1 resolving to +30, and EffectSpellClassMask word1 0x40000, which selects Hand of Elune 801990 (SpellFamilyFlags word1 0x40000, SpellLevel 16, MaxLevel 0 so Unit::CalculateLevelPenalty returns 1.0). Native path: Unit::SpellHealingBonusDone multiplies DoneAdvertisedBenefit by coeff after ApplySpellMod(SPELLMOD_BONUS_MULTIPLIER, coeff*100), so the flat +30 becomes +0.30 of bonus healing on top of the coefficient the spell already has (rev_20260909_06_starcaller_completion.sql gives 801990 a spell_bonus_data row of 0 direct_bonus; the module's own healing term is added separately inside ModifySpellEffectBaseValue and does not pass through this function). The metric spell_healing_done calls Unit::SpellHealingBonusDone with a fixed base of 1000, so the difference between a talented and an untalented fixture is 0.30 * DoneAdvertisedBenefit. Both fixtures receive the same fixture bonus healing from set_aura QA Test +1000 SP 10030 (SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT 345, EffectMiscValue 127, EffectBasePoints 999 resolving to 1000, read by Unit::SpellBaseHealingBonusDone for every school), so the expected difference is 300; the window 295..360 allows for a small identical base of other spell power that the level-80 fixtures might carry. Bonus healing of 0 would give a difference of 0, which is why the fixture aura is needed.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "patient",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 801990
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 801990
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 681407
+    },
+    {
+      "action": "assert",
+      "label": "The passive self-applies once learned",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 681407,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture 1000 bonus healing on the control",
+      "actor": "control",
+      "spell": 10030,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture 1000 bonus healing on the talented healer",
+      "actor": "talent",
+      "spell": 10030,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Hand of Elune healing without the talent",
+      "actor": "control",
+      "metric": "spell_healing_done",
+      "spell": 801990,
+      "target": "patient",
+      "save_as": "hand_base"
+    },
+    {
+      "action": "assert",
+      "label": "With the talent Hand of Elune gains 30% of the 1000 bonus healing",
+      "actor": "talent",
+      "metric": "spell_healing_done",
+      "spell": 801990,
+      "target": "patient",
+      "relative_to": "hand_base",
+      "min": 295,
+      "max": 360
+    }
+  ]
+}

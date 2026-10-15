@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Blessing of the Firelands raises Heat's effect 2 by 6 (#1923)",
+  "contract": "#1923: Blessing of the Firelands 504397 effect 0 is ADD_FLAT_MODIFIER (107), misc 12 = SPELLMOD_EFFECT2, base 5 + 1 = +6, class mask C 0x40 = Heat 807389. ApplyEffectModifiers adds it to Heat's effect index 1 base (Unit.cpp:12147-12167), then the aura multiplies by its stack count, so each Heat stack carries 6 and Dragon Leap (806611) gains 6% per stack. No contract or script touches 807389 or 504397. Asserts the EFFECT2 modifier read for Heat is 6 (from 0), with Dragon Leap 806611 (outside mask C 0x40) as the control. The second effect (EFFECT3) has no slot on Heat and is not asserted. The per-stack Dragon Leap damage is not asserted because the report records no expected absolute damage. Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no effect-2 modifier on Heat before Blessing",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 807389,
+      "op": 12,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 504397
+    },
+    {
+      "action": "assert",
+      "label": "Blessing of the Firelands adds 6 to Heat's effect 2",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 807389,
+      "op": 12,
+      "base": 0,
+      "equals": 6,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Control: Dragon Leap gets no effect-2 modifier",
+      "actor": "p",
+      "metric": "spell_modifier",
+      "spell": 806611,
+      "op": 12,
+      "base": 0,
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

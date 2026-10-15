@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "name": "Destabilize Time slows enemy casting by 10% and 10% more per enemy cast (#534)",
+  "contract": "Destabilize Time 680971's Description is \"Reduces enemy casting speed by $570761s1% for $d, increasing by $570761s1% every time they cast. Gaining stacks does not extend the duration of the spell.\" and its aura tooltip reads \"Casting speed reduced by ${-$570761M1}%\". 680971 is the visible debuff: SpellDuration 18 = 20000 ms, StackAmount 10, and one effect, aura 42 (proc trigger spell) with EffectTriggerSpell 0 and ProcFlags 0. The slow lives in 570761: SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK with EffectBasePoints -11 + DieSides 1 = -10 per stack, StackAmount 10, SPELL_ATTR1_NO_AURA_ICON. Unit::ApplyCastTimePercentMod turns an amount of -10n into a cast-time multiplier of (100 + 10n) / 100, so the enemy's UNIT_MOD_CAST_SPEED is 1.10 on application, 1.20 after its first cast and 1.30 after its second, and returns to its baseline when the debuff expires 20 sec after application, not 20 sec after the last stack. The enemy is a hostile player so that its casts go through the normal cast handler (the harness makes creatures cast triggered spells, which are not casts of their own); Frost Armor 168 is an instant self-buff. The Chronomancer's spell hit rating keeps the debuff from missing.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    { "id": "chronomancer", "race": 1, "class": 22, "level": 80, "spell_hit_rating": 10000 },
+    { "id": "enemy", "race": 8, "class": 8, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "chronomancer", "spell": 680971 },
+    { "action": "learn", "actor": "enemy", "spell": 168 },
+    { "action": "pvp", "actor": "chronomancer", "enabled": true },
+    { "action": "pvp", "actor": "enemy", "enabled": true },
+    { "action": "snapshot", "actor": "enemy", "metric": "cast_speed_multiplier", "save_as": "cast0" },
+    { "action": "cast", "actor": "chronomancer", "spell": 680971, "target": "enemy" },
+    {
+      "action": "assert", "label": "SETUP: Destabilize Time lands on the enemy", "actor": "enemy",
+      "metric": "aura", "spell": 680971, "caster": "chronomancer", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the enemy casts 10% slower on application", "actor": "enemy",
+      "metric": "cast_speed_multiplier", "ratio_to": "cast0", "min": 1.095, "max": 1.105, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The hidden slow carries one stack", "actor": "enemy",
+      "metric": "aura_stacks", "spell": 570761, "caster": "chronomancer", "equals": 1
+    },
+    { "action": "cast", "label": "The enemy casts once", "actor": "enemy", "spell": 168 },
+    {
+      "action": "assert", "label": "The enemy's cast adds a stack to the debuff", "actor": "enemy",
+      "metric": "aura_stacks", "spell": 680971, "caster": "chronomancer", "equals": 2, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the enemy casts 20% slower after one cast", "actor": "enemy",
+      "metric": "cast_speed_multiplier", "ratio_to": "cast0", "min": 1.195, "max": 1.205, "within_ms": 1000
+    },
+    { "action": "wait", "label": "Let the enemy's global and Frost Armor cooldowns pass", "ms": 1600 },
+    { "action": "cast", "label": "The enemy casts again", "actor": "enemy", "spell": 168 },
+    {
+      "action": "assert", "label": "The second cast adds another stack", "actor": "enemy",
+      "metric": "aura_stacks", "spell": 570761, "caster": "chronomancer", "equals": 3, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the enemy casts 30% slower after two casts", "actor": "enemy",
+      "metric": "cast_speed_multiplier", "ratio_to": "cast0", "min": 1.295, "max": 1.305, "within_ms": 1000
+    },
+    { "action": "wait", "label": "Let time pass after the last stack", "ms": 3000 },
+    {
+      "action": "assert", "label": "Gaining stacks did not extend the debuff (about 15.3 sec left, 17 if extended)",
+      "actor": "enemy", "metric": "aura_duration_ms", "spell": 680971, "caster": "chronomancer",
+      "min": 14000, "max": 16000
+    },
+    {
+      "action": "assert", "label": "The hidden slow expires with the debuff", "actor": "enemy",
+      "metric": "aura_duration_ms", "spell": 570761, "caster": "chronomancer", "min": 14000, "max": 16000
+    },
+    { "action": "wait", "label": "Wait past 20 sec from application", "ms": 16000 },
+    {
+      "action": "assert", "label": "The debuff has expired", "actor": "enemy",
+      "metric": "aura", "spell": 680971, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The hidden slow has expired", "actor": "enemy",
+      "metric": "aura", "spell": 570761, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The enemy's casting speed is restored", "actor": "enemy",
+      "metric": "cast_speed_multiplier", "ratio_to": "cast0", "min": 0.995, "max": 1.005, "within_ms": 1000
+    }
+  ]
+}

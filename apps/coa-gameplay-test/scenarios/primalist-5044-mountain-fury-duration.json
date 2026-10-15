@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Mountain Fury: actual duration and tick count vs the reported 2 seconds (#5044)",
+  "contract": "#5044: reported Mountain Fury (806185) lasts 2 seconds instead of the tooltip's 4, and deals 600 damage instead of the tooltip's 1383. Spell.dbc SpellDuration id 35 (806185's DurationIndex) is 4000 ms, matching the tooltip's '4 seconds' and contradicting the '2 seconds' claim by data alone; 806185's own EffectAmplitude is 2000 ms, so its periodic trigger (807724 -> 806186, the actual SCHOOL_DAMAGE hit) should fire twice over its 4-second duration -- primalist-mountain-fury.json already proves the SP/AP/Stamina coefficients are wired correctly via deterministic spell_damage_done/spell_effect_value queries and that a cone hit does land on multiple pulled targets (total_hits 9 across three creatures), but does not assert the live aura's own remaining duration. The Stamina*1.25/SP0.65/AP0.17 coefficients for 806186 landed in commit 5cfead9b4 (PR #4523) before this report was filed, yet the shortfall was still observed, so the damage-coefficient portion is not re-tested here (already covered) and stays unconfirmed. This scenario only reproduces the report: it does not change any code. It casts Mountain Fury at a single pulled target and records the aura's live remaining duration right after casting and the number of periodic hits that land over the full window; the controller's run is the evidence for whether the live duration or the live damage total, not just the coefficients, match the DBC/tooltip contract.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "front0",
+      "owner": "primalist",
+      "entry": 12142,
+      "level": 80,
+      "health": 100000,
+      "distance": 8.0
+    }
+  ],
+  "steps": [
+    { "action": "pvp", "actor": "primalist", "enabled": true },
+    { "action": "specialization", "actor": "primalist", "id": 60 },
+    { "action": "learn", "actor": "primalist", "spell": 806185 },
+    { "action": "set_power", "actor": "primalist", "power": 1, "value": 1000 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "cast", "label": "Mountain Fury", "actor": "primalist", "spell": 806185 },
+    { "action": "wait", "ms": 200 },
+    { "action": "assert", "label": "control: the buff applied", "actor": "primalist", "metric": "aura", "spell": 806185, "equals": 1 },
+    { "action": "assert", "label": "reproduction: live remaining duration is close to the DBC 4 seconds, not 2", "actor": "primalist", "metric": "aura_duration_ms", "spell": 806185, "min": 3500, "max": 4300 },
+    { "action": "wait", "label": "let both periodic ticks resolve", "ms": 4300 },
+    { "action": "assert", "label": "reproduction: both periodic ticks landed on the pulled target", "actor": "primalist", "metric": "spell_damage_count", "spell": 806186, "target": "front0", "min": 2 }
+  ]
+}

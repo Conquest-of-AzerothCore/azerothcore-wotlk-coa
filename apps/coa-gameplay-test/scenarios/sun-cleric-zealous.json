@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Zealous cuts Radiance's cooldown by 30s and boosts its healing and damage by 125% (#1081)",
+  "contract": "Zealous 560113 is family 33, Attributes 448 (SPELL_ATTR0_PASSIVE), EquippedItemClass -1, no Stances, so it self-applies on learn. Effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 11 (SPELLMOD_COOLDOWN) and EffectSpellClassMask word1 65536 (0x10000), EffectBasePoints -30001 + DieSides 1 = -30000; Radiance's container spell 800054 (the one with its own RecoveryTime/CategoryRecoveryTime) carries that exact word1 bit. Player::AddSpellAndCategoryCooldowns applies ApplySpellMod(id, SPELLMOD_COOLDOWN, ...) unconditionally whenever a matching spell is cast; spell_modifier exercises the same ApplySpellMod path synthetically with no cast. Effect 1 is SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue 0 (SPELLMOD_DAMAGE) and EffectSpellClassMask word0 -2147483648 (bit 0x80000000), EffectBasePoints 124 + DieSides 1 = 125; Radiance's periodic payload 800038 (heal effect 0, damage effect 1) carries that exact word0 bit in SpellFamilyFlags_1. Unit::SpellHealingBonusDone and Unit::SpellDamageBonusDone both apply their own ApplySpellMod(id, SPELLMOD_DAMAGE, ...) unconditionally at the end of each function, independent of any spell_bonus_data coefficient, so both the heal and the damage effect of 800038 gain the full 125%. None of this needs a script: this is not \"no server-side implementation\".",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "control",
+      "entry": 36,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 560113
+    },
+    {
+      "action": "assert",
+      "label": "Talent self-applies its passive",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 560113,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control's Radiance cooldown is unmodified",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 800054,
+      "op": 11,
+      "base": 100000,
+      "equals": 100000
+    },
+    {
+      "action": "assert",
+      "label": "Talent's Radiance cooldown drops by exactly 30s",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 800054,
+      "op": 11,
+      "base": 100000,
+      "equals": 70000
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_healing_done",
+      "spell": 800038,
+      "effect": 0,
+      "target": "dummy",
+      "save_as": "control_heal"
+    },
+    {
+      "action": "assert",
+      "label": "Radiance's heal effect gains 125%",
+      "actor": "talent",
+      "metric": "spell_healing_done",
+      "spell": 800038,
+      "effect": 0,
+      "target": "dummy",
+      "ratio_to": "control_heal",
+      "min": 2.2,
+      "max": 2.3
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_damage_done",
+      "spell": 800038,
+      "effect": 1,
+      "target": "dummy",
+      "save_as": "control_dmg"
+    },
+    {
+      "action": "assert",
+      "label": "Radiance's damage effect gains 125%",
+      "actor": "talent",
+      "metric": "spell_damage_done",
+      "spell": 800038,
+      "effect": 1,
+      "target": "dummy",
+      "ratio_to": "control_dmg",
+      "min": 2.2,
+      "max": 2.3
+    }
+  ]
+}

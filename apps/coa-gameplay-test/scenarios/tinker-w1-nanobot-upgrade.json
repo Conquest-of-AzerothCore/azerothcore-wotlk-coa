@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "name": "Tinker J27 Upgrade cheapens and extends Nanobots (#1822)",
+  "contract": "J27 Upgrade 301322 carries two stock spell modifiers sharing class mask 0x00300000/0x00002000/0x00100000: SPELL_AURA_ADD_PCT_MODIFIER -10 on SPELLMOD_COST (DBC EffectBasePoints -11, DieSides 1) and SPELL_AURA_ADD_FLAT_MODIFIER +10000 on SPELLMOD_DURATION (EffectBasePoints 9999, DieSides 1). The mask resolves to Nanobot Reconstruction 801809 (flags[0] 0x00100000), Nanobot Recharger 803552 (flags[0] 0x00200000), Nanobot Cleanser 502537 (flags[1] 0x00002000) and Nanobot Swarm 801709 (flags[2] 0x00100000). SpellDuration.dbc index 3 is 60000 ms and index 8 is 15000 ms, so the Nanobots on index 3 become 70000 ms and the Cleanser 25000 ms. Repair Shot 801707 is the control: SpellFamilyName 34, outside the mask. Nanobot Reconstruction carries StartRecoveryCategory 133 and StartRecoveryTime 1500, so the second, refreshing cast is submitted through the ordinary CMSG_CAST_SPELL path only after a wait long enough to clear the global cooldown the first cast started; without it the cast is refused and the first application simply keeps ticking down. Aura::ModStackAmount -> Aura::RefreshTimers -> Aura::CalcMaxDuration (SpellAuras.cpp:792-814) recomputes the maximum duration through Player::ApplySpellMod on every refresh, which is what turns the refreshed application's 60000 ms into 70000 ms.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 801809
+    },
+    {
+      "action": "snapshot",
+      "save_as": "cost0",
+      "actor": "t",
+      "metric": "spell_power_cost",
+      "spell": 801809
+    },
+    {
+      "action": "snapshot",
+      "save_as": "swarmcost0",
+      "actor": "t",
+      "metric": "spell_power_cost",
+      "spell": 801709
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 801809
+    },
+    {
+      "action": "assert",
+      "label": "The Nanobots are on the Tinker",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 801809,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent they run the DBC's 60 seconds",
+      "actor": "t",
+      "metric": "aura_duration_ms",
+      "spell": 801809,
+      "min": 55000,
+      "max": 60000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 301322
+    },
+    {
+      "action": "assert",
+      "label": "Reconstruction costs 10% less",
+      "actor": "t",
+      "metric": "spell_power_cost",
+      "spell": 801809,
+      "ratio_to": "cost0",
+      "min": 0.88,
+      "max": 0.92
+    },
+    {
+      "action": "assert",
+      "label": "Swarm costs 10% less",
+      "actor": "t",
+      "metric": "spell_power_cost",
+      "spell": 801709,
+      "ratio_to": "swarmcost0",
+      "min": 0.88,
+      "max": 0.92
+    },
+    {
+      "action": "assert",
+      "label": "Recharger gains the 10 second extension",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 803552,
+      "op": 1,
+      "base": 60000,
+      "equals": 70000
+    },
+    {
+      "action": "assert",
+      "label": "Cleanser gains the 10 second extension",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 502537,
+      "op": 1,
+      "base": 15000,
+      "equals": 25000
+    },
+    {
+      "action": "assert",
+      "label": "Repair Shot is outside the mask",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 801707,
+      "op": 1,
+      "base": 60000,
+      "equals": 60000
+    },
+    {
+      "action": "assert",
+      "label": "Repair Shot keeps its cost",
+      "actor": "t",
+      "metric": "spell_modifier",
+      "spell": 801707,
+      "op": 14,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown from the first cast",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 801809
+    },
+    {
+      "action": "assert",
+      "label": "A refreshed application lasts 70 seconds",
+      "actor": "t",
+      "metric": "aura_duration_ms",
+      "spell": 801809,
+      "min": 65000,
+      "max": 70000,
+      "within_ms": 5000
+    }
+  ]
+}

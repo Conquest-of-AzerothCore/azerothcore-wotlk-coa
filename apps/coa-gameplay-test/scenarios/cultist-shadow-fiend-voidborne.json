@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Shadow Fiend cuts Voidborne's cooldown and extends its duration through native flat spell mods (#2199)",
+  "contract": "680487 has two ADD_FLAT_MODIFIER (107) effects, both classmask word C bit31 (2147483648), matching Voidborne's (681104) own SpellFamilyFlags[2]=2147483648 exactly. Effect[0]: Misc=11=SPELLMOD_COOLDOWN (SpellDefines.h:87), BasePoints -90001+1=-90000 ms. Effect[1]: Misc=1=SPELLMOD_DURATION (SpellDefines.h:77), BasePoints 4999+1=+5000 ms. Both are consumed through the same native Player::ApplySpellMod (Player.cpp:10219) that every other spell mod in this chunk uses, keyed by SpellInfo::IsAffectedBySpellMod's classmask match (SpellInfo.cpp:1472); the harness's spell_modifier metric calls this function directly on Voidborne's own verified base values (RecoveryTime/CategoryRecoveryTime=180000 ms, DurationIndex 8 = 15000 ms), so 180000-90000=90000 ('reduces the cooldown by 90 sec', exactly halving it) and 15000+5000=20000 ('+5 sec') are read without any cast. A negative control confirms the match is exact: Darkwither (502213, a different family-31 spell with a different classmask) does not have its cooldown op touched by this talent. Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: Voidborne keeps its 180000 ms cooldown",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 681104, "op": 11, "base": 180000,
+      "min": 180000, "max": 180000
+    },
+    {
+      "action": "assert", "label": "SETUP: Voidborne keeps its 15000 ms duration",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 681104, "op": 1, "base": 15000,
+      "min": 15000, "max": 15000
+    },
+    { "action": "learn", "actor": "cultist", "spell": 680487 },
+    {
+      "action": "assert", "label": "Shadow Fiend cuts Voidborne's cooldown to 90000 ms (#2199)",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 681104, "op": 11, "base": 180000,
+      "min": 90000, "max": 90000
+    },
+    {
+      "action": "assert", "label": "Shadow Fiend extends Voidborne's duration to 20000 ms (#2199)",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 681104, "op": 1, "base": 15000,
+      "min": 20000, "max": 20000
+    },
+    {
+      "action": "assert", "label": "Shadow Fiend leaves an unrelated family-31 spell's cooldown alone",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 502213, "op": 11, "base": 180000,
+      "min": 180000, "max": 180000
+    }
+  ]
+}

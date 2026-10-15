@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Improved Radiant Cascade is a native spell modifier on Radiant Cascade only (#1099)",
+  "contract": "Spell.dbc 807963 (\"Improved Radiant Cascade\", SpellFamilyName 33, Passive) has two SPELL_AURA_ADD_PCT_MODIFIER (108) effects, both keyed to EffectSpellClassMask word 1 = 32768, which a repository-wide Spell.dbc scan for family-33 spells shows matches only the Radiant Cascade chain (500141 Rank 1 .. 502411 Rank 6) and nothing else. Effect 0 is EffectMiscValue 14 (SPELLMOD_COST) with EffectBasePoints -16 (amount -15); effect 1 is EffectMiscValue 0 (SPELLMOD_DAMAGE, the generic value modifier the engine also applies to healing) with EffectBasePoints 14 (amount 15). Player::ApplySpellMod's SPELLMOD_PCT branch (Player.cpp:10219) computes basevalue = basevalue*totalmul + totalflat: for a single -15% modifier, totalmul = 0.85, so base 1000 reads back 850; for a single +15% modifier on SPELLMOD_DAMAGE, totalmul *= (100+15)/100 = 1.15, so base 1000 reads back 1150. This is a fully generic native pipeline; no server script exists or is needed, and the class mask keeps it off unrelated family-33 spells such as Horusath Blast.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "cleric", "spell": 807963 },
+    {
+      "action": "assert", "label": "Radiant Cascade's mana cost is reduced by 15%",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 500141, "op": 14, "base": 1000, "equals": 850
+    },
+    {
+      "action": "assert", "label": "Radiant Cascade's healing is increased by 15%",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 500141, "op": 0, "base": 1000, "equals": 1150
+    },
+    {
+      "action": "assert", "label": "An unrelated family-33 spell (Horusath Blast) keeps its normal cost",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 500154, "op": 14, "base": 1000, "equals": 1000
+    }
+  ]
+}

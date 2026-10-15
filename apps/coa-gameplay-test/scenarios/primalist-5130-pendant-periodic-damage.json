@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "Earthmother's Pendant does not heal from periodic damage (#5130)",
+  "contract": "#5130: Earthmother's Pendant (504446, aura_ascension_earthmother_pendant, AscensionPrimalistPendant.cpp) tooltip reads 'With every strike, the Earthmother’s pendant restores what was lost, healing you equal to $s1% of your damage dealt.' -- a strike is a direct hit, not a periodic bleed tick. Its spell_proc row (rev_1789936967260477700.sql) sets ProcFlags 332116, which includes PROC_FLAG_DONE_PERIODIC (0x40000), and Check() previously only tested damage->GetDamage(), so Torn to Shreds' periodic bleed (560313) also triggered the self-heal. Check() now also rejects event.GetTypeMask() & PROC_FLAG_DONE_PERIODIC. Rylak's Bite (706342) both lands a direct hit and applies the Torn to Shreds bleed in one cast: the direct hit is allowed to proc the heal (control, heal_count reaches 1), but none of the bleed's periodic ticks over its full duration may add a second heal (heal_count must stay at 1).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 500000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "specialization", "actor": "primalist", "id": 60 },
+    { "action": "learn", "actor": "primalist", "spell": 196 },
+    { "action": "learn", "actor": "primalist", "spell": 674 },
+    { "action": "add_item", "actor": "primalist", "item": 37 },
+    { "action": "equip", "actor": "primalist", "item": 37, "slot": 15 },
+    { "action": "add_item", "actor": "primalist", "item": 2134 },
+    { "action": "equip", "actor": "primalist", "item": 2134, "slot": 16 },
+    { "action": "learn", "actor": "primalist", "spell": 504446 },
+    { "action": "learn", "actor": "primalist", "spell": 706342 },
+    { "action": "learn", "actor": "primalist", "spell": 500294 },
+    { "action": "set_health", "actor": "primalist", "maximum": 100000, "value": 20000 },
+    { "action": "reset_cooldown", "actor": "primalist", "spell": 706342 },
+    { "action": "snapshot", "label": "baseline pendant heal count", "actor": "primalist", "metric": "spell_heal_count", "spell": 524972, "target": "primalist", "save_as": "heal_count_before" },
+    { "action": "cast", "label": "Rylak's Bite: direct hit plus bleed application", "actor": "primalist", "spell": 706342, "target": "target" },
+    { "action": "assert", "label": "control: the direct hit landed", "actor": "primalist", "metric": "spell_damage_count", "spell": 706342, "target": "target", "equals": 1, "within_ms": 2000 },
+    { "action": "wait", "ms": 300 },
+    { "action": "assert", "label": "control: Torn to Shreds bleed is applied", "actor": "target", "metric": "aura_stacks", "spell": 560313, "caster": "primalist", "equals": 1 },
+    { "action": "assert", "label": "the direct hit alone is allowed to proc the pendant heal", "actor": "primalist", "metric": "spell_heal_count", "spell": 524972, "target": "primalist", "relative_to": "heal_count_before", "equals": 1 },
+    { "action": "wait", "label": "let every periodic tick of the 12s bleed resolve", "ms": 12500 },
+    { "action": "assert", "label": "control: the bleed actually ticked", "actor": "primalist", "metric": "spell_damage_count", "spell": 560313, "target": "target", "min": 1 },
+    { "action": "assert", "label": "control: the bleed has expired", "actor": "target", "metric": "aura", "spell": 560313, "equals": 0 },
+    { "action": "assert", "label": "none of the periodic ticks added a second pendant heal", "actor": "primalist", "metric": "spell_heal_count", "spell": 524972, "target": "primalist", "relative_to": "heal_count_before", "equals": 1 }
+  ]
+}

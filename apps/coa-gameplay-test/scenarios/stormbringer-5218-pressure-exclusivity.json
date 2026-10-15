@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Only one Pressure aura stays active at a time (#5218, #4891, #4422)",
+  "contract": "Barometric Pressure (803563), Crushing Pressure (803564) and Atmospheric Pressure (803565) each tooltip 'Only 1 Pressure spell can be active at a time..' and are each a permanent (-1 duration) single-rank ability with no spell_group row, so nothing stopped two coexisting (#4891, #5218) or a fresh cast replacing an already-active one (#4422's 'permanent, never switched off'). The new spell_group 1170 (stack rule 2, exclusive from same caster) makes a new Pressure cast remove whichever different Pressure aura the caster already had.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "storm", "race": 1, "class": 16, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "storm", "spell": 803563 },
+    { "action": "learn", "actor": "storm", "spell": 803564 },
+    { "action": "learn", "actor": "storm", "spell": 803565 },
+    { "action": "assert", "actor": "storm", "metric": "spell_power_cost", "spell": 803563, "max": 1000 },
+    { "action": "assert", "actor": "storm", "metric": "spell_power_cost", "spell": 803564, "max": 1000 },
+    { "action": "assert", "actor": "storm", "metric": "spell_power_cost", "spell": 803565, "max": 1000 },
+
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "cast", "actor": "storm", "spell": 803563 },
+    { "action": "assert", "label": "SETUP: Barometric Pressure is applied",
+      "actor": "storm", "metric": "aura", "spell": 803563, "equals": 1, "within_ms": 1500 },
+
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "cast", "actor": "storm", "spell": 803564 },
+    { "action": "assert", "label": "SETUP: Crushing Pressure is applied",
+      "actor": "storm", "metric": "aura", "spell": 803564, "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "DISCRIMINATING: Crushing removes Barometric (fails today: both stay at 1)",
+      "actor": "storm", "metric": "aura", "spell": 803563, "equals": 0 },
+
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "cast", "actor": "storm", "spell": 803565 },
+    { "action": "assert", "label": "SETUP: Atmospheric Pressure is applied",
+      "actor": "storm", "metric": "aura", "spell": 803565, "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "DISCRIMINATING: Atmospheric removes Crushing (fails today: both stay at 1)",
+      "actor": "storm", "metric": "aura", "spell": 803564, "equals": 0 },
+
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "cast", "actor": "storm", "spell": 803563 },
+    { "action": "assert", "label": "SETUP: Barometric Pressure is cast a second time",
+      "actor": "storm", "metric": "spell_cast_count", "spell": 803563, "equals": 2, "within_ms": 1500 },
+    { "action": "assert", "label": "DISCRIMINATING: a fresh Barometric cast replaces Atmospheric instead of looking permanently stuck",
+      "actor": "storm", "metric": "aura", "spell": 803565, "equals": 0 },
+    { "action": "assert", "actor": "storm", "metric": "aura", "spell": 803563, "equals": 1 }
+  ]
+}

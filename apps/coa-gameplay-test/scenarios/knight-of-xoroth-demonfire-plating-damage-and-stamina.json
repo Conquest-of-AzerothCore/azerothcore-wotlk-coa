@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Demonfire Plating reduces magic damage taken by 4% and raises Stamina by 6% (#1833)",
+  "contract": "Demonfire Plating 302549 reads 'Reduces your damage taken by $s1% and increases your Stamina by $s2%.' (rank 2 tooltip: -4% damage taken, +6% Stamina). Effect 0 is native aura 87 (SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN), EffectMiscValue 126 (all magic schools: Holy/Fire/Nature/Frost/Shadow/Arcane, excludes SPELL_SCHOOL_MASK_NORMAL bit 0), EffectBasePoints -5 with DieSides 1 -> -4 (all verified directly in the installed Spell.dbc). Its handler comment at src/server/game/Spells/Auras/SpellAuraEffects.cpp:152 reads '87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN implemented in Unit::MeleeDamageBonus and Unit::SpellDamageBonus' and is consumed at src/server/game/Entities/Unit/Unit.cpp:9427 and :10940 via GetTotalAuraMultiplier(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, [...] effect->GetMiscValue() & spellProto->GetSchoolMask()) -- a real native consumer, not a stub, gated by school mask. Effect 1 is native aura 137 (SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE), EffectMiscValue 2 (STAT_STAMINA), EffectBasePoints 5 with DieSides 1 -> 6, handler AuraEffect::HandleModTotalPercentStat (SpellAuraEffects.cpp:202,4510) -- a fully native stat-percent aura. No script anywhere references 302549; both effects are native generic auras. The scenario probes incoming damage from Fire-school spell 524919 (Burning Blade, SchoolMask=SPELL_SCHOOL_MASK_FIRE=4, verified in the installed Spell.dbc), which the 126 misc mask includes. Stamina is asserted as an exact +6 point rise, not a 1.055-1.065 ratio: this class's level-60 base Stamina (GetCreateStat, no gear) is 116, and Unit::GetTotalStatValue's '((base*base_pct)+total)*total_pct' formula gives 116*1.06=122.96, which Player::UpdateStats truncates via SetStat(stat, int32(value)) to 122 - a +6 delta but a 1.0517 ratio (confirmed empirically: the untouched native aura produced exactly this and failed the tighter ratio window), the same base-dependent integer-truncation trap already fixed for Combusting Blade's Intellect assertion (#699). A 1.055-1.065 ratio window assumes a base large enough that this floor truncation doesn't matter; at 116 it does, so the scenario checks the truncation-exact delta instead.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    },
+    {
+      "id": "attacker",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "knight", "metric": "stat", "stat": 2, "save_as": "stam_before" },
+    {
+      "action": "snapshot", "actor": "knight", "metric": "spell_damage_taken", "spell": 524919, "target": "attacker",
+      "save_as": "fire_damage_taken_before"
+    },
+    { "action": "learn", "actor": "knight", "spell": 302549 },
+    { "action": "set_aura", "actor": "knight", "spell": 302549, "stacks": 1, "label": "Force the Demonfire Plating passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Demonfire Plating passive is active",
+      "actor": "knight", "metric": "aura", "spell": 302549, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Stamina rises by 6% (truncates to +6 at this class's base 116 Stamina)",
+      "actor": "knight", "metric": "stat", "stat": 2, "relative_to": "stam_before", "equals": 6
+    },
+    {
+      "action": "assert", "label": "CONTRACT: incoming Fire-school damage drops by ~4%",
+      "actor": "knight", "metric": "spell_damage_taken", "spell": 524919, "target": "attacker",
+      "ratio_to": "fire_damage_taken_before", "min": 0.955, "max": 0.965
+    }
+  ]
+}

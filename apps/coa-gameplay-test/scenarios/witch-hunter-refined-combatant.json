@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Refined Combatant grants 10 expertise (#996)",
+  "contract": "Refined Combatant 572770 has E0 aura 240 (SPELL_AURA_MOD_EXPERTISE), BasePoints 9 / DieSides 1 = 10; the description reads 'Increases your expertise by $s1'. EquippedItemClass is -1 (EquippedItemSubClassMask 0xa091 is only consulted for a class-restricted spell), so Player::UpdateExpertise counts it for any weapon state, including an empty hand. The difference in the expertise field is asserted so the character's own expertise is irrelevant.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 572770,
+      "all_specs": true
+    },
+    {
+      "action": "snapshot",
+      "label": "Expertise before",
+      "actor": "hunter",
+      "metric": "expertise",
+      "save_as": "expertise_before"
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 572770
+    },
+    {
+      "action": "assert",
+      "label": "The passive aura is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 572770,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Expertise rises by 10",
+      "actor": "hunter",
+      "metric": "expertise",
+      "relative_to": "expertise_before",
+      "min": 9.99,
+      "max": 10.01
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 572770,
+      "all_specs": true,
+      "label": "Remove the passive"
+    },
+    {
+      "action": "assert",
+      "label": "Expertise returns to its base",
+      "actor": "hunter",
+      "metric": "expertise",
+      "relative_to": "expertise_before",
+      "min": -0.01,
+      "max": 0.01
+    }
+  ]
+}

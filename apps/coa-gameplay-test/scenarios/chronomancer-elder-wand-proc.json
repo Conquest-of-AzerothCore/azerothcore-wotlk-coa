@@ -1,0 +1,260 @@
+{
+  "schema": 1,
+  "name": "Elder Wand's Wand attacks stack the Artificer's Wand damage debuff (#536)",
+  "contract": "Elder Wand 560129 applies aura 42 (proc trigger spell) on Elder Wand 560128, a target debuff whose single effect is SPELL_AURA_MOD_DAMAGE_FROM_CASTER with EffectBasePoints 2 / DieSides 1 (+3%), StackAmount 10 and EffectSpellClassMask word2 0x200, which matches Artificer's Wand 561064's own SpellFamilyFlags [0, 0, 512] and no other family 28 record. Spell.dbc gives 560129's record ProcFlags 0 and no spell_proc row existed, so LoadSpellProcs skipped it and the debuff could never be applied. With a spell_proc row gated on the ranged class damage of Wand of Time and Artificer's Wand - the same definition of \"Wand attacks\" already shipped for Erode Armaments 520386 - each Artificer's Wand hit rolls the record's own 30% ProcChance, which this scenario keeps unchanged. Twenty independent hits are cast because 0.70^20 = 7.98e-4, a false failure below 0.1%; 561064 has RecoveryTime 0 and StartRecoveryTime 0, so the twenty casts are independent and need no cooldown wait. The debuff's DurationIndex 8 is 15000 ms, longer than the 4 s casting window plus the assertion's poll, so a proc on the first hit is still present at the end.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 560129
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 561064
+    },
+    {
+      "action": "assert",
+      "label": "No Elder Wand debuff before any Wand attack",
+      "actor": "dummy",
+      "metric": "aura_stacks",
+      "spell": 560128,
+      "caster": "chronomancer",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 561064,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 561064,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 561064,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 561064,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 561064,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 561064,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 561064,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 561064,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 561064,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 561064,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 561064,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 561064,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 561064,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 561064,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 561064,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 561064,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 561064,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 561064,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 561064,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 561064,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "label": "Repeated Artificer's Wand hits apply the Elder Wand debuff",
+      "actor": "dummy",
+      "metric": "aura_stacks",
+      "spell": 560128,
+      "caster": "chronomancer",
+      "min": 1,
+      "within_ms": 5000
+    }
+  ]
+}

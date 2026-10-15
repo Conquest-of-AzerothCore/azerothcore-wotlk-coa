@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Dark Sigil heals for 15% of critical damage dealt (#3728)",
+  "contract": "Dark Sigil 560535 ships two effects in Spell.dbc. Effect 0 is SPELL_EFFECT_APPLY_AREA_AURA_RAID with aura 290 SPELL_AURA_MOD_CRIT_PCT, BasePoints 2 + DieSides 1 = 3% and radius index 12, handled natively by AuraEffect::HandleAuraModCritPct - that is the tooltip's \"Increases critical strike chance of all party and raid members by 3%\". Effect 1 is SPELL_EFFECT_APPLY_AURA with aura 354, BasePoints 14 + DieSides 1 = the 15% of \"you now heal for 15% of all critical damage dealt\", and TriggerSpell Bloodlord's Curse 707449, a SPELL_EFFECT_HEAL with BasePoints 0. Aura 354 has no AuraEffectHandler entry, no AuraEffect::HandleProc case and is not an isTriggerAura, so no SpellProcEntry was generated and Aura::GetProcEffectMask returned 0: the leech half healed nothing. Valanar's Vengeance 572795 is the probe - the rank a level-80 character owns, a pure SPELL_EFFECT_SCHOOL_DAMAGE with no leech of its own - and spell_crit_rating 10000 makes every hit a critical, which the scenario checks before relying on it. The caster is put in combat before the measured cast because Player::RegenerateHealth adds nothing while in combat, so a health gain can only come from the proc; every combat precondition is asserted rather than assumed. TIMING: 572795 has CastingTimeIndex 171 and SpellCastTimes.dbc row 171 is 6000 ms, while combat only starts when the spell launches on its target (Spell.cpp:8475), so every window that has to see a cast land is 9000 ms, not 5000. COST: 572795 is PowerType -2 (POWER_HEALTH) with ManaCost 50 and ManaCostPercentage 30, so SpellInfo::CalcPowerCost (SpellInfo.cpp:3021) charges 50 plus 30% of GetCreateHealth and Spell::CheckPower (Spell.cpp:7282) refuses the cast unless current health is strictly above that. The fixture health is therefore 4000, not 1000, and the scenario asserts spell_power_cost stays under it instead of assuming a number. Because the cast itself spends far more health than the 15% leech returns, a health reading taken before the cast can never show the leech; the measurement is differential instead. Both legs start from exactly 4000 and pay the same cost, so the health left after the untalented cast (after_control) is the zero point, and what the talented leg has above it is the heal.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "caster", "entry": 36, "level": 1, "health": 1000000, "distance": 25 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "caster", "spell": 572795 },
+    {
+      "action": "assert", "label": "The fixture rating guarantees a critical hit",
+      "actor": "caster", "metric": "spell_done_crit_chance", "spell": 572795, "target": "dummy", "min": 100
+    },
+    {
+      "action": "assert", "label": "SETUP: the probe's health cost fits inside the 4000 fixture health",
+      "actor": "caster", "metric": "spell_power_cost", "spell": 572795, "max": 3999
+    },
+    { "action": "set_power", "actor": "caster", "power": 1, "value": 1000 },
+    { "action": "cast", "actor": "caster", "spell": 572795, "target": "dummy" },
+    {
+      "action": "assert", "label": "The caster is in combat, so health regeneration is off",
+      "actor": "caster", "metric": "combat", "equals": 1, "within_ms": 9000
+    },
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_health", "actor": "caster", "value": 4000 },
+    { "action": "snapshot", "actor": "caster", "metric": "health", "save_as": "control_health" },
+    { "action": "set_power", "actor": "caster", "power": 1, "value": 1000 },
+    { "action": "cast", "actor": "caster", "spell": 572795, "target": "dummy" },
+    { "action": "wait", "label": "Let the 6 sec cast, its health cost and its critical hit resolve", "ms": 9000 },
+    {
+      "action": "assert", "label": "SETUP: combat still holds, so no regeneration enters the measurement",
+      "actor": "caster", "metric": "combat", "equals": 1
+    },
+    {
+      "action": "assert", "label": "Control: without the talent the critical hit only spends health, it heals nothing",
+      "actor": "caster", "metric": "health", "relative_to": "control_health", "max": -1
+    },
+    {
+      "action": "snapshot", "label": "Zero point: 4000 minus the cast's health cost, with no leech",
+      "actor": "caster", "metric": "health", "save_as": "after_control"
+    },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_crit_chance", "save_as": "crit_before" },
+    { "action": "learn", "actor": "caster", "spell": 560535 },
+    {
+      "action": "assert", "label": "The raid critical-strike aura adds its shipped 3%",
+      "actor": "caster", "metric": "spell_crit_chance", "relative_to": "crit_before",
+      "min": 2.9, "max": 3.1, "within_ms": 5000
+    },
+    { "action": "set_health", "actor": "caster", "value": 4000 },
+    { "action": "set_power", "actor": "caster", "power": 1, "value": 1000 },
+    { "action": "cast", "actor": "caster", "spell": 572795, "target": "dummy" },
+    { "action": "wait", "label": "Let the 6 sec cast, its health cost and its critical hit resolve", "ms": 9000 },
+    {
+      "action": "assert", "label": "SETUP: combat still holds, so no regeneration enters the measurement",
+      "actor": "caster", "metric": "combat", "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Dark Sigil heals its caster from the critical hit",
+      "actor": "caster", "metric": "health", "relative_to": "after_control", "min": 1
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Corrupt Fate reduces the cooldown of Dark Veil by 60 sec (#675)",
+  "contract": "Corrupt Fate 520810 reads 'Reduces the cooldown of Dark Veil by 60 sec.' In the installed Spell.dbc it is passive, family 31, effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107), misc 11 = SPELLMOD_COOLDOWN, BasePoints -60001 / DieSides 1 = -60000 ms, class mask dword 2 = 16384 = bit 14. Dark Veil 520345 (family 31) carries SpellFamilyFlags[2] 16384 (bit 14), Category 48, RecoveryTime 120000 ms and CategoryRecoveryTime 120000 ms (verified directly). Player::AddSpellAndCategoryCooldowns applies SPELLMOD_COOLDOWN to both timers; SpellInfo::IsAffectedBySpellMod has no family-31 override for this op, so plain class-mask matching decides. Player::ApplySpellMod (Player.cpp:10219-10323) computes non-duration ops as base*totalmul+totalflat (line 10324); 120000*1+(-60000)=60000. Grasp of Zek'voz 573028 (family 31, SpellFamilyFlags dword 2 = 0) does not carry bit 14 and is the control. The scenario probes the cooldown value with spell_modifier and does not cast Dark Veil.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "c", "race": 1, "class": 25, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the fixtures settle", "ms": 5000},
+    {"action": "assert", "label": "SETUP: Dark Veil's real 120000 ms cooldown is unmodified", "actor": "c", "metric": "spell_modifier", "spell": 520345, "op": 11, "base": 120000, "equals": 120000},
+    {"action": "assert", "label": "SETUP: control spell unmodified", "actor": "c", "metric": "spell_modifier", "spell": 573028, "op": 11, "base": 120000, "equals": 120000},
+    {"action": "learn", "label": "Learn Corrupt Fate", "actor": "c", "spell": 520810},
+    {"action": "assert", "label": "The passive is active", "actor": "c", "metric": "aura", "spell": 520810, "equals": 1},
+    {"action": "assert", "label": "Dark Veil's cooldown drops by 60 sec to 60000 ms", "actor": "c", "metric": "spell_modifier", "spell": 520345, "op": 11, "base": 120000, "equals": 60000},
+    {"action": "assert", "label": "Grasp of Zek'voz is outside the mask", "actor": "c", "metric": "spell_modifier", "spell": 573028, "op": 11, "base": 120000, "equals": 120000},
+    {"action": "unlearn", "label": "Drop Corrupt Fate", "actor": "c", "spell": 520810},
+    {"action": "assert", "label": "Dark Veil returns to 120000 ms", "actor": "c", "metric": "spell_modifier", "spell": 520345, "op": 11, "base": 120000, "equals": 120000}
+  ]
+}

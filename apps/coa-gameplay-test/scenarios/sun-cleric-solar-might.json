@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Solar Might raises Strength and Intellect by 5%/10% per rank (#1269)",
+  "contract": "Solar Might has two rank spell IDs, both SpellFamilyName 33, self-targeted, using SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (137) on two effects: rank 1 (704916) effect 0 has EffectMiscValue 0 (STAT_STRENGTH) and EffectBasePoints 4 -> real 5, effect 1 has EffectMiscValue 3 (STAT_INTELLECT) and EffectBasePoints 4 -> real 5; rank 2 (570120) is the same shape with EffectBasePoints 9 -> real 10 on both effects. AuraEffect::HandleModTotalPercentStat (via Player::UpdateStatPercentAuras) applies both generically, matching the tooltip's 'Strength and Intellect by 5%/10%' exactly, with no per-spell-id dispatch needed. Native handlers only; regression scenario for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 27, "level": 80 },
+    { "id": "rank1", "race": 1, "class": 27, "level": 80 },
+    { "id": "rank2", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "control", "metric": "stat", "stat": 0, "save_as": "str_base" },
+    { "action": "snapshot", "actor": "control", "metric": "stat", "stat": 3, "save_as": "int_base" },
+    { "action": "learn", "actor": "rank1", "spell": 704916 },
+    { "action": "learn", "actor": "rank2", "spell": 570120 },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises Strength by roughly 5%",
+      "actor": "rank1",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "str_base",
+      "min": 1.03,
+      "max": 1.07
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises Intellect by roughly 5%",
+      "actor": "rank1",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "int_base",
+      "min": 1.03,
+      "max": 1.07
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises Strength by roughly 10%",
+      "actor": "rank2",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "str_base",
+      "min": 1.07,
+      "max": 1.13
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises Intellect by roughly 10%",
+      "actor": "rank2",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "int_base",
+      "min": 1.07,
+      "max": 1.13
+    }
+  ]
+}

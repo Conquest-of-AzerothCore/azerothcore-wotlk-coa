@@ -1,0 +1,176 @@
+{
+  "schema": 1,
+  "name": "Primalist Wild Rampage native attack power and hit",
+  "contract": "Both ranks grant exactly 5/10% attack power and 2/4 percentage points of melee and spell hit; removal restores each baseline.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504881,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504197,
+      "all_specs": true
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "save_as": "base_attack_power"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_hit_chance",
+      "save_as": "base_melee_hit_chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_hit_chance",
+      "save_as": "base_spell_hit_chance"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 504197
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "ratio_to": "base_attack_power",
+      "min": 1.0450000000000002,
+      "max": 1.055
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_hit_chance",
+      "relative_to": "base_melee_hit_chance",
+      "min": 1.999,
+      "max": 2.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_hit_chance",
+      "relative_to": "base_spell_hit_chance",
+      "min": 1.999,
+      "max": 2.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504197,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "relative_to": "base_attack_power",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_hit_chance",
+      "relative_to": "base_melee_hit_chance",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_hit_chance",
+      "relative_to": "base_spell_hit_chance",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 504881
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "ratio_to": "base_attack_power",
+      "min": 1.0950000000000002,
+      "max": 1.105
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_hit_chance",
+      "relative_to": "base_melee_hit_chance",
+      "min": 3.999,
+      "max": 4.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_hit_chance",
+      "relative_to": "base_spell_hit_chance",
+      "min": 3.999,
+      "max": 4.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 504881,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "relative_to": "base_attack_power",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_hit_chance",
+      "relative_to": "base_melee_hit_chance",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_hit_chance",
+      "relative_to": "base_spell_hit_chance",
+      "equals": 0
+    }
+  ]
+}

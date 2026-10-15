@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Torrential Wrath cross-talents work natively (#2819, #3087, #3663)",
+  "contract": "Three passives report 'Spell Script / Aura Handler Not Implemented' but are plain Spell.dbc modifiers on Torrential Wrath (804017, SpellFamilyName 22) and its sibling spells; SpellInfo::IsAffectedBySpellMod has no special case for family 22, so the generic mask test at SpellInfo.cpp:1437 applies to all three, and none of the affected spells carries SPELL_ATTR3_IGNORE_CASTER_MODIFIERS. #2819 Disciple of Thorim (705727/707795/707798, ranks 1-3): eff0 is aura 107 SPELLMOD_CASTING_TIME (misc 10), BasePoints -201/-401/-601 + DieSides 1 = -200/-400/-600 ms, class mask word1 0x11 intersecting Torrential Wrath's own SpellFamilyFlags[1] 0x1, applied by Player::ApplySpellMod (Player.cpp:10323) inside Unit::CalcSpellCastTime (Unit.cpp:12317); eff1 is aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 1/3/5 + 1 = 2/4/6, a real handled CoA aura (SpellAuraEffects.cpp:398, consumed at StatSystem.cpp:999/1005/1011). Torrential Wrath's CastingTimeIndex is 19 = 2500 ms (SpellCastTimes.dbc). #3087 Raining and Pouring (706660): one aura 108 ADD_PCT_MODIFIER, MiscValue 15 (SPELLMOD_CRIT_DAMAGE_BONUS), BasePoints 29 + 1 = 30, class mask word1 0x200001 = bit0 (Torrential Wrath) + bit21 (Electrocute 801844, SpellFamilyFlags[1] 0x200000), applied inside Unit::SpellCriticalDamageBonus (Unit.cpp:9960); Stormflow (567555) is not in the mask and is asserted as a control. #3663 Torrential Rage (807196 rank1/807884 rank2): eff0 is aura 108 ADD_PCT_MODIFIER MiscValue 0 (SPELLMOD_DAMAGE), BasePoints 14/29 + 1 = 15/30, class mask word1 0x1 (Torrential Wrath); eff1 is the same aura type MiscValue 22 (SPELLMOD_DOT), same BasePoints, class mask word1 0x10000 (Stormflow's own SpellFamilyFlags[1] 0x10000, Stormflow deals its damage through SPELL_AURA_PERIODIC_DAMAGE so damagetype == DOT selects SPELLMOD_DOT at Unit.cpp:9369); cross-controls (op 22 on 804017, op 0 on 567555) confirm each effect's mask lands on only its own spell. Percentage DAMAGE/DOT mods are multiplicative (Player.cpp:10273, base 1000 -> 1150 -> 1300), CASTING_TIME is (base + flat) * mul (Player.cpp:10323), CRIT_DAMAGE_BONUS is additive (Player.cpp:10275, base 1000 -> 1300). Every rank is unlearned before the next is learned so ranks never stack, which the talent tree never allows either. All expected numbers come from Spell.dbc EffectBasePoints/DieSides and SpellCastTimes id 19; none is invented.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+
+    { "action": "learn", "label": "Learn Torrential Wrath rank 1", "actor": "s", "spell": 804017 },
+
+    { "action": "assert", "label": "BASELINE #2819: Torrential Wrath cast time is unmodified without Disciple of Thorim", "actor": "s", "metric": "spell_modifier", "spell": 804017, "op": 10, "base": 2500, "equals": 2500 },
+    { "action": "snapshot", "label": "BASELINE #2819: hit chance before Disciple of Thorim", "actor": "s", "metric": "spell_hit_chance", "save_as": "hit_base" },
+
+    { "action": "learn", "label": "Learn Disciple of Thorim rank 1", "actor": "s", "spell": 705727 },
+    { "action": "assert", "label": "DISCRIMINATING #2819: Disciple of Thorim rank 1 cuts Torrential Wrath's cast time by 200 ms", "actor": "s", "metric": "spell_modifier", "spell": 804017, "op": 10, "base": 2500, "equals": 2300 },
+    { "action": "assert", "label": "DISCRIMINATING #2819: Disciple of Thorim rank 1 raises spell hit chance by 2 points", "actor": "s", "metric": "spell_hit_chance", "relative_to": "hit_base", "min": 1.9, "max": 2.1 },
+
+    { "action": "unlearn", "label": "Unlearn Disciple of Thorim rank 1 before isolating rank 2", "actor": "s", "spell": 705727 },
+    { "action": "learn", "label": "Learn Disciple of Thorim rank 2", "actor": "s", "spell": 707795 },
+    { "action": "assert", "label": "DISCRIMINATING #2819: Disciple of Thorim rank 2 cuts Torrential Wrath's cast time by 400 ms", "actor": "s", "metric": "spell_modifier", "spell": 804017, "op": 10, "base": 2500, "equals": 2100 },
+    { "action": "assert", "label": "DISCRIMINATING #2819: Disciple of Thorim rank 2 raises spell hit chance by 4 points", "actor": "s", "metric": "spell_hit_chance", "relative_to": "hit_base", "min": 3.9, "max": 4.1 },
+
+    { "action": "unlearn", "label": "Unlearn Disciple of Thorim rank 2 before isolating rank 3", "actor": "s", "spell": 707795 },
+    { "action": "learn", "label": "Learn Disciple of Thorim rank 3", "actor": "s", "spell": 707798 },
+    { "action": "assert", "label": "DISCRIMINATING #2819: Disciple of Thorim rank 3 cuts Torrential Wrath's cast time by 600 ms", "actor": "s", "metric": "spell_modifier", "spell": 804017, "op": 10, "base": 2500, "equals": 1900 },
+    { "action": "assert", "label": "DISCRIMINATING #2819: Disciple of Thorim rank 3 raises spell hit chance by 6 points", "actor": "s", "metric": "spell_hit_chance", "relative_to": "hit_base", "min": 5.9, "max": 6.1 },
+    { "action": "unlearn", "label": "Unlearn Disciple of Thorim rank 3 before the next mechanism", "actor": "s", "spell": 707798 },
+
+    { "action": "learn", "label": "Learn Electrocute rank 1", "actor": "s", "spell": 801844 },
+    { "action": "learn", "label": "Learn Stormflow rank 1", "actor": "s", "spell": 567555 },
+
+    { "action": "assert", "label": "BASELINE #3087: Torrential Wrath crit damage is unmodified without Raining and Pouring", "actor": "s", "metric": "spell_modifier", "spell": 804017, "op": 15, "base": 1000, "equals": 1000 },
+    { "action": "assert", "label": "BASELINE #3087: Electrocute crit damage is unmodified without Raining and Pouring", "actor": "s", "metric": "spell_modifier", "spell": 801844, "op": 15, "base": 1000, "equals": 1000 },
+    { "action": "assert", "label": "BASELINE #3087 control: Stormflow crit damage is unaffected before and after (not in Raining and Pouring's mask)", "actor": "s", "metric": "spell_modifier", "spell": 567555, "op": 15, "base": 1000, "equals": 1000 },
+
+    { "action": "learn", "label": "Learn Raining and Pouring", "actor": "s", "spell": 706660 },
+    { "action": "assert", "label": "DISCRIMINATING #3087: Raining and Pouring raises Torrential Wrath's crit damage by 30%", "actor": "s", "metric": "spell_modifier", "spell": 804017, "op": 15, "base": 1000, "equals": 1300 },
+    { "action": "assert", "label": "DISCRIMINATING #3087: Raining and Pouring raises Electrocute's crit damage by 30%", "actor": "s", "metric": "spell_modifier", "spell": 801844, "op": 15, "base": 1000, "equals": 1300 },
+    { "action": "assert", "label": "DISCRIMINATING #3087 control: Raining and Pouring leaves Stormflow's crit damage untouched (mask is not blanket)", "actor": "s", "metric": "spell_modifier", "spell": 567555, "op": 15, "base": 1000, "equals": 1000 },
+    { "action": "unlearn", "label": "Unlearn Raining and Pouring before the next mechanism", "actor": "s", "spell": 706660 },
+
+    { "action": "assert", "label": "BASELINE #3663: Torrential Wrath direct damage is unmodified without Torrential Rage", "actor": "s", "metric": "spell_modifier", "spell": 804017, "op": 0, "base": 1000, "equals": 1000 },
+    { "action": "assert", "label": "BASELINE #3663: Stormflow DoT damage is unmodified without Torrential Rage", "actor": "s", "metric": "spell_modifier", "spell": 567555, "op": 22, "base": 1000, "equals": 1000 },
+    { "action": "assert", "label": "BASELINE #3663 control: Torrential Wrath's DoT-op slot is untouched", "actor": "s", "metric": "spell_modifier", "spell": 804017, "op": 22, "base": 1000, "equals": 1000 },
+    { "action": "assert", "label": "BASELINE #3663 control: Stormflow's direct-damage-op slot is untouched", "actor": "s", "metric": "spell_modifier", "spell": 567555, "op": 0, "base": 1000, "equals": 1000 },
+
+    { "action": "learn", "label": "Learn Torrential Rage rank 1", "actor": "s", "spell": 807196 },
+    { "action": "assert", "label": "DISCRIMINATING #3663: Torrential Rage rank 1 raises Torrential Wrath's direct damage by 15%", "actor": "s", "metric": "spell_modifier", "spell": 804017, "op": 0, "base": 1000, "equals": 1150 },
+    { "action": "assert", "label": "DISCRIMINATING #3663: Torrential Rage rank 1 raises Stormflow's DoT damage by 15%", "actor": "s", "metric": "spell_modifier", "spell": 567555, "op": 22, "base": 1000, "equals": 1150 },
+    { "action": "assert", "label": "DISCRIMINATING #3663 control: Torrential Wrath's DoT-op slot still untouched by rank 1", "actor": "s", "metric": "spell_modifier", "spell": 804017, "op": 22, "base": 1000, "equals": 1000 },
+    { "action": "assert", "label": "DISCRIMINATING #3663 control: Stormflow's direct-damage-op slot still untouched by rank 1", "actor": "s", "metric": "spell_modifier", "spell": 567555, "op": 0, "base": 1000, "equals": 1000 },
+
+    { "action": "unlearn", "label": "Unlearn Torrential Rage rank 1 before isolating rank 2", "actor": "s", "spell": 807196 },
+    { "action": "learn", "label": "Learn Torrential Rage rank 2", "actor": "s", "spell": 807884 },
+    { "action": "assert", "label": "DISCRIMINATING #3663: Torrential Rage rank 2 raises Torrential Wrath's direct damage by 30%", "actor": "s", "metric": "spell_modifier", "spell": 804017, "op": 0, "base": 1000, "equals": 1300 },
+    { "action": "assert", "label": "DISCRIMINATING #3663: Torrential Rage rank 2 raises Stormflow's DoT damage by 30%", "actor": "s", "metric": "spell_modifier", "spell": 567555, "op": 22, "base": 1000, "equals": 1300 },
+    { "action": "assert", "label": "DISCRIMINATING #3663 control: Torrential Wrath's DoT-op slot still untouched by rank 2", "actor": "s", "metric": "spell_modifier", "spell": 804017, "op": 22, "base": 1000, "equals": 1000 },
+    { "action": "assert", "label": "DISCRIMINATING #3663 control: Stormflow's direct-damage-op slot still untouched by rank 2", "actor": "s", "metric": "spell_modifier", "spell": 567555, "op": 0, "base": 1000, "equals": 1000 }
+  ]
+}

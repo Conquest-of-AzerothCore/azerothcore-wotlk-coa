@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "name": "Dream Flowers preserve Falcons Call cooldown on critical hits",
+  "contract": [
+    "Falcons Call 804715 has a 90-second cooldown. Dream Flowers 92117 promises a flower on damaging",
+    "critical strikes.",
+    "Neither the green flower nor the falcon summon promises a cooldown reset. Highlander is not learned.",
+    "The normal area summon must start its cooldown. A subsequent native ranged critical strike must",
+    "create a flower",
+    "without erasing that cooldown. Bow proficiency and maximum weapon skill isolate the critical-hit",
+    "control.",
+    "The flower script explicitly casts its helper without a triggering-aura pointer, so its native cast",
+    "count is observed."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 60,
+      "ranged_crit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 15,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "unlearn", "actor": "ranger", "spell": 92117},
+    {"action": "unlearn", "actor": "ranger", "spell": 800150},
+    {"action": "assert", "actor": "ranger", "metric": "aura", "spell": 92117, "equals": 0},
+    {"action": "learn", "actor": "ranger", "spell": 804715},
+    {"action": "learn", "actor": "ranger", "spell": 500074},
+    {"action": "add_item", "actor": "ranger", "item": 2504},
+    {"action": "equip", "actor": "ranger", "item": 2504, "slot": 17},
+    {"action": "learn", "actor": "ranger", "spell": 264},
+    {"action": "set_skill", "actor": "ranger", "skill": 45, "value": 300, "maximum": 300},
+    {"action": "set_power", "actor": "ranger", "power": 2, "value": 100},
+    {"action": "cast", "actor": "ranger", "spell": 804715, "target": "enemy"},
+    {"action": "assert", "actor": "ranger", "metric": "cast_failure", "spell": 804715, "equals": 0},
+    {"action": "wait", "ms": 1500},
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "cooldown_ms",
+      "spell": 804715,
+      "min": 85000,
+      "max": 90000,
+      "within_ms": 500
+    },
+    {"action": "learn", "actor": "ranger", "spell": 92117},
+    {"action": "wait", "ms": 2000},
+    {"action": "set_power", "actor": "ranger", "power": 2, "value": 100},
+    {"action": "cast", "actor": "ranger", "spell": 500074, "target": "enemy"},
+    {"action": "assert", "actor": "ranger", "metric": "cast_failure", "spell": 500074, "equals": 0},
+    {
+      "action": "assert",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 500074,
+      "min": 1,
+      "within_ms": 3000,
+      "target": "enemy",
+      "critical": true
+    },
+    {"action": "assert", "actor": "ranger", "metric": "spell_cast_count", "min": 1, "spell": 561005},
+    {"action": "assert", "actor": "ranger", "metric": "cooldown_ms", "spell": 804715, "min": 80000, "max": 90000}
+  ]
+}

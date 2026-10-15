@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "wrath-of-elune-cooldown|Wrath of Elune cuts Sentinel Glaive's cooldown by 5 sec (#2397)",
+  "contract": "Wrath of Elune 704786 (Spell.dbc, SpellFamilyName 32, passive 0x1c0) carries SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue SPELLMOD_COOLDOWN (11), EffectSpellClassMask word2 0x20000000 and EffectBasePoints -5001, resolving to -5000 with DieSides 1, matching 'Reduces the cooldown of Sentinel Glaive by $/1000;s1 sec'. Sentinel Glaive 800506 has SpellFamilyFlags word2 0x20000000, RecoveryTime 15000 and CategoryRecoveryTime 15000, and no SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (0x20000000 in AttributesEx3) nor SPELL_ATTR6_NO_CATEGORY_COOLDOWN_MODS. Native path only: Player::AddSpellAndCategoryCooldowns applies SPELLMOD_COOLDOWN to both recovery fields through Player::ApplySpellMod, and SpellInfo::IsAffectedBySpellMod admits the modifier on the shared family and mask. The spell_modifier metric runs that same ApplySpellMod on the shipped 15000 ms: 15000 - 5000 = 10000. Astral Blade 805563 (word2 0x200000, RecoveryTime 20000) has a different mask and must stay at 20000. Both fixtures are the same race, class and level.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 704786
+    },
+    {
+      "action": "assert",
+      "label": "Sentinel Glaive cooldown is unmodified without the talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 800506,
+      "op": 11,
+      "base": 15000,
+      "equals": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Sentinel Glaive cooldown drops to 10 sec with the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 800506,
+      "op": 11,
+      "base": 15000,
+      "equals": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Astral Blade cooldown is not touched by the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 805563,
+      "op": 11,
+      "base": 20000,
+      "equals": 20000
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Boom Hour adds critical chance to Bomb Toss and Firepot (#1232)",
+  "contract": "#1232: Boom Hour 802963 is a native ADD_FLAT_MODIFIER (aura 107) passive, EffectMiscValue 7 SPELLMOD_CRITICAL_CHANCE, BasePoints 9 DieSides 1 (+10), EffectSpellClassMask (0,0,128). Unit::SpellDoneCritChance consumes SPELLMOD_CRITICAL_CHANCE through Player::ApplySpellMod. The CoA route for this modifier is already in the core: SpellInfo::IsAffectedBySpellMod has `case 802963: return root == 801005 || Id == 500601;` in its SpellFamilyName 34 branch, which keeps the modifier on the whole Bomb Toss rank chain and adds Firepot 500601, whose SpellFamilyFlags (0,0,0) the raw mask could never reach. spell_ranks declares the chain root of 502510 (rank 2) and 547209 (rank 8) as 801005. The only other family-34 row carrying mask bit (0,0,128) is the unreferenced duplicate Bomb Toss 561107, which is not in that chain and which the route therefore excludes; asserting zero on it is the regression guard for the route itself.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 28, "level": 80 },
+    { "id": "boom", "race": 1, "class": 28, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "boom", "spell": 802963 },
+
+    { "action": "assert", "label": "Bomb Toss has no extra critical chance without Boom Hour",
+      "actor": "control", "metric": "spell_modifier", "spell": 801005, "op": 7, "base": 0, "equals": 0 },
+    { "action": "assert", "label": "Boom Hour adds 10 points of critical chance to Bomb Toss",
+      "actor": "boom", "metric": "spell_modifier", "spell": 801005, "op": 7, "base": 0, "equals": 10 },
+    { "action": "assert", "label": "Boom Hour reaches Bomb Toss rank 2",
+      "actor": "boom", "metric": "spell_modifier", "spell": 502510, "op": 7, "base": 0, "equals": 10 },
+    { "action": "assert", "label": "Boom Hour reaches Bomb Toss rank 8",
+      "actor": "boom", "metric": "spell_modifier", "spell": 547209, "op": 7, "base": 0, "equals": 10 },
+
+    { "action": "assert", "label": "Firepot has no extra critical chance without Boom Hour",
+      "actor": "control", "metric": "spell_modifier", "spell": 500601, "op": 7, "base": 0, "equals": 0 },
+    { "action": "assert", "label": "Boom Hour adds 10 points of critical chance to Firepot",
+      "actor": "boom", "metric": "spell_modifier", "spell": 500601, "op": 7, "base": 0, "equals": 10 },
+
+    { "action": "assert", "label": "The route excludes the unreferenced Bomb Toss row that shares the mask bit",
+      "actor": "boom", "metric": "spell_modifier", "spell": 561107, "op": 7, "base": 0, "equals": 0 }
+  ]
+}

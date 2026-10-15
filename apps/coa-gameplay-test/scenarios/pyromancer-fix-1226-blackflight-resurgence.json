@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "name": "Blackflight Resurgence raises Legacy of Deathwing's damage bonus (#1226)",
+  "contract": "#1226: Blackflight Resurgence 805587 is ADD_FLAT_MODIFIER (aura 107) on SPELLMOD_EFFECT3 (misc 23), base 49 -> +50 (Spell.dbc served file), class mask {0, 0x4000, 0} = Legacy of Deathwing 520823. 520823's DBC effect 3 is an ADD_PCT_MODIFIER on SPELLMOD_DAMAGE, base -1 -> 0%, mask {0x8000000, 0, 0x2000} = Destroyer's Maw and Firefall, so the talent lifts it to +50%. The module overwrote that slot with its free-cast COST -100% modifier, leaving -100 + 50 = -50 (Destroyer's Maw and Firefall cost half and gain no damage). The cost modifier now sits in effect 2, freed by zeroing the DBC custom effect. spell_modifier applies the player's native modifiers to a base of 1000: op 0 (DAMAGE) must read 1500 and op 14 (COST) must read 0 for both spells, with the aura re-applied after learning the talent so the effect amount is recomputed. Before the fix the damage reads 1000 and the cost 500.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 520823,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Legacy of Deathwing alone leaves Destroyer's Maw damage unchanged",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 802107,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Legacy of Deathwing alone makes Destroyer's Maw free",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 802107,
+      "op": 14,
+      "base": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Legacy of Deathwing alone makes Firefall free",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 801905,
+      "op": 14,
+      "base": 1000,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 520823,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 805587
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 520823,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Blackflight Resurgence adds 50% to Destroyer's Maw damage",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 802107,
+      "op": 0,
+      "base": 1000,
+      "equals": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Blackflight Resurgence adds 50% to Firefall damage",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 801905,
+      "op": 0,
+      "base": 1000,
+      "equals": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Blackflight Resurgence leaves Destroyer's Maw free",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 802107,
+      "op": 14,
+      "base": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Blackflight Resurgence leaves Firefall free",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 801905,
+      "op": 14,
+      "base": 1000,
+      "equals": 0
+    }
+  ]
+}

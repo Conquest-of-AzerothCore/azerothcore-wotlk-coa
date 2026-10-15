@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Tempest's Call hastes the raid and locks it out with Worn Out (#1375)",
+  "contract": "#1375 Tempest's Call 560567 (SpellFamilyName 22): RecoveryTime 300000 (5 min, matches tooltip), DurationIndex 18 = 20000 ms (matches 'for 20 sec'), MaxAffectedTargets 25, ExcludeTargetAuraSpell 804457 ('Worn Out'). Effect[0] is SPELL_EFFECT_APPLY_AURA (6), TargetA 56 TARGET_UNIT_CASTER_AREA_RAID, RadiusIndex 23 (40 yd), ApplyAuraName 65 SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK, EffectBasePoints 29 + DieSides 1 = 30, handled by AuraEffect::HandleModCastingSpeed (SpellAuraEffects.cpp dispatch line 130), which writes UNIT_MOD_CAST_SPEED - the field the cast_speed_multiplier metric reads, smaller is faster. Effect[1] is the same effect type, TargetA 56, RadiusIndex 12 (100 yd), ApplyAuraName 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, amount 30, handled by AuraEffect::HandleModMeleeRangedSpeedPct (SpellAuraEffects.cpp dispatch line 257), which shortens UNIT_FIELD_BASEATTACKTIME. Effect[2] is SPELL_EFFECT_TRIGGER_SPELL (64) that applies Worn Out 804457, DurationIndex 5 = 300000 ms, a SPELL_AURA_DUMMY marker with SpellFamilyName 18 (shared across classes). The 5-minute lockout is native: SpellInfo::CheckTarget (src/server/game/Spells/SpellInfo.cpp:2027) drops a unit that already has ExcludeTargetAuraSpell, the field read at SpellInfo.cpp:909, the same mechanism Bloodlust/Heroism use. Decisive corroboration: 520493 'Red Thirst' (Bloodmage, SpellFamilyName 26) is byte-identical in shape - same ExcludeTargetAuraSpell 804457, RecoveryTime 300000, DurationIndex 18, EffectBasePoints[0]=[1]=29, EffectRadiusIndex 23/12/12, ApplyAuraName 65/192, EffectTriggerSpell[2]=804457, MaxAffectedTargets 25 - and already has a committed regression scenario, apps/coa-gameplay-test/scenarios/bloodmage-red-thirst.json, whose contract documents this exact path. This file is that scenario copied verbatim with class 20 -> 16 and spell 520493 -> 560567, keeping 804457 (Worn Out is shared, not class-specific). Two casters are required because the 300000 ms cooldown cannot be cleared with ordinary player permissions: the second caster's Tempest's Call must not reach an ally that is still Worn Out, which the per-caster aura lookup distinguishes. The haste assertions are stated as 'at least 5% faster' because the exact percentage conversion of ApplyCastTimePercentMod and ApplyAttackTimePercentMod was not re-derived for this report, matching the Red Thirst file's own stated limit.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster1", "race": 8, "class": 16, "level": 80 },
+    { "id": "caster2", "race": 8, "class": 16, "level": 80 },
+    { "id": "ally", "race": 8, "class": 16, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "group", "actor": "caster1", "target": "ally" },
+    { "action": "group", "actor": "caster1", "target": "caster2" },
+    { "action": "learn", "actor": "caster1", "spell": 560567 },
+    { "action": "learn", "actor": "caster2", "spell": 560567 },
+    { "action": "snapshot", "actor": "ally", "metric": "cast_speed_multiplier", "save_as": "cast_base" },
+    { "action": "snapshot", "actor": "ally", "metric": "attack_time_ms", "hand": 0, "save_as": "swing_base" },
+    { "action": "cast", "actor": "caster1", "spell": 560567 },
+    {
+      "action": "assert",
+      "label": "BASELINE #1375: the ally is hasted by the first caster",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 560567,
+      "caster": "caster1",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE #1375: the ally is marked Worn Out",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 804457,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE #1375: the ally casts faster",
+      "actor": "ally",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "cast_base",
+      "max": 0.95
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE #1375: the ally swings faster",
+      "actor": "ally",
+      "metric": "attack_time_ms",
+      "hand": 0,
+      "ratio_to": "swing_base",
+      "max": 0.95
+    },
+    { "action": "wait", "ms": 2000 },
+    { "action": "cast", "actor": "caster2", "spell": 560567 },
+    { "action": "wait", "ms": 2000 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING #1375: Worn Out keeps the second Tempest's Call off the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 560567,
+      "caster": "caster2",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING #1375: the first caster's haste is still running",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 560567,
+      "caster": "caster1",
+      "equals": 1
+    }
+  ]
+}

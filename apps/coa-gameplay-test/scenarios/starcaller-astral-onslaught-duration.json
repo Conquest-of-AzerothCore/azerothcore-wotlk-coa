@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "astral-onslaught-duration|Astral Onslaught extends Astral Blade's duration by 7 sec (#1359)",
+  "contract": "Astral Onslaught 704789 (Spell.dbc, SpellFamilyName 32, passive 0x1c0) carries SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue SPELLMOD_DURATION (1), EffectSpellClassMask word2 0x200000 and EffectBasePoints 6999, resolving to 7000 with DieSides 1, matching 'Increases the duration of Astral Blade by $/1000;s1 sec'. Astral Blade 805563 has SpellFamilyFlags word2 0x200000 and DurationIndex 28, which SpellDuration.dbc gives as 5000 ms, and no SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (and that attribute would still allow SPELLMOD_DURATION, SpellInfo::IsAffectedBySpellMod). Native path only: Aura::CalcMaxDuration applies SPELLMOD_DURATION through Player::ApplySpellMod; the module's OnCalcMaxDuration hook only clamps other spells. The spell_modifier metric runs that same ApplySpellMod on the shipped duration: 5000 + 7000 = 12000. Sentinel Glaive 800506 (word2 0x20000000, DurationIndex 31 = 8000 ms) carries a different class mask and must keep 8000. Both fixtures are the same race, class and level. A real cast is not used: the probe reads the modifier exactly as Aura::CalcMaxDuration would consume it and needs no hostile target or hit roll.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 704789
+    },
+    {
+      "action": "assert",
+      "label": "Astral Blade lasts its 5 sec without the talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 805563,
+      "op": 1,
+      "base": 5000,
+      "equals": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Astral Blade lasts 12 sec with the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 805563,
+      "op": 1,
+      "base": 5000,
+      "equals": 12000
+    },
+    {
+      "action": "assert",
+      "label": "Sentinel Glaive duration is not touched by the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 800506,
+      "op": 1,
+      "base": 8000,
+      "equals": 8000
+    }
+  ]
+}

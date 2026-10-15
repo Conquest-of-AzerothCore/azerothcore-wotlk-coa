@@ -1,0 +1,18 @@
+{
+ "schema": 1,
+ "name": "Masochistic Rage suffers self damage and enrages",
+ "contract": "Masochistic Rage 803030 promises a 1 sec delay then self damage and a 20% damage-dealt buff for 15 sec. Its single effect is native SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED (183, SpellEffects.cpp:499 Spell::EffectAscensionTriggerSpellDelayed), which triggers 570097 after the delay. 570097 is itself fully native: EFFECT_0 SPELL_EFFECT_SCHOOL_DAMAGE (self, EffectBasePoints 419 + DieSides 19 => matches $AP*0.36 formula) and EFFECT_1 SPELL_EFFECT_APPLY_AURA SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (EffectBasePoints 19 + DieSides 1 = 20%). Effect 183 and both native effects on 570097 need no CoA registration; #3712-style zero-hits-in-source is expected here too.",
+ "timeout_ms": 90000,
+ "players": [{"id": "reaper", "race": 10, "class": 30, "level": 80}],
+ "steps": [
+  {"action": "wait", "label": "Let the world settle", "ms": 6000},
+  {"action": "learn", "actor": "reaper", "spell": 803030},
+  {"action": "assert", "label": "No rage buff yet", "actor": "reaper", "metric": "aura", "spell": 570097, "equals": 0},
+  {"action": "snapshot", "actor": "reaper", "metric": "health", "save_as": "pre_cast_health"},
+  {"action": "cast", "actor": "reaper", "spell": 803030},
+  {"action": "assert", "label": "Cast was accepted", "actor": "reaper", "metric": "cast_failure", "spell": 803030, "equals": 0},
+  {"action": "assert", "label": "The Reaper suffered self damage after the delay", "actor": "reaper", "metric": "health", "relative_to": "pre_cast_health", "max": -1, "within_ms": 3000},
+  {"action": "assert", "label": "Masochistic Rage (570097) applied", "actor": "reaper", "metric": "aura", "spell": 570097, "equals": 1, "within_ms": 3000},
+  {"action": "assert", "label": "The buff grants 20% increased damage dealt", "actor": "reaper", "metric": "aura_amount", "spell": 570097, "effect": 1, "equals": 20}
+ ]
+}

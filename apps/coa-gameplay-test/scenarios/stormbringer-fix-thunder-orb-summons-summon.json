@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Summon: Thunder Orb spawns the orb and its Orb Shock (#3767)",
+  "contract": "Summon: Thunder Orb (801802) promises \"Summon a Thunder Orb at the target location for 16 sec that triggers an Orb Shock and generates 10 Static\". Spell.dbc gives Effect[0] SPELL_EFFECT_SUMMON with EffectMiscValue[0] 50074 and EffectMiscValueB[0] 61, DurationIndex 387 = SpellDuration 16000 ms, and Effect[1] SPELL_EFFECT_TRIGGER_SPELL 804084 whose Effect[1] 175 adds EffectMiscValue[1] = 10 stacks of Static (803102). The Static clause is delivered natively by SpellEffects.cpp and is asserted as the baseline half. Creature 50074 ships no creature_template, so Creature::CreateFromProto rejects the summon and no orb appears, and nothing binds Orb Shock (801863, EffectAmplitude 2000 ms -> 801868) to the summon, so no shock is ever cast. Orb Shock 801868 hits SpellRadius(8) = 5 yd around the orb, which only reaches the dummy 10 yd away if the orb is placed at the target and not at the caster's feet.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "s",
+      "race": 1,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "s",
+      "entry": 36,
+      "level": 80,
+      "distance": 10
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 801802
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: no Thunder Orb (creature 50074, Spell.dbc EffectMiscValue[0]) is owned before the cast",
+      "actor": "s",
+      "metric": "owned_creature_count",
+      "entry": 50074,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Static (803102) sits below its StackAmount 100 cap minus the 10 this cast adds",
+      "actor": "s",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "max": 90
+    },
+    {
+      "action": "snapshot",
+      "label": "Static stacks before the cast",
+      "save_as": "static_before",
+      "actor": "s",
+      "metric": "aura_stacks",
+      "spell": 803102
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 801802,
+      "target": "e"
+    },
+    {
+      "action": "assert",
+      "label": "NATIVE: the cast adds 10 Static, from 804084 Effect[1] EffectMiscValue[1] = 10",
+      "actor": "s",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "relative_to": "static_before",
+      "equals": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: one Thunder Orb 50074 is summoned, from EffectMiscValue[0] = 50074 with SummonProperties 61",
+      "actor": "s",
+      "metric": "owned_creature_count",
+      "entry": 50074,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the orb's Orb Shock 801868 damages the dummy, from 801863 EffectAmplitude 2000 ms",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 801868,
+      "target": "e",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Orb Shock leaves its SPELL_AURA_MOD_DAMAGE_FROM_CASTER debuff on the dummy",
+      "actor": "e",
+      "metric": "aura_stacks",
+      "spell": 801868,
+      "caster": "s",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Outlast the orb's 16000 ms SpellDuration(387)",
+      "ms": 17000
+    },
+    {
+      "action": "assert",
+      "label": "The orb despawns after its 16000 ms duration",
+      "actor": "s",
+      "metric": "owned_creature_count",
+      "entry": 50074,
+      "equals": 0,
+      "within_ms": 5000
+    }
+  ]
+}

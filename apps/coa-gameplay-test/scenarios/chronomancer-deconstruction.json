@@ -1,0 +1,242 @@
+{
+  "schema": 1,
+  "name": "Deconstruction adds 5% then 10% critical strike chance to Unmake (#3581)",
+  "contract": "Deconstruction's tooltip reads \"Increases the critical strike chance of Unmake by $s1%.\" In Spell.dbc both ranks are a single SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 7 (SPELLMOD_CRITICAL_CHANCE) on EffectSpellClassMask [0,33554432,0], which inside SpellFamilyName 28 selects Unmake (503784-503790, 504574, 574344, 574345) and nothing else: rank 1 805851 has EffectBasePoints 4 + DieSides 1 = +5 and rank 2 807894 has EffectBasePoints 9 + DieSides 1 = +10. Unit::SpellDoneCritChance consumes SPELLMOD_CRITICAL_CHANCE through Player::ApplySpellMod (Unit.cpp:9626); the modifier is flat, so the percent-only HasSpellModApplied early return in Player::ApplySpellMod does not apply. Unmake's AttributesEx3 is 0, so SPELL_ATTR3_IGNORE_CASTER_MODIFIERS does not exempt it. The two ranks are asserted on separate players because holding both would stack to 15, which is not the contract. The native reading is taken through the periodic path, not through the harness's spell_done_crit_chance metric: Unmake's three effects are APPLY_AURA / DISPEL / APPLY_AURA, so SpellInfo::ComputeIsCritCapable (SpellInfo.cpp:1290) finds none of the direct damage or healing effects it looks for and Unit::SpellDoneCritChance returns 0.0 at its !IsCritCapable() guard (Unit.cpp:9550) for talented and untalented casters alike. What decides whether an Unmake tick crits is AuraEffect::CalcPeriodicCritChance (SpellAuraEffects.cpp:1167), which returns 0 unless the caster holds a SPELL_AURA_ABILITY_PERIODIC_CRIT effect matching the spell and otherwise calls the same SpellDoneCritChance with skipEffectCheck = true - past the guard and through the same ApplySpellMod. Impeccable Timing 560949 is that aura: SpellFamilyName 28, EffectSpellClassMask [0, 319291904, 16777216], whose word 1 bit 25 (33554432) is exactly Unmake's family bit. All three casters learn it and the same spell_crit_rating, so the only difference between them is Deconstruction, and the value AuraEffect::CalculatePeriodicData snapshots at aura creation is read back with aura_crit_chance. Each caster has its own dummy because that snapshot lives on the applied aura. Generic core machinery. This scenario is a regression guard for behaviour that already works. The three dummies carry neither a level nor a maximum health: each only has to receive one Unmake and hold its aura long enough to be read, so nothing in this scenario depends on what local level scaling makes of them, as long as all three are the same template at the same distance from identical casters.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    },
+    {
+      "id": "rank1",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    },
+    {
+      "id": "rank2",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_control",
+      "owner": "control",
+      "entry": 36,
+      "distance": 3
+    },
+    {
+      "id": "dummy_rank1",
+      "owner": "rank1",
+      "entry": 36,
+      "distance": 3
+    },
+    {
+      "id": "dummy_rank2",
+      "owner": "rank2",
+      "entry": 36,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1's player starts with no Unmake crit modifier",
+      "actor": "rank1",
+      "metric": "spell_modifier",
+      "spell": 503784,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2's player starts with no Unmake crit modifier",
+      "actor": "rank2",
+      "metric": "spell_modifier",
+      "spell": 503784,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 503784
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 503784
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 503784
+    },
+    {
+      "action": "learn",
+      "label": "Impeccable Timing makes Unmake's ticks crit-capable on every caster alike",
+      "actor": "control",
+      "spell": 560949
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 560949
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 560949
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 805851
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 807894
+    },
+    {
+      "action": "assert",
+      "label": "The control still has no Unmake crit modifier",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 503784,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds 5 points of Unmake crit chance",
+      "actor": "rank1",
+      "metric": "spell_modifier",
+      "spell": 503784,
+      "op": 7,
+      "base": 0,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 adds 10 points of Unmake crit chance",
+      "actor": "rank2",
+      "metric": "spell_modifier",
+      "spell": 503784,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 503784,
+      "target": "dummy_control"
+    },
+    {
+      "action": "cast",
+      "actor": "rank1",
+      "spell": 503784,
+      "target": "dummy_rank1"
+    },
+    {
+      "action": "cast",
+      "actor": "rank2",
+      "spell": 503784,
+      "target": "dummy_rank2"
+    },
+    {
+      "action": "assert",
+      "label": "The control's Unmake periodic landed",
+      "actor": "dummy_control",
+      "metric": "aura",
+      "spell": 503784,
+      "caster": "control",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1's Unmake periodic landed",
+      "actor": "dummy_rank1",
+      "metric": "aura",
+      "spell": 503784,
+      "caster": "rank1",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2's Unmake periodic landed",
+      "actor": "dummy_rank2",
+      "metric": "aura",
+      "spell": 503784,
+      "caster": "rank2",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Unmake's snapshotted tick crit chance with no talent",
+      "actor": "dummy_control",
+      "metric": "aura_crit_chance",
+      "spell": 503784,
+      "caster": "control",
+      "effect": 0,
+      "save_as": "unmake_crit"
+    },
+    {
+      "action": "assert",
+      "label": "The untalented control's Unmake ticks already carry a crit chance to add to",
+      "actor": "dummy_control",
+      "metric": "aura_crit_chance",
+      "spell": 503784,
+      "caster": "control",
+      "effect": 0,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1's native Unmake tick crit chance is 5 points above the control",
+      "actor": "dummy_rank1",
+      "metric": "aura_crit_chance",
+      "spell": 503784,
+      "caster": "rank1",
+      "effect": 0,
+      "relative_to": "unmake_crit",
+      "min": 4.9,
+      "max": 5.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2's native Unmake tick crit chance is 10 points above the control",
+      "actor": "dummy_rank2",
+      "metric": "aura_crit_chance",
+      "spell": 503784,
+      "caster": "rank2",
+      "effect": 0,
+      "relative_to": "unmake_crit",
+      "min": 9.9,
+      "max": 10.1
+    }
+  ]
+}

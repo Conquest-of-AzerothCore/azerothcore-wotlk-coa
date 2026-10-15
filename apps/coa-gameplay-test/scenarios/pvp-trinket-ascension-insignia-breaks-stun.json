@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Insignia on Ascension's PvP Trinket 1142292 break a stun like the WotLK trinket 42292",
+  "contract": [
+    "The CoA-mode item cache gives Insignia of the Horde 1118852 and Insignia of the Alliance 1118864 the spell",
+    "1142292 PvP Trinket, which differs from 42292 only in category 1182 and its 45 s category recovery. Its single",
+    "effect names only the charm mechanic, so like 42292 it needs the core's movement-impairment and",
+    "loss-of-control immunity. Expected: once the 30 s equip cooldown has passed, a level 60 player stunned by",
+    "Hammer of Justice 10308 who uses either Insignia is no longer stunned and loses the stun."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8771.9, "y": 412.5, "z": 103.921, "o": 1.57},
+  "players": [
+    {"id": "orc", "race": 2, "class": 1, "level": 60},
+    {"id": "human", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    {"action": "add_item", "actor": "orc", "item": 1118852},
+    {"action": "equip", "actor": "orc", "item": 1118852, "slot": 12},
+    {"action": "add_item", "actor": "human", "item": 1118864},
+    {"action": "equip", "actor": "human", "item": 1118864, "slot": 12},
+    {"action": "wait", "ms": 30500},
+    {"action": "set_aura", "actor": "orc", "spell": 10308, "stacks": 1},
+    {"action": "set_aura", "actor": "human", "spell": 10308, "stacks": 1},
+    {"action": "assert", "label": "The orc is stunned", "actor": "orc", "metric": "stunned", "equals": 1},
+    {"action": "assert", "label": "The human is stunned", "actor": "human", "metric": "stunned", "equals": 1},
+    {"action": "use_item", "actor": "orc", "item": 1118852, "spell": 1142292},
+    {"action": "use_item", "actor": "human", "item": 1118864, "spell": 1142292},
+    {"action": "assert", "label": "Insignia of the Horde breaks the stun", "actor": "orc", "metric": "stunned",
+     "equals": 0, "within_ms": 1000},
+    {"action": "assert", "actor": "orc", "metric": "aura", "spell": 10308, "equals": 0},
+    {"action": "assert", "label": "Insignia of the Alliance breaks the stun", "actor": "human", "metric": "stunned",
+     "equals": 0, "within_ms": 1000},
+    {"action": "assert", "actor": "human", "metric": "aura", "spell": 10308, "equals": 0}
+  ]
+}

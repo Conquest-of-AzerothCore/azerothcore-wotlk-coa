@@ -1,0 +1,680 @@
+{
+  "schema": 1,
+  "name": "Primalist Spiritbound: dodge and parry give five Rage and reduce all Seismic ranks",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "dodge",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "dodge_enemy",
+      "race": 5,
+      "class": 1,
+      "level": 80,
+      "melee_hit_rating": 10000
+    },
+    {
+      "id": "parry",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "parry_enemy",
+      "race": 5,
+      "class": 1,
+      "level": 80,
+      "melee_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "pvp",
+      "actor": "dodge",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "dodge_enemy",
+      "enabled": true
+    },
+    {
+      "action": "learn",
+      "actor": "dodge",
+      "spell": 196
+    },
+    {
+      "action": "add_item",
+      "actor": "dodge",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "dodge",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "specialization",
+      "actor": "dodge",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "dodge",
+      "spell": 681364
+    },
+    {
+      "action": "learn",
+      "actor": "dodge",
+      "spell": 503264
+    },
+    {
+      "action": "learn",
+      "actor": "dodge",
+      "spell": 582532
+    },
+    {
+      "action": "learn",
+      "actor": "dodge",
+      "spell": 807432
+    },
+    {
+      "action": "learn",
+      "actor": "dodge",
+      "spell": 500696
+    },
+    {
+      "action": "set_aura",
+      "actor": "dodge",
+      "spell": 10020,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "dodge",
+      "metric": "dodge_chance",
+      "min": 99
+    },
+    {
+      "action": "cast",
+      "actor": "dodge",
+      "spell": 500696
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "teleport",
+      "actor": "dodge",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "dodge_enemy",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159
+    },
+    {
+      "action": "set_power",
+      "actor": "dodge",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "dodge",
+      "spell": 503264,
+      "target": "dodge_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "dodge",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "target": "dodge_enemy",
+      "label": "crash_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "dodge",
+      "metric": "cooldown_ms",
+      "spell": 503264,
+      "save_as": "dodge_before_503264",
+      "label": "before_503264"
+    },
+    {
+      "action": "snapshot",
+      "actor": "dodge",
+      "metric": "cooldown_ms",
+      "spell": 582532,
+      "save_as": "dodge_before_582532",
+      "label": "before_582532"
+    },
+    {
+      "action": "snapshot",
+      "actor": "dodge",
+      "metric": "cooldown_ms",
+      "spell": 807432,
+      "save_as": "dodge_before_807432",
+      "label": "before_807432"
+    },
+    {
+      "action": "snapshot",
+      "actor": "dodge",
+      "metric": "cooldown_ms",
+      "spell": 500696,
+      "save_as": "dodge_before_500696",
+      "label": "before_500696"
+    },
+    {
+      "action": "snapshot",
+      "actor": "dodge",
+      "metric": "health",
+      "save_as": "dodge_before_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "dodge",
+      "metric": "spell_energize_count",
+      "spell": 521452,
+      "save_as": "dodge_before_rage"
+    },
+    {
+      "action": "snapshot",
+      "actor": "dodge_enemy",
+      "metric": "melee_attack_count",
+      "save_as": "dodge_before_attack"
+    },
+    {
+      "action": "attack",
+      "actor": "dodge_enemy",
+      "target": "dodge"
+    },
+    {
+      "action": "assert",
+      "actor": "dodge_enemy",
+      "metric": "melee_attack_count",
+      "relative_to": "dodge_before_attack",
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "dodge",
+      "metric": "health",
+      "relative_to": "dodge_before_health",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "dodge",
+      "metric": "spell_energize_count",
+      "spell": 521452,
+      "relative_to": "dodge_before_rage",
+      "label": "rage_count",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "dodge",
+      "metric": "spell_energize_total",
+      "spell": 521452,
+      "label": "rage_total",
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "actor": "dodge",
+      "metric": "cooldown_ms",
+      "spell": 503264,
+      "relative_to": "dodge_before_503264",
+      "label": "delta_503264",
+      "min": -1700,
+      "max": -1000
+    },
+    {
+      "action": "assert",
+      "actor": "dodge",
+      "metric": "cooldown_ms",
+      "spell": 582532,
+      "relative_to": "dodge_before_582532",
+      "label": "delta_582532",
+      "min": -1700,
+      "max": -1000
+    },
+    {
+      "action": "assert",
+      "actor": "dodge",
+      "metric": "cooldown_ms",
+      "spell": 807432,
+      "relative_to": "dodge_before_807432",
+      "label": "delta_807432",
+      "min": -1700,
+      "max": -1000
+    },
+    {
+      "action": "assert",
+      "actor": "dodge",
+      "metric": "cooldown_ms",
+      "spell": 500696,
+      "relative_to": "dodge_before_500696",
+      "label": "delta_500696",
+      "min": -700,
+      "max": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "dodge",
+      "spell": 681364
+    },
+    {
+      "action": "snapshot",
+      "actor": "dodge",
+      "metric": "spell_energize_count",
+      "spell": 521452,
+      "save_as": "dodge_removed_rage"
+    },
+    {
+      "action": "snapshot",
+      "actor": "dodge_enemy",
+      "metric": "melee_attack_count",
+      "save_as": "dodge_removed_attacks"
+    },
+    {
+      "action": "snapshot",
+      "actor": "dodge",
+      "metric": "cooldown_ms",
+      "spell": 503264,
+      "save_as": "dodge_removed_cd"
+    },
+    {
+      "action": "snapshot",
+      "actor": "dodge",
+      "metric": "cooldown_ms",
+      "spell": 500696,
+      "save_as": "dodge_removed_control"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "dodge_enemy",
+      "metric": "melee_attack_count",
+      "relative_to": "dodge_removed_attacks",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "dodge",
+      "metric": "spell_energize_count",
+      "spell": 521452,
+      "relative_to": "dodge_removed_rage",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "dodge",
+      "metric": "cooldown_ms",
+      "spell": 503264,
+      "relative_to": "dodge_removed_cd",
+      "save_as": "dodge_removed_cd_delta",
+      "label": "dodge_removed_cd_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "dodge",
+      "metric": "cooldown_ms",
+      "spell": 500696,
+      "relative_to": "dodge_removed_control",
+      "save_as": "dodge_removed_control_delta",
+      "label": "dodge_removed_control_delta"
+    },
+    {
+      "action": "pvp",
+      "actor": "parry",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "parry_enemy",
+      "enabled": true
+    },
+    {
+      "action": "learn",
+      "actor": "parry",
+      "spell": 196
+    },
+    {
+      "action": "add_item",
+      "actor": "parry",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "parry",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "specialization",
+      "actor": "parry",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "parry",
+      "spell": 681364
+    },
+    {
+      "action": "learn",
+      "actor": "parry",
+      "spell": 503264
+    },
+    {
+      "action": "learn",
+      "actor": "parry",
+      "spell": 582532
+    },
+    {
+      "action": "learn",
+      "actor": "parry",
+      "spell": 807432
+    },
+    {
+      "action": "learn",
+      "actor": "parry",
+      "spell": 500696
+    },
+    {
+      "action": "set_aura",
+      "actor": "parry",
+      "spell": 10019,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "parry",
+      "metric": "parry_chance",
+      "min": 99
+    },
+    {
+      "action": "cast",
+      "actor": "parry",
+      "spell": 500696
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "teleport",
+      "actor": "parry",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "parry_enemy",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159
+    },
+    {
+      "action": "set_power",
+      "actor": "parry",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "parry",
+      "spell": 503264,
+      "target": "parry_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "parry",
+      "metric": "spell_damage_count",
+      "spell": 503264,
+      "target": "parry_enemy",
+      "label": "crash_hits",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "parry",
+      "metric": "cooldown_ms",
+      "spell": 503264,
+      "save_as": "parry_before_503264",
+      "label": "before_503264"
+    },
+    {
+      "action": "snapshot",
+      "actor": "parry",
+      "metric": "cooldown_ms",
+      "spell": 582532,
+      "save_as": "parry_before_582532",
+      "label": "before_582532"
+    },
+    {
+      "action": "snapshot",
+      "actor": "parry",
+      "metric": "cooldown_ms",
+      "spell": 807432,
+      "save_as": "parry_before_807432",
+      "label": "before_807432"
+    },
+    {
+      "action": "snapshot",
+      "actor": "parry",
+      "metric": "cooldown_ms",
+      "spell": 500696,
+      "save_as": "parry_before_500696",
+      "label": "before_500696"
+    },
+    {
+      "action": "snapshot",
+      "actor": "parry",
+      "metric": "health",
+      "save_as": "parry_before_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "parry",
+      "metric": "spell_energize_count",
+      "spell": 521452,
+      "save_as": "parry_before_rage"
+    },
+    {
+      "action": "snapshot",
+      "actor": "parry_enemy",
+      "metric": "melee_attack_count",
+      "save_as": "parry_before_attack"
+    },
+    {
+      "action": "attack",
+      "actor": "parry_enemy",
+      "target": "parry"
+    },
+    {
+      "action": "assert",
+      "actor": "parry_enemy",
+      "metric": "melee_attack_count",
+      "relative_to": "parry_before_attack",
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "parry",
+      "metric": "health",
+      "relative_to": "parry_before_health",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "parry",
+      "metric": "spell_energize_count",
+      "spell": 521452,
+      "relative_to": "parry_before_rage",
+      "label": "rage_count",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "parry",
+      "metric": "spell_energize_total",
+      "spell": 521452,
+      "label": "rage_total",
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "actor": "parry",
+      "metric": "cooldown_ms",
+      "spell": 503264,
+      "relative_to": "parry_before_503264",
+      "label": "delta_503264",
+      "min": -1700,
+      "max": -1000
+    },
+    {
+      "action": "assert",
+      "actor": "parry",
+      "metric": "cooldown_ms",
+      "spell": 582532,
+      "relative_to": "parry_before_582532",
+      "label": "delta_582532",
+      "min": -1700,
+      "max": -1000
+    },
+    {
+      "action": "assert",
+      "actor": "parry",
+      "metric": "cooldown_ms",
+      "spell": 807432,
+      "relative_to": "parry_before_807432",
+      "label": "delta_807432",
+      "min": -1700,
+      "max": -1000
+    },
+    {
+      "action": "assert",
+      "actor": "parry",
+      "metric": "cooldown_ms",
+      "spell": 500696,
+      "relative_to": "parry_before_500696",
+      "label": "delta_500696",
+      "min": -700,
+      "max": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "parry",
+      "spell": 681364
+    },
+    {
+      "action": "snapshot",
+      "actor": "parry",
+      "metric": "spell_energize_count",
+      "spell": 521452,
+      "save_as": "parry_removed_rage"
+    },
+    {
+      "action": "snapshot",
+      "actor": "parry_enemy",
+      "metric": "melee_attack_count",
+      "save_as": "parry_removed_attacks"
+    },
+    {
+      "action": "snapshot",
+      "actor": "parry",
+      "metric": "cooldown_ms",
+      "spell": 503264,
+      "save_as": "parry_removed_cd"
+    },
+    {
+      "action": "snapshot",
+      "actor": "parry",
+      "metric": "cooldown_ms",
+      "spell": 500696,
+      "save_as": "parry_removed_control"
+    },
+    {
+      "action": "wait",
+      "ms": 2200
+    },
+    {
+      "action": "assert",
+      "actor": "parry_enemy",
+      "metric": "melee_attack_count",
+      "relative_to": "parry_removed_attacks",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "parry",
+      "metric": "spell_energize_count",
+      "spell": 521452,
+      "relative_to": "parry_removed_rage",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "parry",
+      "metric": "cooldown_ms",
+      "spell": 503264,
+      "relative_to": "parry_removed_cd",
+      "save_as": "parry_removed_cd_delta",
+      "label": "parry_removed_cd_delta"
+    },
+    {
+      "action": "snapshot",
+      "actor": "parry",
+      "metric": "cooldown_ms",
+      "spell": 500696,
+      "relative_to": "parry_removed_control",
+      "save_as": "parry_removed_control_delta",
+      "label": "parry_removed_control_delta"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Storm Channeling raises Stormcloak's Intellect-to-armor modifier (#3344)",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "p1", "race": 8, "class": 16, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    {
+      "action": "assert", "label": "BASELINE: Stormcloak effect 2 (armor-from-Intellect base) is 1 without Storm Channeling",
+      "actor": "p1", "metric": "spell_effect_value", "spell": 805161, "effect": 2, "equals": 1
+    },
+    { "action": "learn", "actor": "p1", "spell": 804040 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Storm Channeling's SPELLMOD_EFFECT3 modifier (805161 eff0, base 499+1=500) raises Stormcloak effect 2 from 1 to 501",
+      "actor": "p1", "metric": "spell_effect_value", "spell": 805161, "effect": 2, "equals": 501
+    },
+    { "action": "learn", "actor": "p1", "spell": 804833 },
+    {
+      "action": "cast", "actor": "p1", "spell": 804833
+    },
+    {
+      "action": "assert", "label": "The linked companion aura 805161 is applied on cast (spell_linked_spell type 2)",
+      "actor": "p1", "metric": "aura", "spell": 805161, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the live companion aura carries the Storm-Channeling-modified 501, not the unmodified 1",
+      "actor": "p1", "metric": "aura_amount", "spell": 805161, "effect": 2, "equals": 501, "within_ms": 3000
+    }
+  ],
+  "contract": "#3344: Storm Channeling (804040) is SPELL_ATTR0_PASSIVE, effect 0 SPELL_AURA_ADD_FLAT_MODIFIER (107), EffectMiscValue 23 = SPELLMOD_EFFECT3, EffectBasePoints 499 + DieSides 1 = 500, EffectSpellClassMask[1] = 0x02000000. The only SpellFamilyName-22 row carrying that class mask bit is Stormcloak's companion aura 805161, whose effect 2 is SPELL_AURA_MOD_RESISTANCE_OF_STAT_PERCENT (182, MiscValue 1 = SPELL_SCHOOL_MASK_NORMAL i.e. armor, MiscValueB 3 = STAT_INTELLECT) with EffectBasePoints 0 + DieSides 1, i.e. a native SpellEffectInfo::CalcValue base of 1. AuraEffect::CalculateSpellMod (SpellAuraEffects.cpp:771-801) builds the SPELLMOD_EFFECT3 modifier generically from Storm Channeling's DBC row once it is learned, and Unit::ApplyEffectModifiers (Unit.cpp:12162-12164) routes 805161's effect index 2 through it, raising 1 to 1+500=501; the description's 500% figure omits the DieSides-1 base, a 0.2% tooltip rounding gap, not the reported failure. Stormcloak (804833) applies 805161 on itself through the existing spell_linked_spell row (data/sql/updates/pending_db_world/rev_1789379311228000700.sql:167,171, type 2 = SPELL_LINK_AURA) at SpellAuras.cpp:1256-1268, so the live companion aura carries the modified value, not just the static DBC row. No module code is involved anywhere on this chain; this is a regression scenario only, no code change. This passive's uptime depends on #3451 (Stormcloak's own barrier is stripped by the first hit taken, removing the linked 805161 with it), tracked separately and not fixed here."
+}

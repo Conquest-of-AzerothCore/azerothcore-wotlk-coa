@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Devoted to the Sun cuts Solar Invocation cooldowns by 5 seconds (#2228)",
+  "contract": "Devoted to the Sun 681066 (Spell.dbc, SpellFamilyName 33) carries SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue SPELLMOD_COOLDOWN (11), EffectSpellClassMask word A = 294912 (bits 15 and 18), word B = 128 (bit 7), word C = 524290 (bits 1 and 19), EffectBasePoints -5001 resolving to -5000 (milliseconds). The four Solar Invocation spells the module's own Invocation() helper (AscensionSunCleric.cpp) recognizes each carry a matching bit: Conquest 800764 (word C = 524288, bit 19), Ascension 500152 (word B = 128, bit 7), Revelation 503651 (word A = 262144, bit 18) and Resplendence 806159 (word A = 262144, bit 18). SpellInfo::IsAffected(33, mask) admits all four. Native path: Player::ApplySpellMod(spellInfo->Id, SPELLMOD_COOLDOWN, recovery, spell) (Player.cpp) is called whenever any of these spells' cooldown is set, with no script required. This scenario drives that call through the harness's spell_modifier metric.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "Conquest cooldown modifier is zero before the talent",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 800764, "op": 11, "base": 0, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Ascension cooldown modifier is zero before the talent",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 500152, "op": 11, "base": 0, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Revelation cooldown modifier is zero before the talent",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 503651, "op": 11, "base": 0, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Resplendence cooldown modifier is zero before the talent",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 806159, "op": 11, "base": 0, "equals": 0
+    },
+    { "action": "learn", "actor": "cleric", "spell": 681066 },
+    {
+      "action": "assert", "label": "Devoted to the Sun cuts Conquest's cooldown by 5000ms",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 800764, "op": 11, "base": 0, "equals": -5000
+    },
+    {
+      "action": "assert", "label": "Devoted to the Sun cuts Ascension's cooldown by 5000ms",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 500152, "op": 11, "base": 0, "equals": -5000
+    },
+    {
+      "action": "assert", "label": "Devoted to the Sun cuts Revelation's cooldown by 5000ms",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 503651, "op": 11, "base": 0, "equals": -5000
+    },
+    {
+      "action": "assert", "label": "Devoted to the Sun cuts Resplendence's cooldown by 5000ms",
+      "actor": "cleric", "metric": "spell_modifier", "spell": 806159, "op": 11, "base": 0, "equals": -5000
+    }
+  ]
+}

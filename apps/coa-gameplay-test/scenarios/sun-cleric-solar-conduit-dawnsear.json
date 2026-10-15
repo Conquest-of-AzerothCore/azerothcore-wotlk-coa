@@ -1,0 +1,375 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Solar Conduit cuts Dawnsear's cast time by 20% while Dawn is active, and Dawn still picks Sunrise or Sunset once (#1562)",
+  "contract": "#1562. Solar Conduit 300321 (Piety talent, CharacterAdvancement 30311): 'Reduces the cast time of Dawnsear by $s1% while Dawn is active.' Its only effect is ADD_FLAT_MODIFIER (107), MiscValue 12 = SPELLMOD_EFFECT2, BasePoints -21 + DieSides 1 = -20, EffectSpellClassMask (0x40, 0, 0), which in family 33 matches only Dawn 807440 (SpellFamilyFlags word 0 = 0x40). Dawn's own effect 1 is ADD_PCT_MODIFIER (108), MiscValue 10 = SPELLMOD_CASTING_TIME, amount 0 (BasePoints -1 + DieSides 1), mask (0, 2, 0) = Dawnsear 500146's SpellFamilyFlags word 1. So the authored chain is: Solar Conduit sets Dawn's effect-1 amount to -20, and Dawn's aura then shortens Dawnsear's 3500 ms cast (SpellCastTimes 22) to 2800 ms for as long as Dawn exists; without the talent Dawn's modifier is 0 and changes nothing. Dawn is armed through its real cast, Dawn 804584 with 20 Solar Power. Sunrise and Sunset 92135 (Piety) keeps its behavior: the first Holy or Fire cast after Dawn is armed picks the buff for that school (Fire Dawnsear -> Sunset 500511, Holy Sunflare 800231 -> Sunrise 500477, removing the other), once per Dawn; a later cast of the other school under the same Dawn does not switch it, and a new Dawn arms the choice again. A control cleric without Solar Conduit arms Dawn the same way.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "conduit",
+      "race": 1,
+      "class": 27,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "plain",
+      "race": 1,
+      "class": 27,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "conduit",
+      "entry": 36,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "conduit",
+      "spell": 804584
+    },
+    {
+      "action": "learn",
+      "actor": "conduit",
+      "spell": 500146
+    },
+    {
+      "action": "learn",
+      "actor": "conduit",
+      "spell": 800231
+    },
+    {
+      "action": "learn",
+      "actor": "conduit",
+      "spell": 92135
+    },
+    {
+      "action": "learn",
+      "actor": "conduit",
+      "spell": 300321
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 804584
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 500146
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 800231
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 92135
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Solar Conduit's passive is on the talented cleric",
+      "actor": "conduit",
+      "metric": "aura",
+      "spell": 300321,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "Dawnsear's cast time on the untalented cleric, without Dawn",
+      "actor": "plain",
+      "metric": "spell_cast_time_ms",
+      "spell": 500146,
+      "save_as": "dawnsear_base"
+    },
+    {
+      "action": "assert",
+      "label": "Solar Conduit alone leaves Dawnsear's cast time unchanged outside Dawn",
+      "actor": "conduit",
+      "metric": "spell_cast_time_ms",
+      "spell": 500146,
+      "ratio_to": "dawnsear_base",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "set_aura",
+      "label": "Fill Solar Power",
+      "actor": "conduit",
+      "spell": 500149,
+      "stacks": 20
+    },
+    {
+      "action": "set_aura",
+      "label": "Fill Solar Power",
+      "actor": "plain",
+      "spell": 500149,
+      "stacks": 20
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: 20 Solar Power arms the Dawn requirement 704396",
+      "actor": "conduit",
+      "metric": "aura",
+      "spell": 704396,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Arm Dawn",
+      "actor": "conduit",
+      "spell": 804584
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: 20 Solar Power arms the Dawn requirement 704396",
+      "actor": "plain",
+      "metric": "aura",
+      "spell": 704396,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Arm Dawn",
+      "actor": "plain",
+      "spell": 804584
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Dawn is active on the talented cleric",
+      "actor": "conduit",
+      "metric": "aura",
+      "spell": 807440,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Dawn is active on the control cleric",
+      "actor": "plain",
+      "metric": "aura",
+      "spell": 807440,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Solar Conduit sets Dawn's Dawnsear cast-time modifier to -20%",
+      "actor": "conduit",
+      "metric": "aura_amount",
+      "spell": 807440,
+      "effect": 1,
+      "min": -20.01,
+      "max": -19.99
+    },
+    {
+      "action": "assert",
+      "label": "Without Solar Conduit Dawn's Dawnsear cast-time modifier is 0",
+      "actor": "plain",
+      "metric": "aura_amount",
+      "spell": 807440,
+      "effect": 1,
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "assert",
+      "label": "While Dawn is active Solar Conduit cuts Dawnsear's cast time by 20%",
+      "actor": "conduit",
+      "metric": "spell_cast_time_ms",
+      "spell": 500146,
+      "ratio_to": "dawnsear_base",
+      "min": 0.795,
+      "max": 0.805
+    },
+    {
+      "action": "assert",
+      "label": "Dawn alone does not change Dawnsear's cast time",
+      "actor": "plain",
+      "metric": "spell_cast_time_ms",
+      "spell": 500146,
+      "ratio_to": "dawnsear_base",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Sunrise or Sunset before the first cast under Dawn",
+      "actor": "conduit",
+      "metric": "aura",
+      "spell": 500511,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let Dawn's global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Fire: Dawnsear under Dawn",
+      "actor": "conduit",
+      "spell": 500146,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "The real Dawnsear cast runs on the shortened 2.8 s timer",
+      "actor": "conduit",
+      "metric": "cast_remaining_ms",
+      "spell": 500146,
+      "min": 2500,
+      "max": 2800
+    },
+    {
+      "action": "assert",
+      "label": "The first Fire cast under Dawn picks Sunset",
+      "actor": "conduit",
+      "metric": "aura",
+      "spell": 500511,
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Picking Sunset does not also grant Sunrise",
+      "actor": "conduit",
+      "metric": "aura",
+      "spell": 500477,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let Dawnsear's global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "actor": "conduit",
+      "metric": "spell_cast_count",
+      "spell": 800231,
+      "save_as": "sunflare_casts"
+    },
+    {
+      "action": "cast",
+      "label": "Holy: Sunflare under the same Dawn",
+      "actor": "conduit",
+      "spell": 800231,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Holy Sunflare cast completes",
+      "actor": "conduit",
+      "metric": "spell_cast_count",
+      "spell": 800231,
+      "relative_to": "sunflare_casts",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The choice is made once per Dawn: a later Holy cast does not switch to Sunrise",
+      "actor": "conduit",
+      "metric": "aura",
+      "spell": 500477,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Sunset stays",
+      "actor": "conduit",
+      "metric": "aura",
+      "spell": 500511,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "End the first Dawn",
+      "actor": "conduit",
+      "spell": 807440,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Dawnsear's cast time returns to normal once Dawn ends",
+      "actor": "conduit",
+      "metric": "spell_cast_time_ms",
+      "spell": 500146,
+      "ratio_to": "dawnsear_base",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "set_aura",
+      "label": "Refill Solar Power",
+      "actor": "conduit",
+      "spell": 500149,
+      "stacks": 20
+    },
+    {
+      "action": "wait",
+      "label": "Let Sunflare's global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Arm a new Dawn",
+      "actor": "conduit",
+      "spell": 804584
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the new Dawn is active",
+      "actor": "conduit",
+      "metric": "aura",
+      "spell": 807440,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let Dawn's global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Holy: Sunflare first under the new Dawn",
+      "actor": "conduit",
+      "spell": 800231,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "A new Dawn arms the choice again: the first Holy cast picks Sunrise",
+      "actor": "conduit",
+      "metric": "aura",
+      "spell": 500477,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Picking Sunrise removes Sunset",
+      "actor": "conduit",
+      "metric": "aura",
+      "spell": 500511,
+      "equals": 0
+    }
+  ]
+}

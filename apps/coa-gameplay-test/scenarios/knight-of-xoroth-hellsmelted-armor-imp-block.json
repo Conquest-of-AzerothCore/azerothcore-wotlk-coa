@@ -1,0 +1,392 @@
+{
+  "schema": 1,
+  "name": "Hellsmelted Armor raises block chance for each active Hellfire Imp at both ranks (#746)",
+  "contract": "Hellsmelted Armor is CharacterAdvancement 6620 (Defiance) with ranks 706569 and 707836. Rank 1 reads 'Each Hellfire Imp active now increases your chance to block by $302546s1%. In addition, increases your chance to block by $s2% at all times.'; rank 2 reads the same with $302546s2%. In Spell.dbc both ranks carry two SPELL_AURA_MOD_BLOCK_PERCENT (51) effects: effect 0 BasePoints -1 DieSides 1 = 0 and effect 1 = 5 (rank 1) or 10 (rank 2). Hellfire Imp Hidden Aura 302546 resolves s1 = 1 (BasePoints 0, DieSides 1) and s2 = 2 (BasePoints 1, DieSides 1); its two SPELLMOD_EFFECT1 effects target rank 1 (class mask dword2 0x8000) and rank 2 (dword0 0x10000) respectively. Expected: rank 1 blocks +5% always and +1% per living imp, rank 2 blocks +10% always and +2% per living imp, and the per-imp part ends with the imps (805966 lasts 12 sec). A rank above 1 replaces the lower rank spell (SetTalentRank), and the server chain of 706569 comes from Talent.dbc 35742 (706569 -> 706570), so rank 2 707836 is not in it. Each knight holds a shield (Block 107, shield proficiency 9116), and Defense is pinned at its level-60 maximum (300), so block_chance reads the unclamped native block percentage; each Call: Hellfire Imp (804883) cast summons one imp.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "rank1",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    },
+    {
+      "id": "rank2",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_skill",
+      "label": "Defense at its level maximum, so the block base is not clamped at zero",
+      "actor": "rank1",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "label": "Block, needed for CanBlock",
+      "actor": "rank1",
+      "spell": 107
+    },
+    {
+      "action": "learn",
+      "label": "Shield proficiency",
+      "actor": "rank1",
+      "spell": 9116
+    },
+    {
+      "action": "add_item",
+      "actor": "rank1",
+      "item": 629951
+    },
+    {
+      "action": "equip",
+      "label": "Swap the class's two-handed starter weapon for a one-hander so a shield can be equipped",
+      "actor": "rank1",
+      "item": 629951,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "rank1",
+      "item": 2362
+    },
+    {
+      "action": "equip",
+      "label": "Equip a shield in the off hand",
+      "actor": "rank1",
+      "item": 2362,
+      "slot": 16
+    },
+    {
+      "action": "set_skill",
+      "label": "Defense at its level maximum, so the block base is not clamped at zero",
+      "actor": "rank2",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "label": "Block, needed for CanBlock",
+      "actor": "rank2",
+      "spell": 107
+    },
+    {
+      "action": "learn",
+      "label": "Shield proficiency",
+      "actor": "rank2",
+      "spell": 9116
+    },
+    {
+      "action": "add_item",
+      "actor": "rank2",
+      "item": 629951
+    },
+    {
+      "action": "equip",
+      "label": "Swap the class's two-handed starter weapon for a one-hander so a shield can be equipped",
+      "actor": "rank2",
+      "item": 629951,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "rank2",
+      "item": 2362
+    },
+    {
+      "action": "equip",
+      "label": "Equip a shield in the off hand",
+      "actor": "rank2",
+      "item": 2362,
+      "slot": 16
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 804883
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 804883
+    },
+    {
+      "action": "set_power",
+      "actor": "rank1",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "rank2",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Let the equipment update settle",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: rank 1 knight can block",
+      "actor": "rank1",
+      "metric": "block_chance",
+      "min": 0.01
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: rank 2 knight can block",
+      "actor": "rank2",
+      "metric": "block_chance",
+      "min": 0.01
+    },
+    {
+      "action": "snapshot",
+      "actor": "rank1",
+      "metric": "block_chance",
+      "save_as": "rank1_block_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rank2",
+      "metric": "block_chance",
+      "save_as": "rank2_block_base"
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 706569
+    },
+    {
+      "action": "set_aura",
+      "label": "Force the rank 1 passive aura",
+      "actor": "rank1",
+      "spell": 706569,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 707836
+    },
+    {
+      "action": "set_aura",
+      "label": "Force the rank 2 passive aura",
+      "actor": "rank2",
+      "spell": 707836,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the passives settle",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: rank 1 is active",
+      "actor": "rank1",
+      "metric": "aura",
+      "spell": 706569,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: rank 2 is active",
+      "actor": "rank2",
+      "metric": "aura",
+      "spell": 707836,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no imps are out yet",
+      "actor": "rank2",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: rank 1 blocks 5% more at all times",
+      "actor": "rank1",
+      "metric": "block_chance",
+      "relative_to": "rank1_block_base",
+      "min": 4.99,
+      "max": 5.01
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: rank 2 blocks 10% more at all times",
+      "actor": "rank2",
+      "metric": "block_chance",
+      "relative_to": "rank2_block_base",
+      "min": 9.99,
+      "max": 10.01
+    },
+    {
+      "action": "cast",
+      "label": "Call: Hellfire Imp (first imp)",
+      "actor": "rank1",
+      "spell": 804883
+    },
+    {
+      "action": "cast",
+      "label": "Call: Hellfire Imp (first imp)",
+      "actor": "rank2",
+      "spell": 804883
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: rank 1 knight has one imp",
+      "actor": "rank1",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: rank 2 knight has one imp",
+      "actor": "rank2",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: one imp adds 1% block at rank 1 (5 + 1)",
+      "actor": "rank1",
+      "metric": "block_chance",
+      "relative_to": "rank1_block_base",
+      "min": 5.99,
+      "max": 6.01,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: one imp adds 2% block at rank 2 (10 + 2)",
+      "actor": "rank2",
+      "metric": "block_chance",
+      "relative_to": "rank2_block_base",
+      "min": 11.99,
+      "max": 12.01,
+      "within_ms": 1500
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rank1",
+      "spell": 804883
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rank2",
+      "spell": 804883
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Call: Hellfire Imp (second imp)",
+      "actor": "rank1",
+      "spell": 804883
+    },
+    {
+      "action": "cast",
+      "label": "Call: Hellfire Imp (second imp)",
+      "actor": "rank2",
+      "spell": 804883
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: rank 1 knight has two imps",
+      "actor": "rank1",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: rank 2 knight has two imps",
+      "actor": "rank2",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: two imps add 2% block at rank 1 (5 + 2)",
+      "actor": "rank1",
+      "metric": "block_chance",
+      "relative_to": "rank1_block_base",
+      "min": 6.99,
+      "max": 7.01,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: two imps add 4% block at rank 2 (10 + 4)",
+      "actor": "rank2",
+      "metric": "block_chance",
+      "relative_to": "rank2_block_base",
+      "min": 13.99,
+      "max": 14.01,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the imps expire",
+      "actor": "rank2",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: rank 1 knight's imps expire",
+      "actor": "rank1",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: without imps rank 2 keeps only its 10%",
+      "actor": "rank2",
+      "metric": "block_chance",
+      "relative_to": "rank2_block_base",
+      "min": 9.99,
+      "max": 10.01,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: without imps rank 1 keeps only its 5%",
+      "actor": "rank1",
+      "metric": "block_chance",
+      "relative_to": "rank1_block_base",
+      "min": 4.99,
+      "max": 5.01,
+      "within_ms": 1500
+    }
+  ]
+}

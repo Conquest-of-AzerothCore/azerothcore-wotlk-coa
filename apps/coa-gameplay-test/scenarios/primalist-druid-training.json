@@ -1,0 +1,1024 @@
+{
+  "schema": 1,
+  "name": "Primalist Druid Training Geode healing around the caster",
+  "contract": [
+    "Each of three real Geode Barrage stones heals the caster and every tested ally within twenty yards for",
+    "10% of damage dealt. A farther ally and the enemy receive none. Compare the spell-power bonus using the",
+    "same fixed base damage before each normal cast. Healing remains 10% of the actual stone damage without",
+    "another healing coefficient; baseline and removal produce no helper heals."
+  ],
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "near",
+      "race": 1,
+      "class": 8,
+      "level": 80
+    },
+    {
+      "id": "edge",
+      "race": 1,
+      "class": 8,
+      "level": 80
+    },
+    {
+      "id": "far",
+      "race": 1,
+      "class": 8,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "timeout_ms": 120000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 58
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 82888,
+      "stacks": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 707560,
+      "all_specs": true
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 502777
+    },
+    {
+      "action": "teleport",
+      "actor": "near",
+      "map": 0,
+      "x": -9617.06,
+      "y": -283.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "edge",
+      "map": 0,
+      "x": -9617.06,
+      "y": -269.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "far",
+      "map": 0,
+      "x": -9617.06,
+      "y": -264.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 707560
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "primalist",
+      "save_as": "baseline_primalist_n0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "primalist",
+      "save_as": "baseline_primalist_h0"
+    },
+    {
+      "action": "set_health",
+      "actor": "near",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "near",
+      "save_as": "baseline_near_n0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "near",
+      "save_as": "baseline_near_h0"
+    },
+    {
+      "action": "set_health",
+      "actor": "edge",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "edge",
+      "save_as": "baseline_edge_n0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "edge",
+      "save_as": "baseline_edge_h0"
+    },
+    {
+      "action": "set_health",
+      "actor": "far",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "far",
+      "save_as": "baseline_far_n0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "far",
+      "save_as": "baseline_far_h0"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "baseline_d0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "baseline_n0"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502777,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 4500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "relative_to": "baseline_n0",
+      "equals": 3
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 803138,
+      "target": "target",
+      "relative_to": "baseline_d0",
+      "save_as": "baseline_damage"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "primalist",
+      "relative_to": "baseline_primalist_n0",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "primalist",
+      "relative_to": "baseline_primalist_h0",
+      "save_as": "baseline_primalist_healed"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "near",
+      "relative_to": "baseline_near_n0",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "near",
+      "relative_to": "baseline_near_h0",
+      "save_as": "baseline_near_healed"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "edge",
+      "relative_to": "baseline_edge_n0",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "edge",
+      "relative_to": "baseline_edge_h0",
+      "save_as": "baseline_edge_healed"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "far",
+      "relative_to": "baseline_far_n0",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "far",
+      "relative_to": "baseline_far_h0",
+      "save_as": "baseline_far_healed"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 707560
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "primalist",
+      "save_as": "talented_primalist_n0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "primalist",
+      "save_as": "talented_primalist_h0"
+    },
+    {
+      "action": "set_health",
+      "actor": "near",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "near",
+      "save_as": "talented_near_n0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "near",
+      "save_as": "talented_near_h0"
+    },
+    {
+      "action": "set_health",
+      "actor": "edge",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "edge",
+      "save_as": "talented_edge_n0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "edge",
+      "save_as": "talented_edge_h0"
+    },
+    {
+      "action": "set_health",
+      "actor": "far",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "far",
+      "save_as": "talented_far_n0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "far",
+      "save_as": "talented_far_h0"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "talented_d0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "talented_n0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "talented_source_damage"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502777,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 4500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "relative_to": "talented_n0",
+      "equals": 3
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 803138,
+      "target": "target",
+      "relative_to": "talented_d0",
+      "save_as": "talented_damage"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "primalist",
+      "relative_to": "talented_primalist_n0",
+      "equals": 3
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "primalist",
+      "relative_to": "talented_primalist_h0",
+      "save_as": "talented_primalist_healed"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "near",
+      "relative_to": "talented_near_n0",
+      "equals": 3
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "near",
+      "relative_to": "talented_near_h0",
+      "save_as": "talented_near_healed"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "edge",
+      "relative_to": "talented_edge_n0",
+      "equals": 3
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "edge",
+      "relative_to": "talented_edge_h0",
+      "save_as": "talented_edge_healed"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "far",
+      "relative_to": "talented_far_n0",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "far",
+      "relative_to": "talented_far_h0",
+      "save_as": "talented_far_healed"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 707560
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 26395,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 38305,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "primalist",
+      "save_as": "power_primalist_n0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "primalist",
+      "save_as": "power_primalist_h0"
+    },
+    {
+      "action": "set_health",
+      "actor": "near",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "near",
+      "save_as": "power_near_n0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "near",
+      "save_as": "power_near_h0"
+    },
+    {
+      "action": "set_health",
+      "actor": "edge",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "edge",
+      "save_as": "power_edge_n0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "edge",
+      "save_as": "power_edge_h0"
+    },
+    {
+      "action": "set_health",
+      "actor": "far",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "far",
+      "save_as": "power_far_n0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "far",
+      "save_as": "power_far_h0"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "power_d0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "power_n0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "power_source_damage"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502777,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 4500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "relative_to": "power_n0",
+      "equals": 3
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 803138,
+      "target": "target",
+      "relative_to": "power_d0",
+      "save_as": "power_damage"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "primalist",
+      "relative_to": "power_primalist_n0",
+      "equals": 3
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "primalist",
+      "relative_to": "power_primalist_h0",
+      "save_as": "power_primalist_healed"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "near",
+      "relative_to": "power_near_n0",
+      "equals": 3
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "near",
+      "relative_to": "power_near_h0",
+      "save_as": "power_near_healed"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "edge",
+      "relative_to": "power_edge_n0",
+      "equals": 3
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "edge",
+      "relative_to": "power_edge_h0",
+      "save_as": "power_edge_healed"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "far",
+      "relative_to": "power_far_n0",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "far",
+      "relative_to": "power_far_h0",
+      "save_as": "power_far_healed"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 707560
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "primalist",
+      "save_as": "removed_primalist_n0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "primalist",
+      "save_as": "removed_primalist_h0"
+    },
+    {
+      "action": "set_health",
+      "actor": "near",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "near",
+      "save_as": "removed_near_n0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "near",
+      "save_as": "removed_near_h0"
+    },
+    {
+      "action": "set_health",
+      "actor": "edge",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "edge",
+      "save_as": "removed_edge_n0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "edge",
+      "save_as": "removed_edge_h0"
+    },
+    {
+      "action": "set_health",
+      "actor": "far",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "far",
+      "save_as": "removed_far_n0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "far",
+      "save_as": "removed_far_h0"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "removed_d0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "removed_n0"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 502777,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 4500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "target",
+      "relative_to": "removed_n0",
+      "equals": 3
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 803138,
+      "target": "target",
+      "relative_to": "removed_d0",
+      "save_as": "removed_damage"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "primalist",
+      "relative_to": "removed_primalist_n0",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "primalist",
+      "relative_to": "removed_primalist_h0",
+      "save_as": "removed_primalist_healed"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "near",
+      "relative_to": "removed_near_n0",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "near",
+      "relative_to": "removed_near_h0",
+      "save_as": "removed_near_healed"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "edge",
+      "relative_to": "removed_edge_n0",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "edge",
+      "relative_to": "removed_edge_h0",
+      "save_as": "removed_edge_healed"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "far",
+      "relative_to": "removed_far_n0",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_heal_total",
+      "spell": 712433,
+      "target": "far",
+      "relative_to": "removed_far_h0",
+      "save_as": "removed_far_healed"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 712433,
+      "target": "target",
+      "equals": 0
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

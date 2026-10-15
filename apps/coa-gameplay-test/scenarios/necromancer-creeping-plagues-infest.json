@@ -1,0 +1,125 @@
+{
+  "schema": 1,
+  "name": "Necromancer Creeping Plagues lets one Virulency Infest an additional target (#1169)",
+  "contract": "Creeping Plagues 572130 is a Death-tab talent (CharacterAdvancement 30917, ClassType 25 = class 23, Tab 59, TalentEssenceCost 1, SpellFamilyName 29) whose description reads 'You may now Infest an additional target after using Virulency.' Its only effect is SPELL_AURA_ADD_FLAT_MODIFIER (107) MiscValue 4 (SPELLMOD_CHARGES), BasePoints 0 + DieSides 1 = +1, EffectSpellClassMask (0, 0x10, 0) in family 29, which matches exactly Virulency 801938, Infestation 803782 and the passive Blood and Ice 561164 (family flags word 1 = 0x10). Virulency (Death talent CharacterAdvancement 30804) reads 'Reinvigorate your diseases, refreshing all diseases on the target enemy and copying them ... You may use this ability again within 10 sec to Infest another target, applying the copied diseases.'; the copy is carried by the 10 sec self aura Infestation 803782 (DBC ProcCharges 0, no proc flags) whose description reads 'Your next use of Virulency within 10 sec will allow you to Infest another target'. Aura::CalcMaxCharges applies the caster's SPELLMOD_CHARGES, so with the talent the Infestation aura carries one charge: one extra Infest. Expected: without the talent one Virulency lets exactly one target be infested (the Infestation aura and the Virulency -> Infest 803781 replacement end after it); with the talent the same Virulency lets a first Infest copy the disease and keeps Infestation and the Infest replacement, and a second Infest on another target also receives the copied Flesh to Worms 500338 (Dispel 3, a Necromancer disease), after which Infestation ends. The Infest casts are submitted as Virulency 801938, the button the client keeps on the bar, so they go through the server's temporary spell replacement.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "source", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 8 },
+    { "id": "control_target", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 10 },
+    { "id": "first_target", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 12 },
+    { "id": "additional_target", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 14 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "necro", "spell": 500338 },
+    { "action": "learn", "actor": "necro", "spell": 801938 },
+    {
+      "action": "assert", "label": "SETUP: the fixture does not have Creeping Plagues yet", "actor": "necro",
+      "metric": "aura", "spell": 572130, "equals": 0
+    },
+    { "action": "cast", "label": "Disease the source", "actor": "necro", "spell": 500338, "target": "source" },
+    {
+      "action": "assert", "label": "SETUP: the source carries Flesh to Worms", "actor": "source",
+      "metric": "aura", "spell": 500338, "caster": "necro", "equals": 1, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    {
+      "action": "cast", "label": "Virulency copies the disease", "actor": "necro", "spell": 801938, "target": "source"
+    },
+    {
+      "action": "assert", "label": "SETUP: Virulency grants Infestation", "actor": "necro",
+      "metric": "aura", "spell": 803782, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTROL: without the talent Infestation carries no extra charge", "actor": "necro",
+      "metric": "aura_charges", "spell": 803782, "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: Virulency is replaced by Infest", "actor": "necro",
+      "metric": "temporary_spell_replacement", "spell": 801938, "equals": 803781
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    {
+      "action": "cast", "label": "Infest the control target", "actor": "necro", "spell": 801938,
+      "target": "control_target"
+    },
+    {
+      "action": "assert", "label": "CONTROL: Infest applies the copied disease", "actor": "control_target",
+      "metric": "aura", "spell": 500338, "caster": "necro", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTROL: without the talent one Infest ends Infestation", "actor": "necro",
+      "metric": "aura", "spell": 803782, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "CONTROL: without the talent Virulency returns to the bar", "actor": "necro",
+      "metric": "temporary_spell_replacement", "spell": 801938, "equals": 801938
+    },
+    { "action": "learn", "actor": "necro", "spell": 572130 },
+    {
+      "action": "assert", "label": "The talent aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 572130, "equals": 1, "within_ms": 2000
+    },
+    { "action": "reset_cooldown", "actor": "necro", "spell": 801938 },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    {
+      "action": "cast", "label": "Refresh the source's disease", "actor": "necro", "spell": 500338, "target": "source"
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    {
+      "action": "assert", "label": "SETUP: the source still carries Flesh to Worms", "actor": "source",
+      "metric": "aura", "spell": 500338, "caster": "necro", "equals": 1
+    },
+    { "action": "cast", "label": "Virulency with the talent", "actor": "necro", "spell": 801938, "target": "source" },
+    {
+      "action": "assert", "label": "Virulency grants Infestation", "actor": "necro",
+      "metric": "aura", "spell": 803782, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The talent's SPELLMOD_CHARGES gives Infestation one charge", "actor": "necro",
+      "metric": "aura_charges", "spell": 803782, "equals": 1
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    {
+      "action": "cast", "label": "First Infest", "actor": "necro", "spell": 801938, "target": "first_target"
+    },
+    {
+      "action": "assert", "label": "The first Infest applies the copied disease", "actor": "first_target",
+      "metric": "aura", "spell": 500338, "caster": "necro", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Infestation survives the first Infest", "actor": "necro",
+      "metric": "aura", "spell": 803782, "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Infest stays on the Virulency button", "actor": "necro",
+      "metric": "temporary_spell_replacement", "spell": 801938, "equals": 803781
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    {
+      "action": "assert", "label": "SETUP: the additional target is not diseased yet", "actor": "additional_target",
+      "metric": "aura", "spell": 500338, "caster": "necro", "equals": 0
+    },
+    {
+      "action": "cast", "label": "Infest an additional target", "actor": "necro", "spell": 801938,
+      "target": "additional_target"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the additional target receives the copied disease",
+      "actor": "additional_target", "metric": "aura", "spell": 500338, "caster": "necro", "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The additional target spends Infestation", "actor": "necro",
+      "metric": "aura", "spell": 803782, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Virulency returns to the bar after the additional target", "actor": "necro",
+      "metric": "temporary_spell_replacement", "spell": 801938, "equals": 801938
+    }
+  ]
+}

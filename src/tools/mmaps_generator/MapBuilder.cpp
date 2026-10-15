@@ -97,7 +97,7 @@ namespace MMAP
     {
         std::vector<std::string> files;
         uint32 mapID, tileX, tileY, tileID, count = 0, fsize = 0;
-        char filter[12];
+        std::string filter;
 
         printf("Discovering maps... ");
         getDirContents(files, m_config->MapsPath());
@@ -131,7 +131,7 @@ namespace MMAP
             std::set<uint32>* tiles = m_tile.m_tiles;
             mapID = m_tile.m_mapId;
 
-            sprintf(filter, "%03u*.vmtile", mapID);
+            filter = Acore::StringFormat("{:03}*.vmtile", mapID);
             files.clear();
             getDirContents(files, m_config->VMapsPath(), filter);
             for (auto & file : files)
@@ -146,7 +146,7 @@ namespace MMAP
                 count++;
             }
 
-            sprintf(filter, "%03u*", mapID);
+            filter = Acore::StringFormat("{:03}*", mapID);
             files.clear();
             getDirContents(files, m_config->MapsPath(), filter);
             for (auto & file : files)

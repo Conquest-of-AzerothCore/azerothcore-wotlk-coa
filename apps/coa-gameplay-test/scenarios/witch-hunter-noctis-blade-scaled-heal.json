@@ -1,0 +1,160 @@
+{
+  "schema": 1,
+  "name": "Noctis Blade heals for displayed damage against a level-scaled creature (#4713)",
+  "contract": "Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1, offset=4 and CoA.QuestLevelScaling=1. A level-59 Witch Hunter sees the level-1 hostile at level 55 with a 6,080,000 health pool. Noctis Blade's 100% healing must match the hit's post-mitigation damage packet; the shared real health pool loses only a scaled fraction of that displayed damage.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 15,
+      "level": 59,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 1501,
+      "level": 1,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "caster",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "The target is scaled to the viewer's level",
+      "actor": "caster",
+      "metric": "view_level",
+      "target": "enemy",
+      "equals": 55,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The viewer receives the level-55 health pool",
+      "actor": "caster",
+      "metric": "sent_max_health",
+      "target": "enemy",
+      "equals": 6080000,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 197
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 802280
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 12282
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 12282,
+      "slot": 15
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 802280,
+      "target": "enemy",
+      "save_as": "damage_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_heal_total",
+      "spell": 574337,
+      "target": "caster",
+      "save_as": "heal_before"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802280,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "The hit produces a positive damage packet",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 802280,
+      "target": "enemy",
+      "relative_to": "damage_before",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 802280,
+      "target": "enemy",
+      "relative_to": "damage_before",
+      "save_as": "damage_dealt"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_heal_total",
+      "spell": 574337,
+      "target": "caster",
+      "relative_to": "heal_before",
+      "save_as": "healing_done"
+    },
+    {
+      "action": "assert",
+      "label": "Noctis Blade heals for its displayed damage",
+      "actor": "caster",
+      "metric": "spell_heal_total",
+      "spell": 574337,
+      "target": "caster",
+      "relative_to": "heal_before",
+      "ratio_to": "damage_dealt",
+      "min": 0.99,
+      "max": 1.01
+    }
+  ]
+}

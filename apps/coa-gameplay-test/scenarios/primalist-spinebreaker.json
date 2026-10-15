@@ -1,0 +1,250 @@
+{
+  "schema": 1,
+  "name": "Primalist Spinebreaker: Seismic Grasp root and expiry",
+  "timeout_ms": 100000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "enemy",
+      "race": 5,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "pvp",
+      "actor": "primalist",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9612.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 95
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 807432
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 803138
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 807432,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 807432,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 537216,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3800
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 537216,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 807432,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 537212
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 807432,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 807432,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 537216,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_duration_ms",
+      "spell": 537216,
+      "min": 3150,
+      "max": 3500
+    },
+    {
+      "action": "wait",
+      "ms": 3800
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 537216,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 807432,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 537212
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 807432,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 807432,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 537216,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3800
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 537216,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 807432,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 537212
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 537216,
+      "equals": 0
+    }
+  ],
+  "contract": "Landed Seismic Grasp roots its enemy for 3.5 seconds with Spinebreaker. Native slow remains after the root expires. Baseline, talent removal and unrelated damage cannot apply the root."
+}

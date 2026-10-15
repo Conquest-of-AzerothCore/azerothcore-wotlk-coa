@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Seething Void cuts Empire's Grasp's cooldown by the native spell-mod system (#1107)",
+  "contract": "524804 is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 11 = SPELLMOD_COOLDOWN, BasePoints -5001 / DieSides 1 -> value -5000 ms, matching the tooltip's $/1000;s1 = 5 sec. Its EffectSpellClassMask dwordC bit20 (1048576) is an exact, singular match for Empire's Grasp (500704)'s own SpellFamilyFlags dwordC bit20 -- verified directly from Spell.dbc, not from the audit report's claim alone. There is no family-31 routing-table entry for 524804 and none is needed: no collision to resolve. Empire's Grasp's native RecoveryTime is 35000 ms. The harness's spell_modifier metric applies the player's native spell mods to a supplied base through Player::ApplySpellMod, so it reads the routed value without submitting a cast (Empire's Grasp requires a real enemy target and would need spell_hit_rating fixtures otherwise).",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 40 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn/level settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: Empire's Grasp keeps its native 35 s cooldown before the talent",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 500704, "op": 11, "base": 35000,
+      "min": 35000, "max": 35000
+    },
+    { "action": "learn", "actor": "cultist", "spell": 524804 },
+    {
+      "action": "assert", "label": "Seething Void cuts 5000 ms off Empire's Grasp's cooldown",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 500704, "op": 11, "base": 35000,
+      "min": 30000, "max": 30000
+    }
+  ]
+}

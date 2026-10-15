@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Blessing of C'Thun grants Darkwither crit and 5% Intellect spell hit rating (#518)",
+  "contract": "Blessing of C'Thun 301255 reads 'Your Darkwither can now critically strike and your spell hit rating is increased by 5% of your Intellect.' In the installed Spell.dbc it is passive, family 31, with three effects, all Apply Aura (6). Effect 1 is SPELL_AURA_MOD_RATING_FROM_STAT (220), MiscValue 128 = 1<<7 = CR_HIT_SPELL only (Unit.h:231), MiscValueB 3 = Intellect, BasePoints 4 / DieSides 1 = 5%. Player::UpdateRating (PlayerUpdates.cpp:651-662) recomputes the rating from scratch every time it runs: amount = m_baseRatingValue[cr] + int32(CalculatePct(GetStat(Intellect), 5)), using the player's CURRENT total Intellect, not any delta since a fixture buff was applied. CalculatePct (Util.h:52) truncates via a float-to-int32 cast, so the result is floor(TotalIntellect * 0.05) for a nonnegative amount. Applying Arcane Intellect 36880 (Effect 0: Apply Aura, AuraName 29 = SPELL_AURA_MOD_STAT, MiscValue 3 = Intellect, BasePoints 99/DieSides 1 = +100, verified directly from Spell.dbc) therefore only gives an exact, non-fractional +5 rating delta when it is measured against a baseline already taken with the passive active (so the passive's own recompute already includes the character's base Intellect on both sides of the comparison and it cancels out): floor((Base+100)*0.05) - floor(Base*0.05) = 5 for this fixture's Base of 99 Intellect (floor(199*0.05)=9, floor(99*0.05)=4, 9-4=5). Comparing instead to a baseline taken before the passive was learned folds the base Intellect's own 5% contribution into the delta too (floor(199*0.05)-0=9), which is not what the tooltip's 'increased by 5% of your Intellect' describes and is not the quantity this scenario is trying to prove. The fixture removes the Arcane Intellect buff, learns the passive against unbuffed base Intellect, snapshots the rating it already grants, then re-applies the same buff and asserts only its own +5 marginal contribution. Effect 2 is SPELL_AURA_ABILITY_PERIODIC_CRIT (286), class mask dword 1 (EffectSpellClassMask[7]) = 2097152 = bit 21. Darkwither rank 502213 (family 31) carries SpellFamilyFlags[1] 2097152 (bit 21) -- exact match. AuraEffect::CalcPeriodicCritChance (SpellAuraEffects.cpp:1175-1190) sets a periodic-damage effect's crit chance only if the caster owns a SPELL_AURA_ABILITY_PERIODIC_CRIT aura whose class mask intersects the DoT's SpellFamilyFlags; without one it stays 0. This is computed once, in AuraEffect::CalculatePeriodicData (line 658, called from the AuraEffect constructor at line 441), so the Darkwither aura is torn down and rebuilt around learning the talent to force a fresh computation. The fixture applies Darkwither directly to the caster with the set_aura fixture (which creates the aura through Unit::AddAura, still running the same constructor path) rather than casting it at a target, since the mechanism under test -- whether ABILITY_PERIODIC_CRIT's class mask intersects the DoT -- does not depend on who the aura lands on. Effect 0 (SPELL_AURA_DUMMY, BasePoints 1) is an inert marker.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "c", "race": 1, "class": 25, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the fixtures settle", "ms": 5000},
+    {"action": "snapshot", "label": "Intellect before the fixture buff", "actor": "c", "metric": "stat", "stat": 3, "save_as": "int_before"},
+    {"action": "snapshot", "label": "Spell hit rating before", "actor": "c", "metric": "combat_rating", "rating": 7, "save_as": "hit_before"},
+    {"action": "snapshot", "label": "Melee hit rating before (control)", "actor": "c", "metric": "combat_rating", "rating": 6, "save_as": "melee_hit_before"},
+    {"action": "set_aura", "label": "Apply +100 Intellect", "actor": "c", "spell": 36880, "stacks": 1},
+    {"action": "assert", "label": "Fixture assumption: the buff adds exactly 100 Intellect", "actor": "c", "metric": "stat", "stat": 3, "relative_to": "int_before", "equals": 100},
+    {"action": "assert", "label": "Spell hit rating is unaffected by Intellect alone", "actor": "c", "metric": "combat_rating", "rating": 7, "relative_to": "hit_before", "equals": 0},
+    {"action": "set_aura", "label": "Put a fresh, uncrittable Darkwither on the caster", "actor": "c", "spell": 502213, "stacks": 1},
+    {"action": "assert", "label": "Darkwither cannot crit before the talent", "actor": "c", "metric": "aura_crit_chance", "spell": 502213, "effect": 0, "equals": 0},
+    {"action": "set_aura", "label": "Remove Darkwither", "actor": "c", "spell": 502213, "stacks": 0},
+    {"action": "set_aura", "label": "Remove the Intellect buff so the passive's own recompute (below) reflects only base Intellect, letting the buff's later marginal contribution be isolated", "actor": "c", "spell": 36880, "stacks": 0},
+    {"action": "learn", "label": "Learn Blessing of C'Thun", "actor": "c", "spell": 301255},
+    {"action": "assert", "label": "The passive is active", "actor": "c", "metric": "aura", "spell": 301255, "equals": 1},
+    {"action": "snapshot", "label": "Spell hit rating with the passive active on unbuffed base Intellect", "actor": "c", "metric": "combat_rating", "rating": 7, "save_as": "hit_before_buff"},
+    {"action": "set_aura", "label": "Re-apply +100 Intellect now that the passive is already active", "actor": "c", "spell": 36880, "stacks": 1},
+    {"action": "assert", "label": "Fixture assumption: the buff still adds exactly 100 Intellect", "actor": "c", "metric": "stat", "stat": 3, "relative_to": "int_before", "equals": 100},
+    {"action": "assert", "label": "Spell hit rating rises by exactly 5% of Intellect (5)", "actor": "c", "metric": "combat_rating", "rating": 7, "relative_to": "hit_before_buff", "equals": 5},
+    {"action": "assert", "label": "Melee hit rating (outside the mask) is unaffected", "actor": "c", "metric": "combat_rating", "rating": 6, "relative_to": "melee_hit_before", "equals": 0},
+    {"action": "set_aura", "label": "Recreate Darkwither with the talent active", "actor": "c", "spell": 502213, "stacks": 1},
+    {"action": "assert", "label": "Darkwither can now crit", "actor": "c", "metric": "aura_crit_chance", "spell": 502213, "effect": 0, "min": 0.01}
+  ]
+}

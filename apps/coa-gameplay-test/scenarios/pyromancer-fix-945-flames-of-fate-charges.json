@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "name": "Pyromancer Flames of Fate gives Aspect's Blessing extra charges (#945)",
+  "contract": "Flames of Fate 707325 reads \"Your Aspect's Blessing now affects $s1 additional casts of Echo of Nozdormu, but its cooldown is doubled, and its mana cost is increased by $s3%.\" Its effects on class mask 0x20 (Aspect's Blessing 802168) are SPELLMOD_CHARGES +2 (BasePoints 1), SPELLMOD_COOLDOWN +60000 ms (BasePoints 59999) and SPELLMOD_COST +50%. Aspect's Blessing has DBC ProcCharges 0 and RecoveryTime 60000, so the native mod gives it 2 charges and a 120000 ms cooldown. Before the fix Finish() in AscensionPyromancerAbilities.cpp removed the aura after every consuming cast (only 524707 decremented charges), so it vanished after the first Echo of Nozdormu and the second charge was never usable. The expected charge count is the DBC-derived 2; a maintainer could read '2 additional casts' as 3 total, which the DBC does not support.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "p",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000,
+      "label": "Let spawn AI and level scaling settle"
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 802168
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 802174
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 707325
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 802168
+    },
+    {
+      "action": "assert",
+      "label": "Aspect's Blessing is applied with the two charges Flames of Fate adds (SPELLMOD_CHARGES +2 on a base of 0)",
+      "actor": "p",
+      "metric": "aura_charges",
+      "spell": 802168,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Its cooldown is doubled from the DBC 60000 ms to 120000 ms (SPELLMOD_COOLDOWN +60000)",
+      "actor": "p",
+      "metric": "cooldown_ms",
+      "spell": 802168,
+      "min": 100000,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 2500,
+      "label": "Let the global cooldown expire"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 807533,
+      "stacks": 2
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 802174,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "The first Echo of Nozdormu consumes one charge and the blessing stays",
+      "actor": "p",
+      "metric": "aura_charges",
+      "spell": 802168,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "p",
+      "value": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 807533,
+      "stacks": 2
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 802174,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "The second Echo of Nozdormu consumes the last charge",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 802168,
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

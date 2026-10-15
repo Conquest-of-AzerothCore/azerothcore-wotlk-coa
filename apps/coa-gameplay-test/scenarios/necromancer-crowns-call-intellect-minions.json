@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "name": "Necromancer Crown's Call raises Intellect and puts its Frost damage aura on raised minions (#1075)",
+  "contract": "Crown's Call is a Necromancer Rime talent with two ranks (CharacterAdvancement 30617, ClassType 25 = class 23, Tab 60 Rime, TalentEssenceCost 1: 805429, 807924). Its client description reads 'Increases your Intellect by $s2% and the Frost damage dealt by your Undead minions by $s1%.' Effect 1 is SPELL_EFFECT_APPLY_AURA with SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (137), MiscValue 3 (Intellect), BasePoints 4 / 9 + DieSides 1 = 5% / 10%. Effect 0 is SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (190) with SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79), MiscValue 16 (Frost), BasePoints 9 / 19 + 1 = 10% / 20%, radius 100 yd; UnitAura::FillTargetMap gives that effect to the owner's live, owned summons only, never to the Necromancer. No Necromancer contract rewrites these effects. Player::UpdateStats stores whole Intellect points, so with at least 100 Intellect the truncated ratio stays within 1.04-1.051 for 5% and 1.09-1.101 for 10% (level-80 Undead Necromancer: 166 class Intellect - 2 racial). Learning rank 1 must raise Intellect by 5% and put the Necromancer's Crown's Call aura on a raised Ghoul (entry 50073); unlearning removes both; rank 2 raises Intellect by 10% and its aura reaches the Ghoul. The harness cannot read a non-pet minion's aura amount or execute its Frost damage, so the minion side checks the caster-owned aura on the Ghoul, not the 10% / 20% magnitude.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and stat updates settle", "ms": 3000 },
+    { "action": "learn", "actor": "necro", "spell": 500971 },
+    { "action": "snapshot", "actor": "necro", "metric": "stat", "stat": 3, "save_as": "intellect" },
+    {
+      "action": "assert", "label": "SETUP: truncating Intellect costs under 1%", "actor": "necro",
+      "metric": "stat", "stat": 3, "min": 100
+    },
+    { "action": "cast", "label": "Raise a Ghoul", "actor": "necro", "spell": 500971 },
+    {
+      "action": "assert", "label": "SETUP: the Ghoul is raised", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50073, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the Ghoul carries no Crown's Call aura yet", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50073, "spell": 805429, "caster": "necro", "equals": 0
+    },
+    { "action": "learn", "actor": "necro", "spell": 805429 },
+    {
+      "action": "assert", "label": "Rank 1 aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 805429, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: rank 1 raises Intellect by 5%", "actor": "necro",
+      "metric": "stat", "stat": 3, "ratio_to": "intellect", "min": 1.04, "max": 1.051
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: rank 1's Frost damage aura reaches the Ghoul", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50073, "spell": 805429, "caster": "necro", "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "unlearn", "actor": "necro", "spell": 805429 },
+    {
+      "action": "assert", "label": "Unlearning removes rank 1", "actor": "necro",
+      "metric": "aura", "spell": 805429, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Unlearning restores Intellect", "actor": "necro",
+      "metric": "stat", "stat": 3, "relative_to": "intellect", "min": -0.01, "max": 0.01
+    },
+    {
+      "action": "assert", "label": "Unlearning removes the aura from the Ghoul", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50073, "spell": 805429, "caster": "necro", "equals": 0,
+      "within_ms": 3000
+    },
+    { "action": "learn", "actor": "necro", "spell": 807924 },
+    {
+      "action": "assert", "label": "Rank 2 aura is applied", "actor": "necro",
+      "metric": "aura", "spell": 807924, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Rank 2 raises Intellect by 10%", "actor": "necro",
+      "metric": "stat", "stat": 3, "ratio_to": "intellect", "min": 1.09, "max": 1.101
+    },
+    {
+      "action": "assert", "label": "Rank 2's Frost damage aura reaches the Ghoul", "actor": "necro",
+      "metric": "owned_creature_count", "entry": 50073, "spell": 807924, "caster": "necro", "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

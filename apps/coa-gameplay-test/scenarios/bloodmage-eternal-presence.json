@@ -1,0 +1,130 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Eternal Presence converts damage taken into attack power (#1988)",
+  "contract": "Eternal Presence 560001: \"Increases the attack power of party and raid members by $s1%. Does not stack with similar effects. / In addition, you now gain attack power equal to $s3% of the damage taken for $560010d. Can only occur once every 10 sec.\" Effects 0 and 1 are SPELL_EFFECT_APPLY_AREA_AURA_RAID with auras 166/167 at 5% and already work; that half is asserted here so a fix cannot regress it. Effect 2 is the private aura 354 (nullptr in AuraEffectHandler, SpellAuraEffects.cpp:419) with amount 15 and TriggerSpell 560010, and the record carries ProcFlags 0x0, so 560010 was never cast. 560010's own single effect is aura 99 with a flat amount of 5, so an applied 560010 whose effect value is well above 5 proves the 15% of the damage taken was forwarded. 560010's DurationIndex 1 is 10000 ms, matching the tooltip's \"once every 10 sec\". Corruption rank 8 (27216) applied to the Bloodmage itself supplies a controlled taken-damage source: AuraEffect::HandlePeriodicDamageAurasTick raises PROC_FLAG_TAKEN_DAMAGE for the victim (SpellAuraEffects.cpp:6584) and its base tick is 150.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "b",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "attack_power",
+      "save_as": "ap_base"
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 560001
+    },
+    {
+      "action": "assert",
+      "label": "Eternal Presence is applied on learn",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 560001,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The raid half already works: attack power is 5% higher",
+      "actor": "b",
+      "metric": "attack_power",
+      "ratio_to": "ap_base",
+      "min": 1.03,
+      "max": 1.07
+    },
+    {
+      "action": "attack",
+      "label": "Stay in combat so health regeneration does not interfere",
+      "actor": "b",
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "No Eternal Presence buff before any damage is taken",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 560010,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Self Corruption rank 8: a 150 damage tick every 3 sec",
+      "actor": "b",
+      "spell": 27216,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 27216,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: taking damage applies Eternal Presence 560010",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 560010,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The buff carries 15% of the damage taken, not 560010's flat 5",
+      "actor": "b",
+      "metric": "aura_amount",
+      "spell": 560010,
+      "effect": 0,
+      "min": 10
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "aura_duration_ms",
+      "spell": 560010,
+      "save_as": "buff_duration"
+    },
+    {
+      "action": "wait",
+      "label": "A second tick lands inside the 10 sec internal cooldown",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The buff is not refreshed inside its 10 sec internal cooldown",
+      "actor": "b",
+      "metric": "aura_duration_ms",
+      "spell": 560010,
+      "relative_to": "buff_duration",
+      "max": -2000
+    }
+  ]
+}

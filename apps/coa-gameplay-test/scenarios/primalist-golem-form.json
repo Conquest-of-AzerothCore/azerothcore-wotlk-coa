@@ -1,0 +1,396 @@
+{
+  "schema": 1,
+  "name": "Primalist Golem Form: armor, both haste effects, scoped moving casts and helper cleanup",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "base",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "cancel",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "base",
+      "entry": 28168,
+      "level": 80,
+      "health": 100000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "base",
+      "id": 95
+    },
+    {
+      "action": "learn",
+      "actor": "base",
+      "spell": 805335
+    },
+    {
+      "action": "learn",
+      "actor": "base",
+      "spell": 681536
+    },
+    {
+      "action": "learn",
+      "actor": "base",
+      "spell": 502777
+    },
+    {
+      "action": "learn",
+      "actor": "base",
+      "spell": 116
+    },
+    {
+      "action": "learn",
+      "actor": "base",
+      "spell": 502822
+    },
+    {
+      "action": "learn",
+      "actor": "base",
+      "spell": 8737
+    },
+    {
+      "action": "add_item",
+      "actor": "base",
+      "item": 285
+    },
+    {
+      "action": "equip",
+      "actor": "base",
+      "item": 285,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "base",
+      "metric": "armor",
+      "save_as": "base_armor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "base",
+      "metric": "attack_time_ms",
+      "save_as": "base_attack_time_ms"
+    },
+    {
+      "action": "snapshot",
+      "actor": "base",
+      "metric": "cast_speed_multiplier",
+      "save_as": "base_cast_speed_multiplier"
+    },
+    {
+      "action": "set_power",
+      "actor": "base",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "base",
+      "spell": 805335
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "aura_duration_ms",
+      "spell": 805335,
+      "min": 19500,
+      "max": 20000
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "cooldown_ms",
+      "spell": 805335,
+      "min": 119500,
+      "max": 120000
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "armor",
+      "ratio_to": "base_armor",
+      "label": "form_armor",
+      "min": 1.499,
+      "max": 1.501
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "attack_time_ms",
+      "ratio_to": "base_attack_time_ms",
+      "label": "form_attack_time_ms",
+      "min": 0.832,
+      "max": 0.834
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "base_cast_speed_multiplier",
+      "label": "form_cast_speed_multiplier",
+      "min": 0.832,
+      "max": 0.834
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "aura",
+      "spell": 801615,
+      "label": "helper_801615",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "aura",
+      "spell": 504635,
+      "label": "helper_504635",
+      "equals": 1
+    },
+    {
+      "action": "set_moving",
+      "actor": "base",
+      "enabled": true
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "moving",
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "base",
+      "spell": 681536,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_damage_count",
+      "spell": 681536,
+      "label": "moving_681536",
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "base",
+      "spell": 502777,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "label": "moving_502777",
+      "equals": 3
+    },
+    {
+      "action": "cast",
+      "actor": "base",
+      "spell": 116,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_damage_count",
+      "spell": 116,
+      "label": "moving_116",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "base",
+      "spell": 502822
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_heal_count",
+      "spell": 502822,
+      "equals": 0
+    },
+    {
+      "action": "set_moving",
+      "actor": "base",
+      "enabled": false
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "moving",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "aura",
+      "spell": 805335,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "aura",
+      "spell": 801615,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "aura",
+      "spell": 504635,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "armor",
+      "ratio_to": "base_armor",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "attack_time_ms",
+      "ratio_to": "base_attack_time_ms",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "base_cast_speed_multiplier",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "cast",
+      "actor": "base",
+      "spell": 116,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_damage_count",
+      "spell": 116,
+      "equals": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "base",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "base",
+      "spell": 502822
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_heal_count",
+      "spell": 502822,
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "spell": 805335,
+      "actor": "cancel"
+    },
+    {
+      "action": "cast",
+      "spell": 805335,
+      "actor": "cancel"
+    },
+    {
+      "action": "assert",
+      "metric": "aura",
+      "spell": 801615,
+      "equals": 1,
+      "actor": "cancel"
+    },
+    {
+      "action": "assert",
+      "metric": "aura",
+      "spell": 504635,
+      "equals": 1,
+      "actor": "cancel"
+    },
+    {
+      "action": "set_aura",
+      "spell": 805335,
+      "stacks": 0,
+      "actor": "cancel"
+    },
+    {
+      "action": "assert",
+      "metric": "aura",
+      "spell": 801615,
+      "equals": 0,
+      "actor": "cancel"
+    },
+    {
+      "action": "assert",
+      "metric": "aura",
+      "spell": 504635,
+      "equals": 0,
+      "actor": "cancel"
+    }
+  ]
+}

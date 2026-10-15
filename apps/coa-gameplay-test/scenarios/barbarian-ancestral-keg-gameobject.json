@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Ancestral Keg spawns its gameobject (#5153, #4258)",
+  "contract": "Ancestral Keg 804748 is SPELL_EFFECT_TRANS_DOOR with EffectMiscValue 9000118 (Spell.dbc). Spell::EffectTransmitted (SpellEffects.cpp) looks the id up with sObjectMgr->GetGameObjectTemplate and silently returns, logging an error, when the row is missing; no gameobject_template row for 9000118 existed anywhere before this fix, so the cast animation played but nothing was ever placed. The new pending_db_world migration adds gameobject_template entry 9000118 (type 22 GAMEOBJECT_TYPE_SPELLCASTER, displayId 1011172, name 'Ancestral Keg', sourced from hertigservices/ascension-data exiles-db-export-2026-09-13), so the cast must now leave exactly one owned gameobject of that entry near the caster.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "b", "race": 1, "class": 12, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+
+    { "action": "assert", "label": "No Ancestral Keg object exists yet", "actor": "b", "metric": "owned_gameobject_count", "entry": 9000118, "equals": 0 },
+
+    { "action": "learn", "actor": "b", "spell": 804748 },
+    { "action": "cast", "actor": "b", "spell": 804748, "target": "b" },
+    { "action": "assert", "label": "The Ancestral Keg gameobject is placed near the caster", "actor": "b", "metric": "owned_gameobject_count", "entry": 9000118, "equals": 1, "within_ms": 5000 }
+  ]
+}

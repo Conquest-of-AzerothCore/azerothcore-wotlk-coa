@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "name": "Ultra Instinct stacks from direct ability critical strikes (#1052)",
+  "contract": "Ultra Instinct 704654's single effect is SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on Ultra Instinct 504166, which is entirely native: aura 290 SPELL_AURA_MOD_CRIT_PCT (BasePoints 2), aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS (MiscValue 127) and SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION with MiscValue 504166, StackAmount 10. Spell.dbc gives 704654 ProcFlags 0 and no spell_proc row existed, so the aura never fired. The tooltip is 'Direct ability critical strikes now increase your ... critical strike chance and critical damage by $504166s1% ... stacking up to $504166u times' at ProcChance 100, so each guaranteed critical Bloodbolt must add exactly one stack. Bloodbolt rank 578305 is the rank a level-80 character owns. Crit Test Buff 503747 (aura 290, +100 percentage points) makes every strike critical, so nothing here depends on a proc roll.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 578305
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 704654
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "bloodmage",
+      "spell": 503747,
+      "stacks": 1,
+      "label": "Crit Test Buff 503747 (aura 290 MOD_CRIT_PCT +100) forces every strike to crit"
+    },
+    {
+      "action": "assert",
+      "label": "The crit fixture is in effect",
+      "actor": "bloodmage",
+      "metric": "spell_crit_chance",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "No stacks before any strike",
+      "actor": "bloodmage",
+      "metric": "aura_stacks",
+      "spell": 504166,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 578305,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the first critical strike grants one stack",
+      "actor": "bloodmage",
+      "metric": "aura_stacks",
+      "spell": 504166,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 578305,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "The second critical strike stacks it to two",
+      "actor": "bloodmage",
+      "metric": "aura_stacks",
+      "spell": 504166,
+      "equals": 2,
+      "within_ms": 3000
+    }
+  ]
+}

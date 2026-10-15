@@ -1,0 +1,379 @@
+{
+  "schema": 1,
+  "name": "Barbarian: all Brutal and Enduring Shout ranks are exclusive per caster (#5626)",
+  "contract": "Main PR5917 establishes spell-group1210 EXCLUSIVE_SAME_CASTER for Brutal and Enduring Shout. The reported pair300883/680302 must replace each other in both cast orders. Current Spell.dbc additionally contains level65 Brutal rank7 spell300887, absent from both that group and the native spell_ranks chain. It must follow the same exclusivity contract with highest Enduring681441 on the caster and a party recipient, while another Barbarian's300883 remains. Normal casts with native Energy drive all applications; the highest-rank grant is a fixture because current automatic progression stops at level60.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "reported",
+      "race": 1,
+      "class": 12,
+      "level": 40
+    },
+    {
+      "id": "high",
+      "race": 1,
+      "class": 12,
+      "level": 65
+    },
+    {
+      "id": "other",
+      "race": 1,
+      "class": 12,
+      "level": 65
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 12,
+      "level": 65
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "high",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "high",
+      "target": "other"
+    },
+    {
+      "action": "learn",
+      "actor": "reported",
+      "spell": 300883
+    },
+    {
+      "action": "learn",
+      "actor": "reported",
+      "spell": 680302
+    },
+    {
+      "action": "learn",
+      "actor": "high",
+      "spell": 300887
+    },
+    {
+      "action": "learn",
+      "actor": "high",
+      "spell": 681441
+    },
+    {
+      "action": "learn",
+      "actor": "other",
+      "spell": 300883
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "reported",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "reported",
+      "spell": 300883
+    },
+    {
+      "action": "assert",
+      "actor": "reported",
+      "metric": "aura",
+      "spell": 300883,
+      "caster": "reported",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "reported",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "reported",
+      "spell": 680302
+    },
+    {
+      "action": "assert",
+      "actor": "reported",
+      "metric": "aura",
+      "spell": 680302,
+      "caster": "reported",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "reported",
+      "metric": "aura",
+      "spell": 300883,
+      "caster": "reported",
+      "equals": 0,
+      "label": "Reported Brutal rank3 is replaced by Enduring rank1"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "reported",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "reported",
+      "spell": 300883
+    },
+    {
+      "action": "assert",
+      "actor": "reported",
+      "metric": "aura",
+      "spell": 300883,
+      "caster": "reported",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "reported",
+      "metric": "aura",
+      "spell": 680302,
+      "caster": "reported",
+      "equals": 0,
+      "label": "Reported ranks are exclusive in the reverse order"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "high",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "high",
+      "spell": 300887
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "aura",
+      "spell": 300887,
+      "caster": "high",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300887,
+      "caster": "high",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "other",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "other",
+      "spell": 300883
+    },
+    {
+      "action": "assert",
+      "actor": "other",
+      "metric": "aura",
+      "spell": 300883,
+      "caster": "other",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300883,
+      "caster": "other",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "high",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "high",
+      "spell": 681441
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "aura",
+      "spell": 681441,
+      "caster": "high",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "aura",
+      "spell": 681441,
+      "caster": "high",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "aura",
+      "spell": 300887,
+      "caster": "high",
+      "equals": 0,
+      "label": "The highest Brutal rank is replaced by the same caster's Enduring Shout"
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "aura",
+      "spell": 300883,
+      "caster": "other",
+      "equals": 1,
+      "label": "A different caster's Brutal Shout remains"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 681441,
+      "caster": "high",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300887,
+      "caster": "high",
+      "equals": 0,
+      "label": "The highest Brutal rank is replaced by the same caster's Enduring Shout"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300883,
+      "caster": "other",
+      "equals": 1,
+      "label": "A different caster's Brutal Shout remains"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "high",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "high",
+      "spell": 300887
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "aura",
+      "spell": 300887,
+      "caster": "high",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "aura",
+      "spell": 681441,
+      "caster": "high",
+      "equals": 0,
+      "label": "Highest ranks are exclusive in the reverse order"
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "aura",
+      "spell": 300887,
+      "caster": "high",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "high",
+      "metric": "aura",
+      "spell": 300883,
+      "caster": "other",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 681441,
+      "caster": "high",
+      "equals": 0,
+      "label": "Highest ranks are exclusive in the reverse order"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300887,
+      "caster": "high",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 300883,
+      "caster": "other",
+      "equals": 1
+    }
+  ]
+}

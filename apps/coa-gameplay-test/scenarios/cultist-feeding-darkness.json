@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Cultist: Feeding Darkness's range/crit modifiers apply through the native spellmod path (#1550)",
+  "contract": "Partial proof, Refs #1550 only: both ranks (300302, 301347) are ADD_FLAT_MODIFIER (107) auras, effect0 MiscValue=5 (SPELLMOD_RANGE) and effect1 MiscValue=7 (SPELLMOD_CRITICAL_CHANCE), with EffectBasePoints/DieSides giving rank 1 +3/+2 and rank 2 +6/+4 (+1 per DieSides==1, SpellInfo.cpp:489), matching the tooltip's own numbers exactly. Its combined classmask (dword0=131148/64, dword1=10747952/2097200, dword2=0/1073741824) is wide and, decomposed bit by bit against every family-31 spell in Spell.dbc, hits Horrorbolt (800416), Wrath of the Black Empire (800413) and Darkwither (800446) on both effects, plus Eldritch Shock, Psychic Suppression, Eldritch Devastation and the Gaze family on one effect each -- but no spell named 'Corruption' exists anywhere in the family-31 set with an overlapping SpellFamilyFlags bit. This scenario proves the generic native spellmod mechanism (SPELL_AURA_ADD_FLAT_MODIFIER, Player::ApplySpellMod, no per-spell script) applies both authored bonuses to a confirmed real spell (Horrorbolt) at the tooltip's exact numbers; it cannot independently confirm the tooltip's specific 'Corruption' spell reference, so it is filed as Refs, not Fixes.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "c", "race": 1, "class": 25, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: Horrorbolt's range is unmodified before Feeding Darkness",
+      "actor": "c", "metric": "spell_modifier", "spell": 800416, "op": 5, "base": 30, "min": 30, "max": 30
+    },
+    {
+      "action": "assert", "label": "SETUP: Horrorbolt's crit chance is unmodified before Feeding Darkness",
+      "actor": "c", "metric": "spell_modifier", "spell": 800416, "op": 7, "base": 5, "min": 5, "max": 5
+    },
+    {
+      "action": "assert", "label": "SETUP: an outside-the-mask spell (Devour Magic) is unaffected",
+      "actor": "c", "metric": "spell_modifier", "spell": 520151, "op": 5, "base": 30, "min": 30, "max": 30
+    },
+    { "action": "set_aura", "label": "Apply rank 1 alone", "actor": "c", "spell": 300302, "stacks": 1 },
+    {
+      "action": "assert", "label": "Rank 1 adds 3 yards of range to Horrorbolt",
+      "actor": "c", "metric": "spell_modifier", "spell": 800416, "op": 5, "base": 30, "min": 33, "max": 33
+    },
+    {
+      "action": "assert", "label": "Rank 1 adds 2 crit points to Horrorbolt",
+      "actor": "c", "metric": "spell_modifier", "spell": 800416, "op": 7, "base": 5, "min": 7, "max": 7
+    },
+    {
+      "action": "assert", "label": "Rank 1 leaves Devour Magic's range alone",
+      "actor": "c", "metric": "spell_modifier", "spell": 520151, "op": 5, "base": 30, "min": 30, "max": 30
+    },
+    { "action": "set_aura", "label": "Remove rank 1", "actor": "c", "spell": 300302, "stacks": 0 },
+    { "action": "set_aura", "label": "Apply rank 2 alone", "actor": "c", "spell": 301347, "stacks": 1 },
+    {
+      "action": "assert", "label": "Rank 2 adds 6 yards of range to Horrorbolt",
+      "actor": "c", "metric": "spell_modifier", "spell": 800416, "op": 5, "base": 30, "min": 36, "max": 36
+    },
+    {
+      "action": "assert", "label": "Rank 2 adds 4 crit points to Horrorbolt",
+      "actor": "c", "metric": "spell_modifier", "spell": 800416, "op": 7, "base": 5, "min": 9, "max": 9
+    }
+  ]
+}

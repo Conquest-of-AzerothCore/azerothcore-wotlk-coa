@@ -1,7 +1,7 @@
 #include "ManastormClientBridge.h"
 
 #include "DatabaseEnv.h"
-#include "ManastormClientConfig.h"
+#include "AscensionCoAConfig.h"
 #include "Group.h"
 #include "GroupScript.h"
 #include "Log.h"
@@ -22,8 +22,8 @@
 
 // Transport serializers and validated gadget ranks from the native donor.
 // No donor Scene catalogue, run service, rewards or progression are used.
-#include "../../mod-ascension-compat/src/AscensionManastormProtocol.h"
-#include "../../mod-ascension-compat/src/AscensionManastormGadgets.h"
+#include "AscensionManastormProtocol.h"
+#include "AscensionManastormGadgets.h"
 
 #include <algorithm>
 #include <array>
@@ -560,8 +560,7 @@ void ManastormClientBridge::SendConfig(Player* player) const
     if (!player || !player->GetSession() || !ManastormModuleConfig::IsNativeClientMode())
         return;
     WorldSession* session = player->GetSession();
-    ManastormClientConfig::Apply(session->GetNativeClientConfig(), NativeEnabled());
-    session->SendNativeClientConfig();
+    SendAscensionCoAConfig(session);
 }
 
 void ManastormClientBridge::Login(Player* player) const
@@ -755,6 +754,16 @@ namespace
 
 void AddSC_manastorm_native_bridge()
 {
+    RegisterAscensionClientConfig([](AscensionClientConfig& config)
+    {
+        if (!ManastormModuleConfig::IsNativeClientMode())
+            return;
+
+        config.Integers.emplace_back("CONFIG_MANASTORM_LOADOUTS_MAX", 4);
+        config.Booleans.emplace_back("CONFIG_MANASTORM_ENABLED", NativeEnabled());
+        config.Booleans.emplace_back("CONFIG_MANASTORM_END_GAME_ENABLED", NativeEnabled());
+        config.Booleans.emplace_back("CONFIG_MANASTORM_LOADOUTS_ENABLED", NativeEnabled());
+    });
     new manastorm_native_packet_script();
     new manastorm_native_group_script();
 }

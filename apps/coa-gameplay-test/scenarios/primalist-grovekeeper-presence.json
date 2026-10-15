@@ -1,0 +1,347 @@
+{
+  "schema": 1,
+  "name": "Primalist Grovekeeper Presence group hit and exclusivity",
+  "contract": "Owner and grouped ally gain one point of melee and spell hit; an outsider does not. Two casters and Heroic Presence do not stack. Removal restores both hit modifiers.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "outsider",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "timeout_ms": 120000,
+  "steps": [
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "ally"
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 805443,
+      "all_specs": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_hit_chance",
+      "save_as": "primalist_melee_hit_chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_hit_chance",
+      "save_as": "primalist_spell_hit_chance"
+    },
+    {
+      "action": "unlearn",
+      "actor": "ally",
+      "spell": 805443,
+      "all_specs": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "melee_hit_chance",
+      "save_as": "ally_melee_hit_chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "spell_hit_chance",
+      "save_as": "ally_spell_hit_chance"
+    },
+    {
+      "action": "unlearn",
+      "actor": "outsider",
+      "spell": 805443,
+      "all_specs": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "outsider",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "melee_hit_chance",
+      "save_as": "outsider_melee_hit_chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "spell_hit_chance",
+      "save_as": "outsider_spell_hit_chance"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 805443
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_hit_chance",
+      "relative_to": "primalist_melee_hit_chance",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_hit_chance",
+      "relative_to": "primalist_spell_hit_chance",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "melee_hit_chance",
+      "relative_to": "ally_melee_hit_chance",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_hit_chance",
+      "relative_to": "ally_spell_hit_chance",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "melee_hit_chance",
+      "relative_to": "outsider_melee_hit_chance",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "spell_hit_chance",
+      "relative_to": "outsider_spell_hit_chance",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "learn",
+      "actor": "ally",
+      "spell": 805443
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_hit_chance",
+      "relative_to": "primalist_melee_hit_chance",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_hit_chance",
+      "relative_to": "primalist_spell_hit_chance",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "melee_hit_chance",
+      "relative_to": "ally_melee_hit_chance",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_hit_chance",
+      "relative_to": "ally_spell_hit_chance",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "melee_hit_chance",
+      "relative_to": "outsider_melee_hit_chance",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "spell_hit_chance",
+      "relative_to": "outsider_spell_hit_chance",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 6562,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_hit_chance",
+      "relative_to": "primalist_melee_hit_chance",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_hit_chance",
+      "relative_to": "primalist_spell_hit_chance",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "melee_hit_chance",
+      "relative_to": "ally_melee_hit_chance",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_hit_chance",
+      "relative_to": "ally_spell_hit_chance",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "melee_hit_chance",
+      "relative_to": "outsider_melee_hit_chance",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "spell_hit_chance",
+      "relative_to": "outsider_spell_hit_chance",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 6562,
+      "stacks": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 805443,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "ally",
+      "spell": 805443,
+      "all_specs": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_hit_chance",
+      "relative_to": "primalist_melee_hit_chance",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_hit_chance",
+      "relative_to": "primalist_spell_hit_chance",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "melee_hit_chance",
+      "relative_to": "ally_melee_hit_chance",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "spell_hit_chance",
+      "relative_to": "ally_spell_hit_chance",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "melee_hit_chance",
+      "relative_to": "outsider_melee_hit_chance",
+      "min": -0.001,
+      "max": 0.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "spell_hit_chance",
+      "relative_to": "outsider_spell_hit_chance",
+      "min": -0.001,
+      "max": 0.001
+    }
+  ]
+}

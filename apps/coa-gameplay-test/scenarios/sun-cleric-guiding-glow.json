@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Guiding Glow already grants Dawn extra charges (#1565)",
+  "contract": "Both ranks' effect 0 is ADD_FLAT_MODIFIER (aura 107), MiscValue 4 = SPELLMOD_CHARGES, EffectSpellClassMask word 0 = 0x40, matching Dawn's (807440) own SpellFamilyFlags word 0 (0x40, the same bit rank 2 of Leap of the Valkyrie also matches). Dawn's own ProcCharges is 10. Rank 1's BasePoints 2 resolves to 3 (DieSides 1), matching 'Allows Dawn to affect 3 additional casts'; rank 2's BasePoints 4 resolves to 5, matching '5 additional casts'. Native SPELLMOD_CHARGES, applied wherever Player::ApplySpellMod(Dawn, SPELLMOD_CHARGES, ...) is read (Dawn's own ProcCharges lookup). Native only, no server code needed.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    {
+      "action": "snapshot", "label": "Dawn's own charge count before the talent",
+      "actor": "caster", "metric": "spell_modifier", "spell": 807440, "op": 4, "base": 10, "save_as": "charges_before"
+    },
+    { "action": "learn", "label": "Rank 1: Allows Dawn to affect 3 additional casts", "actor": "caster", "spell": 300324 },
+    {
+      "action": "assert", "label": "Dawn gains 3 additional charges",
+      "actor": "caster", "metric": "spell_modifier", "spell": 807440, "op": 4, "base": 10,
+      "relative_to": "charges_before", "equals": 3
+    },
+    { "action": "learn", "label": "Rank 2 replaces rank 1: Allows Dawn to affect 5 additional casts", "actor": "caster", "spell": 300329 },
+    {
+      "action": "assert", "label": "Dawn gains 5 additional charges total",
+      "actor": "caster", "metric": "spell_modifier", "spell": 807440, "op": 4, "base": 10,
+      "relative_to": "charges_before", "equals": 5
+    }
+  ]
+}

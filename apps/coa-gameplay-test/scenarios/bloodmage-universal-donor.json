@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "name": "Universal Donor buffs allies' healing received when Vampyr's Kiss is cast (#3642)",
+  "contract": "Universal Donor 806428 reads 'Casting Infuse or Vampyr's Kiss now increases the healing received by all allies by $704238s1% for $704238d'. Its single effect is aura 42 (proc trigger spell) on Universal Donor 704238, an SPELL_AURA_MOD_HEALING_RECEIVED with BasePoints 5 (+6%), TargetA 56 (the caster's raid) and radius index 12. Spell.dbc gives 806428 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and no ally ever received 704238. Vampyr's Kiss is cast as rank 504281 (top of the spell_ranks chain 504275-504281, SpellFamilyFlags (32768, 0, 0)). The second player is put in the caster's group so the raid-area effect can reach them.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "bloodmage",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 806428
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504281
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Universal Donor passive is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 806428,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "No Universal Donor buff on the ally before the cast",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 704238,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 504281,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ally gains Universal Donor 704238",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 704238,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Universal Donor grants the DBC value of +6% healing received",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 704238,
+      "equals": 6
+    }
+  ]
+}

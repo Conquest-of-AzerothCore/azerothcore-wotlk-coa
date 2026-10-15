@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "name": "Tyrande's Vigilance shortens Starfire Shot and cuts pushback (#1154)",
+  "contract": "Tyrande's Vigilance 680801 (Spell.dbc, family 32) tooltip: \"Reduces the cast time of Starfire Shot by $/1000;S1 sec. Reduces the pushback suffered from damaging attacks while casting ranged abilities by $s2%.\" Effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107), EffectMiscValue SPELLMOD_CASTING_TIME (10), EffectBasePoints -501 (=-500 ms), EffectSpellClassMask word0 0x800, which matches Starfire Shot ranks 801978 and 804463-804469 and Starfire Barrage 802682 (family 32, word0 0x800; CastingTimeIndex 19 = 2500 ms and 16 = 1500 ms in SpellCastTimes.dbc). Effect 1 is SPELL_AURA_ADD_PCT_MODIFIER (108), EffectMiscValue SPELLMOD_NOT_LOSE_CASTING_TIME (9), EffectBasePoints 74 (=+75), mask (0xc00, 0x100024, 0). Native path: SpellInfo::CalcCastTime applies Unit/Player::ApplySpellMod SPELLMOD_CASTING_TIME before the haste multiplier, and Spell::Delayed reads SPELLMOD_NOT_LOSE_CASTING_TIME to shrink the pushback delay. Both fixtures are the same race, class and level with no ratings, so cast-speed multipliers are identical and the cast-time difference must be exactly -500. The pushback clause is proved at the modifier level with spell_modifier op 9 on a base of 100 (100 * (1 + 0.75) = 175), because the harness cannot deliver a damaging hit into a cast; Lunar Lance 502340 (word0 0, word1 0x02000000) lies outside both masks and is the negative control. Values read 2026-09-21 from the shipped /srv/coa/server-data/dbc/Spell.dbc.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 680801
+    },
+    {
+      "action": "snapshot",
+      "label": "Starfire Shot rank 8 cast time without the talent",
+      "actor": "control",
+      "metric": "spell_cast_time_ms",
+      "save_as": "ss_base",
+      "spell": 804469
+    },
+    {
+      "action": "assert",
+      "label": "Starfire Shot casts 0.5 sec faster with the talent",
+      "actor": "talent",
+      "metric": "spell_cast_time_ms",
+      "spell": 804469,
+      "relative_to": "ss_base",
+      "equals": -500
+    },
+    {
+      "action": "snapshot",
+      "label": "Starfire Barrage cast time without the talent",
+      "actor": "control",
+      "metric": "spell_cast_time_ms",
+      "save_as": "sb_base",
+      "spell": 802682
+    },
+    {
+      "action": "assert",
+      "label": "Starfire Barrage casts 0.5 sec faster with the talent",
+      "actor": "talent",
+      "metric": "spell_cast_time_ms",
+      "spell": 802682,
+      "relative_to": "sb_base",
+      "equals": -500
+    },
+    {
+      "action": "snapshot",
+      "label": "Lunar Lance cast time without the talent",
+      "actor": "control",
+      "metric": "spell_cast_time_ms",
+      "save_as": "ll_base",
+      "spell": 502340
+    },
+    {
+      "action": "assert",
+      "label": "Lunar Lance (outside the mask) keeps its cast time",
+      "actor": "talent",
+      "metric": "spell_cast_time_ms",
+      "spell": 502340,
+      "relative_to": "ll_base",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No pushback modifier on Starfire Shot without the talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 804469,
+      "op": 9,
+      "base": 100,
+      "min": 99.99,
+      "max": 100.01
+    },
+    {
+      "action": "assert",
+      "label": "Starfire Shot loses 75% less casting time to pushback with the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 804469,
+      "op": 9,
+      "base": 100,
+      "min": 174.99,
+      "max": 175.01
+    },
+    {
+      "action": "assert",
+      "label": "Starfire Barrage gets the same pushback reduction",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 802682,
+      "op": 9,
+      "base": 100,
+      "min": 174.99,
+      "max": 175.01
+    },
+    {
+      "action": "assert",
+      "label": "Lunar Lance is outside the pushback mask",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 502340,
+      "op": 9,
+      "base": 100,
+      "min": 99.99,
+      "max": 100.01
+    }
+  ]
+}

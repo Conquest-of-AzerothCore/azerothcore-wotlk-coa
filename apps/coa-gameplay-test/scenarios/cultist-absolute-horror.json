@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Cultist: Absolute Horror cuts Horrorbolt's and Wrath of the Black Empire's cast time natively (#1554)",
+  "contract": "300309 has two effects. Effect0 uses EffectApplyAuraName=340, an aura the engine binds to a nullptr handler (SpellAuraEffects.cpp:405, 'unknown Ascension aura'); its own EffectBasePoints=-1/DieSides=1 computes to 0 (SpellInfo.cpp:489), so it is an inert leftover that promises nothing extra and is not asserted here. Effect1 is ADD_FLAT_MODIFIER (107), MiscValue=10 (SPELLMOD_CASTING_TIME), EffectBasePoints=-301/DieSides=1 giving a flat -300 ms, classmask dword1=48=16+32 (bits 4 and 5). Verified against Spell.dbc: 800416 'Horrorbolt' (dword1=16, bit4, base cast time 1500 ms from CastingTimeIndex=16) and 800413 'Wrath of the Black Empire' (dword1=288, bit5 set, base cast time 2000 ms from CastingTimeIndex=5) both match, delivering exactly the tooltip's '-0.3 sec' on each. No script needed.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "c", "race": 1, "class": 25, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "SETUP: Horrorbolt keeps its 1500 ms base cast time",
+      "actor": "c", "metric": "spell_modifier", "spell": 800416, "op": 10, "base": 1500, "min": 1500, "max": 1500
+    },
+    {
+      "action": "assert", "label": "SETUP: Wrath of the Black Empire keeps its 2000 ms base cast time",
+      "actor": "c", "metric": "spell_modifier", "spell": 800413, "op": 10, "base": 2000, "min": 2000, "max": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: an outside-the-mask spell (Psychic Suppression) is unaffected",
+      "actor": "c", "metric": "spell_modifier", "spell": 800432, "op": 10, "base": 1500, "min": 1500, "max": 1500
+    },
+    { "action": "learn", "actor": "c", "spell": 300309 },
+    {
+      "action": "assert", "label": "Absolute Horror cuts Horrorbolt's cast time by 300 ms",
+      "actor": "c", "metric": "spell_modifier", "spell": 800416, "op": 10, "base": 1500, "min": 1200, "max": 1200
+    },
+    {
+      "action": "assert", "label": "Absolute Horror cuts Wrath of the Black Empire's cast time by 300 ms",
+      "actor": "c", "metric": "spell_modifier", "spell": 800413, "op": 10, "base": 2000, "min": 1700, "max": 1700
+    },
+    {
+      "action": "assert", "label": "Absolute Horror leaves Psychic Suppression's cast time alone",
+      "actor": "c", "metric": "spell_modifier", "spell": 800432, "op": 10, "base": 1500, "min": 1500, "max": 1500
+    }
+  ]
+}

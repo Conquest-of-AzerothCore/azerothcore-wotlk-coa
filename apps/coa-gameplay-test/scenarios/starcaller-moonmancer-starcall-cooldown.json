@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "name": "Moonmancer halves Starcall's cooldown (#2217)",
+  "contract": "Moonmancer 680810 (Spell.dbc, family 32) tooltip: \"Reduces the cooldown of Starcall by $s1%.\" Effect 0 is SPELL_AURA_ADD_PCT_MODIFIER (108), EffectMiscValue SPELLMOD_COOLDOWN (11), EffectBasePoints -51 with DieSides 1 (=-50), EffectSpellClassMask word1 0x20000000, which matches every Starcall rank read (800497, 502316, 502317, 302568, 302569: family 32, word1 0x20000000, Category 753, RecoveryTime 0, CategoryRecoveryTime 12000, no SPELL_ATTR6_NO_CATEGORY_COOLDOWN_MODS in Attributes Ex6). Native path: Player::AddSpellAndCategoryCooldowns runs ApplySpellMod(spell, SPELLMOD_COOLDOWN, catrec) on a positive category recovery (Player.cpp), so the 12000 ms category cooldown becomes 6000. spell_modifier op 11 on the real 12000 base is that exact call without casting (a Starcall cast depends on target, resources and hit rolls that add nothing to the contract); Lunar Lance 502340 is the negative control and the twin without the passive proves the baseline stays 12000. Values read 2026-09-21 from the shipped /srv/coa/server-data/dbc/Spell.dbc.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 680810
+    },
+    {
+      "action": "assert",
+      "label": "Starcall 800497 cooldown is halved with the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 800497,
+      "op": 11,
+      "base": 12000,
+      "min": 5999.99,
+      "max": 6000.01
+    },
+    {
+      "action": "assert",
+      "label": "Starcall 502316 cooldown is halved with the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 502316,
+      "op": 11,
+      "base": 12000,
+      "min": 5999.99,
+      "max": 6000.01
+    },
+    {
+      "action": "assert",
+      "label": "Starcall 502317 cooldown is halved with the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 502317,
+      "op": 11,
+      "base": 12000,
+      "min": 5999.99,
+      "max": 6000.01
+    },
+    {
+      "action": "assert",
+      "label": "Starcall 302568 cooldown is halved with the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 302568,
+      "op": 11,
+      "base": 12000,
+      "min": 5999.99,
+      "max": 6000.01
+    },
+    {
+      "action": "assert",
+      "label": "Starcall 302569 cooldown is halved with the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 302569,
+      "op": 11,
+      "base": 12000,
+      "min": 5999.99,
+      "max": 6000.01
+    },
+    {
+      "action": "assert",
+      "label": "Starcall cooldown is untouched without the talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 800497,
+      "op": 11,
+      "base": 12000,
+      "min": 11999.99,
+      "max": 12000.01
+    },
+    {
+      "action": "assert",
+      "label": "Lunar Lance is outside the cooldown mask",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 502340,
+      "op": 11,
+      "base": 12000,
+      "min": 11999.99,
+      "max": 12000.01
+    }
+  ]
+}

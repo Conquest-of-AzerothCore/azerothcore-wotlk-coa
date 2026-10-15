@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Liquid Pyrite expires three minutes after landing",
+  "contract": "A Pyrite Safety Container landing during Flame Leviathan creates one Liquid Pyrite. It remains available before three minutes and despawns after three minutes, independently of vehicle pickup. Expected lifetime follows AzerothCore issue 27837 Classic and retail video evidence.",
+  "timeout_ms": 210000,
+  "players": [
+    {
+      "id": "observer",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "container",
+      "owner": "observer",
+      "entry": 33218,
+      "distance": 3,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "assert",
+      "label": "Landing creates one Liquid Pyrite",
+      "actor": "observer",
+      "metric": "nearby_creature_count",
+      "entry": 33189,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 175000
+    },
+    {
+      "action": "assert",
+      "label": "Liquid Pyrite remains available before three minutes",
+      "actor": "observer",
+      "metric": "nearby_creature_count",
+      "entry": 33189,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Liquid Pyrite expires after three minutes",
+      "actor": "observer",
+      "metric": "nearby_creature_count",
+      "entry": 33189,
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ],
+  "location": {
+    "map": 603,
+    "x": 322.39,
+    "y": -14.5,
+    "z": 409.8,
+    "o": 3.14,
+    "ignore_access": true
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Stormcloud amplifies damage and erupts a Geyser (#3235)",
+  "contract": "#3235: Stormcloud 801859 reads \"Summon a cloud above an enemy target's head for $d, causing them to take $s1% additional damage from your spells. Using Torrential Wrath on an enemy affected by Stormcloud causes a Geyser to erupt beneath them.\" Spell.dbc gives 801859 DurationIndex 8 (SpellDuration.dbc 8 = 15000 ms), RecoveryTime 60000, effect 0 aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER with EffectBasePoints 19 and DieSides 1 (= 20%) and an all-zero SpellClassMask. The first clause is native and the report's premise is wrong: SpellAuraEffects.cpp:336 routes aura 271 through Unit::SpellDamageBonusTaken (Unit.cpp:9440-9445), which matches on the aura's own caster and on AuraEffect::IsAffectedOnSpell; SpellInfo::IsAffected (SpellInfo.cpp:1437) returns true for a zero class mask inside the same family, so the 20% covers every SpellFamilyName 22 spell from that Stormbringer. spell_damage_taken queries that path with a fixed base of 1000, so the readings are exactly 1000 unamplified and 1200 amplified. The second clause had no path at all: Geyser 800374 is family 32 and the only spell in Spell.dbc that triggers it is 706593, which is not a Stormbringer spell, and no spell_script_names, spell_linked_spell or conditions row names 801859 or 800374. The fix casts 800374 on a target that carries this Stormbringer's Stormcloud when any Torrential Wrath rank lands on it. Torrential Wrath is cast as rank 503359, the rank a level-80 character owns (AscensionTalentReplacementData.h:41-42 gives it RequiredLevel 58).",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "storm", "race": 1, "class": 16, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "storm", "entry": 36, "level": 80, "health": 1000000, "distance": 3 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "storm", "spell": 801859 },
+    { "action": "learn", "actor": "storm", "spell": 503359 },
+    { "action": "assert", "label": "BASELINE: without Stormcloud the target takes the unmodified base of 1000",
+      "actor": "dummy", "metric": "spell_damage_taken", "spell": 503359, "target": "storm", "equals": 1000 },
+    { "action": "assert", "label": "BASELINE: no Geyser has been cast",
+      "actor": "storm", "metric": "spell_cast_count", "spell": 800374, "equals": 0 },
+    { "action": "cast", "actor": "storm", "spell": 801859, "target": "dummy" },
+    { "action": "assert", "label": "NATIVE: Stormcloud is applied by this Stormbringer",
+      "actor": "dummy", "metric": "aura", "spell": 801859, "caster": "storm", "equals": 1, "within_ms": 4000 },
+    { "action": "assert", "label": "NATIVE: Stormcloud lasts 15000 ms (SpellDuration.dbc 8)",
+      "actor": "dummy", "metric": "aura_duration_ms", "spell": 801859, "caster": "storm", "min": 11000, "max": 15000 },
+    { "action": "assert", "label": "NATIVE: aura 271 adds the tooltip's 20% (BasePoints 19 + DieSides 1), so 1000 becomes 1200",
+      "actor": "dummy", "metric": "spell_damage_taken", "spell": 503359, "target": "storm", "equals": 1200 },
+    { "action": "wait", "label": "Let the shared GCD (StartRecoveryCategory 133, 1000-1500 ms) clear before the next cast", "ms": 1701 },
+    { "action": "set_aura", "actor": "storm", "spell": 803102, "stacks": 100 },
+    { "action": "cast", "actor": "storm", "spell": 503359, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: Torrential Wrath lands on the Stormcloud'd target",
+      "actor": "storm", "metric": "spell_damage_count", "spell": 503359, "equals": 1, "within_ms": 8000 },
+    { "action": "assert", "label": "DISCRIMINATING: Torrential Wrath erupts one Geyser (800374)",
+      "actor": "storm", "metric": "spell_cast_count", "spell": 800374, "equals": 1, "within_ms": 3000 }
+  ]
+}

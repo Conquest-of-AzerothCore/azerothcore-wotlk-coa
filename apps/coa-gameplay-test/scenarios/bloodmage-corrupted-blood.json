@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "name": "Corrupted Blood marks only Humanoid and Beast victims of Taldaram's Torment (#2357)",
+  "contract": "Corrupted Blood 704692 reads 'When you use Taldaram's Torment on a Humanoid or Beast it now corrupts their blood, increasing your damage dealt against them by $532623s1%'. Its single effect is aura 42 (proc trigger spell) on Corrupted Blood 532623 (MOD_DAMAGE_FROM_CASTER, BasePoints 9 -> +10%, EffectSpellClassMask (6291456, 0, 0) = Veinburst plus Reave, TargetA 6). Spell.dbc gives 704692 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and the debuff never landed. The creature-type gate has no spell_proc column and is expressed with CONDITION_SOURCE_TYPE_SPELL_PROC rows, so the scenario needs both sides: Defias Thug 38 has creature_template.type 7 (Humanoid) and must receive the debuff, while the standard Harvest Golem 36 has type 9 (Mechanical) and must not. Taldaram's Torment is cast as 800772 itself.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "humanoid",
+      "owner": "bloodmage",
+      "entry": 38,
+      "health": 1000000,
+      "distance": 6
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 704692
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 800772
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Corrupted Blood passive is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 704692,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800772,
+      "target": "humanoid"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a Humanoid target gains Corrupted Blood 532623",
+      "actor": "humanoid",
+      "metric": "aura",
+      "spell": 532623,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Corrupted Blood grants the DBC value of +10% damage from the caster",
+      "actor": "humanoid",
+      "metric": "aura_amount",
+      "spell": 532623,
+      "caster": "bloodmage",
+      "equals": 10
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800772,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the second cast finish and any proc resolve",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Mechanical target is left uncorrupted by the creature-type gate",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 532623,
+      "caster": "bloodmage",
+      "equals": 0
+    }
+  ]
+}

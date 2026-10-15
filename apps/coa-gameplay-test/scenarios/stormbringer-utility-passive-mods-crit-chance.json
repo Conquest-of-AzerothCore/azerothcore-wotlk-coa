@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Aethermancy raises Invigorating Surge's crit chance natively (#2801)",
+  "contract": "Aethermancy rank1 (705690) effect0 is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), EffectBasePoints 19 + EffectDieSides 1 = 20, EffectSpellClassMask word1 1073741824 (0x40000000) matching Invigorating Surge's (500038) own SpellFamilyFlags word1 exactly (confirmed today via coa-dbc-viewer against /home/fab/CoaServer/dbc_clientset). SPELLMOD_CRITICAL_CHANCE (op 7) is read generically at Unit.cpp:9697 via Player::ApplySpellMod; that function's non-CASTING_TIME/DURATION branch computes basevalue*totalmul+totalflat (Player.cpp:10315-10326), so rank1's flat-type mod yields base+20 -- the scenario asserts the actual formula on an arbitrary base of 100 rather than a hand-picked constant. Rank 1 has no module code; it is native SpellInfo/spellmod mechanics. Rank 2 (705691) is deliberately NOT asserted here: its DBC effect0 is aura 108 SPELL_AURA_ADD_PCT_MODIFIER for the same op, and Player::ApplySpellMod's PCT branch returns early for SPELLMOD_CRITICAL_CHANCE unless HasSpellModApplied is already true for the same cast (Player.cpp:10264-10266), which never happens for the direct heal Invigorating Surge, so rank 2 is unreachable natively. Rank 2 is covered by the fix scenario stormbringer-fix-aethermancy.json, which asserts the module contract in AscensionStormbringerContracts.cpp.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    },
+    {
+      "id": "rank1",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "assert", "label": "BASELINE: no crit-chance modifier on Invigorating Surge without Aethermancy",
+      "actor": "control", "metric": "spell_modifier", "spell": 500038, "op": 7, "base": 100, "equals": 100 },
+    { "action": "learn", "label": "Learn Aethermancy rank 1", "actor": "rank1", "spell": 705690 },
+    { "action": "assert", "label": "DISCRIMINATING: Aethermancy rank 1 is a flat +20 crit-chance modifier on Invigorating Surge",
+      "actor": "rank1", "metric": "spell_modifier", "spell": 500038, "op": 7, "base": 100, "equals": 120 },
+    { "action": "assert", "label": "Rank 1 leaves an unrelated spell's crit chance untouched",
+      "actor": "rank1", "metric": "spell_modifier", "spell": 804020, "op": 7, "base": 100, "equals": 100 }
+  ]
+}

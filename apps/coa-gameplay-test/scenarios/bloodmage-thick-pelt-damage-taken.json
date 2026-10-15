@@ -1,0 +1,195 @@
+{
+  "schema": 1,
+  "name": "Thick Pelt scales its damage reduction with melee AP and ignores the Bloodmage's own swings (#2325, #4709)",
+  "contract": "Thick Pelt's active 704626 tooltip uses $556233m1 + 20% of melee AP. At AP 95, that reports reduction 4. Helper 556233 has a physical MOD_DAMAGE_TAKEN base amount of -15 (BasePoints -16 plus DieSides 1), so the server amount is the negative of that displayed reduction: 15 - 20% of the applying Bloodmage's BASE_ATTACK power, clamped at zero. The reported tooltip value and required negative damage-taken sign support that formula; the helper's own 25% tooltip conflicts. Spell.dbc gives 704626 ProcFlags 0x4 (PROC_FLAG_DONE_MELEE_AUTO_ATTACK), so the spell_proc override sets it to 680 (taken physical melee/ranged events). This scenario checks that a level-1 Bloodmage at 21 AP gets amount zero and a level-80 Bloodmage with at least 80 AP gets a negative reduction amount. The manifest-matched original DBC has no cooldown; a fan-maintained Build Hub snapshot adds a conflicting 5-second clause, so this change follows the shipped DBC. The aura amount is snapshotted when 556233 applies. The harness fixture creature is passive and cannot attack back, so the incoming proc itself is tested using a hostile player actor.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "low_ap_bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 1
+    },
+    {
+      "id": "attacker",
+      "race": 2,
+      "class": 1,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "bag",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3,
+      "faction": 7
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the level-1 Bloodmage has less than 75 melee AP",
+      "actor": "low_ap_bloodmage",
+      "metric": "attack_power",
+      "max": 74
+    },
+    {
+      "action": "set_aura",
+      "actor": "low_ap_bloodmage",
+      "spell": 556233,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Thick Pelt does not increase damage taken below 75 AP",
+      "actor": "low_ap_bloodmage",
+      "metric": "aura_amount",
+      "spell": 556233,
+      "effect": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the level-80 Bloodmage has at least 80 melee AP",
+      "actor": "bloodmage",
+      "metric": "attack_power",
+      "equals": 309
+    },
+    {
+      "action": "set_aura",
+      "actor": "bloodmage",
+      "spell": 556233,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Thick Pelt scales to a negative amount at higher AP",
+      "actor": "bloodmage",
+      "metric": "aura_amount",
+      "spell": 556233,
+      "effect": 0,
+      "equals": -46
+    },
+    {
+      "action": "set_aura",
+      "actor": "bloodmage",
+      "spell": 556233,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 704626
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Thick Pelt passive is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 704626,
+      "equals": 1
+    },
+    {
+      "action": "attack",
+      "actor": "bloodmage",
+      "target": "bag"
+    },
+    {
+      "action": "wait",
+      "label": "Swing at the neutral bag long enough for several auto attacks to land",
+      "ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Bloodmage really did swing, so the next assertion is not vacuous",
+      "actor": "bloodmage",
+      "metric": "melee_attack_count",
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Bloodmage's own swings do not arm Thick Pelt 556233",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 556233,
+      "equals": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "bloodmage",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "attacker",
+      "enabled": true
+    },
+    {
+      "action": "attack",
+      "label": "A hostile player starts incoming melee attacks against the Bloodmage",
+      "actor": "attacker",
+      "target": "bloodmage"
+    },
+    {
+      "action": "wait",
+      "label": "Allow one incoming hit and another inside the cooldown window",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Thick Pelt procs on an incoming physical melee hit",
+      "actor": "bloodmage",
+      "metric": "spell_proc_count",
+      "spell": 704626,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The incoming proc applies the scaled one-hit helper aura",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 556233,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The proc helper keeps the Bloodmage's AP-scaled amount",
+      "actor": "bloodmage",
+      "metric": "aura_amount",
+      "spell": 556233,
+      "effect": 0,
+      "equals": -46
+    }
+  ]
+}

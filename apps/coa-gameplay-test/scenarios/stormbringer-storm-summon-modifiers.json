@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Stormy Days, Surge Overload and Improved Body of Lightning work natively (#1027, #1674, #2803)",
+  "contract": "Three Stormbringer passives read as 'not implemented' by a source-id grep but are each delivered end to end by the engine's generic spell-modifier system, with no module or script code involved. #1027 Stormy Days (705655) is aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 19 SPELLMOD_ACTIVATION_TIME, BasePoints -26 + DieSides 1 = -25%, class mask word2 bit 4 matching exactly Conjure Storm (800227, ranks 501415-501420) and its Lesser/Rainstorm variants; AuraEffect::CalculatePeriodic (SpellAuraEffects.cpp:713-720) applies SPELLMOD_ACTIVATION_TIME to the amplitude of every periodic aura the caster owns, so Conjure Storm's 2000 ms tick becomes 2000*(1-0.25)=1500 ms. #1674 Surge Overload (300596) is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 12 SPELLMOD_EFFECT2, BasePoints 0 + DieSides 1 = +1, class mask word1 bit 5 matching exactly Body of Lightning (500041); SPELLMOD_EFFECT2 reaches effect index 1's value through SpellEffectInfo::CalcValue -> Unit::ApplyEffectModifiers (SpellInfo.cpp:520, Unit.cpp:12148-12166 case 1), and effect 1 of 500041 is SPELL_AURA_OBS_MOD_POWER whose base value of 1 (percent of max mana per tick) becomes 2. #2803 Improved Body of Lightning (705693) is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 11 SPELLMOD_COOLDOWN, BasePoints -30001 + DieSides 1 = -30000 ms, class mask word1 bits 5 and 22 matching Body of Lightning (500041, RecoveryTime and CategoryRecoveryTime both 90000) and its inert damage half (800406, no cooldown); Player::AddSpellAndCategoryCooldowns (Player.cpp:11450-11457) applies SPELLMOD_COOLDOWN to both the spell and category cooldowns since 500041 does not carry SPELL_ATTR6_NO_CATEGORY_COOLDOWN_MODS, so 90000 becomes 60000, exactly the promised 30 sec reduction. All three assertions query the native spell-modifier/effect-value chain directly (CoAGameplayTest.cpp), so none of the target spells needs to be learned or cast, and none of the expected values depends on stats.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "sb", "race": 8, "class": 16, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn and level scaling settle", "ms": 3000 },
+    { "action": "assert", "label": "BASELINE #1027: Conjure Storm ticks at the unmodified 2000 ms without Stormy Days",
+      "actor": "sb", "metric": "spell_modifier", "spell": 800227, "op": 19, "base": 2000, "equals": 2000 },
+    { "action": "learn", "actor": "sb", "spell": 705655 },
+    { "action": "assert", "label": "DISCRIMINATING #1027: Stormy Days speeds Conjure Storm's tick to 1500 ms (-25% of the DBC amplitude)",
+      "actor": "sb", "metric": "spell_modifier", "spell": 800227, "op": 19, "base": 2000, "equals": 1500 },
+    { "action": "assert", "label": "BASELINE #1674: Body of Lightning's mana-per-tick effect value is the unmodified 1% without Surge Overload",
+      "actor": "sb", "metric": "spell_effect_value", "spell": 500041, "effect": 1, "equals": 1 },
+    { "action": "learn", "actor": "sb", "spell": 300596 },
+    { "action": "assert", "label": "DISCRIMINATING #1674: Surge Overload raises the mana-per-tick effect value to 2%",
+      "actor": "sb", "metric": "spell_effect_value", "spell": 500041, "effect": 1, "equals": 2 },
+    { "action": "assert", "label": "BASELINE #2803: Body of Lightning's cooldown is the unmodified 90000 ms without Improved Body of Lightning",
+      "actor": "sb", "metric": "spell_modifier", "spell": 500041, "op": 11, "base": 90000, "equals": 90000 },
+    { "action": "learn", "actor": "sb", "spell": 705693 },
+    { "action": "assert", "label": "DISCRIMINATING #2803: Improved Body of Lightning cuts the cooldown to 60000 ms (-30000 ms from the DBC BasePoints/DieSides)",
+      "actor": "sb", "metric": "spell_modifier", "spell": 500041, "op": 11, "base": 90000, "equals": 60000 }
+  ]
+}

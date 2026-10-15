@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Dark Souls lengthens Tonics by 5 seconds (#1327)",
+  "contract": "Dark Souls 802011 reads 'Increases the duration of Tonics by $/1000;s2 sec.' In the installed Spell.dbc it is passive, family 21, with effect 0 a SPELLMOD_EFFECT2 placeholder worth 0 on Dark Tonic (BasePoints -1, mask word 1 0x04000000) and effect 1 = SPELL_AURA_ADD_FLAT_MODIFIER misc 1 = SPELLMOD_DURATION, BasePoints 4999 (+5000 ms), class mask word 2 = 0x200, which every Tonic carries (Vampiric 802276 and Pyro 802277 among them). Tonics have SpellDuration index 1 = 10000 ms. Aura::CalcMaxDuration applies SPELLMOD_DURATION (SpellAuras.cpp:812), so a Tonic lasts 15000 ms. No script overrides Tonic durations. The scenario reads the probe on two Tonics and a control spell outside the mask (Smite Evil), then drinks a real Vampiric Tonic before and after the talent and reads the live aura duration. The aura is removed between casts so the second cast creates a fresh aura instead of refreshing. The second drink is only sent once the Tonic's global cooldown reads 0: measured on slot 3, 434 ms of it were still running when the fixed 2.5 s wait ended, the cast was refused and no aura appeared (aura_duration_ms 0); after a further 1 s wait the same cast produced a 15000 ms aura.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hunter", "race": 1, "class": 15, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Vampiric Tonic", "actor": "hunter", "spell": 802276},
+    {"action": "learn", "label": "Pyro Tonic", "actor": "hunter", "spell": 802277},
+    {"action": "assert", "label": "Vampiric Tonic lasts 10000 ms without the talent (SpellDuration 1)", "actor": "hunter", "metric": "spell_modifier", "spell": 802276, "op": 1, "base": 10000, "equals": 10000},
+    {"action": "cast", "label": "Drink a Tonic without the talent", "actor": "hunter", "spell": 802276},
+    {"action": "assert", "label": "Live duration without the talent is at most 10 s", "actor": "hunter", "metric": "aura_duration_ms", "spell": 802276, "min": 9000, "max": 10000, "within_ms": 3000},
+    {"action": "set_aura", "label": "Remove the Tonic", "actor": "hunter", "spell": 802276, "stacks": 0},
+    {"action": "reset_cooldown", "label": "Clear the Tonic cooldown", "actor": "hunter", "spell": 802276},
+    {"action": "wait", "label": "Let the global cooldown pass", "ms": 2500},
+    {"action": "learn", "label": "Dark Souls", "actor": "hunter", "spell": 802011},
+    {"action": "assert", "label": "The passive is active", "actor": "hunter", "metric": "aura", "spell": 802011, "equals": 1},
+    {"action": "assert", "label": "Vampiric Tonic now lasts 15000 ms", "actor": "hunter", "metric": "spell_modifier", "spell": 802276, "op": 1, "base": 10000, "equals": 15000},
+    {"action": "assert", "label": "Pyro Tonic now lasts 15000 ms", "actor": "hunter", "metric": "spell_modifier", "spell": 802277, "op": 1, "base": 10000, "equals": 15000},
+    {"action": "assert", "label": "Smite Evil is outside the mask", "actor": "hunter", "metric": "spell_modifier", "spell": 802004, "op": 1, "base": 10000, "equals": 10000},
+    {"action": "assert", "label": "The global cooldown has ended before the second drink", "actor": "hunter", "metric": "global_cooldown_ms", "spell": 802276, "equals": 0, "within_ms": 5000},
+    {"action": "cast", "label": "Drink a Tonic with the talent", "actor": "hunter", "spell": 802276},
+    {"action": "assert", "label": "Live duration with the talent is between 14 s and 15 s", "actor": "hunter", "metric": "aura_duration_ms", "spell": 802276, "min": 14000, "max": 15000, "within_ms": 3000},
+    {"action": "unlearn", "label": "Drop Dark Souls", "actor": "hunter", "spell": 802011},
+    {"action": "assert", "label": "Vampiric Tonic returns to 10000 ms", "actor": "hunter", "metric": "spell_modifier", "spell": 802276, "op": 1, "base": 10000, "equals": 10000}
+  ]
+}

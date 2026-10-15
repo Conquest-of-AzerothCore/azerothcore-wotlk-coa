@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Charm of Power raises Gravity Bomb's explosion damage by 50% (#1237)",
+  "contract": "Charm of Power 706100 carries SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue SPELLMOD_DAMAGE (0) and EffectSpellClassMask word0 bit 0x10000; EffectBasePoints 49 resolves to 50 with DieSides 1, matching the tooltip \"Increases the damage dealt by Gravity Bomb by $s1%.\" The only family-28 record with SpellFamilyFlags word0 bit 0x10000 is 801282 \"Gravity Bomb\", the SPELL_EFFECT_SCHOOL_DAMAGE explosion that the Gravity Bomb debuff's periodic trigger casts; its AttributesEx3 is 0x40000000 (DO_NOT_DISPLAY_RANGE), not IGNORE_CASTER_MODIFIERS. Native path only: AuraEffect::CalculateSpellMod, SpellInfo::IsAffectedBySpellMod, and Unit::SpellDamageBonusDone, which applies SPELLMOD_DAMAGE last to the finished damage. The Chronomancer stays the caster of 801282 because its EffectImplicitTargetA 53 makes it need an explicit unit target, so AuraEffect::HandlePeriodicTriggerSpellAuraTick routes the cast through the debuff's caster.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 22, "level": 80 },
+    { "id": "talent", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talent", "spell": 706100 },
+    {
+      "action": "assert",
+      "label": "Gravity Bomb's explosion damage is unmodified without the talent",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 801282,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Gravity Bomb's explosion damage is 50% higher with the talent",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 801282,
+      "op": 0,
+      "base": 1000,
+      "equals": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The debuff's own periodic damage keeps its unmodified damage mod",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 501820,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    }
+  ]
+}

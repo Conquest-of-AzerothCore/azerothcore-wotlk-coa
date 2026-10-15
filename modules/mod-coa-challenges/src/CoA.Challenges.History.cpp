@@ -7,33 +7,28 @@ namespace CoAChallenges
 
     void SendActiveList(Player* player)
     {
+        if (!player->GetSession())
+            return;
+        SendActiveList(player, LoadActiveChallengeRows(player->GetGUID().GetCounter()));
+    }
+
+    void SendActiveList(Player* player, std::vector<ActiveChallengeRow> const& rows)
+    {
         WorldSession* session = player->GetSession();
         if (!session)
             return;
 
-        uint32 guid = player->GetGUID().GetCounter();
-        QueryResult result = CharacterDatabase.Query(
-            "SELECT challengeId, level FROM coa_character_challenge WHERE guid = {}", guid);
-
         WorldPacket data(SMSG_COA_CHALLENGE_ACTIVE_LIST, 64);
-        if (!result)
+        data << uint32(rows.size());
+        for (ActiveChallengeRow const& row : rows)
         {
             data << uint32(0);
-        }
-        else
-        {
-            data << uint32(result->GetRowCount());
-            do
-            {
-                Field* f = result->Fetch();
-                data << uint32(0);
-                data << uint32(f[0].Get<uint32>());
-                data << uint32(f[1].Get<uint32>());
-                data << uint32(1);
-                data << uint32(0);
-                data << uint32(0);
-                data << uint16(0);
-            } while (result->NextRow());
+            data << uint32(row.challengeId);
+            data << uint32(row.level);
+            data << uint32(1);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint16(0);
         }
 
         session->SendPacket(&data);
@@ -232,13 +227,18 @@ namespace CoAChallenges
             pending.rollback.size(), pending.requesterGuid);
     }
 
-
     void PushLoginState(Player* player)
     {
-        SendConfigBatch(player);
-        SendActiveList(player);
+        std::vector<ActiveChallengeRow> const active = TakeLoginChallengeRows(player->GetGUID().GetCounter());
+
+        SendActiveList(player, active);
         SendCriteriaState(player);
-        RecomputeRequiredGameModes(player);
+        uint32 const guid = player->GetGUID().GetCounter();
+        uint32 const maskBefore = CachedGameModeMask(guid);
+        RecomputeRequiredGameModes(player, active);
+        // The client forgets the mask on the character screen; the recompute only sends it when it changed.
+        if (uint32 const mask = CachedGameModeMask(guid); mask && mask == maskBefore)
+            SendGameModeState(player, mask);
         ReapplyGameModeBehavior(player);
         if (sConfigMgr->GetOption<bool>("CoAChallenges.SendFailureList", true))
             SendFailureList(player);
@@ -248,38 +248,24 @@ namespace CoAChallenges
         // Load the in-memory counters and push the meter stacks first, then
         // re-apply the challenge aura last so its icon keeps the same slot.
         // (Auras don't reliably survive relog; the DB is the source of truth.)
-        RefreshHungerTracking(player);
-        RefreshFatigueTracking(player);
+        RefreshHungerTracking(player, active);
+        RefreshFatigueTracking(player, active);
         RefreshSpellbindTracking(player);
         RefreshInvertedBreathTracking(player);
         RefreshRegenTracking(player);
         RefreshHighRiskTracking(player);
+        RefreshLevelScalingTracking(player);
         RefreshLootedTracking(player);
         SyncMeterAuras(player);
-        ReapplyActiveSpells(player);
+        ReapplyActiveSpells(player, active);
         // Drop challenge auras with no backing active challenge (self-heal for
         // an orphan left by a row deleted out-of-band).
         StripOrphanChallengeAuras(player);
 
         // Safety: no hunger active -> no meter icons lingering.
-        {
-            uint32 guid = player->GetGUID().GetCounter();
-            bool anyHunger = false;
-            if (QueryResult r = CharacterDatabase.Query(
-                    "SELECT challengeId FROM coa_character_challenge WHERE guid = {}", guid))
-            {
-                do
-                {
-                    if (IsHungerChallenge(r->Fetch()[0].Get<uint32>()))
-                    {
-                        anyHunger = true;
-                        break;
-                    }
-                } while (r->NextRow());
-            }
-            if (!anyHunger)
-                RemoveMeterAuras(player);
-        }
+        if (std::none_of(active.begin(), active.end(),
+                [](ActiveChallengeRow const& row) { return IsHungerChallenge(row.challengeId); }))
+            RemoveMeterAuras(player);
 
         // A character that logs in already at the cap with an active challenge
         // (or one activated at the cap) completes it here.
@@ -471,9 +457,6 @@ namespace CoAChallenges
             challengeID, level, player->GetName());
     }
 
-    // SMSG 0x597 CHALLENGE_COMPLETED_LIST_CHANGED: the player's own completed
-    // challenges (feeds GetCompletedChallenges / the green "already completed"
-    // checkmark). Handler 0x1382F0 layout:
     //   u32 count, count x 28-byte entry:
     //     u32 0 (baggage), u32 Id, u32 Level, u32 StartTimeLo, u32 StartTimeHi,
     //     u32 0 (unused), u32 EndTime.   (Id = map key = challengeID.)
@@ -483,30 +466,43 @@ namespace CoAChallenges
         if (!session)
             return;
 
-        uint32 guid = player->GetGUID().GetCounter();
-        QueryResult r = CharacterDatabase.Query(
-            "SELECT challengeId, level, startTime, completeTime FROM coa_challenge_completion WHERE guid = {}",
-            guid);
-
-        WorldPacket data(SMSG_COA_CHALLENGE_COMPLETED_LIST, 128);
-        if (!r)
+        struct Completion
         {
-            data << uint32(0);
-        }
-        else
+            uint32 startTime;
+            uint32 completeTime;
+        };
+        std::map<std::pair<uint32, uint32>, Completion> completions;
+        auto collect = [&](auto rows, bool shared)
         {
-            data << uint32(r->GetRowCount());
+            if (!rows)
+                return;
             do
             {
-                Field* f = r->Fetch();
-                data << uint32(0);               // baggage
-                data << f[0].Get<uint32>();      // Id (challengeID)
-                data << f[1].Get<uint32>();      // Level
-                data << f[2].Get<uint32>();      // StartTime lo
-                data << uint32(0);               // StartTime hi
-                data << uint32(0);               // unused
-                data << f[3].Get<uint32>();      // EndTime (completeTime)
-            } while (r->NextRow());
+                Field* f = rows->Fetch();
+                uint32 const challengeID = f[0].Get<uint32>();
+                if (shared && !IsTrialChallenge(challengeID))
+                    continue;
+                completions[{ challengeID, f[1].Get<uint32>() }] = { f[2].Get<uint32>(), f[3].Get<uint32>() };
+            } while (rows->NextRow());
+        };
+        collect(CharacterDatabase.Query(
+            "SELECT challengeId, level, startTime, completeTime FROM coa_challenge_completion WHERE guid = {}",
+            player->GetGUID().GetCounter()), false);
+        auto* accountCompletions = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_ACCOUNT_CHALLENGE_COMPLETIONS);
+        accountCompletions->SetData(0, session->GetAccountId());
+        collect(CharacterDatabase.Query(accountCompletions), true);
+
+        WorldPacket data(SMSG_COA_CHALLENGE_COMPLETED_LIST, 4 + 28 * completions.size());
+        data << uint32(completions.size());
+        for (auto const& [key, completion] : completions)
+        {
+            data << uint32(0);
+            data << key.first;
+            data << key.second;
+            data << completion.startTime;
+            data << uint32(0);
+            data << uint32(0);
+            data << completion.completeTime;
         }
 
         session->SendPacket(&data);

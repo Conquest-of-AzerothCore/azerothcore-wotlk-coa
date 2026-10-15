@@ -1,0 +1,121 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Tempest Sovereign works natively (#484)",
+  "contract": "Tempest Sovereign 560020 reads that it transforms Shock into Brine and Call Lightning into Torrential Wrath. Effect 0 is a bare SPELL_AURA_DUMMY (misc=31) with no aura handler, but that is not the delivery mechanism: it is a data table plus a player hook. AscensionTalentReplacementData.h:36-43 carries two rows, {16, 14, 560020, 804020, {807105 at 0 .. 807111 at 58}} for Shock's root and {16, 14, 560020, 500040, {804017 at 0 .. 503359 at 58}} for Call Lightning's root - fields {ClassId, SpecId, ParentSpellId, OriginalSpellId, Ranks} (AscensionTalentReplacementData.h:17-23), exactly the two @s: ids the tooltip names (807105 Brine, 804017 Torrential Wrath). AscensionClassService::SynchronizeTalentReplacements (AscensionCompat.cpp:741-808) gates on specializationId == entry.SpecId and player->HasSpell(entry.ParentSpellId) (:755), picks the highest rank whose RequiredLevel <= level (:761), learns it and registers it with Player::SetTemporarySpellReplacement (:808); it runs from OnPlayerLearnSpell (:5385-5386), OnPlayerForgotSpell (:5411-5414) and OnPlayerAfterSpecSlotChanged (:5438). Spec 14 is STORMBRINGER GIFTS (ChrSpecs.dbc row 14, identity 4015), confirmed independently of the module; CharacterAdvancement row 31165 for 560020 has RequiredLevel 1 and zero AE/TE cost, so the specialization grants it for free the moment spec 14 activates via AscensionClassService::SynchronizeAutomaticTalents (AscensionCompat.cpp:2051-2074), which is unconditional and unaffected by the AutoProgression toggle below. A level-80 Stormbringer's originals are Call Lightning 501398 (AscensionSpellProgressionData.h:574, RequiredLevel 79) and Shock 504634 (:648, RequiredLevel 60); the replacement ranks whose RequiredLevel <= 80 top out at 807111 (Brine) and 503359 (Torrential Wrath). Player::GetTemporarySpellReplacement returns the queried id itself when no replacement is registered, so the unreplaced reading of the metric is the original spell id, not zero - the baseline assertions read that way rather than asserting zero. The class/spec tuning aura 887036 (AscensionClassTuning.h:56) proves spec 14 is active independently of any Tempest Sovereign specific state. Correction found while fixing up a native-run failure: the level-80 Shock/Call Lightning ranks are NOT granted automatically by character creation plus GiveLevel(80) on this deployment. AscensionCompatConfig::AUTO_PROGRESSION defaults to false (src/server/coa/conf/coa.conf.dist:92, `CoA.AutoProgression = 0`, not overridden by the deployed slot conf) and gates every loop in AscensionClassService::SynchronizeProgression that would otherwise learn AscensionProgression::Ranks entries such as {16, 804020, 504634, 60} and {16, 500040, 501398, 79} (AscensionSpellProgressionData.h:648,574); Player::GiveLevel does call sScriptMgr->OnPlayerLevelChanged (Player.cpp:2670), and the module's OnPlayerLevelChanged does call SynchronizeProgression(player) (AscensionCompat.cpp:5377-5386), but that overload is not the explicitRequest=true one, so the rank loop is skipped. In real play a Stormbringer picks these ranks up from a trainer (or via AutoProgression=1); the test fixture has no trainer interaction, so it teaches the two level-80 ranks directly with `learn` steps before asserting them. This does not touch SynchronizeTalentReplacements (AscensionCompat.cpp:741-808), which needs the player to already hold an active spell in each original chain (via player->HasActiveSpell(id) over player->GetSpellMap(), :765-772) to register a replacement, so the explicit `learn` steps are load-bearing for the discriminating assertions further down, not just cosmetic.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "stormbringer",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks and class synchronisation settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Fixture teaches the level-80 Shock rank (AutoProgression = 0 on this deployment, so GiveLevel(80) does not grant it; real play acquires it from a trainer)",
+      "actor": "stormbringer",
+      "spell": 504634
+    },
+    {
+      "action": "learn",
+      "label": "Fixture teaches the level-80 Call Lightning rank (same AutoProgression gap)",
+      "actor": "stormbringer",
+      "spell": 501398
+    },
+    {
+      "action": "assert",
+      "label": "The level-80 Shock rank is known after the fixture teaches it",
+      "actor": "stormbringer",
+      "metric": "knows_spell",
+      "spell": 504634,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The level-80 Call Lightning rank is known after the fixture teaches it",
+      "actor": "stormbringer",
+      "metric": "knows_spell",
+      "spell": 501398,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Nothing replaces Shock before the specialization is active, so the metric reads Shock itself",
+      "actor": "stormbringer",
+      "metric": "temporary_spell_replacement",
+      "spell": 504634,
+      "equals": 504634
+    },
+    {
+      "action": "assert",
+      "label": "Nothing replaces Call Lightning before the specialization is active, so the metric reads Call Lightning itself",
+      "actor": "stormbringer",
+      "metric": "temporary_spell_replacement",
+      "spell": 501398,
+      "equals": 501398
+    },
+    {
+      "action": "specialization",
+      "actor": "stormbringer",
+      "id": 14
+    },
+    {
+      "action": "assert",
+      "label": "Specialization 14 is active, shown by its own tuning aura",
+      "actor": "stormbringer",
+      "metric": "aura",
+      "spell": 887036,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The specialization granted Tempest Sovereign itself",
+      "actor": "stormbringer",
+      "metric": "knows_spell",
+      "spell": 560020,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The active specialization replaces Shock with the level-appropriate Brine rank",
+      "actor": "stormbringer",
+      "metric": "temporary_spell_replacement",
+      "spell": 504634,
+      "equals": 807111,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The active specialization replaces Call Lightning with the level-appropriate Torrential Wrath rank",
+      "actor": "stormbringer",
+      "metric": "temporary_spell_replacement",
+      "spell": 501398,
+      "equals": 503359,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Brine replacement rank was granted to the spellbook as well",
+      "actor": "stormbringer",
+      "metric": "knows_spell",
+      "spell": 807111,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Torrential Wrath replacement rank was granted to the spellbook as well",
+      "actor": "stormbringer",
+      "metric": "knows_spell",
+      "spell": 503359,
+      "equals": 1
+    }
+  ]
+}

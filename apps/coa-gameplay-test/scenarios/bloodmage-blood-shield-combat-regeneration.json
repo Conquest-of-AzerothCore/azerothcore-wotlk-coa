@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Blood Shield keeps health regeneration running in combat at 150% of the normal rate, and nothing regenerates in combat without it (#362)",
+  "contract": "Blood Shield 504296 (Spell.dbc, family 26, class 20 grant at level 4): effect 1 is aura 88 SPELL_AURA_MOD_HEALTH_REGEN_PERCENT with BasePoints 49 + DieSides 1 = 50, effect 2 is aura 116 SPELL_AURA_MOD_REGEN_DURING_COMBAT with value 100; tooltip 'Your health regeneration now continues in combat and is increased by 50%'. No other spell a level-5 Bloodmage owns carries a health-regeneration aura, and the in-combat measurement uses a passive fixture that never swings back, so health moves only by regeneration. Expected: out of combat without the shield the Bloodmage regenerates its normal rate R per 2 s tick; in combat without the shield it regenerates nothing; in combat with the shield it regenerates 1.5 R per tick. Each window starts about 1 s after an observed tick and lasts 20 s, so it holds exactly 10 ticks; Player::RegenerateHealth truncates each tick to an integer, so the in-combat/out-of-combat ratio lies in 1.35-1.75 for any per-tick base above 7 health (a level-5 Bloodmage has about 27 Spirit and the CoA client's gtOCTRegenHP custom-class row 0.274 at level 5). The ratio is independent of Rate.Health and EnableLowLevelRegenBoost, which scale both windows alike. It rejects in-combat regeneration without the shield, a shield that only restores the unboosted rate (1.0) and a doubled bonus (2.0 or more). The absolute rate stays recorded, not asserted: no independent source states the intended Bloodmage regeneration magnitude. The maximum health is fixed at 5000 so no window reaches the cap.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "bloodmage", "race": 1, "class": 20, "level": 5, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "bloodmage", "entry": 36, "level": 5, "health": 100000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "bloodmage", "spell": 504296 },
+    { "action": "snapshot", "label": "Record the natural maximum health", "actor": "bloodmage", "metric": "max_health", "save_as": "natural_max_health" },
+    { "action": "snapshot", "label": "Record Spirit", "actor": "bloodmage", "metric": "stat", "stat": 4, "save_as": "spirit" },
+    {
+      "action": "assert", "label": "SETUP: out of combat without Blood Shield",
+      "actor": "bloodmage", "metric": "combat", "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: Blood Shield is not up",
+      "actor": "bloodmage", "metric": "aura", "spell": 504296, "equals": 0
+    },
+    { "action": "set_health", "actor": "bloodmage", "value": 100, "maximum": 5000 },
+    { "action": "snapshot", "actor": "bloodmage", "metric": "health", "save_as": "rest_seed" },
+    {
+      "action": "assert", "label": "SETUP: an out-of-combat regeneration tick lands",
+      "actor": "bloodmage", "metric": "health", "relative_to": "rest_seed", "min": 1, "within_ms": 2500
+    },
+    { "action": "wait", "label": "Sit between regeneration ticks", "ms": 1000 },
+    { "action": "snapshot", "actor": "bloodmage", "metric": "health", "save_as": "rest_start" },
+    { "action": "wait", "label": "Ten out-of-combat regeneration ticks", "ms": 20000 },
+    {
+      "action": "assert", "label": "SETUP: still out of combat",
+      "actor": "bloodmage", "metric": "combat", "equals": 0
+    },
+    {
+      "action": "snapshot", "label": "Normal out-of-combat regeneration over ten ticks",
+      "actor": "bloodmage", "metric": "health", "relative_to": "rest_start", "save_as": "rest_gain"
+    },
+    {
+      "action": "assert", "label": "SETUP: the Bloodmage regenerates out of combat",
+      "actor": "bloodmage", "metric": "health", "relative_to": "rest_start", "min": 10
+    },
+    { "action": "attack", "actor": "bloodmage", "target": "dummy" },
+    {
+      "action": "assert", "label": "SETUP: the Bloodmage enters combat",
+      "actor": "bloodmage", "metric": "combat", "equals": 1, "within_ms": 5000
+    },
+    { "action": "set_health", "actor": "bloodmage", "value": 100 },
+    { "action": "snapshot", "actor": "bloodmage", "metric": "health", "save_as": "fight_start" },
+    { "action": "wait", "label": "Ten regeneration intervals in combat without Blood Shield", "ms": 20000 },
+    {
+      "action": "assert", "label": "SETUP: combat held through the window",
+      "actor": "bloodmage", "metric": "combat", "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: without Blood Shield no health regenerates in combat",
+      "actor": "bloodmage", "metric": "health", "relative_to": "fight_start", "equals": 0
+    },
+    { "action": "cast", "actor": "bloodmage", "spell": 504296 },
+    {
+      "action": "assert", "label": "SETUP: Blood Shield is up",
+      "actor": "bloodmage", "metric": "aura", "spell": 504296, "equals": 1, "within_ms": 3000
+    },
+    { "action": "set_health", "actor": "bloodmage", "value": 100 },
+    { "action": "snapshot", "actor": "bloodmage", "metric": "health", "save_as": "shield_seed" },
+    {
+      "action": "assert", "label": "Blood Shield: health regeneration continues in combat",
+      "actor": "bloodmage", "metric": "health", "relative_to": "shield_seed", "min": 1, "within_ms": 2500
+    },
+    { "action": "wait", "label": "Sit between regeneration ticks", "ms": 1000 },
+    { "action": "snapshot", "actor": "bloodmage", "metric": "health", "save_as": "shield_start" },
+    { "action": "wait", "label": "Ten in-combat regeneration ticks under Blood Shield", "ms": 20000 },
+    {
+      "action": "assert", "label": "SETUP: combat held through the shielded window",
+      "actor": "bloodmage", "metric": "combat", "equals": 1
+    },
+    {
+      "action": "snapshot", "label": "In-combat regeneration under Blood Shield over ten ticks",
+      "actor": "bloodmage", "metric": "health", "relative_to": "shield_start", "save_as": "shield_gain"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: in combat, Blood Shield regenerates 150% of the normal out-of-combat rate",
+      "actor": "bloodmage", "metric": "health", "relative_to": "shield_start", "ratio_to": "rest_gain",
+      "min": 1.35, "max": 1.75
+    },
+    {
+      "action": "assert", "label": "SETUP: the fixed maximum health held, so no window was capped",
+      "actor": "bloodmage", "metric": "max_health", "equals": 5000
+    }
+  ]
+}

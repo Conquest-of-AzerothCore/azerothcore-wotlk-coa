@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Insanity decays by exactly 2 every 10 seconds out of combat (#4261)",
+  "contract": "500706 tooltip: 'causing you to lose $500728q1 Insanity every $500727t1 sec while not in combat.' $500728q1 -> spell 500728 EffectMiscValue[0]=-2; $500727t1 -> spell 500727 EffectAmplitude[0]=10000 ms (both confirmed via coa-dbc-viewer). #4261 was filed as decay having no implementation, but the current source already wires two paths to it: 500727 is a SPELL_AURA_PERIODIC_TRIGGER_SPELL (EffectTriggerSpell[0]=500728) applied by Refresh()'s SetHelper(player, 500727, HasSpell(500706)), so its native periodic tick (AuraEffect::PeriodicTick, SpellAuraEffects.cpp:1262) casts 500728 every 10s, whose hit is caught by spell_ascension_cultist_resource::Effect (AscensionCultistAbilities.cpp, effect.Effect==175 && effect.TriggerSpell==Insanity) and calls Resource(player, Insanity, -2, true) out of combat -- AND aura_ascension_cultist_lifecycle::Tick (AscensionCultistAuras.cpp) independently calls Resource(player, Insanity, -2, true) on the same id==500727 EFFECT_0 periodic tick, without ever calling PreventDefaultAction(), so CallScriptEffectPeriodicHandlers (SpellAuraEffects.cpp:1237) does not suppress the native trigger-spell cast either. Both paths appear to fire on the same tick unless the player has 706725 (cast only from event 805606), which a fresh Cultist does not have by default. This scenario asserts the tooltip's exact -2 value; a -4 result would mean the two paths double-count, a distinct defect from '#4261 not implemented' and outside this issue's reported scope to fix blindly.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "set_aura", "actor": "cultist", "spell": 500706, "stacks": 40 },
+    {
+      "action": "wait", "label": "Let Refresh() apply the 500727 decay helper aura (polled every 500 ms)",
+      "ms": 1000
+    },
+    {
+      "action": "assert", "label": "SETUP: 706725 (the decay-suppression aura) is not known by a fresh Cultist",
+      "actor": "cultist", "metric": "aura", "spell": 706725, "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: Insanity starts at 40",
+      "actor": "cultist", "metric": "aura_stacks", "spell": 500706, "equals": 40
+    },
+    { "action": "wait", "label": "One full 10000 ms decay tick, plus a buffer for step resolution", "ms": 10500 },
+    {
+      "action": "assert", "label": "Insanity lost exactly 2 (#4261 tooltip), not 0 (no implementation) or 4 (double-counted)",
+      "actor": "cultist", "metric": "aura_stacks", "spell": 500706, "equals": 38, "within_ms": 1000
+    }
+  ]
+}

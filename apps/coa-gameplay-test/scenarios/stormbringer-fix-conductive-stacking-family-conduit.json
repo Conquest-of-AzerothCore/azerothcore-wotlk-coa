@@ -1,0 +1,558 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Conduit procs from Frost damage (#3632)",
+  "contract": "#3632: Conduit 806374 is a Stormbringer passive (CharacterAdvancement class 16) whose tooltip reads \"Dealing Frost damage now has a $h% chance to increase the damage the target takes from Electrocute by $806393s1% for $806393d, stacking up to $806393u times\". Its single effect is aura 42 SPELL_AURA_PROC_TRIGGER_SPELL with EffectTriggerSpell 806393, ProcChance 60 and Spell.dbc ProcFlags 0x0. SpellMgr::LoadSpellProcs skips DBC fallback generation for a record without proc flags, so with no `spell_proc` row SpellMgr::GetSpellProcEntry returned nullptr, Aura::GetProcEffectMask returned 0 and the passive could never fire; 806374 is 806393's only incoming reference in Spell.dbc, so nothing else could apply the debuff either. The trigger 806393 is native: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER, EffectBasePoints[0] 14 + EffectDieSides[0] 1 = 15%, DurationIndex 1 = 10000 ms, StackAmount 4, and EffectSpellClassMask (33554432, 0, 0) under SpellFamilyName 22, which is exactly Electrocute (501421/801844, SpellFamilyFlags[0] 33554432). Unit::SpellDamageBonusTaken applies it only for the aura's own caster and only to spells its family mask covers. The harness has no statistical test, so the proc is asserted as \"at least once in N trials\" on cumulative counters that cannot expire: eight Brine casts (807105, SchoolMask 16 Frost, DmgClass 1 MAGIC, ManaCostPercentage 21, no cooldown, 2000 ms cast) at the record's own ProcChance 60 leave 0.4^8 = 6.6e-4 as the false-failure probability. `spell_proc_count` on 806374 counts the casts whose triggering aura was 806374, and `spell_cast_count` on 806393 counts the trigger casts themselves; both are zero on a tree without the `spell_proc` row no matter how much Frost damage is dealt, which is what makes them the discriminating assertions. Eight Shock casts (804020, SchoolMask 8 Nature) on a separate victim assert the debuff stays absent there, which is what proves the row's SchoolMask 16 gate rather than an unconditional proc. The magnitude half is asserted without any proc roll at all: 806393 is cast directly on a third victim, so one stack, four stacks and the refusal to exceed four are exact, and the Electrocute damage-taken bonus is read as a ratio against a snapshot taken before the first stack, so the per-viewer creature scaling the harness applies cannot move it. 15% per stack gives 1.15 at one stack and 1.60 at the cap of four. 806393's own description text says \"20 sec\" while its DurationIndex 1 is 10000 ms; the duration index is the server's source of truth and nothing here changes the record.",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "v",
+      "owner": "s",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5
+    },
+    {
+      "id": "n",
+      "owner": "s",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5
+    },
+    {
+      "id": "m",
+      "owner": "s",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 806374
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 807105
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 804020
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Conduit 806374 has never procced",
+      "actor": "s",
+      "metric": "spell_proc_count",
+      "spell": 806374,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the Frost victim carries no Conduit debuff from this Stormbringer",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 806393,
+      "caster": "s",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Conduit's authored bonus is EffectBasePoints[0] 14 + EffectDieSides[0] 1 = 15% per stack",
+      "actor": "s",
+      "metric": "spell_effect_value",
+      "spell": 806393,
+      "effect": 0,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: Conduit's authored StackAmount is 4",
+      "actor": "s",
+      "metric": "spell_max_stacks",
+      "spell": 806393,
+      "equals": 4
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "label": "Brine 1 of 8, Frost magic damage on the victim",
+      "actor": "s",
+      "spell": 807105,
+      "target": "v"
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "label": "Brine 2 of 8, Frost magic damage on the victim",
+      "actor": "s",
+      "spell": 807105,
+      "target": "v"
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "label": "Brine 3 of 8, Frost magic damage on the victim",
+      "actor": "s",
+      "spell": 807105,
+      "target": "v"
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "label": "Brine 4 of 8, Frost magic damage on the victim",
+      "actor": "s",
+      "spell": 807105,
+      "target": "v"
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "label": "Brine 5 of 8, Frost magic damage on the victim",
+      "actor": "s",
+      "spell": 807105,
+      "target": "v"
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "label": "Brine 6 of 8, Frost magic damage on the victim",
+      "actor": "s",
+      "spell": 807105,
+      "target": "v"
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "label": "Brine 7 of 8, Frost magic damage on the victim",
+      "actor": "s",
+      "spell": 807105,
+      "target": "v"
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "label": "Brine 8 of 8, Frost magic damage on the victim",
+      "actor": "s",
+      "spell": 807105,
+      "target": "v"
+    },
+    {
+      "action": "wait",
+      "ms": 2400
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: eight Frost hits fired Conduit's own ProcChance 60 at least once (0.4^8 = 6.6e-4 false failure); with no spell_proc row this count can never leave zero",
+      "actor": "s",
+      "metric": "spell_proc_count",
+      "spell": 806374,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the proc cast EffectTriggerSpell[0] 806393 at least once",
+      "actor": "s",
+      "metric": "spell_cast_count",
+      "spell": 806393,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Frost victim now carries the Conduit debuff cast by this Stormbringer",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 806393,
+      "caster": "s",
+      "min": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "label": "Shock 1 of 8, Nature magic damage on the control victim",
+      "actor": "s",
+      "spell": 804020,
+      "target": "n"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "label": "Shock 2 of 8, Nature magic damage on the control victim",
+      "actor": "s",
+      "spell": 804020,
+      "target": "n"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "label": "Shock 3 of 8, Nature magic damage on the control victim",
+      "actor": "s",
+      "spell": 804020,
+      "target": "n"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "label": "Shock 4 of 8, Nature magic damage on the control victim",
+      "actor": "s",
+      "spell": 804020,
+      "target": "n"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "label": "Shock 5 of 8, Nature magic damage on the control victim",
+      "actor": "s",
+      "spell": 804020,
+      "target": "n"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "label": "Shock 6 of 8, Nature magic damage on the control victim",
+      "actor": "s",
+      "spell": 804020,
+      "target": "n"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "label": "Shock 7 of 8, Nature magic damage on the control victim",
+      "actor": "s",
+      "spell": 804020,
+      "target": "n"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "label": "Shock 8 of 8, Nature magic damage on the control victim",
+      "actor": "s",
+      "spell": 804020,
+      "target": "n"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: eight Nature hits never applied Conduit, so the row's SchoolMask 16 gate holds (an ungated row would leave this at zero only 0.4^8 = 6.6e-4 of the time)",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 806393,
+      "caster": "s",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the magnitude victim carries no Conduit debuff",
+      "actor": "m",
+      "metric": "aura",
+      "spell": 806393,
+      "caster": "s",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Electrocute damage taken by the magnitude victim before any Conduit stack",
+      "actor": "m",
+      "metric": "spell_damage_taken",
+      "target": "s",
+      "spell": 801844,
+      "save_as": "taken_base"
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 806393
+    },
+    {
+      "action": "cast",
+      "label": "Apply one Conduit stack directly, without relying on the proc roll",
+      "actor": "s",
+      "spell": 806393,
+      "target": "m"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: one application is one stack",
+      "actor": "m",
+      "metric": "aura_stacks",
+      "spell": 806393,
+      "caster": "s",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the debuff runs on DurationIndex 1 = 10000 ms",
+      "actor": "m",
+      "metric": "aura_duration_ms",
+      "spell": 806393,
+      "caster": "s",
+      "min": 1,
+      "max": 10000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: one stack raises this Stormbringer's Electrocute damage on this victim by 15%",
+      "actor": "m",
+      "metric": "spell_damage_taken",
+      "target": "s",
+      "spell": 801844,
+      "ratio_to": "taken_base",
+      "min": 1.14,
+      "max": 1.16
+    },
+    {
+      "action": "cast",
+      "label": "Conduit stack 2 of 4",
+      "actor": "s",
+      "spell": 806393,
+      "target": "m"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Conduit stack 3 of 4",
+      "actor": "s",
+      "spell": 806393,
+      "target": "m"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Conduit stack 4 of 4",
+      "actor": "s",
+      "spell": 806393,
+      "target": "m"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: four applications reach the authored StackAmount 4",
+      "actor": "m",
+      "metric": "aura_stacks",
+      "spell": 806393,
+      "caster": "s",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: four stacks raise Electrocute damage by 4 x 15% = 60%",
+      "actor": "m",
+      "metric": "spell_damage_taken",
+      "target": "s",
+      "spell": 801844,
+      "ratio_to": "taken_base",
+      "min": 1.59,
+      "max": 1.61
+    },
+    {
+      "action": "cast",
+      "label": "A fifth application cannot exceed the cap",
+      "actor": "s",
+      "spell": 806393,
+      "target": "m"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the stack count stays at the cap of 4",
+      "actor": "m",
+      "metric": "aura_stacks",
+      "spell": 806393,
+      "caster": "s",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: and the Electrocute bonus stays at 60%",
+      "actor": "m",
+      "metric": "spell_damage_taken",
+      "target": "s",
+      "spell": 801844,
+      "ratio_to": "taken_base",
+      "min": 1.59,
+      "max": 1.61
+    }
+  ]
+}

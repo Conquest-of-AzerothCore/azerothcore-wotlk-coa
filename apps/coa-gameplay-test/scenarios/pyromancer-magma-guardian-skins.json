@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Magma Guardian adds 50% to Skin spells (#3102)",
+  "contract": "#3102: Magma Guardian 706872 is a family 30 passive, e1 ADD_PCT_MODIFIER (108) misc 8 = SPELLMOD_ALL_EFFECTS, BasePoints 49 = +50%, class mask C 0x4000000, which selects the Skin spells (SpellFamilyFlags C 0x4000000): Magma Skin 680387 and Ember Skin 504707 among them. SpellEffectInfo::CalcValue (SpellInfo.cpp:520) reaches Unit::ApplyEffectModifiers (Unit.cpp:12147) and Player::ApplySpellMod(SPELLMOD_ALL_EFFECTS). Values from the DBC: Magma Skin effect index 0 (aura 182) BasePoints 199 = 200 becomes 300; Ember Skin effect index 2 (aura 220) BasePoints 9 = 10 becomes 15. Asserts spell_effect_value before and after learning the passive and after unlearning it. Effect indices here are 0-based (the group report's e1 is index 0).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 680387
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 504707
+    },
+    {
+      "action": "assert",
+      "label": "Magma Skin effect 0 is 200 without Magma Guardian",
+      "actor": "p",
+      "metric": "spell_effect_value",
+      "spell": 680387,
+      "effect": 0,
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "label": "Ember Skin effect 2 is 10 without Magma Guardian",
+      "actor": "p",
+      "metric": "spell_effect_value",
+      "spell": 504707,
+      "effect": 2,
+      "equals": 10
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 706872
+    },
+    {
+      "action": "assert",
+      "label": "Magma Skin effect 0 is 300 with Magma Guardian",
+      "actor": "p",
+      "metric": "spell_effect_value",
+      "spell": 680387,
+      "effect": 0,
+      "equals": 300
+    },
+    {
+      "action": "assert",
+      "label": "Ember Skin effect 2 is 15 with Magma Guardian",
+      "actor": "p",
+      "metric": "spell_effect_value",
+      "spell": 504707,
+      "effect": 2,
+      "equals": 15
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 706872
+    },
+    {
+      "action": "assert",
+      "label": "Magma Skin effect 0 returns to 200",
+      "actor": "p",
+      "metric": "spell_effect_value",
+      "spell": 680387,
+      "effect": 0,
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "label": "Ember Skin effect 2 returns to 10",
+      "actor": "p",
+      "metric": "spell_effect_value",
+      "spell": 504707,
+      "effect": 2,
+      "equals": 10
+    }
+  ]
+}

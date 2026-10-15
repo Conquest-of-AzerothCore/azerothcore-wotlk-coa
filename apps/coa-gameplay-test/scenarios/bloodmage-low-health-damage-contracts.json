@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "name": "Terrorizer and Enduring raise damage against targets below 35% health (#3612, #1664)",
+  "contract": "Terrorizer 806210 effect 0 and Enduring 300585 effect 0 are both aura 112 (SPELL_AURA_OVERRIDE_CLASS_SCRIPTS) with MiscValue 20007 and MiscValueB 13 (AURA_STATE_HEALTHLESS_35_PERCENT), BasePoints 24 / DieSides 1, i.e. 25%. The native contract the core honours is the mirror image: aura 303 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE with the state in MiscValue and 20007 (ASCENSION_CLASSMASK_AURASTATE_DAMAGE) in MiscValueB, read by Unit.cpp:8831 and Unit.cpp:10741. Terrorizer's class mask (2097152, 8388608, 16384) covers Veinburst, Bloodfang Bite and Claw Sweep (plus Crimson Maw, a Claw Sweep sibling the tooltip does not name); Enduring's (0, 131072, 0) covers Bloodbolt. 504820 and 578305 are the Veinburst and Bloodbolt ranks a level-80 character owns per AscensionSpellProgressionData.h. Enduring's second clause is effect 1, a native ADD_PCT_MODIFIER / SPELLMOD_DAMAGE of 25% that already worked and is asserted here as a regression. spell_damage_done queries Unit::SpellDamageBonusDone with a fixed base of 1000 and damagetype SPELL_DIRECT_DAMAGE, and that function ends at Unit.cpp:9307-9308 with ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, tmpDamage), so the metric carries Enduring's flat clause as well as the aura-state multiplier. The Bloodbolt baseline is therefore taken after both talents are learned and while the enemy is still above 35% health: the flat 25% then sits in both sides of the ratio and cancels, leaving only the aura-state multiplier, while the flat clause is asserted on its own through spell_modifier. Terrorizer has no second effect, so its Veinburst baseline is unaffected and stays before the learn. UNRESOLVED, and not settled by this scenario: Enduring's tooltip reads \"plus an additional $s2% while below 35% health\" where Terrorizer's reads \"on enemies below 35% health\", so Enduring's clause may be gated on the caster's health rather than the victim's. The conversion to SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE is read by Unit.cpp:8836 as victim->HasAuraState, so the low-health steps below drop the enemy; if the caster reading is the right one, both that conversion and these two steps state the wrong unit.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 806210
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 300585
+    },
+    {
+      "action": "assert",
+      "label": "Enemy starts above 35% health",
+      "actor": "enemy",
+      "metric": "health_pct",
+      "min": 99
+    },
+    {
+      "action": "snapshot",
+      "label": "Veinburst damage without Terrorizer",
+      "actor": "caster",
+      "metric": "spell_damage_done",
+      "spell": 504820,
+      "target": "enemy",
+      "save_as": "veinburst_base"
+    },
+    {
+      "action": "assert",
+      "label": "No Bloodbolt damage modifier before Enduring",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 806210
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 300585
+    },
+    {
+      "action": "snapshot",
+      "label": "Bloodbolt damage with Enduring learned and the enemy still above 35% health",
+      "actor": "caster",
+      "metric": "spell_damage_done",
+      "spell": 578305,
+      "target": "enemy",
+      "save_as": "bloodbolt_base"
+    },
+    {
+      "action": "assert",
+      "label": "Enduring's flat Bloodbolt modifier already worked (regression)",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 0,
+      "base": 1000,
+      "min": 1249,
+      "max": 1251
+    },
+    {
+      "action": "assert",
+      "label": "Terrorizer adds nothing above 35% health",
+      "actor": "caster",
+      "metric": "spell_damage_done",
+      "spell": 504820,
+      "target": "enemy",
+      "ratio_to": "veinburst_base",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "label": "Enduring adds nothing above 35% health",
+      "actor": "caster",
+      "metric": "spell_damage_done",
+      "spell": 578305,
+      "target": "enemy",
+      "ratio_to": "bloodbolt_base",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "set_health",
+      "label": "Drop the enemy below 35% health",
+      "actor": "enemy",
+      "value": 100000
+    },
+    {
+      "action": "wait",
+      "label": "Let Unit::Update refresh the aura state",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Terrorizer adds 25% against a target below 35% health",
+      "actor": "caster",
+      "metric": "spell_damage_done",
+      "spell": 504820,
+      "target": "enemy",
+      "ratio_to": "veinburst_base",
+      "min": 1.249,
+      "max": 1.251
+    },
+    {
+      "action": "assert",
+      "label": "Enduring adds a further 25% against a target below 35% health",
+      "actor": "caster",
+      "metric": "spell_damage_done",
+      "spell": 578305,
+      "target": "enemy",
+      "ratio_to": "bloodbolt_base",
+      "min": 1.249,
+      "max": 1.251
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 806210
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning Terrorizer removes the bonus",
+      "actor": "caster",
+      "metric": "spell_damage_done",
+      "spell": 504820,
+      "target": "enemy",
+      "ratio_to": "veinburst_base",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "name": "Radiant Marks cuts Sunslam's channel time by 1 sec (#2457)",
+  "contract": "Radiant Marks 704947 (SpellFamilyName 33) has two live effects, both EffectSpellClassMask word 3 bit 0x1000000 (16777216), matching Sunslam's (805629) own SpellFamilyFlags_3 16777216: effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 1 (SPELLMOD_DURATION) and EffectBasePoints -1001 -> real -1000 ms, matching the tooltip's 'Reduces the channel time of Sunslam by 1 sec' against Sunslam's own DurationIndex 35 = 4000 ms (4 -> 3 seconds); effect 1 is the same aura with EffectMiscValue 19 (SPELLMOD_ACTIVATION_TIME) and EffectBasePoints -351 -> real -350 ms, a bonus tick-speed clause the quoted tooltip line does not mention but that is equally native (AuraEffect::HandleAuraPeriodicMod feeds SPELLMOD_ACTIVATION_TIME into the periodic tick amplitude, and Sunslam's own EffectAmplitude_1 is 1000 ms). Both ops are read through Player::ApplySpellMod, which the 'spell_modifier' query metric calls directly, without casting Sunslam or entering its channel. Native handlers only; regression scenario for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 27, "level": 80 },
+    { "id": "talent", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talent", "spell": 704947 },
+    {
+      "action": "assert",
+      "label": "Without the talent Sunslam keeps its own 4 second channel",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 805629,
+      "op": 1,
+      "base": 4000,
+      "equals": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Radiant Marks cuts Sunslam's channel to 3 seconds",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 805629,
+      "op": 1,
+      "base": 4000,
+      "equals": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent Sunslam keeps its own 1 second tick interval",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 805629,
+      "op": 19,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Radiant Marks also speeds Sunslam's ticks to 650 ms",
+      "actor": "talent",
+      "metric": "spell_modifier",
+      "spell": 805629,
+      "op": 19,
+      "base": 1000,
+      "equals": 650
+    }
+  ]
+}

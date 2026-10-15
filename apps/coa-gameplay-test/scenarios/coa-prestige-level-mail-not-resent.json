@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Prestige Mode: the level 20 riding mail is not resent while a prestige cycle relevels the character through it again",
+  "contract": "data/sql/base/db_world/mail_level_reward.sql sends mail template 224 (sender 4732) to race mask 1 (Human) characters reaching level 20, with no per-character idempotency beyond Player::GiveLevel's own level check. Outside Prestige Mode this mail is sent exactly once, the first time a character reaches level 20 (GiveLevel(20)). CoAPrestige::Activate() calls GiveLevel(1) and the character then relevels through 20 again inside the same prestige cycle; #5622 reports the mail resending every cycle. The character stays in an active prestige cycle (CoAPrestige::IsActive) from the reset until it reaches the required level again, so no new copy of this mail should arrive while releveling through 20 a second time.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8816.5, "y": 627.0, "z": 94.1, "o": 3.8 },
+  "players": [
+    { "id": "rider", "race": 1, "class": 16, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "chromie", "owner": "rider", "entry": 178081, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixture settle", "ms": 3000 },
+    { "action": "specialization", "actor": "rider", "id": 13 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "snapshot", "actor": "rider", "metric": "mail_count", "save_as": "mail_baseline" },
+    { "action": "set_level", "actor": "rider", "value": 20, "label": "Reach level 20 for the first time" },
+    { "action": "assert", "label": "The riding mail arrives the first time", "actor": "rider", "metric": "mail_count", "relative_to": "mail_baseline", "equals": 1, "within_ms": 3000 },
+    { "action": "set_level", "actor": "rider", "value": 60, "label": "Back to the required level" },
+
+    { "action": "gossip_hello", "actor": "rider", "target": "chromie", "label": "Speak to Chromie" },
+    { "action": "gossip_select", "actor": "rider", "option": 0, "label": "I would like to prestige!" },
+    { "action": "assert", "label": "Back to level 1", "actor": "rider", "metric": "level", "equals": 1, "within_ms": 5000 },
+
+    { "action": "snapshot", "actor": "rider", "metric": "mail_count", "save_as": "mail_before_second_20" },
+    { "action": "set_level", "actor": "rider", "value": 20, "label": "Relevel through 20 again inside the same prestige cycle" },
+    { "action": "assert", "label": "The riding mail is not resent while prestiging", "actor": "rider", "metric": "mail_count", "relative_to": "mail_before_second_20", "equals": 0, "within_ms": 3000 }
+  ]
+}

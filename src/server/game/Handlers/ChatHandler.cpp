@@ -393,6 +393,13 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recvData)
             break;
         case CHAT_MSG_WHISPER:
             {
+                if (lang != LANG_ADDON)
+                    resolveWhisperTarget(to, msg, [](std::string const& firstName)
+                        {
+                            Player* player = ObjectAccessor::FindUniquePlayerByFirstName(firstName);
+                            return player ? player->GetName() : std::string();
+                        });
+
                 if (!normalizePlayerName(to))
                 {
                     SendPlayerNotFoundNotice(to);

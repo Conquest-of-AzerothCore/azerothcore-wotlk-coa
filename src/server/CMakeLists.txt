@@ -22,5 +22,6 @@ endif()
 
 if (BUILD_APPLICATION_WORLDSERVER)
   add_subdirectory(game)
+  add_subdirectory(coa)
   add_subdirectory(scripts)
 endif()

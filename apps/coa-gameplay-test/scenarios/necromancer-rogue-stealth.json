@@ -38,6 +38,11 @@
    "actor": "n"
   },
   {
+   "action": "learn",
+   "spell": 500983,
+   "actor": "n"
+  },
+  {
    "action": "cast",
    "spell": 500969,
    "actor": "n"

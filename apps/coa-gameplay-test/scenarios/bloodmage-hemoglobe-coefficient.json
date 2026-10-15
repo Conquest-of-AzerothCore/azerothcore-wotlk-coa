@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "Hemoglobe's tick pays its full bonus-healing coefficient and Spirit/Stamina terms (#1978)",
+  "contract": "Hemoglobe 524907 reads its tick 524906 as ${($524907d*1000/$524907t1)*($524906m1+$524906ppl1+$bh*0.1125+$SPI*0.45+$STA*0.35)}. Spell.dbc gives 524906 SpellLevel 35, BaseLevel 35, MaxLevel 60, DmgClass 1 (not NONE) and EffectBonusMultiplier 0. Without a spell_bonus_data row, Unit::SpellHealingBonusDone finds coeff 0 and adds nothing for any amount of bonus healing, so the harness's fixed base stays 1000 regardless. With only the spell_bonus_data row (direct_bonus 0.1125) but no IgnoreSpellLevelPenalty, Unit::CalculateLevelPenalty returns (35+6)/80 = 0.5125 for a level-80 caster (SpellLevel 35 < MaxLevel 60), halving the term: int32(2000*0.1125*0.5125) = 115, reading 1115. ApplyAscensionBloodmageHemoglobeContract sets IgnoreSpellLevelPenalty for this exact record shape (id 524906, family 26, effect 0 SPELL_EFFECT_HEAL, SpellLevel/BaseLevel 35, MaxLevel 60), so factorMod becomes 1.0 and the reading becomes int32(2000*0.1125) = 225 added to 1000 = 1225 - the full tooltip coefficient. Separately, bloodmage_vitality_scaling::ModifySpellEffectBaseValue (AscensionBloodmageVitality.cpp) now adds SPI*0.45+STA*0.35 to 524906's own base value (a different code path, SpellEffectInfo::CalcValue, exercised by the harness's spell_effect_value metric, not by spell_healing_done); Measured against the Spirit and Stamina actually gained (the Human racial raises Spirit by 3%), that reading must rise by 0.45 per Spirit and 0.35 per Stamina.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "ally",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "bloodmage", "spell": 524907 },
+    {
+      "action": "assert", "label": "SETUP: Hemoglobe is learned", "actor": "bloodmage", "metric": "knows_spell",
+      "spell": 524907, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: with no bonus healing the tick's bh term contributes nothing",
+      "actor": "bloodmage", "metric": "spell_healing_done", "spell": 524906, "target": "ally", "effect": 0,
+      "equals": 1000
+    },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 51041, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 2000 bonus healing adds its full 0.1125 coefficient once the level penalty is ignored",
+      "actor": "bloodmage", "metric": "spell_healing_done", "spell": 524906, "target": "ally", "effect": 0, "min": 1200,
+      "max": 1250
+    },
+    {
+      "action": "snapshot", "label": "Baseline Spirit", "actor": "bloodmage", "metric": "stat", "stat": 4,
+      "save_as": "spirit0"
+    },
+    {
+      "action": "snapshot", "label": "Baseline Stamina", "actor": "bloodmage", "metric": "stat", "stat": 2,
+      "save_as": "stamina0"
+    },
+    {
+      "action": "snapshot", "actor": "bloodmage", "metric": "spell_effect_value", "spell": 524906, "effect": 0,
+      "save_as": "effect_base"
+    },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 486, "stacks": 1 },
+    {
+      "action": "snapshot", "label": "Spirit gained", "actor": "bloodmage", "metric": "stat", "stat": 4,
+      "relative_to": "spirit0", "save_as": "spirit_delta"
+    },
+    {
+      "action": "assert", "label": "SETUP: the aura raised Spirit enough to dominate int32 truncation",
+      "actor": "bloodmage", "metric": "stat", "stat": 4, "relative_to": "spirit0", "min": 900
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the base value rises by 0.45 of the Spirit gained",
+      "actor": "bloodmage", "metric": "spell_effect_value", "spell": 524906, "effect": 0, "relative_to": "effect_base",
+      "ratio_to": "spirit_delta", "min": 0.445, "max": 0.455
+    },
+    {
+      "action": "snapshot", "actor": "bloodmage", "metric": "spell_effect_value", "spell": 524906, "effect": 0,
+      "save_as": "effect_spirit"
+    },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 985549, "stacks": 1 },
+    {
+      "action": "snapshot", "label": "Stamina gained", "actor": "bloodmage", "metric": "stat", "stat": 2,
+      "relative_to": "stamina0", "save_as": "stamina_delta"
+    },
+    {
+      "action": "assert", "label": "SETUP: the aura raised Stamina enough to dominate int32 truncation",
+      "actor": "bloodmage", "metric": "stat", "stat": 2, "relative_to": "stamina0", "min": 900
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the base value rises by 0.35 of the Stamina gained",
+      "actor": "bloodmage", "metric": "spell_effect_value", "spell": 524906, "effect": 0,
+      "relative_to": "effect_spirit", "ratio_to": "stamina_delta", "min": 0.345, "max": 0.355
+    }
+  ]
+}

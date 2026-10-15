@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "name": "Shadows In The Night reduces damage taken above 75% health (#594)",
+  "contract": "Shadows In The Night 704662: 'While above 75% health, damage taken is reduced by $s1%.' The record's CasterAuraState is 23 (AURA_STATE_HEALTH_ABOVE_75_PERCENT, SharedDefines.h:1390) and effect 1 is aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN with MiscValue 127 (all schools) and BasePoints -6 / DieSides 1, i.e. -5%. Both halves are native: SpellAuraEffects.cpp:152 routes aura 87 through Unit::MeleeDamageBonus and Unit::SpellDamageBonus, and Unit.cpp:637 refreshes the aura state every update, with Unit::ModifyAuraState applying and removing the effects of every owned aura whose CasterAuraState matches. Effect 0 is an inert aura 4 marker. spell_damage_taken queries Unit::SpellDamageBonusTaken with a fixed base of 1000 and `target` as the attacker, submitting no attack. The full-health reading is taken first because the harness has no fixture that restores maximum health, so the comparison runs protected then unprotected: 1 / 0.95 = 1.0526.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "victim",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "attacker",
+      "owner": "victim",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "victim",
+      "spell": 704662
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The victim starts above 75% health",
+      "actor": "victim",
+      "metric": "health_pct",
+      "min": 80
+    },
+    {
+      "action": "assert",
+      "label": "The passive is applied",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 704662,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Incoming damage above 75% health",
+      "actor": "victim",
+      "metric": "spell_damage_taken",
+      "spell": 578305,
+      "target": "attacker",
+      "save_as": "protected"
+    },
+    {
+      "action": "set_health",
+      "label": "Drop below 75% health",
+      "actor": "victim",
+      "value": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Let Unit::Update refresh the aura state",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The victim is below 75% health",
+      "actor": "victim",
+      "metric": "health_pct",
+      "max": 74
+    },
+    {
+      "action": "assert",
+      "label": "Below 75% health the 5% reduction is gone",
+      "actor": "victim",
+      "metric": "spell_damage_taken",
+      "spell": 578305,
+      "target": "attacker",
+      "ratio_to": "protected",
+      "min": 1.052,
+      "max": 1.0533
+    }
+  ]
+}

@@ -1,0 +1,405 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth: Burning Blade displays and consumes six plus Demonfire attacks (#5602)",
+  "contract": "Current Spell.dbc524920 promises six attacks plus one per consumed Demonfire. Normal Burning Blade with three Demonfire must therefore display nine remaining uses. Native auto attacks are started and stopped at each landed-hit boundary to observe9\u21920 without waiting through multiple hits. Each attack consumes one use irrespective of its crit roll, and exhaustion removes the aura. Script-controlled counters must remain authoritative; exposing charges must not introduce automatic double consumption. War is selected normally and Burning Blade is bought through entry7889.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "k",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "k",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "k",
+      "item": 629951
+    },
+    {
+      "action": "equip",
+      "actor": "k",
+      "item": 629951,
+      "slot": 15
+    },
+    {
+      "action": "specialization",
+      "actor": "k",
+      "id": 18
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "k",
+      "entry": 7889,
+      "rank": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "k",
+      "spell": 500906,
+      "stacks": 3
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 524920
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura",
+      "spell": 524920,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 524920,
+      "equals": 9,
+      "label": "Six base attacks plus three consumed Demonfire are visible"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_script_value",
+      "spell": 524920,
+      "key": 524920,
+      "equals": 9
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura",
+      "spell": 500906,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "attack",
+      "actor": "k",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 524920,
+      "equals": 8,
+      "label": "Every landed auto attack consumes exactly one displayed Burning Blade use"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_script_value",
+      "spell": 524920,
+      "key": 524920,
+      "equals": 8
+    },
+    {
+      "action": "attack",
+      "actor": "k",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 524920,
+      "equals": 7,
+      "label": "Every landed auto attack consumes exactly one displayed Burning Blade use"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_script_value",
+      "spell": 524920,
+      "key": 524920,
+      "equals": 7
+    },
+    {
+      "action": "attack",
+      "actor": "k",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 524920,
+      "equals": 6,
+      "label": "Every landed auto attack consumes exactly one displayed Burning Blade use"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_script_value",
+      "spell": 524920,
+      "key": 524920,
+      "equals": 6
+    },
+    {
+      "action": "attack",
+      "actor": "k",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 524920,
+      "equals": 5,
+      "label": "Every landed auto attack consumes exactly one displayed Burning Blade use"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_script_value",
+      "spell": 524920,
+      "key": 524920,
+      "equals": 5
+    },
+    {
+      "action": "attack",
+      "actor": "k",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "equals": 5,
+      "within_ms": 4000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 524920,
+      "equals": 4,
+      "label": "Every landed auto attack consumes exactly one displayed Burning Blade use"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_script_value",
+      "spell": 524920,
+      "key": 524920,
+      "equals": 4
+    },
+    {
+      "action": "attack",
+      "actor": "k",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "equals": 6,
+      "within_ms": 4000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 524920,
+      "equals": 3,
+      "label": "Every landed auto attack consumes exactly one displayed Burning Blade use"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_script_value",
+      "spell": 524920,
+      "key": 524920,
+      "equals": 3
+    },
+    {
+      "action": "attack",
+      "actor": "k",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "equals": 7,
+      "within_ms": 4000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 524920,
+      "equals": 2,
+      "label": "Every landed auto attack consumes exactly one displayed Burning Blade use"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_script_value",
+      "spell": 524920,
+      "key": 524920,
+      "equals": 2
+    },
+    {
+      "action": "attack",
+      "actor": "k",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "equals": 8,
+      "within_ms": 4000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 524920,
+      "equals": 1,
+      "label": "Every landed auto attack consumes exactly one displayed Burning Blade use"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_script_value",
+      "spell": 524920,
+      "key": 524920,
+      "equals": 1
+    },
+    {
+      "action": "attack",
+      "actor": "k",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "melee_damage_count",
+      "hand": 0,
+      "equals": 9,
+      "within_ms": 4000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_charges",
+      "spell": 524920,
+      "equals": 0,
+      "label": "Every landed auto attack consumes exactly one displayed Burning Blade use"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura_script_value",
+      "spell": 524920,
+      "key": 524920,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura",
+      "spell": 524920,
+      "equals": 0
+    }
+  ]
+}

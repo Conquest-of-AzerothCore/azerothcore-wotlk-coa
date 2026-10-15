@@ -1,0 +1,207 @@
+{
+  "schema": 1,
+  "name": "Crushing Dissonance locks only the interrupted school for three seconds (#3722)",
+  "contract": [
+    "A hostile player begins a normal Fireball. After its global cooldown expires, Crushing Dissonance interrupts it. A normal Fire Blast is rejected during the Fire lockout, Frost Armor succeeds, and Fire Blast succeeds after the lockout expires."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 25,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "mage",
+      "race": 2,
+      "class": 8,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "cultist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "mage",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.141593
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "pvp",
+      "actor": "cultist",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "actor": "cultist",
+      "value": 20000,
+      "maximum": 20000
+    },
+    {
+      "action": "set_power",
+      "actor": "cultist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "pvp",
+      "actor": "mage",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "actor": "mage",
+      "value": 20000,
+      "maximum": 20000
+    },
+    {
+      "action": "set_power",
+      "actor": "mage",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 804056
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "spell": 42833
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "spell": 42873
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "spell": 168
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "spell_power_cost",
+      "spell": 42833,
+      "save_as": "fireball_cost"
+    },
+    {
+      "action": "cast",
+      "actor": "mage",
+      "spell": 42833,
+      "target": "cultist"
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "casting",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "cast",
+      "actor": "cultist",
+      "spell": 804056
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "mage",
+      "spell": 42873,
+      "target": "cultist"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "cast_failure",
+      "spell": 42873,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "spell_damage_count",
+      "spell": 42873,
+      "target": "cultist",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "mage",
+      "spell": 168
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "aura",
+      "spell": 168,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "cast",
+      "actor": "mage",
+      "spell": 42873,
+      "target": "cultist"
+    },
+    {
+      "action": "assert",
+      "actor": "mage",
+      "metric": "spell_damage_count",
+      "spell": 42873,
+      "target": "cultist",
+      "min": 1,
+      "within_ms": 2000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

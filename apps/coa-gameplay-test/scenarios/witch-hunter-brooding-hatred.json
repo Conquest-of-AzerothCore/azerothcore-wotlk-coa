@@ -1,0 +1,200 @@
+{
+  "schema": 1,
+  "name": "Brooding Hatred raises off-hand damage and hit chance (#1805)",
+  "contract": "Brooding Hatred 301251 (rank 1) and 301362 (rank 2) are SpellFamily 21 passives with EquippedItemClass -1. Effect 0 is SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT (122), BasePoints 19 / 39 with DieSides 1 = +20 / +40 percent; AuraEffect::HandleModOffhandDamagePercent (SpellAuraEffects.cpp:5209) calls Unit::UpdateDamagePctDoneMods(OFF_ATTACK), which multiplies the off-hand TOTAL_PCT unit mod by the aura multiplier (Unit.cpp:12777-12812) and so the calculated minimum off-hand damage (UNIT_FIELD_MINOFFHANDDAMAGE) by 1.2 / 1.4. Effect 1 is SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT (333), BasePoints 2 / 5 + 1 = +3 / +6 percent, routed to melee and spell hit fields by HandleAscensionModHitChanceAll (SpellAuraEffects.cpp:4845). The dual-wield fixture (spells 201, 1180 and 674, item 25 in slot 15, item 2092 in slot 16) is the one dusk-blade.json already uses. The scenario measures the white-hit off-hand damage field; off-hand weapon spells such as Dusk Blade's off-hand strike use the same unit mod but are not exercised here.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Learn weapon skill or Dual Wield 201",
+      "actor": "hunter",
+      "spell": 201
+    },
+    {
+      "action": "learn",
+      "label": "Learn weapon skill or Dual Wield 1180",
+      "actor": "hunter",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "label": "Learn weapon skill or Dual Wield 674",
+      "actor": "hunter",
+      "spell": 674
+    },
+    {
+      "action": "add_item",
+      "actor": "hunter",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "label": "Equip a main-hand sword",
+      "actor": "hunter",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "hunter",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "label": "Equip an off-hand dagger",
+      "actor": "hunter",
+      "item": 2092,
+      "slot": 16
+    },
+    {
+      "action": "wait",
+      "label": "Let the equipment settle",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "label": "Off-hand minimum damage before the talent",
+      "actor": "hunter",
+      "metric": "weapon_damage_min",
+      "save_as": "off_before",
+      "hand": 1
+    },
+    {
+      "action": "assert",
+      "label": "Precondition: the off-hand weapon deals damage",
+      "actor": "hunter",
+      "metric": "weapon_damage_min",
+      "hand": 1,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Melee hit modifier before the talent",
+      "actor": "hunter",
+      "metric": "melee_hit_chance",
+      "save_as": "melee_hit_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Spell hit modifier before the talent",
+      "actor": "hunter",
+      "metric": "spell_hit_chance",
+      "save_as": "spell_hit_before"
+    },
+    {
+      "action": "learn",
+      "label": "Learn 301251",
+      "actor": "hunter",
+      "spell": 301251
+    },
+    {
+      "action": "assert",
+      "label": "Brooding Hatred rank 1 is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 301251,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: off-hand damage is 20 percent higher (aura 122, 19+1)",
+      "actor": "hunter",
+      "metric": "weapon_damage_min",
+      "hand": 1,
+      "ratio_to": "off_before",
+      "min": 1.19,
+      "max": 1.21
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: melee hit is 3 percent higher (aura 333, 2+1)",
+      "actor": "hunter",
+      "metric": "melee_hit_chance",
+      "relative_to": "melee_hit_before",
+      "min": 2.99,
+      "max": 3.01
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1: spell hit is 3 percent higher",
+      "actor": "hunter",
+      "metric": "spell_hit_chance",
+      "relative_to": "spell_hit_before",
+      "min": 2.99,
+      "max": 3.01
+    },
+    {
+      "action": "unlearn",
+      "label": "Unlearn 301251",
+      "actor": "hunter",
+      "spell": 301251
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning rank 1 restores the off-hand damage",
+      "actor": "hunter",
+      "metric": "weapon_damage_min",
+      "hand": 1,
+      "ratio_to": "off_before",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "learn",
+      "label": "Learn 301362",
+      "actor": "hunter",
+      "spell": 301362
+    },
+    {
+      "action": "assert",
+      "label": "Brooding Hatred rank 2 is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 301362,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: off-hand damage is 40 percent higher (aura 122, 39+1)",
+      "actor": "hunter",
+      "metric": "weapon_damage_min",
+      "hand": 1,
+      "ratio_to": "off_before",
+      "min": 1.39,
+      "max": 1.41
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: melee hit is 6 percent higher (aura 333, 5+1)",
+      "actor": "hunter",
+      "metric": "melee_hit_chance",
+      "relative_to": "melee_hit_before",
+      "min": 5.99,
+      "max": 6.01
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2: spell hit is 6 percent higher",
+      "actor": "hunter",
+      "metric": "spell_hit_chance",
+      "relative_to": "spell_hit_before",
+      "min": 5.99,
+      "max": 6.01
+    }
+  ]
+}

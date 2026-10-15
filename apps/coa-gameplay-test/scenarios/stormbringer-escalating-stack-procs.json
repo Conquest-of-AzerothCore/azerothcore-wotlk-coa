@@ -1,0 +1,244 @@
+{
+    "schema": 1,
+    "name": "Electrical Charge already ticks, gates on movement, hits 20 stacks and its Charged Conduit exempts Static spend (#1007)",
+    "contract": "#1007: 704149 'Electrical Charge' (Attributes 448 PASSIVE|DO_NOT_DISPLAY|DO_NOT_LOG, self-applying on learn) has EffectApplyAuraName[0]=23 PERIODIC_TRIGGER_SPELL, EffectAmplitude[0]=1000 ms, EffectTriggerSpell[0]=800299; the binding script aura_ascension_electrical_charge (src/server/coa/AscensionStormbringerTalents.cpp:135-169, registered by spell_script_names in data/sql/updates/pending_db_world/rev_1789379311228000700.sql:17-21) ticks that trigger once per second while the owner is not moving and Charged Conduit (803790) is not up, i.e. 'standing still grants Electrical Charge every second'. 800299 has StackAmount=20 (SpellDuration 18 = 20000 ms) and EffectApplyAuraName[0]=216 HASTE_SPELLS with BasePoints 0 + DieSides 1, giving CalcValue=1 (1% haste per stack), matching the tooltip's 'increasing your haste by 1%'; once GetStackAmount() reaches StackAmount(20) the script casts 803790 ('upon reaching 20 stacks'). 803790 (SpellDuration 1 = 10000 ms, 'for 10 sec') has its EFFECT_2 REMOVE_AURA(800299) zeroed at load by stormbringer_resource_contracts (AscensionStormbringerTalents.cpp:103-104) and instead removes 800299 in aura_ascension_charged_conduit::OnRemove (:171-185) when the conduit itself expires ('after which the charges are depleted'). While 803790 is up, Static (803102) spend from the module's tabled ResourceCostRules is skipped for CLASS_STORMBRINGER (AscensionCompat.cpp:2390-2393, mirrored for native stack-effect spenders in src/server/game/Spells/SpellEffects.cpp:345-348), matching 'your spells dont deplete Static'. Call Lightning 500040 is one such tabled rule: {16, 500040, 500040, 803102, 50, ResourceConsumption::Fixed} (AscensionCustomResourceData.h:526) and is not itself a class-16 Static generator (absent from the ResourceGainRules ranges at :140-160/:197-214), so it isolates the spend exemption cleanly. No code change exists for this issue; this is a regression scenario proving the mechanic already works end to end.",
+    "timeout_ms": 90000,
+    "players": [
+        {
+            "id": "storm",
+            "race": 8,
+            "class": 16,
+            "level": 80
+        }
+    ],
+    "location": {
+        "map": 0,
+        "x": -8917.41,
+        "y": -115.853,
+        "z": 82.3711,
+        "o": 0
+    },
+    "creatures": [
+        {
+            "id": "dummy",
+            "owner": "storm",
+            "entry": 36,
+            "health": 1000000,
+            "distance": 3
+        }
+    ],
+    "steps": [
+        {
+            "action": "wait",
+            "label": "Let spawn AI and level scaling settle",
+            "ms": 3000
+        },
+        {
+            "action": "learn",
+            "label": "Learn Electrical Charge (self-applying passive)",
+            "actor": "storm",
+            "spell": 704149
+        },
+        {
+            "action": "assert",
+            "label": "No Electrical Charge stacks yet, before the first 1000 ms tick",
+            "actor": "storm",
+            "metric": "aura_stacks",
+            "spell": 800299,
+            "equals": 0
+        },
+        {
+            "action": "set_moving",
+            "label": "Stand still (movement flag off)",
+            "actor": "storm",
+            "enabled": false
+        },
+        {
+            "action": "wait",
+            "label": "Let the periodic trigger tick a few times at 1000 ms amplitude",
+            "ms": 3000
+        },
+        {
+            "action": "assert",
+            "label": "BASELINE: standing still grants Electrical Charge stacks (one per 1000 ms tick, lower bound only)",
+            "actor": "storm",
+            "metric": "aura_stacks",
+            "spell": 800299,
+            "min": 2
+        },
+        {
+            "action": "snapshot",
+            "actor": "storm",
+            "metric": "aura_stacks",
+            "spell": 800299,
+            "save_as": "stacks_before_moving"
+        },
+        {
+            "action": "set_moving",
+            "label": "Start moving",
+            "actor": "storm",
+            "enabled": true
+        },
+        {
+            "action": "assert",
+            "label": "The fixture is moving",
+            "actor": "storm",
+            "metric": "moving",
+            "equals": 1
+        },
+        {
+            "action": "wait",
+            "label": "While moving, no further ticks should land",
+            "ms": 3000
+        },
+        {
+            "action": "assert",
+            "label": "DISCRIMINATING: Electrical Charge does not grow while moving (isMoving() gate)",
+            "actor": "storm",
+            "metric": "aura_stacks",
+            "spell": 800299,
+            "relative_to": "stacks_before_moving",
+            "equals": 0
+        },
+        {
+            "action": "set_moving",
+            "label": "Stand still again",
+            "actor": "storm",
+            "enabled": false
+        },
+        {
+            "action": "attack",
+            "label": "Enter combat so Static (803102) cannot decay for the rest of the scenario (DecayStatic returns early while IsInCombat())",
+            "actor": "storm",
+            "target": "dummy"
+        },
+        {
+            "action": "assert",
+            "actor": "storm",
+            "metric": "combat",
+            "equals": 1,
+            "within_ms": 1000
+        },
+        {
+            "action": "learn",
+            "label": "Learn Call Lightning, a tabled Static spender not itself a class-16 Static generator",
+            "actor": "storm",
+            "spell": 500040
+        },
+        {
+            "action": "assert",
+            "label": "Charged Conduit is not up yet (still below 20 stacks)",
+            "actor": "storm",
+            "metric": "aura",
+            "spell": 803790,
+            "equals": 0
+        },
+        {
+            "action": "set_aura",
+            "label": "Fixture Static at the display maximum",
+            "actor": "storm",
+            "spell": 803102,
+            "stacks": 100
+        },
+        {
+            "action": "cast",
+            "label": "Cast Call Lightning without Charged Conduit up",
+            "actor": "storm",
+            "spell": 500040,
+            "target": "dummy"
+        },
+        {
+            "action": "assert",
+            "label": "BASELINE: Call Lightning's tabled Fixed cost of 50 Static applies normally",
+            "actor": "storm",
+            "metric": "aura_stacks",
+            "spell": 803102,
+            "equals": 50,
+            "within_ms": 3000
+        },
+        {
+            "action": "wait",
+            "label": "Let the GCD from Call Lightning clear",
+            "ms": 2000
+        },
+        {
+            "action": "set_aura",
+            "label": "Push Electrical Charge to the 19/20 threshold",
+            "actor": "storm",
+            "spell": 800299,
+            "stacks": 19
+        },
+        {
+            "action": "wait",
+            "label": "Let one more 1000 ms tick land, taking the stack to 20 and casting Charged Conduit",
+            "ms": 2000
+        },
+        {
+            "action": "assert",
+            "label": "Electrical Charge reaches its DBC StackAmount of 20",
+            "actor": "storm",
+            "metric": "aura_stacks",
+            "spell": 800299,
+            "equals": 20
+        },
+        {
+            "action": "assert",
+            "label": "Charged Conduit is applied at the 20-stack threshold",
+            "actor": "storm",
+            "metric": "aura",
+            "spell": 803790,
+            "equals": 1
+        },
+        {
+            "action": "set_aura",
+            "label": "Re-fixture Static at the display maximum for the exemption test",
+            "actor": "storm",
+            "spell": 803102,
+            "stacks": 100
+        },
+        {
+            "action": "cast",
+            "label": "Cast the same Call Lightning while Charged Conduit is up",
+            "actor": "storm",
+            "spell": 500040,
+            "target": "dummy"
+        },
+        {
+            "action": "assert",
+            "label": "DISCRIMINATING: with Charged Conduit up, Static is not spent (spend loop breaks before ModifyAuraStacks)",
+            "actor": "storm",
+            "metric": "aura_stacks",
+            "spell": 803102,
+            "equals": 100,
+            "within_ms": 3000
+        },
+        {
+            "action": "set_moving",
+            "label": "Start moving so the still-running 1000 ms passive (Charged Conduit's 10000 ms duration is an exact multiple of it) cannot regenerate a stack on the same tick Charged Conduit expires, isolating depletion from the already-proven movement gate",
+            "actor": "storm",
+            "enabled": true
+        },
+        {
+            "action": "wait",
+            "label": "Let Charged Conduit's 10000 ms duration expire",
+            "ms": 10000
+        },
+        {
+            "action": "assert",
+            "label": "Charged Conduit has expired",
+            "actor": "storm",
+            "metric": "aura",
+            "spell": 803790,
+            "equals": 0
+        },
+        {
+            "action": "assert",
+            "label": "DEPLETION: Electrical Charge's 20 stacks are removed when Charged Conduit expires ('after which the charges are depleted')",
+            "actor": "storm",
+            "metric": "aura_stacks",
+            "spell": 800299,
+            "equals": 0,
+            "within_ms": 200
+        }
+    ]
+}

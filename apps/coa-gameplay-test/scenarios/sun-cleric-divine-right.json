@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Divine Right raises crit and spell hit chance, and its parry bonus now lands on a Sun Cleric's real parry stat at both ranks (#2204)",
+  "contract": "Divine Right rank 1 (680631) and rank 2 (681469) are SPELL_ATTR0_PASSIVE stat auras with three native, family-agnostic effects (spelldump.py confirms DieSides 1 on all three, so CalcValue = EffectBasePoints + 1 deterministically): effect 0 SPELL_AURA_MOD_CRIT_PCT (290), EffectBasePoints 1/3 -> +2/+4; effect 1 SPELL_AURA_MOD_PARRY_PERCENT (47), EffectBasePoints 1/3 -> +2/+4; effect 2 SPELL_AURA_MOD_SPELL_HIT_CHANCE (55), EffectBasePoints 4/9 -> +5/+10. This scenario asserts each effect's own resolved value via aura_amount (AuraEffect::GetAmount(), fixed at apply time) instead of a before/after delta on melee_crit_chance/parry_chance/spell_hit_chance: on a freshly spawned harness fixture those PLAYER_CRIT_PERCENTAGE/PLAYER_PARRY_PERCENTAGE/m_modSpellHitChance fields read 0 before any stat-recalculating trigger has ever run (no login-time UpdateAllCritPercentages/UpdateParryPercentage/UpdateSpellHitChances call), so a post-learn delta bundles the class's own never-before-computed base contribution together with the aura -- the run that originally failed here read melee_crit_chance jump from 0 to 6.15 on rank 1, not the promised 2, because of exactly this cold-start baseline, not a wrong aura value. This is the same measurement fault already fixed for Fel Infusion (#3738) in this batch (see sun-cleric-felsworn-fel-infusion equivalent contract note there): a before/after read of a Player::Update*Percentage() field cannot isolate one aura's own contribution. AuraEffect::HandleAuraModCritPct (SpellAuraEffects.cpp) calls UpdateAllWeaponDependentCritAuras/UpdateAllSpellCritChances unconditionally for any class, and AuraEffect::HandleModSpellHitChance calls Player::UpdateSpellHitChances, which reads GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE, ...) with no class gating either -- both effects are confirmed native and working via aura_amount alone. Effect 1 (parry) used to be different: AuraEffect::HandleAuraModParryPercent calls Player::UpdateParryPercentage (StatSystem.cpp:876-931), which reads a per-class parry_cap table gated by `if (CanParry() && parry_cap[pclass] > 0.0f)`. Sun Cleric's legacy class is CLASS_PRIEST (SharedDefines.h GetLegacyClassForCustomClass), whose parry_cap entry used to be 0.0f, discarding the aura's amount entirely -- that was issue #2204. A fix now in this branch maps Sun Cleric (class 27) onto the Paladin parry curve instead of its Priest legacy fallback (StatSystem.cpp, `parryClass` ternary, comment: 'Sun Cleric's March of the Valkyr (#756) grants SPELL_AURA_MOD_PARRY_PERCENT too...'), so parry_cap[pclass] is now 47.003525 and the gate opens as soon as CanParry() is true. AuraEffect::HandleAuraModParryPercent itself flips CanParry() to true as a side effect of applying ANY SPELL_AURA_MOD_PARRY_PERCENT aura (stock, class-agnostic core behavior -- see sun-cleric-march-of-the-valkyr.json's contract for the full mechanism), so learning either rank of Divine Right both applies its own aura and un-gates Player::UpdateParryPercentage's nondiminishing 5.0f base term in the same recalculation. With no rating or defense-skill delta on these fresh fixtures (confirmed empirically: the march-of-the-valkyr talent's own +5 aura resolves to exactly 5+5=10, not 5, isolating the base term), the real parry_chance stat becomes base 5.0 + the aura's own amount: rank 1 (aura +2) reads 7, rank 2 (aura +4) reads 9. This scenario is a fixed rank1/rank2 pair, so the two ranks are never both active on the same character and there is no rank-supersede stacking to account for.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "rank1", "race": 1, "class": 27, "level": 80 },
+    { "id": "rank2", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "rank1", "spell": 680631 },
+    { "action": "learn", "actor": "rank2", "spell": 681469 },
+    {
+      "action": "assert", "label": "Rank 1's own crit-chance effect resolves to 2 (EffectBasePoints 1 + 1, DieSides 1)",
+      "actor": "rank1", "metric": "aura_amount", "spell": 680631, "caster": "rank1", "effect": 0, "equals": 2
+    },
+    {
+      "action": "assert", "label": "Rank 1's own parry-chance effect resolves to 2 (EffectBasePoints 1 + 1, DieSides 1), independent of the CanParry gate it also flips -- see the real stat assertion below",
+      "actor": "rank1", "metric": "aura_amount", "spell": 680631, "caster": "rank1", "effect": 1, "equals": 2
+    },
+    {
+      "action": "assert", "label": "Rank 1's own spell-hit effect resolves to 5 (EffectBasePoints 4 + 1, DieSides 1)",
+      "actor": "rank1", "metric": "aura_amount", "spell": 680631, "caster": "rank1", "effect": 2, "equals": 5
+    },
+    {
+      "action": "assert", "label": "Rank 2's own crit-chance effect resolves to 4 (EffectBasePoints 3 + 1, DieSides 1)",
+      "actor": "rank2", "metric": "aura_amount", "spell": 681469, "caster": "rank2", "effect": 0, "equals": 4
+    },
+    {
+      "action": "assert", "label": "Rank 2's own parry-chance effect resolves to 4 (EffectBasePoints 3 + 1, DieSides 1), independent of the CanParry gate it also flips -- see the real stat assertion below",
+      "actor": "rank2", "metric": "aura_amount", "spell": 681469, "caster": "rank2", "effect": 1, "equals": 4
+    },
+    {
+      "action": "assert", "label": "Rank 2's own spell-hit effect resolves to 10 (EffectBasePoints 9 + 1, DieSides 1)",
+      "actor": "rank2", "metric": "aura_amount", "spell": 681469, "caster": "rank2", "effect": 2, "equals": 10
+    },
+    {
+      "action": "assert", "label": "Rank 1's real parry_chance stat is the 5.0 nondiminishing base plus its own +2 aura, now that CanParry() gates open on the Paladin curve",
+      "actor": "rank1", "metric": "parry_chance", "min": 6.9, "max": 7.1
+    },
+    {
+      "action": "assert", "label": "Rank 2's stronger +4 aura raises the real parry_chance stat further, to base 5.0 plus 4",
+      "actor": "rank2", "metric": "parry_chance", "min": 8.9, "max": 9.1
+    }
+  ]
+}

@@ -1,0 +1,368 @@
+{
+  "schema": 1,
+  "name": "Primalist Dream threshold, critical chance and expiry",
+  "contract": "A gain attempted with at least ten existing Earthshaping stacks grants three seconds of +10% Seismic/Lithic critical chance. Reaching ten from nine does not; attempts at the cap do. Cover native resource-manager and stack-helper paths, expiry and removal.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "level": 80,
+      "health": 500000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 95
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 92149
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 680452
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 582532
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 582532,
+      "target": "target",
+      "save_as": "crit_582532"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 681251,
+      "target": "target",
+      "save_as": "crit_681251"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 803138,
+      "target": "target",
+      "save_as": "crit_803138"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 578255,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 9
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 582532
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 582532,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 578255,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 578255,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 578255,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 10
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 582532
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 582532,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 578255,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 582532,
+      "target": "target",
+      "relative_to": "crit_582532",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 681251,
+      "target": "target",
+      "relative_to": "crit_681251",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 803138,
+      "target": "target",
+      "relative_to": "crit_803138",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "spell": 578255,
+      "min": 1500,
+      "max": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 3100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 578255,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 578255,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 15
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 582532
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 582532,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 578255,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 582532,
+      "target": "target",
+      "relative_to": "crit_582532",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 681251,
+      "target": "target",
+      "relative_to": "crit_681251",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_done_crit_chance",
+      "spell": 803138,
+      "target": "target",
+      "relative_to": "crit_803138",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_duration_ms",
+      "spell": 578255,
+      "min": 1500,
+      "max": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 3100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 578255,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 10
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 681264
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 578255,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 680452,
+      "all_specs": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680441,
+      "stacks": 10
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 582532
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 582532,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 578255,
+      "equals": 0
+    }
+  ]
+}

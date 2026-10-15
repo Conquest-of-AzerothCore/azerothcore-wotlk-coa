@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Tinker: Mechanical Enhancements reduces bleed damage taken",
+  "contract": "#1120: Mechanical Enhancements (506632) is a plain self aura pair on stock types 255 and 232, both scoped to MECHANIC_BLEED with -20. Both native incoming-damage consumers must return 80% of the unbuffed value for a spell whose mechanic really is 15 (Rend, 772), and must leave a family-34 spell with no mechanic (Gear Grind, 505160) untouched.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "t", "race": 1, "class": 28, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "a", "owner": "t", "entry": 299, "level": 80, "distance": 5 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "snapshot", "save_as": "bleed0",
+      "actor": "t", "metric": "spell_damage_taken", "spell": 772, "target": "a" },
+    { "action": "snapshot", "save_as": "mbleed0",
+      "actor": "t", "metric": "melee_damage_taken", "spell": 772, "target": "a" },
+    { "action": "snapshot", "save_as": "plain0",
+      "actor": "t", "metric": "spell_damage_taken", "spell": 505160, "target": "a" },
+    { "action": "learn", "actor": "t", "spell": 506632 },
+    { "action": "assert", "label": "The passive is applied to the Tinker",
+      "actor": "t", "metric": "aura", "spell": 506632, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "Incoming bleed spell damage drops to 80%",
+      "actor": "t", "metric": "spell_damage_taken", "spell": 772, "target": "a",
+      "ratio_to": "bleed0", "min": 0.795, "max": 0.805 },
+    { "action": "assert", "label": "Incoming bleed melee damage drops to 80%",
+      "actor": "t", "metric": "melee_damage_taken", "spell": 772, "target": "a",
+      "ratio_to": "mbleed0", "min": 0.795, "max": 0.805 },
+    { "action": "assert", "label": "A non-bleed spell is left alone",
+      "actor": "t", "metric": "spell_damage_taken", "spell": 505160, "target": "a",
+      "ratio_to": "plain0", "min": 0.999, "max": 1.001 }
+  ]
+}

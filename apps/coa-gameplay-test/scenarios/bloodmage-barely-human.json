@@ -1,0 +1,145 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Barely Human raises armor penetration and health-cost spell damage (#1918)",
+  "contract": "Barely Human 504254 (15%) and 504894 (30%): \"Increases your armor penetration and the damage of spells that cost health by $s2%.\" Effect 0 is aura 280 SPELL_AURA_MOD_ARMOR_PENETRATION_PCT with MiscValue 0 and an empty class mask, the shape Unit::CalcArmorReducedDamage accepts unconditionally at Unit.cpp:2298, so it applies to every attack. Effect 1 is aura 108 with MiscValue 0 = SPELLMOD_DAMAGE and Effect 2 the same aura with MiscValue 22 = SPELLMOD_DOT, both over the Bloodmage health-cost set; enumerating either mask over SpellFamilyName 26 in Spell.dbc selects Bloodmoon Blast 500125 among 66 other family members. Both the direct and the periodic modifier are asserted, because a partial implementation that only wired SPELLMOD_DAMAGE would pass the first and fail the second. Aura 108 is consumed by AuraEffect::CalculateSpellMod (SpellAuraEffects.cpp:173). No source or SQL change is involved.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "b",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 500125,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 500125,
+      "op": 22,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Fixture assumption: the target has armor to penetrate",
+      "actor": "d",
+      "metric": "armor",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Fixture assumption: that armor really mitigates the probe",
+      "actor": "b",
+      "metric": "armor_reduced_damage",
+      "spell": 500125,
+      "target": "d",
+      "max": 990
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "armor_reduced_damage",
+      "spell": 500125,
+      "target": "d",
+      "save_as": "armor_base"
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 504254
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 504254,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises direct damage by 15%",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 500125,
+      "op": 0,
+      "base": 1000,
+      "equals": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises periodic damage by 15%",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 500125,
+      "op": 22,
+      "base": 1000,
+      "equals": 1150
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 lets more damage through the target's armor",
+      "actor": "b",
+      "metric": "armor_reduced_damage",
+      "spell": 500125,
+      "target": "d",
+      "ratio_to": "armor_base",
+      "min": 1.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 504254
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 504894
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises direct damage by 30%",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 500125,
+      "op": 0,
+      "base": 1000,
+      "equals": 1300
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises periodic damage by 30%",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 500125,
+      "op": 22,
+      "base": 1000,
+      "equals": 1300
+    }
+  ]
+}

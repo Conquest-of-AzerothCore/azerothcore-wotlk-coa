@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Cultist: Wicked Thoughts grants 15% max mana, run speed and mounted speed through native stock auras (#3023)",
+  "contract": "706190 (SpellFamilyName 31, self-target) has three stock 3.3.5a auras with no CoA-specific handler: effect0 SPELL_AURA_MOD_INCREASE_SPEED (31) BasePoints=14 -> CalcValue 15; effect1 SPELL_AURA_MOD_MOUNTED_SPEED_NOT_STACK (172) BasePoints=14 -> CalcValue 15; effect2 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT (132) MiscValue=0 (POWER_MANA) BasePoints=14 -> CalcValue 15. run_speed_rate and max_power (README's metric table) directly observe effect0 and effect2. The harness has no mounted-speed metric, so effect1 is asserted through aura_amount instead, per the README's fallback for mechanisms without a dedicated metric. Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "c", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "c", "metric": "run_speed_rate", "save_as": "run_speed_base" },
+    { "action": "snapshot", "actor": "c", "metric": "max_power", "power": 0, "save_as": "max_mana_base" },
+    {
+      "action": "assert", "label": "SETUP: Wicked Thoughts' mounted-speed effect is absent before it is learned",
+      "actor": "c", "metric": "aura", "spell": 706190, "equals": 0
+    },
+    { "action": "learn", "actor": "c", "spell": 706190 },
+    {
+      "action": "assert", "label": "Wicked Thoughts raises run speed by 15% (#3023)",
+      "actor": "c", "metric": "run_speed_rate", "ratio_to": "run_speed_base", "min": 1.14, "max": 1.16
+    },
+    {
+      "action": "assert", "label": "Wicked Thoughts raises maximum mana by 15% (#3023)",
+      "actor": "c", "metric": "max_power", "power": 0, "ratio_to": "max_mana_base", "min": 1.14, "max": 1.16
+    },
+    {
+      "action": "assert", "label": "Wicked Thoughts installs a 15-point mounted-speed aura effect; the harness has no mounted-speed metric (#3023)",
+      "actor": "c", "metric": "aura_amount", "spell": 706190, "effect": 1, "min": 15, "max": 15
+    }
+  ]
+}

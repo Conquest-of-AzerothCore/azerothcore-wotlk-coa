@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Leaving a Dungeon Finder group while dead revives the player outside the dungeon",
+  "contract": "Issue #5099: a player who dies in a Dungeon Finder dungeon and leaves the group before releasing is teleported out by LFGGroupScript::OnRemoveMember through Player::TeleportToEntryPoint. Moving an unreleased body out of an instance leaves the player dead at the entry point, where releasing creates the corpse. Like leaving a battleground, leaving the group revives the player (at 50% health, as re-entering an instance to a corpse does) before the teleport, so the player arrives alive at the entry point on map 0.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    { "id": "leader", "race": 1, "class": 1, "level": 20 },
+    { "id": "seeker", "race": 1, "class": 1, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "group", "actor": "leader", "target": "seeker" },
+    { "action": "lfg_dungeon", "label": "The group is assigned Deadmines", "actor": "leader", "dungeon": 6 },
+    { "action": "lfg_teleport", "actor": "leader" },
+    { "action": "lfg_teleport", "actor": "seeker" },
+    { "action": "assert", "label": "The seeker enters Deadmines", "actor": "seeker", "metric": "map_id",
+      "equals": 36, "within_ms": 15000 },
+    { "action": "die", "actor": "seeker" },
+    { "action": "assert", "label": "The seeker is dead and unreleased", "actor": "seeker", "metric": "alive",
+      "equals": 0 },
+    { "action": "leave_group", "actor": "seeker" },
+    { "action": "assert", "label": "Leaving teleports the seeker to the entry point", "actor": "seeker",
+      "metric": "map_id", "equals": 0, "within_ms": 15000 },
+    { "action": "assert", "label": "The seeker arrives alive", "actor": "seeker", "metric": "alive",
+      "equals": 1 },
+    { "action": "assert", "label": "The seeker is revived at half health", "actor": "seeker",
+      "metric": "health_pct", "min": 49, "max": 60 }
+  ]
+}

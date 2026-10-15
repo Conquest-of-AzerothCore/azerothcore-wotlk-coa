@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Fungal Allies adds Fungarians to Fungal Assailant (#1378)",
+  "contract": "#1378: Fungal Allies (681054) reads 'Fungal Assailant now summons $s1 additional Fungarians'. Its effect 0 is a SPELLMOD_EFFECT1 (aura 107, op 3) of +2 on Fungal Assailant (504344), whose summon is skipped by spell_ascension_venomancer_ability and re-done in AscensionVenomancer::Summon with a hard-coded count of 1, so the modifier never reached the summon. Without the passive one Fungarian (45896) is summoned; with it 1 + 2 = 3. Both casts share one run so the count is compared against its own baseline.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 29,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "v",
+      "entry": 36,
+      "health": 10000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 504344
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Fungarian is out yet",
+      "actor": "v",
+      "metric": "owned_creature_count",
+      "entry": 45896,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Fungal Allies is not known",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 681054,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 504344,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: without Fungal Allies one Fungarian is summoned",
+      "actor": "v",
+      "metric": "owned_creature_count",
+      "entry": 45896,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Fungarians out after the baseline cast",
+      "actor": "v",
+      "metric": "owned_creature_count",
+      "entry": 45896,
+      "save_as": "fungarians_base"
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 681054
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Fungal Allies is applied",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 681054,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "v",
+      "spell": 504344
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown of the first cast expire",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 504344,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the second cast was accepted (cooldown started)",
+      "actor": "v",
+      "metric": "cooldown_ms",
+      "spell": 504344,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Fungal Allies adds 2 Fungarians to the 1 the spell always summons",
+      "actor": "v",
+      "metric": "owned_creature_count",
+      "entry": 45896,
+      "relative_to": "fungarians_base",
+      "equals": 3,
+      "within_ms": 5000
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "name": "Shadow Pact raises every Shield effect value by 50% (#2046)",
+  "contract": "Shadow Pact 561227 is one effect: aura 108 with MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 49 + DieSides 1 = +50%, over EffectSpellClassMask (1342177280, 0, 0) = word 0 bits 28 and 30, which is exactly the Bloodmage's shields: Blood Shield 504296, Vital Shield 504849/804309, Thick Pelt 556233 and Coagulated Shield 504897. Unit::ApplyEffectModifiers applies SPELLMOD_ALL_EFFECTS to every effect value. Tooltip: \"Increases the effectiveness of your Shields by $s1%.\" Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Blood Shield unmodified before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 504296,
+      "op": 8,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Vital Shield unmodified before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 504849,
+      "op": 8,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 561227
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Pact raises Blood Shield by 50%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 504296,
+      "op": 8,
+      "base": 100,
+      "equals": 150
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Pact raises Vital Shield by 50%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 504849,
+      "op": 8,
+      "base": 100,
+      "equals": 150
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Pact raises Thick Pelt by 50%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 556233,
+      "op": 8,
+      "base": 100,
+      "equals": 150
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Pact does not touch Bloodbolt",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 8,
+      "base": 100,
+      "equals": 100
+    }
+  ]
+}

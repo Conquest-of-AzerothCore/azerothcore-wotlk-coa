@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Timed Attacks grants 4% and 8% spell haste (#2407)",
+  "contract": "#2407: Timed Attacks rank 1 (704812) and rank 2 (707803) are family 30 passives with one effect each: Effect 6, aura 216 (SPELL_AURA_HASTE_SPELLS), BasePoints 3 and 7, i.e. 4% and 8%. AuraEffect::HandleModCastingSpeed (SpellAuraEffects.cpp:4913) applies ApplyCastTimePercentMod, and neither id is in a spell_group or referenced by module code. Asserts the native cast-speed multiplier (smaller is faster) against a snapshot taken before learning: about 0.96 at rank 1 and 0.92 at rank 2 (bounds allow either a 1-x or 1/(1+x) formulation), and back to 1 after unlearning.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Cast speed before Timed Attacks",
+      "actor": "p",
+      "metric": "cast_speed_multiplier",
+      "save_as": "cast0"
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 704812
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 shortens casts by about 4%",
+      "actor": "p",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "cast0",
+      "min": 0.95,
+      "max": 0.97
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 704812
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 707803
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 shortens casts by about 8%",
+      "actor": "p",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "cast0",
+      "min": 0.91,
+      "max": 0.94
+    },
+    {
+      "action": "unlearn",
+      "actor": "p",
+      "spell": 707803
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning restores the base cast speed",
+      "actor": "p",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "cast0",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

@@ -25,10 +25,11 @@ add_executable(
 
 target_link_libraries(
         unit_tests
+        acore-core-interface
         game
         gtest_main
         gmock_main
-        game-interface
+        coa-interface
 )
 
 # Add module test sources if any modules registered tests
@@ -51,9 +52,11 @@ if(TARGET modules)
     target_link_libraries(unit_tests modules)
 endif()
 
+target_link_libraries(unit_tests coa game)
+
 add_test(
         NAME
         unit
         COMMAND
-        ${CMAKE_BINARY_DIR}/src/test/unit_tests
+        unit_tests
 )

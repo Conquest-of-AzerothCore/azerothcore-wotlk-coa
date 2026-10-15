@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Cultist: Adaptive Combatant grants its parry/dodge natively at both ranks (#1539)",
+  "contract": "300268 (rank 1) and 301348 (rank 2) are SPELL_AURA_MOD_PARRY_PERCENT (47) / SPELL_AURA_MOD_DODGE_PERCENT (49) auras with native handlers (AuraEffect::HandleAuraModParryPercent/HandleAuraModDodgePercent, SpellAuraEffects.cpp:4766/4782) that apply GetAmount() straight to UpdateParryPercentage/UpdateDodgePercentage; no script is registered or needed. DBC (Spell.dbc, family 31, both passive): rank 1 EffectBasePoints/DieSides are 2/1 and 1/1, rank 2 are 5/1 and 3/1; SpellEffectInfo::CalcValue (SpellInfo.cpp:489) adds +1 whenever DieSides==1, giving rank 1 parry +3%/dodge +2% and rank 2 parry +6%/dodge +4%, matching the tooltip exactly. Each rank is applied alone via set_aura (learn does not strip a lower rank, so two learned ranks would stack per docs/systems/ascension-spell-parity.md). Player::m_canParry defaults to false (Player.cpp:276), and Player::UpdateParryPercentage (StatSystem.cpp:893-941) forces the whole percentage to 0 whenever CanParry() is false, no matter what parry-affecting auras or rating the player has. AuraEffect::HandleAuraModParryPercent (SpellAuraEffects.cpp:4766-4781) calls SetCanParry(true) -- which itself triggers one UpdateParryPercentage() recompute -- the first time any SPELL_AURA_MOD_PARRY_PERCENT aura is applied while CanParry() is still false; Player::SetCanParry (Player.cpp:13752-13758) never flips it back to false, so the unlock is permanent and one-shot. A freshly created fixture character (no weapon, no prior parry-granting spell) starts with CanParry() == false, so applying rank 1 as the very first parry aura both (a) unlocks the class's flat 5% base parry chance (StatSystem.cpp:921, Paladin curve since Cultist maps to CLASS_PALADIN via GetLegacyClassForCustomClass, SharedDefines.h:190) and (b) adds the rank's own bonus, in the same recompute -- an 8% jump from a 0% baseline (5 base + 3 aura), not the rank's isolated 3%. The fixture primes and removes rank 1 once before taking the baseline snapshot so CanParry() is already permanently true (and the base 5% already included) before either rank is measured; every rank assertion afterward isolates exactly that rank's own SPELL_AURA_MOD_PARRY_PERCENT/SPELL_AURA_MOD_DODGE_PERCENT contribution, matching the DBC-derived values above.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "c", "race": 1, "class": 25, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "set_aura", "label": "Prime parry capability once: applying any MOD_PARRY_PERCENT aura while CanParry() is false permanently unlocks the class's flat base parry chance (HandleAuraModParryPercent -> SetCanParry(true))", "actor": "c", "spell": 300268, "stacks": 1 },
+    { "action": "set_aura", "label": "Remove the priming application; CanParry() stays true (SetCanParry never resets it), so parry now reads the true unlocked baseline with no rank aura active", "actor": "c", "spell": 300268, "stacks": 0 },
+    { "action": "snapshot", "label": "Baseline parry", "actor": "c", "metric": "parry_chance", "save_as": "parry_before" },
+    { "action": "snapshot", "label": "Baseline dodge", "actor": "c", "metric": "dodge_chance", "save_as": "dodge_before" },
+    { "action": "set_aura", "label": "Apply rank 1 alone", "actor": "c", "spell": 300268, "stacks": 1 },
+    {
+      "action": "assert", "label": "Rank 1 grants +3% parry",
+      "actor": "c", "metric": "parry_chance", "relative_to": "parry_before", "min": 2.9, "max": 3.1
+    },
+    {
+      "action": "assert", "label": "Rank 1 grants +2% dodge",
+      "actor": "c", "metric": "dodge_chance", "relative_to": "dodge_before", "min": 1.9, "max": 2.1
+    },
+    { "action": "set_aura", "label": "Remove rank 1", "actor": "c", "spell": 300268, "stacks": 0 },
+    {
+      "action": "assert", "label": "Parry returns to baseline",
+      "actor": "c", "metric": "parry_chance", "relative_to": "parry_before", "min": -0.1, "max": 0.1
+    },
+    { "action": "set_aura", "label": "Apply rank 2 alone", "actor": "c", "spell": 301348, "stacks": 1 },
+    {
+      "action": "assert", "label": "Rank 2 grants +6% parry",
+      "actor": "c", "metric": "parry_chance", "relative_to": "parry_before", "min": 5.9, "max": 6.1
+    },
+    {
+      "action": "assert", "label": "Rank 2 grants +4% dodge",
+      "actor": "c", "metric": "dodge_chance", "relative_to": "dodge_before", "min": 3.9, "max": 4.1
+    }
+  ]
+}

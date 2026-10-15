@@ -1,0 +1,198 @@
+{
+  "schema": 1,
+  "name": "Hard Bargain grants its attack speed and Dreadwake discount during Tormented Souls (#1653)",
+  "contract": "Hard Bargain 300569 grants attack speed and a Dreadwake discount only during Tormented Souls 500481.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 5,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "reaper",
+      "spell": 300569
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 300569
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "assert",
+      "label": "Hard Bargain passive is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 300569,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Hard Bargain helper is absent before Tormented Souls",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 572300,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Base melee attack time",
+      "actor": "reaper",
+      "metric": "attack_time_ms",
+      "save_as": "base_attack_time"
+    },
+    {
+      "action": "assert",
+      "label": "Base Dreadwake cost is thirty Runic Power",
+      "actor": "reaper",
+      "metric": "spell_power_cost",
+      "spell": 803992,
+      "equals": 300
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "label": "Cast Tormented Souls",
+      "actor": "reaper",
+      "spell": 500483
+    },
+    {
+      "action": "assert",
+      "label": "Tormented Souls is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 500481,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Hard Bargain helper starts with Tormented Souls",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 572300,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Hard Bargain increases melee attack speed by thirty percent",
+      "actor": "reaper",
+      "metric": "attack_time_ms",
+      "ratio_to": "base_attack_time",
+      "min": 0.75,
+      "max": 0.8
+    },
+    {
+      "action": "assert",
+      "label": "Dreadwake costs five less Runic Power",
+      "actor": "reaper",
+      "metric": "spell_power_cost",
+      "spell": 803992,
+      "equals": 250
+    },
+    {
+      "action": "set_aura",
+      "label": "End Tormented Souls",
+      "actor": "reaper",
+      "spell": 500481,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Hard Bargain helper ends with Tormented Souls",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 572300,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Dreadwake cost returns to normal",
+      "actor": "reaper",
+      "metric": "spell_power_cost",
+      "spell": 803992,
+      "equals": 300
+    },
+    {
+      "action": "assert",
+      "label": "Melee attack time returns to normal",
+      "actor": "reaper",
+      "metric": "attack_time_ms",
+      "ratio_to": "base_attack_time",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "set_aura",
+      "label": "Reactivate Tormented Souls",
+      "actor": "reaper",
+      "spell": 500481,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Helper resumes while both auras are present",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 572300,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "unlearn",
+      "label": "Remove Hard Bargain talent",
+      "actor": "reaper",
+      "spell": 300569
+    },
+    {
+      "action": "assert",
+      "label": "Helper ends when Hard Bargain is removed",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 572300,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "learn",
+      "label": "Restore Hard Bargain while Tormented Souls persists",
+      "actor": "reaper",
+      "spell": 300569
+    },
+    {
+      "action": "assert",
+      "label": "Helper starts when Hard Bargain is learned during Tormented Souls",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 572300,
+      "equals": 1,
+      "within_ms": 1000
+    }
+  ]
+}

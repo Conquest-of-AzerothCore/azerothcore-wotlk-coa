@@ -1,0 +1,140 @@
+{
+  "schema": 1,
+  "name": "Low Dawn raises Sixfold Shot damage by 25% and shortens its channel by 0.5 seconds (#1068)",
+  "contract": "Low Dawn 680247 has E0 aura 108 MiscValue 0 (SPELLMOD_DAMAGE) BasePoints 24 = +25% on mask (0, 0x800000, 0) = Sixfold Shot damage 807527; E1 aura 107 MiscValue 1 (SPELLMOD_DURATION) BasePoints -501 = -500 ms and E2 aura 107 MiscValue 19 (SPELLMOD_ACTIVATION_TIME) BasePoints -86 = -85 ms, both on mask (0, 0x80000, 0) = the Sixfold Shot channel 807364. Its description reads 'Increases the damage of Sixfold Shot by $s1% and causes it to channel 0.5 sec quicker'. Spell.dbc gives the channel 1500 ms (duration index 65) with a 250 ms tick, so the channel becomes 1000 ms with a 165 ms tick (6 ticks, still six shots). Witchbane 800165 (B 0x400000) is the control for the channel mods and Darkslayer 804179 for the damage mod.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 680247,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "label": "Baseline channel duration is 1500 ms",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 807364,
+      "op": 1,
+      "base": 1500,
+      "equals": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Baseline tick interval is 250 ms",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 807364,
+      "op": 19,
+      "base": 250,
+      "equals": 250
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 680247
+    },
+    {
+      "action": "assert",
+      "label": "The passive aura is applied",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 680247,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Sixfold Shot damage is 25% higher",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 807527,
+      "op": 0,
+      "base": 1000,
+      "min": 1249.9,
+      "max": 1250.1
+    },
+    {
+      "action": "assert",
+      "label": "The channel is 0.5 seconds quicker",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 807364,
+      "op": 1,
+      "base": 1500,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The tick interval is 85 ms shorter",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 807364,
+      "op": 19,
+      "base": 250,
+      "equals": 165
+    },
+    {
+      "action": "assert",
+      "label": "The channel record does not take the damage modifier",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 807364,
+      "op": 0,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "assert",
+      "label": "Witchbane's channel is unchanged",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 800165,
+      "op": 1,
+      "base": 3000,
+      "equals": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Darkslayer damage is unchanged",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 804179,
+      "op": 0,
+      "base": 1000,
+      "min": 999.9,
+      "max": 1000.1
+    },
+    {
+      "action": "unlearn",
+      "actor": "hunter",
+      "spell": 680247,
+      "all_specs": true,
+      "label": "Remove the passive"
+    },
+    {
+      "action": "assert",
+      "label": "The channel returns to 1500 ms",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 807364,
+      "op": 1,
+      "base": 1500,
+      "equals": 1500
+    }
+  ]
+}

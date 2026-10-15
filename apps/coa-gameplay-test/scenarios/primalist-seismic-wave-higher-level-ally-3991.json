@@ -1,0 +1,282 @@
+{
+  "schema": 1,
+  "name": "primalist-seismic-wave-higher-level-ally-3991",
+  "contract": [
+    "Original Spell.dbc 805462 Seismic Wave has heal effect 0 selecting source-area allies and Nature damage",
+    "effect 1 selecting source-area enemies. Helpful healing cannot miss a friendly ally because of level",
+    "difference. A level 16 caster with ordinary hit chance casts four waves beside a wounded level 80 party",
+    "ally. Every cast must heal both the caster and the ally. No hit-rating fixture changes the friendly",
+    "hit calculation; hostile damage is observed separately. The caster-heal control proves each cast completed.",
+    "A same-level hostile creature checks that the harmful effect still deals damage and does not heal it. A",
+    "native Divine Shield fixture then checks that damage immunity remains effective while the higher-level",
+    "ally is still healed.",
+    "The initial spawn location matches the caster location, so the nearby enemy remains within the wave",
+    "radius after the party-positioning steps. The four ordinary hostile hit rolls stay unchanged."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 16,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "primalist",
+      "entry": 36,
+      "level": 16,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9615.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 805462
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 805462
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 805462
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 805462
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 805462
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 805462
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 805462
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 805462
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 805462
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Four normal Seismic Waves heal the caster",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 805462,
+      "target": "primalist",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "Every Seismic Wave heals the higher-level ally without a hostile hit roll",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 805462,
+      "target": "ally",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "Healing actually restores the wounded higher-level ally",
+      "actor": "primalist",
+      "metric": "spell_effective_heal_total",
+      "spell": 805462,
+      "target": "ally",
+      "min": 200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 805462,
+      "target": "enemy",
+      "min": 1,
+      "label": "The same wave still damages an enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 805462,
+      "target": "enemy",
+      "equals": 0,
+      "label": "The harmful target is not healed"
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 642
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 642,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "The enemy has native damage immunity"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 805462,
+      "target": "enemy",
+      "save_as": "damage_before_immunity"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 805462
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 805462
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 805462,
+      "target": "ally",
+      "equals": 5,
+      "label": "The friendly heal still lands beside an immune enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 805462,
+      "target": "enemy",
+      "relative_to": "damage_before_immunity",
+      "equals": 0,
+      "label": "The friendly hit correction preserves enemy damage immunity"
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

@@ -20,6 +20,7 @@
 #include "Item.h"
 #include "Log.h"
 #include "Player.h"
+#include "ScriptMgr.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
@@ -46,6 +47,12 @@ void WorldSession::HandleBankerActivateOpcode(WorldPacket& recvData)
     ObjectGuid guid;
 
     recvData >> guid;
+
+    // A script may answer this click itself, and it is asked before the interaction checks below:
+    // a banker that must not open its bank still has to be able to say so, and those checks would
+    // refuse the click without a word.
+    if (!sScriptMgr->OnPlayerBankerActivate(GetPlayer(), guid))
+        return;
 
     Creature* unit = GetPlayer()->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_BANKER);
     if (!unit)

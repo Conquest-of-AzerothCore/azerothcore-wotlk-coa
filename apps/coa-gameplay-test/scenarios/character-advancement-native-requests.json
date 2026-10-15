@@ -1,0 +1,215 @@
+{
+  "schema": 1,
+  "name": "Native character-advancement uploads switch archetypes, charge removals and reset talents",
+  "contract": "The original client changes talents only through Extensions.dll packets. SwitchActiveChrSpec plus\nApplyPendingBuild uploads CMSG 0x0727 holding the class tree, the new ChrSpecs identity entry (+0x70) and\nits signature entry (+0x60); UnlearnAllTalents sends CMSG_UNLEARN_TALENTS (0x0213). A Bloodmage (class\n20) at level 80 enters Eternal (ChrSpecs 99), buys Rotclaw (entry 30191, spell 804197, one specialization\npoint), switches to Sanguine (26) and back. The DLL signals the upload's result from SMSG 0x072C {result,\nlearn result, u32 entry, u32 rank} and the reset's from SMSG 0x072B {result}. Expected: the purchase\nanswers CA_UPDATE_ENTRIES_OK; an upload naming an unknown entry answers CA_UPDATE_ENTRIES_BAD_ENTRY /\nCA_LEARN_WRONG_CLASS and changes nothing; leaving Eternal pays to remove Rotclaw; returning with only the\nidentity and signature leaves it absent; a new purchase restores the rank; the native reset answers\nCA_PURGE_TALENTS_OK and removes every paid rank while Eternal stays active (player setting\ncore.ascension_active_spec), and a second reset answers CA_PURGE_TALENTS_NO_KNOWN_TALENTS. Native\nremovals and resets retain their original prices; fixture actors have 100 gold to pay them.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks and class synchronisation settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_money",
+      "label": "Fund the original native removal and purge prices",
+      "actor": "bloodmage",
+      "value": 1000000
+    },
+    {
+      "action": "specialization",
+      "label": "Enter Eternal",
+      "actor": "bloodmage",
+      "id": 99
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Buy Rotclaw",
+      "actor": "bloodmage",
+      "entry": 30191,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rotclaw is owned in Eternal",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 804197,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The purchase is answered natively",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 1836,
+      "text": "CA_UPDATE_ENTRIES_OK",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "label": "Upload an unknown entry",
+      "actor": "bloodmage",
+      "opcode": 1831,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 999999
+        },
+        {
+          "u32": 1
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The unknown entry is refused",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 1836,
+      "text": "CA_UPDATE_ENTRIES_BAD_ENTRY",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "with the class reason",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 1836,
+      "text": "CA_LEARN_WRONG_CLASS",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The refused upload keeps Rotclaw",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 804197,
+      "equals": 1
+    },
+    {
+      "action": "specialization",
+      "label": "Switch to Sanguine",
+      "actor": "bloodmage",
+      "id": 26
+    },
+    {
+      "action": "assert",
+      "label": "Sanguine is the active specialization",
+      "actor": "bloodmage",
+      "metric": "player_setting",
+      "source": "core.ascension_active_spec",
+      "index": 0,
+      "equals": 26
+    },
+    {
+      "action": "assert",
+      "label": "Leaving Eternal removes Rotclaw",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 804197,
+      "equals": 0
+    },
+    {
+      "action": "specialization",
+      "label": "Switch back to Eternal",
+      "actor": "bloodmage",
+      "id": 99
+    },
+    {
+      "action": "assert",
+      "label": "An identity-only return does not restore omitted purchases",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 804197
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Repurchase through the complete native upload",
+      "actor": "bloodmage",
+      "entry": 30191,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "label": "The explicit repurchase restores Rotclaw",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "equals": 1,
+      "spell": 804197
+    },
+    {
+      "action": "client_packet",
+      "label": "Native talent reset",
+      "actor": "bloodmage",
+      "opcode": 531
+    },
+    {
+      "action": "assert",
+      "label": "The native reset removes Rotclaw",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 804197,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The native reset keeps Eternal active",
+      "actor": "bloodmage",
+      "metric": "player_setting",
+      "source": "core.ascension_active_spec",
+      "index": 0,
+      "equals": 99
+    },
+    {
+      "action": "assert",
+      "label": "The reset is answered natively",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 1835,
+      "text": "CA_PURGE_TALENTS_OK",
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "Reset again",
+      "actor": "bloodmage",
+      "opcode": 531
+    },
+    {
+      "action": "assert",
+      "label": "Nothing is left to reset",
+      "actor": "bloodmage",
+      "metric": "server_packet_contains",
+      "opcode": 1835,
+      "text": "CA_PURGE_TALENTS_NO_KNOWN_TALENTS",
+      "equals": 1,
+      "within_ms": 1000
+    }
+  ]
+}

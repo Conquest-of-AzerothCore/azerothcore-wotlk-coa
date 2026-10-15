@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Oblivion's Embrace raises Hammer of Twilight and Eldritch Shock crit damage by 25% (#517)",
+  "contract": "Oblivion's Embrace 680500 reads 'Increases the critical damage of your Hammer of Twilight and Eldritch Shock by 25%.' In the installed Spell.dbc it is passive, family 31, effect 1 is SPELL_AURA_ADD_PCT_MODIFIER (108) misc 15 = SPELLMOD_CRIT_DAMAGE_BONUS, BasePoints 24 / DieSides 1 = +25%, class mask dword 2 = 540672 = 0x84000 (bits 14 and 19). Effect 0 is an inert Dummy scaffold effect and does not gate the aura. Hammer of Twilight rank 805116 and Eldritch Shock rank 808043 (family 31) carry SpellFamilyFlags[2] 16384 (bit 14) and 524288 (bit 19) respectively -- exact matches; the unranked name-only row 254852 carries no family flags and is not itself castable, so ranks are probed directly. Unit::SpellCriticalDamageBonus (Unit.cpp:9926-9965) starts a magic spell's crit bonus at 50% of the hit (crit_bonus = damage/2 = 500 for a 1000 base), applies Player::ApplySpellMod(spellId, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus) at line 9960, then folds the bonus back onto the base (line 9956/9962). Without the talent this gives 1000+500=1500; with the 25% PCT mod it gives 1000+500*1.25=1625. Player::ApplySpellMod (Player.cpp:10219-10323) is fully generic: any op/classmask-matching aura is picked up without a dedicated script. Grasp of Zek'voz 573028 (family 31, SpellFamilyFlags[0]=2) shares neither bit and is the control.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "c", "race": 1, "class": 25, "level": 80}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "c", "entry": 36, "level": 80, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the fixtures settle", "ms": 5000},
+    {"action": "assert", "label": "SETUP: Hammer of Twilight crit-damage op unmodified", "actor": "c", "metric": "spell_modifier", "spell": 805116, "op": 15, "base": 1000, "equals": 1000},
+    {"action": "assert", "label": "SETUP: Eldritch Shock crit-damage op unmodified", "actor": "c", "metric": "spell_modifier", "spell": 808043, "op": 15, "base": 1000, "equals": 1000},
+    {"action": "assert", "label": "SETUP: Eldritch Shock's real crit total (1000 base) is 1500 (50% magic crit bonus, no passive)", "actor": "c", "metric": "spell_critical_damage", "spell": 808043, "target": "dummy", "min": 1499, "max": 1501},
+    {"action": "learn", "label": "Learn Oblivion's Embrace", "actor": "c", "spell": 680500},
+    {"action": "assert", "label": "The passive is active", "actor": "c", "metric": "aura", "spell": 680500, "equals": 1},
+    {"action": "assert", "label": "Hammer of Twilight crit-damage op is now +25%", "actor": "c", "metric": "spell_modifier", "spell": 805116, "op": 15, "base": 1000, "equals": 1250},
+    {"action": "assert", "label": "Eldritch Shock crit-damage op is now +25%", "actor": "c", "metric": "spell_modifier", "spell": 808043, "op": 15, "base": 1000, "equals": 1250},
+    {"action": "assert", "label": "Grasp of Zek'voz is outside the mask", "actor": "c", "metric": "spell_modifier", "spell": 573028, "op": 15, "base": 1000, "equals": 1000},
+    {"action": "assert", "label": "Eldritch Shock's real crit total rises to 1625 (1000 + 500*1.25)", "actor": "c", "metric": "spell_critical_damage", "spell": 808043, "target": "dummy", "min": 1624, "max": 1626},
+    {"action": "unlearn", "label": "Drop Oblivion's Embrace", "actor": "c", "spell": 680500},
+    {"action": "assert", "label": "Hammer of Twilight returns to unmodified", "actor": "c", "metric": "spell_modifier", "spell": 805116, "op": 15, "base": 1000, "equals": 1000}
+  ]
+}

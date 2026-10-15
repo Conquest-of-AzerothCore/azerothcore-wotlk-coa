@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Toxic Stride grants silence and interrupt immunity and casting while moving (#1159)",
+  "contract": "#1159: Toxic Stride 504347 is an active spell whose effect 0 is SPELL_EFFECT_TRIGGER_SPELL (type 64) on TARGET_UNIT_CASTER for spell 504346 (its tooltip 'for $504346d'). 504346 has effect 0 aura 77 (MECHANIC_IMMUNITY) misc 9 (silence), effect 2 aura 77 misc 26 (interrupt) and effect 1 aura 313 with EffectSpellClassMask (0x428080c, 0x490002a8, 0x46044008) in SpellFamilyName 35; that mask covers Venom Bolt (word 1 0x80). Unit::CanCastSpellWhileMoving ends with HasAuraTypeWithAffectMask(SPELL_AURA_313, info), which lifts the SPELL_FAILED_MOVING restriction of Spell::CheckCast and the movement interrupt for spells the mask selects. Its DurationEntry 8 is 15000 ms. Silence (15487, Mechanic 9) and Counterspell (2139, Mechanic 26) are the probes: Unit::IsImmunedToSpell checks the spell's Mechanic against the mechanic immunities the aura installs. Venom Bolt 800869 has a 2000 ms cast time (SpellCastTimes 5) and InterruptFlags 0xb (movement interrupts). The scenario first shows in the same run that without the aura the moving cast deals nothing and the probes are not immune, then that with the aura both change. The active spell has no scripted handler; 504347's extra effect 2 (DISPEL_MECHANIC, snare) is not mentioned in its text and is not asserted. No script or SQL is needed; this is a regression scenario for behaviour that already works.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "stride",
+      "race": 1,
+      "class": 29,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "stride",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "stride",
+      "spell": 800869,
+      "label": "Learn Venom Bolt (2 second cast)"
+    },
+    {
+      "action": "assert",
+      "label": "Without Toxic Stride the Venomancer is not immune to Silence (mechanic 9)",
+      "actor": "stride",
+      "metric": "spell_immune",
+      "spell": 15487,
+      "target": "control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Without Toxic Stride the Venomancer is not immune to Counterspell (mechanic 26, interrupt)",
+      "actor": "stride",
+      "metric": "spell_immune",
+      "spell": 2139,
+      "target": "control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No Toxic Stride aura yet",
+      "actor": "stride",
+      "metric": "aura",
+      "spell": 504346,
+      "equals": 0
+    },
+    {
+      "action": "set_moving",
+      "label": "Start moving",
+      "actor": "stride",
+      "enabled": true
+    },
+    {
+      "action": "assert",
+      "label": "The fixture is moving",
+      "actor": "stride",
+      "metric": "moving",
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Cast the 2 second Venom Bolt while moving, without Toxic Stride",
+      "actor": "stride",
+      "spell": 800869,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "label": "Let a cast that was allowed complete",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "Without Toxic Stride the moving Venom Bolt deals no damage",
+      "actor": "stride",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "equals": 0
+    },
+    {
+      "action": "set_moving",
+      "label": "Stop moving",
+      "actor": "stride",
+      "enabled": false
+    },
+    {
+      "action": "learn",
+      "label": "Learn Toxic Stride (active spell; cast requires HasActiveSpell)",
+      "actor": "stride",
+      "spell": 504347
+    },
+    {
+      "action": "cast",
+      "label": "Cast Toxic Stride",
+      "actor": "stride",
+      "spell": 504347
+    },
+    {
+      "action": "assert",
+      "label": "Toxic Stride's triggered aura is applied",
+      "actor": "stride",
+      "metric": "aura",
+      "spell": 504346,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The aura lasts about 15 seconds",
+      "actor": "stride",
+      "metric": "aura_duration_ms",
+      "spell": 504346,
+      "min": 14000,
+      "max": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Toxic Stride grants immunity to Silence",
+      "actor": "stride",
+      "metric": "spell_immune",
+      "spell": 15487,
+      "target": "control",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Toxic Stride grants immunity to interrupts (Counterspell)",
+      "actor": "stride",
+      "metric": "spell_immune",
+      "spell": 2139,
+      "target": "control",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown expire",
+      "ms": 2000
+    },
+    {
+      "action": "set_moving",
+      "label": "Start moving again",
+      "actor": "stride",
+      "enabled": true
+    },
+    {
+      "action": "cast",
+      "label": "Cast the same Venom Bolt while moving with Toxic Stride",
+      "actor": "stride",
+      "spell": 800869,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "With Toxic Stride the moving Venom Bolt completes and deals damage",
+      "actor": "stride",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "min": 1,
+      "within_ms": 6000
+    }
+  ]
+}

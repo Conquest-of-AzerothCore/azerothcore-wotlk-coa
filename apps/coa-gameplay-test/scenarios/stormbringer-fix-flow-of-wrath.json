@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Flow of Wrath raises Drown's crit-for-caster (#3234)",
+  "contract": "Flow of Wrath 801855 (SpellFamilyName 22) is a single SPELL_EFFECT_APPLY_AURA / SPELL_AURA_ADD_FLAT_MODIFIER (107) with MiscValue 12 (SPELLMOD_EFFECT2), EffectBasePoints[0] 14 and EffectDieSides[0] 1, so its value is 15 - the \"$s1%\" of its tooltip \"Increases your critical strike chance by $s1% against enemies affected by |cffffffffDrown|r.\" Its EffectSpellClassMask is flag96(0, 0, 0x08000000). In family 22 that word-2 bit is carried by exactly one record, Lightning Cage 560032 (SpellFamilyFlags[2] 134217728); Drown carries 0x08000000 in word 1 (806407 and ranks 572760-572764 all have SpellFamilyFlags[1] 134217728). flag96::operator& is element-wise (src/common/Utilities/Util.h) and SpellInfo::IsAffected needs a non-empty intersection, so the modifier reached Lightning Cage and never Drown. SPELLMOD_EFFECT2 addresses effect index 1, and Drown's effect 1 is SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER (308) with EffectBasePoints[1] -1 and EffectDieSides[1] 1, i.e. a 0 placeholder that the engine already consumes in Unit::SpellTakenCritChance. Lightning Cage's effect 1 is SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE (185), also -1 + 1 = 0, and has nothing to do with the tooltip. The fix rewrites the mask at load time to flag96(0, 0x08000000, 0), so the same +15 lands on Drown and leaves Lightning Cage at 0. spell_effect_value reads SpellEffectInfo::CalcValue for this caster, so no cast, target or crit roll enters the measurement.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "s", "race": 1, "class": 16, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    {
+      "action": "assert", "label": "BASELINE: Drown's crit-for-caster placeholder is 0 (-1 + 1 die side) before the talent",
+      "actor": "s", "metric": "spell_effect_value", "spell": 806407, "effect": 1, "equals": 0
+    },
+    {
+      "action": "assert", "label": "BASELINE: the level-80 Drown rank 572764 carries the same 0 placeholder",
+      "actor": "s", "metric": "spell_effect_value", "spell": 572764, "effect": 1, "equals": 0
+    },
+    {
+      "action": "assert", "label": "BASELINE: Lightning Cage's effect 1 is 0 (-1 + 1 die side) before the talent",
+      "actor": "s", "metric": "spell_effect_value", "spell": 560032, "effect": 1, "equals": 0
+    },
+    { "action": "learn", "actor": "s", "spell": 801855 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Flow of Wrath adds its 14 + 1 die side = 15 to Drown's crit-for-caster",
+      "actor": "s", "metric": "spell_effect_value", "spell": 806407, "effect": 1, "equals": 15
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the same +15 reaches the level-80 Drown rank 572764",
+      "actor": "s", "metric": "spell_effect_value", "spell": 572764, "effect": 1, "equals": 15
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Lightning Cage's unrelated effect 1 no longer collects the +15",
+      "actor": "s", "metric": "spell_effect_value", "spell": 560032, "effect": 1, "equals": 0
+    },
+    { "action": "unlearn", "actor": "s", "spell": 801855 },
+    {
+      "action": "assert", "label": "Unlearning the talent removes the modifier again",
+      "actor": "s", "metric": "spell_effect_value", "spell": 806407, "effect": 1, "equals": 0
+    }
+  ]
+}

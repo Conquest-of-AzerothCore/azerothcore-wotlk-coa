@@ -1,0 +1,521 @@
+{
+  "schema": 1,
+  "name": "Barbarian: one-handed Brutal Swing and Decapitate across ranks and with dual wield (#5625)",
+  "contract": "Main PR5446 corrects higher-rank weapon masks. Three independent single-weapon native Barbarians wield one-handed sword25 at levels20,26,80, so base500913/804414, rank2 500996/806905 and highest501002/573228 are each active when cast. Each queued Brutal Swing must execute on an actual native melee swing, and each Decapitate cast must hit a target below35% health. The broader existing barbarian-weapon-requirement-ranks scenario remains intact with its separate unarmed checks. A previously learned higher rank must not make a lower-rank cast look successful merely because no rejection packet was sent. A fourth level80 actor equips sword25 in the main hand and dagger2092 in the off hand, with weapon proficiencies201/1180 and dual-wield674 as fixtures, and must land both highest-rank abilities through normal casts while both weapons remain equipped.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "base",
+      "race": 1,
+      "class": 12,
+      "level": 20,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "higher",
+      "race": 1,
+      "class": 12,
+      "level": 26,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "top",
+      "race": 1,
+      "class": 12,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "dual",
+      "race": 1,
+      "class": 12,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "base_enemy",
+      "owner": "base",
+      "entry": 36,
+      "level": 20,
+      "health": 500000,
+      "distance": 3
+    },
+    {
+      "id": "higher_enemy",
+      "owner": "higher",
+      "entry": 36,
+      "level": 26,
+      "health": 500000,
+      "distance": 3
+    },
+    {
+      "id": "top_enemy",
+      "owner": "top",
+      "entry": 36,
+      "level": 80,
+      "health": 500000,
+      "distance": 3
+    },
+    {
+      "id": "dual_enemy",
+      "owner": "dual",
+      "entry": 36,
+      "level": 80,
+      "health": 500000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "base",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "base",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "base",
+      "spell": 500913
+    },
+    {
+      "action": "learn",
+      "actor": "base",
+      "spell": 804414
+    },
+    {
+      "action": "set_health",
+      "actor": "base_enemy",
+      "value": 150000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "base",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_active",
+      "spell": 500913,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "base",
+      "spell": 500913,
+      "target": "base_enemy"
+    },
+    {
+      "action": "attack",
+      "actor": "base",
+      "target": "base_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_damage_count",
+      "spell": 500913,
+      "target": "base_enemy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "base"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "base",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_active",
+      "spell": 804414,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "base",
+      "spell": 804414,
+      "target": "base_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "spell_damage_count",
+      "spell": 804414,
+      "target": "base_enemy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "base"
+    },
+    {
+      "action": "add_item",
+      "actor": "higher",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "higher",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "higher",
+      "spell": 500996
+    },
+    {
+      "action": "learn",
+      "actor": "higher",
+      "spell": 806905
+    },
+    {
+      "action": "set_health",
+      "actor": "higher_enemy",
+      "value": 150000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "higher",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "actor": "higher",
+      "metric": "spell_active",
+      "spell": 500996,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "higher",
+      "spell": 500996,
+      "target": "higher_enemy"
+    },
+    {
+      "action": "attack",
+      "actor": "higher",
+      "target": "higher_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "higher",
+      "metric": "spell_damage_count",
+      "spell": 500996,
+      "target": "higher_enemy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "higher"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "higher",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "actor": "higher",
+      "metric": "spell_active",
+      "spell": 806905,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "higher",
+      "spell": 806905,
+      "target": "higher_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "higher",
+      "metric": "spell_damage_count",
+      "spell": 806905,
+      "target": "higher_enemy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "higher"
+    },
+    {
+      "action": "add_item",
+      "actor": "top",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "top",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "top",
+      "spell": 501002
+    },
+    {
+      "action": "learn",
+      "actor": "top",
+      "spell": 573228
+    },
+    {
+      "action": "set_health",
+      "actor": "top_enemy",
+      "value": 150000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "top",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "actor": "top",
+      "metric": "spell_active",
+      "spell": 501002,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "top",
+      "spell": 501002,
+      "target": "top_enemy"
+    },
+    {
+      "action": "attack",
+      "actor": "top",
+      "target": "top_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "top",
+      "metric": "spell_damage_count",
+      "spell": 501002,
+      "target": "top_enemy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "top"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "top",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "actor": "top",
+      "metric": "spell_active",
+      "spell": 573228,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "top",
+      "spell": 573228,
+      "target": "top_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "top",
+      "metric": "spell_damage_count",
+      "spell": 573228,
+      "target": "top_enemy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "top"
+    },
+    {
+      "action": "learn",
+      "actor": "dual",
+      "spell": 201,
+      "label": "Fixture weapon proficiency and dual-wield permission"
+    },
+    {
+      "action": "learn",
+      "actor": "dual",
+      "spell": 1180,
+      "label": "Fixture weapon proficiency and dual-wield permission"
+    },
+    {
+      "action": "learn",
+      "actor": "dual",
+      "spell": 674,
+      "label": "Fixture weapon proficiency and dual-wield permission"
+    },
+    {
+      "action": "add_item",
+      "actor": "dual",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "dual",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "dual",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "dual",
+      "item": 2092,
+      "slot": 16
+    },
+    {
+      "action": "learn",
+      "actor": "dual",
+      "spell": 501002
+    },
+    {
+      "action": "learn",
+      "actor": "dual",
+      "spell": 573228
+    },
+    {
+      "action": "set_health",
+      "actor": "dual_enemy",
+      "value": 150000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "dual",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "actor": "dual",
+      "metric": "spell_active",
+      "spell": 501002,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "dual",
+      "spell": 501002,
+      "target": "dual_enemy"
+    },
+    {
+      "action": "attack",
+      "actor": "dual",
+      "target": "dual_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "dual",
+      "metric": "spell_damage_count",
+      "spell": 501002,
+      "target": "dual_enemy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "dual"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "dual",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "actor": "dual",
+      "metric": "spell_active",
+      "spell": 573228,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "dual",
+      "spell": 573228,
+      "target": "dual_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "dual",
+      "metric": "spell_damage_count",
+      "spell": 573228,
+      "target": "dual_enemy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "dual"
+    }
+  ]
+}

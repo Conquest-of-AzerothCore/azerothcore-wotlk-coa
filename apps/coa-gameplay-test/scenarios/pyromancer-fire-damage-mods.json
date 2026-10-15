@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "name": "Concentrated Fire and Mad Aspect's Scepter raise Cleansing Flames and Destroyer's Maw (#2426, #1283)",
+  "contract": "#2426, #1283: both passives are ADD_PCT_MODIFIER (aura 108) on MiscValue 0 (SPELLMOD_DAMAGE), applied through the native spell-mod path (Unit.cpp:9367 for direct damage, :10217 for healing). Concentrated Fire 704864: base 19 -> +20%, class mask {0, 0x8, 0} = Cleansing Flames Heal 681141 and Damage 681142 only. Mad Aspect's Scepter rank 1 706896: base 19 -> +20%; rank 2 707790: base 39 -> +40%; class mask {0x8000000, 0, 0} = Destroyer's Maw 802107 (rank 1) and 502107-502113 (ranks 2-8). No other family-30 spell carries either bit (scanned in the group 4 audit). spell_modifier queries the native SPELLMOD_DAMAGE path on a base of 1000 without casting, so a passive that stops applying, or applies to the wrong spells, fails an assertion. Each control asserts the mask does not leak onto the other passive's spell.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Cleansing Flames Damage has no damage modifier before any passive",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 681142,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Destroyer's Maw has no damage modifier before any passive",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 802107,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 704864
+    },
+    {
+      "action": "assert",
+      "label": "Concentrated Fire adds 20% to Cleansing Flames Damage",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 681142,
+      "op": 0,
+      "base": 1000,
+      "equals": 1200
+    },
+    {
+      "action": "assert",
+      "label": "Concentrated Fire adds 20% to Cleansing Flames Heal",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 681141,
+      "op": 0,
+      "base": 1000,
+      "equals": 1200
+    },
+    {
+      "action": "assert",
+      "label": "Concentrated Fire does not touch Destroyer's Maw",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 802107,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 704864
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning Concentrated Fire removes the bonus",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 681142,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 706896
+    },
+    {
+      "action": "assert",
+      "label": "Mad Aspect's Scepter rank 1 adds 20% to Destroyer's Maw rank 1",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 802107,
+      "op": 0,
+      "base": 1000,
+      "equals": 1200
+    },
+    {
+      "action": "assert",
+      "label": "Mad Aspect's Scepter rank 1 adds 20% to a higher Destroyer's Maw rank",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 502107,
+      "op": 0,
+      "base": 1000,
+      "equals": 1200
+    },
+    {
+      "action": "assert",
+      "label": "Mad Aspect's Scepter does not touch Cleansing Flames Damage",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 681142,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 706896
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707790
+    },
+    {
+      "action": "assert",
+      "label": "Mad Aspect's Scepter rank 2 adds 40% to Destroyer's Maw rank 1",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 802107,
+      "op": 0,
+      "base": 1000,
+      "equals": 1400
+    },
+    {
+      "action": "assert",
+      "label": "Mad Aspect's Scepter rank 2 adds 40% to a higher Destroyer's Maw rank",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 502107,
+      "op": 0,
+      "base": 1000,
+      "equals": 1400
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 replaced rank 1 instead of stacking on it (still 40%, not 60%)",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 502113,
+      "op": 0,
+      "base": 1000,
+      "equals": 1400
+    }
+  ]
+}

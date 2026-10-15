@@ -1,0 +1,149 @@
+{
+  "schema": 1,
+  "name": "Dark Chivalry doubles the armor of mail items only (#1256)",
+  "contract": "Dark Chivalry 680525 (installed Spell.dbc) is a passive family-21 spell with one effect: SPELL_AURA_MOD_BASE_RESISTANCE_PCT (142), misc 1 (physical/armor), MiscValueB 8 = 1 << ITEM_SUBCLASS_ARMOR_MAIL, base 99 die 1 -> +100%. Its Description reads 'Increases your Armor contribution from mail items by 100%'. Player::UpdateArmor adds GetItemArmorBySubclass(subclass) * (multiplier - 1) per armor subclass scoped by that mask. World database item_template (data/sql/base/db_world) lists Augmented Chain Vest 2417 as a level-32 mail chest with 208 armor and Studded Doublet 2463 as a level-32 leather chest with 100 armor, no class restriction. Level-60 hunters cannot be assumed to own the armor proficiencies, so Mail 8737 and Leather 9077 (SpellEffect PROFICIENCY) are granted as fixtures. The mail wearer must gain about 208 armor from the talent; the leather wearer, same talent, must gain nothing. The DBC ToolTip text of 680525 mentions a Pommel Smash / Desecrate heal that its Description does not promise; only the Description clause is asserted. MEASURED on slot 3 (2026-09-21): the world database's item_template row for 2417 reads armor 225 (data/sql/base lists 208) and 2463 reads 196, and equipping added 219 and 190 to the naked armor (6 less than printed for both); Dark Chivalry then added exactly 225 to the mail wearer and 0 to the leather one. The bands therefore cover both printed values while still separating an untouched contribution (a gain of 0) from a doubled one.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "mail",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    },
+    {
+      "id": "lea",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "mail",
+      "spell": 8737,
+      "label": "Mail proficiency"
+    },
+    {
+      "action": "learn",
+      "actor": "mail",
+      "spell": 9077,
+      "label": "Leather proficiency"
+    },
+    {
+      "action": "learn",
+      "actor": "lea",
+      "spell": 8737,
+      "label": "Mail proficiency"
+    },
+    {
+      "action": "learn",
+      "actor": "lea",
+      "spell": 9077,
+      "label": "Leather proficiency"
+    },
+    {
+      "action": "snapshot",
+      "actor": "mail",
+      "metric": "armor",
+      "save_as": "mail_naked",
+      "label": "Armor before any gear"
+    },
+    {
+      "action": "add_item",
+      "actor": "mail",
+      "item": 2417
+    },
+    {
+      "action": "equip",
+      "actor": "mail",
+      "item": 2417,
+      "slot": 4
+    },
+    {
+      "action": "assert",
+      "label": "Fixture: the mail chest adds its printed armor (208 in the base file, 225 in the slot world data, less a few points the equip replaces)",
+      "actor": "mail",
+      "metric": "armor",
+      "relative_to": "mail_naked",
+      "min": 200,
+      "max": 232
+    },
+    {
+      "action": "snapshot",
+      "actor": "mail",
+      "metric": "armor",
+      "save_as": "mail_worn",
+      "label": "Armor with the mail chest, before the talent"
+    },
+    {
+      "action": "snapshot",
+      "actor": "lea",
+      "metric": "armor",
+      "save_as": "lea_naked",
+      "label": "Armor before any gear (control)"
+    },
+    {
+      "action": "add_item",
+      "actor": "lea",
+      "item": 2463
+    },
+    {
+      "action": "equip",
+      "actor": "lea",
+      "item": 2463,
+      "slot": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "lea",
+      "metric": "armor",
+      "save_as": "lea_worn",
+      "label": "Armor with the leather chest, before the talent"
+    },
+    {
+      "action": "learn",
+      "actor": "mail",
+      "spell": 680525,
+      "label": "Learn Dark Chivalry (mail wearer)"
+    },
+    {
+      "action": "learn",
+      "actor": "lea",
+      "spell": 680525,
+      "label": "Learn Dark Chivalry (leather wearer)"
+    },
+    {
+      "action": "assert",
+      "label": "The armor aura is +100%",
+      "actor": "mail",
+      "metric": "aura_amount",
+      "spell": 680525,
+      "effect": 0,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Dark Chivalry doubles the mail chest's armor contribution",
+      "actor": "mail",
+      "metric": "armor",
+      "relative_to": "mail_worn",
+      "min": 200,
+      "max": 232
+    },
+    {
+      "action": "assert",
+      "label": "A leather chest is untouched by the mail-only multiplier",
+      "actor": "lea",
+      "metric": "armor",
+      "relative_to": "lea_worn",
+      "min": -1,
+      "max": 1
+    }
+  ]
+}

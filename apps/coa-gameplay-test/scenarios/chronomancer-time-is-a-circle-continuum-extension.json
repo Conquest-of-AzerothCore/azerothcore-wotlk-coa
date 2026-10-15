@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "name": "Time Is A Circle extends Continuum spells when Wand of Time is cast (#3608)",
+  "contract": "Time Is A Circle 806206 applies aura 42 (proc trigger spell) on 524962 (named \"Wand Master\" in Spell.dbc, a stale label), which carries three effect 177 entries (SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION), each EffectBasePoints 2999 / DieSides 1 (3000 ms), with EffectMiscValue 806203 (Paradox Cannon), 804435 (Flux Emitter) and 804436 (Aether Compression). Spell.dbc gives 806206's record ProcFlags 0 and no spell_proc row existed, so the extension could never fire. With a spell_proc row on the cast phase of Wand of Time (family 28, word1 0x100000, carried by 520175 and every rank) at the record's own 100% ProcChance, casting Wand of Time must raise Flux Emitter's remaining duration instead of letting it decay. Flux Emitter carries CasterAuraSpell 804455 (Echo Fragment), fixtured with set_aura; five stacks also give it the per-fragment duration bonus (Echo Fragment's effect 1 is SPELLMOD_DURATION, 5000 ms per stack) so its DurationIndex 28 base of 5000 ms becomes long enough to observe. The assertion is relative to a snapshot taken 1.5 s later: without the fix the remaining duration can only have fallen, so a positive delta discriminates and needs no randomness.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 806206
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 804435
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 520175
+    },
+    {
+      "action": "set_aura",
+      "label": "Echo Fragments satisfy Flux Emitter's CasterAuraSpell",
+      "actor": "chronomancer",
+      "spell": 804455,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 804435
+    },
+    {
+      "action": "assert",
+      "label": "Flux Emitter is active on the Chronomancer",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 804435,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Continuum duration decay measurably",
+      "ms": 1500
+    },
+    {
+      "action": "snapshot",
+      "label": "Flux Emitter duration before Wand of Time",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 804435,
+      "caster": "chronomancer",
+      "save_as": "flux_before"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 520175,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Casting Wand of Time extends the Continuum spell",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 804435,
+      "caster": "chronomancer",
+      "relative_to": "flux_before",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

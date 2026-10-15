@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "name": "knight-warbringer-native-rank-replacement-4191",
+  "contract": [
+    "Warbringer 570727 automatically replaces Flames of Xoroth in War specialization 18. Active DBC ranks",
+    "802581-802586 require levels 8,18,28,36,44,52 and all have the same 65% weapon-damage term with increasing",
+    "flat damage. At level 40, Flames rank 802414 must map to Warbringer 802584; at level 60, highest Flames",
+    "573448 must map to 802586. A periodic Xoroth refresh must preserve the learned replacement rank. A normal",
+    "highest-rank cast must hit and apply its healing reduction."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "k",
+      "race": 1,
+      "class": 17,
+      "level": 40,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 802414
+    },
+    {
+      "action": "specialization",
+      "actor": "k",
+      "id": 18
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "aura",
+      "spell": 570727,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "knows_spell",
+      "spell": 802584,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "temporary_spell_replacement",
+      "spell": 802414,
+      "equals": 802584
+    },
+    {
+      "action": "set_level",
+      "actor": "k",
+      "value": 60
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 573448
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "knows_spell",
+      "spell": 802586,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "temporary_spell_replacement",
+      "spell": 573448,
+      "equals": 802586
+    },
+    {
+      "action": "set_aura",
+      "actor": "k",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "spell": 802586,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 802586,
+      "target": "target",
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 803240,
+      "caster": "k",
+      "equals": 1
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "k",
+      "entry": 36,
+      "level": 40,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  }
+}

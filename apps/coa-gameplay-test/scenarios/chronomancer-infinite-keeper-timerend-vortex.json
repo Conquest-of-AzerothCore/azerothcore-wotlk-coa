@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "name": "Unmake on an enemy with the Chronomancer's own Timerend erupts Infinite Keeper's sand vortex (#829)",
+  "contract": "Infinite Keeper 806312 (Chronomancer Duality talent, CharacterAdvancement 5861) reads \"Using Unmake on an enemy affected by your Timerend now causes the enemy to erupt in a vortex of sand, dealing ${$806313m1+$806313ppl1)$SP*0.12} Chromatic Damage every $806313t1 sec to up to $806313i enemies for $806313d in an $806313a1 yd radius.\" Its only effect is aura 42 on 806314 (Keeper of Balance Trigger, SPELL_EFFECT_TRIGGER_SPELL on TARGET_UNIT_TARGET_ENEMY -> 806313), but Spell.dbc gives it ProcFlags 0 and no spell_proc row exists, so nothing ever fired. 806313 is a SPELL_EFFECT_PERSISTENT_AREA_AURA of SPELL_AURA_PERIODIC_DAMAGE at the enemy (radius 14 = 8 yd, 1000 ms amplitude, DurationIndex 32 = 6000 ms, 8 targets) with EffectBonusMultiplier 0.0 and no spell_bonus_data row. Unmake is rank chain 804418 (single-target DoT, 1.5 s cast); Timerend ranks are SpellFamily 28 word1 0x01000000 periodic damage (801291 rank 1, instant). Control: an Unmake that lands while the golem carries no Timerend creates no 806313 ground effect. After the Chronomancer's own Timerend lands, the next Unmake must create the 806313 ground effect and put its periodic aura on the golem. With a fixture +2000 spell damage (Drink Fel Infusion 44505), the vortex tick queried through the native periodic path must carry the tooltip's 0.12 coefficient: 1000 + 2000 * 0.12 = 1240 (806313 has SpellLevel 60 and no MaxLevel, so no level penalty); without the coefficient it stays exactly 1000. Before the fix no vortex appears.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    { "id": "chronomancer", "race": 1, "class": 22, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "chronomancer", "entry": 36, "level": 80, "health": 1000000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "chronomancer", "spell": 806312 },
+    { "action": "learn", "actor": "chronomancer", "spell": 801291 },
+    { "action": "learn", "actor": "chronomancer", "spell": 804418 },
+    {
+      "action": "assert", "label": "SETUP: Infinite Keeper is active on the Chronomancer", "actor": "chronomancer",
+      "metric": "aura", "spell": 806312, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "cast", "label": "Control Unmake on a golem without Timerend", "actor": "chronomancer", "spell": 804418,
+      "target": "golem"
+    },
+    {
+      "action": "assert", "label": "SETUP: the control Unmake landed", "actor": "chronomancer",
+      "metric": "spell_damage_count", "spell": 804418, "target": "golem", "min": 1, "within_ms": 4000
+    },
+    { "action": "wait", "label": "Let any vortex appear", "ms": 1500 },
+    {
+      "action": "assert", "label": "Control: Unmake without the Chronomancer's Timerend erupts no vortex",
+      "actor": "chronomancer", "metric": "dynamic_object", "spell": 806313, "equals": 0
+    },
+    { "action": "cast", "label": "Timerend on the golem", "actor": "chronomancer", "spell": 801291, "target": "golem" },
+    {
+      "action": "assert", "label": "SETUP: the golem carries the Chronomancer's Timerend", "actor": "golem",
+      "metric": "aura", "spell": 801291, "caster": "chronomancer", "equals": 1, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let Timerend's global cooldown pass", "ms": 1600 },
+    {
+      "action": "cast", "label": "Unmake on the Timerend-afflicted golem", "actor": "chronomancer", "spell": 804418,
+      "target": "golem"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Unmake on the Timerend-afflicted golem erupts the sand vortex",
+      "actor": "chronomancer", "metric": "dynamic_object", "spell": 806313, "equals": 1, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "The vortex's periodic damage aura lands on the golem", "actor": "golem",
+      "metric": "aura", "spell": 806313, "caster": "chronomancer", "equals": 1, "within_ms": 3000
+    },
+    { "action": "set_aura", "label": "Fixture +2000 spell damage", "actor": "chronomancer", "spell": 44505, "stacks": 1 },
+    {
+      "action": "assert", "label": "SETUP: the fixture grants at least 2000 Arcane spell damage", "actor": "chronomancer",
+      "metric": "spell_power", "school": 6, "min": 2000
+    },
+    {
+      "action": "assert", "label": "The vortex tick carries the tooltip's 12% spell power coefficient",
+      "actor": "chronomancer", "metric": "spell_damage_done", "spell": 806313, "effect": 0, "periodic": true,
+      "target": "golem", "min": 1200, "max": 1260
+    }
+  ]
+}

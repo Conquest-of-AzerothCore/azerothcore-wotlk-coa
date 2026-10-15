@@ -1,0 +1,266 @@
+{
+  "schema": 1,
+  "name": "Dire Maul North: Guard Slip'kik casts Shield Wall once below 30% health",
+  "contract": "Guard Slip'kik's Ascension kit casts Shield Wall (2100276) once per fight, when he falls below 30% health, as Ascension combat logs show; he does not cast it on a timer above that threshold. It does not check Shield Wall's damage reduction or the other kit timers.",
+  "timeout_ms": 150000,
+  "location": {
+    "map": 429,
+    "x": 550.38,
+    "y": 533.725,
+    "z": -25.3185,
+    "o": 3.92699,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 14323,
+      "level": 60,
+      "health": 400000,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 2156414,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Dire Maul",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 429
+    },
+    {
+      "action": "attack",
+      "label": "Engage Guard Slip'kik",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Guard Slip'kik fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Guard Slip'kik is still above 30% health",
+      "actor": "boss",
+      "metric": "health",
+      "min": 130000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Guard Slip'kik's kit runs and casts Spell Reflection",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 14323,
+      "spell": 2100275,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Guard Slip'kik does not cast Shield Wall above 30% health",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 14323,
+      "spell": 2100276,
+      "max": 0
+    },
+    {
+      "action": "set_health",
+      "label": "Drop Guard Slip'kik to 25% health",
+      "actor": "boss",
+      "value": 100000
+    },
+    {
+      "action": "assert",
+      "label": "Guard Slip'kik casts Shield Wall below 30% health",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 14323,
+      "spell": 2100276,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Guard Slip'kik is still alive and fighting",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Guard Slip'kik casts Shield Wall only once",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 14323,
+      "spell": 2100276,
+      "equals": 1
+    }
+  ]
+}

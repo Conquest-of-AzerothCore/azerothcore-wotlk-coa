@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Voidwarding reduces party damage taken and raises the caster's resistances natively (#1127)",
+  "contract": "560002 effect0 is SPELL_EFFECT_APPLY_AREA_AURA_RAID (native, generic: UnitAura::FillTargetMap pushes the owner plus every grouped unit in range via Acore::AnyGroupedUnitInObjectRangeCheck), aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, BasePoints -4 / DieSides 1 -> value -3, matching the tooltip's 3%. Its EffectMiscValue is 127 = all seven school bits (0..6), i.e. every school including SPELL_SCHOOL_MASK_NORMAL/physical -- the audit report's own claim that physical is excluded is wrong (127 = 1+2+4+8+16+32+64 includes bit 0); this scenario asserts what the DBC actually encodes, not the report's text. Effect1 is self aura 83 SPELL_AURA_MOD_BASE_RESISTANCE, BasePoints 4 / DieSides 1 -> base value 5, EffectRealPointsPerLevel 0.5, EffectMiscValue 126 = the six magic-school bits (Holy..Arcane, physical excluded, as resistance itself is a magic-only stat). Both Spell.dbc's SpellLevel and BaseLevel for 560002 are 31; SpellEffectInfo::CalcValue clamps a caster below BaseLevel up to BaseLevel and then subtracts max(BaseLevel, SpellLevel), so a level-31 caster gets exactly the unscaled base rather than needing to reproduce the 0.5/level term. The \"does not stack with similar effects\" clause (spell_group plumbing) is not covered here; only the two implemented percentage/resistance mechanics are asserted, per the audit's own noted verification limit.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 31 },
+    { "id": "ally", "race": 1, "class": 25, "level": 31 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn/level settle", "ms": 3000 },
+    { "action": "group", "actor": "cultist", "target": "ally" },
+    {
+      "action": "snapshot", "label": "Cultist's own Shadow resistance before the talent",
+      "actor": "cultist", "metric": "resistance", "school": 5, "save_as": "resist_before"
+    },
+    {
+      "action": "snapshot", "label": "Ally's incoming Shadow damage bonus before the talent",
+      "actor": "ally", "metric": "spell_damage_taken", "spell": 500707, "target": "cultist", "save_as": "taken_before"
+    },
+    { "action": "learn", "actor": "cultist", "spell": 560002 },
+    { "action": "wait", "ms": 1500 },
+    {
+      "action": "assert", "label": "Voidwarding raises the caster's own Shadow resistance by 5 at level 31",
+      "actor": "cultist", "metric": "resistance", "school": 5, "relative_to": "resist_before", "equals": 5
+    },
+    {
+      "action": "assert", "label": "Voidwarding reduces the grouped ally's incoming Shadow damage bonus by 30 (3% of the fixed 1000 base)",
+      "actor": "ally", "metric": "spell_damage_taken", "spell": 500707, "target": "cultist",
+      "relative_to": "taken_before", "min": -31, "max": -29
+    }
+  ]
+}

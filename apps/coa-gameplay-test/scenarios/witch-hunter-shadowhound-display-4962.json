@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Houndmaster Whistle preserves the captured Shadowhound model (#4962)",
+  "contract": "The original CoA alpha creature cache records main Shadowhound 50124 with display 16049 (DarkHound), matching Lesser Shadowhound. SkillLineAbility grants the Shadowhound Visual passive 500036. Native summoned display and passive ownership establish these server contracts; no authoritative capture specifies template scale reductions.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 801343
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 801343
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_entry",
+      "equals": 50124,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_display",
+      "equals": 16049
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "pet_aura_stacks",
+      "spell": 500036,
+      "equals": 1
+    }
+  ]
+}

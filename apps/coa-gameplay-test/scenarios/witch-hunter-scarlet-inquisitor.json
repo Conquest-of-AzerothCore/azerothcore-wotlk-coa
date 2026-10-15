@@ -1,0 +1,176 @@
+{
+  "schema": 1,
+  "name": "Scarlet Inquisitor halves the mana cost of Brands and Traps (#1824)",
+  "contract": "Scarlet Inquisitor 301338 is SpellFamily 21, passive (Attributes 0x1c0), with one SPELL_AURA_ADD_PCT_MODIFIER (108) effect: MiscValue 14 (SPELLMOD_COST), BasePoints -51 + DieSides 1 = -50 percent, EffectSpellClassMask word 1 = 0x2 (Brands) and word 2 = 0x40000 (Traps). The targets cost mana as a percentage of the class mana pool (ManaCostPercentage 7 for Brand of the Damned and Brand of the Unworthy, 11 for Shadow Trap, 13 plus a flat 75 for Inquisitor's Trap), and SpellInfo::CalcPowerCost applies ApplySpellMod(SPELLMOD_COST) after the percentage is resolved (SpellInfo.cpp:3074), so the pct mod multiplies the total by 0.5. The witch hunter's mana pool comes from the world DB and was not read while writing this scenario; the precondition asserts require every cost to be at least 50 so that the integer truncation cannot move the ratio outside 0.485 to 0.515. Vault 500085 and Dawn Blade 802024 are outside both masks and are the controls.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Brand of the Damned mana cost before the talent",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "save_as": "brand_before",
+      "spell": 807682
+    },
+    {
+      "action": "assert",
+      "label": "Precondition: Brand of the Damned has a non-trivial mana cost to halve",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "spell": 807682,
+      "min": 50
+    },
+    {
+      "action": "snapshot",
+      "label": "Brand of the Unworthy mana cost before the talent",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "save_as": "unworthy_before",
+      "spell": 501380
+    },
+    {
+      "action": "assert",
+      "label": "Precondition: Brand of the Unworthy has a non-trivial mana cost to halve",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "spell": 501380,
+      "min": 50
+    },
+    {
+      "action": "snapshot",
+      "label": "Shadow Trap mana cost before the talent",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "save_as": "shadow_before",
+      "spell": 680238
+    },
+    {
+      "action": "assert",
+      "label": "Precondition: Shadow Trap has a non-trivial mana cost to halve",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "spell": 680238,
+      "min": 50
+    },
+    {
+      "action": "snapshot",
+      "label": "Inquisitor's Trap mana cost before the talent",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "save_as": "insq_before",
+      "spell": 681445
+    },
+    {
+      "action": "assert",
+      "label": "Precondition: Inquisitor's Trap has a non-trivial mana cost to halve",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "spell": 681445,
+      "min": 50
+    },
+    {
+      "action": "snapshot",
+      "label": "Vault cost before the talent",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "save_as": "vault_before",
+      "spell": 500085
+    },
+    {
+      "action": "snapshot",
+      "label": "Dawn Blade cost before the talent",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "save_as": "dawn_before",
+      "spell": 802024
+    },
+    {
+      "action": "learn",
+      "label": "Learn 301338",
+      "actor": "hunter",
+      "spell": 301338
+    },
+    {
+      "action": "assert",
+      "label": "Scarlet Inquisitor is applied as a passive",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 301338,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Brand of the Damned costs half (op 14, -51+1 percent, truncated to an integer)",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "spell": 807682,
+      "ratio_to": "brand_before",
+      "min": 0.485,
+      "max": 0.515
+    },
+    {
+      "action": "assert",
+      "label": "Brand of the Unworthy costs half (op 14, -51+1 percent, truncated to an integer)",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "spell": 501380,
+      "ratio_to": "unworthy_before",
+      "min": 0.485,
+      "max": 0.515
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Trap costs half (op 14, -51+1 percent, truncated to an integer)",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "spell": 680238,
+      "ratio_to": "shadow_before",
+      "min": 0.485,
+      "max": 0.515
+    },
+    {
+      "action": "assert",
+      "label": "Inquisitor's Trap costs half (op 14, -51+1 percent, truncated to an integer)",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "spell": 681445,
+      "ratio_to": "insq_before",
+      "min": 0.485,
+      "max": 0.515
+    },
+    {
+      "action": "assert",
+      "label": "Vault is neither Brand nor Trap and keeps its cost",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "spell": 500085,
+      "ratio_to": "vault_before",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "label": "Dawn Blade keeps its cost",
+      "actor": "hunter",
+      "metric": "spell_power_cost",
+      "spell": 802024,
+      "ratio_to": "dawn_before",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

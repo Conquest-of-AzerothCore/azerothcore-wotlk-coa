@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Issue 3967: Sanguine Mend cannot be cast while in any Cursed Form",
-  "contract": "Sanguine Mend (504079) is natively gated by ExcludeCasterAuraSpell=802877 (AscensionBloodmage::CursedForm). Nothing previously granted that marker while shapeshifted, so the native gate never fired.",
+  "name": "Sanguine Mend obeys ordinary and unique Cursed Form restrictions",
+  "contract": "Sanguine Mend (504079) excludes Cursed Form marker 802877. Ordinary Cursed Forms block Mortal Form abilities, while Sanguine Essence (680692) and Transgression (801076) explicitly allow them. All three forms still grant the Cursed Form eligibility markers 524861 and 525031.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -92,6 +92,71 @@
       "relative_to": "rage_before_after",
       "max": -1,
       "within_ms": 3500,
+      "actor": "bloodmage"
+    },
+    { "action": "set_aura", "spell": 680692, "stacks": 1, "actor": "bloodmage" },
+    {
+      "action": "assert", "label": "Sanguine Essence does not set the Mortal Form exclusion marker",
+      "metric": "aura", "spell": 802877, "equals": 0, "within_ms": 1000, "actor": "bloodmage"
+    },
+    {
+      "action": "assert", "label": "Sanguine Essence retains the first Cursed Form marker",
+      "metric": "aura", "spell": 524861, "equals": 1, "within_ms": 1000, "actor": "bloodmage"
+    },
+    {
+      "action": "assert", "label": "Sanguine Essence retains the second Cursed Form marker",
+      "metric": "aura", "spell": 525031, "equals": 1, "within_ms": 1000, "actor": "bloodmage"
+    },
+    { "action": "set_power", "power": 1, "value": 1000, "actor": "bloodmage" },
+    {
+      "action": "snapshot", "metric": "power", "power": 1, "save_as": "rage_before_sanguine_essence",
+      "actor": "bloodmage"
+    },
+    { "action": "cast", "spell": 504079, "actor": "bloodmage" },
+    {
+      "action": "assert", "label": "Sanguine Mend casts in Sanguine Essence",
+      "metric": "power", "power": 1, "relative_to": "rage_before_sanguine_essence", "max": -1,
+      "within_ms": 3500, "actor": "bloodmage"
+    },
+    { "action": "set_aura", "spell": 680692, "stacks": 0, "actor": "bloodmage" },
+    { "action": "set_aura", "spell": 801076, "stacks": 1, "actor": "bloodmage" },
+    {
+      "action": "assert", "label": "Transgression does not set the Mortal Form exclusion marker",
+      "metric": "aura", "spell": 802877, "equals": 0, "within_ms": 1000, "actor": "bloodmage"
+    },
+    {
+      "action": "assert", "label": "Transgression retains the first Cursed Form marker",
+      "metric": "aura", "spell": 524861, "equals": 1, "within_ms": 1000, "actor": "bloodmage"
+    },
+    {
+      "action": "assert", "label": "Transgression retains the second Cursed Form marker",
+      "metric": "aura", "spell": 525031, "equals": 1, "within_ms": 1000, "actor": "bloodmage"
+    },
+    { "action": "set_power", "power": 1, "value": 1000, "actor": "bloodmage" },
+    {
+      "action": "snapshot", "metric": "power", "power": 1, "save_as": "rage_before_transgression",
+      "actor": "bloodmage"
+    },
+    { "action": "cast", "spell": 504079, "actor": "bloodmage" },
+    {
+      "action": "assert", "label": "Sanguine Mend casts in Transgression",
+      "metric": "power", "power": 1, "relative_to": "rage_before_transgression", "max": -1,
+      "within_ms": 3500, "actor": "bloodmage"
+    },
+    { "action": "set_aura", "spell": 800157, "stacks": 1, "actor": "bloodmage" },
+    {
+      "action": "assert", "label": "An overlapping restrictive form restores the Mortal Form exclusion marker",
+      "metric": "aura", "spell": 802877, "equals": 1, "within_ms": 1000, "actor": "bloodmage"
+    },
+    { "action": "set_power", "power": 1, "value": 1000, "actor": "bloodmage" },
+    {
+      "action": "snapshot", "metric": "power", "power": 1, "save_as": "rage_before_overlap",
+      "actor": "bloodmage"
+    },
+    { "action": "cast", "spell": 504079, "actor": "bloodmage" },
+    {
+      "action": "assert", "label": "A restrictive overlapping form blocks Sanguine Mend",
+      "metric": "power", "power": 1, "relative_to": "rage_before_overlap", "equals": 0,
       "actor": "bloodmage"
     }
   ]

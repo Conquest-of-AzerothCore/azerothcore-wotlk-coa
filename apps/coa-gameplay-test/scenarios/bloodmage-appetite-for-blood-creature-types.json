@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "name": "Appetite for Blood raises Bloodfang Bite damage against Humanoids and Beasts (#2010)",
+  "contract": "Appetite for Blood 560479 has one effect: aura 112 (SPELL_AURA_OVERRIDE_CLASS_SCRIPTS), MiscValue 20014, MiscValueB 65, BasePoints 19 / DieSides 1, i.e. 20%, class mask (0, 8388608, 16384) = Bloodfang Bite, Claw Sweep and Crimson Maw. Unit::GetCreatureTypeMask returns 1 << (type - 1), so 65 is CREATURE_TYPE_BEAST (1) plus CREATURE_TYPE_HUMANOID (64) - exactly the tooltip's 'Humanoids and Beasts'. The native bonus that expresses this is aura 168 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS (Unit.cpp:8823 and Unit.cpp:10730), which ignores the effect's class mask, so the conversion keeps the selector in MiscValueB and the core honours the mask for those rows only. 572551 is the Bloodfang Bite rank a level-80 character owns; it is DmgClass 2, so melee_spell_damage_done (Unit::MeleeDamageBonusDone) is its damage path. Creature templates: 27228 Jormungar Worm is type 1 (Beast), 27434 Winterfin First Responder is type 7 (Humanoid) and 36 Harvest Golem is type 9 (Mechanical), the control.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "beast",
+      "owner": "caster",
+      "entry": 27228,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "humanoid",
+      "owner": "caster",
+      "entry": 27434,
+      "level": 80,
+      "health": 1000000,
+      "distance": 6
+    },
+    {
+      "id": "mechanical",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 9
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 560479
+    },
+    {
+      "action": "snapshot",
+      "label": "Bloodfang Bite against the Beast without the talent",
+      "actor": "caster",
+      "metric": "melee_spell_damage_done",
+      "spell": 572551,
+      "target": "beast",
+      "save_as": "beast_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Bloodfang Bite against the Humanoid without the talent",
+      "actor": "caster",
+      "metric": "melee_spell_damage_done",
+      "spell": 572551,
+      "target": "humanoid",
+      "save_as": "humanoid_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Bloodfang Bite against the Mechanical control without the talent",
+      "actor": "caster",
+      "metric": "melee_spell_damage_done",
+      "spell": 572551,
+      "target": "mechanical",
+      "save_as": "mechanical_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Bloodbolt against the Beast without the talent",
+      "actor": "caster",
+      "metric": "spell_damage_done",
+      "spell": 578305,
+      "target": "beast",
+      "save_as": "bloodbolt_base"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 560479
+    },
+    {
+      "action": "assert",
+      "label": "Appetite for Blood adds 20% against a Beast",
+      "actor": "caster",
+      "metric": "melee_spell_damage_done",
+      "spell": 572551,
+      "target": "beast",
+      "ratio_to": "beast_base",
+      "min": 1.199,
+      "max": 1.201
+    },
+    {
+      "action": "assert",
+      "label": "Appetite for Blood adds 20% against a Humanoid",
+      "actor": "caster",
+      "metric": "melee_spell_damage_done",
+      "spell": 572551,
+      "target": "humanoid",
+      "ratio_to": "humanoid_base",
+      "min": 1.199,
+      "max": 1.201
+    },
+    {
+      "action": "assert",
+      "label": "Appetite for Blood adds nothing against a Mechanical",
+      "actor": "caster",
+      "metric": "melee_spell_damage_done",
+      "spell": 572551,
+      "target": "mechanical",
+      "ratio_to": "mechanical_base",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "label": "Appetite for Blood does not touch an unmasked Bloodmage spell",
+      "actor": "caster",
+      "metric": "spell_damage_done",
+      "spell": 578305,
+      "target": "beast",
+      "ratio_to": "bloodbolt_base",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 560479
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning removes the bonus",
+      "actor": "caster",
+      "metric": "melee_spell_damage_done",
+      "spell": 572551,
+      "target": "beast",
+      "ratio_to": "beast_base",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

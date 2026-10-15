@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "Raging Hunger makes Pooled Vitality generate 3 Rage (#601)",
+  "contract": "Raging Hunger 681336 is one effect: aura 107 with MiscValue 3 (SPELLMOD_EFFECT1, which Unit::ApplyEffectModifiers maps to effect index 0) and BasePoints 29 + DieSides 1 = +30, over EffectSpellClassMask (536870912, 0, 0) = word 0 bit 29 = Pooled Vitality 680687 and Running Wild 800175. Pooled Vitality's effect 0 is SPELL_EFFECT_ENERGIZE (30) with MiscValue 1 (POWER_RAGE) and value 0, so it becomes 30 raw; Rage is stored at ten times the displayed value, so that is 3 Rage. Pooled Vitality is cast on the player as a triggered spell by AscensionBloodmageVitality.cpp, and effect values still pass through Unit::ApplyEffectModifiers for a triggered cast. Tooltip: \"Triggering Pooled Vitality now also generates $/10;s1 Rage.\" Regression guard for native behaviour. Running Wild (Journeyman) 520575 is the same kind of modifier (+40 on SPELLMOD_EFFECT1 over the same mask), so a Bloodmage that knows it starts from 40; the raw data stacks both to 70 (7 Rage). The scenario unlearns 520575 first to measure Raging Hunger alone.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 520575
+    },
+    {
+      "action": "assert",
+      "label": "Pooled Vitality energizes nothing before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 680687,
+      "op": 3,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 681336
+    },
+    {
+      "action": "assert",
+      "label": "Raging Hunger sets Pooled Vitality's energize to 30 (3 Rage)",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 680687,
+      "op": 3,
+      "base": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Raging Hunger does not touch Bloodbolt",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 3,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 520575
+    },
+    {
+      "action": "assert",
+      "label": "Running Wild (Journeyman) stacks with Raging Hunger to 70 (7 Rage), as in the raw data",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 680687,
+      "op": 3,
+      "base": 0,
+      "equals": 70
+    }
+  ]
+}

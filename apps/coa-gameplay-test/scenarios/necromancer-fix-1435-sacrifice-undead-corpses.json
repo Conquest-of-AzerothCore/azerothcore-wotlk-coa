@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Sacrifice Undead kills its minions instead of despawning them (#1435)",
+  "contract": "Sacrifice Undead 807938 (rank 2 of 805027, family 29 word 2 0x4000000) reads 'Sacrifices your Undead, returning their Life Force to you, and restoring ... health for each Undead minion destroyed.' Spell.dbc: effect 0 is SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE on TARGET_UNIT_SRC_AREA_ALLY (up to 25) with 805031, whose description is 'Destroys an Undead minion and heals the caster.' and whose effect 0 is SPELL_EFFECT_INSTAKILL on TARGET_UNIT_TARGET_ALLY (the minion) and effect 1 SPELL_EFFECT_HEAL on the caster. A sacrificed minion therefore dies (death animation, a corpse left behind) instead of being removed from the world, which the client shows as a fade-out. The corpse is observed natively by Cannibalize 20577 (spell_gen_cannibalize), which is refused with SPELL_FAILED_NO_EDIBLE_CORPSES (141) unless a dead Humanoid or Undead (TargetCreatureType 96) that is not friendly to the caster lies within 5 yd (SpellRange 12). An Alliance observer beside the Horde Necromancer is refused while the Lesser Skeletal Warriors (creature type 6, Undead) are alive and must be able to cannibalize their corpses once they are sacrificed, starting its 20578 channel. The Necromancer is still healed once per sacrificed minion and gets its Life Force back.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 80 },
+    { "id": "observer", "race": 1, "class": 1, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 500970 },
+    { "action": "learn", "actor": "n", "spell": 807938 },
+    { "action": "learn", "actor": "observer", "spell": 20577 },
+    { "action": "cast", "label": "Raise the first Lesser Skeletal Warrior", "actor": "n", "spell": 500970 },
+    {
+      "action": "assert", "label": "SETUP: one Lesser Skeletal Warrior is raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 500 },
+    { "action": "cast", "label": "Raise the second Lesser Skeletal Warrior", "actor": "n", "spell": 500970 },
+    {
+      "action": "assert", "label": "SETUP: two Lesser Skeletal Warriors are raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 2, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let the minions take their places beside the Necromancer", "ms": 1500 },
+    { "action": "cast", "label": "CONTROL: Cannibalize while the minions live", "actor": "observer", "spell": 20577 },
+    {
+      "action": "assert", "label": "CONTROL: no corpse lies nearby before the sacrifice", "actor": "observer",
+      "metric": "cast_failure", "spell": 20577, "equals": 141, "within_ms": 1000
+    },
+    {
+      "action": "snapshot", "actor": "observer", "metric": "spell_go_count", "spell": 20577,
+      "save_as": "cannibalize_casts"
+    },
+    { "action": "cast", "label": "Sacrifice Undead", "actor": "n", "spell": 807938 },
+    {
+      "action": "assert", "label": "Both minions are destroyed", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 0, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The Necromancer is healed once for each minion destroyed", "actor": "n",
+      "metric": "spell_heal_count", "spell": 805031, "target": "n", "equals": 2, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "The Life Force of both minions is returned", "actor": "n",
+      "metric": "aura_stacks", "spell": 525004, "equals": 2, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Let the sacrificed minions settle as corpses", "ms": 1000 },
+    { "action": "cast", "label": "Cannibalize after the sacrifice", "actor": "observer", "spell": 20577 },
+    {
+      "action": "assert", "label": "The sacrificed minions left corpses that can be cannibalized", "actor": "observer",
+      "metric": "spell_go_count", "spell": 20577, "relative_to": "cannibalize_casts", "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "Cannibalize starts its channel on a sacrificed minion's corpse", "actor": "observer",
+      "metric": "aura", "spell": 20578, "equals": 1, "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "The post-sacrifice Cannibalize was not refused", "actor": "observer",
+      "metric": "cast_failure", "spell": 20577, "equals": 0
+    }
+  ]
+}

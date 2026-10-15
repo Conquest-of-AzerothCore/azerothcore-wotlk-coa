@@ -18,6 +18,7 @@
 #include "MapMgr.h"
 #include "Chat.h"
 #include "DatabaseEnv.h"
+#include "GameTime.h"
 #include "GridDefines.h"
 #include "GridTerrainLoader.h"
 #include "Group.h"
@@ -453,6 +454,32 @@ void MapMgr::Update(uint32 diff)
         {
             sLFGMgr->Update(diff, 1);
         }
+    }
+
+    if (GameTime::IsSimulated())
+    {
+        bool const full = i_timer[3].Passed();
+        uint32 const t_diff = full ? uint32(i_timer[3].GetCurrent()) : 0;
+        for (auto const& [mapId, map] : i_maps)
+        {
+            if (m_updater.activated())
+                m_updater.schedule_update(*map, t_diff, diff);
+            else
+                map->Update(t_diff, diff);
+        }
+
+        if (m_updater.activated())
+            m_updater.wait();
+
+        if (full)
+        {
+            for (auto const& [mapId, map] : i_maps)
+                map->DelayedUpdate(t_diff);
+
+            i_timer[3].SetCurrent(0);
+        }
+
+        return;
     }
 
     MapMapType::iterator iter = i_maps.begin();

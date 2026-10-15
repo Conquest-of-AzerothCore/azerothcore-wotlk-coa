@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "name": "Decimate lets the Shadow Hounds ignore armor (#3718)",
+  "contract": "Decimate 804194 reads 'Empowers your Shadow Hounds ..., granting them $s1% increased damage and haste and allowing them to ignore Armor'. In the client Spell.dbc (2026-09-17) its three SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS effects carry aura 79 (+30% damage), aura 280 (MOD_ARMOR_PENETRATION_PCT, 99 + 1 = 100) and aura 192 (+30% haste); SpellAuras.cpp copies each to the owner's summons. Unit::CalcArmorReducedDamage reads aura 280 only for players (and Primalist's Sharpened Claws on pets), so a hound's hits stay fully mitigated. Aura 338 SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT is read for any attacker and a 100% amount removes all armor, so the module retargets effect 1 to it (Sun Cleric Vindicator precedent); the full ignore, not the player armor-penetration formula, is the literal reading of 'ignore Armor'. armor_reduced_damage applies the native armor mitigation to a base of 1000 as the hound: below 1000 before Decimate, exactly 1000 (no mitigation) after. Pommel Smash 680515 is only a physical-school spell for the probe. Harvest Golem 36 is the armored target.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "wh",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "wh",
+      "entry": 36,
+      "level": 60,
+      "health": 100000,
+      "distance": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 801343
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 804194
+    },
+    {
+      "action": "cast",
+      "label": "Summon the Shadowhound",
+      "actor": "wh",
+      "spell": 801343
+    },
+    {
+      "action": "assert",
+      "label": "The Shadowhound is out",
+      "actor": "wh",
+      "metric": "pet_entry",
+      "equals": 50124,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Armor mitigates the hound before Decimate (1000 base, so armor is above zero)",
+      "actor": "wh",
+      "metric": "armor_reduced_damage",
+      "spell": 680515,
+      "target": "enemy",
+      "pet": true,
+      "max": 999
+    },
+    {
+      "action": "cast",
+      "label": "Decimate",
+      "actor": "wh",
+      "spell": 804194
+    },
+    {
+      "action": "assert",
+      "label": "The hound carries Decimate",
+      "actor": "wh",
+      "metric": "pet_aura_stacks",
+      "spell": 804194,
+      "caster": "wh",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Decimate's damage clause reaches the hound (effect 0, 29 + 1 = 30%)",
+      "actor": "wh",
+      "metric": "pet_aura_amount",
+      "spell": 804194,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Decimate's armor clause reaches the hound (effect 1, 99 + 1 = 100%)",
+      "actor": "wh",
+      "metric": "pet_aura_amount",
+      "spell": 804194,
+      "effect": 1,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "The hound now ignores all armor",
+      "actor": "wh",
+      "metric": "armor_reduced_damage",
+      "spell": 680515,
+      "target": "enemy",
+      "pet": true,
+      "equals": 1000
+    }
+  ]
+}

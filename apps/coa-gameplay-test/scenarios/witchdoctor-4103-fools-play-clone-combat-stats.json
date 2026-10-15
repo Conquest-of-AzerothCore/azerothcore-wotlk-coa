@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Fool's Play clone fights with the target's own combat stats (#4103)",
+  "contract": [
+    "Fool's Play 681007 summons a copy of an enemy that attacks it. The clone must copy its target's weapon",
+    "damage and deal more than the one-to-two-damage placeholder. Onyxian Whelp 11262 has an actual level-80",
+    "creature_template level band; setting a level-11 Harvest Golem fixture to level 80 only changes its level",
+    "field, leaving its original weapon base stats. Both the Witch Doctor and the target are level 80 so an",
+    "unintended twenty-level attack-skill penalty cannot determine the verdict. Independent target weapon",
+    "metadata is compared with the owned clone, then normal native melee damage must exceed 24 in twelve",
+    "seconds. Unit::CalculateDamage uses the calculated weapon update fields for ordinary physical swings;",
+    "the former contract incorrectly asserted that these swings always read the raw m_weaponDamage array."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "witchdoctor",
+      "race": 1,
+      "class": 13,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy0",
+      "owner": "witchdoctor",
+      "entry": 11262,
+      "level": 80,
+      "distance": 4,
+      "health": 1000000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "witchdoctor",
+      "spell": 681007
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy0",
+      "metric": "health",
+      "save_as": "hp0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy0",
+      "metric": "weapon_damage_min",
+      "save_as": "enemy_weapon_min"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy0",
+      "metric": "weapon_damage_min",
+      "min": 40,
+      "label": "The target template supplies actual level-80 weapon stats"
+    },
+    {
+      "action": "cast",
+      "actor": "witchdoctor",
+      "spell": 681007,
+      "target": "enemy0",
+      "label": "Summon the Fool's Play clone of enemy0"
+    },
+    {
+      "action": "assert",
+      "actor": "witchdoctor",
+      "metric": "owned_creature_count",
+      "entry": 300660,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "SETUP: exactly one clone spawned"
+    },
+    {
+      "action": "assert",
+      "actor": "witchdoctor",
+      "metric": "owned_creature_weapon_damage_min",
+      "entry": 300660,
+      "ratio_to": "enemy_weapon_min",
+      "min": 0.99,
+      "max": 1.01,
+      "label": "Fool's Play copies the target's calculated minimum weapon damage"
+    },
+    {
+      "action": "wait",
+      "label": "Let the clone close in and land several swings",
+      "ms": 12000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy0",
+      "metric": "health",
+      "relative_to": "hp0",
+      "max": -1,
+      "label": "SETUP: the clone is actually landing melee hits"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy0",
+      "metric": "health",
+      "relative_to": "hp0",
+      "max": -30,
+      "label": "Actual clone attacks exceed the 24-damage ceiling of twelve 1-to-2-damage swings"
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

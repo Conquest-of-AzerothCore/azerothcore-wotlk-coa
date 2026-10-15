@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "name": "Pure Agony doubles Quickdraw's critical damage bonus (#1767)",
+  "contract": "Pure Agony 300789 is SpellFamily 21, passive (Attributes 0x1c0), with one SPELL_AURA_ADD_PCT_MODIFIER (108) effect: MiscValue 15 (SPELLMOD_CRIT_DAMAGE_BONUS), BasePoints 99 + DieSides 1 = +100 percent, EffectSpellClassMask word 1 = 0x20, the bit carried by every Quickdraw rank (804193 through 806851, SpellFamilyFlags 0x40, 0x20, 0). Quickdraw is DmgClass 3 (ranged), so Unit::SpellCriticalDamageBonus (Unit.cpp:9926) starts from a 100 percent crit bonus (crit_bonus = damage + damage), removes the base damage, applies ApplySpellMod(SPELLMOD_CRIT_DAMAGE_BONUS) to the remaining bonus part (Unit.cpp:9956) and adds the base back: 1000 base gives 1000 + 1000 * 2 = 3000 instead of 2000, ratio 1.5. Darkslayer 680256 (SpellFamilyFlags word 1 = 0) is the untouched control. The tooltip's 'increases the critical damage by 100 percent' is read as the stock spell-mod semantics of doubling the crit bonus.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "hunter",
+      "entry": 36,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Quickdraw critical damage before the talent",
+      "actor": "hunter",
+      "metric": "spell_critical_damage",
+      "save_as": "crit_before",
+      "spell": 804193,
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "label": "Darkslayer critical damage before the talent",
+      "actor": "hunter",
+      "metric": "spell_critical_damage",
+      "save_as": "ctrl_before",
+      "spell": 680256,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Before the talent: crit damage bonus modifier is neutral",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 804193,
+      "op": 15,
+      "base": 1000,
+      "min": 999.4,
+      "max": 1000.6
+    },
+    {
+      "action": "learn",
+      "label": "Learn 300789",
+      "actor": "hunter",
+      "spell": 300789
+    },
+    {
+      "action": "assert",
+      "label": "Pure Agony is applied as a passive",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 300789,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Quickdraw's critical damage bonus part doubles (op 15, 99+1 percent)",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 804193,
+      "op": 15,
+      "base": 1000,
+      "min": 1999.4,
+      "max": 2000.6
+    },
+    {
+      "action": "assert",
+      "label": "Quickdraw rank 7 critical damage bonus part doubles",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 806851,
+      "op": 15,
+      "base": 1000,
+      "min": 1999.4,
+      "max": 2000.6
+    },
+    {
+      "action": "assert",
+      "label": "Darkslayer is outside the mask",
+      "actor": "hunter",
+      "metric": "spell_modifier",
+      "spell": 680256,
+      "op": 15,
+      "base": 1000,
+      "min": 999.4,
+      "max": 1000.6
+    },
+    {
+      "action": "assert",
+      "label": "A Quickdraw critical hit is 1.5 times the old one (bonus part 1000 to 2000, total 3000 instead of 2000)",
+      "actor": "hunter",
+      "metric": "spell_critical_damage",
+      "spell": 804193,
+      "target": "dummy",
+      "ratio_to": "crit_before",
+      "min": 1.49,
+      "max": 1.51
+    },
+    {
+      "action": "assert",
+      "label": "Darkslayer's critical damage is unchanged",
+      "actor": "hunter",
+      "metric": "spell_critical_damage",
+      "spell": 680256,
+      "target": "dummy",
+      "ratio_to": "ctrl_before",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

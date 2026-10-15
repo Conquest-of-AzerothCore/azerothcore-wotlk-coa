@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Jungle Booms Cauldron target-count reduction (#2865)",
+  "contract": "705859 Jungle Booms (family 19) is two APPLY_AURA effects on the Witch Doctor's own passive. Effect0 (ADD_PCT_MODIFIER, MiscValue 0 = SPELLMOD_DAMAGE, BasePoints 99/DieSides1 -> +100, SpellClassMask (0,0,2048) matching Ingredient: Jungle Shrooms' cauldron heal 802703, SpellFamilyFlags [0,0,2176]) already works natively through Unit::SpellHealingBonusDone -> ApplySpellMod (Unit.cpp:10220): the tooltip's '+100% heal' clause. Effect1 (BasePoints -4/DieSides1 -> -3, the tooltip's 'heals 3 less targets') is ADD_FLAT_MODIFIER with MiscValue 34, which is >= MAX_SPELLMOD (32, SpellDefines.h:110) so AuraEffect::CalculateSpellMod (SpellAuraEffects.cpp:772-787) drops it as an out-of-range SpellModOp before it ever becomes a SpellModifier -- it never reaches Player::m_spellMods. Its SpellClassMask (2147483648,128,0) also does not intersect 802703's SpellFamilyFlags [0,0,2176] (it matches Ingredient: Jungle Shrooms' own trigger aura 801660 [0,128,128] instead, which never runs area target selection), so remapping the aura name alone would still be a no-op. The fix (AscensionWitchDoctorCompletion.cpp ApplyContracts, guarded on the DBC shape) rewrites Effect1 to SPELL_AURA_MOD_MAX_AFFECTED_TARGETS (277) with SpellClassMask (0,0,2048) -- the same mask Effect0 already uses for 802703. Spell::SelectImplicitAreaTargets (Spell.cpp:1375-1379) reads this generically via Unit::GetTotalAuraModifierByAffectMask(SPELL_AURA_MOD_MAX_AFFECTED_TARGETS, m_spellInfo) -> AuraEffect::IsAffectedOnSpell -> SpellInfo::IsAffected(19, mask), which only passes once the mask targets 802703. 802703's own MaxAffectedTargets is 8 (TARGET_UNIT_CASTER_AREA_RAID, EffectRadiusIndex 10 = 30 yd, AttributesEx has no SPELL_ATTR1_EXCLUDE_CASTER so the caster is itself a valid heal target via SpellInfo::CheckTarget and Unit::IsInRaidWith(self)==true); 8-3=5 matches the client tooltip's own '$?s705859[5][$i]' (5 known vs 8 unknown). This scenario groups the doctor with six allies (7 raid members total, all within 8) so the baseline tick heals every member (spell_heal_count == 7, proving the group/range fixture and Effect0's +100% both work before any fix), then learns Jungle Booms and isolates the very next periodic tick's own target count via a relative_to snapshot: unfixed, MaxAffectedTargets stays 8 so the next tick still heals all 7 members (delta 7, assertion of 5 fails); fixed, RandomResize (Spell.cpp:1378, Acore::Containers::RandomResize) trims the candidate list to 5 before the tick's heals fire (delta 5). No recast of Jungle Shrooms is needed for the fix to take effect: unlike Doctor of the Jungle's SPELLMOD_ACTIVATION_TIME (cached on the periodic aura at CalculatePeriodic time), SPELL_AURA_MOD_MAX_AFFECTED_TARGETS is re-read fresh by SelectImplicitAreaTargets on every cast of 802703, i.e. on every periodic trigger. All DBC fields verified via coa-dbc-viewer against /home/fab/CoaServer/dbc_clientset (Spell.dbc sha256 9d77d79e...4cfda234) on branch fix/coa-witchdoctor-audit; core call sites re-read directly from src/server/game in this worktree.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    { "id": "doctor", "race": 8, "class": 13, "level": 80 },
+    { "id": "a1", "race": 8, "class": 1, "level": 80 },
+    { "id": "a2", "race": 8, "class": 3, "level": 80 },
+    { "id": "a3", "race": 8, "class": 4, "level": 80 },
+    { "id": "a4", "race": 8, "class": 5, "level": 80 },
+    { "id": "a5", "race": 8, "class": 8, "level": 80 },
+    { "id": "a6", "race": 8, "class": 9, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+
+    { "action": "group", "label": "Group a1", "actor": "doctor", "target": "a1" },
+    { "action": "group", "label": "Group a2", "actor": "doctor", "target": "a2" },
+    { "action": "group", "label": "Group a3", "actor": "doctor", "target": "a3" },
+    { "action": "group", "label": "Group a4 (party converts to raid)", "actor": "doctor", "target": "a4" },
+    { "action": "group", "label": "Group a5", "actor": "doctor", "target": "a5" },
+    { "action": "group", "label": "Group a6 (7-member raid, doctor + 6 allies)", "actor": "doctor", "target": "a6" },
+
+    { "action": "learn", "actor": "doctor", "spell": 801660 },
+    { "action": "cast", "label": "Cast Ingredient: Jungle Shrooms to start the Cauldron tick", "actor": "doctor", "spell": 801660 },
+    { "action": "assert", "label": "Jungle Shrooms is active", "actor": "doctor", "metric": "aura", "spell": 801660, "equals": 1, "within_ms": 3000 },
+
+    { "action": "assert", "label": "Clean slate: no +100% heal modifier yet",
+      "actor": "doctor", "metric": "spell_modifier", "spell": 802703, "op": 0, "base": 100, "equals": 100 },
+
+    { "action": "wait", "label": "Let the first Cauldron tick fire (Amplitude 6000 ms)", "ms": 6500 },
+    { "action": "assert", "label": "Baseline: the first tick heals all 7 raid members (doctor + 6 allies, within the native 8 cap)",
+      "actor": "doctor", "metric": "spell_heal_count", "spell": 802703, "equals": 7, "within_ms": 1500 },
+    { "action": "snapshot", "label": "Heal-event count through the first tick",
+      "actor": "doctor", "metric": "spell_heal_count", "spell": 802703, "save_as": "heal_count_after_tick1" },
+
+    { "action": "learn", "actor": "doctor", "spell": 705859 },
+    { "action": "assert", "label": "#2865 Part A (already worked before this fix): +100% on the cauldron heal",
+      "actor": "doctor", "metric": "spell_modifier", "spell": 802703, "op": 0, "base": 100, "equals": 200 },
+
+    { "action": "wait", "label": "Let the next Cauldron tick fire with Jungle Booms known", "ms": 6500 },
+    { "action": "assert", "label": "#2865 Part B (the bug): the tick after Jungle Booms heals only 5 (8-3), not the raw 7 (fails before the fix -- stays 7)",
+      "actor": "doctor", "metric": "spell_heal_count", "spell": 802703, "relative_to": "heal_count_after_tick1", "equals": 5, "within_ms": 1500 }
+  ]
+}

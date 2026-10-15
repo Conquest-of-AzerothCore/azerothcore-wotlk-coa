@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "name": "Vindicator ignores 10%/20% of armor on Glorious Execution, only while Vow of the Valkyr is active (#2452)",
+  "contract": "Vindicator (704938 rank 1, 707773 rank 2, SpellFamilyName 33) shipped as SPELL_AURA_ADD_FLAT_MODIFIER / SPELLMOD_EFFECT2 (12) with EffectSpellClassMask (0, 0, 0x100000). Scanning every family-33 record for that bit finds only Holy Form (805301) and Vow of the Valkyr (807751) -- never Glorious Execution (800626, SpellFamilyFlags (0, 0x1000, 4)) -- so the shipped mod could never match its own named target, and even a corrected classMask would still be an unconditional SpellMod with no way to gate on another aura's presence. ApplyAscensionSunClericRadianceContracts retargets both ranks onto SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT (338) with Glorious Execution's own family-flag classMask (0, 4096, 4); Unit::CalcArmorReducedDamage already reads this aura via AuraEffect::IsAffectedOnSpell(spellInfo) and applies armor = AddPct(armor, -ignoreArmorPct), so less mitigated armor means more of a fixed base damage gets through. The shipped raw BasePoints (-11/-21, real -10/-20 through the old flat-modifier sign) are stored positive by the patch (+9/+19, real +10/+20) to match that convention. aura_ascension_vindicator_vow_gate (registered on 704938, 707773 and Vow of the Valkyr 807749) keeps the cached amount at 0 unless Vow of the Valkyr is currently applied, using AscensionSunCleric::SetAmount/Amount the same way AscensionSunCleric::Refresh() already toggles other conditional talents. 'armor_reduced_damage' queries Unit::CalcArmorReducedDamage on a fixed base of 1000 without executing an attack, so it observes exactly this mechanism deterministically.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "control", "race": 1, "class": 27, "level": 80 },
+    { "id": "vindicator", "race": 1, "class": 27, "level": 80 },
+    { "id": "vindicator_vow", "race": 1, "class": 27, "level": 80 },
+    { "id": "vindicator2_vow", "race": 1, "class": 27, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "control", "entry": 36, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "vindicator", "spell": 704938 },
+    { "action": "learn", "actor": "vindicator_vow", "spell": 704938 },
+    { "action": "learn", "actor": "vindicator_vow", "spell": 807749 },
+    { "action": "learn", "actor": "vindicator2_vow", "spell": 707773 },
+    { "action": "learn", "actor": "vindicator2_vow", "spell": 807749 },
+    {
+      "action": "set_aura",
+      "label": "Vow of the Valkyr is not a passive/DO_NOT_DISPLAY-stance spell (Attributes 0x01010000), so learning it never auto-casts it -- raise its own aura directly, the same fixture pattern sun-cleric-champions-arrival.json uses for Champion of the Sun",
+      "actor": "vindicator_vow",
+      "spell": 807749,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Same fixture for rank 2's actor",
+      "actor": "vindicator2_vow",
+      "spell": 807749,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline mitigated damage against the dummy's armor",
+      "actor": "control",
+      "metric": "armor_reduced_damage",
+      "spell": 800626,
+      "target": "dummy",
+      "save_as": "base_mitigated"
+    },
+    {
+      "action": "assert",
+      "label": "Vindicator alone, without Vow of the Valkyr, changes nothing",
+      "actor": "vindicator",
+      "metric": "armor_reduced_damage",
+      "spell": 800626,
+      "target": "dummy",
+      "relative_to": "base_mitigated",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Vindicator rank 1 with Vow of the Valkyr active lets more damage through",
+      "actor": "vindicator_vow",
+      "metric": "armor_reduced_damage",
+      "spell": 800626,
+      "target": "dummy",
+      "relative_to": "base_mitigated",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Remember rank 1's mitigated damage with Vow active",
+      "actor": "vindicator_vow",
+      "metric": "armor_reduced_damage",
+      "spell": 800626,
+      "target": "dummy",
+      "save_as": "rank1_mitigated"
+    },
+    {
+      "action": "assert",
+      "label": "Vindicator rank 2 ignores more armor than rank 1",
+      "actor": "vindicator2_vow",
+      "metric": "armor_reduced_damage",
+      "spell": 800626,
+      "target": "dummy",
+      "relative_to": "rank1_mitigated",
+      "min": 1
+    }
+  ]
+}

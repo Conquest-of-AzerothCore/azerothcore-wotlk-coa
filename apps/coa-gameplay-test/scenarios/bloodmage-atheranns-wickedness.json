@@ -1,0 +1,147 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Atherann's Wickedness raises Shadow damage, hit chance and Atherann's Anguish (#2332)",
+  "contract": "Atherann's Wickedness 704642 (rank 1) and 707865 (rank 2): \"Increases your Shadow damage dealt by $s1% and increases your hit chance by $s2%.\" Effect 0 is aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE with MiscValue 32 = Shadow, amount 4 / 8, handled by AuraEffect::HandleModDamagePercentDone (SpellAuraEffects.cpp:144). Effect 1 is aura 333 ASCENSION_MOD_HIT_CHANCE_ALL_PCT, amount 3 / 6, handled by AuraEffect::HandleAscensionModHitChanceAll (SpellAuraEffects.cpp:398) and consumed in StatSystem.cpp at 998/1004/1010 for melee, ranged and spell hit. 704643: \"Increases the damage of Atherann's Anguish by $s1%\" - one aura 108 effect, MiscValue 0 = SPELLMOD_DAMAGE, amount 20, EffectSpellClassMask [0, 65536, 0], which over SpellFamilyName 26 selects exactly one record, Atherann's Anguish 500448. The damage probe is Bloodmoon Blast 500125, SchoolMask 32 = Shadow. Confirmed natively in .agents/plans/bloodmage-sanguine/verify-native.md:319-340; this is its regression scenario. NOT COVERED HERE: the delivered +20% on 500448. 704643 is the one of the three records that is not passive - Attributes 0x180 is SPELL_ATTR0_DO_NOT_DISPLAY | SPELL_ATTR0_DO_NOT_LOG with no SPELL_ATTR0_PASSIVE 0x40, and Stances is 0 - so Player::addSpell (Player.cpp:3363) does not self-cast it at learn and no spell in this repository grants it either. Fixturing the aura does not work around that: its DurationIndex is 0, SpellDuration.dbc has no row 0, so SpellInfo::GetDuration returns 0, Aura::IsExpired is immediately true and Unit::_UpdateSpells (Unit.cpp:4245) removes the aura on the next world tick - before the harness runs the following step, since it executes one step per OnUpdate. With no applied aura there is no SPELLMOD_DAMAGE entry in Player::m_spellMods, so the spell_modifier metric can never see the 20%. This scenario therefore locks the shipped magnitude of the record only; the applied modifier needs a Ghost e2e test on a character that has actually been granted 704643 in game, comparing Atherann's Anguish combat-log damage with and without it.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "b",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_damage_done",
+      "spell": 500125,
+      "target": "d",
+      "save_as": "shadow_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "spell_hit_chance",
+      "save_as": "spellhit_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "b",
+      "metric": "melee_hit_chance",
+      "save_as": "meleehit_base"
+    },
+    {
+      "action": "assert",
+      "label": "Nothing in this fixture modifies Atherann's Anguish",
+      "actor": "b",
+      "metric": "spell_modifier",
+      "spell": 500448,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 704642
+    },
+    {
+      "action": "assert",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 704642,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises Shadow damage by 4%",
+      "actor": "b",
+      "metric": "spell_damage_done",
+      "spell": 500125,
+      "target": "d",
+      "ratio_to": "shadow_base",
+      "min": 1.03,
+      "max": 1.05
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises spell hit chance by 3 points",
+      "actor": "b",
+      "metric": "spell_hit_chance",
+      "relative_to": "spellhit_base",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 raises melee hit chance by 3 points",
+      "actor": "b",
+      "metric": "melee_hit_chance",
+      "relative_to": "meleehit_base",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 704643
+    },
+    {
+      "action": "assert",
+      "label": "704643 ships the 20% Atherann's Anguish modifier",
+      "actor": "b",
+      "metric": "spell_effect_value",
+      "spell": 704643,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "unlearn",
+      "actor": "b",
+      "spell": 704642
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 707865
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises Shadow damage by 8%",
+      "actor": "b",
+      "metric": "spell_damage_done",
+      "spell": 500125,
+      "target": "d",
+      "ratio_to": "shadow_base",
+      "min": 1.07,
+      "max": 1.09
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 raises spell hit chance by 6 points",
+      "actor": "b",
+      "metric": "spell_hit_chance",
+      "relative_to": "spellhit_base",
+      "min": 5.9,
+      "max": 6.1
+    }
+  ]
+}

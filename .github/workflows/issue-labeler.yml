@@ -1,0 +1,49 @@
+name: Automatic Issue and PR Labeler
+
+on:
+  issues:
+    types: [opened, edited, reopened]
+  pull_request_target:
+    types: [opened, edited, reopened]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "Issue or PR number. Leave empty to process all issues and PRs."
+        required: false
+        type: string
+      dry_run:
+        description: "Preview label additions without changing issues."
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: >-
+    issue-labeler-${{ github.event.issue.number || github.event.pull_request.number || inputs.issue_number || 'all' }}
+  cancel-in-progress: false
+
+jobs:
+  label-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          # pull_request_target supplies the trusted repository commit, never the PR head.
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Label issues and PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number || github.event.pull_request.number || inputs.issue_number }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        run: |
+          if [[ -n "$ISSUE_NUMBER" ]]; then
+            python3 .github/scripts/label_issues.py
+          else
+            python3 .github/scripts/label_issues.py --all
+          fi

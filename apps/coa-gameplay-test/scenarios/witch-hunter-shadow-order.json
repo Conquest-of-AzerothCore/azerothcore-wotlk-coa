@@ -1,0 +1,203 @@
+{
+  "schema": 1,
+  "name": "Shadow Order grants exactly one damage bonus to Shadow Brand and Dawn Blade (#980)",
+  "contract": [
+    "Shadow Order rank 2 (681486) promises 40% more Shadow Brand and Dawn Blade damage and hit rating",
+    "equal to 6% of Agility. Each named ability receives the bonus once: Shadow Brand through",
+    "SPELLMOD_DOT and Dawn Blade through SPELLMOD_DAMAGE. The raw rank-2 DBC duplicates its periodic",
+    "modifier while neither copy selects Dawn Blade. The regression requires exactly 1400 from a native",
+    "1000-base query for each named damage path, checks that their other damage paths remain unmodified,",
+    "and retains the Agility-to-hit-rating control. Spell-modifier queries exercise native calculations;",
+    "the hit-rating observations exercise the live player stat update."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ctl",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    },
+    {
+      "id": "so",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "ctl",
+      "metric": "combat_rating",
+      "save_as": "hit_melee_0",
+      "label": "Melee hit rating without the talent",
+      "rating": 5
+    },
+    {
+      "action": "snapshot",
+      "actor": "ctl",
+      "metric": "combat_rating",
+      "save_as": "hit_ranged_0",
+      "label": "Ranged hit rating without the talent",
+      "rating": 6
+    },
+    {
+      "action": "snapshot",
+      "actor": "ctl",
+      "metric": "combat_rating",
+      "save_as": "hit_spell_0",
+      "label": "Spell hit rating without the talent",
+      "rating": 7
+    },
+    {
+      "action": "learn",
+      "actor": "so",
+      "spell": 681486,
+      "label": "Learn Shadow Order rank 2"
+    },
+    {
+      "action": "assert",
+      "label": "Effect 0 is the +40% damage modifier",
+      "actor": "so",
+      "metric": "aura_amount",
+      "spell": 681486,
+      "effect": 0,
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "label": "Effect 1 is 6% of Agility as hit rating",
+      "actor": "so",
+      "metric": "aura_amount",
+      "spell": 681486,
+      "effect": 1,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "Control: Shadow Brand is not modified",
+      "actor": "ctl",
+      "metric": "spell_modifier",
+      "spell": 680517,
+      "op": 22,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Brand receives exactly one 40% periodic damage bonus",
+      "actor": "so",
+      "metric": "spell_modifier",
+      "spell": 680517,
+      "op": 22,
+      "base": 1000,
+      "equals": 1400
+    },
+    {
+      "action": "assert",
+      "label": "Dawn Blade receives its promised 40% direct damage bonus",
+      "actor": "so",
+      "metric": "spell_modifier",
+      "spell": 802024,
+      "op": 0,
+      "base": 1000,
+      "equals": 1400
+    },
+    {
+      "action": "assert",
+      "label": "Dawn Blade does not receive a second periodic modifier",
+      "actor": "so",
+      "metric": "spell_modifier",
+      "spell": 802024,
+      "op": 22,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Brand does not receive a second direct modifier",
+      "actor": "so",
+      "metric": "spell_modifier",
+      "spell": 680517,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "so",
+      "metric": "combat_rating",
+      "save_as": "hit_melee_1",
+      "label": "Melee hit rating with the talent",
+      "rating": 5
+    },
+    {
+      "action": "snapshot",
+      "actor": "so",
+      "metric": "combat_rating",
+      "save_as": "hit_ranged_1",
+      "label": "Ranged hit rating with the talent",
+      "rating": 6
+    },
+    {
+      "action": "snapshot",
+      "actor": "so",
+      "metric": "combat_rating",
+      "save_as": "hit_spell_1",
+      "label": "Spell hit rating with the talent",
+      "rating": 7
+    },
+    {
+      "action": "set_aura",
+      "actor": "so",
+      "spell": 14404,
+      "stacks": 1,
+      "label": "Add a known +40 Agility"
+    },
+    {
+      "action": "assert",
+      "label": "Fixture: the Agility aura is +40",
+      "actor": "so",
+      "metric": "aura_amount",
+      "spell": 14404,
+      "effect": 0,
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "label": "+40 Agility adds 6% of it (2.4 -> 2 or 3) melee hit rating",
+      "actor": "so",
+      "metric": "combat_rating",
+      "rating": 5,
+      "relative_to": "hit_melee_1",
+      "min": 2,
+      "max": 3
+    },
+    {
+      "action": "assert",
+      "label": "... ranged hit rating",
+      "actor": "so",
+      "metric": "combat_rating",
+      "rating": 6,
+      "relative_to": "hit_ranged_1",
+      "min": 2,
+      "max": 3
+    },
+    {
+      "action": "assert",
+      "label": "... spell hit rating",
+      "actor": "so",
+      "metric": "combat_rating",
+      "rating": 7,
+      "relative_to": "hit_spell_1",
+      "min": 2,
+      "max": 3
+    }
+  ]
+}

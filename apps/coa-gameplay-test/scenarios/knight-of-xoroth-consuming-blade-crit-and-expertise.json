@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Consuming Blade raises Gore's crit chance and expertise (#898)",
+  "contract": "Consuming Blade 707388 reads 'Increases the critical strike chance of Gore by 25% and your expertise by 5' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z). Effect 0 is aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER), MiscValue 7 (SPELLMOD_CRITICAL_CHANCE), BasePoints 25, classmask (0,64,0) matching Gore's own family flags. Effect 1 is the native aura 240 (SPELL_AURA_MOD_EXPERTISE), BasePoints 5. At level 60 the owned Gore rank is 680944 (AscensionSpellProgressionData.h).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "knight", "metric": "expertise", "save_as": "expertise_before" },
+    {
+      "action": "assert", "label": "SETUP: no crit bonus on Gore before Consuming Blade",
+      "actor": "knight", "metric": "spell_modifier", "spell": 680944, "op": 7, "base": 0, "equals": 0
+    },
+    { "action": "learn", "actor": "knight", "spell": 707388 },
+    { "action": "set_aura", "actor": "knight", "spell": 707388, "stacks": 1, "label": "Force the Consuming Blade passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Consuming Blade passive is active",
+      "actor": "knight", "metric": "aura", "spell": 707388, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Gore gains 25 crit percentage points",
+      "actor": "knight", "metric": "spell_modifier", "spell": 680944, "op": 7, "base": 0, "equals": 25
+    },
+    {
+      "action": "assert", "label": "REGRESSION: an unrelated family spell is untouched",
+      "actor": "knight", "metric": "spell_modifier", "spell": 501518, "op": 7, "base": 0, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTRACT: expertise rises by 5",
+      "actor": "knight", "metric": "expertise", "relative_to": "expertise_before", "equals": 5
+    }
+  ]
+}

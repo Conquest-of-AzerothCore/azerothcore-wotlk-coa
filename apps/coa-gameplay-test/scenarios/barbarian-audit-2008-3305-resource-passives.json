@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Barbarian audit: Athleticism and Efficient Killer are native resource auras (#2008, #3305)",
+  "contract": "#2008 Athleticism (560456) is a single SPELL_AURA_MOD_POWER_REGEN_PERCENT (110, amount 25, MiscValue 3 = Energy) effect. Its handler AuraEffect::HandleModPowerRegenPCT calls HandleModPowerRegen, which for POWER_ENERGY calls Player::UpdateEnergyRegen immediately and is otherwise consumed by Player::Regenerate every tick; there is no harness metric for the live regen rate, so only the aura and its amount are asserted as native, data-driven proof that the correct percentage reaches the engine. #3305 Efficient Killer (803085) is SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT (72, amount -10, MiscValue 127 = all schools). AuraEffect::HandleModPowerCostPCT applies -0.10 to UNIT_FIELD_POWER_COST_MULTIPLIER for every school bit set, and SpellInfo::CalcPowerCost multiplies powerCost by (1 + powerCostMultiplier) for the spell's own school. Skull Smash (560532, PowerType 3 = Energy, ManaCost 30, no ManaCostPercentage) is used as the probe spell since it is a Barbarian ability with a real flat Energy cost; the spell_power_cost metric calls CalcPowerCost directly, so 30 must become int32(30 * 0.90) = 27 once Efficient Killer is learned.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+
+    { "action": "learn", "actor": "b", "spell": 560456 },
+    { "action": "assert", "label": "Athleticism (560456) is active", "actor": "b", "metric": "aura", "spell": 560456, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Effect 0 (Energy regen percentage) resolves to 25", "actor": "b", "metric": "aura_amount", "spell": 560456, "effect": 0, "equals": 25 },
+    { "action": "unlearn", "actor": "b", "spell": 560456 },
+    { "action": "assert", "label": "Unlearning removes Athleticism", "actor": "b", "metric": "aura", "spell": 560456, "equals": 0, "within_ms": 3000 },
+
+    { "action": "assert", "label": "Before: Skull Smash costs 30 Energy", "actor": "b", "metric": "spell_power_cost", "spell": 560532, "equals": 30 },
+    { "action": "learn", "actor": "b", "spell": 803085 },
+    { "action": "assert", "label": "Efficient Killer (803085) is active", "actor": "b", "metric": "aura", "spell": 803085, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Effect 0 (power cost percentage) resolves to -10", "actor": "b", "metric": "aura_amount", "spell": 803085, "effect": 0, "equals": -10 },
+    { "action": "assert", "label": "Skull Smash now costs 27 Energy (30 * 0.90)", "actor": "b", "metric": "spell_power_cost", "spell": 560532, "equals": 27, "within_ms": 3000 },
+    { "action": "unlearn", "actor": "b", "spell": 803085 },
+    { "action": "assert", "label": "Unlearning restores the 30 Energy cost", "actor": "b", "metric": "spell_power_cost", "spell": 560532, "equals": 30, "within_ms": 3000 }
+  ]
+}

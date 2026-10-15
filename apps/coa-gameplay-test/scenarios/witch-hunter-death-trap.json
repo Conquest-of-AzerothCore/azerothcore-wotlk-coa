@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "name": "Death Trap marks the first enemy to approach it and deals 3100 plus attack power after a minute (#870)",
+  "contract": "Death Trap 681450 (installed Spell.dbc) is a 60000 ms cooldown SUMMON of creature 506252 in front of the caster, duration 60 s. Tooltip: 'Place a death trap on the ground lasting 1 min that will curse the first enemy to approach it, marking them for death, causing them to take ... Shadow damage after 1 min.' Like Inquisitor's Trap it is implemented by spell_ascension_witch_hunter_summon and npc_ascension_witch_hunter_field (AscensionWitchHunterSummons.cpp): the creature's AI casts helper 681452 on the first valid enemy within 3 yd and despawns. Helper 681452 is SPELL_AURA_PERIODIC_DAMAGE (Shadow) with base 499 die 1 and +100 per level over level 34 (level 60: 499 + 1 + 26 x 100 = 3100) and an amplitude of 59999 ms inside the 60000 ms duration, so it ticks once at the end; the module adds 1.0 x attack power through the WitchCoefficients row {681452, 0, 1.0 ap} (AscensionWitchHunterCoefficients.h). Enemy a stands 2 yd from the caster and enemy b 20 yd away, so only a is marked. Attack power is not a value this scenario may assume, so the aura amount and the delivered damage are bounded (3101 minimum shows the AP term contributed; 5000 maximum assumes attack power under 1900, an unverified assumption). The damage assertion polls for up to 75 s because the tick is a minute away; the hunter is the aura caster, so the damage log is attributed to it. GEOMETRY CORRECTED after slot 3 runs: the field AI finds enemies with Acore::AnyUnitInObjectRangeCheck, whose WorldObject::IsWithinDistInMap adds both units' object size (combat reach; Object.cpp _IsWithinDist), so the ranges are edge to edge: creature_model_info gives the trap model 1.0 and Harvest Golem 36 1.275, hence the 3 yd trigger reaches an enemy up to 5.275 yd from the trap and the silence radius around the triggering enemy reaches 5 + 2 x 1.275 = 7.55 yd. Measured with owned_creature_count min_distance: the trap stands 2 to 3 yd from the caster. Enemies at 6 or 9 yd were therefore inside the ranges (and an enemy standing exactly on the caster was never picked as the trigger in five runs), so the fixture now uses an enemy at 2 yd (always inside the trigger range whatever the trap's direction) and a far enemy at 20 yd (beyond 3 + 5.275 + 7.55).",
+  "timeout_ms": 200000,
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "a",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 60,
+      "distance": 2
+    },
+    {
+      "id": "b",
+      "owner": "hunter",
+      "entry": 36,
+      "level": 60,
+      "distance": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "hunter",
+      "spell": 681450,
+      "label": "Learn Death Trap"
+    },
+    {
+      "action": "cast",
+      "actor": "hunter",
+      "spell": 681450,
+      "label": "Drop Death Trap in front of the hunter"
+    },
+    {
+      "action": "assert",
+      "label": "The first enemy in reach is marked for death",
+      "actor": "a",
+      "metric": "aura",
+      "spell": 681452,
+      "caster": "hunter",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "An enemy 20 yd away is not marked",
+      "actor": "b",
+      "metric": "aura",
+      "spell": 681452,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The mark holds 3100 (499 + 1 + 26 levels x 100) plus the attack power term",
+      "actor": "a",
+      "metric": "aura_amount",
+      "spell": 681452,
+      "effect": 0,
+      "min": 3101,
+      "max": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The mark runs for at most a minute",
+      "actor": "a",
+      "metric": "aura_duration_ms",
+      "spell": 681452,
+      "caster": "hunter",
+      "min": 50000,
+      "max": 60000
+    },
+    {
+      "action": "assert",
+      "label": "The trap is used up",
+      "actor": "hunter",
+      "metric": "owned_creature_count",
+      "entry": 506252,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The mark's damage lands after the minute",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 681452,
+      "target": "a",
+      "min": 3000,
+      "within_ms": 75000
+    },
+    {
+      "action": "assert",
+      "label": "The unmarked enemy took none",
+      "actor": "hunter",
+      "metric": "spell_damage_total",
+      "spell": 681452,
+      "target": "b",
+      "equals": 0
+    }
+  ]
+}

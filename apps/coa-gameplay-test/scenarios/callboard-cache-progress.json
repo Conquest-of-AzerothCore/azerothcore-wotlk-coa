@@ -1,0 +1,698 @@
+{
+  "schema": 1,
+  "name": "Callboard quests fill the cache progress bar and a full bar pays the cache of the highest item level reached",
+  "contract": "Callboard Cache progress. The client asks a quest's points with CMSG 0x731 (quest id) and reads SMSG 0x732 (quest id, points, 0); captured live replies (questcacheaddon.wdb, 2026-08/09) give Dungeon Diving 81244 15 and the world boss quest 170015 50, and uncaptured quests follow the Bronzebeard video of 2025-11-05: profession 15, world kill 20, elite 25. A quest outside the Callboard is worth 0. At login the server sends SMSG 0x730 with the released cache tiers, highest item level first (id, 0, condition 0, item level, cache item, points per cache), the highest item level reached as achievement criterion 80129 (SMSG_CRITERIA_UPDATE) and the TOKEN_TYPE_CALLBOARD_CACHE_POINTS token (SMSG 0x670: name, amount, 0). At the default release stage 7 all nine tiers are sent: item level 78 Callboard Cache (Naxxramas) 1615009 first and item level 0 Adventurer's Cache 1397886 last (live sniffs 2026-08-31/09-01 for item levels 0, 40, 55, 60 and 62; 61, 66, 72 and 78 approved 2026-10-07), each costing 150 points. The client shows a tenth of every amount (user choice 2026-10-07): the bar shows 15 per cache and a quest's points round up (25 as 3, 15 as 2, 20 as 2, 50 as 5). A turn-in adds its points and pays one cache per 150, keeping the remainder: four elite quests reach 100, two world kill quests 140 with no cache yet, and a profession quest 155, which pays the Adventurer's Cache of an unequipped character and leaves 5 (shown as 0); another profession quest then shows 2, proving the remainder carried over. After the next login, twelve epic pieces (Wrath set 584, Band of Accuria 72, Onyxia Tooth Pendant 69, Drake Fang Talisman 79, Cloak of the Shrouded Mists 70) sum to 874 over 15 slots, an average of 58, so the next full bar (20 + world boss 50 + four world kill quests 80 = 150) pays the Zul'Gurub cache 1615003 (tier 55) rather than Molten Core (tier 60). Opening it pays its item plus 5 to 15 gold (Ascension.CallboardCache.GoldMin/GoldMax, user choice 2026-10-07).",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the points of an elite Callboard quest",
+      "actor": "hero",
+      "opcode": 1841,
+      "fields": [
+        {
+          "u32": 18034
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "the reply names quest 18034",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1842,
+      "index": 0,
+      "equals": 18034,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "quest 18034's 25 points show as 3",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1842,
+      "index": 1,
+      "equals": 3
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the points of a profession Callboard quest",
+      "actor": "hero",
+      "opcode": 1841,
+      "fields": [
+        {
+          "u32": 26035
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "the reply names quest 26035",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1842,
+      "index": 0,
+      "equals": 26035,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "quest 26035's 15 points show as 2",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1842,
+      "index": 1,
+      "equals": 2
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the points of a world kill Callboard quest",
+      "actor": "hero",
+      "opcode": 1841,
+      "fields": [
+        {
+          "u32": 18017
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "the reply names quest 18017",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1842,
+      "index": 0,
+      "equals": 18017,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "quest 18017's 20 points show as 2",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1842,
+      "index": 1,
+      "equals": 2
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the points of Dungeon Diving",
+      "actor": "hero",
+      "opcode": 1841,
+      "fields": [
+        {
+          "u32": 81244
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "the reply names quest 81244",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1842,
+      "index": 0,
+      "equals": 81244,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "quest 81244's 15 points show as 2",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1842,
+      "index": 1,
+      "equals": 2
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the points of a world boss quest",
+      "actor": "hero",
+      "opcode": 1841,
+      "fields": [
+        {
+          "u32": 170015
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "the reply names quest 170015",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1842,
+      "index": 0,
+      "equals": 170015,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "quest 170015's 50 points show as 5",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1842,
+      "index": 1,
+      "equals": 5
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the points of a quest outside the Callboard",
+      "actor": "hero",
+      "opcode": 1841,
+      "fields": [
+        {
+          "u32": 33
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "the reply names quest 33",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1842,
+      "index": 0,
+      "equals": 33,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "quest 33 is worth 0 points",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1842,
+      "index": 1,
+      "equals": 0
+    },
+    {
+      "action": "login_hooks",
+      "label": "Log in",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "the cache config holds the nine released tiers",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1840,
+      "index": 0,
+      "equals": 9,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the first tier is always eligible",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1840,
+      "index": 3,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the first tier starts at item level 78",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1840,
+      "index": 4,
+      "equals": 78
+    },
+    {
+      "action": "assert",
+      "label": "item level 78 pays the Naxxramas cache",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1840,
+      "index": 5,
+      "equals": 1615009
+    },
+    {
+      "action": "assert",
+      "label": "a 150-point cache shows as 15",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1840,
+      "index": 6,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "the last tier starts at item level 0",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1840,
+      "index": 52,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "item level 0 pays the Adventurer's Cache",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1840,
+      "index": 53,
+      "equals": 1397886
+    },
+    {
+      "action": "assert",
+      "label": "the highest item level reached reaches the client's criterion",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 1130,
+      "row": 80129,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "a new character starts with an empty bar",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1648,
+      "skip_strings": 1,
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "a new character holds no cache",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 1397886,
+      "equals": 0
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "hero",
+      "quest": 18034
+    },
+    {
+      "action": "reward_quest",
+      "actor": "hero",
+      "quest": 18034
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "hero",
+      "quest": 18036
+    },
+    {
+      "action": "reward_quest",
+      "actor": "hero",
+      "quest": 18036
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "hero",
+      "quest": 18104
+    },
+    {
+      "action": "reward_quest",
+      "actor": "hero",
+      "quest": 18104
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "hero",
+      "quest": 18109
+    },
+    {
+      "action": "reward_quest",
+      "actor": "hero",
+      "quest": 18109
+    },
+    {
+      "action": "assert",
+      "label": "four elite quests give 100 points, shown as 10",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1648,
+      "skip_strings": 1,
+      "index": 0,
+      "equals": 10
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "hero",
+      "quest": 18017
+    },
+    {
+      "action": "reward_quest",
+      "actor": "hero",
+      "quest": 18017
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "hero",
+      "quest": 18018
+    },
+    {
+      "action": "reward_quest",
+      "actor": "hero",
+      "quest": 18018
+    },
+    {
+      "action": "assert",
+      "label": "two world kill quests bring the bar to 140, shown as 14",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1648,
+      "skip_strings": 1,
+      "index": 0,
+      "equals": 14
+    },
+    {
+      "action": "assert",
+      "label": "no cache below 150 points",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 1397886,
+      "equals": 0
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "hero",
+      "quest": 26035
+    },
+    {
+      "action": "reward_quest",
+      "actor": "hero",
+      "quest": 26035
+    },
+    {
+      "action": "assert",
+      "label": "reaching 155 points pays an unequipped character the Adventurer's Cache",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 1397886,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the 5-point remainder shows as 0",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1648,
+      "skip_strings": 1,
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "hero",
+      "quest": 26053
+    },
+    {
+      "action": "reward_quest",
+      "actor": "hero",
+      "quest": 26053
+    },
+    {
+      "action": "assert",
+      "label": "the kept remainder and a profession quest make 20, shown as 2",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1648,
+      "skip_strings": 1,
+      "index": 0,
+      "equals": 2
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 750
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 16963
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 16963,
+      "slot": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 18404
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 18404,
+      "slot": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 16961
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 16961,
+      "slot": 2
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 16966
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 16966,
+      "slot": 4
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 16960
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 16960,
+      "slot": 5
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 16962
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 16962,
+      "slot": 6
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 16965
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 16965,
+      "slot": 7
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 16959
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 16959,
+      "slot": 8
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 16964
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 16964,
+      "slot": 9
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 17063
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 17063,
+      "slot": 10
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 19406
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 19406,
+      "slot": 12
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 17102
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 17102,
+      "slot": 14
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "hero",
+      "quest": 170015
+    },
+    {
+      "action": "reward_quest",
+      "actor": "hero",
+      "quest": 170015
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "hero",
+      "quest": 18019
+    },
+    {
+      "action": "reward_quest",
+      "actor": "hero",
+      "quest": 18019
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "hero",
+      "quest": 18030
+    },
+    {
+      "action": "reward_quest",
+      "actor": "hero",
+      "quest": 18030
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "hero",
+      "quest": 18044
+    },
+    {
+      "action": "reward_quest",
+      "actor": "hero",
+      "quest": 18044
+    },
+    {
+      "action": "assert",
+      "label": "130 points, shown as 13, pay nothing yet",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1648,
+      "skip_strings": 1,
+      "index": 0,
+      "equals": 13
+    },
+    {
+      "action": "assert",
+      "label": "no Zul'Gurub cache below 150 points",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 1615003,
+      "equals": 0
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "hero",
+      "quest": 18045
+    },
+    {
+      "action": "reward_quest",
+      "actor": "hero",
+      "quest": 18045
+    },
+    {
+      "action": "assert",
+      "label": "item level 58 pays the Zul'Gurub cache",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 1615003,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "item level 58 stays below the Molten Core tier",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 1615004,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "exactly 150 points leave an empty bar",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 1648,
+      "skip_strings": 1,
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the character carries no money before opening",
+      "actor": "hero",
+      "metric": "carried_money",
+      "equals": 0
+    },
+    {
+      "action": "open_item",
+      "actor": "hero",
+      "item": 1615003
+    },
+    {
+      "action": "assert",
+      "label": "the opened cache is consumed",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 1615003,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the opened cache pays 5 to 15 gold",
+      "actor": "hero",
+      "metric": "carried_money",
+      "min": 50000,
+      "max": 150000
+    }
+  ]
+}

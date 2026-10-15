@@ -53,6 +53,7 @@ namespace lfg
         LFG_SPELL_DUNGEON_COOLDOWN                   = 71328,
         LFG_SPELL_DUNGEON_DESERTER                   = 71041,
         LFG_SPELL_LUCK_OF_THE_DRAW                   = 72221,
+        LFG_DUNGEON_RANDOM_CLASSIC                   = 258,
         LFG_GROUP_KICK_VOTES_NEEDED                  = 3
     };
 
@@ -590,6 +591,7 @@ namespace lfg
 
         void SetDungeon(ObjectGuid guid, uint32 dungeon);
         LFGDungeonData const* GetLFGDungeon(uint32 id);
+        LFGDungeonData const* GetClassicRandomFallback(uint32 completedDungeonId);
 
     private:
         TeamId GetTeam(ObjectGuid guid);
@@ -636,6 +638,7 @@ namespace lfg
         RBInternalInfoMap _rbCopy;
 
         LfgQueueContainer QueuesStore;                     ///< Queues
+        std::set<uint32> DungeonsWithoutEntrance;
         LfgCachedDungeonContainer CachedDungeonMapStore;   ///< Stores all dungeons by groupType
         // Reward System
         LfgRewardContainer RewardMapStore;                 ///< Stores rewards for random dungeons

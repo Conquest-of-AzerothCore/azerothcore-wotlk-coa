@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Normally acquired Arbalest Mastery is a caster buff during Witchbane (#3935)",
+  "contract": [
+    "Arbalest Mastery's tooltip grants increasing Witchbane damage during the channel. The progress stacks therefore belong to the caster. PR #4019 marks helper 706241 positive in spell_custom_attr; its effective attributes are 234881024 on main. Normal Boltslinger talent acquisition and an ordinary Witchbane channel must create a positive caster aura, leave the enemy without that progress aura, and clean the helper up when the channel finishes. A Witch Hunter without Arbalest Mastery supplies the negative control. Native aura classification is checked; client rendering is outside this scenario."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "hunter", "race": 1, "class": 15, "level": 60, "spell_hit_rating": 10000, "ranged_hit_rating": 10000 },
+    { "id": "control", "race": 1, "class": 15, "level": 60, "spell_hit_rating": 10000, "ranged_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "hunter", "entry": 36, "level": 60, "health": 1000000, "distance": 15 },
+    { "id": "control_target", "owner": "control", "entry": 36, "level": 60, "health": 1000000, "distance": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "specialization", "actor": "hunter", "id": 10 },
+    { "action": "specialization", "actor": "control", "id": 10 },
+    { "action": "advancement_rank", "actor": "hunter", "entry": 31160, "rank": 1 },
+    { "action": "advancement_rank", "actor": "control", "entry": 31160, "rank": 1 },
+    { "action": "advancement_rank", "actor": "hunter", "entry": 7458, "rank": 1 },
+    { "action": "assert", "actor": "hunter", "metric": "aura", "spell": 706240, "equals": 1 },
+    { "action": "assert", "actor": "control", "metric": "aura", "spell": 706240, "equals": 0 },
+    { "action": "add_item", "actor": "hunter", "item": 15807 },
+    { "action": "equip", "actor": "hunter", "item": 15807, "slot": 17 },
+    { "action": "add_item", "actor": "control", "item": 15807 },
+    { "action": "equip", "actor": "control", "item": 15807, "slot": 17 },
+    { "action": "assert", "actor": "hunter", "metric": "knows_spell", "spell": 800165, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "actor": "control", "metric": "knows_spell", "spell": 800165, "equals": 1, "within_ms": 2000 },
+    { "action": "set_power", "actor": "hunter", "power": 1, "value": 1000 },
+    { "action": "set_power", "actor": "control", "power": 1, "value": 1000 },
+    { "action": "cast", "actor": "control", "spell": 800165, "target": "control_target" },
+    { "action": "assert", "actor": "control", "metric": "spell_cast_count", "spell": 704342, "min": 1, "within_ms": 1500 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "An untalented channel grants no progress", "actor": "control", "metric": "aura", "spell": 706241, "equals": 0 },
+    { "action": "cast", "actor": "hunter", "spell": 800165, "target": "target" },
+    { "action": "assert", "actor": "hunter", "metric": "spell_cast_count", "spell": 704342, "min": 1, "within_ms": 1500 },
+    { "action": "wait", "ms": 1800 },
+    { "action": "assert", "label": "The talented channel creates caster progress stacks", "actor": "hunter", "metric": "aura", "spell": 706241, "caster": "hunter", "min": 1 },
+    { "action": "assert", "label": "Arbalest Mastery progress is classified as a buff", "actor": "hunter", "metric": "aura_positive", "spell": 706241, "caster": "hunter", "equals": 1 },
+    { "action": "assert", "label": "Progress stacks do not become an enemy debuff", "actor": "target", "metric": "aura", "spell": 706241, "equals": 0 },
+    { "action": "wait", "ms": 4000 },
+    { "action": "assert", "label": "Progress disappears after the channel", "actor": "hunter", "metric": "aura", "spell": 706241, "equals": 0 }
+  ]
+}

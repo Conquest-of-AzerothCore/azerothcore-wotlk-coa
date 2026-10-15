@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Mind Games cuts Hallucination's cooldown and mana cost through the native spell-mod system (#1202)",
+  "contract": "582589 effect0 is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 11 = SPELLMOD_COOLDOWN, BasePoints -5001 / DieSides 1 -> value -5000 ms, matching $/1000;s1=5 sec. Effect1 is aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 14 = SPELLMOD_COST, BasePoints -21 / DieSides 1 -> value -20, matching $s2=20%. Both effects' EffectSpellClassMask dwordB bit2 (4) exactly and singularly match Hallucination (560301)'s own SpellFamilyFlags dwordB bit2 -- verified from Spell.dbc, distinct from the unrelated same-named 503652/504873/706932 rows (706932 is the Cultist's own summon-trigger helper, per CultistSummonSpells in AscensionCultistData.h). Hallucination's native RecoveryTime is 30000 ms. The harness's spell_modifier metric applies the player's native spell mods to a supplied base through Player::ApplySpellMod, reading both routed operations without submitting a cast.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 40 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn/level settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: Hallucination keeps its native 30 s cooldown before the talent",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 560301, "op": 11, "base": 30000,
+      "min": 30000, "max": 30000
+    },
+    {
+      "action": "assert", "label": "SETUP: Hallucination's mana cost is unmodified before the talent",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 560301, "op": 14, "base": 100,
+      "min": 100, "max": 100
+    },
+    { "action": "learn", "actor": "cultist", "spell": 582589 },
+    {
+      "action": "assert", "label": "Mind Games cuts 5000 ms off Hallucination's cooldown",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 560301, "op": 11, "base": 30000,
+      "min": 25000, "max": 25000
+    },
+    {
+      "action": "assert", "label": "Mind Games cuts Hallucination's mana cost by 20%",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 560301, "op": 14, "base": 100,
+      "min": 79, "max": 81
+    }
+  ]
+}

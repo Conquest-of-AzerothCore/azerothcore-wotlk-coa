@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Destructo-Bot: a Tinker dying while possessing it releases the bot (#265)",
+  "contract": [
+    "Build: Destructo-Bot 804673 'Build a Destructo-Bot that you can see through and directly control.' Its",
+    "summon effect names creature 50300 with SummonProperties 65, a puppet: the Tinker possesses the bot, and",
+    "dying ends that control like any possession. #265 reported an ABORT in Player::StopCastingCharm",
+    "(Unit::Kill -> setDeathState -> RemoveAllControlled) on release feb155c82, where the bot was charmed without",
+    "a charm aura or puppet summon. Killing the possessing Tinker must leave it dead with its own character",
+    "back under control, the bot gone and the server running."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "tinker", "race": 1, "class": 28, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the world settle", "ms": 5000 },
+    { "action": "learn", "actor": "tinker", "spell": 804673 },
+    { "action": "cast", "actor": "tinker", "spell": 804673 },
+    {
+      "action": "assert", "label": "The build spell possesses its Destructo-Bot", "actor": "tinker",
+      "metric": "charm_entry", "equals": 50300, "within_ms": 7000
+    },
+    { "action": "assert", "actor": "tinker", "metric": "owned_creature_count", "entry": 50300, "equals": 1 },
+    { "action": "assert", "actor": "tinker", "metric": "controls_self", "equals": 0 },
+    { "action": "die", "label": "The Tinker dies while possessing the bot", "actor": "tinker" },
+    { "action": "assert", "actor": "tinker", "metric": "alive", "equals": 0 },
+    {
+      "action": "assert", "label": "Death releases the possession", "actor": "tinker", "metric": "charm_entry",
+      "equals": 0, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The Tinker controls its own character again", "actor": "tinker",
+      "metric": "controls_self", "equals": 1
+    },
+    {
+      "action": "assert", "label": "The released bot is gone", "actor": "tinker", "metric": "owned_creature_count",
+      "entry": 50300, "equals": 0, "within_ms": 5000
+    },
+    { "action": "wait", "ms": 5000 },
+    { "action": "console", "command": "server info" },
+    { "action": "assert", "label": "The server keeps running", "actor": "tinker", "metric": "alive", "equals": 0 }
+  ]
+}

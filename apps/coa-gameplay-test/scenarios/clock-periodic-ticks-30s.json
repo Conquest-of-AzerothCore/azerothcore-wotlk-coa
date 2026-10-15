@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Clock probe: a 2 s periodic damage aura ticks on game time over 30 s",
+  "contract": [
+    "Curse of Agony rank 10 (47864) in the installed Spell.dbc is an instant SPELL_AURA_PERIODIC_DAMAGE of 41 per",
+    "tick with EffectAmplitude 2000 ms and SpellDuration 24000 ms, with no SPELL_ATTR5 flags, so it neither starts",
+    "ticking at application nor scales its period with haste: it ticks at 2, 4, ..., 24 s after application, 12",
+    "ticks. AuraEffect::Update carries each diff's remainder into the periodic timer and caps ticks at",
+    "GetTotalTicks, so tick times follow game time to within one map update. spell_warl_curse_of_agony only scales",
+    "tick amounts (half, full, one and a half), all positive, so spell_damage_count sees every tick; spell hit",
+    "rating removes the application miss. Checkpoints 7, 13, 19 and 30 s of game time after the cast each lie 1 s",
+    "from the nearest tick and must read 3, 6, 9 and 12, and the curse has expired at 30 s. A 25 ms world step moves",
+    "a tick by at most one step; aura time that lags or leads fast-forwarded game time changes the counts."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 8, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "caster", "entry": 36, "level": 80, "health": 100000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "caster", "spell": 47864 },
+    {
+      "action": "assert", "label": "SETUP: no ticks before the cast", "actor": "caster",
+      "metric": "spell_damage_count", "spell": 47864, "target": "target", "equals": 0
+    },
+    { "action": "cast", "actor": "caster", "spell": 47864, "target": "target" },
+    {
+      "action": "assert", "label": "SETUP: the curse is on the target", "actor": "target",
+      "metric": "aura", "spell": 47864, "caster": "caster", "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "SETUP: the tick period is the DBC 2000 ms", "actor": "target",
+      "metric": "aura_amplitude_ms", "spell": 47864, "caster": "caster", "equals": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the curse lasts the DBC 24 s", "actor": "target",
+      "metric": "aura_duration_ms", "spell": 47864, "caster": "caster", "min": 23000, "max": 24000
+    },
+    { "action": "wait", "ms": 7000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: 3 ticks after 7 s", "actor": "caster",
+      "metric": "spell_damage_count", "spell": 47864, "target": "target", "equals": 3
+    },
+    { "action": "wait", "ms": 6000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: 6 ticks after 13 s", "actor": "caster",
+      "metric": "spell_damage_count", "spell": 47864, "target": "target", "equals": 6
+    },
+    { "action": "wait", "ms": 6000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: 9 ticks after 19 s", "actor": "caster",
+      "metric": "spell_damage_count", "spell": 47864, "target": "target", "equals": 9
+    },
+    { "action": "wait", "ms": 11000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: all 12 ticks after 30 s", "actor": "caster",
+      "metric": "spell_damage_count", "spell": 47864, "target": "target", "equals": 12
+    },
+    {
+      "action": "assert", "label": "The curse expired after its 24 s", "actor": "target",
+      "metric": "aura", "spell": 47864, "caster": "caster", "equals": 0
+    }
+  ]
+}

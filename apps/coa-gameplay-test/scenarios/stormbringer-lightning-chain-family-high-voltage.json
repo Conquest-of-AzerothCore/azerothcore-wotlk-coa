@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: High Voltage extends Arm of Thorim's stun (#2154)",
+  "contract": "#2154: High Voltage (570191) is a passive flat SPELLMOD_DURATION (EffectMiscValue[0] 1) modifier, EffectBasePoints 999 + DieSides 1 = +1000 ms, EffectSpellClassMask[0] (0,0,16777216), SpellFamilyName 22. Arm of Thorim (501433) triggers its stun 570339 through Spell::EffectTriggerSpell (SpellEffects.cpp), and 570339 is family 22 with SpellFamilyFlags (0,0,16777216) and DurationIndex 36 (1000 ms), so the mask matches that stun and nothing else. Aura::CalcMaxDuration (SpellAuras.cpp) feeds the stun's duration through Player::ApplySpellMod on the caster, the same call the spell_modifier metric makes, so the live triggered stun is raised from the 1000 ms DBC base to 2000 ms. The two halves deliberately use two different dummies: SpellMgr::LoadSpellInfoCorrections (src/server/game/Spells/SpellInfoCorrections.cpp) gives 570339 Mechanic MECHANIC_STUN, so GetDiminishingReturnsGroupForSpell (SpellMgr.cpp) returns DIMINISHING_CONTROLLED_STUN, whose type is DRTYPE_ALL (GetDiminishingReturnsGroupType), i.e. diminishing returns that also apply to creatures. Spell::DoSpellHitOnUnit calls Unit::IncrDiminishing on the first stun and Unit::ApplyDiminishingToDuration (mod 0.5f at DIMINISHING_LEVEL_2, Unit.cpp) on any further stun landing on the same unit within 15 s, which would halve the extended 2000 ms back to exactly 1000 ms and make a working talent look broken. Diminishing returns are tracked per target unit (Unit::m_Diminishing), so the discriminating cast lands on a dummy that has never been stunned. Arm of Thorim is gated by the class-16 custom resource system (AscensionCompatData::ResourceCostRules, src/server/coa/AscensionCustomResourceData.h): it requires at least 1 stack of the 'Static' resource aura 803102 and consumes it entirely on cast (Consumption::All), so the fixture grants 1 stack before each cast. The three DISCRIMINATING assertions separate the mechanism into its stages: the passive's own aura must reach the caster, Player::ApplySpellMod must accept the modifier for 570339 (read through spell_modifier, which needs no cast and no timing), and Aura::CalcMaxDuration must apply it to the live triggered stun. aura_duration_ms reads the remaining duration, so the live windows allow one tick of decay. Arm of Thorim and its stun are magic spells that can miss a level-80 target, which left the second stun missing, so the caster carries spell_hit_rating.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "aot_dummy", "owner": "s", "entry": 36, "health": 10000000, "distance": 6 },
+    { "id": "hv_dummy", "owner": "s", "entry": 36, "health": 10000000, "distance": 18 }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "s", "spell": 501433 },
+    { "action": "assert", "label": "SETUP: the fixture has enough mana for a 37% base mana cast",
+      "actor": "s", "metric": "max_power", "power": 0, "min": 2500 },
+    { "action": "assert", "label": "BASELINE: the stun duration modifier query is unmodified without High Voltage",
+      "actor": "s", "metric": "spell_modifier", "spell": 570339, "op": 1, "base": 1000, "equals": 1000 },
+    { "action": "set_power", "actor": "s", "power": 0, "value": 2500 },
+    { "action": "set_aura", "actor": "s", "spell": 803102, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: the fixture carries the Static charge Arm of Thorim's resource gate consumes (ResourceCostRules class 16, 501433-501437, amount 1, Consumption::All)",
+      "actor": "s", "metric": "aura_stacks", "spell": 803102, "equals": 1 },
+    { "action": "cast", "actor": "s", "spell": 501433, "target": "aot_dummy" },
+    { "action": "assert", "label": "BASELINE: Arm of Thorim's triggered stun is applied",
+      "actor": "aot_dummy", "metric": "aura", "spell": 570339, "caster": "s", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "BASELINE: the stun lasts its DBC 1000 ms without High Voltage",
+      "actor": "aot_dummy", "metric": "aura_duration_ms", "spell": 570339, "min": 900, "max": 1000 },
+    { "action": "wait", "label": "Let the shared global cooldown clear before the second cast", "ms": 2500 },
+    { "action": "learn", "actor": "s", "spell": 570191 },
+    { "action": "assert", "label": "DISCRIMINATING: learning High Voltage puts its passive aura on the caster",
+      "actor": "s", "metric": "aura", "spell": 570191, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the stun duration modifier query now returns 2000 ms",
+      "actor": "s", "metric": "spell_modifier", "spell": 570339, "op": 1, "base": 1000, "equals": 2000 },
+    { "action": "reset_cooldown", "actor": "s", "spell": 501433 },
+    { "action": "set_power", "actor": "s", "power": 0, "value": 2500 },
+    { "action": "set_aura", "actor": "s", "spell": 803102, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: the fixture carries the Static charge the second cast consumes",
+      "actor": "s", "metric": "aura_stacks", "spell": 803102, "equals": 1 },
+    { "action": "assert", "label": "SETUP: the second dummy has never been stunned, so no DIMINISHING_CONTROLLED_STUN entry halves this cast",
+      "actor": "hv_dummy", "metric": "aura", "spell": 570339, "equals": 0 },
+    { "action": "cast", "actor": "s", "spell": 501433, "target": "hv_dummy" },
+    { "action": "assert", "label": "DISCRIMINATING: the stun is applied again with High Voltage learned",
+      "actor": "hv_dummy", "metric": "aura", "spell": 570339, "caster": "s", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: High Voltage doubles the Arm of Thorim stun to 2000 ms",
+      "actor": "hv_dummy", "metric": "aura_duration_ms", "spell": 570339, "min": 1600, "max": 2000 }
+  ]
+}

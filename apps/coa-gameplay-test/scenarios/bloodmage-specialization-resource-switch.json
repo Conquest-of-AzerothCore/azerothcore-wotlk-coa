@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Bloodmage resource state follows the active specialization",
+  "contract": "Pooled Vitality (681078) is Fleshweaver's level-10 passive and generates resource aura 680687 from health-cost spells. Leaving Fleshweaver clears that stored pool. Blood spec 26 grants Sanguine Thirst 92112, and a paid family-26 health-cost cast grants one Thirst stack (706613).",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "bloodmage", "race": 1, "class": 20, "level": 12, "spell_hit_rating": 10000,
+      "allow_regeneration": false }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "bloodmage", "entry": 36, "level": 12, "health": 1000000, "distance": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "set_health", "actor": "target", "value": 999999 },
+    { "action": "assert", "actor": "target", "metric": "max_health", "equals": 1000000 },
+    { "action": "specialization", "actor": "bloodmage", "id": 25 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "Fleshweaver grants Pooled Vitality",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 681078, "equals": 1
+    },
+    { "action": "learn", "actor": "bloodmage", "spell": 500125 },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 680687, "stacks": 0 },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 706613, "stacks": 0 },
+    { "action": "cast", "actor": "bloodmage", "spell": 500125, "target": "target" },
+    {
+      "action": "assert", "label": "Fleshweaver stores Pooled Vitality from the health-cost cast",
+      "actor": "bloodmage", "metric": "aura_stacks", "spell": 680687, "equals": 1,
+      "within_ms": 5000
+    },
+    { "action": "specialization", "actor": "bloodmage", "id": 26 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "Leaving Fleshweaver removes its Pooled Vitality passive",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 681078, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Sanguine grants its Thirst passive",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 92112, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Thirst starts empty",
+      "actor": "bloodmage", "metric": "aura_stacks", "spell": 706613, "equals": 0
+    },
+    { "action": "cast", "actor": "bloodmage", "spell": 500125, "target": "target" },
+    {
+      "action": "assert", "label": "A paid health cast in Sanguine grants one Thirst stack",
+      "actor": "bloodmage", "metric": "aura_stacks", "spell": 706613, "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "Leaving Fleshweaver clears its stored Pooled Vitality",
+      "actor": "bloodmage", "metric": "aura_stacks", "spell": 680687, "equals": 0
+    }
+  ]
+}

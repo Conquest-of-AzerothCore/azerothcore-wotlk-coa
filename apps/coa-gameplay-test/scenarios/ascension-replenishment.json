@@ -1,0 +1,213 @@
+{
+  "schema": 1,
+  "name": "ascension-replenishment",
+  "contract": "Shared Replenishment restores floor(5% of each recipient maximum Mana) every five seconds, three ticks over fifteen seconds. Recipients have different Mana pools; logs exclude regeneration.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 8,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 1257670
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "max_power",
+      "save_as": "primalist_max_mana",
+      "label": "primalist_max_mana",
+      "power": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "ally",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "max_power",
+      "save_as": "ally_max_mana",
+      "label": "ally_max_mana",
+      "power": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 1257670
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 1257670,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 1257670,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 4300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_count",
+      "spell": 1257670,
+      "power": 0,
+      "target": "primalist",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_count",
+      "spell": 1257670,
+      "power": 0,
+      "target": "ally",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_count",
+      "spell": 1257670,
+      "power": 0,
+      "target": "primalist",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "save_as": "primalist_first",
+      "label": "primalist_first",
+      "spell": 1257670,
+      "power": 0,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_count",
+      "spell": 1257670,
+      "power": 0,
+      "target": "ally",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "save_as": "ally_first",
+      "label": "ally_first",
+      "spell": 1257670,
+      "power": 0,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_count",
+      "spell": 1257670,
+      "power": 0,
+      "target": "primalist",
+      "equals": 3
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "save_as": "primalist_total",
+      "label": "primalist_total",
+      "spell": 1257670,
+      "power": 0,
+      "target": "primalist"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 1257670,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_energize_count",
+      "spell": 1257670,
+      "power": 0,
+      "target": "ally",
+      "equals": 3
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_energize_total",
+      "save_as": "ally_total",
+      "label": "ally_total",
+      "spell": 1257670,
+      "power": 0,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 1257670,
+      "equals": 0
+    }
+  ]
+}

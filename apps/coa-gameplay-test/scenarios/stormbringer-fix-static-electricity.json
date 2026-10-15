@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Static Electricity spawns an elemental that shortens Drown (#1692)",
+  "contract": "#1692: Static Electricity 524954 reads 'Critical strikes with Torrential Wrath now spawn an Electrified Water Elemental to aid you in combat for $/1000;573451s1 sec. When an Electrified Water Elemental dissipates, the cooldown of your Drown is reduced by $/1000;573442S1 sec.' 573451 has EffectBasePoints 19999 and DieSides 1, so the tooltip's first number is (19999+1)/1000 = 20 sec, confirmed a second way by 573438's DurationIndex 18 (SpellDuration.dbc 18 = 20000 ms). 573442 has EffectBasePoints -2001 and DieSides 1 on SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN with EffectMiscValue 806407, so the second number is (-2001+1)/1000 = 2 sec off Drown. Nothing of this happened: 524954's SPELL_AURA_PROC_TRIGGER_SPELL has ProcFlags 0 and no spell_proc row, so SpellMgr::LoadSpellProcs skips it (SpellMgr.cpp:2256-2257); its trigger 573451's only effect is effect 178, which is &Spell::EffectNULL at SpellEffects.cpp:250; and creature 310603, the entry 573438 summons, has no creature_template in this repository. The fix summons 310603 for 20000 ms on a non-triggered critical Torrential Wrath hit and, when it dissipates, has the owner cast 573442 so the core's own effect-165 handler applies the -2000 ms. Entry 310603 is also what 573438 summons for Electrified Waters (#929), so its creature_template and its npc_ascension_electrified_water_elemental script are defined once, by #929's migration, and serve both talents; the script gives the summon the owner's faction and level on this path, so the template's level band does not change any number asserted below. Torrential Wrath is cast as rank 503359, the rank a level-80 character owns (AscensionTalentReplacementData.h:41-42 gives it RequiredLevel 58, the highest at or below 80), and spell_crit_rating 100000 makes the critical strike deterministic. Drown 806407 has CategoryRecoveryTime 60000, so its cooldown is long enough to still be running 20 seconds later. Drown and Torrential Wrath both carry StartRecoveryCategory 133 / StartRecoveryTime 1500 (the shared 1.5 s GCD), so the gap between casting Drown and casting Torrential Wrath is 1701 ms to clear it, matching the wait already used for the same GCD in stormbringer-fix-on-cast-proc-cooldowns-evergale.json. The final assertion's -21800 max (not the exact -22000 the tooltip math gives) allows for the few tens of ms between the elemental's actual TEMPSUMMON_TIMED_DESPAWN spawn instant (inside the SETUP crit poll) and the 'before' snapshot a couple of steps later: TempSummon::Update's `m_timer <= diff` guard (TemporarySummon.cpp) cannot fire before 20000 ms of accumulated diff, so this margin only absorbs harness/tick scheduling gap, not a missing effect — a broken cooldown reduction would still show only ~-20000 and fail this bound.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "storm", "race": 1, "class": 16, "level": 80, "spell_hit_rating": 10000, "spell_crit_rating": 100000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "storm", "entry": 36, "level": 80, "health": 1000000, "distance": 3 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "storm", "spell": 524954 },
+    { "action": "learn", "actor": "storm", "spell": 503359 },
+    { "action": "learn", "actor": "storm", "spell": 806407 },
+    { "action": "assert", "label": "BASELINE: the Static Electricity passive is applied",
+      "actor": "storm", "metric": "aura", "spell": 524954, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "BASELINE: no Electrified Water Elemental before the critical strike",
+      "actor": "storm", "metric": "owned_creature_count", "entry": 310603, "equals": 0 },
+    { "action": "assert", "label": "BASELINE: Drown is off cooldown",
+      "actor": "storm", "metric": "cooldown_ms", "spell": 806407, "equals": 0 },
+    { "action": "cast", "actor": "storm", "spell": 806407, "target": "dummy" },
+    { "action": "assert", "label": "BASELINE: Drown is on its 60000 ms category cooldown",
+      "actor": "storm", "metric": "cooldown_ms", "spell": 806407, "min": 50000, "within_ms": 3000 },
+    { "action": "wait", "ms": 1701 },
+    { "action": "set_aura", "actor": "storm", "spell": 803102, "stacks": 100 },
+    { "action": "cast", "actor": "storm", "spell": 503359, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: Torrential Wrath lands as a critical strike",
+      "actor": "storm", "metric": "spell_damage_count", "spell": 503359, "critical": true, "equals": 1, "within_ms": 8000 },
+    { "action": "assert", "label": "DISCRIMINATING: the critical strike spawns one Electrified Water Elemental (310603)",
+      "actor": "storm", "metric": "owned_creature_count", "entry": 310603, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "BASELINE: Electrified (573442) has not been cast while the elemental is alive",
+      "actor": "storm", "metric": "spell_cast_count", "spell": 573442, "equals": 0 },
+    { "action": "snapshot", "label": "Drown cooldown before the elemental dissipates",
+      "actor": "storm", "metric": "cooldown_ms", "spell": 806407, "save_as": "drown_before_dissipate" },
+    { "action": "assert", "label": "DISCRIMINATING: the elemental dissipates after 20000 ms and casts Electrified (573442)",
+      "actor": "storm", "metric": "spell_cast_count", "spell": 573442, "equals": 1, "within_ms": 25000 },
+    { "action": "assert", "label": "DISCRIMINATING: the elemental is gone once it has dissipated",
+      "actor": "storm", "metric": "owned_creature_count", "entry": 310603, "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: Drown lost the 20000 ms that elapsed plus the 2000 ms Electrified removes",
+      "actor": "storm", "metric": "cooldown_ms", "spell": 806407, "relative_to": "drown_before_dissipate", "max": -21800 }
+  ]
+}

@@ -1,0 +1,325 @@
+{
+  "schema": 1,
+  "name": "Primalist Mountain Fury: twelve-target cap in a thirteen-enemy cone",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "behind",
+      "race": 5,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "enemy0",
+      "race": 5,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "enemy1",
+      "race": 5,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "enemy2",
+      "race": 5,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "enemy3",
+      "race": 5,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "enemy4",
+      "race": 5,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "enemy5",
+      "race": 5,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "front0",
+      "owner": "primalist",
+      "entry": 12142,
+      "level": 80,
+      "health": 100000,
+      "distance": 8.0
+    },
+    {
+      "id": "front1",
+      "owner": "primalist",
+      "entry": 12142,
+      "level": 80,
+      "health": 100000,
+      "distance": 8.1
+    },
+    {
+      "id": "front2",
+      "owner": "primalist",
+      "entry": 12142,
+      "level": 80,
+      "health": 100000,
+      "distance": 8.2
+    },
+    {
+      "id": "front3",
+      "owner": "primalist",
+      "entry": 12142,
+      "level": 80,
+      "health": 100000,
+      "distance": 8.3
+    },
+    {
+      "id": "front4",
+      "owner": "primalist",
+      "entry": 12142,
+      "level": 80,
+      "health": 100000,
+      "distance": 8.4
+    },
+    {
+      "id": "front5",
+      "owner": "primalist",
+      "entry": 12142,
+      "level": 80,
+      "health": 100000,
+      "distance": 8.5
+    },
+    {
+      "id": "front6",
+      "owner": "primalist",
+      "entry": 12142,
+      "level": 80,
+      "health": 100000,
+      "distance": 8.6
+    },
+    {
+      "id": "far",
+      "owner": "primalist",
+      "entry": 12142,
+      "level": 80,
+      "health": 100000,
+      "distance": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "pvp",
+      "actor": "primalist",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "behind",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy0",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy1",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy2",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy3",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy4",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy5",
+      "enabled": true
+    },
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 806185
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "behind",
+      "map": 0,
+      "x": -9622.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy0",
+      "map": 0,
+      "x": -9609.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy1",
+      "map": 0,
+      "x": -9608.96,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy2",
+      "map": 0,
+      "x": -9608.859999999999,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy3",
+      "map": 0,
+      "x": -9608.76,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy4",
+      "map": 0,
+      "x": -9608.66,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy5",
+      "map": 0,
+      "x": -9608.56,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 806185
+    },
+    {
+      "action": "wait",
+      "ms": 750
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 806186,
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_stacks",
+      "spell": 807434,
+      "equals": 5
+    },
+    {
+      "action": "wait",
+      "ms": 3600
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 806186,
+      "equals": 36
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 806186,
+      "target": "behind",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 806186,
+      "target": "far",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_amount",
+      "spell": 807434,
+      "effect": 0,
+      "equals": -10
+    },
+    {
+      "action": "wait",
+      "ms": 3300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 807434,
+      "equals": 0
+    }
+  ]
+}

@@ -109,12 +109,12 @@ namespace CoAChallenges
         uint32 ownerGuid = TrialOwnerGuid(trialID);
         if (!ownerGuid)
             return false;
-        if (!CharacterDatabase.Query(
-                "SELECT 1 FROM coa_custom_trial_entry WHERE guid = {} AND trialId = '{}' AND challengeId = {} LIMIT 1",
-                ownerGuid, trialID, challengeID))
-            return false;
         std::string eTrialId = trialID;
         CharacterDatabase.EscapeString(eTrialId);
+        if (!CharacterDatabase.Query(
+                "SELECT 1 FROM coa_custom_trial_entry WHERE guid = {} AND trialId = '{}' AND challengeId = {} LIMIT 1",
+                ownerGuid, eTrialId, challengeID))
+            return false;
         if (QueryResult t = CharacterDatabase.Query(
                 "SELECT title, icon FROM coa_custom_trial WHERE trialId = '{}'", eTrialId))
         {
@@ -130,9 +130,11 @@ namespace CoAChallenges
     {
         up = 0;
         down = 0;
+        std::string eTrialId = trialID;
+        CharacterDatabase.EscapeString(eTrialId);
         if (QueryResult r = CharacterDatabase.Query(
                 "SELECT upvote, downvote FROM coa_custom_trial_vote WHERE guid = {} AND trialId = '{}'",
-                selfGuid, trialID))
+                selfGuid, eTrialId))
         {
             Field* f = r->Fetch();
             up = f[0].Get<uint8>();
@@ -335,11 +337,13 @@ namespace CoAChallenges
             SetActiveCustomTrial(player, "");
             return false;
         }
+        std::string eTrialId = trialID;
+        CharacterDatabase.EscapeString(eTrialId);
 
         std::vector<std::pair<uint32, uint32>> bundled; // (challengeId, level)
         if (QueryResult r = CharacterDatabase.Query(
                 "SELECT challengeId, level FROM coa_custom_trial_entry WHERE guid = {} AND trialId = '{}'",
-                ownerGuid, trialID))
+                ownerGuid, eTrialId))
         {
             do
             {
@@ -369,12 +373,10 @@ namespace CoAChallenges
         uint32 startTime = 0;
         if (QueryResult r = CharacterDatabase.Query(
                 "SELECT startTime FROM coa_custom_trial_active WHERE guid = {} AND trialId = '{}'",
-                guid, trialID))
+                guid, eTrialId))
             startTime = r->Fetch()[0].Get<uint32>();
         uint32 completeTime = uint32(::time(nullptr));
 
-        std::string eTrialId = trialID;
-        CharacterDatabase.EscapeString(eTrialId);
         CharacterDatabase.DirectExecute(
             "REPLACE INTO coa_custom_trial_completion (guid, trialId, startTime, completeTime) "
             "VALUES ({}, '{}', {}, {})",
@@ -688,10 +690,12 @@ namespace CoAChallenges
             SendCriteriaState(player);
             return;
         }
+        std::string eTrialId = trialID;
+        CharacterDatabase.EscapeString(eTrialId);
         std::vector<std::pair<uint32, uint32>> entries;
         if (QueryResult r = CharacterDatabase.Query(
                 "SELECT challengeId, level FROM coa_custom_trial_entry WHERE guid = {} AND trialId = '{}'",
-                ownerGuid, trialID))
+                ownerGuid, eTrialId))
         {
             do
             {
@@ -787,6 +791,8 @@ namespace CoAChallenges
             return;
 
         uint32 ownerGuid = TrialOwnerGuid(trialID);
+        std::string eTrialId = trialID;
+        CharacterDatabase.EscapeString(eTrialId);
         std::vector<std::pair<uint32, uint32>> removed;
         g_suppressSyncBroadcast = true;
         if (ownerGuid)
@@ -797,7 +803,7 @@ namespace CoAChallenges
             std::set<uint32> actives = ActiveChallenges(guid);
             if (QueryResult r = CharacterDatabase.Query(
                     "SELECT challengeId FROM coa_custom_trial_entry WHERE guid = {} AND trialId = '{}'",
-                    ownerGuid, trialID))
+                    ownerGuid, eTrialId))
             {
                 do
                 {

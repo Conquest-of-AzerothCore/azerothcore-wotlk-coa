@@ -30,7 +30,8 @@
 #include <mysql.h>
 #include <mysqld_error.h>
 
-MySQLConnectionInfo::MySQLConnectionInfo(std::string_view infoString)
+MySQLConnectionInfo::MySQLConnectionInfo(std::string_view infoString, std::string_view transactionIsolationLevel)
+    : transactionIsolation(transactionIsolationLevel)
 {
     std::vector<std::string_view> tokens = Acore::Tokenize(infoString, ';', true);
 
@@ -45,6 +46,12 @@ MySQLConnectionInfo::MySQLConnectionInfo(std::string_view infoString)
 
     if (tokens.size() == 6)
         ssl.assign(tokens.at(5));
+}
+
+bool MySQLConnectionInfo::IsTransactionIsolationLevel(std::string_view level)
+{
+    return level == "READ-UNCOMMITTED" || level == "READ-COMMITTED" || level == "REPEATABLE-READ"
+        || level == "SERIALIZABLE";
 }
 
 MySQLConnection::MySQLConnection(MySQLConnectionInfo& connInfo) :
@@ -138,6 +145,13 @@ uint32 MySQLConnection::Open()
         mysql_options(mysqlInit, MYSQL_OPT_SSL_MODE, (char const*)&opt_use_ssl);
     }
 
+    if (!m_connectionInfo.transactionIsolation.empty())
+    {
+        std::string const isolation =
+            "SET SESSION transaction_isolation = '" + m_connectionInfo.transactionIsolation + "'";
+        mysql_options(mysqlInit, MYSQL_INIT_COMMAND, isolation.c_str());
+    }
+
     m_Mysql = reinterpret_cast<MySQLHandle*>(mysql_real_connect(mysqlInit, m_connectionInfo.host.c_str(), m_connectionInfo.user.c_str(),
         m_connectionInfo.password.c_str(), m_connectionInfo.database.c_str(), port, unix_socket, 0));
 
@@ -155,7 +169,7 @@ uint32 MySQLConnection::Open()
         // set connection properties to UTF8 to properly handle locales for different
         // server configs - core sends data in UTF8, so MySQL must expect UTF8 too
         mysql_set_character_set(m_Mysql, "utf8mb4");
-        return 0;
+        return CheckBinaryLogFormat();
     }
     else
     {
@@ -164,6 +178,47 @@ uint32 MySQLConnection::Open()
         mysql_close(mysqlInit);
         return errorCode;
     }
+}
+
+uint32 MySQLConnection::CheckBinaryLogFormat()
+{
+    std::string const& isolation = m_connectionInfo.transactionIsolation;
+    if (isolation != "READ-COMMITTED" && isolation != "READ-UNCOMMITTED")
+        return 0;
+
+    // InnoDB rejects every write at these levels with error 1665 while the server logs statements
+    bool statementLogging = false;
+    if (!mysql_query(m_Mysql,
+        "SELECT @@GLOBAL.log_bin AND @@SESSION.sql_log_bin AND @@SESSION.binlog_format = 'STATEMENT'"))
+    {
+        if (MYSQL_RES* result = mysql_store_result(m_Mysql))
+        {
+            MYSQL_ROW const row = mysql_fetch_row(result);
+            statementLogging = row && row[0] && std::string_view(row[0]) != "0";
+            mysql_free_result(result);
+        }
+    }
+
+    uint32 error = mysql_errno(m_Mysql);
+    if (error)
+    {
+        LOG_ERROR("sql.driver", "Could not read the binary log format of the MySQL server at {}: {}",
+            m_connectionInfo.host, mysql_error(m_Mysql));
+    }
+    else if (statementLogging)
+    {
+        LOG_ERROR("sql.driver", "Transaction isolation {} needs row-based binary logging, but the MySQL server at {} "
+            "logs statements. Set binlog_format to ROW or MIXED, disable binary logging or change the "
+            "TransactionIsolation setting.", isolation, m_connectionInfo.host);
+        error = ER_BINLOG_STMT_MODE_AND_ROW_ENGINE;
+    }
+
+    if (error)
+    {
+        mysql_close(m_Mysql);
+        m_Mysql = nullptr;
+    }
+    return error;
 }
 
 bool MySQLConnection::PrepareStatements()

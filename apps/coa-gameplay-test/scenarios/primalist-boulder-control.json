@@ -1,0 +1,755 @@
+{
+  "schema": 1,
+  "name": "Primalist Boulder Dash: crowd control, attack and cast lock cleanup",
+  "contract": "For ten seconds Boulder Dash grants 70% speed and forward movement while dealing native periodic damage, preventing attacks/casts and granting crowd-control immunity. Natural expiry and cancellation remove every helper immediately. The fixture does not simulate client navigation.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "cancelled",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "enemy",
+      "race": 5,
+      "class": 2,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "pvp",
+      "actor": "primalist",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "cancelled",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "cancelled",
+      "map": 0,
+      "x": -9667.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159265
+    },
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 196
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500692
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 803138
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 78
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "specialization",
+      "actor": "cancelled",
+      "id": 59
+    },
+    {
+      "action": "learn",
+      "actor": "cancelled",
+      "spell": 196
+    },
+    {
+      "action": "learn",
+      "actor": "cancelled",
+      "spell": 500692
+    },
+    {
+      "action": "learn",
+      "actor": "cancelled",
+      "spell": 803138
+    },
+    {
+      "action": "learn",
+      "actor": "cancelled",
+      "spell": 78
+    },
+    {
+      "action": "add_item",
+      "actor": "cancelled",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "cancelled",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "enemy",
+      "spell": 853
+    },
+    {
+      "action": "learn",
+      "actor": "enemy",
+      "spell": 122
+    },
+    {
+      "action": "learn",
+      "actor": "enemy",
+      "spell": 5782
+    },
+    {
+      "action": "set_aura",
+      "actor": "enemy",
+      "spell": 45813,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 853,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_immune",
+      "spell": 122,
+      "effect": 1,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 5782,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 118,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 605,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 676,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 15487,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "actor": "primalist",
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_damage_count",
+      "min": 1
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500692
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 500692,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "forced_forward",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "min": 1.699,
+      "max": 1.701
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 680473,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 681302,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 500693,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 853,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_immune",
+      "spell": 122,
+      "effect": 1,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 5782,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 118,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 605,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 676,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 15487,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_attack_count",
+      "save_as": "dash_attacks_start"
+    },
+    {
+      "action": "attack",
+      "actor": "primalist",
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "enemy"
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 78,
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 853,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 853,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 122,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 122,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 5782,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 5782,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_attack_count",
+      "relative_to": "dash_attacks_start",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 78,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 500693,
+      "target": "enemy",
+      "min": 8
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 500692,
+      "equals": 0,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 680473,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 681302,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 500693,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "forced_forward",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "run_speed_rate",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 853,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_effect_immune",
+      "spell": 122,
+      "effect": 1,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 5782,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 118,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 605,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 676,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 15487,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "melee_attack_count",
+      "save_as": "after_dash_attacks"
+    },
+    {
+      "action": "attack",
+      "actor": "primalist",
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "melee_attack_count",
+      "relative_to": "after_dash_attacks",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 78,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "stop_attack",
+      "actor": "primalist"
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 5782,
+      "target": "primalist"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 5782,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 5782,
+      "stacks": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9664.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159265
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 4000
+    },
+    {
+      "action": "cast",
+      "actor": "cancelled",
+      "spell": 500692
+    },
+    {
+      "action": "wait",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "actor": "cancelled",
+      "metric": "spell_damage_count",
+      "spell": 500693,
+      "target": "enemy",
+      "min": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "cancelled",
+      "spell": 500692,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cancelled",
+      "metric": "aura",
+      "spell": 680473,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cancelled",
+      "metric": "aura",
+      "spell": 681302,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cancelled",
+      "metric": "aura",
+      "spell": 500693,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cancelled",
+      "metric": "forced_forward",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cancelled",
+      "metric": "run_speed_rate",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "cancelled",
+      "metric": "spell_damage_count",
+      "spell": 500693,
+      "target": "enemy",
+      "save_as": "cancel_ticks"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "cancelled",
+      "spell": 803138,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "actor": "cancelled",
+      "metric": "spell_damage_count",
+      "spell": 803138,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "cancelled",
+      "metric": "spell_damage_count",
+      "spell": 500693,
+      "target": "enemy",
+      "relative_to": "cancel_ticks",
+      "equals": 0
+    }
+  ]
+}

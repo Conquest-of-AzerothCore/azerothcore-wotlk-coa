@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "name": "Cultist: Empire Commander raises every primary stat by 4/8/12% per rank (#1350)",
+  "contract": "All three ranks have a single effect, Apply Aura SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (137), EffectMiscValue -1 (the documented 'all stats' sentinel). EffectBasePoints are 3, 7, 11 with DieSides 1, giving +4%, +8%, +12% respectively - an exact per-rank match to the tooltip. AuraEffect::HandleModTotalPercentStat (SpellAuraEffects.cpp ~4510-4535) loops STAT_STRENGTH..MAX_STATS for MiscValue == -1, multiplies every stat's TOTAL_PCT modifier by GetTotalAuraMultiplier over all matching SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE auras, and calls UpdateStatBuffMod so the change is visible immediately. The stat metric reads Unit::GetStat directly, so learning a rank must raise every stat's reading by the matching ratio over the same character's own unbuffed baseline - no injected test stats needed, since the aura is a pure percentage of whatever Strength the fixture already has. Each rank is unlearned before the next is learned so the ranks are never stacked; a final unlearn-all step restores the original ratio of 1.0, confirming cleanup. Numbers read from Spell.dbc via coa-dbc-viewer; the -1 sentinel was independently confirmed against the consumer code, not assumed. No script or SQL references 704887, 707781 or 712470. Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 25,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "cultist",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "str_base"
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 704887
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "knows_spell",
+      "spell": 704887,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 (704887) raises Strength by ~4% (#1350)",
+      "actor": "cultist",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "str_base",
+      "min": 1.02,
+      "max": 1.06
+    },
+    {
+      "action": "unlearn",
+      "actor": "cultist",
+      "spell": 704887
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 707781
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "knows_spell",
+      "spell": 707781,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 (707781) raises Strength by ~8% (#1350)",
+      "actor": "cultist",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "str_base",
+      "min": 1.06,
+      "max": 1.1
+    },
+    {
+      "action": "unlearn",
+      "actor": "cultist",
+      "spell": 707781
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 712470
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "knows_spell",
+      "spell": 712470,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 3 (712470) raises Strength by ~12% (#1350)",
+      "actor": "cultist",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "str_base",
+      "min": 1.1,
+      "max": 1.14
+    },
+    {
+      "action": "unlearn",
+      "actor": "cultist",
+      "spell": 712470
+    },
+    {
+      "action": "assert",
+      "label": "Removing every rank restores the original Strength (cleanup)",
+      "actor": "cultist",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "str_base",
+      "min": 0.99,
+      "max": 1.01
+    }
+  ]
+}

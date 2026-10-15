@@ -1,0 +1,277 @@
+{
+  "schema": 1,
+  "name": "Upper Blackrock Spire: General Drakkisath and his guards fight with Ascension's kits",
+  "contract": [
+    "General Drakkisath uses Ascension's kit for him (db.exil.es/npc/10363): Pierce Armor 2100345, Fierce Blow",
+    "975011, Flamestrike 2100015, Cleave 2102501, Heatwave 2102203 with its line of burning ground 2102204,",
+    "Conflagration 2102208 and Thunder Clap 2102619, and enrages (2102552) below 30% health. His Chromatic Elite",
+    "Guards add Fierce Blow to their kit (db.exil.es/npc/10814).",
+    "Configure the existing two-million survival health before the initial settling wait. These aggressive",
+    "creatures can attack during that wait; changing health afterward cannot revive a killed hero. Native alive",
+    "and maximum-health observations require a living hero before and after settling. Preserve both ordinary",
+    "attack requests, the existing encounter deadlines, every original kit assertion and the 35%-to-25% enrage",
+    "control. Boss damage, aggression, abilities and timers stay unchanged.",
+    "Use the native General Drakkisath chamber: world spawn 137971 is at (36.4509, -285.994, 111.036).",
+    "The old platform could reject Heatwave's destination LOS while the hero wandered under Conflagration.",
+    "The kit fixture starts four yards west of the native boss position and preserves every attack, assertion,",
+    "deadline, damage value, aggression setting and ability timer.",
+    "Keep the guard inside the same chamber, eight yards from the hero, while retaining its ordinary attack.",
+    "native guards around Drakkisath. The old 25-yard offset placed the guard outside this chamber."
+  ],
+  "timeout_ms": 240000,
+  "location": {
+    "map": 229,
+    "x": 32.4509,
+    "y": -285.994,
+    "z": 111.036,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 10363,
+      "level": 62,
+      "health": 400000,
+      "reaction": 2,
+      "distance": 4
+    },
+    {
+      "id": "guard",
+      "owner": "hero",
+      "entry": 10814,
+      "level": 61,
+      "health": 400000,
+      "reaction": 2,
+      "distance": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000,
+      "label": "Configure the original survival health before aggressive creatures can attack"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "max_health",
+      "equals": 2000000,
+      "label": "CONTROL: the survival health is configured before settling"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1,
+      "label": "CONTROL: health setup starts with a living hero"
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1,
+      "label": "CONTROL: the hero survives the initial aggressive encounter settling"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Upper Blackrock Spire",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 229
+    },
+    {
+      "action": "attack",
+      "label": "Engage General Drakkisath",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: General Drakkisath fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Drakkisath uses Pierce Armor",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10363,
+      "spell": 2100345,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Pierce Armor stays on the hero",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2100345,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Drakkisath uses Fierce Blow",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10363,
+      "spell": 975011,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Drakkisath casts Flamestrike",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10363,
+      "spell": 2100015,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Drakkisath uses Cleave",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10363,
+      "spell": 2102501,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "assert",
+      "label": "Drakkisath casts Heatwave",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10363,
+      "spell": 2102203,
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "Heatwave leaves burning ground",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10363,
+      "spell": 2102204,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Drakkisath casts Conflagration",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10363,
+      "spell": 2102208,
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "assert",
+      "label": "Drakkisath uses Thunder Clap",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10363,
+      "spell": 2102619,
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "A Chromatic Elite Guard uses Fierce Blow",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 10814,
+      "spell": 975011,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero survives the fight",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Drakkisath has not enraged above 30% health",
+      "actor": "boss",
+      "metric": "aura",
+      "spell": 2102552,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "label": "Leave Drakkisath at 35% health",
+      "actor": "boss",
+      "value": 140000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "A blow takes Drakkisath to 25% health",
+      "actor": "hero",
+      "entry": 10363,
+      "damage_pct": 10
+    },
+    {
+      "action": "assert",
+      "label": "Drakkisath enrages below 30% health",
+      "actor": "boss",
+      "metric": "aura",
+      "spell": 2102552,
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

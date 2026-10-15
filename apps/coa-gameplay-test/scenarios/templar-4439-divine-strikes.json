@@ -1,0 +1,34 @@
+{
+ "schema": 1,
+ "name": "Divine Strikes grants its stacking buff when Scourgebane deals damage (#4439)",
+ "contract": "Divine Strikes 705255's Description reads \"Damage dealt by Scourgebane now increases the damage of Argent Blade by X% for Y, stacking N times.\" AscensionTemplarAbilities.cpp's OnSpellHitResult casts 803372 (StackAmount 10, a self-targeted stacking aura) unconditionally whenever Scourgebane 801832 (Argent Blade's own guaranteed trigger, per the existing templar-argent-blade-scourgebane.json scenario) deals damage and the player knows 705255 - no chance roll, so one Argent Blade cast is deterministic.",
+ "timeout_ms": 90000,
+ "players": [
+  { "id": "control", "race": 1, "class": 19, "level": 80, "melee_hit_rating": 10000, "spell_hit_rating": 10000, "expertise_rating": 10000, "allow_regeneration": false },
+  { "id": "talent", "race": 1, "class": 19, "level": 80, "melee_hit_rating": 10000, "spell_hit_rating": 10000, "expertise_rating": 10000, "allow_regeneration": false }
+ ],
+ "creatures": [
+  { "id": "dummy_control", "owner": "control", "entry": 36, "health": 1000000, "distance": 3 },
+  { "id": "dummy_talent", "owner": "talent", "entry": 36, "health": 1000000, "distance": 3 }
+ ],
+ "steps": [
+  { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+  { "action": "learn", "actor": "control", "spell": 807268 },
+  { "action": "learn", "actor": "talent", "spell": 807268 },
+  { "action": "learn", "actor": "talent", "spell": 705255 },
+  { "action": "add_item", "actor": "control", "item": 2495 },
+  { "action": "equip", "actor": "control", "item": 2495, "slot": 15 },
+  { "action": "add_item", "actor": "talent", "item": 2495 },
+  { "action": "equip", "actor": "talent", "item": 2495, "slot": 15 },
+  { "action": "set_power", "actor": "control", "power": 3, "value": 100 },
+  { "action": "set_power", "actor": "talent", "power": 3, "value": 100 },
+  { "action": "cast", "actor": "control", "spell": 807268, "target": "dummy_control" },
+  { "action": "cast", "actor": "talent", "spell": 807268, "target": "dummy_talent" },
+  { "action": "wait", "label": "let hits land", "ms": 2000 },
+  { "action": "assert", "label": "SETUP: Scourgebane triggers for control", "actor": "control", "metric": "spell_cast_count", "spell": 801832, "min": 1 },
+  { "action": "assert", "label": "SETUP: Scourgebane triggers for talent", "actor": "talent", "metric": "spell_cast_count", "spell": 801832, "min": 1 },
+  { "action": "assert", "label": "Without Divine Strikes, its buff does not apply", "actor": "control", "metric": "aura", "spell": 803372, "equals": 0 },
+  { "action": "assert", "label": "DISCRIMINATING: Divine Strikes' buff applies once Scourgebane deals damage", "actor": "talent", "metric": "aura", "spell": 803372, "equals": 1 },
+  { "action": "assert", "label": "Divine Strikes' buff carries a stack", "actor": "talent", "metric": "aura_stacks", "spell": 803372, "min": 1 }
+ ]
+}

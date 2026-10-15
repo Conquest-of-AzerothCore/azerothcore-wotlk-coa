@@ -1,0 +1,714 @@
+{
+  "schema": 1,
+  "name": "Primalist Primal Totem: raid stats, stationary range and expiry",
+  "contract": "The normal 20-Rage cast creates one stationary Primal Totem for 15 seconds, granting all five primary stats +20% to the owner and party within 40 yards. Ungrouped/out-of-range players are excluded, walking away removes the aura, expiry restores stats and the native cooldown is ten minutes.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 2,
+      "level": 80
+    },
+    {
+      "id": "distant",
+      "race": 1,
+      "class": 2,
+      "level": 80
+    },
+    {
+      "id": "outsider",
+      "race": 1,
+      "class": 2,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "distant"
+    },
+    {
+      "action": "teleport",
+      "actor": "distant",
+      "map": 0,
+      "x": -9557.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "primalist_stat0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 1,
+      "save_as": "primalist_stat1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "primalist_stat2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 3,
+      "save_as": "primalist_stat3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 4,
+      "save_as": "primalist_stat4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "ally_stat0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 1,
+      "save_as": "ally_stat1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "ally_stat2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 3,
+      "save_as": "ally_stat3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 4,
+      "save_as": "ally_stat4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "distant",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "distant_stat0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "distant",
+      "metric": "stat",
+      "stat": 1,
+      "save_as": "distant_stat1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "distant",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "distant_stat2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "distant",
+      "metric": "stat",
+      "stat": 3,
+      "save_as": "distant_stat3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "distant",
+      "metric": "stat",
+      "stat": 4,
+      "save_as": "distant_stat4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "outsider_stat0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "stat",
+      "stat": 1,
+      "save_as": "outsider_stat1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "outsider_stat2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "stat",
+      "stat": 3,
+      "save_as": "outsider_stat3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "outsider",
+      "metric": "stat",
+      "stat": 4,
+      "save_as": "outsider_stat4"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 504229
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 504229,
+      "destination": {
+        "x": -9615.06,
+        "y": -288.949,
+        "z": 57.3053
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "owned_creature_count",
+      "entry": 224861,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 504229,
+      "min": 598000,
+      "max": 600000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 806694,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "primalist_stat0",
+      "min": 1.189,
+      "max": 1.2109999999999999
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "primalist_stat1",
+      "min": 1.189,
+      "max": 1.2109999999999999
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 2,
+      "ratio_to": "primalist_stat2",
+      "min": 1.189,
+      "max": 1.2109999999999999
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "primalist_stat3",
+      "min": 1.189,
+      "max": 1.2109999999999999
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "primalist_stat4",
+      "min": 1.189,
+      "max": 1.2109999999999999
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 806694,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "ally_stat0",
+      "min": 1.189,
+      "max": 1.2109999999999999
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "ally_stat1",
+      "min": 1.189,
+      "max": 1.2109999999999999
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 2,
+      "ratio_to": "ally_stat2",
+      "min": 1.189,
+      "max": 1.2109999999999999
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "ally_stat3",
+      "min": 1.189,
+      "max": 1.2109999999999999
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "ally_stat4",
+      "min": 1.189,
+      "max": 1.2109999999999999
+    },
+    {
+      "action": "assert",
+      "actor": "distant",
+      "metric": "aura",
+      "spell": 806694,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "distant",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "distant_stat0",
+      "min": 0.989,
+      "max": 1.011
+    },
+    {
+      "action": "assert",
+      "actor": "distant",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "distant_stat1",
+      "min": 0.989,
+      "max": 1.011
+    },
+    {
+      "action": "assert",
+      "actor": "distant",
+      "metric": "stat",
+      "stat": 2,
+      "ratio_to": "distant_stat2",
+      "min": 0.989,
+      "max": 1.011
+    },
+    {
+      "action": "assert",
+      "actor": "distant",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "distant_stat3",
+      "min": 0.989,
+      "max": 1.011
+    },
+    {
+      "action": "assert",
+      "actor": "distant",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "distant_stat4",
+      "min": 0.989,
+      "max": 1.011
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "aura",
+      "spell": 806694,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "outsider_stat0",
+      "min": 0.989,
+      "max": 1.011
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "outsider_stat1",
+      "min": 0.989,
+      "max": 1.011
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "stat",
+      "stat": 2,
+      "ratio_to": "outsider_stat2",
+      "min": 0.989,
+      "max": 1.011
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "outsider_stat3",
+      "min": 0.989,
+      "max": 1.011
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "outsider_stat4",
+      "min": 0.989,
+      "max": 1.011
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9557.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 806694,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 806694,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "distant",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "assert",
+      "actor": "distant",
+      "metric": "aura",
+      "spell": 806694,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 13000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "owned_creature_count",
+      "entry": 224861,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 806694,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "primalist_stat0",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "primalist_stat1",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 2,
+      "ratio_to": "primalist_stat2",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "primalist_stat3",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "primalist_stat4",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 806694,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "ally_stat0",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "ally_stat1",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 2,
+      "ratio_to": "ally_stat2",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "ally_stat3",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "ally_stat4",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "distant",
+      "metric": "aura",
+      "spell": 806694,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "distant",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "distant_stat0",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "distant",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "distant_stat1",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "distant",
+      "metric": "stat",
+      "stat": 2,
+      "ratio_to": "distant_stat2",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "distant",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "distant_stat3",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "distant",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "distant_stat4",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "aura",
+      "spell": 806694,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "outsider_stat0",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "outsider_stat1",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "stat",
+      "stat": 2,
+      "ratio_to": "outsider_stat2",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "outsider_stat3",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "outsider_stat4",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Ranger Deadeye extends Auto Shot as well as the Ranger's ranged abilities by 5 yds (#1733)",
+  "contract": "Deadeye 300700 (Ranger Archery talent, CharacterAdvancement 29447, SpellFamilyName 27) reads 'Increases the range of your ranged abilities and Auto Shot by $s1 yds.' Its only effect is SPELL_AURA_ADD_FLAT_MODIFIER (107) with MiscValue 5 = SPELLMOD_RANGE and BasePoints 4 + DieSides 1 = +5, masked to family 27 words (1081480, 210305041, 18882688), which covers the Ranger's shots such as Quick Shot 500074 (family 27, flags 0/1/0, SpellRange 54 = 30 yds). The Auto Shot every Ranger learns at level 1 (AscensionCustomClassData {21, 1, 75}) is spell 75, SpellFamilyName 9 with flags (1, 0, 0) and SpellRange 114 = 35 yds, so the family-27 mask can never select it and SpellInfo::IsAffectedBySpellMod leaves it at 35 yds. The tooltip names Auto Shot explicitly, so with Deadeye learned Auto Shot must reach 35 + 5 = 40 yds, Quick Shot 30 + 5 = 35 yds, and the melee Flank 804940 (SpellRange 2 = 5 yds, outside the mask) must stay unchanged. spell_max_range is SpellInfo::GetMaxRange with the player's SPELLMOD_RANGE modifiers, the same Player::ApplySpellMod call Spell::CheckRange makes. Before the fix the Auto Shot assertion reads +0.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the character settle", "ms": 3000 },
+    { "action": "unlearn", "actor": "ranger", "spell": 300700 },
+    {
+      "action": "assert", "label": "SETUP: Deadeye is not active", "actor": "ranger",
+      "metric": "aura", "spell": 300700, "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: Auto Shot starts at its native 35 yds", "actor": "ranger",
+      "metric": "spell_max_range", "spell": 75, "min": 34.99, "max": 35.01
+    },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_max_range", "spell": 75, "save_as": "auto_shot_before" },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_max_range", "spell": 500074, "save_as": "quick_shot_before" },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_max_range", "spell": 804940, "save_as": "flank_before" },
+    { "action": "learn", "actor": "ranger", "spell": 300700 },
+    {
+      "action": "assert", "label": "SETUP: Deadeye is active on the Ranger", "actor": "ranger",
+      "metric": "aura", "spell": 300700, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTROL: Quick Shot's range rises by 5 yds", "actor": "ranger",
+      "metric": "spell_max_range", "spell": 500074, "relative_to": "quick_shot_before", "min": 4.99, "max": 5.01
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Auto Shot's range rises by 5 yds", "actor": "ranger",
+      "metric": "spell_max_range", "spell": 75, "relative_to": "auto_shot_before", "min": 4.99, "max": 5.01
+    },
+    {
+      "action": "assert", "label": "REGRESSION: the melee Flank keeps its range", "actor": "ranger",
+      "metric": "spell_max_range", "spell": 804940, "relative_to": "flank_before", "min": -0.01, "max": 0.01
+    },
+    { "action": "unlearn", "actor": "ranger", "spell": 300700 },
+    {
+      "action": "assert", "label": "Unlearning Deadeye returns Auto Shot to 35 yds", "actor": "ranger",
+      "metric": "spell_max_range", "spell": 75, "relative_to": "auto_shot_before", "min": -0.01, "max": 0.01,
+      "within_ms": 3000
+    }
+  ]
+}

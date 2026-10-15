@@ -25,6 +25,7 @@
 #include "DatabaseEnv.h"
 #include "IPLocation.h"
 #include "Log.h"
+#include "RealmCard.h"
 #include "RealmList.h"
 #include "SecretMgr.h"
 #include "StringConvert.h"
@@ -811,6 +812,7 @@ void AuthSession::RealmListCallback(PreparedQueryResult result)
     ByteBuffer pkt;
 
     std::size_t RealmListSize = 0;
+    std::vector<std::string> listedNames;
     for (auto const& [realmHandle, realm] : sRealmList->GetRealms())
     {
         // don't work with realms which not compatible with the client
@@ -864,7 +866,29 @@ void AuthSession::RealmListCallback(PreparedQueryResult result)
             pkt << uint16(buildInfo->Build);
         }
 
+        listedNames.push_back(realm.Name);
         ++RealmListSize;
+    }
+
+    if (_expversion & POST_BC_EXP_FLAG && sConfigMgr->GetOption<bool>("RealmCards.Enable", true))
+    {
+        RealmCardStyle const style{ sConfigMgr->GetOption<uint32>("RealmCards.Expansion", 2),
+            sConfigMgr->GetOption<uint32>("RealmCards.GameMode", 11),
+            sConfigMgr->GetOption<std::string>("RealmCards.Image", "Default") };
+        uint8 const category = uint8(sConfigMgr->GetOption<uint32>("RealmCards.Category", 41));
+        for (std::size_t order = 0; order < listedNames.size(); ++order)
+        {
+            pkt << uint8(REALM_TYPE_NORMAL);
+            pkt << uint8(0);
+            pkt << uint8(REALM_FLAG_OFFLINE);
+            pkt << BuildRealmCardName(listedNames[order], style, GetRealmCardSlot(order));
+            pkt << "0.0.0.0:0";
+            pkt << float(0);
+            pkt << uint8(0);
+            pkt << category;
+            pkt << uint8(0);
+            ++RealmListSize;
+        }
     }
 
     if (_expversion & POST_BC_EXP_FLAG)                     // 2.x and 3.x clients

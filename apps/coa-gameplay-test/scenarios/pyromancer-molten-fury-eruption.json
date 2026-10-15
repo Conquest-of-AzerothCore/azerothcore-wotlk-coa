@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "name": "Molten Fury shortens Eruption and strengthens its effects (#1151)",
+  "contract": "#1151: Molten Fury 704818 has effect 1 ADD_PCT_MODIFIER on SPELLMOD_DURATION (misc 1, bp -51 = -50 percent) and effect 2 ADD_FLAT_MODIFIER on SPELLMOD_ALL_EFFECTS (misc 8, bp 14 = +15), both with class mask C 0x20000000 which only Eruption 800103 has. Eruption lasts 15000 ms (duration index 8) with aura 79 and aura 136 at bp 19 (20). Native paths do the rest: aura duration through ApplySpellMod SPELLMOD_DURATION, effect amounts through SpellEffectInfo::CalcValue -> ApplyEffectModifiers. Expected with the passive: duration 7500 ms and both amounts 35 (a flat +15 points, as the DBC says, not 20 x 1.15). Probes read the native modifiers before and after learning, then a real cast checks the applied aura.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000,
+      "label": "Let spawn AI and level scaling settle"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800103
+    },
+    {
+      "action": "assert",
+      "label": "Eruption lasts its authored 15000 ms before the passive",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 800103,
+      "op": 1,
+      "base": 15000,
+      "equals": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Eruption effect 1 is its authored 20 before the passive",
+      "actor": "caster",
+      "metric": "spell_effect_value",
+      "spell": 800103,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "Eruption effect 2 is its authored 20 before the passive",
+      "actor": "caster",
+      "metric": "spell_effect_value",
+      "spell": 800103,
+      "effect": 1,
+      "equals": 20
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 704818
+    },
+    {
+      "action": "assert",
+      "label": "Molten Fury halves the duration",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 800103,
+      "op": 1,
+      "base": 15000,
+      "equals": 7500
+    },
+    {
+      "action": "assert",
+      "label": "Molten Fury raises effect 1 to 35",
+      "actor": "caster",
+      "metric": "spell_effect_value",
+      "spell": 800103,
+      "effect": 0,
+      "equals": 35
+    },
+    {
+      "action": "assert",
+      "label": "Molten Fury raises effect 2 to 35",
+      "actor": "caster",
+      "metric": "spell_effect_value",
+      "spell": 800103,
+      "effect": 1,
+      "equals": 35
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800103
+    },
+    {
+      "action": "assert",
+      "label": "Eruption is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 800103,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The applied Eruption lasts at most 7500 ms",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 800103,
+      "min": 1,
+      "max": 7500
+    },
+    {
+      "action": "assert",
+      "label": "The applied Eruption effect 1 is 35",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 800103,
+      "effect": 0,
+      "equals": 35
+    },
+    {
+      "action": "assert",
+      "label": "The applied Eruption effect 2 is 35",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 800103,
+      "effect": 1,
+      "equals": 35
+    }
+  ]
+}

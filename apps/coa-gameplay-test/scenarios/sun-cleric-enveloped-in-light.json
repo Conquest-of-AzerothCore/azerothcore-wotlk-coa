@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Enveloped in Light raises plate armor and cuts Shadow damage taken (#1376)",
+  "contract": "Enveloped in Light rank 1 (680652) and rank 2 (681467) are SPELL_ATTR0_PASSIVE. Effect 0 is SPELL_AURA_MOD_BASE_RESISTANCE_PCT (142) with EffectMiscValue SPELL_SCHOOL_MASK_NORMAL (1) and EffectMiscValueB 16 (1 << ITEM_SUBCLASS_ARMOR_PLATE); SpellEffectInfo::GetItemArmorSubclassMask() (SpellInfo.cpp) already special-cases spell ids 680652 and 681467 by name, returning mask 16 for exactly this effect, and Player::UpdateArmor (StatSystem.cpp) multiplies only GetItemArmorBySubclass(PLATE) by this modifier before adding it to total armor -- a native, already-shipped mechanism, not a side effect. EffectBasePoints 9/19 resolve to +10/+20 (percent), matching the tooltip. Effect 1 is SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN (87) with EffectMiscValue school mask 32 (Shadow) and EffectBasePoints -4/-7 resolving to -3/-6 (percent); this is a fully generic, family-agnostic damage-taken modifier consumed wherever incoming Shadow damage is calculated, with no script needed.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "rank1", "race": 1, "class": 27, "level": 80 },
+    { "id": "rank2", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "rank1", "spell": 680652 },
+    { "action": "learn", "actor": "rank2", "spell": 681467 },
+    {
+      "action": "assert", "label": "Rank 1 grants +10% plate armor contribution",
+      "actor": "rank1", "metric": "aura_amount", "spell": 680652, "effect": 0, "equals": 10
+    },
+    {
+      "action": "assert", "label": "Rank 1 grants -3% Shadow damage taken",
+      "actor": "rank1", "metric": "aura_amount", "spell": 680652, "effect": 1, "equals": -3
+    },
+    {
+      "action": "assert", "label": "Rank 2 grants +20% plate armor contribution",
+      "actor": "rank2", "metric": "aura_amount", "spell": 681467, "effect": 0, "equals": 20
+    },
+    {
+      "action": "assert", "label": "Rank 2 grants -6% Shadow damage taken",
+      "actor": "rank2", "metric": "aura_amount", "spell": 681467, "effect": 1, "equals": -6
+    }
+  ]
+}

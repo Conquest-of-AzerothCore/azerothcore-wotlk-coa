@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "name": "Issue 753: Frostburn removes the cast time of Glacial Rune and Permafrost Rune",
+  "contract": [
+    "Frostburn 705594 (passive) reads 'Removes the cast time of Glacial Rune and Permafrost Rune.' Effect 1 is a",
+    "native percent modifier (aura 108) of SPELLMOD_CASTING_TIME (10), BasePoints -101 (-100%), on family 38 mask1",
+    "0x4200000, which Glacial Rune 807842 (mask1 0x200000, 1250 ms cast) and Permafrost Rune 804060 (mask1 0x4000000,",
+    "1000 ms cast) carry. Effect 0 is a copied override-script selector 20001 (critical damage versus Frozen targets)",
+    "with an amount of 0 that the description does not mention. Expected: both runes keep their cast times without",
+    "the talent, become instant with it, and regain them when it is removed; a real Glacial Rune cast shows a cast",
+    "bar without Frostburn and places its rune at once with it. This is evidence that the mechanic already works."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 807842},
+    {"action": "learn", "actor": "rm", "spell": 804060},
+    {"action": "assert", "label": "Glacial Rune has a cast time without Frostburn", "actor": "rm",
+      "metric": "spell_cast_time_ms", "spell": 807842, "min": 1000, "max": 1250},
+    {"action": "assert", "label": "Permafrost Rune has a cast time without Frostburn", "actor": "rm",
+      "metric": "spell_cast_time_ms", "spell": 804060, "min": 800, "max": 1000},
+
+    {"action": "cast", "actor": "rm", "spell": 807842,
+      "destination": {"x": -8946.95, "y": -132.493, "z": 83.5312}},
+    {"action": "assert", "label": "Without Frostburn Glacial Rune shows a cast bar", "actor": "rm",
+      "metric": "cast_remaining_ms", "spell": 807842, "min": 500},
+    {"action": "assert", "label": "SETUP: the cast completes and places the rune", "actor": "rm",
+      "metric": "dynamic_object", "spell": 807842, "equals": 1, "within_ms": 2500},
+    {"action": "assert", "label": "SETUP: the rune expires", "actor": "rm", "metric": "dynamic_object",
+      "spell": 807842, "equals": 0, "within_ms": 3000},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 807842},
+
+    {"action": "learn", "actor": "rm", "spell": 705594},
+    {"action": "assert", "label": "Frostburn passive is active", "actor": "rm", "metric": "aura", "spell": 705594,
+      "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "Frostburn makes Glacial Rune instant", "actor": "rm",
+      "metric": "spell_cast_time_ms", "spell": 807842, "equals": 0},
+    {"action": "assert", "label": "Frostburn makes Permafrost Rune instant", "actor": "rm",
+      "metric": "spell_cast_time_ms", "spell": 804060, "equals": 0},
+    {"action": "wait", "ms": 1500},
+    {"action": "cast", "actor": "rm", "spell": 807842,
+      "destination": {"x": -8946.95, "y": -132.493, "z": 83.5312}},
+    {"action": "assert", "label": "With Frostburn Glacial Rune has no cast bar", "actor": "rm",
+      "metric": "cast_remaining_ms", "spell": 807842, "equals": 0},
+    {"action": "assert", "label": "With Frostburn the rune is placed at once", "actor": "rm",
+      "metric": "dynamic_object", "spell": 807842, "equals": 1, "within_ms": 200},
+
+    {"action": "unlearn", "actor": "rm", "spell": 705594},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 705594, "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "Removing Frostburn restores Glacial Rune's cast time", "actor": "rm",
+      "metric": "spell_cast_time_ms", "spell": 807842, "min": 1000, "max": 1250},
+    {"action": "assert", "label": "Removing Frostburn restores Permafrost Rune's cast time", "actor": "rm",
+      "metric": "spell_cast_time_ms", "spell": 804060, "min": 800, "max": 1000}
+  ]
+}

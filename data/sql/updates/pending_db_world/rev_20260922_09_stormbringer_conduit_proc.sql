@@ -1,0 +1,39 @@
+-- Conduit (806374), a Stormbringer passive granted by CharacterAdvancement for class 16: "Dealing Frost
+-- damage now has a $h% chance to increase the damage the target takes from Electrocute by $806393s1% for
+-- $806393d, stacking up to $806393u times." Its single effect is SPELL_EFFECT_APPLY_AURA with aura 42
+-- SPELL_AURA_PROC_TRIGGER_SPELL and EffectTriggerSpell 806393, ProcChance 60, and Spell.dbc ProcFlags 0x0.
+-- SpellMgr::LoadSpellProcs skips DBC fallback generation for a record without proc flags ("Skip if no proc
+-- flags in DBC", SpellMgr.cpp), and there was no `spell_proc` row, so SpellMgr::GetSpellProcEntry returned
+-- nullptr, Aura::GetProcEffectMask returned 0 and the passive was inert: 806393 was never applied to
+-- anything. It has no other incoming reference in Spell.dbc, so no other route could apply it either.
+--
+-- The trigger 806393 "Conduit" is native and untouched: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER,
+-- BasePoints 14 + DieSides 1 = 15%, DurationIndex 1 = 10000 ms, StackAmount 4, EffectSpellClassMask
+-- (33554432, 0, 0) with SpellFamilyName 22, which is exactly Electrocute (501421/801844,
+-- SpellFamilyFlags[0] 33554432). Unit::SpellDamageBonusTaken consumes it behind a caster-GUID and
+-- IsAffectedOnSpell check, so the debuff only helps the Stormbringer who applied it, and only on
+-- Electrocute. AuraEffect::HandleProcTriggerSpellAuraProc casts the trigger at eventInfo.GetActionTarget(),
+-- which is the enemy that took the Frost hit.
+--
+-- SchoolMask 16 = SPELL_SCHOOL_MASK_FROST is the "dealing Frost damage" clause;
+-- SpellMgr::CanSpellTriggerProcOnEvent checks it against eventInfo.GetSchoolMask().
+-- ProcFlags 65536 = PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG: every Stormbringer Frost damage record read
+-- is DmgClass 1 MAGIC (Brine 807105, Deluge 806400/807713/807717, Drown 572760, Conduction 567560,
+-- Torrential Wrath 503352/804017). PROC_FLAG_DONE_PERIODIC is deliberately not added: no Frost periodic
+-- Stormbringer source was found (Drown's periodic child 806406 is Nature, Deluge's child 806399 is aura 344
+-- and not damage).
+-- SpellTypeMask 1 = PROC_SPELL_TYPE_DAMAGE: the tooltip says damage, not healing.
+-- SpellPhaseMask 2 = PROC_SPELL_PHASE_HIT rolls on the hit rather than on the cast.
+-- SpellFamilyName and the family masks stay 0: "dealing Frost damage" names no ability.
+-- Chance stays 0 so SpellMgr::LoadSpellProcs takes the record's own ProcChance of 60 - the $h the
+-- description renders.
+-- HitMask 0 leaves the DONE default (NORMAL | CRITICAL | ABSORB); AttributesMask 0 (no mana-cost or
+-- XP-target requirement); DisableEffectsMask 0 (the record has a single effect); Charges 0 matches
+-- ProcCharges 0, the passive being permanent. 806374 has no `spell_ranks` row, so the "not first rank"
+-- validation does not fire.
+--
+-- 806393's own description text says "20 sec" while its DurationIndex 1 is 10000 ms; the duration index is
+-- what the server and the client tooltip's $806393d both use, and nothing here changes it.
+DELETE FROM `spell_proc` WHERE `SpellId` = 806374;
+INSERT INTO `spell_proc` (`SpellId`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `ProcFlags`, `SpellTypeMask`, `SpellPhaseMask`, `HitMask`, `AttributesMask`, `DisableEffectsMask`, `ProcsPerMinute`, `Chance`, `Cooldown`, `Charges`) VALUES
+(806374, 16, 0, 0, 0, 0, 65536, 1, 2, 0, 0, 0, 0, 0, 0, 0);

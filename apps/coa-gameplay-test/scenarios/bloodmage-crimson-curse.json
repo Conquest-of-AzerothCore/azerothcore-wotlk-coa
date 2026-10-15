@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "name": "Crimson Curse raises bleed damage taken on a critical strike (#3086)",
+  "contract": "Crimson Curse 706656 reads 'Your direct damage critical strikes increase the damage the target takes from bleed effects by $560288s1% for $560288d'. Its single effect is aura 42 (proc trigger spell) on Lacerations 560288 (MOD_MECHANIC_DAMAGE_TAKEN_PERCENT, MiscValue 15 = MECHANIC_BLEED, BasePoints 29 -> +30%, duration index 8, TargetA 6). Spell.dbc gives 706656 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and no crit ever applied the debuff. Bloodbolt is cast as rank 578305 (the rank a level-80 character owns; 578304 is only granted up to level 52 and gets no server response) and spell_crit_rating 100000 makes the critical strike deterministic instead of hoping for one.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 100000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 706656
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 578305
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Crimson Curse passive is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 706656,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "No Lacerations debuff before any cast",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 560288,
+      "caster": "bloodmage",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 578305,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a critical Bloodbolt applies Lacerations 560288",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 560288,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Lacerations grants the DBC value of +30% bleed damage taken",
+      "actor": "dummy",
+      "metric": "aura_amount",
+      "spell": 560288,
+      "caster": "bloodmage",
+      "equals": 30
+    }
+  ]
+}

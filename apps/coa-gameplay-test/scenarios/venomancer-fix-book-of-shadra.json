@@ -1,0 +1,138 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Book of Shadra makes Green Salve seek every 6 sec (#2906)",
+  "contract": "#2906: Book of Shadra 705957 reads 'Doubles the duration, cooldown, and healing of Green Salve. In addition, it now seeks another nearby ally to heal every 6 sec, instead of at the end of the duration.' Spell.dbc: Green Salve 800902 effect 1 is aura 227 with a 5999 ms period and duration index 32 (6 s); the three 705957 effects are aura 108 with BasePoints 99 (+100%), which lengthen it to 12 s. The seek heal 803529 was cast by aura_ascension_venomancer_lifecycle behind a once-only ScriptValue guard, so a 12 s salve seeked once. The guard is now skipped while the caster has 705957. The baseline in the same run (Book unlearned) must seek exactly once; with the Book learned two seeks are required. Free instant 800902 needs no resource.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "venom",
+      "race": 1,
+      "class": 29,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "venom",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "venom",
+      "spell": 800902
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Book of Shadra is not yet active",
+      "actor": "venom",
+      "metric": "aura",
+      "spell": 705957,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "venom",
+      "metric": "spell_cast_count",
+      "spell": 803529,
+      "save_as": "seek_before"
+    },
+    {
+      "action": "cast",
+      "actor": "venom",
+      "spell": 800902,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "Green Salve is applied on the ally for the base 6 s",
+      "actor": "ally",
+      "metric": "aura_duration_ms",
+      "spell": 800902,
+      "min": 1,
+      "max": 6000,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the base 6 s aura run out",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: without Book the salve seeks another ally exactly once",
+      "actor": "venom",
+      "metric": "spell_cast_count",
+      "spell": 803529,
+      "relative_to": "seek_before",
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "venom",
+      "spell": 705957
+    },
+    {
+      "action": "assert",
+      "label": "Book of Shadra passive is active",
+      "actor": "venom",
+      "metric": "aura",
+      "spell": 705957,
+      "equals": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "venom",
+      "spell": 800902
+    },
+    {
+      "action": "snapshot",
+      "actor": "venom",
+      "metric": "spell_cast_count",
+      "spell": 803529,
+      "save_as": "seek_book"
+    },
+    {
+      "action": "cast",
+      "actor": "venom",
+      "spell": 800902,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "With Book the salve lasts 12 s",
+      "actor": "ally",
+      "metric": "aura_duration_ms",
+      "spell": 800902,
+      "min": 7000,
+      "max": 12000,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let both 6 s ticks and the aura end pass",
+      "ms": 14000
+    },
+    {
+      "action": "assert",
+      "label": "Book of Shadra: the salve seeks another ally on each of the two 6 s ticks",
+      "actor": "venom",
+      "metric": "spell_cast_count",
+      "spell": 803529,
+      "relative_to": "seek_book",
+      "equals": 2
+    }
+  ]
+}

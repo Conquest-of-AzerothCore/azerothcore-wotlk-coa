@@ -5,7 +5,7 @@
   "timeout_ms": 30000,
   "players": [{ "id": "hunter", "race": 1, "class": 15, "level": 20 }],
   "steps": [
-    { "action": "command", "actor": "hunter", "command": ".localspec 11" },
+    { "action": "specialization", "actor": "hunter", "id": 11 },
     { "action": "learn", "actor": "hunter", "spell": 801343 },
     { "action": "assert", "actor": "hunter", "metric": "knows_spell", "spell": 578118, "equals": 1 },
     { "action": "assert", "actor": "hunter", "metric": "knows_spell", "spell": 680263, "equals": 1 },

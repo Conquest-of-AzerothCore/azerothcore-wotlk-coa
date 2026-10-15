@@ -1,0 +1,294 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Wilting Away chain target and Glory To Shadra! critical chance (#2933, #2938)",
+  "contract": "Issues #2933 (Wilting Away 706012) and #2938 (Glory To Shadra! 706033), both classified works-natively; regression scenario. Spell.dbc: 706012 is one ADD_FLAT_MODIFIER (aura 107) effect, misc 17 SPELLMOD_JUMP_TARGETS, BasePoints 0 DieSides 1 (+1), EffectSpellClassMask (64,0,0) = SpellFamilyFlags of every Wilt rank (804982, 620067..620072). Wilt effect 0 is aura 3 PERIODIC_DAMAGE with TargetA 6 (enemy) and ChainTarget 1, so Spell::SelectImplicitChainTargets reads maxTargets 1, applies SPELLMOD_JUMP_TARGETS to make it 2, and SearchChainTargets picks the closest other enemy within the jump radius (10 yards for a magic-class spell unless spell_jump_distance overrides it). Effect 1 (aura 271) has ChainTarget 0 and stays single-target. Wilt has range index 4 (30 yd), no cost besides 9% mana and no cooldown. 706033 is one ADD_FLAT_MODIFIER effect, misc 7 SPELLMOD_CRITICAL_CHANCE, BasePoints 9 DieSides 1 (+10), mask (0,18432,0) = SpellFamilyFlags 16384 (Venom Fang ranks 800880, 502896..502904, DoT 524724) or 2048 (Nerubian Sting ranks 800882, 502905..502911); Unit::SpellCriticalChance applies SPELLMOD_CRITICAL_CHANCE. Wilt is the negative control for the critical mask. Numbers read from /srv/coa/server-data/dbc Spell.dbc. Fixtures: cluster one (a1 at 5 yd, b1 at 6 yd) is cast at before the talent, cluster two (a2 at 18 yd, b2 at 19 yd, c2 at 21.5 yd) after it; a2 is more than 10 yd from cluster one, and b2 (1 yd from a2) is closer than c2 (3.5 yd). The chain jump-radius assumption (10 yd) and creature line of sight were not checked in-game. The critical-chance comparison is against the same character before it learns the talent.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "wilter",
+      "race": 1,
+      "class": 29,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "glory",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "a1",
+      "owner": "wilter",
+      "entry": 12142,
+      "level": 80,
+      "health": 100000,
+      "distance": 5
+    },
+    {
+      "id": "b1",
+      "owner": "wilter",
+      "entry": 12142,
+      "level": 80,
+      "health": 100000,
+      "distance": 6
+    },
+    {
+      "id": "a2",
+      "owner": "wilter",
+      "entry": 12142,
+      "level": 80,
+      "health": 100000,
+      "distance": 18
+    },
+    {
+      "id": "b2",
+      "owner": "wilter",
+      "entry": 12142,
+      "level": 80,
+      "health": 100000,
+      "distance": 19
+    },
+    {
+      "id": "c2",
+      "owner": "wilter",
+      "entry": 12142,
+      "level": 80,
+      "health": 100000,
+      "distance": 21.5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "No critical-chance modifier on Venom Fang before Glory To Shadra!",
+      "actor": "glory",
+      "metric": "spell_modifier",
+      "spell": 800880,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Venom Fang critical chance against the dummy without the talent",
+      "actor": "glory",
+      "metric": "spell_done_crit_chance",
+      "save_as": "vf_crit_base",
+      "spell": 800880,
+      "target": "a1"
+    },
+    {
+      "action": "snapshot",
+      "label": "Nerubian Sting critical chance against the dummy without the talent",
+      "actor": "glory",
+      "metric": "spell_done_crit_chance",
+      "save_as": "ns_crit_base",
+      "spell": 800882,
+      "target": "a1"
+    },
+    {
+      "action": "learn",
+      "actor": "glory",
+      "spell": 706033
+    },
+    {
+      "action": "assert",
+      "label": "Glory To Shadra! adds a flat 10 critical chance to Venom Fang",
+      "actor": "glory",
+      "metric": "spell_modifier",
+      "spell": 800880,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Glory To Shadra! adds a flat 10 critical chance to Nerubian Sting",
+      "actor": "glory",
+      "metric": "spell_modifier",
+      "spell": 800882,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Glory To Shadra! reaches a higher Venom Fang rank (502896)",
+      "actor": "glory",
+      "metric": "spell_modifier",
+      "spell": 502896,
+      "op": 7,
+      "base": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Glory To Shadra! does not reach Wilt",
+      "actor": "glory",
+      "metric": "spell_modifier",
+      "spell": 804982,
+      "op": 7,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Venom Fang critical chance rose by exactly 10 points",
+      "actor": "glory",
+      "metric": "spell_done_crit_chance",
+      "spell": 800880,
+      "target": "a1",
+      "relative_to": "vf_crit_base",
+      "min": 9.9,
+      "max": 10.1
+    },
+    {
+      "action": "assert",
+      "label": "Nerubian Sting critical chance rose by exactly 10 points",
+      "actor": "glory",
+      "metric": "spell_done_crit_chance",
+      "spell": 800882,
+      "target": "a1",
+      "relative_to": "ns_crit_base",
+      "min": 9.9,
+      "max": 10.1
+    },
+    {
+      "action": "assert",
+      "label": "No jump-target modifier on Wilt before Wilting Away",
+      "actor": "wilter",
+      "metric": "spell_modifier",
+      "spell": 804982,
+      "op": 17,
+      "base": 1,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "wilter",
+      "spell": 804982
+    },
+    {
+      "action": "cast",
+      "label": "Wilt the first cluster without Wilting Away",
+      "actor": "wilter",
+      "spell": 804982,
+      "target": "a1"
+    },
+    {
+      "action": "assert",
+      "label": "Wilt lands on its target",
+      "actor": "a1",
+      "metric": "aura",
+      "spell": 804982,
+      "caster": "wilter",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Give any chained application time to land",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Without Wilting Away the nearby enemy is not affected",
+      "actor": "b1",
+      "metric": "aura",
+      "spell": 804982,
+      "caster": "wilter",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "wilter",
+      "spell": 706012
+    },
+    {
+      "action": "assert",
+      "label": "Wilting Away adds one jump target to Wilt (1 -> 2 targets)",
+      "actor": "wilter",
+      "metric": "spell_modifier",
+      "spell": 804982,
+      "op": 17,
+      "base": 1,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Wilting Away adds one jump target to a higher Wilt rank (620072)",
+      "actor": "wilter",
+      "metric": "spell_modifier",
+      "spell": 620072,
+      "op": 17,
+      "base": 1,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Wilting Away does not touch Venom Fang",
+      "actor": "wilter",
+      "metric": "spell_modifier",
+      "spell": 800880,
+      "op": 17,
+      "base": 1,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Wilt the second cluster with Wilting Away",
+      "actor": "wilter",
+      "spell": 804982,
+      "target": "a2"
+    },
+    {
+      "action": "assert",
+      "label": "Wilt lands on its primary target",
+      "actor": "a2",
+      "metric": "aura",
+      "spell": 804982,
+      "caster": "wilter",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Wilt strikes the nearest additional enemy",
+      "actor": "b2",
+      "metric": "aura",
+      "spell": 804982,
+      "caster": "wilter",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Give a wrongly chained third application time to land",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Only one additional enemy is struck",
+      "actor": "c2",
+      "metric": "aura",
+      "spell": 804982,
+      "caster": "wilter",
+      "equals": 0
+    }
+  ]
+}

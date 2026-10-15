@@ -1,0 +1,193 @@
+{
+  "schema": 1,
+  "name": "Dead and Gone gives Bolt and Dash an additional use (#2714)",
+  "contract": "Bolt and Dash 520670 has ProcCharges 1 and two spell mods (damage and cooldown, class mask word1 0x800 = Heartseeking Bolt) in the client Spell.dbc (2026-09-17); its text says the Bolt consumes it and Dash 524602 follows. Dead and Gone 705524 effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER SPELLMOD_CHARGES with base 0 (+1) on class mask word0 0x01000000, the flags of 520670, and its text reads 'Your Bolt and Dash now affects an additional use of a Heartseeking Bolt'. Aura::CalcMaxCharges is the DBC charge plus that flat mod, so the buff has 1 charge without the talent and 2 with it, and the native Player::RemoveSpellMods drops one per matching cast. The module used to force ProcCharges to 0 and remove the buff after every Heartseeking Bolt, so the talent never delivered the second use. Asserted: 1 charge and one use without the talent, 2 charges with it, the buff still present after the first Bolt and Dash granted only after the second. The second Bolt only succeeds if the buff's -101% cooldown mod was applied to the first (Bolt category cooldown 10000 ms).",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "wh",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "wh",
+      "entry": 36,
+      "level": 60,
+      "health": 100000,
+      "distance": 12
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 5011
+    },
+    {
+      "action": "add_item",
+      "actor": "wh",
+      "item": 15807
+    },
+    {
+      "action": "equip",
+      "actor": "wh",
+      "item": 15807,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "label": "Let the weapon swap cooldown expire",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 805754
+    },
+    {
+      "action": "assert",
+      "label": "Dead and Gone is not known yet",
+      "actor": "wh",
+      "metric": "knows_spell",
+      "spell": 705524,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Bolt and Dash without Dead and Gone",
+      "actor": "wh",
+      "spell": 520670,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Bolt and Dash keeps its DBC charge (ProcCharges 1)",
+      "actor": "wh",
+      "metric": "aura_charges",
+      "spell": 520670,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Heartseeking Bolt uses it up",
+      "actor": "wh",
+      "spell": 805754,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "The single charge is spent",
+      "actor": "wh",
+      "metric": "aura",
+      "spell": 520670,
+      "equals": 0,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Spending it grants Dash",
+      "actor": "wh",
+      "metric": "aura",
+      "spell": 524602,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear Dash",
+      "actor": "wh",
+      "spell": 524602,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the Bolt cooldown pass",
+      "ms": 11000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Dead and Gone",
+      "actor": "wh",
+      "spell": 705524
+    },
+    {
+      "action": "set_aura",
+      "label": "Bolt and Dash with Dead and Gone",
+      "actor": "wh",
+      "spell": 520670,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Dead and Gone adds one charge to the DBC charge",
+      "actor": "wh",
+      "metric": "aura_charges",
+      "spell": 520670,
+      "equals": 2
+    },
+    {
+      "action": "cast",
+      "label": "First Heartseeking Bolt",
+      "actor": "wh",
+      "spell": 805754,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "label": "Cast, projectile and global cooldown",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Bolt and Dash survives the first Bolt with one charge",
+      "actor": "wh",
+      "metric": "aura",
+      "spell": 520670,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "No Dash yet",
+      "actor": "wh",
+      "metric": "aura",
+      "spell": 524602,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Second Heartseeking Bolt (needs Bolt and Dash's no-cooldown mod, the first Bolt's 10 s cooldown is still running otherwise)",
+      "actor": "wh",
+      "spell": 805754,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "The second use spends the last charge",
+      "actor": "wh",
+      "metric": "aura",
+      "spell": 520670,
+      "equals": 0,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Spending it grants Dash",
+      "actor": "wh",
+      "metric": "aura",
+      "spell": 524602,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

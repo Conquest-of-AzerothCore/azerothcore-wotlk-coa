@@ -1,0 +1,164 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Invigorating Winds grants silence and interrupt immunity (#2783)",
+  "contract": "#2783: Invigorating Winds 705661 (Spell.dbc, SpellFamilyName 22, DurationIndex 18 = 20000 ms) promises 'granting them immunity to silence and interrupt effects and causes them to take no pushback from damaging attacks'. The spell has exactly two effects, both APPLY_AURA on EffectImplicitTargetA 21 TARGET_UNIT_TARGET_ALLY: effect 0 is aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN with EffectBasePoints -1 and DieSides 1, i.e. amount 0 on misc 127 (all schools), a literal no-op; effect 1 is aura 149 SPELL_AURA_REDUCE_PUSHBACK with EffectBasePoints 99 and DieSides 1, i.e. amount 100. The pushback half is native: Spell.cpp:7958-7963 computes delayReduce = 100 + GetTotalAuraModifier(SPELL_AURA_REDUCE_PUSHBACK) - 100 = 100 and returns without applying pushback. The immunity half had no carrier at all: neither effect is aura 77 MECHANIC_IMMUNITY, 147 MECHANIC_IMMUNITY_MASK or 39 SCHOOL_IMMUNITY, and no script was registered on 705661. The fix registers aura_ascension_invigorating_winds on 705661, which holds IMMUNITY_MECHANIC for MECHANIC_SILENCE (9) and MECHANIC_INTERRUPT (26) on the aura's own target for the aura's lifetime. Probes: Silence 15487 has Mechanic 9 and Counterspell 2139 has Mechanic 26 in Spell.dbc, and Unit::IsImmunedToSpell (Unit.cpp:10598-10603) tests spellInfo->Mechanic against m_spellImmune[IMMUNITY_MECHANIC]; neither probe carries SPELL_ATTR0_NO_IMMUNITIES (15487 Attributes 2162688 = NOT_SHAPESHIFTED|NO_ACTIVE_DEFENSE, 2139 Attributes 65536). spell_immune is evaluated on the actor, so the ally has to be a player.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "attacker",
+      "owner": "s",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "s",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 705661
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the ally can be silenced before the buff (Silence 15487, Mechanic 9)",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 15487,
+      "target": "attacker",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the ally can be interrupted before the buff (Counterspell 2139, Mechanic 26)",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 2139,
+      "target": "attacker",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 705661,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Invigorating Winds is on the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 705661,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the native pushback half resolves to 100 (EffectBasePoints[1] 99 + die roll 1)",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 705661,
+      "effect": 1,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the buff lasts the tooltip's 20 s (SpellDuration row 18 = 20000 ms)",
+      "actor": "ally",
+      "metric": "aura_duration_ms",
+      "spell": 705661,
+      "min": 15000,
+      "max": 20000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ally is immune to silence while the buff is up",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 15487,
+      "target": "attacker",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ally is immune to interrupts while the buff is up",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 2139,
+      "target": "attacker",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the caster gains no immunity, the aura lands on the ally only",
+      "actor": "s",
+      "metric": "spell_immune",
+      "spell": 15487,
+      "target": "attacker",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 705661,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the buff is gone from the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 705661,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the silence immunity leaves with the buff",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 15487,
+      "target": "attacker",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the interrupt immunity leaves with the buff",
+      "actor": "ally",
+      "metric": "spell_immune",
+      "spell": 2139,
+      "target": "attacker",
+      "equals": 0
+    }
+  ]
+}

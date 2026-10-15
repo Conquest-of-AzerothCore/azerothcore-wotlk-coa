@@ -185,28 +185,35 @@ def sql_check(file: io, file_path: str) -> None:
 
 def insert_delete_safety_check(file: io, file_path: str) -> None:
     global error_handler, results
-    file.seek(0)  # Reset file pointer to the beginning
-    not_delete = ["creature_template", "gameobject_template", "item_template", "quest_template"]
+    file.seek(0)
+    text = file.read()
+    protected = {"creature_template", "gameobject_template", "item_template", "quest_template"}
+    tokens = re.compile(r"'(?:''|\\.|[^'])*'|\"(?:\"\"|\\.|[^\"])*\"|`[^`]*`|--[^\n]*|/\*.*?\*/|;", re.S)
+    statements = []
+    start = 0
+    for token in tokens.finditer(text):
+        if token.group() == ";":
+            statement = text[start:token.end()]
+            statement = re.sub(r"'(?:''|\\.|[^'])*'|\"(?:\"\"|\\.|[^\"])*\"|--[^\n]*|/\*.*?\*/",
+                               " ", statement, flags=re.S).strip()
+            if statement:
+                statements.append((statement, text.count("\n", 0, start) + 1))
+            start = token.end()
+    previous_delete = None
     check_failed = False
-    previous_line = ""
-
-    # Parse all the file
-    for line_number, line in enumerate(file, start = 1):
-        if line.strip().startswith("--"):
-            continue
-        if "INSERT" in line and "DELETE" not in previous_line:
-            print(f"❌ No DELETE keyword found before the INSERT in {file_path} at line {line_number}\nIf this error is intended, please notify a maintainer")
+    for statement, line_number in statements:
+        deletion = re.match(r"DELETE\s+FROM\s+`([^`]+)`", statement, re.I)
+        insertion = re.match(r"INSERT\s+INTO\s+`([^`]+)`", statement, re.I)
+        if deletion and deletion[1].lower() in protected:
+            print(f"❌ Entries from {deletion[1]} should not be deleted! {file_path} at line {line_number}")
             check_failed = True
-        previous_line = line
-        match = re.match(r"DELETE FROM\s+`([^`]+)`", line, re.IGNORECASE)
-        if match:
-            table_name = match.group(1)
-            if table_name in not_delete:
-                print(
-                    f"❌ Entries from {table_name} should not be deleted! {file_path} at line {line_number}\nIf this error is intended, please notify a maintainer")
+        if insertion:
+            table = insertion[1].lower()
+            protected_upsert = table in protected and re.search(r"\bON\s+DUPLICATE\s+KEY\s+UPDATE\b", statement, re.I)
+            if previous_delete != table and not protected_upsert:
+                print(f"❌ No matching DELETE before the INSERT in {file_path} at line {line_number}")
                 check_failed = True
-
-    # Handle the script error and update the result output
+        previous_delete = deletion[1].lower() if deletion else None
     if check_failed:
         error_handler = True
         results["INSERT & DELETE safety usage check"] = "Failed"
@@ -289,7 +296,7 @@ def semicolon_check(file: io, file_path: str) -> None:
         # Remove inline comments after SQL (ignoring "--" inside string literals)
         stripped_line = strip_inline_comment(stripped_line)
 
-        if stripped_line.upper().startswith("SET") and not stripped_line.endswith(";"):
+        if not query_open and stripped_line.upper().startswith("SET") and not stripped_line.endswith(";"):
             print(f"❌ Missing semicolon in {file_path} at line {line_number}")
             check_failed = True
 

@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Yogg-Saron's Embrace grants +10% attack power and +10% max mana through native unconditional auras (#1828)",
+  "contract": "301984 is a passive with two effects that read no classmask (both native handlers ignore EffectSpellClassMask, so no target-spell match is needed). Effect[0]: Aura 166 = SPELL_AURA_MOD_ATTACK_POWER_PCT, BasePoints 9+1=+10%; AuraEffect::HandleAuraModAttackPowerPercent (SpellAuraEffects.cpp:5103) unconditionally calls SetStatPctModifier(UNIT_MOD_ATTACK_POWER, TOTAL_PCT, ...). Effect[1]: Aura 132 = SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT, EffectMiscValue=0=POWER_MANA, BasePoints 9+1=+10%; AuraEffect::HandleAuraModIncreaseEnergyPercent (SpellAuraEffects.cpp:4693) reads Powers(GetMiscValue()) and calls ApplyStatPctModifier(UNIT_MOD_POWER_START+POWER_MANA, TOTAL_PCT, ...), i.e. max mana exactly as the tooltip promises. Learning the passive self-casts it (Player::addSpell, Player.cpp:3384). Both effects are unconditional and multiplicative on the player's current totals, so attack_power and max_power(power=0) read directly via ratio_to a pre-learn snapshot, with a rounding tolerance around the exact 1.10 multiplier. Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "snapshot", "actor": "cultist", "metric": "attack_power", "save_as": "ap_before" },
+    { "action": "snapshot", "actor": "cultist", "metric": "max_power", "power": 0, "save_as": "mana_before" },
+    { "action": "learn", "actor": "cultist", "spell": 301984 },
+    {
+      "action": "assert", "label": "Yogg-Saron's Embrace adds 10% attack power (#1828)",
+      "actor": "cultist", "metric": "attack_power", "ratio_to": "ap_before",
+      "min": 1.09, "max": 1.11, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Yogg-Saron's Embrace adds 10% max mana (#1828)",
+      "actor": "cultist", "metric": "max_power", "power": 0, "ratio_to": "mana_before",
+      "min": 1.09, "max": 1.11, "within_ms": 1000
+    }
+  ]
+}

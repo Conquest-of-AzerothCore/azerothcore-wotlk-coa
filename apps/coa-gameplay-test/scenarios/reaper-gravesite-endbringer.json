@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "Gravesite marks the ground when Endbringer is cast (#774)",
+  "contract": [
+    "Gravesite 572213 promises a 15-second ground marker when Endbringer 800922 is cast.",
+    "The marker is the native dynamic object from Gravesite 804722."
+  ],
+  "timeout_ms": 45000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 572213
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 800922
+    },
+    {
+      "action": "assert",
+      "label": "Gravesite talent aura is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 572213,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Activate Endbringer",
+      "actor": "reaper",
+      "spell": 800922
+    },
+    {
+      "action": "assert",
+      "label": "Endbringer cast was accepted",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 800922,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Endbringer aura is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 800922,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Endbringer created the Gravesite",
+      "actor": "reaper",
+      "metric": "dynamic_object",
+      "spell": 804722,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Gravesite lasts about 15 seconds",
+      "actor": "reaper",
+      "metric": "dynamic_object_duration_ms",
+      "spell": 804722,
+      "min": 12000
+    }
+  ]
+}

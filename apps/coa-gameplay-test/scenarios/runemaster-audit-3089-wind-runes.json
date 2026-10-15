@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Runemaster audit: Wind Runes extends Hurricane's duration by 1s, adding 2 more native strikes (#3089)",
+  "contract": [
+    "Wind Runes 706672 effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 1 (SPELLMOD_DURATION), EffectBasePoints 999 + DieSides 1 = +1000ms, EffectSpellClassMask word 0 = 256, matching Hurricane 645435's SpellFamilyFlags word 0 bit 8 (256) exactly.",
+    "Hurricane's own aura is SPELL_AURA_PERIODIC_DUMMY (EffectApplyAuraName 226) at EffectAmplitude 500ms, base SpellDuration 39 = 2000ms; AscensionRunemasterHurricane.cpp's aura_ascension_runemaster_hurricane::Tick calls StrikeHurricane on every native OnEffectPeriodic tick with no hardcoded strike counter, so duration alone controls tick count.",
+    "2000ms / 500ms = 4 native periodic ticks without Wind Runes; (2000+1000)ms / 500ms = 6 native periodic ticks with it - 2 more, matching the tooltip exactly. Player::ApplySpellMod applies the duration mod at cast time through the same native path proven for Battle Engravings (#3090)."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "enemy", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 197},
+    {"action": "add_item", "actor": "rm", "item": 12784},
+    {"action": "equip", "actor": "rm", "item": 12784, "slot": 15},
+    {"action": "learn", "actor": "rm", "spell": 645435},
+
+    {"action": "snapshot", "actor": "rm", "metric": "spell_damage_count", "spell": 645437, "target": "enemy",
+      "save_as": "s0"},
+    {"action": "cast", "actor": "rm", "spell": 645435, "target": "enemy"},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 645435, "equals": 1, "within_ms": 500},
+    {"action": "assert", "label": "Hurricane's base 2000ms duration ends", "actor": "rm",
+      "metric": "aura", "spell": 645435, "equals": 0, "within_ms": 3000},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "SETUP: without Wind Runes, Hurricane strikes at least 4 times (4 native ticks)",
+      "actor": "rm", "metric": "spell_damage_count", "spell": 645437, "target": "enemy", "relative_to": "s0",
+      "min": 4},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_damage_count", "spell": 645437, "target": "enemy",
+      "save_as": "s1"},
+
+    {"action": "learn", "actor": "rm", "spell": 706672},
+    {"action": "assert", "label": "Wind Runes (706672) is active", "actor": "rm",
+      "metric": "aura", "spell": 706672, "equals": 1, "within_ms": 2000},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 645435},
+    {"action": "cast", "actor": "rm", "spell": 645435, "target": "enemy"},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 645435, "equals": 1, "within_ms": 500},
+    {"action": "assert", "label": "Hurricane's extended 3000ms duration ends", "actor": "rm",
+      "metric": "aura", "spell": 645435, "equals": 0, "within_ms": 4000},
+    {"action": "wait", "ms": 500},
+    {"action": "assert",
+      "label": "CONTRACT: with Wind Runes, this Hurricane cast alone strikes at least 6 times (6 native ticks, 2 more than without it)",
+      "actor": "rm", "metric": "spell_damage_count", "spell": 645437, "target": "enemy", "relative_to": "s1",
+      "min": 6}
+  ]
+}

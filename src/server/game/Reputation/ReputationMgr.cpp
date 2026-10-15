@@ -16,6 +16,7 @@
  */
 
 #include "ReputationMgr.h"
+#include "ClassicPlusReputation.h"
 #include "DBCStores.h"
 #include "DatabaseEnv.h"
 #include "ObjectMgr.h"
@@ -300,8 +301,22 @@ bool ReputationMgr::SetReputation(FactionEntry const* factionEntry, float standi
 
     if (!noSpillOver)
     {
+        ClassicPlusReputation::Spillover const* classicSpillover = nullptr;
+        if (sWorld->getBoolConfig(CONFIG_CLASSIC_PLUS_REPUTATION_SPILLOVER) &&
+            _player->GetLevel() <= ClassicPlusReputation::MaxLevel)
+            classicSpillover = ClassicPlusReputation::Find(factionEntry->ID);
+
+        if (classicSpillover)
+        {
+            for (ClassicPlusReputation::SpilloverTarget const& target : classicSpillover->targets)
+            {
+                FactionEntry const* targetEntry = target.faction ? sFactionStore.LookupEntry(target.faction) : nullptr;
+                if (targetEntry)
+                    SetOneFactionReputation(targetEntry, standing * target.rate, incremental);
+            }
+        }
         // if spillover definition exists in DB, override DBC
-        if (RepSpilloverTemplate const* repTemplate = sObjectMgr->GetRepSpilloverTemplate(factionEntry->ID))
+        else if (RepSpilloverTemplate const* repTemplate = sObjectMgr->GetRepSpilloverTemplate(factionEntry->ID))
         {
             for (uint32 i = 0; i < MAX_SPILLOVER_FACTIONS; ++i)
             {

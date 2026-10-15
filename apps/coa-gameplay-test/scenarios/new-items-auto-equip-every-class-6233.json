@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "New gear and bags equip into empty slots for every class (#6233)",
+  "contract": [
+    "A newly stored item that the player can equip goes into its empty equipment slot, and a new bag into an empty bag slot. The server queued this only for the CoA classes 12-32, so Heroes and the stock classes kept everything in their bags.",
+    "An occupied slot is never replaced: a second cloak stays in the bags."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "hero", "name": "Equiphero", "race": 1, "class": 10, "level": 10 },
+    { "id": "warrior", "name": "Equipwarrior", "race": 1, "class": 1, "level": 10 },
+    { "id": "coa", "name": "Equipcoa", "race": 1, "class": 12, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "assert", "label": "The Hero starts without a cloak", "actor": "hero",
+      "metric": "equipped_item", "slot": 14, "equals": 0 },
+    { "action": "snapshot", "actor": "hero", "metric": "free_inventory_slots", "save_as": "hero_slots" },
+    { "action": "snapshot", "actor": "warrior", "metric": "free_inventory_slots", "save_as": "warrior_slots" },
+    { "action": "snapshot", "actor": "coa", "metric": "free_inventory_slots", "save_as": "coa_slots" },
+    { "action": "add_item", "actor": "hero", "item": 2570 },
+    { "action": "add_item", "actor": "hero", "item": 2119 },
+    { "action": "add_item", "actor": "hero", "item": 4496 },
+    { "action": "add_item", "actor": "warrior", "item": 2570 },
+    { "action": "add_item", "actor": "warrior", "item": 4496 },
+    { "action": "add_item", "actor": "coa", "item": 2570 },
+    { "action": "add_item", "actor": "coa", "item": 4496 },
+    { "action": "assert", "label": "The Hero wears the new cloak", "actor": "hero",
+      "metric": "equipped_item", "slot": 14, "equals": 2570, "within_ms": 3000 },
+    { "action": "assert", "label": "The Hero wears the new gloves", "actor": "hero",
+      "metric": "equipped_item", "slot": 9, "equals": 2119, "within_ms": 3000 },
+    { "action": "assert", "label": "The Hero's pouch went into a bag slot and adds its six slots", "actor": "hero",
+      "metric": "free_inventory_slots", "relative_to": "hero_slots", "equals": 6, "within_ms": 3000 },
+    { "action": "assert", "label": "The Warrior wears the new cloak", "actor": "warrior",
+      "metric": "equipped_item", "slot": 14, "equals": 2570, "within_ms": 3000 },
+    { "action": "assert", "label": "The Warrior's pouch went into a bag slot", "actor": "warrior",
+      "metric": "free_inventory_slots", "relative_to": "warrior_slots", "equals": 6, "within_ms": 3000 },
+    { "action": "assert", "label": "The CoA class still wears the new cloak", "actor": "coa",
+      "metric": "equipped_item", "slot": 14, "equals": 2570, "within_ms": 3000 },
+    { "action": "assert", "label": "The CoA class's pouch went into a bag slot", "actor": "coa",
+      "metric": "free_inventory_slots", "relative_to": "coa_slots", "equals": 6, "within_ms": 3000 },
+    { "action": "add_item", "actor": "hero", "item": 3070 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "A second cloak does not replace the worn one", "actor": "hero",
+      "metric": "equipped_item", "slot": 14, "equals": 2570 },
+    { "action": "assert", "label": "and stays in the bags", "actor": "hero",
+      "metric": "item_count", "item": 3070, "equals": 1 }
+  ]
+}

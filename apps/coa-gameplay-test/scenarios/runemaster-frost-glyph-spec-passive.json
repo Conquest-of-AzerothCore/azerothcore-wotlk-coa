@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Issue 1870: the Glyphic Frost Glyph passive grants Frost Glyph on Elemental Burst and Primordial Blast",
+  "contract": [
+    "Issue 1870 names Frost Glyph 500309, 'Using Elemental Burst and Primordial Blast now grants you Frost Glyph.'",
+    "500309 is the PassiveSpell of ChrSpecs 62 (Glyphic, field 27), the spell the client's spec choice card shows",
+    "(CoASpecChoiceMixin: icon:SetSpell(specInfo.PassiveSpell)); no CharacterAdvancement entry, trainer or script",
+    "grants it. The spec's granted identity passive is ChrSpecs field 28, CharacterAdvancement 4061 = Frost Glyph",
+    "92152 (Rank 'Specialization', level 10, automatic), whose description is the same text. Frost Glyph 520090 reads",
+    "'Unleash: Deals Frost Damage and slows movement speed by $520110s1% (30%) for $520110d', unleashed by Glyphic",
+    "Ruin or Thaumaturgy. Expected: without 92152 Primordial Blast 800732 grants no Frost Glyph; with it, Primordial",
+    "Blast and Elemental Burst 502838 each grant 520090, and Thaumaturgy 804550 consumes it, dealing Unleashed Frost",
+    "Glyph 520096 damage and slowing the target with 520110."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80, "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 80, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 800732},
+    {"action": "learn", "actor": "rm", "spell": 502838},
+    {"action": "learn", "actor": "rm", "spell": 804550},
+
+    {"action": "cast", "label": "Primordial Blast without the passive", "actor": "rm", "spell": 800732,
+      "target": "dummy"},
+    {"action": "assert", "label": "SETUP: Primordial Blast hits", "actor": "rm", "metric": "spell_damage_count",
+      "spell": 800732, "target": "dummy", "equals": 1, "within_ms": 2000},
+    {"action": "wait", "label": "Allow any Glyph to appear", "ms": 500},
+    {"action": "assert", "label": "Control: no Frost Glyph without the Glyphic passive", "actor": "rm",
+      "metric": "aura", "spell": 520090, "equals": 0},
+
+    {"action": "learn", "actor": "rm", "spell": 92152},
+    {"action": "assert", "label": "SETUP: the Frost Glyph passive is active", "actor": "rm", "metric": "aura",
+      "spell": 92152, "equals": 1, "within_ms": 1000},
+    {"action": "reset_cooldown", "actor": "rm", "spell": 800732},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "cast", "label": "Primordial Blast with the passive", "actor": "rm", "spell": 800732,
+      "target": "dummy"},
+    {"action": "assert", "label": "CONTRACT: Primordial Blast grants Frost Glyph", "actor": "rm", "metric": "aura",
+      "spell": 520090, "caster": "rm", "equals": 1, "within_ms": 2000},
+
+    {"action": "set_aura", "label": "Clear the Glyph", "actor": "rm", "spell": 520090, "stacks": 0},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 520090, "equals": 0},
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "cast", "label": "Elemental Burst with the passive", "actor": "rm", "spell": 502838,
+      "target": "dummy"},
+    {"action": "assert", "label": "SETUP: Elemental Burst hits", "actor": "rm", "metric": "spell_damage_count",
+      "spell": 502838, "target": "dummy", "equals": 1, "within_ms": 4000},
+    {"action": "assert", "label": "CONTRACT: Elemental Burst grants Frost Glyph", "actor": "rm", "metric": "aura",
+      "spell": 520090, "caster": "rm", "equals": 1, "within_ms": 1000},
+
+    {"action": "wait", "label": "Global cooldown", "ms": 1100},
+    {"action": "cast", "label": "Thaumaturgy unleashes the Glyph", "actor": "rm", "spell": 804550,
+      "target": "dummy"},
+    {"action": "assert", "label": "CONTRACT: the Glyph deals Unleashed Frost Glyph damage", "actor": "rm",
+      "metric": "spell_damage_count", "spell": 520096, "target": "dummy", "min": 1, "within_ms": 3000},
+    {"action": "assert", "label": "CONTRACT: unleashing consumes the Glyph", "actor": "rm", "metric": "aura",
+      "spell": 520090, "equals": 0, "within_ms": 1000},
+    {"action": "assert", "label": "CONTRACT: the unleashed Glyph slows the target", "actor": "dummy",
+      "metric": "aura", "spell": 520110, "caster": "rm", "equals": 1, "within_ms": 1000}
+  ]
+}

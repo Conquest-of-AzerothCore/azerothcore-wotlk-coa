@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "The final boss of a normal dungeon gives Dungeon Spoils without the Dungeon Finder",
+  "contract": "A level 30 player in normal Scarlet Monastery - Graveyard, outside the Dungeon Finder, gets nothing for Interrogator Vishas and one Dungeon Spoils (2021814) for the final boss Bloodmage Thalnos. Opened at level 30 the spoils are used up and put exactly one vanilla dungeon item that requires level 25-30 in the bags.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 189,
+    "x": 1688.99,
+    "y": 1053.48,
+    "z": 18.6775
+  },
+  "players": [
+    {
+      "id": "p1",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "encounter_credit",
+      "label": "Interrogator Vishas is credited",
+      "actor": "p1",
+      "entry": 3983
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "A boss before the last gives no Dungeon Spoils",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 0
+    },
+    {
+      "action": "encounter_credit",
+      "label": "Bloodmage Thalnos is credited",
+      "actor": "p1",
+      "entry": 4543
+    },
+    {
+      "action": "assert",
+      "label": "The final boss gives one Dungeon Spoils",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "A normal dungeon gives no Mark of Triumph",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 1414502,
+      "equals": 0
+    },
+    {
+      "action": "use_item",
+      "label": "p1 opens the spoils at level 30",
+      "actor": "p1",
+      "item": 2021814,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "p1 no longer holds the opened spoils",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The spoils put exactly one of their items in p1's bags",
+      "actor": "p1",
+      "metric": "carried_pool_item_count",
+      "cache": 2021814,
+      "table": "loot",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The item opened at level 30 requires level 25-30",
+      "actor": "p1",
+      "metric": "carried_pool_item_count",
+      "cache": 2021814,
+      "table": "loot",
+      "min_required_level": 25,
+      "max_required_level": 30,
+      "equals": 1
+    }
+  ]
+}

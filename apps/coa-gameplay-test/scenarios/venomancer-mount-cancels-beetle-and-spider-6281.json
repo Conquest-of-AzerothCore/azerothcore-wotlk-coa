@@ -1,0 +1,225 @@
+{
+  "schema": 1,
+  "name": "venomancer-mount-cancels-beetle-and-spider-6281",
+  "contract": [
+    "Beetle and Spider forms carry the native mount interrupt flag. Each form is learned and cast normally. The",
+    "authored Brown Horse cast is forbidden while shapeshifted (native result 68), so the fixture applies its",
+    "mounted aura to isolate the actual native Unit::Mount event. That mounted event must remove the active",
+    "Venomancer form. Native dismount separates the two cases. This covers server mount cancellation; client",
+    "automatic unshifting before a mount cast is outside the fixture. The normal server display must return, and",
+    "Beetle armor/health and threat helpers must also be gone."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 29,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "ranged_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "display_id",
+      "save_as": "unshifted_display"
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 33388
+    },
+    {
+      "action": "set_skill",
+      "actor": "p",
+      "skill": 762,
+      "value": 75,
+      "maximum": 75
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 458
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 803183
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 800841
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 803183,
+      "target": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 803183,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 458,
+      "target": "p"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 458,
+      "equals": 68
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 458,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 4500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 458,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 803183,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "display_id",
+      "relative_to": "unshifted_display",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 803216,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 807726,
+      "equals": 0
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 800841,
+      "target": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 800841,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 458,
+      "target": "p"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 458,
+      "equals": 68
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 458,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 4500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 458,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 800841,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "display_id",
+      "relative_to": "unshifted_display",
+      "equals": 0
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    }
+  ]
+}

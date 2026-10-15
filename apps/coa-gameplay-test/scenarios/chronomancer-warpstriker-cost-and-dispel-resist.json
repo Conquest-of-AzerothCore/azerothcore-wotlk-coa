@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "name": "Warpstriker cuts spell costs by 5% and adds 15% dispel resistance (#570)",
+  "contract": "Warpstriker 707556 is a passive with two effects. Effect 0 is SPELL_AURA_MOD_DISPEL_RESIST (235) with EffectBasePoints 14, resolving to 15 with DieSides 1: the tooltip's $s1. Aura::CalcDispelChance (SpellAuras.cpp) consumes it as auraTarget->GetTotalAuraModifier(SPELL_AURA_MOD_DISPEL_RESIST), under 'if (offensive && auraTarget)'. Effect 1 is SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT (72) with EffectMiscValue 127 (all schools) and EffectBasePoints -6, resolving to -5: the tooltip's $s2. AuraEffect::HandleModPowerCostPCT writes UNIT_FIELD_POWER_COST_MULTIPLIER per school and SpellInfo::CalcPowerCost multiplies the cost by (1 + multiplier). Epoch 501779 is the priced spell: PowerType 0, ManaCostPercentage 18, SchoolMask 80 whose first school is 4. SCOPE OF THE DISPEL HALF, asserted only as the applied amount: the native modifier is read off the unit carrying the aura being dispelled and only when the dispel is offensive, so Warpstriker protects auras on the Chronomancer from enemy purges; it does not protect auras the Chronomancer placed on other units, because a friendly dispel is not offensive and the caster-side lever for that is SPELLMOD_RESIST_DISPEL_CHANCE (op 28), which 707556 does not carry. The harness cannot stage an enemy purge (no player-versus-player dispel), so the resistance roll itself is left to code trace; a Ghost e2e test with two hostile characters would be needed to observe it. Native handlers only. Regression scenario for behaviour that already works.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "control", "race": 1, "class": 22, "level": 80 },
+    { "id": "talent", "race": 1, "class": 22, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talent", "spell": 707556 },
+    {
+      "action": "assert",
+      "label": "Warpstriker is not applied without learning it",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 707556,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Warpstriker self-applies its passive aura once learned",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 707556,
+      "caster": "talent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The dispel resistance effect resolves to 15",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 707556,
+      "caster": "talent",
+      "effect": 0,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "The power cost effect resolves to -5",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 707556,
+      "caster": "talent",
+      "effect": 1,
+      "equals": -5
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline Epoch mana cost without the talent",
+      "actor": "control",
+      "metric": "spell_power_cost",
+      "spell": 501779,
+      "save_as": "epoch_cost_base"
+    },
+    {
+      "action": "assert",
+      "label": "Warpstriker prices Epoch 5% cheaper",
+      "actor": "talent",
+      "metric": "spell_power_cost",
+      "spell": 501779,
+      "ratio_to": "epoch_cost_base",
+      "min": 0.94,
+      "max": 0.96
+    }
+  ]
+}

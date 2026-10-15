@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "name": "Venomancer Rot Lich resets Serpent's Fang from direct hits but not from Mushroom explosions",
+  "contract": [
+    "Rot Lich 92142 has a 20% chance (DBC ProcChance) on the Venomancer's direct damage to make the next Serpent's Fang free (706032) and reset its cooldown; its script rolls the chance, so spell_proc.Chance is 100.",
+    "Live combat logs (C:/CoA/SUB/old-logs, 2026-08-10 to 08-31) show 86 Rot Lich procs: Venom Bolt 32 of 168 hits and Serpent's Fang 21 of 167 hits, but 0 of 5593 Mushroom explosion hits, where 20% per hit would give about 1100.",
+    "The server casts every Mushroom explosion (504543, large 503925) from the Venomancer once per nearby enemy, so each hit reached the Rot Lich roll and Blightfang mushrooms multiplied the resets.",
+    "aura_proc_rate runs the aura's full proc decision 40000 times on a synthetic 1000-damage direct spell hit: Venom Bolt and Serpent's Fang stay inside 20 +/- 1.5 points, and both Mushroom explosions stay at 0."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "venomancer",
+      "race": 1,
+      "class": 29,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "venomancer",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "venomancer",
+      "spell": 92142
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Rot Lich 92142 is active",
+      "actor": "venomancer",
+      "metric": "aura",
+      "spell": 92142,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rot Lich keeps its 20% on Venom Bolt hits",
+      "actor": "venomancer",
+      "metric": "aura_proc_rate",
+      "spell": 92142,
+      "target": "dummy",
+      "type_mask": 65536,
+      "trigger_spell": 573334,
+      "min": 18.5,
+      "max": 21.5
+    },
+    {
+      "action": "assert",
+      "label": "Rot Lich keeps its 20% on Serpent's Fang hits",
+      "actor": "venomancer",
+      "metric": "aura_proc_rate",
+      "spell": 92142,
+      "target": "dummy",
+      "type_mask": 65536,
+      "trigger_spell": 552783,
+      "min": 18.5,
+      "max": 21.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Mushroom explosion 504543 never procs Rot Lich",
+      "actor": "venomancer",
+      "metric": "aura_proc_rate",
+      "spell": 92142,
+      "target": "dummy",
+      "type_mask": 65536,
+      "trigger_spell": 504543,
+      "max": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: large Mushroom explosion 503925 never procs Rot Lich",
+      "actor": "venomancer",
+      "metric": "aura_proc_rate",
+      "spell": 92142,
+      "target": "dummy",
+      "type_mask": 65536,
+      "trigger_spell": 503925,
+      "max": 0
+    }
+  ]
+}

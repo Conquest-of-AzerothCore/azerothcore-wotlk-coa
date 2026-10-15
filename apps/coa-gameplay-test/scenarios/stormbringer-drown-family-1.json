@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Undertow raises Drown's crit chance (#485, #1117)",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "s", "race": 8, "class": 16, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "s", "spell": 806407 },
+    { "action": "assert", "label": "BASELINE: Drown (806408) has no crit modifier without Undertow",
+      "actor": "s", "metric": "spell_modifier", "spell": 806408, "op": 7, "base": 0, "equals": 0 },
+    { "action": "assert", "label": "BASELINE: the Drown aura parent (806407) never carries the crit modifier",
+      "actor": "s", "metric": "spell_modifier", "spell": 806407, "op": 7, "base": 0, "equals": 0 },
+    { "action": "learn", "actor": "s", "spell": 705666 },
+    { "action": "assert", "label": "DISCRIMINATING: Undertow rank 1 (#485) adds +25% crit chance to Drown's damage effect (806408)",
+      "actor": "s", "metric": "spell_modifier", "spell": 806408, "op": 7, "base": 0, "equals": 25 },
+    { "action": "assert", "label": "Undertow rank 1 still does not touch the aura parent (806407)",
+      "actor": "s", "metric": "spell_modifier", "spell": 806407, "op": 7, "base": 0, "equals": 0 },
+    { "action": "unlearn", "actor": "s", "spell": 705666 },
+    { "action": "learn", "actor": "s", "spell": 707796 },
+    { "action": "assert", "label": "DISCRIMINATING: Undertow rank 2 (#1117) adds +50% crit chance to Drown's damage effect (806408)",
+      "actor": "s", "metric": "spell_modifier", "spell": 806408, "op": 7, "base": 0, "equals": 50 },
+    { "action": "assert", "label": "Undertow rank 2 still does not touch the aura parent (806407)",
+      "actor": "s", "metric": "spell_modifier", "spell": 806407, "op": 7, "base": 0, "equals": 0 }
+  ],
+  "contract": "#485 and #1117: Undertow (705666 rank 1, 707796 rank 2) tooltips promise 'Increases the critical strike chance of Drown by $s2%.' Drown (806407) is a passive aura whose Effect[2] periodically triggers 806408, the SPELL_EFFECT_SCHOOL_DAMAGE spell that actually deals Drown's damage; only 806408 carries the SpellFamilyFlags word-0 bit (0x00100000) that Undertow's SPELLMOD_CRITICAL_CHANCE class mask targets. Undertow's Effect[1] is a stock ADD_FLAT_MODIFIER (EffectBasePoints+EffectDieSides: rank 1 = 24+1 = 25, rank 2 = 49+1 = 50), applied through the engine's own Unit::SpellDoneCritChance -> Player::ApplySpellMod path with no module code involved. Both ranks are proven independently via unlearn/relearn so neither can be mistaken for the other or for a stacked 75%."
+}

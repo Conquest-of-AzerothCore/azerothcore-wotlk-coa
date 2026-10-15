@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "name": "Level 10 Scourgebane deals its level-scaled tooltip damage (#305)",
+  "contract": "Scourgebane 92111 (Level 10 Passive): 'Direct damage dealt now has a $520007h% chance to strike an enemy with Scourgebane, dealing an additional $801832s2% Weapon damage plus ${$801832m1*$<scalingbp>+$SP*.25+$AP*.25} Holyflame Damage.' 801832 carries m1 = 262 (BasePoints 261, DieSides 1) and s2 = 50; its SpellDescriptionVariableID 182 defines $scalingbp = 0.0267291844060354 + 0.0048541098014737*PL + 0.0001859597762293*PL^2, 0.0939 at level 10, so the flat part is 24.6, not 262. A level 10 Templar with 30-150 attack power, no spell power and the 8-13 damage, 2.5 sec Walking Stick expects 24.6 + AP/4 + (8..13 + AP/14*2.5)/2 per non-critical hit, 38-82 before percentage modifiers; the unscaled base would put every hit above 262.",
+  "timeout_ms": 300000,
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 10,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "templar", "entry": 36, "level": 10, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "assert",
+      "label": "The target keeps the Templar's level",
+      "actor": "dummy",
+      "metric": "level",
+      "equals": 10
+    },
+    { "action": "learn", "actor": "templar", "spell": 92111 },
+    {
+      "action": "assert",
+      "label": "The passive is active",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 92111,
+      "equals": 1
+    },
+    { "action": "add_item", "actor": "templar", "item": 2495 },
+    { "action": "equip", "actor": "templar", "item": 2495, "slot": 15 },
+    {
+      "action": "assert",
+      "label": "Attack power lies in the contract's range",
+      "actor": "templar",
+      "metric": "attack_power",
+      "min": 30,
+      "max": 150
+    },
+    { "action": "attack", "actor": "templar", "target": "dummy" },
+    { "action": "wait", "label": "About 70 auto attacks at a 20% trigger chance", "ms": 180000 },
+    { "action": "stop_attack", "actor": "templar" },
+    { "action": "wait", "label": "Let the last strike land", "ms": 3000 },
+    {
+      "action": "snapshot",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 801832,
+      "target": "dummy",
+      "critical": false,
+      "save_as": "hits"
+    },
+    {
+      "action": "assert",
+      "label": "Auto attacks trigger Scourgebane",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 801832,
+      "target": "dummy",
+      "critical": false,
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "A non-critical Scourgebane averages the level 10 tooltip amount",
+      "actor": "templar",
+      "metric": "spell_damage_total",
+      "spell": 801832,
+      "target": "dummy",
+      "critical": false,
+      "ratio_to": "hits",
+      "min": 30,
+      "max": 95
+    }
+  ]
+}

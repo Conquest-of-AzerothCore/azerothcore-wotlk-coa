@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "name": "Necromancer Mutation halves the tick period of diseases applied during it (#679)",
+  "contract": "Mutation 500342 is a Death talent with its own CharacterAdvancement row (4620, ClassType 25 = class 23, Tab 59 Death, TalentEssenceCost 1), not a tooltip carrier: an instant self-cast with a 3 min RecoveryTime and DurationIndex 8 = 15000 ms. Its description reads 'For the next $d your diseases mutate ... allowing your freshly applied diseases to tick $s1% faster.' Effect 0 is SPELL_AURA_ADD_PCT_MODIFIER (108) MiscValue 19 (SPELLMOD_ACTIVATION_TIME, the periodic period) with BasePoints -51 + DieSides 1 = -50 and EffectSpellClassMask (0x0800C000, 0x04800000, 0x400) in SpellFamilyName 29, which covers Flesh to Worms 500338 (family flags 0x4000, 0, 0x20; PERIODIC_DAMAGE every 3000 ms). Effect 1 (SPELLMOD_DURATION) has amount 0. AuraEffect::CalculatePeriodic applies the caster's SPELLMOD_ACTIVATION_TIME when a periodic aura is created, so a Flesh to Worms applied before Mutation keeps its 3000 ms period, a Flesh to Worms applied while Mutation is active ticks every 1500 ms (two ticks within 3.1 s instead of one), and the earlier disease is not changed.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "necro", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "old_golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 8 },
+    { "id": "fresh_golem", "owner": "necro", "entry": 36, "level": 80, "health": 1000000, "distance": 11 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "necro", "spell": 500338 },
+    { "action": "learn", "actor": "necro", "spell": 500342 },
+    {
+      "action": "cast", "label": "Disease the first golem before Mutation", "actor": "necro", "spell": 500338,
+      "target": "old_golem"
+    },
+    {
+      "action": "assert", "label": "SETUP: the first golem carries Flesh to Worms", "actor": "old_golem",
+      "metric": "aura", "spell": 500338, "caster": "necro", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTROL: without Mutation Flesh to Worms ticks every 3 sec", "actor": "old_golem",
+      "metric": "aura_amplitude_ms", "spell": 500338, "caster": "necro", "effect": 0, "equals": 3000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "Activate Mutation", "actor": "necro", "spell": 500342 },
+    {
+      "action": "assert", "label": "Mutation is active on the Necromancer", "actor": "necro",
+      "metric": "aura", "spell": 500342, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Mutation lasts 15 sec", "actor": "necro",
+      "metric": "aura_duration_ms", "spell": 500342, "min": 13000, "max": 15000
+    },
+    { "action": "wait", "label": "Let any shared cooldown pass", "ms": 200 },
+    {
+      "action": "cast", "label": "Disease the second golem during Mutation", "actor": "necro", "spell": 500338,
+      "target": "fresh_golem"
+    },
+    {
+      "action": "assert", "label": "SETUP: the second golem carries Flesh to Worms", "actor": "fresh_golem",
+      "metric": "aura", "spell": 500338, "caster": "necro", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "snapshot", "actor": "necro", "metric": "spell_damage_count", "spell": 500338,
+      "target": "fresh_golem", "save_as": "fresh_ticks0"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the freshly applied disease ticks every 1.5 sec",
+      "actor": "fresh_golem", "metric": "aura_amplitude_ms", "spell": 500338, "caster": "necro", "effect": 0,
+      "equals": 1500
+    },
+    {
+      "action": "assert", "label": "The disease applied before Mutation keeps its 3 sec period", "actor": "old_golem",
+      "metric": "aura_amplitude_ms", "spell": 500338, "caster": "necro", "effect": 0, "equals": 3000
+    },
+    { "action": "wait", "label": "Let 3.1 sec of the fresh disease elapse", "ms": 3100 },
+    {
+      "action": "assert", "label": "The fresh disease ticked twice in 3.1 sec", "actor": "necro",
+      "metric": "spell_damage_count", "spell": 500338, "target": "fresh_golem", "relative_to": "fresh_ticks0",
+      "min": 2, "max": 3
+    }
+  ]
+}

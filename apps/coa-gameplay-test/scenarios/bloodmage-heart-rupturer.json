@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "Heart Rupturer raises all four named spells by 20% (#2210)",
+  "contract": "Heart Rupturer 680685 effect 0 is aura 108 with MiscValue 0 (SPELLMOD_DAMAGE), BasePoints 19 + DieSides 1 = +20%, over EffectSpellClassMask (0, 8193, 2147500032): word 1 bit 0 Ravenous Strike (500123, 501671-501679), word 1 bit 13 Bloodmoon Blast (500125, 501607-501614, 572332), word 2 bit 14 Claw Sweep (500169, 500436-500441, 500444) and word 2 bit 31 the Sanguine Rupture cast rows (572907, 800774, 802456-802461). Effect 1 is aura 108 with MiscValue 8 (SPELLMOD_ALL_EFFECTS), +20%, over (0, 0, 2147483648) = the Sanguine Rupture cast rows only, which is the correct split: the cast row deals no direct damage (its effect 0 is SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE forwarding to 800775), so SPELLMOD_ALL_EFFECTS is what raises it while SPELLMOD_DAMAGE covers the three spells that do. Tooltip: \"Increases the damage of Claw Sweep, Sanguine Rupture, Ravenous Strike and Bloodmoon Blast by $s1%.\" The spell_modifier metric returns Player::ApplySpellMod's float, and the percent branch computes totalmul *= CalculatePct(1.0f, 120.0f) = 1.2f, so 100 * 1.2f lands one ULP above 120 (measured 120.00000762939453). The +20% steps therefore assert 119.9-120.1, a band that still excludes the unmodified 100. Regression guard for native behaviour.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Ravenous Strike unmodified before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 501679,
+      "op": 0,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Sanguine Rupture unmodified before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 802461,
+      "op": 8,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680685
+    },
+    {
+      "action": "assert",
+      "label": "Heart Rupturer raises Ravenous Strike by 20%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 501679,
+      "op": 0,
+      "base": 100,
+      "min": 119.9,
+      "max": 120.1
+    },
+    {
+      "action": "assert",
+      "label": "Heart Rupturer raises Bloodmoon Blast by 20%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 501614,
+      "op": 0,
+      "base": 100,
+      "min": 119.9,
+      "max": 120.1
+    },
+    {
+      "action": "assert",
+      "label": "Heart Rupturer raises Claw Sweep by 20%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 500444,
+      "op": 0,
+      "base": 100,
+      "min": 119.9,
+      "max": 120.1
+    },
+    {
+      "action": "assert",
+      "label": "Heart Rupturer raises Sanguine Rupture's forwarded value by 20%",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 802461,
+      "op": 8,
+      "base": 100,
+      "min": 119.9,
+      "max": 120.1
+    },
+    {
+      "action": "assert",
+      "label": "Heart Rupturer does not touch Bloodbolt",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 578305,
+      "op": 0,
+      "base": 100,
+      "equals": 100
+    }
+  ]
+}

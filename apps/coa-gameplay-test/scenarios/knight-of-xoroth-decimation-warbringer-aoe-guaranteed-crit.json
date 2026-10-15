@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "Decimation makes a whole Warbringer cast crit and is consumed once per cast, not per target (#5331)",
+  "contract": "Decimation 524913 (StackAmount 0, no real stacking) reads 'Your next Skulltaker or Warbringer is guaranteed to critically strike for $s2% increased damage. Lasts $d.' Warbringer 802581 is a self-centered AoE ('Slam the ground ... to nearby enemies'), EffectImplicitTargetA/B 22/16, EffectChainTarget 5, EffectRadiusIndex 14 (SpellRadius row 14 = 8 yd), RecoveryTime 6000ms, CastingTimeIndex 1 (instant), confirmed via coa-dbc-viewer against /home/fab/CoaServer/dbc_clientset. In src/server/coa/AscensionXorothAbilities.cpp, BeginResources (called once per cast from OnSpellBeforeEffects, sScriptMgr::OnSpellBeforeEffects at Spell.cpp:3996) copies the live Decimation aura's sequence number into spell->SetScriptValue(524913, sequence) once, spell-scoped; OnSpellCritChance and OnSpellCalculatedTarget (both per-target, but reading the same spell-scoped value) force chance=100 and result.crit=true for every target the AoE hits. ConsumeSelected is called exactly once per cast, from OnSpellCast (sScriptMgr::OnSpellCast at Spell.cpp:4134, invoked once at the end of Spell::cast(), not per target -- sScriptMgr::OnSpellHitResult at Spell.cpp:3019 is the per-target hook and is unrelated to this call site). ConsumeSelected reads the aura's own internal counter via aura->GetScriptValue(524913) (set to 5 on Apply in AscensionXorothAuras.cpp, a separate script-value key from the 500906 sequence used for instance matching) and decrements it by exactly one per call; since the call happens once per cast regardless of how many of the AoE's targets were hit, a single 2-target Warbringer cast must move the counter from 5 to 4, not 5 to 3. This proves the specific #5331 claim (stack drained once per AoE target instead of once per cast) does not reproduce against the current source.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "enemy1", "owner": "knight", "entry": 36, "level": 80, "health": 1000000, "distance": 3 },
+    { "id": "enemy2", "owner": "knight", "entry": 36, "level": 80, "health": 1000000, "distance": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 802581 },
+    { "action": "add_item", "actor": "knight", "item": 629951 },
+    { "action": "equip", "label": "Warbringer requires a main-hand weapon", "actor": "knight", "item": 629951, "slot": 15 },
+    { "action": "wait", "ms": 500 },
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000, "label": "Warbringer costs Rage" },
+    { "action": "set_aura", "actor": "knight", "spell": 524913, "stacks": 1, "label": "Force the Decimation buff" },
+    {
+      "action": "assert", "label": "SETUP: Decimation is active",
+      "actor": "knight", "metric": "aura", "spell": 524913, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: Decimation's internal counter starts at 5",
+      "actor": "knight", "metric": "aura_script_value", "spell": 524913, "key": 524913, "equals": 5
+    },
+    {
+      "action": "set_aura", "label": "Fixture: Warbringer is a Demonfire spender (AscensionXorothAbilities.cpp: Spender(info) && !Count(500906) => SPELL_FAILED_NO_POWER)",
+      "actor": "knight", "spell": 500906, "stacks": 1
+    },
+    { "action": "cast", "actor": "knight", "spell": 802581, "target": "enemy1" },
+    {
+      "action": "assert", "label": "SETUP: the AoE hit enemy1",
+      "actor": "knight", "metric": "spell_damage_count", "spell": 802581, "target": "enemy1", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: the AoE hit enemy2 too",
+      "actor": "knight", "metric": "spell_damage_count", "spell": 802581, "target": "enemy2", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Decimation forces a crit on enemy1",
+      "actor": "knight", "metric": "spell_damage_count", "spell": 802581, "target": "enemy1", "critical": true, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Decimation forces a crit on enemy2 too, within the same cast",
+      "actor": "knight", "metric": "spell_damage_count", "spell": 802581, "target": "enemy2", "critical": true, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTRACT: hitting 2 targets in one cast consumes Decimation's counter once (5 to 4), not twice (5 to 3)",
+      "actor": "knight", "metric": "aura_script_value", "spell": 524913, "key": 524913, "equals": 4
+    },
+    {
+      "action": "assert", "label": "REGRESSION: Decimation is still active after a single non-draining cast",
+      "actor": "knight", "metric": "aura", "spell": 524913, "equals": 1
+    },
+    { "action": "wait", "label": "Clear the cooldown/GCD", "ms": 6500 },
+    {
+      "action": "set_aura", "label": "Fixture: Warbringer consumes Demonfire on the first cast, so it needs re-granting",
+      "actor": "knight", "spell": 500906, "stacks": 1
+    },
+    { "action": "cast", "actor": "knight", "spell": 802581, "target": "enemy1" },
+    {
+      "action": "assert", "label": "SETUP: the second AoE cast hit both enemies again",
+      "actor": "knight", "metric": "spell_damage_count", "spell": 802581, "target": "enemy1", "equals": 2, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "REGRESSION: a second 2-target cast decrements the counter by exactly one more (4 to 3)",
+      "actor": "knight", "metric": "aura_script_value", "spell": 524913, "key": 524913, "equals": 3
+    }
+  ]
+}

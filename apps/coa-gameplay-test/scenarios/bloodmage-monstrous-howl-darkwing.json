@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "name": "Monstrous Howl makes the next six Bloodfang Bites call the Darkwing (#3448)",
+  "contract": "Monstrous Howl 804811 reads 'Enrage for $d, causing the next 6 Bloodfang Bites to have a $s1% reduced global cooldown and cost and to trigger Call of the Darkwing'. Effects 0 and 1 are aura 108 spellmods (SPELLMOD_GLOBAL_COOLDOWN and SPELLMOD_COST, BasePoints -51 -> -50%, EffectSpellClassMask (0, 8388608, 0)) and already work natively. Effect 2 is aura 42 (proc trigger spell) on Call of the Darkwing 801958, a stock SPELL_EFFECT_SUMMON of creature 50069, but Spell.dbc gives 804811 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped the record and the summon clause never fired. Spell.dbc also gives 804811 ProcCharges 0, so the charge budget the tooltip states has to come from the spell_proc row; Aura::CalcMaxCharges takes its value from the proc entry when one exists. Bloodfang Bite is cast as 800156 (SpellFamilyFlags (0, 8388608, 0), CasterAuraSpell 525031) and Monstrous Howl needs CasterAuraSpell 524861, so both Cursed Form markers are fixtured with set_aura.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 804811
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 800156
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture the Cursed Form marker Monstrous Howl requires",
+      "actor": "bloodmage",
+      "spell": 524861,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture the Cursed Form marker Bloodfang Bite requires",
+      "actor": "bloodmage",
+      "spell": 525031,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 804811
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Monstrous Howl is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 804811,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Monstrous Howl carries the tooltip's six charges",
+      "actor": "bloodmage",
+      "metric": "aura_charges",
+      "spell": 804811,
+      "equals": 6
+    },
+    {
+      "action": "snapshot",
+      "label": "Shadow Bats owned before the bite",
+      "actor": "bloodmage",
+      "metric": "owned_creature_count",
+      "entry": 50069,
+      "save_as": "bats_before"
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800156,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a Bloodfang Bite calls the Darkwing",
+      "actor": "bloodmage",
+      "metric": "owned_creature_count",
+      "entry": 50069,
+      "relative_to": "bats_before",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The bite spent exactly one of the six charges",
+      "actor": "bloodmage",
+      "metric": "aura_charges",
+      "spell": 804811,
+      "equals": 5,
+      "within_ms": 3000
+    }
+  ]
+}

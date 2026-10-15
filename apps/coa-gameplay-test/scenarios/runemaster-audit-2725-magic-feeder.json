@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Runemaster audit #2725: Magic Feeder adds +1 to Leyfeed's effect value",
+  "contract": [
+    "Magic Feeder 705546: 'Your Leyfeed now steals 1 additional magic effect from the target.' Re-verified in",
+    "Spell.dbc: Effect0 is SPELL_AURA_ADD_FLAT_MODIFIER (107), MiscValue 3 = SPELLMOD_EFFECT1, EffectBasePoints0",
+    "0 with DieSides 1 = +1, EffectSpellClassMask mask0 16384 (0x4000) on family 38. Leyfeed 520269 carries",
+    "SpellFamilyName 38, SpellFamilyFlags[0] 16384 - an exact, unique match (no other Runemaster spell shares",
+    "0x4000). Effect0 of Leyfeed itself is SPELL_EFFECT_STEAL_BENEFICIAL_BUFF with EffectBasePoints0 1,",
+    "DieSides0 1; SpellEffectInfo::CalcValue's DieSides==1 branch (SpellInfo.cpp:498-500) always adds +1 to a",
+    "single-sided roll, so Leyfeed's real computed steal count before the talent is 2, not the raw BasePoints",
+    "field. SPELLMOD_EFFECT1 raises that base points value, which the native steal-buff effect reads directly.",
+    "This is the native spellmod system; no occurrence of 705546 or Leyfeed exists in src/server/coa/.",
+    "Expected: before the talent Leyfeed's own effect0 value is 2 (1 base + 1 die-roll); with the talent it",
+    "rises by exactly 1 more."
+  ],
+  "timeout_ms": 60000,
+  "players": [{"id": "rm", "race": 1, "class": 32, "level": 80}],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 3000},
+    {"action": "assert", "label": "SETUP: Leyfeed's own effect0 value is 2 before the talent (1 base + 1 die-roll)",
+      "actor": "rm", "metric": "spell_effect_value", "spell": 520269, "effect": 0, "equals": 2},
+    {"action": "assert", "label": "SETUP: no modifier on effect1 before the talent", "actor": "rm",
+      "metric": "spell_modifier", "spell": 520269, "op": 3, "base": 1, "equals": 1},
+    {"action": "learn", "actor": "rm", "spell": 705546},
+    {"action": "assert", "label": "CONTRACT: Magic Feeder is active", "actor": "rm",
+      "metric": "aura", "spell": 705546, "equals": 1, "within_ms": 1500},
+    {"action": "assert", "label": "CONTRACT: Leyfeed steals one additional effect", "actor": "rm",
+      "metric": "spell_modifier", "spell": 520269, "op": 3, "base": 1, "equals": 2},
+    {"action": "unlearn", "actor": "rm", "spell": 705546},
+    {"action": "assert", "label": "CONTRACT: unlearning restores the base value", "actor": "rm",
+      "metric": "spell_modifier", "spell": 520269, "op": 3, "base": 1, "equals": 1, "within_ms": 2000}
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Universal Power lets Aspect of the Cosmos stack one additional time (#1535)",
+  "contract": "Universal Power 300262 (Spell.dbc, SpellFamilyName 32, passive) carries one effect: SPELL_AURA_ADD_FLAT_MODIFIER (107) with EffectMiscValue 31 = SPELLMOD_MAX_AURA_STACKS (SpellDefines.h, the Ascension op), EffectBasePoints 0 with DieSides 1 resolving to +1, and EffectSpellClassMask word2 0x40000000. That mask bit is carried by Aspect of the Cosmos 801124 (family 32, SpellFamilyFlags word2 0x40000800, StackAmount 2) and by Aspect of the Huntress helper 805357 and the unused Searing Arrow 807860, neither of which is stackable. The tooltip reads 'Your Aspect of the Cosmos now stacks 1 additional time.' Native path only, no script and no SQL: AuraEffect::CalculateSpellMod builds the SpellModifier, SpellInfo::CalcMaxAuraStacks (SpellInfo.cpp) applies Player::ApplySpellMod(SPELLMOD_MAX_AURA_STACKS) to StackAmount when the caster owns the modifier, and Aura::ModStackAmount consumes that cap. Cosmos 801124 is cast through the module's Cast(player, target, 801124) (AscensionStarcaller.cpp), which goes through the same native stack path; AscensionStarcallerContracts.cpp does not edit 801124 or 300262. The spell_max_stacks metric calls CalcMaxAuraStacks(player) directly. Both fixtures share race, class and level with no ratings, so only the passive can move the cap: control must read the DBC StackAmount 2, the talented fixture 3.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Untalented Aspect of the Cosmos caps at its DBC StackAmount of 2",
+      "actor": "control",
+      "metric": "spell_max_stacks",
+      "spell": 801124,
+      "equals": 2
+    },
+    {
+      "action": "snapshot",
+      "label": "Aspect of the Cosmos stack cap without the passive",
+      "actor": "control",
+      "metric": "spell_max_stacks",
+      "spell": 801124,
+      "save_as": "cosmos_cap_base"
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 300262
+    },
+    {
+      "action": "assert",
+      "label": "Learning the passive applies its aura",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 300262,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Aspect of the Cosmos stacks exactly one additional time",
+      "actor": "talent",
+      "metric": "spell_max_stacks",
+      "spell": 801124,
+      "relative_to": "cosmos_cap_base",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The talented cap is 3",
+      "actor": "talent",
+      "metric": "spell_max_stacks",
+      "spell": 801124,
+      "equals": 3
+    }
+  ]
+}

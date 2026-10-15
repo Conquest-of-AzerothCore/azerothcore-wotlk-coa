@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Residual Energy doubles the duration of Shadow of the Void (#653)",
+  "contract": "Residual Energy 681389 reads 'Doubles the duration of Shadow of the Void.' In the installed Spell.dbc it is passive, family 31, effect 0 is SPELL_AURA_ADD_FLAT_MODIFIER (107), misc 1 = SPELLMOD_DURATION, BasePoints 7999 / DieSides 1 = +8000 ms, class mask dword 0 = 256 = bit 8. Shadow of the Void 300277 (family 31) carries SpellFamilyFlags[0] 256 (bit 8) -- exact match -- and DurationIndex 31, whose SpellDuration.dbc row is Duration 8000 ms (verified directly). Player::ApplySpellMod (Player.cpp:10219-10323) computes SPELLMOD_DURATION as (base+totalflat)*totalmul (line 10323); with only the flat +8000 mod, 8000 -> (8000+8000)*1 = 16000, exactly double. Grasp of Zek'voz 573028 (family 31, SpellFamilyFlags[0]=2) does not carry bit 8 and is the control.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "c", "race": 1, "class": 25, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the fixtures settle", "ms": 5000},
+    {"action": "assert", "label": "SETUP: Shadow of the Void's real 8000 ms duration is unmodified", "actor": "c", "metric": "spell_modifier", "spell": 300277, "op": 1, "base": 8000, "equals": 8000},
+    {"action": "assert", "label": "SETUP: control spell unmodified", "actor": "c", "metric": "spell_modifier", "spell": 573028, "op": 1, "base": 8000, "equals": 8000},
+    {"action": "learn", "label": "Learn Residual Energy", "actor": "c", "spell": 681389},
+    {"action": "assert", "label": "The passive is active", "actor": "c", "metric": "aura", "spell": 681389, "equals": 1},
+    {"action": "assert", "label": "Shadow of the Void's duration is now 16000 ms (doubled)", "actor": "c", "metric": "spell_modifier", "spell": 300277, "op": 1, "base": 8000, "equals": 16000},
+    {"action": "assert", "label": "Grasp of Zek'voz is outside the mask", "actor": "c", "metric": "spell_modifier", "spell": 573028, "op": 1, "base": 8000, "equals": 8000},
+    {"action": "unlearn", "label": "Drop Residual Energy", "actor": "c", "spell": 681389},
+    {"action": "assert", "label": "Shadow of the Void returns to 8000 ms", "actor": "c", "metric": "spell_modifier", "spell": 300277, "op": 1, "base": 8000, "equals": 8000}
+  ]
+}

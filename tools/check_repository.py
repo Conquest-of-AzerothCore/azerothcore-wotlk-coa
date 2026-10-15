@@ -1,4 +1,3 @@
-"""Source-only publication guard. Reports locations, never matched credential values."""
 import ast
 import json
 import os
@@ -30,8 +29,6 @@ def main():
     for path in paths:
         name = path.relative_to(ROOT).as_posix()
         if path.is_symlink():
-            # Git checks out directory links as links on Linux and as text files on
-            # Windows. Inspect the link itself; its tracked targets are scanned separately.
             raw = os.readlink(path).encode('utf-8')
             target = path.resolve()
             if not target.is_relative_to(ROOT) or not target.exists():

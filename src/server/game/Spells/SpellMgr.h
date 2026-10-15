@@ -93,13 +93,15 @@ enum SpellFamilyFlag
     SPELLFAMILYFLAG_SHAMAN_TOTEM_EFFECTS    = 0x04000000,  // Seems to be linked to most totems and some totem effects
 };
 
-#define SPELL_LINKED_MAX_SPELLS  200000
+// Linked-spell types share one map keyed by spell id + type * SPELL_LINKED_MAX_SPELLS, so the stride must exceed
+// every spell id: CoA's client data holds spell ids up to about 14 million.
+#define SPELL_LINKED_MAX_SPELLS  100000000
 
 enum SpellLinkedType
 {
     SPELL_LINK_CAST     = 0,            // +: cast; -: remove
-    SPELL_LINK_HIT      = 1 * 200000,
-    SPELL_LINK_AURA     = 2 * 200000,   // +: aura; -: immune
+    SPELL_LINK_HIT      = 1 * SPELL_LINKED_MAX_SPELLS,
+    SPELL_LINK_AURA     = 2 * SPELL_LINKED_MAX_SPELLS,   // +: aura; -: immune
     SPELL_LINK_REMOVE   = 0,
 };
 
@@ -635,6 +637,12 @@ inline bool IsProfessionOrRidingSkill(uint32 skill)
     return  IsProfessionSkill(skill) || skill == SKILL_RIDING;
 }
 
+// Classic professions end at Artisan (skill step 4); each expansion adds the next rank (Master, Grand Master).
+inline uint16 GetMaxProfessionSkillStep(uint8 expansion)
+{
+    return 4 + expansion;
+}
+
 bool IsPartOfSkillLine(uint32 skillId, uint32 spellId);
 
 // spell diminishing returns
@@ -786,6 +794,25 @@ public:
     void UnloadSpellInfoChains();
     void LoadSpellTalentRanks();
     void LoadSpellRanks();
+    /// rank chains a module adds after `spell_ranks`; a chain touching an already ranked spell is skipped
+    using AddedSpellRanks = std::vector<std::vector<uint32>> (*)();
+    void SetAddedSpellRanks(AddedSpellRanks ranks) { _addedSpellRanks = ranks; }
+    void LoadAddedSpellRanks();
+    /// (source, twin) spell pairs a module adds; a twin without its own database row takes its source's
+    /// called before spell corrections (ranked = false) and again once rank chains are known (ranked = true)
+    using SpellTwins = std::vector<std::pair<uint32, uint32>> (*)(bool ranked);
+    void SetSpellTwins(SpellTwins twins) { _spellTwinSource = twins; }
+    /// (stock, spell) pairs that share a name but not a layout: matched by id lookups, never given stock data
+    using SpellNamesakes = std::vector<std::pair<uint32, uint32>> (*)();
+    void SetSpellNamesakes(SpellNamesakes namesakes) { _spellNamesakeSource = namesakes; }
+    /// a stock spell with its twins and namesakes
+    [[nodiscard]] std::vector<uint32> GetSpellAndRelatives(uint32 spellId) const;
+    void LoadSpellTwins(bool ranked);
+    [[nodiscard]] std::unordered_multimap<uint32, uint32> const& GetSpellTwins() const { return _spellTwins; }
+    /// the spell a twin takes its data from, or the spell itself
+    [[nodiscard]] uint32 GetSpellTwinSource(uint32 spellId) const;
+    /// the twin or namesake of a stock spell that belongs with a related spell's own twin, or the stock spell
+    [[nodiscard]] uint32 GetSpellTwinFor(uint32 stockSpellId, uint32 relatedSpellId) const;
     void LoadSpellRequired();
     void LoadSpellLearnSkills();
     void LoadSpellTargetPositions();
@@ -816,6 +843,16 @@ public:
     void LoadSpellJumpDistances();
 
 private:
+    template <class Store>
+    void CopyToSpellTwins(Store& store);
+
+    AddedSpellRanks            _addedSpellRanks = nullptr;
+    SpellTwins                 _spellTwinSource = nullptr;
+    std::unordered_multimap<uint32, uint32> _spellTwins;
+    std::unordered_map<uint32, uint32> _spellTwinSources;
+    SpellNamesakes             _spellNamesakeSource = nullptr;
+    std::unordered_multimap<uint32, uint32> _spellNamesakes;
+    std::unordered_map<uint32, uint32> _spellNamesakeSources;
     SpellDifficultySearcherMap mSpellDifficultySearcherMap;
     SpellChainMap              mSpellChains;
     SpellsRequiringSpellMap    mSpellsReqSpell;

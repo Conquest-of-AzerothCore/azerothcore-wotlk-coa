@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "The native bug report request is answered through the bug tracker packets",
+  "contract": "C_BugTracker.SubmitReport sends CMSG_CREATE_BUG_REPORT (0x0562): u32 realm field, u32 category, u32 priority, u8 public, then the title and description as a u32 length and bytes. The server answers every request with SMSG_CREATE_BUG_REPORT_ERROR (0x0565) or SMSG_CREATE_BUG_REPORT_SUCCESS (0x0566). A report marked private is refused whether or not CoABugReport is enabled (disabled realm or public-issue refusal), so it never reaches the spool; a truncated request is refused as invalid.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "reporter", "race": 1, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    {
+      "action": "client_packet", "label": "Private report 'Crash' / 'Body'", "actor": "reporter", "opcode": 1378,
+      "fields": [
+        { "u32": 0 }, { "u32": 3 }, { "u32": 1 }, { "u8": 0 },
+        { "u32": 5 }, { "u8": 67 }, { "u8": 114 }, { "u8": 97 }, { "u8": 115 }, { "u8": 104 },
+        { "u32": 4 }, { "u8": 66 }, { "u8": 111 }, { "u8": 100 }, { "u8": 121 }
+      ]
+    },
+    {
+      "action": "assert", "label": "The private report is refused", "actor": "reporter",
+      "metric": "server_packets", "opcode": 1381, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "client_packet", "label": "Truncated report", "actor": "reporter", "opcode": 1378,
+      "fields": [ { "u32": 0 } ]
+    },
+    {
+      "action": "assert", "label": "The truncated report is refused", "actor": "reporter",
+      "metric": "server_packets", "opcode": 1381, "equals": 2, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Nothing was accepted", "actor": "reporter",
+      "metric": "server_packets", "opcode": 1382, "equals": 0
+    }
+  ]
+}

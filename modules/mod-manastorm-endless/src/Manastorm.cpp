@@ -24,7 +24,7 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include "Chat.h"
-#include "../../mod-ascension-compat/src/AscensionManastormGadgets.h"
+#include "AscensionManastormGadgets.h"
 
 void AddSC_manastorm_commandscript();
 void AddSC_manastorm_greedy_demon();
@@ -969,7 +969,6 @@ public:
         }
     }
 };
-
 
 class manastorm_affix_spell_guard : public AllSpellScript
 {

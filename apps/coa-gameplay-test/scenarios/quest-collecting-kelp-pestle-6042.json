@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Collecting Kelp: William Pestle takes the kelp at his patch-WB1 inn spot (#6042)",
+  "contract": [
+    "Quest 112 Collecting Kelp ends at William Pestle 253 (guid 80350; SUB creature_quest_ends 253/112). Patch-WB1",
+    "moved the Lion's Pride Inn 39 yards south-west, and Pestle stands at his QuestSuperTrack 1079 turn-in point",
+    "-9479.89 -1.924 56.966 (rev_20260923_02, re-applied by rev_20261001_20 after the Northshire baseline restore put",
+    "him back at the stock -9460.3 31.94). Expected: a hero beside the WB1 spot, 39 yards from the stock spot and",
+    "beyond the 30-yard quest-giver search, sees Pestle's turn-in marker and hands in the kelp."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -9476.0, "y": -4.0, "z": 57.0, "o": 3.0},
+  "players": [{"id": "courier", "race": 1, "class": 1, "level": 10}],
+  "steps": [
+    {"action": "wait", "label": "Let login settle", "ms": 3000},
+    {"action": "set_phase", "actor": "courier", "value": 1},
+    {"action": "assert", "label": "William Pestle stands in Goldshire", "actor": "courier",
+     "metric": "nearby_creature_count", "entry": 253, "equals": 1, "within_ms": 10000},
+    {"action": "prepare_quest", "label": "Fixture: the courier carries four Crystal Kelp Fronds", "actor": "courier",
+     "quest": 112},
+    {"action": "assert", "label": "SETUP: the kelp is in the bags", "actor": "courier", "metric": "item_count",
+     "item": 1256, "equals": 4},
+    {"action": "assert", "label": "Pestle at the WB1 inn spot shows the turn-in marker", "actor": "courier",
+     "metric": "dialog_status", "entry": 253, "equals": 10, "within_ms": 5000},
+    {"action": "reward_quest", "label": "Hand in the kelp", "actor": "courier", "quest": 112},
+    {"action": "assert", "label": "Collecting Kelp is rewarded", "actor": "courier", "metric": "quest_rewarded",
+     "quest": 112, "equals": 1}
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Temporal Focus removes a banish on application (#544)",
+  "contract": "Temporal Focus 806165 is three SPELL_AURA_MECHANIC_IMMUNITY (77) effects with EffectMiscValue 9 (MECHANIC_SILENCE), 26 (MECHANIC_INTERRUPT) and 18 (MECHANIC_BANISH) - exactly the three the tooltip names - and AttributesEx 0x8000 = SPELL_ATTR1_IMMUNITY_PURGES_EFFECT, which is the 'removing' half. No script is needed: AuraEffect::HandleModMechanicImmunity calls SpellInfo::ApplyAllSpellImmunitiesTo, which registers IMMUNITY_MECHANIC and, for a purging immunity, calls Unit::RemoveAurasWithMechanic over the same mask. Banish 710 carries Mechanic 18, so applying Temporal Focus must strip it. 806165 also has AttributesEx5 0x8 (SPELL_ATTR5_ALLOW_WHILE_STUNNED), which is what lets it be cast while banished. The silence and interrupt clauses use the identical code path with EffectMiscValue 9 and 26 and are not exercised separately: a fixture aura carrying either mechanic can only be placed before the cast, and a silence would then block the cast itself. DurationIndex 1 = 10000 ms.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 806165
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 710,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "The banish is on the Chronomancer before the cast",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 710,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 806165
+    },
+    {
+      "action": "assert",
+      "label": "Temporal Focus lands while banished",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 806165,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Applying Temporal Focus removes the banish",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 710,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Temporal Focus lasts the record's 10 seconds",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 806165,
+      "min": 1,
+      "max": 10000
+    }
+  ]
+}

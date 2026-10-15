@@ -261,6 +261,7 @@ namespace lfg
         uint32 oldMSTime = getMSTime();
 
         LfgDungeonStore.clear();
+        DungeonsWithoutEntrance.clear();
 
         // Initialize Dungeon map with data from dbcs
         for (uint32 i = 0; i < sLFGDungeonStore.GetNumRows(); ++i)
@@ -279,6 +280,19 @@ namespace lfg
                     break;
             }
         }
+
+        uint32 const maxExpansion = sWorld->getIntConfig(CONFIG_LFG_MAX_EXPANSION);
+        if (maxExpansion < EXPANSION_WRATH_OF_THE_LICH_KING)
+            for (auto& [id, dungeon] : LfgDungeonStore)
+                if (dungeon.type == LFG_TYPE_RANDOM && dungeon.expansion == maxExpansion && dungeon.difficulty == DUNGEON_DIFFICULTY_NORMAL)
+                    dungeon.maxlevel = std::max<uint8>(dungeon.maxlevel, sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL));
+
+        // CoA: the Classic dungeons scale, and Ascension let anyone in their target range (TargetLevelMin,
+        // 15 for most) queue for them; MinLevel is only the level they were made for.
+        for (auto& [id, dungeon] : LfgDungeonStore)
+            if (dungeon.type == LFG_TYPE_DUNGEON && dungeon.expansion == EXPANSION_CLASSIC && dungeon.difficulty == DUNGEON_DIFFICULTY_NORMAL)
+                if (LFGDungeonEntry const* entry = sLFGDungeonStore.LookupEntry(id); entry && entry->TargetLevelMin && entry->TargetLevelMin < dungeon.minlevel)
+                    dungeon.minlevel = uint8(entry->TargetLevelMin);
 
         // Fill teleport locations from DB
         //                                                   0          1           2           3            4
@@ -328,6 +342,7 @@ namespace lfg
                 if (!at)
                 {
                     LOG_ERROR("lfg", "LFGMgr::LoadLFGDungeons: Failed to load dungeon {}, cant find areatrigger for map {}", dungeon.name, dungeon.map);
+                    DungeonsWithoutEntrance.insert(dungeon.id);
                     continue;
                 }
 
@@ -476,7 +491,7 @@ namespace lfg
         ObjectGuid guid = player->GetGUID();
 
         uint8 level = player->GetLevel();
-        uint8 expansion = player->GetSession()->Expansion();
+        uint8 expansion = std::min<uint8>(player->GetSession()->Expansion(), sWorld->getIntConfig(CONFIG_LFG_MAX_EXPANSION));
         LfgDungeonSet const& dungeons = GetDungeonsByRandom(0);
         LfgLockMap lock;
 
@@ -498,7 +513,7 @@ namespace lfg
                 lockData = LFG_LOCKSTATUS_RAID_LOCKED;
             else if (dungeon->expansion > expansion || (onlySeasonalBosses && !dungeon->seasonal))
                 lockData = LFG_LOCKSTATUS_INSUFFICIENT_EXPANSION;
-            else if (IsDungeonDisabled(dungeon->map, dungeon->difficulty))
+            else if (IsDungeonDisabled(dungeon->map, dungeon->difficulty) || DungeonsWithoutEntrance.count(dungeon->id))
                 lockData = LFG_LOCKSTATUS_RAID_LOCKED;
             else if (dungeon->difficulty > DUNGEON_DIFFICULTY_NORMAL && (!mapEntry || !mapEntry->IsRaid()) && sInstanceSaveMgr->PlayerIsPermBoundToInstance(player->GetGUID(), dungeon->map, Difficulty(dungeon->difficulty)))
                 lockData = LFG_LOCKSTATUS_RAID_LOCKED;
@@ -1573,6 +1588,13 @@ namespace lfg
     void LFGMgr::GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& players, LfgLockPartyMap& lockMap, uint32 randomDungeonId)
     {
         lockMap.clear();
+        for (LfgDungeonSet::iterator itr = dungeons.begin(); itr != dungeons.end();)
+        {
+            if (DungeonsWithoutEntrance.count(*itr))
+                itr = dungeons.erase(itr);
+            else
+                ++itr;
+        }
         for (LfgGuidSet::const_iterator it = players.begin(); it != players.end() && !dungeons.empty(); ++it)
         {
             ObjectGuid guid = (*it);
@@ -1585,7 +1607,7 @@ namespace lfg
 
                 uint8 difficultyFlag = (randomDungeonId == RANDOM_DUNGEON_NORMAL_TBC || randomDungeonId == RANDOM_DUNGEON_NORMAL_WOTLK) ? 0 : 1;
 
-                if (dungeon && !IsDungeonDisabled(dungeon->map, (Difficulty)difficultyFlag) && it2->second == LFG_LOCKSTATUS_RAID_LOCKED && randomDungeonId && sWorld->getBoolConfig(CONFIG_LFG_ALLOW_COMPLETED))
+                if (dungeon && !IsDungeonDisabled(dungeon->map, (Difficulty)difficultyFlag) && !DungeonsWithoutEntrance.count(dungeonId) && it2->second == LFG_LOCKSTATUS_RAID_LOCKED && randomDungeonId && sWorld->getBoolConfig(CONFIG_LFG_ALLOW_COMPLETED))
                     continue;
 
                 LfgDungeonSet::iterator itDungeon = dungeons.find(dungeonId);
@@ -2309,6 +2331,17 @@ namespace lfg
 
     }
 
+    LFGDungeonData const* LFGMgr::GetClassicRandomFallback(uint32 completedDungeonId)
+    {
+        LFGDungeonData const* completed = GetLFGDungeon(completedDungeonId);
+        if (!completed || completed->type != LFG_TYPE_DUNGEON || completed->seasonal || completed->expansion != 0 ||
+            completed->difficulty != DUNGEON_DIFFICULTY_NORMAL)
+            return nullptr;
+
+        LFGDungeonData const* random = GetLFGDungeon(LFG_DUNGEON_RANDOM_CLASSIC);
+        return random && random->type == LFG_TYPE_RANDOM ? random : nullptr;
+    }
+
     /**
        Finish a dungeon and give reward, if any.
 
@@ -2352,6 +2385,15 @@ namespace lfg
 
             // Give rewards only if its a random dungeon
             LFGDungeonData const* dungeon = GetLFGDungeon(rDungeonId);
+
+            if (!dungeon || (dungeon->type != LFG_TYPE_RANDOM && !dungeon->seasonal))
+            {
+                if (LFGDungeonData const* classicRandom = GetClassicRandomFallback(dungeonId))
+                {
+                    rDungeonId = classicRandom->id;
+                    dungeon = classicRandom;
+                }
+            }
 
             if (!dungeon || (dungeon->type != LFG_TYPE_RANDOM && !dungeon->seasonal))
             {

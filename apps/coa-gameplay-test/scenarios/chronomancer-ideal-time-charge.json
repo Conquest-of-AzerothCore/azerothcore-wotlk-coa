@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Ideal Time's buff carries a single charge (#3662)",
+  "contract": "Ideal Time's buff 807210 reads \"Your next ability is guaranteed to critically strike\" in both its Description and its AuraDescription, and Spell.dbc gives it DurationIndex 1 = 10000 ms. A buff that applies to one ability and no more is expressed in this core by a charge: Aura::CalcMaxCharges reads SpellInfo::ProcCharges, Aura::IsUsingCharges is false while that is zero, and both consumers - Player::RemoveSpellMods (Player.cpp:10470-10471) and Aura::PrepareProcToTrigger (SpellAuras.cpp:2133-2137) - spend a charge only for an aura that is using charges. 807210 ships ProcCharges 0, so the buff cannot be one-shot by any mechanism and instead lasts its full 10 seconds. The two effects stay as authored: effect 0 is Aura=290 (SPELL_AURA_MOD_CRIT_PCT) with EffectBasePoints 99 and EffectDieSides 1, a +100 stat bonus to every critical chance, and effect 1 is Aura=107 (SPELL_AURA_ADD_FLAT_MODIFIER) with EffectMiscValue 7 = SPELLMOD_CRITICAL_CHANCE, the same +100, class-masked to [0,268435456,0] (Accelerated Recovery). The charge must not disable that modifier: Player::IsAffectedBySpellmod rejects a charged mod only for a real cast that has run out of charges, and the spell_modifier metric submits no cast, so the flat +100 must still read back with the charge in place.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "set_aura",
+      "label": "Fixture Ideal Time's buff as its 30-second periodic grant would leave it",
+      "actor": "chronomancer",
+      "spell": 807210,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Ideal Time's buff is present",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807210,
+      "caster": "chronomancer",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Ideal Time's buff carries exactly one charge",
+      "actor": "chronomancer",
+      "metric": "aura_charges",
+      "spell": 807210,
+      "caster": "chronomancer",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The charge leaves the guaranteed-critical modifier intact",
+      "actor": "chronomancer",
+      "metric": "spell_modifier",
+      "spell": 501772,
+      "op": 7,
+      "base": 0,
+      "equals": 100
+    }
+  ]
+}

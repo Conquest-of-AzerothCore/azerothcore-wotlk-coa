@@ -1,0 +1,153 @@
+{
+  "schema": 1,
+  "name": "Hemal Excision places the siphoned curses on an enemy when reactivated (#607)",
+  "contract": "Hemal Excision 803681: 'Cut into an ally's vital essence, siphoning all curse effects from them. You may reactivate this ability again within $803734d to place these curse effects on an enemy.' Its single effect is 38 SPELL_EFFECT_DISPEL, MiscValue 2 (DISPEL_CURSE), BasePoints 19 -> 20 dispels, TargetA 21 (TARGET_UNIT_TARGET_ALLY), and Spell::EffectDispel already strips the ally's curses with no script - that half is the regression guard here. The re-activation half had records but no caller: 803734 'Hemal Excision' is the window (DurationIndex 1 = 10000 ms, one SPELL_AURA_DUMMY on the caster, AuraDescription 'You may reactivate Hemal Excision to place all siphoned curses on an enemy') and 803733 'Excision' is the re-activation itself ('Apply all siphoned curses onto an enemy', instant, RecoveryTime 0, RangeIndex 4 = 30 yds, ManaCostPercentage 5, effect 0 = 3 SPELL_EFFECT_DUMMY on TargetA 6 = TARGET_UNIT_TARGET_ENEMY, effect 1 = 164 SPELL_EFFECT_REMOVE_AURA with TriggerSpell 803734 on the caster). Nothing in src/, modules/ or data/sql/ referenced either id. Because the re-activation is its own cooldown-free record, Hemal Excision's RecoveryTime 90000 is never bypassed, reset or shortened; the window only points the button at 803733 through Player::SetTemporarySpellReplacement, so the second 'cast 803681' below is delivered as 803733 by WorldSession::HandleCastSpellOpcode. The two fixture curses are chosen for their Dispel field and their SpellFamilyName, read from Spell.dbc: Curse of Weakness 702 (SpellFamilyName 5, DurationIndex 4 = 120000 ms) and Curse of Blood 12279 (SpellFamilyName 0, DurationIndex 6 = 600000 ms) both have Dispel 2 (DISPEL_CURSE), both are non-passive and both durations outlive the transfer, so the assertions cannot be satisfied by expiry. They must come from two different SpellFamilyNames: SpellInfo::LoadSpellSpecific maps every SPELLFAMILY_WARLOCK spell with Dispel == DISPEL_CURSE to SPELL_SPECIFIC_CURSE, IsAuraExclusiveBySpecificPerCasterWith makes that specific exclusive per caster, and the harness applies a fixture aura as player->AddAura(spell, player), so two warlock curses on one ally share one caster and replace each other instead of coexisting. Curse of Blood is SpellFamilyName 0 and appears in no spell_group row, so Aura::CanStackWith returns true on the SpellFamilyName mismatch and the two curses coexist. Aura::CalcDispelChance is 100 for them here (no SPELL_AURA_MOD_DISPEL_RESIST on the ally and the dispel is not offensive), so the strip is deterministic. NOT covered: the client-side action-bar swap itself - the server-side half of it, the temporary knowledge of 803733, is asserted instead.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "faction": 14,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "bloodmage", "spell": 803681 },
+    { "action": "set_power", "actor": "bloodmage", "power": 1, "value": 1000 },
+    { "action": "set_aura", "actor": "ally", "spell": 702, "stacks": 1 },
+    { "action": "set_aura", "actor": "ally", "spell": 12279, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "Fixture: Curse of Weakness is on the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 702,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Fixture: Curse of Blood is on the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 12279,
+      "equals": 1
+    },
+    { "action": "cast", "actor": "bloodmage", "spell": 803681, "target": "ally" },
+    {
+      "action": "assert",
+      "label": "Curse of Weakness is siphoned off the ally (native half)",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 702,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Curse of Blood is siphoned off the ally (native half)",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 12279,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ten-second re-activation window opens on the Bloodmage",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 803734,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the re-activation spell Excision is available while the window is open",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 803733,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Hemal Excision's own ninety-second cooldown is running during the window",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 803681,
+      "min": 70000,
+      "max": 90000
+    },
+    {
+      "action": "wait",
+      "label": "Let Hemal Excision's 1000 ms global cooldown (category 133) lapse inside the 10 s window",
+      "ms": 1500
+    },
+    { "action": "cast", "actor": "bloodmage", "spell": 803681, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Curse of Weakness is placed on the enemy",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 702,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Curse of Blood is placed on the enemy",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 12279,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The window closes once the curses are placed",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 803734,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The re-activation neither cleared nor restarted the ninety-second cooldown",
+      "actor": "bloodmage",
+      "metric": "cooldown_ms",
+      "spell": 803681,
+      "min": 60000,
+      "max": 89000
+    },
+    {
+      "action": "assert",
+      "label": "Excision is withdrawn again once the window is over",
+      "actor": "bloodmage",
+      "metric": "knows_spell",
+      "spell": 803733,
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

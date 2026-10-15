@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "A Scarlet Hammer button is saved as Argent Blade (#5469)",
+  "contract": "Scarlet Crusader 301172 is bound to aura_ascension_templar_lifecycle; its apply calls AscensionTemplar::Replacement(player, 804929, 807035) (AscensionTemplarAuras.cpp:145-146) and its removal Replacement(player, 804929, 0) (lines 221-222). Replacement (AscensionTemplar.cpp:129-143) learns Scarlet Hammer 807035 with learnSpell(..., true) (line 132) and replaces every known Argent Blade rank (chain of 804929; rank 7 807268 here, as in templar-scarlet-hammer-replaces-argent-blade.json) through SetTemporarySpellReplacement (line 139). The scenario fixtures Scarlet Crusader (8 s). 807035 is never written to character_spell, so a button holding it must be saved as Argent Blade 807268, the spell persisted_action_button reads from Player::GetSavedActionButtonSpell; a button holding Argent Blade itself is saved unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "templar", "race": 1, "class": 19, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "learn", "actor": "templar", "spell": 807268 },
+    { "action": "set_aura", "label": "Scarlet Crusader is active", "actor": "templar", "spell": 301172, "stacks": 1 },
+    {
+      "action": "assert",
+      "label": "Argent Blade is replaced with Scarlet Hammer",
+      "actor": "templar",
+      "metric": "temporary_spell_replacement",
+      "spell": 807268,
+      "equals": 807035,
+      "within_ms": 2000
+    },
+    { "action": "set_action_button", "actor": "templar", "button": 2, "spell": 807035 },
+    { "action": "set_action_button", "actor": "templar", "button": 3, "spell": 807268 },
+    {
+      "action": "assert",
+      "label": "The bar holds Scarlet Hammer",
+      "actor": "templar",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 807035
+    },
+    {
+      "action": "assert",
+      "label": "The Scarlet Hammer button is saved as Argent Blade",
+      "actor": "templar",
+      "metric": "persisted_action_button",
+      "button": 2,
+      "equals": 807268
+    },
+    {
+      "action": "assert",
+      "label": "Control: the Argent Blade button is saved unchanged",
+      "actor": "templar",
+      "metric": "persisted_action_button",
+      "button": 3,
+      "equals": 807268
+    }
+  ]
+}

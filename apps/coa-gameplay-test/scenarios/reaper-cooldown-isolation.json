@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Reaper fixes preserve Runemaster Arcane Imprisonment",
+  "contract": "Arcane Imprisonment 705628 promises a four-second reduction to Sorcerer's Cage 801184. Its original DBC cooldown modifier has an empty mask and must survive Reaper-specific changes; removing the aura restores the original value.",
+  "players": [
+    {
+      "id": "runemaster",
+      "race": 1,
+      "class": 32,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "spell_modifier",
+      "spell": 801184,
+      "op": 11,
+      "base": 10000,
+      "equals": 10000
+    },
+    {
+      "action": "set_aura",
+      "actor": "runemaster",
+      "spell": 705628,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "spell_modifier",
+      "spell": 801184,
+      "op": 11,
+      "base": 10000,
+      "equals": 6000
+    },
+    {
+      "action": "set_aura",
+      "actor": "runemaster",
+      "spell": 705628,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "spell_modifier",
+      "spell": 801184,
+      "op": 11,
+      "base": 10000,
+      "equals": 10000
+    }
+  ]
+}

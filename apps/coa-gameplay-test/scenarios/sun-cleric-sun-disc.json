@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "name": "Sun Disc grants a raid-wide 6% healing-taken aura and boosts Illumination healing by 20% (#1028)",
+  "contract": "Sun Disc 560547 is family 33, Attributes 65600 (SPELL_ATTR0_PASSIVE) with EquippedItemClass -1; Stances 134217728 is gated by Player::IsNeedCastPassiveSpellAtLearn, but AttributesEx2 1074266112 carries SPELL_ATTR2_ALLOW_WHILE_NOT_SHAPESHIFTED (bit 0x80000), so it still self-applies on learn for an unshapeshifted caster. Effect 0 is SPELL_EFFECT_APPLY_AREA_AURA_RAID (65) on TARGET_UNIT_CASTER with ApplyAuraName SPELL_AURA_MOD_HEALING_PCT (118), EffectBasePoints 5 + DieSides 1 = 6; Unit::SpellHealingBonusTaken folds this into the receiver's incoming-healing multiplier, and Spell::EffectApplyAreaAura spreads the same aura instance to nearby raid members, so this is not \"no server-side implementation\". Effect 1 is SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue 0 (SPELLMOD_DAMAGE) and EffectSpellClassMask word1 512 (0x200), matching Illumination 500143's own SpellFamilyFlags word1 512; EffectBasePoints 19 + DieSides 1 = 20. Unit::SpellHealingBonusDone applies modOwner->ApplySpellMod(id, SPELLMOD_DAMAGE, heal) unconditionally at the end of the function, which is a percentage multiplier applied to whatever heal value SpellPctHealingModsDone/SpellBaseHealingBonusDone already produced, so it preserves a clean +20% ratio regardless of that pre-modifier baseline. Empirically, a spell-less control's spell_healing_done reading for 500143 is not the harness's plain 1000 base that other family-33 spells with a zero spell_bonus_data row resolve to (measured 800 on this tree); ascension-spell-parity.md's Sun Cleric follow-up lessons already flag this exact trap ('Radiance uses SP, while Illumination uses bonus healing... use different test values... to expose these mistakes'). The spell_bonus_data row for 500143 (direct_bonus 0, loaded unconditionally by SpellMgr::LoadSpellBonuses) forces Unit::SpellHealingBonusDone's own DoneTotal contribution to exactly 0 regardless of DoneAdvertisedBenefit, so the deviation from 1000 was not pinned to one exact native statement during this repair; the scenario therefore snapshots control's own reading as the baseline and asserts the talent's reading against it by ratio (SPELLMOD_DAMAGE is multiplicative, so the 20% holds over any baseline), matching this batch's standard differential-testing convention instead of asserting a literal absolute value this class does not produce for this spell.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "talent",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 560547
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Talent self-applies the raid aura",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 560547,
+      "caster": "talent",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The nearby grouped ally receives the same aura",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 560547,
+      "caster": "talent",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ally's spread aura carries exactly 6%",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 560547,
+      "caster": "talent",
+      "effect": 0,
+      "equals": 6
+    },
+    {
+      "action": "snapshot",
+      "label": "Control's Illumination healing, whatever this class's own baseline resolves to",
+      "actor": "control",
+      "metric": "spell_healing_done",
+      "spell": 500143,
+      "target": "ally",
+      "save_as": "control_heal_illumination"
+    },
+    {
+      "action": "assert",
+      "label": "Talent's Illumination healing is boosted by exactly 20% over the same baseline",
+      "actor": "talent",
+      "metric": "spell_healing_done",
+      "spell": 500143,
+      "target": "ally",
+      "ratio_to": "control_heal_illumination",
+      "min": 1.18,
+      "max": 1.22
+    }
+  ]
+}

@@ -1,0 +1,124 @@
+{
+  "schema": 1,
+  "name": "Phoenix Egg summons one Phoenix that heals the party (#1317)",
+  "contract": "#1317: Phoenix Egg 800796 summons creature 50258 through spell_ascension_pyromancer_ability (spell_script_names row in rev_20260909_11_pyromancer_completion.sql) and Summon() in AscensionPyromancerSummons.cpp; npc_ascension_pyromancer_summon despawns the caster's previous phoenix on IsSummonedBy (one at a time) and every 5000 ms casts Phoenix Egg heal 707110 on nearby allies; effect 2 triggers 681128 on the caster. Asserted: after one cast exactly one 50258 is owned and aura 681128 is on the caster; after a second cast still exactly one; and an injured, regeneration-suppressed group member gains health within 20 s. The heal is asserted as a health rise on the ally, not by spell_heal_total, because the tick is cast by the creature script.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 24,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000,
+      "label": "Let spawn AI and level scaling settle"
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800796
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "health",
+      "save_as": "ally_hp"
+    },
+    {
+      "action": "assert",
+      "label": "No phoenix before the cast",
+      "actor": "caster",
+      "metric": "owned_creature_count",
+      "entry": 50258,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800796,
+      "destination": {
+        "x": -8915.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "label": "One Phoenix Egg creature is owned by the caster",
+      "actor": "caster",
+      "metric": "owned_creature_count",
+      "entry": 50258,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The Phoenix abilities enabler aura is on the caster",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 681128,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The phoenix heals the injured party member",
+      "actor": "ally",
+      "metric": "health",
+      "relative_to": "ally_hp",
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800796,
+      "destination": {
+        "x": -8914.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "A second cast leaves exactly one phoenix",
+      "actor": "caster",
+      "metric": "owned_creature_count",
+      "entry": 50258,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

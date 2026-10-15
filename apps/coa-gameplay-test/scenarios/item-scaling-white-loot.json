@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Item scaling: native item scaling stops the copy lift for items without a ladder",
+  "contract": "Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1, DestinyWeaver.Scaling.Offset=4, CoA.ItemScaling=1 and CoA.ItemScaling.Native=1. \"Squealer\" Thornmantle 3229 is a level 5 creature that drops Squealer's Belt 4951 (white, item level 4, required level 1, 45 armor) at 100%; the belt has no ItemStat.dbc ladder. A level 30 character with open-world scaling on fights it at level 26, which the old copy lift would turn into a copy lifted by 21 levels. While native item scaling is active the copy path makes no new copies, so the scaled corpse holds the authored belt at item level 4 with 45 armor, like the unscaled corpse fought at 5. Client rendering is not tested.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -9465, "y": 64, "z": 56, "o": 0 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 30, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "scaled_squealer", "owner": "hero", "entry": 3229, "level": 5, "health": 1, "distance": 2 },
+    { "id": "authored_squealer", "owner": "hero", "entry": 3229, "level": 5, "health": 1, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
+    { "action": "level_scaling_packet", "actor": "hero", "value": 1 },
+    { "action": "assert", "label": "Scaling on shows Squealer at 26", "actor": "hero", "metric": "view_level", "target": "scaled_squealer", "equals": 26, "within_ms": 2000 },
+    { "action": "attack", "actor": "hero", "target": "scaled_squealer" },
+    { "action": "assert", "actor": "scaled_squealer", "metric": "alive", "equals": 0, "within_ms": 30000 },
+    { "action": "loot_creature", "actor": "hero", "target": "scaled_squealer" },
+    { "action": "assert", "label": "The scaled corpse holds the authored Squealer's Belt", "actor": "hero", "metric": "loot_entry", "item": 4951, "equals": 4951 },
+    { "action": "assert", "label": "The belt keeps item level 4", "actor": "hero", "metric": "loot_item_level", "item": 4951, "equals": 4 },
+    { "action": "assert", "label": "The belt keeps its authored 45 armor", "actor": "hero", "metric": "loot_item_armor", "item": 4951, "equals": 45 },
+    { "action": "loot_slot", "actor": "hero", "item": 4951 },
+    { "action": "assert", "label": "The looted belt keeps item level 4", "actor": "hero", "metric": "carried_item_level", "item": 4951, "equals": 4, "within_ms": 2000 },
+    { "action": "assert", "label": "The looted belt requires level 1", "actor": "hero", "metric": "carried_item_required_level", "item": 4951, "equals": 1 },
+    { "action": "close_loot", "actor": "hero" },
+
+    { "action": "level_scaling_packet", "actor": "hero", "value": 0 },
+    { "action": "assert", "label": "Scaling off shows Squealer at 5", "actor": "hero", "metric": "view_level", "target": "authored_squealer", "equals": 5, "within_ms": 2000 },
+    { "action": "attack", "actor": "hero", "target": "authored_squealer" },
+    { "action": "assert", "actor": "authored_squealer", "metric": "alive", "equals": 0, "within_ms": 30000 },
+    { "action": "loot_creature", "actor": "hero", "target": "authored_squealer" },
+    { "action": "assert", "label": "The unscaled corpse holds the authored Squealer's Belt", "actor": "hero", "metric": "loot_entry", "item": 4951, "equals": 4951 },
+    { "action": "assert", "label": "The authored belt keeps item level 4", "actor": "hero", "metric": "loot_item_level", "item": 4951, "equals": 4 },
+    { "action": "close_loot", "actor": "hero" }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Barbarian audit: First Blood's damage bonus only applies above 80% target health (#2025)",
+  "contract": "First Blood 560906 reads 'Increases all damage dealt to enemies above 80% health by 20%'. Its single effect is aura 303 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE, EffectBasePoints 20, EffectMiscValue 28. Unit::MeleeDamageBonusDone/SpellDamageBonusDone gate this aura on victim->HasAuraState(AuraStateType(aurEff->GetMiscValue())), i.e. HasAuraState(AuraStateType(28)). But 28 is not a real AuraStateType bit (the enum only defines up to 23, plus the unrelated pseudo-state 32 for poison) -- it is ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT from the separate AscensionConditionalTargetState enum (SpellAuraDefines.h), used elsewhere only by Unit::HasAscensionConditionalCombatState/GetAscensionConditionalCombatModifier (the SPELL_AURA_OVERRIDE_CLASS_SCRIPTS conditional-combat system, Unit.cpp ~4011-4123), never wired to plain HasAuraState. Before the fix, HasAuraState(28) fell through to the generic 'return HasFlag(UNIT_FIELD_AURASTATE, 1u << 27)' path, a bit nothing ever sets, so First Blood's bonus never applied regardless of target health. Fix: Unit::HasAuraState (Unit.cpp) now special-cases ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT (28) by delegating to the already-correct health check in HasAscensionConditionalCombatState, the same way it already special-cases AURA_STATE_ASCENSION_POISONED (32). This scenario proves both sides of the gate with the deterministic melee_damage_done metric (fixed base 1000, no hit rolls/variance): the bonus applies while the target is above 80% health, and does not apply once its health drops to or below 80%.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    { "id": "d", "owner": "b", "entry": 36, "level": 80, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+
+    { "action": "snapshot", "label": "Baseline melee damage vs. a full-health target", "actor": "b", "metric": "melee_damage_done", "target": "d", "save_as": "dmg0" },
+
+    { "action": "learn", "actor": "b", "spell": 560906 },
+    { "action": "assert", "label": "First Blood (560906) is active", "actor": "b", "metric": "aura", "spell": 560906, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: target is still above 80% health", "actor": "d", "metric": "health_pct", "min": 81 },
+
+    { "action": "assert", "label": "First Blood adds 20% damage against a target above 80% health", "actor": "b", "metric": "melee_damage_done", "target": "d", "ratio_to": "dmg0", "min": 1.18, "max": 1.22 },
+
+    { "action": "set_health", "actor": "d", "value": 700000 },
+    { "action": "assert", "label": "SETUP: target is now at 70% health", "actor": "d", "metric": "health_pct", "min": 69, "max": 71 },
+
+    { "action": "assert", "label": "First Blood's bonus is gated off once the target drops to or below 80% health", "actor": "b", "metric": "melee_damage_done", "target": "d", "ratio_to": "dmg0", "min": 0.98, "max": 1.02 }
+  ]
+}

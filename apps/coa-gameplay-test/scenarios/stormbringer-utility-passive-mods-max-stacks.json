@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Flow raises Invigoration's max stacks natively (#2055)",
+  "contract": "Flow (570128) effect0 is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 31 (SPELLMOD_MAX_AURA_STACKS, a custom Ascension op, SpellDefines.h:107), EffectBasePoints 4 + EffectDieSides 1 = 5, EffectSpellClassMask word0 1 matching Invigoration's (680918) own SpellFamilyFlags word0 bit0 exactly (both SpellFamilyName 22). SPELLMOD_MAX_AURA_STACKS is consumed at SpellInfo.cpp:1461 through Player::ApplySpellMod against the spell's own StackAmount -- a genuinely core-implemented custom Ascension hook, confirmed present via source read, not a module script. Invigoration's Spell.dbc StackAmount is 10 (confirmed today via coa-dbc-viewer against /home/fab/CoaServer/dbc_clientset), so Flow must raise the modified maximum to 10+5=15. spell_max_stacks/spell_modifier read the player's own spell mods regardless of whether Invigoration itself is known, since the modifier is classmask-matched independently of the target spell's acquisition.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "sb",
+      "race": 8,
+      "class": 16,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "assert", "label": "BASELINE: Invigoration's native max stacks is 10 per Spell.dbc StackAmount",
+      "actor": "sb", "metric": "spell_max_stacks", "spell": 680918, "equals": 10 },
+    { "action": "assert", "label": "BASELINE: no SPELLMOD_MAX_AURA_STACKS modifier on Invigoration before Flow",
+      "actor": "sb", "metric": "spell_modifier", "spell": 680918, "op": 31, "base": 10, "equals": 10 },
+    { "action": "learn", "label": "Learn Flow", "actor": "sb", "spell": 570128 },
+    { "action": "assert", "label": "DISCRIMINATING: Flow raises Invigoration's max stacks to 15",
+      "actor": "sb", "metric": "spell_max_stacks", "spell": 680918, "equals": 15 },
+    { "action": "assert", "label": "DISCRIMINATING: Flow is a +5 SPELLMOD_MAX_AURA_STACKS modifier on Invigoration",
+      "actor": "sb", "metric": "spell_modifier", "spell": 680918, "op": 31, "base": 10, "equals": 15 }
+  ]
+}

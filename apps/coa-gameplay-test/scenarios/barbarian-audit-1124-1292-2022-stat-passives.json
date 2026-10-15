@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Barbarian audit: Powerful Grip, Ogre's Strength and Savage Strength are native stat auras (#1124, #1292, #2022)",
+  "contract": "All three passives need no script. #1124 Powerful Grip (804728) effect 0 is SPELL_AURA_MECHANIC_DURATION_MOD (232, EffectBasePoints -31 DieSides 1 = -30, MiscValue 3 = Disarm); it is HandleNoImmediateEffect, consumed generically by Unit::CalculateSpellDuration, so there is no direct duration-reduction metric and only the aura_amount is asserted. Effect 1 is a plain SPELL_AURA_MOD_STAT (29, EffectBasePoints 24 DieSides 1 = 25, MiscValue 0 = Strength), a flat +25 read directly by the stat metric. #1292 Ogre's Strength (561160) effect 0 is SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE (137, amount 25, MiscValue 0 = Strength); effect 1 is SPELL_AURA_MOD_ATTACK_POWER_OF_STAT_PERCENT (268) but its EffectBasePoints is -1 DieSides 1, which CalcValue resolves to exactly 0 (the tooltip 'Increases your Strength by $s1%.' only ever references effect 0), so effect 1 is an inert leftover DBC row and is only asserted to still be 0, not exercised functionally. #2022 Savage Strength rank 1 (560886, amount 5) and rank 2 (561323, amount 10) are both SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE on MiscValue 1 = Agility. AuraEffect::HandleModTotalPercentStat/HandleModPercentStat-family handlers call ApplyPercentModFloatVar on the stat, which the stat metric reads back directly, so the ratio bands below are the exact percentages widened for integer stat rounding.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+
+    { "action": "snapshot", "label": "Baseline Strength", "actor": "b", "metric": "stat", "stat": 0, "save_as": "str0" },
+    { "action": "learn", "actor": "b", "spell": 804728 },
+    { "action": "assert", "label": "Powerful Grip (804728) is active", "actor": "b", "metric": "aura", "spell": 804728, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Effect 0 (disarm duration cut) resolves to -30", "actor": "b", "metric": "aura_amount", "spell": 804728, "effect": 0, "equals": -30 },
+    { "action": "assert", "label": "Strength rises by exactly 25 (flat)", "actor": "b", "metric": "stat", "stat": 0, "relative_to": "str0", "equals": 25, "within_ms": 3000 },
+    { "action": "unlearn", "actor": "b", "spell": 804728 },
+    { "action": "assert", "label": "Unlearning restores Strength", "actor": "b", "metric": "stat", "stat": 0, "relative_to": "str0", "equals": 0, "within_ms": 3000 },
+
+    { "action": "learn", "actor": "b", "spell": 561160 },
+    { "action": "assert", "label": "Ogre's Strength (561160) is active", "actor": "b", "metric": "aura", "spell": 561160, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Effect 0 (Strength percentage) resolves to 25", "actor": "b", "metric": "aura_amount", "spell": 561160, "effect": 0, "equals": 25 },
+    { "action": "assert", "label": "Effect 1 (attack power of stat) is inert at 0", "actor": "b", "metric": "aura_amount", "spell": 561160, "effect": 1, "equals": 0 },
+    { "action": "assert", "label": "Strength rises by 25% (widened for rounding)", "actor": "b", "metric": "stat", "stat": 0, "ratio_to": "str0", "min": 1.2, "max": 1.3, "within_ms": 3000 },
+    { "action": "unlearn", "actor": "b", "spell": 561160 },
+    { "action": "assert", "label": "Unlearning restores Strength", "actor": "b", "metric": "stat", "stat": 0, "relative_to": "str0", "equals": 0, "within_ms": 3000 },
+
+    { "action": "snapshot", "label": "Baseline Agility", "actor": "b", "metric": "stat", "stat": 1, "save_as": "agi0" },
+    { "action": "learn", "actor": "b", "spell": 560886 },
+    { "action": "assert", "label": "Savage Strength rank 1 (560886) is active", "actor": "b", "metric": "aura", "spell": 560886, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Rank 1 effect 0 resolves to 5", "actor": "b", "metric": "aura_amount", "spell": 560886, "effect": 0, "equals": 5 },
+    { "action": "assert", "label": "Agility rises by 5% (widened for rounding)", "actor": "b", "metric": "stat", "stat": 1, "ratio_to": "agi0", "min": 1.02, "max": 1.08, "within_ms": 3000 },
+    { "action": "unlearn", "actor": "b", "spell": 560886 },
+    { "action": "assert", "label": "Unlearning restores Agility", "actor": "b", "metric": "stat", "stat": 1, "relative_to": "agi0", "equals": 0, "within_ms": 3000 },
+
+    { "action": "learn", "actor": "b", "spell": 561323 },
+    { "action": "assert", "label": "Savage Strength rank 2 (561323) is active", "actor": "b", "metric": "aura", "spell": 561323, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Rank 2 effect 0 resolves to 10", "actor": "b", "metric": "aura_amount", "spell": 561323, "effect": 0, "equals": 10 },
+    { "action": "assert", "label": "Agility rises by 10% (widened for rounding)", "actor": "b", "metric": "stat", "stat": 1, "ratio_to": "agi0", "min": 1.05, "max": 1.15, "within_ms": 3000 },
+    { "action": "unlearn", "actor": "b", "spell": 561323 },
+    { "action": "assert", "label": "Unlearning restores Agility", "actor": "b", "metric": "stat", "stat": 1, "relative_to": "agi0", "equals": 0, "within_ms": 3000 }
+  ]
+}

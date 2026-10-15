@@ -37,42 +37,77 @@ private:
 };
 }
 
-TEST_F(CustomClassAttackPowerTest, BarbarianMatchesWarriorAtStartingAndMaximumLevel)
+TEST_F(CustomClassAttackPowerTest, ConfirmedCoABaselineStatConversions)
 {
-    struct StatsCase
+    struct ConversionCase
     {
-        uint8 level;
-        int32 strength;
-        int32 agility;
-        int32 expectedAttackPower;
+        Classes playerClass;
+        int32 strengthGain;
+        int32 agilityGain;
     };
 
-    for (StatsCase const& stats : {StatsCase{1, 27, 26, 37}, StatsCase{80, 200, 300, 620}})
+    // Official CoA changelog, 2026-07-09: 69019-69020, 69036-69038 and 69043.
+    // Assert the conversion slopes independently of the still-approximate level terms and offsets.
+    for (ConversionCase const& conversion : {ConversionCase{CLASS_BARBARIAN, 10, 10},
+        ConversionCase{CLASS_STARCALLER, 10, 10}, ConversionCase{CLASS_SUN_CLERIC, 20, 0}})
     {
-        TestPlayer* barbarian = CreatePlayerWithStats(CLASS_BARBARIAN, stats.level, stats.strength, stats.agility);
-        TestPlayer* warrior = CreatePlayerWithStats(CLASS_WARRIOR, stats.level, stats.strength, stats.agility);
-        barbarian->UpdateAttackPowerAndDamage();
-        warrior->UpdateAttackPowerAndDamage();
+        for (uint8 level : {1, 60, 80})
+        {
+            SCOPED_TRACE(uint32(conversion.playerClass));
+            SCOPED_TRACE(uint32(level));
+            TestPlayer* player = CreatePlayerWithStats(conversion.playerClass, level, 100, 200);
+            player->UpdateAttackPowerAndDamage();
+            int32 const baseline = player->GetInt32Value(UNIT_FIELD_ATTACK_POWER);
 
-        EXPECT_EQ(barbarian->GetInt32Value(UNIT_FIELD_ATTACK_POWER), stats.expectedAttackPower);
-        EXPECT_EQ(barbarian->GetInt32Value(UNIT_FIELD_ATTACK_POWER), warrior->GetInt32Value(UNIT_FIELD_ATTACK_POWER));
+            player->SetStat(STAT_STRENGTH, 110);
+            player->UpdateAttackPowerAndDamage();
+            EXPECT_EQ(player->GetInt32Value(UNIT_FIELD_ATTACK_POWER) - baseline, conversion.strengthGain);
+
+            player->SetStat(STAT_STRENGTH, 100);
+            player->SetStat(STAT_AGILITY, 210);
+            player->UpdateAttackPowerAndDamage();
+            EXPECT_EQ(player->GetInt32Value(UNIT_FIELD_ATTACK_POWER) - baseline, conversion.agilityGain);
+        }
     }
 }
 
-TEST_F(CustomClassAttackPowerTest, BarbarianScalesWithStrengthAndLevelWithoutBaseAgilityAttackPower)
+TEST_F(CustomClassAttackPowerTest, ReaperCorrectsStrengthWithoutInventingAnAgilityConversion)
 {
-    TestPlayer* player = CreatePlayerWithStats(CLASS_BARBARIAN, 79, 200, 20);
+    TestPlayer* player = CreatePlayerWithStats(CLASS_REAPER, 60, 100, 200);
     player->UpdateAttackPowerAndDamage();
-    EXPECT_EQ(player->GetInt32Value(UNIT_FIELD_ATTACK_POWER), 617);
+    int32 const baseline = player->GetInt32Value(UNIT_FIELD_ATTACK_POWER);
 
-    player->SetStat(STAT_AGILITY, 700);
+    player->SetStat(STAT_STRENGTH, 110);
     player->UpdateAttackPowerAndDamage();
-    EXPECT_EQ(player->GetInt32Value(UNIT_FIELD_ATTACK_POWER), 617);
+    EXPECT_EQ(player->GetInt32Value(UNIT_FIELD_ATTACK_POWER) - baseline, 20);
 
-    player->SetStat(STAT_STRENGTH, 210);
-    player->SetLevel(80);
+    // No CoA Agility coefficient is established for Reaper. Preserve the existing compatibility term.
+    player->SetStat(STAT_STRENGTH, 100);
+    player->SetStat(STAT_AGILITY, 210);
     player->UpdateAttackPowerAndDamage();
-    EXPECT_EQ(player->GetInt32Value(UNIT_FIELD_ATTACK_POWER), 640);
+    EXPECT_EQ(player->GetInt32Value(UNIT_FIELD_ATTACK_POWER) - baseline, 10);
+}
+
+TEST_F(CustomClassAttackPowerTest, PreservesProvisionalLevelContributions)
+{
+    struct LevelCase
+    {
+        Classes playerClass;
+        int32 expectedGain;
+    };
+
+    // This is compatibility preservation, not a claim about official CoA progression.
+    for (LevelCase const& test : {LevelCase{CLASS_BARBARIAN, 3}, LevelCase{CLASS_REAPER, 2},
+        LevelCase{CLASS_SUN_CLERIC, 0}, LevelCase{CLASS_STARCALLER, 0}})
+    {
+        SCOPED_TRACE(uint32(test.playerClass));
+        TestPlayer* player = CreatePlayerWithStats(test.playerClass, 59, 100, 200);
+        player->UpdateAttackPowerAndDamage();
+        int32 const baseline = player->GetInt32Value(UNIT_FIELD_ATTACK_POWER);
+        player->SetLevel(60);
+        player->UpdateAttackPowerAndDamage();
+        EXPECT_EQ(player->GetInt32Value(UNIT_FIELD_ATTACK_POWER) - baseline, test.expectedGain);
+    }
 }
 
 TEST_F(CustomClassAttackPowerTest, PreservesBaseFlatAndTotalAttackPowerModifiers)
@@ -85,10 +120,10 @@ TEST_F(CustomClassAttackPowerTest, PreservesBaseFlatAndTotalAttackPowerModifiers
         player->SetStatPctModifier(UNIT_MOD_ATTACK_POWER, TOTAL_PCT, 1.1f);
         player->UpdateAttackPowerAndDamage();
 
-        EXPECT_EQ(player->GetInt32Value(UNIT_FIELD_ATTACK_POWER), playerClass == CLASS_BARBARIAN ? 930 : 960);
+        EXPECT_EQ(player->GetInt32Value(UNIT_FIELD_ATTACK_POWER), playerClass == CLASS_BARBARIAN ? 1080 : 960);
         EXPECT_EQ(player->GetInt32Value(UNIT_FIELD_ATTACK_POWER_MODS), 40);
         EXPECT_FLOAT_EQ(player->GetTotalAttackPowerValue(BASE_ATTACK),
-            playerClass == CLASS_BARBARIAN ? 1067.0f : 1100.0f);
+            playerClass == CLASS_BARBARIAN ? 1232.0f : 1100.0f);
     }
 }
 
@@ -138,4 +173,45 @@ TEST_F(CustomClassAttackPowerTest, PreservesRogueMeleeAttackPowerAndOtherCompati
     EXPECT_EQ(rogue->GetInt32Value(UNIT_FIELD_ATTACK_POWER), 640);
     EXPECT_EQ(GetLegacyClassForCustomClass(CLASS_BARBARIAN), CLASS_ROGUE);
     EXPECT_EQ(GetLegacyClassForCustomClass(CLASS_SON_OF_ARUGAL), CLASS_DRUID);
+    EXPECT_EQ(GetLegacyClassForCustomClass(CLASS_HERO), CLASS_DRUID);
+}
+
+TEST_F(CustomClassAttackPowerTest, PreservesWarriorPriestAndDruidBaselines)
+{
+    struct LegacyCase
+    {
+        Classes playerClass;
+        int32 expectedAttackPower;
+    };
+
+    for (LegacyCase const& test : {LegacyCase{CLASS_WARRIOR, 560}, LegacyCase{CLASS_PRIEST, 190},
+        LegacyCase{CLASS_DRUID, 380}})
+    {
+        SCOPED_TRACE(uint32(test.playerClass));
+        TestPlayer* player = CreatePlayerWithStats(test.playerClass, 60, 200, 300);
+        player->UpdateAttackPowerAndDamage();
+        EXPECT_EQ(player->GetInt32Value(UNIT_FIELD_ATTACK_POWER), test.expectedAttackPower);
+    }
+}
+
+TEST_F(CustomClassAttackPowerTest, MeleeRecalculationDoesNotOverwriteRangedAttackPower)
+{
+    for (Classes playerClass : {CLASS_BARBARIAN, CLASS_STARCALLER, CLASS_SUN_CLERIC, CLASS_REAPER})
+    {
+        SCOPED_TRACE(uint32(playerClass));
+        TestPlayer* player = CreatePlayerWithStats(playerClass, 60, 200, 300);
+        player->UpdateAttackPowerAndDamage(true);
+        int32 const rangedAttackPower = player->GetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER);
+        player->UpdateAttackPowerAndDamage();
+        EXPECT_EQ(player->GetInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER), rangedAttackPower);
+    }
+}
+
+TEST(ClassProjectileAmmoTest, OnlyStockClassesUseProjectileAmmo)
+{
+    EXPECT_TRUE(UsesProjectileAmmo(CLASS_HUNTER));
+    EXPECT_TRUE(UsesProjectileAmmo(CLASS_WARRIOR));
+    EXPECT_FALSE(UsesProjectileAmmo(CLASS_HERO));
+    EXPECT_FALSE(UsesProjectileAmmo(CLASS_RANGER));
+    EXPECT_FALSE(UsesProjectileAmmo(CLASS_WITCH_HUNTER));
 }

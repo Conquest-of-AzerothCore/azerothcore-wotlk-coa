@@ -254,14 +254,9 @@ void WorldSession::HandleMoveWorldportAck()
     bool allowMount = !mEntry->IsDungeon() || mEntry->IsBattlegroundOrArena();
     if (mInstance)
     {
-        Difficulty diff = GetPlayer()->GetDifficulty(mEntry->IsRaid());
-        if (MapDifficulty const* mapDiff = GetMapDifficultyData(mEntry->MapID, diff))
-            if (mapDiff->resetTime)
-                if (time_t timeReset = sInstanceSaveMgr->GetResetTimeFor(mEntry->MapID, diff))
-                {
-                    uint32 timeleft = uint32(timeReset - GameTime::GetGameTime().count());
-                    GetPlayer()->SendInstanceResetWarning(mEntry->MapID, diff, timeleft, true);
-                }
+        // The Ascension client shows the instance welcome only once it has its instance binds, which it asks for
+        // right after loading; HandleQueryInstanceBindsOpcode sends it then.
+        GetPlayer()->CustomData.Set("InstanceWelcomePending", new DataMap::Base());
         allowMount = mInstance->AllowMount;
     }
 
@@ -869,13 +864,25 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recvData)
 
 void WorldSession::HandleSummonResponseOpcode(WorldPacket& recvData)
 {
-    if (!_player->IsAlive() || _player->IsInCombat())
-        return;
-
     ObjectGuid summoner_guid;
     bool agree;
     recvData >> summoner_guid;
     recvData >> agree;
+
+    if (!agree)
+    {
+        // A declined summon has to clear the pending request even when the
+        // player cannot accept one, which is why the early return below must
+        // not swallow the answer: otherwise the target keeps its summon timer
+        // for the full two minutes and every further summon spell on it fails
+        // with SPELL_FAILED_SUMMON_PENDING until the player relogs.
+        _player->SetSummonAsSpectator(false);
+        _player->SummonIfPossible(false, summoner_guid);
+        return;
+    }
+
+    if (!_player->IsAlive() || _player->IsInCombat())
+        return;
 
     if (agree && _player->IsSummonAsSpectator())
     {

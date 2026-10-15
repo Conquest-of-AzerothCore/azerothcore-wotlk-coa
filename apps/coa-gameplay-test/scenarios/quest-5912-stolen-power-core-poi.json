@@ -1,0 +1,360 @@
+{
+  "schema": 1,
+  "name": "The Stolen Power Core: the map marks the Burly Rockjaw Trogg ground and the turn-in",
+  "contract": "Quest 200090 'The Stolen Power Core' (Coldridge class chain) wants the Power Core 661417, which only Burly Rockjaw Trogg 724 drops. Until rev_20261007_90_coa_quest_5912 the quest had no quest_poi row at all, so a player carrying it saw an unmarked world map (#5912). This case asks the server for 200090's points with the CMSG_QUEST_POI_QUERY a real client sends and reads SMSG_QUEST_POI_QUERY_RESPONSE itself. A control query for stock 170, which the character does not carry, must come back empty. The 200090 answer must hold two item-objective areas (ObjectiveIndex 4) that reuse stock 170's sniffed Burly Rockjaw Trogg polygons on Dun Morogh (WorldMapAreaId 27), followed by the turn-in pin on Binkle Coldbolt.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -6116.33,
+    "y": 396.93,
+    "z": 395.542,
+    "o": 3.7
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 3,
+      "class": 1,
+      "level": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 200090 'The Stolen Power Core' unfinished, the way the reporter did",
+      "actor": "c",
+      "quest": 200090,
+      "complete": false
+    },
+    {
+      "action": "client_packet",
+      "label": "CONTROL: ask the map to mark stock 170 'A New Threat', a quest this character does not carry",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 170
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the answer names 170, so the packet being read is this query's own answer",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 170,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and carries no POIs for a quest outside the log, although 170 has five in the database",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 200090, exactly what the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 200090
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 200090's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 200090,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the map gets three POIs for 200090 - two Burly Rockjaw Trogg areas and the turn-in pin - where it got none",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The first POI is the southern trogg area, id 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "it marks the Power Core item objective, RequiredItemId1 661417 (ObjectiveIndex 4)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on the Eastern Kingdoms, MapID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 20,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "drawn on the Dun Morogh map, WorldMapAreaId 27, the area stock 170 uses for the same troggs",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 27,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the southern area is stock 170's six-point Burly Rockjaw Trogg polygon",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 6,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its first corner is x -6361",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294960935,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its first corner is y 203",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 203,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The second POI is the northern trogg area, id 1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 92,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "it marks the same item objective, ObjectiveIndex 4",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 96,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on Dun Morogh, WorldMapAreaId 27",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 104,
+      "index": 0,
+      "equals": 27,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the northern area is stock 170's nine-point Burly Rockjaw Trogg polygon",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 120,
+      "index": 0,
+      "equals": 9,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its first corner is x -6270",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 124,
+      "index": 0,
+      "equals": 4294961026,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its first corner is y 456",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 128,
+      "index": 0,
+      "equals": 456,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "its far corner reaches x -6245 at the northern end of the valley",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 156,
+      "index": 0,
+      "equals": 4294961051,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "and y 842",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 160,
+      "index": 0,
+      "equals": 842,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The third POI is the turn-in pin, id 2",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 196,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "with ObjectiveIndex -1, the turn-in marker",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 200,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on Dun Morogh, WorldMapAreaId 27",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 208,
+      "index": 0,
+      "equals": 27,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "as a single point",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 224,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "on Binkle Coldbolt, who takes the quest back: x -6116",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 228,
+      "index": 0,
+      "equals": 4294961180,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "y 397",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 232,
+      "index": 0,
+      "equals": 397,
+      "within_ms": 4000
+    }
+  ]
+}

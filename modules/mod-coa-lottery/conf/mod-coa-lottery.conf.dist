@@ -1,0 +1,41 @@
+[worldserver]
+
+CoALottery.Enable = 1
+
+# Defaults match the requested economy. Settings are captured when a round starts;
+# changing them does not change the price or payout terms of tickets already sold.
+# Minimum interval: 60 seconds. Weekly: 604800. Rounds with no player or house tickets extend.
+CoALottery.DrawIntervalSeconds = 604800
+CoALottery.StartingJackpotGold = 0
+CoALottery.PotContributionPercent = 100
+
+# One randomly selected item per round, persisted across restarts and config reloads.
+# CSV example: "97393,98073,99491". Duplicate IDs do not add weight.
+# Missing item templates are skipped. Empty string disables bonus prizes.
+CoALottery.BonusItems = "97393"
+
+# House tickets seed the pot at 10 gold each, in addition to StartingJackpotGold.
+# Each has the same draw weight as a purchased ticket. 0 disables house tickets.
+# A house win records Trade Prince Gallywix and destroys the entire pot; no mail or bonus.
+# Captured per round; existing rounds are unchanged. Clamped to remaining pot capacity.
+# With house tickets, even rounds with no player purchases draw normally.
+CoALottery.FakeTickets = 100
+
+# Announce player and house winners in-game only after the draw transaction commits.
+CoALottery.AnnounceWinners = 1
+
+# Spawn a managed Gallywix in Stormwind (map 0), at -8787.7705 640.43396 96.12781.
+# Present while Enable=1 and lottery initialization succeeds; removed when disabled.
+CoALottery.SpawnGallywix = 1
+
+# Zone-wide monster yells, using universal language. No client changes needed.
+# First ad occurs after one interval. Config reload restarts the advertisement timer.
+# Interval is clamped to 60..86400 seconds; named players are within 1..500 yards.
+CoALottery.Advertise = 1
+CoALottery.AdvertisementIntervalSeconds = 1800
+CoALottery.AdvertisementPlayerRadius = 60
+
+# Managed Goldilocks beside Gallywix, map 0: -8788.967 643.0418 94.944855.
+# Scale grows linearly from 0.5 to 1.5 with round progress, on the advertising timer.
+# A new round resets scale immediately. Scaling continues when ads are muted.
+CoALottery.SpawnGoldilocks = 1

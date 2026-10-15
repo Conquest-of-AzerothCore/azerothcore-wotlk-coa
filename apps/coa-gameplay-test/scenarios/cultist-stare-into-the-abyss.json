@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Stare Into The Abyss zeroes Corrupt Mind's cast time through a native -100% spell mod (#1981)",
+  "contract": "525019 has a single ADD_PCT_MODIFIER (108) effect, Misc=10=SPELLMOD_CASTING_TIME (SpellDefines.h:86), BasePoints -101+1=-100%, classmask word A bit29 (536870912) matching Corrupt Mind's (560109) own SpellFamilyFlags[0]=536870912 exactly. A second same-named record (561150) has different flags ([0,0,65536]) and is not matched, exercised here as a negative control proving the classmask, not just the name, decides the target. SpellInfo::CalcCastTime (SpellInfo.cpp:2948) calls caster->ModSpellCastTime, the normal engine path that applies SPELLMOD_CASTING_TIME through Player::ApplySpellMod (Player.cpp:10219); the harness's spell_cast_time_ms metric reads this exact function. Both 560109 and 561150 share CastingTimeIndex 16 = 1500 ms (SpellCastTimes.dbc, verified), so the -100% mod deterministically zeroes 560109's cast time while 561150 stays at 1500 ms; Player::ApplySpellMod's SPELLMOD_CASTING_TIME clamp is (basevalue+totalflat)*totalmul with totalmul=0, giving exactly 0, not a floor/clamp guess. Regression guard for behaviour that already works natively.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: Corrupt Mind (560109) keeps its 1500 ms base cast time",
+      "actor": "cultist", "metric": "spell_cast_time_ms", "spell": 560109, "equals": 1500
+    },
+    {
+      "action": "assert", "label": "SETUP: the other Corrupt Mind record (561150) also starts at 1500 ms",
+      "actor": "cultist", "metric": "spell_cast_time_ms", "spell": 561150, "equals": 1500
+    },
+    { "action": "learn", "actor": "cultist", "spell": 525019 },
+    {
+      "action": "assert", "label": "Stare Into The Abyss removes Corrupt Mind's cast time entirely (#1981)",
+      "actor": "cultist", "metric": "spell_cast_time_ms", "spell": 560109, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Stare Into The Abyss leaves the unmatched Corrupt Mind record's cast time alone",
+      "actor": "cultist", "metric": "spell_cast_time_ms", "spell": 561150, "equals": 1500
+    }
+  ]
+}

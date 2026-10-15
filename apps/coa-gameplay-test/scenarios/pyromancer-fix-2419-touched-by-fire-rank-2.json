@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "name": "Touched by Fire rank 2 adds its bonus healing scaling (#2419)",
+  "contract": "#2419: Touched by Fire 704848 (rank 1) is ADD_FLAT_MODIFIER (aura 107) on SPELLMOD_BONUS_MULTIPLIER (misc 24), base 14 -> +15; 704853 (rank 2) is the same slot as ADD_PCT_MODIFIER (aura 108), base 29 -> +30, class mask {0x42, 0, 0x100000} on both (Spell.dbc served file). Tooltip: gains an additional $s1% of bonus healing spell power. The Pyromancer heals carry a zero spell_bonus_data coefficient, and Player::ApplySpellMod skips PCT modifiers on a zero base, so rank 2 did nothing while rank 1's flat modifier worked. The module now makes rank 2 flat. spell_modifier applies the native modifiers for op 24 to a base of 0, which reads the coefficient the stock healing code would use: 15 for rank 1, 30 for rank 2 (0 before the fix). Cinderheart 800806 and 502044 have SpellFamilyFlags {2, 0, 0}, in the mask; Flare Bolt 800790 has {0, 2, 0}, outside it.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "No bonus healing scaling modifier on Cinderheart before the talent",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 800806,
+      "op": 24,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 704848
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 adds 15% of bonus healing to Cinderheart",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 800806,
+      "op": 24,
+      "base": 0,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 leaves Flare Bolt alone",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 800790,
+      "op": 24,
+      "base": 0,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 704848
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 704853
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 adds 30% of bonus healing to Cinderheart",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 800806,
+      "op": 24,
+      "base": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 adds 30% to a higher Cinderheart rank",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 502044,
+      "op": 24,
+      "base": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 leaves Flare Bolt alone",
+      "actor": "caster",
+      "metric": "spell_modifier",
+      "spell": 800790,
+      "op": 24,
+      "base": 0,
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Lunar Amplification raises Trueshot's damage by 25% (#2218)",
+  "contract": "Lunar Amplification 680813 (Spell.dbc, SpellFamilyName 32) is a passive whose Effect[0] is SPELL_AURA_ADD_PCT_MODIFIER (108) with EffectMiscValue SPELLMOD_DAMAGE (0), EffectBasePoints 24 (25 with DieSides 0/1) and EffectSpellClassMask word1 0x80000, matching the tooltip \"Increases the damage of Trueshot by $s1%\". The four Trueshot damage helpers 562319-562322 carry SpellFamilyName 32 and SpellFamilyFlags word1 0x80000, so they are selected. The record is anomalous: EffectImplicitTargetA is 6 (TARGET_UNIT_TARGET_ENEMY) where every other family-32 passive modifier uses 1 (TARGET_UNIT_CASTER), so whether the passive lands on the player when learned is the open question. Two assertions decide it. First the aura itself must be present on the player after learn, and absent on the control. Second, Unit::SpellDamageBonusDone applies SPELLMOD_DAMAGE from the caster's modifier list (Unit.cpp, ApplySpellMod with SPELLMOD_DAMAGE), so the harness metric spell_damage_done on helpers 562319 and 562322 returns 1000 * 1.25 for the talented fixture against the control's baseline. Both fixtures share race, class and level and have no gear, so spell power is zero and only the modifier can move the ratio; the ratio bounds 1.24 to 1.26 only absorb integer rounding. Native path only, no module code touches 680813.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_control",
+      "owner": "control",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "dummy_talent",
+      "owner": "talent",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 680813
+    },
+    {
+      "action": "assert",
+      "label": "The passive is present on the player who learned it",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 680813,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The control never learned it",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 680813,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Trueshot rank 1 helper damage without the talent",
+      "actor": "control",
+      "metric": "spell_damage_done",
+      "save_as": "base_1",
+      "spell": 562319,
+      "effect": 0,
+      "target": "dummy_control"
+    },
+    {
+      "action": "assert",
+      "label": "Trueshot rank 1 helper deals 25% more with the talent",
+      "actor": "talent",
+      "metric": "spell_damage_done",
+      "spell": 562319,
+      "effect": 0,
+      "target": "dummy_talent",
+      "ratio_to": "base_1",
+      "min": 1.24,
+      "max": 1.26
+    },
+    {
+      "action": "snapshot",
+      "label": "Trueshot rank 4 helper damage without the talent",
+      "actor": "control",
+      "metric": "spell_damage_done",
+      "save_as": "base_4",
+      "spell": 562322,
+      "effect": 0,
+      "target": "dummy_control"
+    },
+    {
+      "action": "assert",
+      "label": "Trueshot rank 4 helper deals 25% more with the talent",
+      "actor": "talent",
+      "metric": "spell_damage_done",
+      "spell": 562322,
+      "effect": 0,
+      "target": "dummy_talent",
+      "ratio_to": "base_4",
+      "min": 1.24,
+      "max": 1.26
+    }
+  ]
+}

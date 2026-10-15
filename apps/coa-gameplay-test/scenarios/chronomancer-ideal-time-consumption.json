@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Ideal Time's buff is spent on one ability, not two (#3662)",
+  "contract": "Ideal Time 807036 is a permanent passive (DurationIndex 21) whose two SPELL_AURA_PERIODIC_TRIGGER_SPELL effects fire every 30000 ms, one of them on 807210. 807210's Description and AuraDescription both read \"Your next ability is guaranteed to critically strike\", and Spell.dbc gives it DurationIndex 1 = 10000 ms, ProcFlags 0, ProcCharges 0 and ProcChance 100. Its effect 0 is Aura=290 SPELL_AURA_MOD_CRIT_PCT with EffectBasePoints 99 / EffectDieSides 1, a flat +100 that Player::UpdateWeaponDependentCritAuras sums into RANGED_CRIT_PERCENTAGE with no weapon requirement, which is where Unit::SpellDoneCritChance reads the chance for a DmgClass 3 spell. The tooltip therefore promises exactly two things: while the buff is up the next ability is a certain critical strike, and after that ability the promise is over - a second ability must be back to the player's ordinary chance. Shatter Echo 804503 is the ability because Spell.dbc gives it DmgClass 3 and family 28 word2 0x10, it carries CasterAuraSpell 804455 (Echo Fragment, fixtured with set_aura) and ranged_hit_rating removes any chance of a miss. Nothing here is probabilistic: the critical strike and the consumption are both pinned at 100%, so one cast settles it.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 804503
+    },
+    {
+      "action": "assert",
+      "label": "Without the buff Shatter Echo is not a guaranteed critical strike",
+      "actor": "chronomancer",
+      "metric": "spell_done_crit_chance",
+      "spell": 804503,
+      "target": "dummy",
+      "max": 99
+    },
+    {
+      "action": "set_aura",
+      "label": "Ideal Time's buff as its 30-second periodic grant would leave it",
+      "actor": "chronomancer",
+      "spell": 807210,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Ideal Time's buff is present before the ability",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807210,
+      "caster": "chronomancer",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Ideal Time's buff carries exactly one charge",
+      "actor": "chronomancer",
+      "metric": "aura_charges",
+      "spell": 807210,
+      "caster": "chronomancer",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The buff really does guarantee the next ability's critical strike",
+      "actor": "chronomancer",
+      "metric": "spell_done_crit_chance",
+      "spell": 804503,
+      "target": "dummy",
+      "min": 100
+    },
+    {
+      "action": "set_aura",
+      "label": "Echo Fragments satisfy Shatter Echo's CasterAuraSpell",
+      "actor": "chronomancer",
+      "spell": 804455,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "label": "Spend the buff on one ability",
+      "actor": "chronomancer",
+      "spell": 804503,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "One ability ends Ideal Time's buff",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 807210,
+      "caster": "chronomancer",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "A second ability is no longer a guaranteed critical strike",
+      "actor": "chronomancer",
+      "metric": "spell_done_crit_chance",
+      "spell": 804503,
+      "target": "dummy",
+      "max": 99
+    }
+  ]
+}

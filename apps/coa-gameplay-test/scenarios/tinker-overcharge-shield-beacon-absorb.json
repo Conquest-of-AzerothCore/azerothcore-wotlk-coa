@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Tinker: Overcharge on a Shield Beacon shields nearby allies",
+  "contract": [
+    "With Beacon Charging (524834), Overcharge (524835) on a Shield Beacon (50036) casts Overcharge: Shield Beacon",
+    "(560709) on every ally near the beacon, the Tinker included. Its absorb is its base points (815 + 1d12) plus",
+    "the target's Stamina, so the shield exceeds the base roll. Computing that amount must not crash the server."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "t", "race": 1, "class": 28, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "t", "spell": 801799 },
+    { "action": "learn", "actor": "t", "spell": 524835 },
+    { "action": "set_aura", "actor": "t", "spell": 524834, "stacks": 1 },
+    { "action": "cast", "actor": "t", "spell": 801799 },
+    { "action": "assert", "label": "The Shield Beacon is out", "actor": "t", "metric": "owned_creature_count",
+      "entry": 50036, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "set_power", "actor": "t", "power": 0, "value": 100000 },
+    { "action": "cast", "actor": "t", "spell": 524835 },
+    { "action": "assert", "label": "The Tinker receives the Overcharge shield", "actor": "t", "metric": "aura",
+      "spell": 560709, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "The shield adds the Tinker's Stamina to its base roll", "actor": "t",
+      "metric": "aura_amount", "spell": 560709, "effect": 0, "min": 827 },
+    { "action": "assert", "label": "The server is still alive", "actor": "t", "metric": "alive", "equals": 1 }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "Eldritch Eye removes cast time and guarantees crits for its next 3 Eldritch Mendings/Malevolences (#3262)",
+  "contract": "Eldritch Eye 802049 (Spell.dbc, RecoveryTime 60000 = '1 min cooldown', DurationIndex 8 = 15000 ms = 'for 15 sec', ProcCharges 3 / StackAmount 3 = 'next 3 casts') applies a self buff with two spellmod aura effects sharing class mask dword B bit12 (4096) + dword C bit11 (2048). That mask independently name-matches every live Cultist rank of both named spells: all 12 'Eldritch Mending' ranks (254842, 500711, 502226-502234, 574325) carry SpellFamilyFlags [0,4096,0] (dword B bit12), and all 10 'Malevolence' ranks (500714, 502235-502243) carry [0,0,2048] (dword C bit11) -- confirmed here by DBC lookup, upgrading the chunk7 investigator's 'medium confidence, not name-verified' note to high. Effect0 is SPELLMOD_PCT (108) on SPELLMOD_CASTING_TIME (misc 10), BasePoints -101+1=-100%, read by the native SpellInfo::CalcCastTime -> Unit::ModSpellCastTime path (zero floor). Effect1 is SPELLMOD_FLAT (107) on SPELLMOD_CRITICAL_CHANCE (misc 7), BasePoints 999+1=+1000, and Player.cpp's crit-chance spellmod application treats any flat total >=100 as an unconditional crit, read here through spell_done_crit_chance. The charge/stack consumption on each matching cast is native ProcCharges/StackAmount decrement (SpellAuras.cpp), the same mechanism proven for Saronite Mind (#3624, cultist-saronite-mind.json). No CoA script or dummy handler exists for 802049 anywhere in src/server/coa or src/server/game. 500711 and 500714 both use StartRecoveryCategory 133 / StartRecoveryTime 1500 ms (Spell.dbc, the shared global cooldown); the second and third matching casts must wait for it to clear or they are rejected with SPELL_FAILED_NOT_READY (reason 67), which the first native run hit. Regression guard for behaviour that already works natively; no code change.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "cultist", "entry": 36, "level": 80, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000, "label": "Let spawn AI and level scaling settle" },
+    { "action": "learn", "actor": "cultist", "spell": 500711 },
+    { "action": "learn", "actor": "cultist", "spell": 500714 },
+    {
+      "action": "snapshot", "label": "SETUP: Eldritch Mending's native cast time",
+      "actor": "cultist", "metric": "spell_cast_time_ms", "spell": 500711, "save_as": "mending_cast_before"
+    },
+    {
+      "action": "assert", "label": "SETUP: Eldritch Mending has a real (nonzero) cast time before Eldritch Eye",
+      "actor": "cultist", "metric": "spell_cast_time_ms", "spell": 500711, "min": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: Malevolence's untalented crit chance is below the guaranteed-crit floor",
+      "actor": "cultist", "metric": "spell_done_crit_chance", "spell": 500714, "target": "dummy", "max": 99
+    },
+    {
+      "action": "assert", "label": "SETUP: an unrelated family-31 cast-time mod is untouched (control)",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 806222, "op": 10, "base": 2000, "equals": 2000
+    },
+    { "action": "learn", "actor": "cultist", "spell": 802049 },
+    { "action": "cast", "actor": "cultist", "spell": 802049 },
+    {
+      "action": "assert", "label": "Eldritch Eye applies its self buff with the DBC-native 3 charges (#3262)",
+      "actor": "cultist", "metric": "aura_charges", "spell": 802049, "equals": 3, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Eldritch Eye removes Eldritch Mending's cast time entirely (#3262)",
+      "actor": "cultist", "metric": "spell_cast_time_ms", "spell": 500711, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Eldritch Eye guarantees a crit on Malevolence (flat +1000 >= 100 floor, #3262)",
+      "actor": "cultist", "metric": "spell_done_crit_chance", "spell": 500714, "target": "dummy", "min": 100
+    },
+    {
+      "action": "assert", "label": "Control: an unrelated family-31 cast-time mod is still untouched",
+      "actor": "cultist", "metric": "spell_modifier", "spell": 806222, "op": 10, "base": 2000, "equals": 2000
+    },
+    { "action": "cast", "actor": "cultist", "spell": 500711 },
+    {
+      "action": "assert", "label": "Casting the affected Eldritch Mending spends one charge (#3262)",
+      "actor": "cultist", "metric": "aura_charges", "spell": 802049, "equals": 2, "within_ms": 3000
+    },
+    { "action": "wait", "ms": 1700, "label": "Clear the shared 1500 ms global cooldown (StartRecoveryTime, category 133) before the next cast" },
+    { "action": "cast", "actor": "cultist", "spell": 500714, "target": "dummy" },
+    {
+      "action": "assert", "label": "Casting the affected Malevolence spends the second charge (#3262)",
+      "actor": "cultist", "metric": "aura_charges", "spell": 802049, "equals": 1, "within_ms": 3000
+    },
+    { "action": "wait", "ms": 1700, "label": "Clear the shared global cooldown again before the third cast" },
+    { "action": "cast", "actor": "cultist", "spell": 500711 },
+    {
+      "action": "assert", "label": "The third matching cast spends the last charge and removes the buff (#3262)",
+      "actor": "cultist", "metric": "aura", "spell": 802049, "equals": 0, "within_ms": 3000
+    }
+  ]
+}

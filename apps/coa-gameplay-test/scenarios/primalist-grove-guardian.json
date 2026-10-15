@@ -1,0 +1,424 @@
+{
+  "schema": 1,
+  "name": "Primalist Grove Guardian: friendly healing, dispels, hostile roots and AP scaling",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "enemy",
+      "race": 5,
+      "class": 8,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "primalist",
+      "entry": 36,
+      "level": 80,
+      "distance": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_healing_done",
+      "spell": 505208,
+      "target": "ally",
+      "periodic": true,
+      "save_as": "periodic_505208"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_healing_done",
+      "spell": 505208,
+      "target": "ally",
+      "periodic": true,
+      "relative_to": "periodic_505208",
+      "min": 25,
+      "max": 26
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 37342,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_healing_done",
+      "spell": 505208,
+      "target": "ally",
+      "periodic": true,
+      "relative_to": "periodic_505208",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 37342,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 504824,
+      "target": "dummy",
+      "periodic": true,
+      "save_as": "periodic_504824"
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 504824,
+      "target": "dummy",
+      "periodic": true,
+      "relative_to": "periodic_504824",
+      "min": 38,
+      "max": 39
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 18787,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 9361,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_power",
+      "school": 3,
+      "equals": 21
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_done",
+      "spell": 504824,
+      "target": "dummy",
+      "periodic": true,
+      "relative_to": "periodic_504824",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 9361,
+      "stacks": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "primalist",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "ally",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 503721
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "value": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 2818,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55078,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "attack_power",
+      "save_as": "base_ap",
+      "label": "base_ap"
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 503721,
+      "destination": {
+        "x": -9617.06,
+        "y": -288.949,
+        "z": 57.3053
+      }
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object",
+      "spell": 505208,
+      "label": "object_505208",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object_duration_ms",
+      "spell": 505208,
+      "label": "duration_505208",
+      "min": 19000,
+      "max": 20000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object",
+      "spell": 504824,
+      "label": "object_504824",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object_duration_ms",
+      "spell": 504824,
+      "label": "duration_504824",
+      "min": 19000,
+      "max": 20000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_stacks",
+      "spell": 505208,
+      "label": "ally_aura",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 505208,
+      "effect": 0,
+      "save_as": "ally_amount",
+      "label": "ally_amount"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "run_speed_rate",
+      "label": "ally_speed",
+      "min": 1.299,
+      "max": 1.301
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 504824,
+      "label": "enemy_aura",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 504824,
+      "effect": 0,
+      "save_as": "enemy_amount",
+      "label": "enemy_amount"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "label": "enemy_speed",
+      "min": 0.699,
+      "max": 0.701
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 505208,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_stacks",
+      "spell": 504824,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 504825,
+      "equals": 1,
+      "within_ms": 5500,
+      "label": "first root"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_duration_ms",
+      "spell": 504825,
+      "min": 1800,
+      "max": 2000,
+      "label": "root starts at two seconds"
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 505208,
+      "target": "ally",
+      "label": "ally_ticks",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_damage_count",
+      "spell": 504824,
+      "target": "enemy",
+      "label": "enemy_ticks",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_stacks",
+      "spell": 2818,
+      "label": "dispel_2818",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_stacks",
+      "spell": 55078,
+      "label": "dispel_55078",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2100
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 504825,
+      "equals": 0,
+      "label": "root expires between five-second ticks"
+    },
+    {
+      "action": "wait",
+      "ms": 15200
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object",
+      "spell": 505208,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object",
+      "spell": 504824,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_stacks",
+      "spell": 505208,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 504824,
+      "equals": 0
+    }
+  ],
+  "contract": "The hostile periodic probe queries a creature, so normal class tuning 887019 (-15% at level 60+) scales it: the 100 AP increase of 45 or 46 before tuning reads 38 or 39 (1078 x 0.85 = 916, 1123 x 0.85 = 954)."
+}

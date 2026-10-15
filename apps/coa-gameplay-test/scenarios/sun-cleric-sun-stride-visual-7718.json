@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric Sun Stride plays its own solar trail (#7718)",
+  "contract": [
+    "#7718: a Sun Cleric reports Sun Stride (680700) with no animation, describing what it used to look like as a",
+    "rogue's Sprint but yellow. The spell's own client row carries no visual at all (SpellVisual 0 in the client's",
+    "Spell.dbc and in the live data), so nothing renders for it, and the class module never played one.",
+    "What the client does own is the effect itself, reached through the rider Ascension authored beside the",
+    "ability: 681434 is also called Sun Stride, its AttributesEx hides it from the aura bar, its only effect is a",
+    "dummy aura, and its SpellVisual is 486 - kit 910 attaches spells\\WeaponTrail_Solar.m2 at the head and kit 913",
+    "adds spells\\weapontrail_solar.m2 with Priest_Surgeoflight_Base. So the ability applies that rider for exactly",
+    "its own duration and the client renders its own solar weapon trail. No rogue Sprint visual is used, and no",
+    "client data is touched. The ability itself must still work: it applies its speed aura, and the trail goes",
+    "away with it."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "sc", "race": 1, "class": 27, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI, level scaling and the login patch stream settle", "ms": 7000},
+    {"action": "learn", "actor": "sc", "spell": 680700},
+    {
+      "action": "assert", "label": "CONTROL: nothing plays the trail before the ability is used", "actor": "sc",
+      "metric": "aura", "spell": 681434, "equals": 0
+    },
+    {"action": "cast", "label": "Sun Stride", "actor": "sc", "spell": 680700, "target": "sc"},
+    {
+      "action": "assert", "label": "the ability is running", "actor": "sc", "metric": "aura",
+      "spell": 680700, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "VFX: its own solar trail rider is applied", "actor": "sc", "metric": "aura",
+      "spell": 681434, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "REALITY: the ability ends on its own", "actor": "sc", "metric": "aura",
+      "spell": 680700, "equals": 0, "within_ms": 15000
+    },
+    {
+      "action": "assert", "label": "the trail ends with the ability", "actor": "sc", "metric": "aura",
+      "spell": 681434, "equals": 0, "within_ms": 2000
+    }
+  ]
+}

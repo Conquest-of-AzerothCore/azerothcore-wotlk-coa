@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Primalist Stone Cold: both maximum-health ranks",
+  "contract": "Native maximum health rises by 4%/8% and returns after talent removal.",
+  "timeout_ms": 30000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "max_health",
+      "save_as": "baseline"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 560158
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "max_health",
+      "ratio_to": "baseline",
+      "min": 1.0390000000000001,
+      "max": 1.041
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 560158
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "max_health",
+      "ratio_to": "baseline",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 560159
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "max_health",
+      "ratio_to": "baseline",
+      "min": 1.0790000000000002,
+      "max": 1.081
+    },
+    {
+      "action": "unlearn",
+      "actor": "primalist",
+      "spell": 560159
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "max_health",
+      "ratio_to": "baseline",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}

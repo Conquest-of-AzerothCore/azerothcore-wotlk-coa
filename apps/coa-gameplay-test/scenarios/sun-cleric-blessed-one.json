@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Blessed One raises block chance and cuts slow duration (#2207)",
+  "contract": "Blessed One 680670 (Spell.dbc, SpellFamilyName 33) is SPELL_ATTR0_PASSIVE. Effect 0 is SPELL_AURA_MECHANIC_DURATION_MOD (232) with EffectMiscValue mechanic 11 (MECHANIC_SNARE) and EffectBasePoints -21 resolving to -20 (percent); Unit::CalculateSpellDuration (Unit.cpp:12144) reads target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD, mechanic) generically for any incoming snare, exactly matching 'reduces the duration of movement slowing effects by 20%', with no script needed (the aura's own effect-handler comment even says 'implement in Unit::CalculateSpellDuration'). Effect 1 is SPELL_AURA_MOD_BLOCK_PERCENT (51) with EffectBasePoints 4 resolving to +5 (percent), a native, family-agnostic stat aura read by block_chance.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "snapshot", "actor": "cleric", "metric": "block_chance", "save_as": "block_before" },
+    { "action": "learn", "actor": "cleric", "spell": 680670 },
+    {
+      "action": "assert", "label": "Blessed One raises block chance by 5",
+      "actor": "cleric", "metric": "block_chance", "relative_to": "block_before", "equals": 5
+    },
+    {
+      "action": "assert", "label": "Blessed One's own snare-duration effect amount is -20",
+      "actor": "cleric", "metric": "aura_amount", "spell": 680670, "effect": 0, "equals": -20
+    }
+  ]
+}
