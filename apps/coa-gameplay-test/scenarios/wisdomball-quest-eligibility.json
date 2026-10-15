@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "The Wondrous Wisdomball only offers quests the player's own faction could actually take, and never a quest that would complete before the player does anything",
-  "contract": "AscensionWisdomball.cpp lists a dungeon's quests by map alone and accepts them through Player::CanAddQuest (log space and source item only), skipping Player::SatisfyQuestRace. Blackfathom Deeps quests 1200 (AllowableRaces 1101, Alliance) and 6561 (AllowableRaces 690, Horde) are the same 'Blackfathom Villainy' objective for the two factions; a Horde character must never be offered or granted 1200. Ragefire Chasm quests 5722 ('Searching for the Lost Satchel', starter Rahauro 11833, ender Maur Grimtotem 11834) and 5724 ('Returning the Lost Satchel', starter 11834, StartItem 14381, ender 11833) have no RequiredNpcOrGo/RequiredItemId/RequiredPlayerKills objective at all: granting either through the ball leaves it satisfied on the spot, without the player doing anything. Until a real per-quest fix exists, the ball must stop offering exactly these two quest IDs; quest 5723, a real Ragefire Chasm quest with an objective, stays offered as a control.",
+  "name": "The Wondrous Wisdomball offers a dungeon's quests to either faction (#6443), and never a quest that would complete before the player does anything",
+  "contract": "AscensionWisdomball.cpp lists a dungeon's quests by map alone and accepts them through Player::CanAddQuest (log space and source item only). Issue #6443, decided by the user: the ball ignores a quest's AllowableRaces, so PR #5578's Player::SatisfyQuestRace check in CanOffer is gone. Blackfathom Deeps quests 1200 (AllowableRaces 1101, Alliance) and 6561 (AllowableRaces 690, Horde) are both 'Blackfathom Villainy'; neither has an ExclusiveGroup, so a Horde character is offered and granted both, the duplicate #5486 reported. Ragefire Chasm quests 5722 ('Searching for the Lost Satchel', starter Rahauro 11833, ender Maur Grimtotem 11834) and 5724 ('Returning the Lost Satchel', starter 11834, StartItem 14381, ender 11833) have no RequiredNpcOrGo/RequiredItemId/RequiredPlayerKills objective at all: granting either through the ball leaves it satisfied on the spot, without the player doing anything. Until a real per-quest fix exists, the ball must stop offering exactly these two quest IDs; quest 5723, a real Ragefire Chasm quest with an objective, stays offered as a control.",
   "timeout_ms": 180000,
   "players": [
     { "id": "raider", "race": 10, "class": 13, "level": 80 }
@@ -32,24 +32,24 @@
     },
     {
       "action": "assert",
-      "label": "A Horde character is never offered the Alliance turn-in of Blackfathom Villainy",
-      "actor": "raider", "metric": "ball_offers_quest", "quest": 1200, "equals": 0, "within_ms": 5000
+      "label": "A Horde character is offered the Alliance Blackfathom Villainy",
+      "actor": "raider", "metric": "ball_offers_quest", "quest": 1200, "equals": 1, "within_ms": 5000
     },
     {
       "action": "assert",
-      "label": "The ball still offers this Blood Elf the Horde turn-in of the same quest",
+      "label": "The ball still offers this Blood Elf the Horde Blackfathom Villainy",
       "actor": "raider", "metric": "ball_offers_quest", "quest": 6561, "equals": 1
     },
-    { "action": "quest_accept", "label": "Try to take the Alliance-only version anyway, as a hostile client would", "actor": "raider", "quest": 1200, "entry": 79025 },
+    { "action": "quest_accept", "label": "Take the Alliance version at the ball", "actor": "raider", "quest": 1200, "entry": 79025 },
     {
       "action": "assert",
-      "label": "The ball refuses it outright - it never enters the log",
-      "actor": "raider", "metric": "quest_status", "quest": 1200, "equals": 0
+      "label": "The Alliance quest enters the Horde character's log",
+      "actor": "raider", "metric": "quest_status", "quest": 1200, "min": 1, "within_ms": 3000
     },
-    { "action": "quest_accept", "label": "Take the Horde version normally", "actor": "raider", "quest": 6561, "entry": 79025 },
+    { "action": "quest_accept", "label": "Take the Horde version too", "actor": "raider", "quest": 6561, "entry": 79025 },
     {
       "action": "assert",
-      "label": "The character's own faction quest is granted",
+      "label": "The character's own faction quest is granted as well",
       "actor": "raider", "metric": "quest_status", "quest": 6561, "min": 1, "within_ms": 3000
     },
     {

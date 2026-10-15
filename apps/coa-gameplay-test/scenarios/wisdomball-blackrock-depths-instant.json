@@ -47,7 +47,7 @@
     },
     {
       "action": "assert",
-      "label": "Nor the Alliance crumpled note, doubly withheld",
+      "label": "Nor the Alliance crumpled note, whose StartItem is the fetch",
       "actor": "delver", "metric": "ball_offers_quest", "quest": 4264, "equals": 0
     },
     {
