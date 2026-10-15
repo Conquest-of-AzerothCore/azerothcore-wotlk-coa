@@ -12,6 +12,7 @@
 #include "AscensionVenomancer.h"
 #include "AscensionTinker.h"
 #include "AscensionSunCleric.h"
+#include "AscensionXoroth.h"
 #include "AllCreatureScript.h"
 #include "AllItemScript.h"
 #include "AllSpellScript.h"
@@ -4883,7 +4884,7 @@ private:
     if (!info)
       return;
 
-    if (info->Id == AscensionSunCleric::DawnCast || info->Id == 805677)
+    if (info->Id == AscensionSunCleric::DawnCast || info->Id == AscensionXoroth::SPELL_SACRIFICIAL_CIRCLE)
     {
       row.Values[SPELL_WIRE_SLOT(SPELL_CASTER_AURA_SPELL_FIELD)] = info->CasterAuraSpell;
       row.Values[SPELL_WIRE_SLOT(SPELL_EXCLUDE_CASTER_AURA_SPELL_FIELD)] = info->ExcludeCasterAuraSpell;
