@@ -2,18 +2,20 @@
 -- The 23 kill quests offered by the boards 402000/402001 (QuestSortID -380) had no quest_poi rows, so the
 -- client drew no objective area for them (#7024 restored POIs from spawns but missed the module's quests).
 -- Each creature objective now gets one POI per spawn cluster, as in rev_20261009_30_coa_quest_poi_restore.sql:
--- ObjectiveIndex = the RequiredNpcOrGo slot, Floor 0, Priority 0, Flags 1.
+-- ObjectiveIndex = the RequiredNpcOrGo slot, Floor 0, Priority 0, Flags 1. 122 POIs with 707 points.
 --
 -- WHERE EACH VALUE COMES FROM
 --   objectives  quest_template.RequiredNpcOrGo1-4 of each quest (module hero call board SQL).
---   points  the creature spawns of each objective NPC (server `creature`): spawns within 200 yards are one
---     cluster, drawn as its convex hull rounded to whole yards; a cluster with fewer than three hull points
---     is one point at its centre.
+--   points  the creature spawns of each objective NPC (server `creature`, plus the spawns that list the NPC as an
+--     extra entry in `creature_multispawn`, the stock id2/id3 of data/sql/base/db_world/creature.sql): spawns within
+--     200 yards are one cluster, drawn as its convex hull rounded to whole yards; a cluster with fewer than three
+--     hull points is one point at its centre.
 --   MapID, WorldMapAreaId  the spawn map; the zone from the server grid area map (data/maps) and its
 --     AreaTable parent, matched to the client WorldMapArea.dbc row of that zone: 475 Blade's Edge Mountains,
 --     281 Winterspring, 182 Felwood, 23 Eastern Plaguelands, 22 Western Plaguelands, 181 Azshara, 261 Silithus.
---   Winterfall Totemic (7441, quest 17926) and Jadefire Betrayer (7108, quest 18019) have no spawns, so those
---     two objectives get no POI.
+--   Multi-entry spawns: Winterfall Totemic 7441 (quest 17926) shares 19 Winterfall Den Watcher 7440 spawns,
+--     Jadefire Betrayer 7108 (quest 18019) shares 26 Jadefire Trickster 7107 spawns, and Deadwood Shaman 7158 /
+--     Deadwood Avenger 7157 (quest 18017) share 39 / 41 spawns of Deadwood Den Watcher 7156 and Avenger 7157.
 DELETE FROM `quest_poi` WHERE `QuestID` IN (17838, 17926, 18017, 18018, 18019, 18030, 18034, 18036, 18044, 18045, 18046, 18054, 18055, 18056, 18089, 18090, 18091, 18104, 18105, 18106, 18109, 18110, 18111);
 INSERT INTO `quest_poi` (`QuestID`, `id`, `ObjectiveIndex`, `MapID`, `WorldMapAreaId`, `Floor`, `Priority`, `Flags`) VALUES
 (17838, 0, 0, 530, 475, 0, 0, 1),
@@ -26,13 +28,16 @@ INSERT INTO `quest_poi` (`QuestID`, `id`, `ObjectiveIndex`, `MapID`, `WorldMapAr
 (17838, 7, 3, 530, 475, 0, 0, 1),
 (17926, 0, 0, 1, 281, 0, 0, 1),
 (17926, 1, 0, 1, 281, 0, 0, 1),
+(17926, 2, 1, 1, 281, 0, 0, 1),
+(17926, 3, 1, 1, 281, 0, 0, 1),
 (18017, 0, 0, 1, 182, 0, 0, 1),
 (18017, 1, 1, 1, 182, 0, 0, 1),
 (18017, 2, 2, 1, 182, 0, 0, 1),
 (18018, 0, 0, 1, 182, 0, 0, 1),
 (18018, 1, 1, 1, 182, 0, 0, 1),
 (18019, 0, 0, 1, 182, 0, 0, 1),
-(18019, 1, 2, 1, 182, 0, 0, 1),
+(18019, 1, 1, 1, 182, 0, 0, 1),
+(18019, 2, 2, 1, 182, 0, 0, 1),
 (18030, 0, 0, 0, 23, 0, 0, 1),
 (18030, 1, 0, 0, 23, 0, 0, 1),
 (18030, 2, 0, 0, 23, 0, 0, 1),
@@ -173,11 +178,34 @@ INSERT INTO `quest_poi_points` (`QuestID`, `Idx1`, `Idx2`, `X`, `Y`) VALUES
 (17926, 1, 4, 6887, -2516),
 (17926, 1, 5, 6850, -2451),
 (17926, 1, 6, 6783, -2517),
-(18017, 0, 0, 6861, -1965),
-(18017, 1, 0, 6748, -1965),
-(18017, 1, 1, 6837, -1954),
-(18017, 1, 2, 6920, -1834),
-(18017, 1, 3, 6912, -1814),
+(17926, 2, 0, 6415, -3116),
+(17926, 2, 1, 6515, -3270),
+(17926, 2, 2, 6514, -3139),
+(17926, 2, 3, 6453, -3115),
+(17926, 3, 0, 6750, -2616),
+(17926, 3, 1, 6790, -2671),
+(17926, 3, 2, 6811, -2685),
+(17926, 3, 3, 6847, -2491),
+(17926, 3, 4, 6817, -2449),
+(17926, 3, 5, 6783, -2418),
+(18017, 0, 0, 6634, -1995),
+(18017, 0, 1, 6659, -2018),
+(18017, 0, 2, 6873, -2039),
+(18017, 0, 3, 6901, -2020),
+(18017, 0, 4, 6920, -1834),
+(18017, 0, 5, 6912, -1801),
+(18017, 0, 6, 6817, -1819),
+(18017, 0, 7, 6708, -1900),
+(18017, 0, 8, 6650, -1950),
+(18017, 1, 0, 6634, -1995),
+(18017, 1, 1, 6659, -2018),
+(18017, 1, 2, 6873, -2039),
+(18017, 1, 3, 6901, -2020),
+(18017, 1, 4, 6920, -1834),
+(18017, 1, 5, 6912, -1801),
+(18017, 1, 6, 6817, -1819),
+(18017, 1, 7, 6708, -1900),
+(18017, 1, 8, 6650, -1950),
 (18017, 2, 0, 6634, -1995),
 (18017, 2, 1, 6659, -2018),
 (18017, 2, 2, 6873, -2039),
@@ -218,6 +246,13 @@ INSERT INTO `quest_poi_points` (`QuestID`, `Idx1`, `Idx2`, `X`, `Y`) VALUES
 (18019, 1, 4, 6606, -912),
 (18019, 1, 5, 6581, -804),
 (18019, 1, 6, 6288, -599),
+(18019, 2, 0, 6279, -614),
+(18019, 2, 1, 6377, -797),
+(18019, 2, 2, 6582, -1014),
+(18019, 2, 3, 6595, -965),
+(18019, 2, 4, 6606, -912),
+(18019, 2, 5, 6581, -804),
+(18019, 2, 6, 6288, -599),
 (18030, 0, 0, 2521, -4890),
 (18030, 0, 1, 2754, -5005),
 (18030, 0, 2, 2820, -4987),
