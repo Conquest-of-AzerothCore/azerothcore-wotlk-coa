@@ -2,8 +2,11 @@
 #include "CreatureAI.h"
 #include "GameObject.h"
 #include "Map.h"
+#include "MotionMaster.h"
+#include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptMgr.h"
+#include "SmartAI.h"
 #include "SpellScript.h"
 #include "TemporarySummon.h"
 #include <list>
@@ -22,6 +25,7 @@ enum VultureCultNewborns : uint32
     QUEST_A_TRAIL_OF_PETALS = 1660017,
     NPC_NEWBORN_SAVED = 161846,
     NPC_BUTTERFLY = 161847,
+    NPC_ELDYA = 161848,
     SPELL_RESCUING_A_NEWBORN = 256715
 };
 
@@ -30,6 +34,7 @@ constexpr float MoonwellReach = 8.0f;
 constexpr float RemnantSearchReach = 20.0f;
 constexpr uint32 RemnantIdleLifetimeMs = 30000;
 constexpr uint32 ButterflyLifetimeMs = 600000;
+constexpr Milliseconds ButterflyDeliveryCheckInterval = 1s;
 Position const EyrieMoonwell = { 10834.42f, 545.13f, 1396.39f, 0.0f };
 Position const RemnantRise = { 10834.8f, 544.1f, 1396.25f, 3.14f };
 
@@ -93,6 +98,37 @@ class spell_coa_channeling_blessing_of_the_moon : public SpellScript
     }
 };
 
+class ButterflyDeliveryAtSummoner : public BasicEvent
+{
+public:
+    explicit ButterflyDeliveryAtSummoner(Creature* butterfly) : _butterfly(butterfly) { }
+
+    bool Execute(uint64, uint32) override
+    {
+        if (!_butterfly->IsAlive() ||
+            _butterfly->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
+            return true;
+
+        SmartAI* ai = CAST_AI(SmartAI, _butterfly->AI());
+        if (!ai)
+            return true;
+
+        TempSummon* summon = _butterfly->ToTempSummon();
+        Player* summoner = summon ? ObjectAccessor::GetPlayer(*_butterfly, summon->GetSummonerGUID()) : nullptr;
+        if (summoner && summoner->FindNearestCreature(NPC_ELDYA, INTERACTION_DISTANCE))
+        {
+            ai->StopFollow(true);
+            return true;
+        }
+
+        _butterfly->m_Events.AddEventAtOffset(this, ButterflyDeliveryCheckInterval);
+        return false;
+    }
+
+private:
+    Creature* _butterfly;
+};
+
 class go_coa_baby_night_elf : public GameObjectScript
 {
 public:
@@ -120,8 +156,10 @@ class spell_coa_rescuing_a_newborn : public SpellScript
             return;
 
         player->KilledMonsterCredit(NPC_NEWBORN_SAVED);
-        player->SummonCreature(NPC_BUTTERFLY, baby->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, ButterflyLifetimeMs, 0,
-                               nullptr, true);
+        if (TempSummon* butterfly = player->SummonCreature(NPC_BUTTERFLY, baby->GetPosition(), TEMPSUMMON_TIMED_DESPAWN,
+                                                           ButterflyLifetimeMs, 0, nullptr, true))
+            butterfly->m_Events.AddEventAtOffset(new ButterflyDeliveryAtSummoner(butterfly),
+                                                 ButterflyDeliveryCheckInterval);
         baby->DespawnOrUnsummon();
     }
 
