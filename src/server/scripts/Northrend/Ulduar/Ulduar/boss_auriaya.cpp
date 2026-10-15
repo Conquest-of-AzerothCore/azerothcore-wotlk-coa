@@ -115,15 +115,22 @@ struct boss_auriaya : public BossAI
 
     void DespawnFormationMembers(bool onEvade = false)
     {
+        // Collect the GUIDs first: despawning takes the member out of the world,
+        // which erases it from the formation and would invalidate the member loop.
+        std::vector<ObjectGuid> memberGuids;
         if (CreatureGroup* formation = me->GetFormation())
             for (auto const& [member, info] : formation->GetMembers())
                 if (member && member != me)
-                {
-                    if (onEvade)
-                        member->DespawnOnEvade();
-                    else
-                        member->DespawnOrUnsummon();
-                }
+                    memberGuids.push_back(member->GetGUID());
+
+        for (ObjectGuid const& guid : memberGuids)
+            if (Creature* member = ObjectAccessor::GetCreature(*me, guid))
+            {
+                if (onEvade)
+                    member->DespawnOnEvade();
+                else
+                    member->DespawnOrUnsummon();
+            }
     }
 
     void Reset() override

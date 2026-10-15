@@ -245,14 +245,21 @@ struct boss_zuljin : public BossAI
 
     void EnterEvadeMode(EvadeReason /*why*/) override
     {
+        // Collect the GUIDs first: DespawnOnEvade() takes the member out of the world,
+        // which erases it from the formation and would invalidate the member loop.
+        std::vector<ObjectGuid> memberGuids;
         if (CreatureGroup* formation = me->GetFormation())
         {
             for (auto const& itr : formation->GetMembers())
             {
                 if (itr.first && itr.first != me)
-                    itr.first->DespawnOnEvade(2min);
+                    memberGuids.push_back(itr.first->GetGUID());
             }
         }
+
+        for (ObjectGuid const& guid : memberGuids)
+            if (Creature* member = ObjectAccessor::GetCreature(*me, guid))
+                member->DespawnOnEvade(2min);
 
         me->DespawnOnEvade(2min);
         _EnterEvadeMode();
