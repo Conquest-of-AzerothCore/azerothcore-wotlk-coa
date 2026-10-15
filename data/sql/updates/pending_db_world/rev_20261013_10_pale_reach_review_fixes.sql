@@ -104,3 +104,6 @@ UPDATE `creature` SET `position_x` = -7243.9, `position_y` = 382.6, `position_z`
 UPDATE `creature` SET `position_x` = -7252.1, `position_y` = 395.1, `position_z` = 494.39, `orientation` = 4.426, `MovementType` = 0, `wander_distance` = 0 WHERE `guid` = 9960385 AND `id` = 164188;
 UPDATE `creature` SET `position_x` = -7242.0, `position_y` = 417.7, `position_z` = 478.54, `orientation` = 4.993, `MovementType` = 0, `wander_distance` = 0 WHERE `guid` = 9960386 AND `id` = 164188;
 UPDATE `creature` SET `position_x` = -7225.3, `position_y` = 468.5, `position_z` = 460.84, `orientation` = 0.399, `MovementType` = 0, `wander_distance` = 0 WHERE `guid` = 9960387 AND `id` = 164188;
+
+-- Lord Cerios Locker stands in the Petitioner's Chamber (live spawn 634); the export dropped him in the air by the bandit cave.
+UPDATE `creature` SET `position_x` = -8318.84, `position_y` = 306.292, `position_z` = 126.932, `orientation` = 4.8799 WHERE `guid` = 9960200 AND `id` = 164219;
