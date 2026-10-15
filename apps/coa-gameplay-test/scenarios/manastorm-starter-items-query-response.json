@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Entering Manastorm sends the starter items' query responses with the grant",
+  "contract": [
+    "Entering Manastorm grants Endless Manastorm Potion (254041), Millhouse's Regeneration Matrix (97895) and Millhouse's Magical Escape (254042) and starts the far teleport in the same update. The client's CMSG_ITEM_QUERY_SINGLE for the new items reaches the server while the player is out of the world; STATUS_LOGGEDIN packets are dropped then, so the tooltips stay at 'Retrieving item information'.",
+    "The server must send SMSG_ITEM_QUERY_SINGLE_RESPONSE (0x058) for every starter item it grants. The socketless test session sends no item queries, so each counted response, selected by its leading item id, comes from the grant. Requires Ascension.Manastorm.Enable = 1."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "player", "race": 1, "class": 15, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Settle login", "ms": 5000 },
+    {
+      "action": "snapshot", "label": "Endless Manastorm Potion responses before entry",
+      "actor": "player", "metric": "server_packets", "opcode": 88, "row": 254041, "save_as": "potion_responses"
+    },
+    {
+      "action": "snapshot", "label": "Regeneration Matrix responses before entry",
+      "actor": "player", "metric": "server_packets", "opcode": 88, "row": 97895, "save_as": "matrix_responses"
+    },
+    {
+      "action": "snapshot", "label": "Magical Escape responses before entry",
+      "actor": "player", "metric": "server_packets", "opcode": 88, "row": 254042, "save_as": "escape_responses"
+    },
+    { "action": "client_packet", "label": "Enter Manastorm depth 1", "actor": "player", "opcode": 1617, "fields": [{ "u32": 1 }] },
+    {
+      "action": "assert", "label": "The native enter request reached a Manastorm instance",
+      "actor": "player", "metric": "private_instance", "equals": 1, "within_ms": 10000
+    },
+    {
+      "action": "assert", "label": "Endless Manastorm Potion is granted on entry",
+      "actor": "player", "metric": "item_count", "item": 254041, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Endless Manastorm Potion's query response is sent with the grant",
+      "actor": "player", "metric": "server_packets", "opcode": 88, "row": 254041,
+      "relative_to": "potion_responses", "min": 1
+    },
+    {
+      "action": "assert", "label": "Regeneration Matrix is granted on entry",
+      "actor": "player", "metric": "item_count", "item": 97895, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Regeneration Matrix's query response is sent with the grant",
+      "actor": "player", "metric": "server_packets", "opcode": 88, "row": 97895,
+      "relative_to": "matrix_responses", "min": 1
+    },
+    {
+      "action": "assert", "label": "Magical Escape is granted on entry",
+      "actor": "player", "metric": "item_count", "item": 254042, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Magical Escape's query response is sent with the grant",
+      "actor": "player", "metric": "server_packets", "opcode": 88, "row": 254042,
+      "relative_to": "escape_responses", "min": 1
+    },
+    { "action": "wait", "ms": 3000 },
+    { "action": "client_packet", "label": "Leave Manastorm", "actor": "player", "opcode": 1637 },
+    {
+      "action": "assert", "label": "The leave request returned to the open world",
+      "actor": "player", "metric": "private_instance", "equals": 0, "within_ms": 10000
+    }
+  ]
+}
