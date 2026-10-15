@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Minervia's Past credits the Servant of Azora on the Tower of Ilgalar stairs",
+  "contract": "Roman Murashov's Ascension video 3qfdpW_xSb0 (2026-08-02, 10:42-10:44) completes Minervia's Past 254068 (kill credit Servant of Azora 254969) while the player climbs the Tower of Ilgalar's spiral stairs, before the Eye of Ilgalar is reached. A player on the quest at the foot of the tower has no credit; on the stairs the objective becomes 1/1 without any interaction.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9228.15,
+    "y": -3348.43,
+    "z": 102.03,
+    "o": 3.1
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 25
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 254068,
+      "complete": false
+    },
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "No credit at the foot of the tower",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 254068,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -9271.0,
+      "y": -3309.0,
+      "z": 132.08,
+      "o": 0.0
+    },
+    {
+      "action": "assert",
+      "label": "Credit on the stairs",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 254068,
+      "equals": 1,
+      "within_ms": 10000
+    }
+  ]
+}

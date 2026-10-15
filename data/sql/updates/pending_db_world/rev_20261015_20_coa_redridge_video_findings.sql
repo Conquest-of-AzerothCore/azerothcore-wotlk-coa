@@ -160,7 +160,9 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 -- those of the Blackrock orcs. Enchanter Veridan teaches what the other Enchanting trainers teach and keeps the model
 -- and display preset of rev_20260927. Roland Branwick (1502) and Tirig (6037) keep their client displays; Adelise
 -- (255205), Silas Figner (811479) and Dorian Firehart (811480) carry Ascension displays the client lacks, so they
--- wear the stand-ins 9255, 1484 and 1491. Tirig's loot is unknown and left empty.
+-- wear the stand-ins 9255, 1484 and 1491. Ley-Tracker Hestlor wears the captured mirror-image display 49 again
+-- (rev_20260927_00_captured_mirror_models), which his display preset of rev_20260927_01 dresses; rev_20261010_98
+-- had replaced it with 1484.
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`,
   `KillCredit1`, `KillCredit2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`,
   `faction`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_flight`, `detection_range`, `rank`,
@@ -173,7 +175,7 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
 (991479, 0, 0, 0, 0, 0, 'Silas Figner', 'Mage Adept', NULL, 0, 25, 25, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (991480, 0, 0, 0, 0, 0, 'Dorian Firehart', 'Mage Adept', NULL, 0, 25, 25, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'SmartAI', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
 (991481, 0, 0, 0, 0, 0, 'Roland Branwick', 'Novice Mage', NULL, 0, 15, 15, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),
-(254978, 0, 0, 0, 0, 0, 'Tirig', 'Blackrock Dragon Tender', NULL, 0, 18, 20, 0, 40, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 1, 0, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 3, 1, 1, 1, 0, 0, 1, 0, 0, '', 0),
+(254978, 0, 0, 0, 0, 0, 'Tirig', 'Blackrock Dragon Tender', NULL, 0, 18, 20, 0, 40, 0, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 1, 0, 2048, 0, 0, 7, 0, 254978, 0, 0, 0, 0, 0, 0, '', 0, 1, 3, 1, 1, 1, 0, 0, 1, 0, 0, '', 0),
 (255205, 0, 0, 0, 0, 0, 'Adelise', NULL, NULL, 0, 25, 25, 0, 12, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 512, 2048, 0, 0, 7, 134217728, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.312, 1, 1, 1, 0, 0, 1, 0, 2, '', 0)
 ON DUPLICATE KEY UPDATE `difficulty_entry_1` = VALUES(`difficulty_entry_1`),
   `difficulty_entry_2` = VALUES(`difficulty_entry_2`), `difficulty_entry_3` = VALUES(`difficulty_entry_3`),
@@ -199,9 +201,10 @@ ON DUPLICATE KEY UPDATE `difficulty_entry_1` = VALUES(`difficulty_entry_1`),
   `flags_extra` = VALUES(`flags_extra`), `ScriptName` = VALUES(`ScriptName`),
   `VerifiedBuild` = VALUES(`VerifiedBuild`);
 
-DELETE FROM `creature_template_model` WHERE `CreatureID` IN (991479,991480,991481,254978,255205);
+DELETE FROM `creature_template_model` WHERE `CreatureID` IN (991477,991479,991480,991481,254978,255205);
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
   `VerifiedBuild`) VALUES
+(991477, 0, 49, 1, 1, 0),
 (991479, 0, 1484, 1, 1, 0),
 (991480, 0, 1491, 1, 1, 0),
 (991481, 0, 1502, 1, 1, 0),
@@ -211,6 +214,49 @@ INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`,
 DELETE FROM `creature_default_trainer` WHERE `CreatureId` = 991478;
 INSERT INTO `creature_default_trainer` (`CreatureId`, `TrainerId`) VALUES
 (991478, 96);
+
+-- Tirig's loot: SUB archive table creature_loot (db.exil.es dump, 2026-10-04), chances as listed there.
+DELETE FROM `creature_loot_template` WHERE `Entry` = 254978;
+INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`,
+  `GroupId`, `MinCount`, `MaxCount`, `Comment`) VALUES
+(254978, 7906, 0, 8, 0, 1, 0, 1, 1, 'Tirig - Horns of Nez''ra'),
+(254978, 9771, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Greenweave Gloves'),
+(254978, 14127, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Ritual Shroud'),
+(254978, 14133, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Ritual Tunic'),
+(254978, 14165, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Pagan Britches'),
+(254978, 14179, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Watcher''s Cape'),
+(254978, 14373, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Sanguine Belt'),
+(254978, 14374, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Sanguine Sandals'),
+(254978, 14375, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Sanguine Cuffs'),
+(254978, 14566, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Prospector''s Pads'),
+(254978, 14572, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Bristlebark Gloves'),
+(254978, 14742, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Hulking Boots'),
+(254978, 14748, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Hulking Leggings'),
+(254978, 15117, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Rigid Leggings'),
+(254978, 15122, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Robust Bracers'),
+(254978, 15124, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Robust Cloak'),
+(254978, 15329, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Wrangler''s Belt'),
+(254978, 15330, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Wrangler''s Boots'),
+(254978, 15500, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Outrunner''s Chestguard'),
+(254978, 15511, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Grunt''s Legguards'),
+(254978, 15512, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Grunt''s Shield'),
+(254978, 15513, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Grunt''s Pauldrons'),
+(254978, 15517, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Spiked Chain Wristbands'),
+(254978, 15526, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Sentry''s Cape'),
+(254978, 15894, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Bristlebark Buckler'),
+(254978, 15972, 0, 0.014, 0, 1, 0, 1, 1, 'Tirig - Ritual Stein'),
+(254978, 554280, 0, 0.417, 0, 1, 0, 1, 1, 'Tirig - Mystic Scroll: Glyph of Blocking'),
+(254978, 1013734, 0, 0.417, 0, 1, 0, 1, 1, 'Tirig - Mystic Scroll: Impale'),
+(254978, 1013791, 0, 0.625, 0, 1, 0, 1, 1, 'Tirig - Mystic Scroll: Demonic Brutality'),
+(254978, 1013810, 0, 0.625, 0, 1, 0, 1, 1, 'Tirig - Mystic Scroll: Improved Aspect of the Monkey'),
+(254978, 1013862, 0, 0.417, 0, 1, 0, 1, 1, 'Tirig - Mystic Scroll: Shield Mastery'),
+(254978, 1175680, 0, 7.5, 0, 1, 0, 1, 1, 'Tirig - Mystic Scroll: Shield Specialization'),
+(254978, 4050874, 0, 1.171, 0, 1, 0, 1, 1, 'Tirig - Dragon Tender''s Spaulders'),
+(254978, 4050875, 0, 1.171, 0, 1, 0, 1, 1, 'Tirig - Dragon Tender''s Harness'),
+(254978, 4050876, 0, 1.171, 0, 1, 0, 1, 1, 'Tirig - Dragon Tender''s Belt'),
+(254978, 4050877, 0, 1.171, 0, 1, 0, 1, 1, 'Tirig - Dragon Tender''s Pants'),
+(254978, 4050878, 0, 1.171, 0, 1, 0, 1, 1, 'Tirig - Dragon Tender''s Cuffs'),
+(254978, 4050879, 0, 1.171, 0, 1, 0, 1, 1, 'Tirig - Dragon Tender''s Mace');
 
 -- Spots read from the videos: Enchanter Veridan (hTDhaiodOwE), Silas Figner and Dorian Firehart at the Portal to
 -- Stormwind and Roland Branwick between the two mage dummies on the top floor (KfIRjSeLn4Y), Tirig behind the
@@ -238,6 +284,31 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, 
 (9001374, 97444, 0, 0, 0, 1, 1, -9688.62, -1971.12, 99.49, 0.444, 0, 0, 0.2202, 0.9755, 120, 100, 1, '', 0, 'Human Mage Dummy (Red Mage Tower; second dummy seen in the videos along the wall; spot and facing estimated)'),
 (9001375, 254685, 0, 0, 0, 1, 1, -9716.04, -2898.08, 53.6, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Pristine Black Dragon Egg (the Rookery, right nest; spot estimated)'),
 (9001376, 254685, 0, 0, 0, 1, 1, -9713.55, -2900.57, 53.6, 0, 0, 0, 0, 1, 120, 100, 1, '', 0, 'Pristine Black Dragon Egg (the Rookery, left nest; spot estimated)');
+
+-- Minervia's Past: video 3qfdpW_xSb0 (10:42-10:44) completes the objective while the player climbs the Tower of
+-- Ilgalar's spiral stairs, before the Eye of Ilgalar is reached. A trigger bunny on the stairs gives the credit again;
+-- the Eye's gossip credit of rev_20261010_98 stays. Spot and range are estimated; the height is a client WMO floor.
+DELETE FROM `creature` WHERE `guid` = 9950431;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`,
+  `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`,
+  `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`,
+  `CreateObject`, `Comment`) VALUES
+(9950431, 23837, 0, 0, 0, 1, 1, 0, -9271.0, -3311.0, 132.08, 0, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'ELM General Purpose Bunny (Tower of Ilgalar stairs, credit for 254068 seen in the videos; spot estimated)');
+
+DELETE FROM `smart_scripts` WHERE `entryorguid` = -9950431 AND `source_type` = 0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`,
+  `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`,
+  `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`,
+  `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`,
+  `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(-9950431, 0, 0, 0, 10, 0, 100, 0, 1, 10, 1000, 1000, 1, 0, 33, 254969, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'ELM General Purpose Bunny - Within 10 Range Out of Combat LoS - Quest Credit ''Minervia''s Past''');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 22 AND `SourceGroup` = 1 AND `SourceEntry` = -9950431
+  AND `SourceId` = 0;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`,
+  `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`,
+  `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(22, 1, -9950431, 0, 0, 9, 0, 254068, 0, 0, 0, 0, 0, '', 'Tower of Ilgalar stair bunny - credit only on ''Minervia''s Past''');
 
 -- Lakeshire NPCs where y03LWvmfnXM shows them: Solaina on the ground floor and Paien on the stairs of Lady Idelia
 -- Solomon's house, Damion Tyndall at the loom upstairs in Luca Tyndall's house, the altar boys on the north side of
