@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "name": "Level-scaled melee damage for the Honored Ancestor and the Spectral Warden (COA-6085, COA-6058)",
+  "contract": [
+    "The Honored Ancestor (51265, Ancestor's Call 804834), the Spectral Warden (100481, 805716) and the Spectral",
+    "Scythe (250305) are guardians with level 1 templates. Guardian::InitStatsForLevel sets their level from the owner",
+    "but has no damage case for them, so they kept level 1 weapon damage (min about 4) and hit for 2-3. A",
+    "PLAYERHOOK_ON_AFTER_GUARDIAN_INIT_STATS_FOR_LEVEL script now gives them the creature base damage and attack power",
+    "of their level, as the Ranger's Wingman companions already get. The Scythe is summoned by Soul Strike procs and",
+    "is covered by the same entry list."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "b",
+      "race": 11,
+      "class": 12,
+      "level": 60
+    },
+    {
+      "id": "r",
+      "race": 5,
+      "class": 30,
+      "level": 43
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 4000
+    },
+    {
+      "action": "specialization",
+      "label": "Ancestry",
+      "actor": "b",
+      "id": 3
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 804834
+    },
+    {
+      "action": "cast",
+      "label": "Ancestor's Call",
+      "actor": "b",
+      "spell": 804834
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Honored Ancestor is summoned",
+      "actor": "b",
+      "metric": "owned_creature_count",
+      "entry": 51265,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the level 60 Honored Ancestor's weapon is not level 1 damage",
+      "actor": "b",
+      "metric": "owned_creature_weapon_damage_min",
+      "entry": 51265,
+      "min": 20
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 805716
+    },
+    {
+      "action": "set_power",
+      "actor": "r",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Spectral Warden",
+      "actor": "r",
+      "spell": 805716
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Spectral Warden is summoned",
+      "actor": "r",
+      "metric": "owned_creature_count",
+      "entry": 100481,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the level 43 Spectral Warden's weapon is not level 1 damage",
+      "actor": "r",
+      "metric": "owned_creature_weapon_damage_min",
+      "entry": 100481,
+      "min": 15
+    }
+  ]
+}

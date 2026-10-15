@@ -58,6 +58,7 @@ void AddSC_AscensionProfessionSpellAffect();
 void AddSC_AscensionPerforatingShots();
 void AddSC_AscensionSummonedEffects();
 void AddSC_AscensionSummonAvoidance();
+void AddSC_AscensionSummonDamage();
 void AddSC_AscensionKeepersScrollZoneBuff();
 void AddAscensionStockCoefficientScripts();
 void AddAscensionScalingBaseScripts();
@@ -716,6 +717,7 @@ void AddCoAScripts()
     AddSC_AscensionPerforatingShots();
     AddSC_AscensionSummonedEffects();
     AddSC_AscensionSummonAvoidance();
+    AddSC_AscensionSummonDamage();
     AddSC_AscensionKeepersScrollZoneBuff();
     AddSC_AscensionWelcomeWarchest();
     AddSC_AscensionClassBundleStore();
