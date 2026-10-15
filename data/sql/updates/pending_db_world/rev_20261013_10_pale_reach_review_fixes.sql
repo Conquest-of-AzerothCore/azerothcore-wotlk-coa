@@ -136,3 +136,6 @@ INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `e
 
 -- Each Stolen Goods crate yields one Stolen Goods.
 UPDATE `gameobject_loot_template` SET `MinCount` = 1, `MaxCount` = 1 WHERE `Entry` = 2300635 AND `Item` = 559855;
+
+-- No One to Bring Her Flowers names her Martha Argos; the gravestone object read "Agros".
+UPDATE `gameobject_template` SET `name` = 'Martha Argos Gravestone' WHERE `entry` = 2310431;
