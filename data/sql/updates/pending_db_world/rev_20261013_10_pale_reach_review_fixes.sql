@@ -167,3 +167,9 @@ INSERT INTO `quest_poi_points` (`QuestID`, `Idx1`, `Idx2`, `X`, `Y`) VALUES
 (175019, 1, 5, -7843, 876),
 (175019, 1, 6, -7876, 859),
 (175019, 2, 0, -8071, 751);
+
+-- Ascension's display rows 87436 and 86529 carry a placeholder 96 yd selection box, so the client never picks the
+-- object under the cursor; displays 31 and 6448 are the same models (StormwindCrate01, CrateAllianceFirstAid01)
+-- with their real boxes.
+UPDATE `gameobject_template` SET `displayId` = 31 WHERE `entry` = 2300635;
+UPDATE `gameobject_template` SET `displayId` = 6448 WHERE `entry` = 2300661;
