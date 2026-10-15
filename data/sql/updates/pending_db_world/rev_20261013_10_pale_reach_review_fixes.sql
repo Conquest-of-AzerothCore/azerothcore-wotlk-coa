@@ -26,3 +26,6 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 
 -- Playtest 2026-10-14: static Graysky Guards stacked on the Graysky Royal Guards at the keep gate; live sightings show only Royal Guards there.
 DELETE FROM `creature` WHERE `guid` IN (9920754, 9920755) AND `id` = 164552;
+
+-- Playtest 2026-10-14: the wandering Graysky Guard on the keep road duplicates the road patrol (user decision).
+DELETE FROM `creature` WHERE `guid` = 9960838 AND `id` = 164173;
