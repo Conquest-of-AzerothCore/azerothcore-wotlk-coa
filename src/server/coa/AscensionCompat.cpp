@@ -1244,8 +1244,12 @@ public:
     {
       if (entry.ClassId != player->getClass())
         continue;
-      if (!sSkillLineStore.LookupEntry(entry.SkillId))
+      SkillLineEntry const* skill = sSkillLineStore.LookupEntry(entry.SkillId);
+      if (!skill)
         return false;
+      if (skill->categoryId == SKILL_CATEGORY_LANGUAGES &&
+          !GetSkillRaceClassInfo(entry.SkillId, player->getRace(), player->getClass()))
+        continue;
       bool const weapon = std::any_of(AscensionCompatData::ProficiencyDefinitions.begin(),
           AscensionCompatData::ProficiencyDefinitions.end(), [&entry](auto const& definition)
           { return definition.SkillId == entry.SkillId && definition.ScalesWithLevel; });
