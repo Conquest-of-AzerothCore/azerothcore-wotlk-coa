@@ -38,17 +38,22 @@ DELETE FROM `gameobject` WHERE `guid` = 9999302;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `Comment`) VALUES
 (9999302, 2310437, 0, 0, 0, 1, 1, -7125.164, 1019.128, 296.522, 3.417428, 0, 0, 0.990504, -0.137481, 300, 0, 1, 'Pale Reach: Graysky mailbox by the Plucked Rook Inn door');
 
--- #6: every Raven becomes a Possessed Crow (user decision): perched with the blue raven-aura eyes from the template addon;
--- the export's live-capture spawns keep their kneel and cannibalize poses with the aura added. Levels 18-21 as targeted in
--- 2r0PE1dBarE, DuWTvw19xtg and F5g2uzWFLqA.
+-- #6: the live capture has both Ravens and Possessed Crows. Ravens stay level 1 and perch (sit) without the possession
+-- aura; the export's captured kneel and cannibalize spawns keep their own rows and the two wanderers stand.
+-- Possessed Crows are levels 18-21 as targeted in 2r0PE1dBarE, DuWTvw19xtg and F5g2uzWFLqA.
 DELETE FROM `creature` WHERE `guid` = 9960829 AND `id` = 164371;
-UPDATE `creature` SET `id` = 164944, `MovementType` = 0, `wander_distance` = 0 WHERE `id` = 164371;
 UPDATE `creature_template` SET `minlevel` = 18, `maxlevel` = 21 WHERE `entry` = 164944;
+UPDATE `creature_template` SET `AIName` = 'SmartAI' WHERE `entry` = 164371;
 
-DELETE FROM `creature_addon` WHERE `guid` IN (9960029, 9960647, 9961725, 9961860, 9961932);
+DELETE FROM `creature_template_addon` WHERE `entry` = 164371;
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
+(164371, 0, 0, 1, 1, 0, 0, '');
+
+DELETE FROM `creature_addon` WHERE `guid` IN (9961736, 9961872);
 INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
-(9960029, 0, 0, 8, 1, 0, 0, '365403'),
-(9960647, 0, 0, 0, 1, 398, 0, '365403'),
-(9961725, 0, 0, 0, 1, 398, 0, '365403'),
-(9961860, 0, 0, 0, 1, 398, 0, '365403'),
-(9961932, 0, 0, 8, 1, 0, 0, '365403');
+(9961736, 0, 0, 0, 1, 0, 0, ''),
+(9961872, 0, 0, 0, 1, 0, 0, '');
+
+DELETE FROM `smart_scripts` WHERE `entryorguid` = 164371 AND `source_type` = 0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `action_type`, `action_param1`, `action_param2`, `target_type`, `comment`) VALUES
+(164371, 0, 0, 0, 7, 0, 100, 0, 91, 1, 0, 1, 'Raven - On evade - Clear sitting state before returning home; addon restores perch on arrival');
