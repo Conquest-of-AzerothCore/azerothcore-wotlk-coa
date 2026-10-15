@@ -36,6 +36,9 @@ struct WaterRune
 
 constexpr WaterRune WaterRunes[] = {{EFFECT_1, SPELL_WATER_ENGRAVING}, {EFFECT_2, SPELL_ICE_ENGRAVING}};
 
+constexpr float HURRICANE_STRIKE_DISTANCE = 1.5f;
+constexpr uint32 HURRICANE_STRIKE_DIRECTIONS = 5;
+
 bool CanUseHurricane(Unit* caster, uint32 spell)
 {
     Player* player = caster ? caster->ToPlayer() : nullptr;
@@ -67,16 +70,18 @@ bool StrikeHurricane(Unit* player, Aura* aura)
         player->GetMap() != target->GetMap() || !player->InSamePhase(target) ||
         !player->IsValidAttackTarget(target))
         return false;
-    if (aura->GetId() == SPELL_RUNIC_HURRICANE)
-    {
-        uint64 const strikes = aura->GetScriptValue(SPELL_RUNIC_HURRICANE_HIT);
-        if (strikes >= 5)
-            return false;
-        aura->SetScriptValue(SPELL_RUNIC_HURRICANE_HIT, strikes + 1);
-        player->CastSpell(target, SPELL_RUNIC_HURRICANE_HIT, true);
-    }
-    else
-        player->CastSpell(target, SPELL_HURRICANE_HIT, true);
+    uint64 const strikes = aura->GetScriptValue(SPELL_HURRICANE_HIT);
+    if (aura->GetId() == SPELL_RUNIC_HURRICANE && strikes >= HURRICANE_STRIKE_DIRECTIONS)
+        return false;
+    aura->SetScriptValue(SPELL_HURRICANE_HIT, strikes + 1);
+    float const angle = player->GetOrientation() +
+        float(strikes % HURRICANE_STRIKE_DIRECTIONS) * 2.0f * float(M_PI) / float(HURRICANE_STRIKE_DIRECTIONS);
+    player->NearTeleportTo(target->GetPositionX() + std::cos(angle) * HURRICANE_STRIKE_DISTANCE,
+        target->GetPositionY() + std::sin(angle) * HURRICANE_STRIKE_DISTANCE, target->GetPositionZ(),
+        player->GetOrientation());
+    player->SetFacingToObject(target);
+    player->CastSpell(target,
+        aura->GetId() == SPELL_RUNIC_HURRICANE ? SPELL_RUNIC_HURRICANE_HIT : SPELL_HURRICANE_HIT, true);
     return true;
 }
 
