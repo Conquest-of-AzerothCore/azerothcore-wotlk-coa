@@ -477,6 +477,14 @@ namespace
     constexpr uint32 NPC_STRATHOLME_VENGEFUL_PHANTOM = 10387;
     constexpr uint32 SEGMENT_UNFORGIVEN_NORMAL = 130;
     constexpr uint32 SEGMENT_UNFORGIVEN_ENDGAME = 354;
+    // The Scarlet-side Stratholme final encounter has a native
+    // permanent Dathrohan (10812) spawn. His SmartAI performs action 36
+    // (Update Template to 10813) below 40% HP, preserving his GUID.
+    // The historical Manastorm objective remains Balnazzar (10813).
+    constexpr uint32 NPC_STRATHOLME_DATHROHAN = 10812;
+    constexpr uint32 NPC_STRATHOLME_BALNAZZAR = 10813;
+    constexpr uint32 SEGMENT_BALNAZZAR_NORMAL = 187;
+    constexpr uint32 SEGMENT_BALNAZZAR_ENDGAME = 358;
 
     // Historical emulator report locates the original encounter near
     // this gateway. This is an approximate fallback arena, NOT a
@@ -7556,8 +7564,33 @@ void ManastormMgr::OnCreatureAddWorld(Creature* creature)
     // creature is the Chaotic Link boss even if the objective happens
     // to spawn after the stage is already ACTIVE.
     //
+    // Stratholme's Balnazzar is not a separate DB-spawned boss:
+    // Dathrohan (10812) transforms to Balnazzar (10813) on the same
+    // runtime GUID. Bind that GUID as the stage objective while it is
+    // still in disguise so skull, scaling, and Chaotic Link work from
+    // PREPARING onward. OnUnitDeath continues to require entry 10813,
+    // so killing Dathrohan before his transformation cannot complete
+    // either recovered Balnazzar objective.
+    //
+    // Scope this alias to the two exact original private Manastorm
+    // segments; ordinary Stratholme and all other stages are untouched.
+    bool const isBalnazzarDisguise =
+        creature->GetEntry() == NPC_STRATHOLME_DATHROHAN &&
+        map->GetId() == MANASTORM_MAP_STRATHOLME &&
+        map->IsScriptedPrivateInstance() &&
+        map->GetInstanceId() == run->GetInstanceId() &&
+        segment.MapId == MANASTORM_MAP_STRATHOLME &&
+        segment.ObjectiveCreatureEntry == NPC_STRATHOLME_BALNAZZAR &&
+        ((segment.SegmentId == SEGMENT_BALNAZZAR_NORMAL &&
+          segment.Difficulty == 0 &&
+          segment.DungeonEncounterId == 478) ||
+         (segment.SegmentId == SEGMENT_BALNAZZAR_ENDGAME &&
+          segment.Difficulty == 2 &&
+          segment.DungeonEncounterId == 2478));
+
     if (creature->GetEntry() ==
-        segment.ObjectiveCreatureEntry)
+            segment.ObjectiveCreatureEntry ||
+        isBalnazzarDisguise)
     {
         ObjectGuid const existingGuid =
             run->GetObjectiveCreatureGuid();
