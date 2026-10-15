@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Callboard quests fill the cache progress bar and a full bar pays the cache of the highest item level reached",
-  "contract": "Callboard Cache progress. The client asks a quest's points with CMSG 0x731 (quest id) and reads SMSG 0x732 (quest id, points, 0); captured live replies (questcacheaddon.wdb, 2026-08/09) give Dungeon Diving 81244 15 and the world boss quest 170015 50, and uncaptured quests follow the Bronzebeard video of 2025-11-05: profession 15, world kill 20, elite 25. A quest outside the Callboard is worth 0. At login the server sends SMSG 0x730 with the released cache tiers, highest item level first (id, 0, condition 0, item level, cache item, points per cache), the highest item level reached as achievement criterion 80129 (SMSG_CRITERIA_UPDATE) and the TOKEN_TYPE_CALLBOARD_CACHE_POINTS token (SMSG 0x670: name, amount, 0). At the default release stage 7 all nine tiers are sent: item level 78 Callboard Cache (Naxxramas) 1615009 first and item level 0 Adventurer's Cache 1397886 last (live sniffs 2026-08-31/09-01 for item levels 0, 40, 55, 60 and 62; 61, 66, 72 and 78 approved 2026-10-07), each costing 150 points. The client shows a tenth of every amount (user choice 2026-10-07): the bar shows 15 per cache and a quest's points round up (25 as 3, 15 as 2, 20 as 2, 50 as 5). A turn-in adds its points and pays one cache per 150, keeping the remainder: four elite quests reach 100, two world kill quests 140 with no cache yet, and a profession quest 155, which pays the Adventurer's Cache of an unequipped character and leaves 5 (shown as 0); another profession quest then shows 2, proving the remainder carried over. After the next login, twelve epic pieces (Wrath set 584, Band of Accuria 72, Onyxia Tooth Pendant 69, Drake Fang Talisman 79, Cloak of the Shrouded Mists 70) sum to 874 over 15 slots, an average of 58, so the next full bar (20 + world boss 50 + four world kill quests 80 = 150) pays the Zul'Gurub cache 1615003 (tier 55) rather than Molten Core (tier 60). Opening it pays its item plus 5 to 15 gold (Ascension.CallboardCache.GoldMin/GoldMax, user choice 2026-10-07).",
+  "contract": "Callboard Cache progress. The client asks a quest's points with CMSG 0x731 (quest id) and reads SMSG 0x732 (quest id, points, 0); captured live replies (questcacheaddon.wdb, 2026-08/09) give Dungeon Diving 81244 15 and the world boss quest 170015 50, and uncaptured quests follow the Bronzebeard video of 2025-11-05: profession 15, world kill 20, elite 25. A quest outside the Callboard is worth 0. At login the server sends SMSG 0x730 with the released cache tiers, highest item level first (id, 0, condition 0, item level, cache item, points per cache), the highest item level reached as achievement criterion 80129 (SMSG_CRITERIA_UPDATE) and the TOKEN_TYPE_CALLBOARD_CACHE_POINTS token (SMSG 0x670: name, amount, 0). At the default release stage 7 all nine tiers are sent: item level 78 Callboard Cache (Naxxramas) 1615009 first and item level 0 Adventurer's Cache 1397886 last (live sniffs 2026-08-31/09-01 for item levels 0, 40, 55, 60 and 62; 61, 66, 72 and 78 approved 2026-10-07), each costing 150 points. The client shows a tenth of every amount (user choice 2026-10-07): the bar shows 15 per cache and a quest's points round up (25 as 3, 15 as 2, 20 as 2, 50 as 5). A turn-in adds its points and pays one cache per 150, keeping the remainder: four elite quests reach 100, two world kill quests 140 with no cache yet, and a profession quest 155, which pays the Adventurer's Cache of an unequipped character and leaves 5 (shown as 0); another profession quest then shows 2, proving the remainder carried over. After the next login, thirteen epic and rare pieces (Wrath set 584, Band of Accuria 72, Onyxia Tooth Pendant 69, Drake Fang Talisman 79, Blackhand's Breadth 63, Cloak of the Shrouded Mists 70) and the starting Worn Greatsword, Recruit's Pants and Boots (5) sum to 942 over 16 slots (every slot but the shirt and tabard, and no off hand beside the lone two-hander), an average of 58.9, so the next full bar (20 + world boss 50 + four world kill quests 80 = 150) pays the Zul'Gurub cache 1615003 (tier 55) rather than Molten Core (tier 60). Opening it pays its item plus 5 to 15 gold (Ascension.CallboardCache.GoldMin/GoldMax, user choice 2026-10-07).",
   "timeout_ms": 180000,
   "location": {
     "map": 0,
@@ -570,6 +570,17 @@
       "actor": "hero",
       "item": 17102,
       "slot": 14
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 13965
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 13965,
+      "slot": 13
     },
     {
       "action": "prepare_quest",

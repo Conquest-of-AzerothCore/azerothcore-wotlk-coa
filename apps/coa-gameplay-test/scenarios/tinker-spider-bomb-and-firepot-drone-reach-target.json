@@ -20,7 +20,9 @@
     "at most 0.05^8 < 4e-11. Actual detonation packets and timely disappearance prove arrival even when a",
     "damage roll misses. Refill Mana, reset the parent build cooldown, and restore Firepot's three native",
     "charges (SpellCharges category 124, ten-second recharge) between independent trials; do not modify",
-    "explosion hit chance or cost handling."
+    "explosion hit chance or cost handling. Firepot drops along the drone's path cast the same Firepot spell",
+    "once the golem is inside their radius, so a drone trial requires at least one Firepot spell-go and its",
+    "early disappearance proves the landing explosion."
   ],
   "timeout_ms": 300000,
   "players": [
@@ -739,7 +741,7 @@
       "spell": 500601,
       "entry": 226112,
       "relative_to": "drone_0_go",
-      "equals": 1,
+      "min": 1,
       "within_ms": 8000,
       "label": "The device reaches the golem and actually casts its detonation"
     },
@@ -824,7 +826,7 @@
       "spell": 500601,
       "entry": 226112,
       "relative_to": "drone_1_go",
-      "equals": 1,
+      "min": 1,
       "within_ms": 8000,
       "label": "The device reaches the golem and actually casts its detonation"
     },
@@ -909,7 +911,7 @@
       "spell": 500601,
       "entry": 226112,
       "relative_to": "drone_2_go",
-      "equals": 1,
+      "min": 1,
       "within_ms": 8000,
       "label": "The device reaches the golem and actually casts its detonation"
     },
@@ -994,7 +996,7 @@
       "spell": 500601,
       "entry": 226112,
       "relative_to": "drone_3_go",
-      "equals": 1,
+      "min": 1,
       "within_ms": 8000,
       "label": "The device reaches the golem and actually casts its detonation"
     },
@@ -1079,7 +1081,7 @@
       "spell": 500601,
       "entry": 226112,
       "relative_to": "drone_4_go",
-      "equals": 1,
+      "min": 1,
       "within_ms": 8000,
       "label": "The device reaches the golem and actually casts its detonation"
     },
@@ -1164,7 +1166,7 @@
       "spell": 500601,
       "entry": 226112,
       "relative_to": "drone_5_go",
-      "equals": 1,
+      "min": 1,
       "within_ms": 8000,
       "label": "The device reaches the golem and actually casts its detonation"
     },
@@ -1249,7 +1251,7 @@
       "spell": 500601,
       "entry": 226112,
       "relative_to": "drone_6_go",
-      "equals": 1,
+      "min": 1,
       "within_ms": 8000,
       "label": "The device reaches the golem and actually casts its detonation"
     },
@@ -1334,7 +1336,7 @@
       "spell": 500601,
       "entry": 226112,
       "relative_to": "drone_7_go",
-      "equals": 1,
+      "min": 1,
       "within_ms": 8000,
       "label": "The device reaches the golem and actually casts its detonation"
     },

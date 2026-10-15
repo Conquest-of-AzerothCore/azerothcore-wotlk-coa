@@ -236,6 +236,8 @@ class aura_ascension_pyromancer_draconic_form : public AuraScript
     }
     void Register() override
     {
+        if (SpellInfo const* info = sSpellMgr->GetSpellInfo(m_scriptSpellId))
+            const_cast<SpellInfo*>(info)->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_MOUNT;
         AfterEffectApply += AuraEffectApplyFn(aura_ascension_pyromancer_draconic_form::Apply, EFFECT_ALL,
                                               SPELL_AURA_ANY, AURA_EFFECT_HANDLE_REAL);
         AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_pyromancer_draconic_form::Remove, EFFECT_ALL,

@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Hexing Effigy renders at its summon model scale (#7793)",
+  "contract": [
+    "The CoA alpha creature cache (coa-datamine-master, raw/cache/enus/creaturecache) records entry 50120 'Hexing",
+    "Effigy' with display 412985 and scale 0.2, while its siblings Swift Idol 50118 and Shadow Effigy 50119 carry 1.0.",
+    "The cache's scale field is the classic creature scale: the same field holds 0.98 for Murloc Forager, 3.3792 for",
+    "Blue Dragonspawn and 0.0106 for Map Trigger. Display 412985 is the world doodad",
+    "8tr_ancientblood_headstatue01.m2, which the client draws at world size, so the installed DisplayScale 1 renders the",
+    "gigantic effigy of the report. creature_template_model.DisplayScale is the creature's model scale",
+    "(ObjectMgr loads it into CreatureTemplate::CreatureDisplayData and Creature::SetDisplayId applies it), and",
+    "owned_creature_scale reads the resulting ObjectScale. The captured 0.2 still renders a statue that towers over the",
+    "player, so the summon is deliberately stepped down to 0.07, the size the class's other stationary totems occupy.",
+    "Expected: the summoned Hexing Effigy renders at 0.07 and a second Witch Doctor's Shadow Effigy keeps the captured",
+    "1.0. Client rendering itself is not observed."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "hexer", "race": 1, "class": 13, "level": 60, "spell_hit_rating": 10000 },
+    { "id": "shadow", "race": 1, "class": 13, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "hexer", "entry": 36, "level": 60, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the characters settle", "ms": 5000 },
+    { "action": "learn", "actor": "hexer", "spell": 116 },
+    { "action": "learn", "actor": "hexer", "spell": 506634 },
+    { "action": "learn", "actor": "shadow", "spell": 116 },
+    { "action": "learn", "actor": "shadow", "spell": 505339 },
+    { "action": "assert", "label": "SETUP: the Hexing Effigy is known", "actor": "hexer", "metric": "knows_spell", "spell": 506634, "equals": 1 },
+    { "action": "assert", "label": "SETUP: the Shadow Effigy is known", "actor": "shadow", "metric": "knows_spell", "spell": 505339, "equals": 1 },
+    { "action": "cast", "label": "Enter combat so the effigy may be placed", "actor": "hexer", "spell": 116, "target": "enemy" },
+    { "action": "wait", "label": "Let the opening cast land", "ms": 1500 },
+
+    { "action": "cast", "label": "Summon the Hexing Effigy", "actor": "hexer", "spell": 506634 },
+    { "action": "assert", "label": "SETUP: the Hexing Effigy is summoned", "actor": "hexer", "metric": "owned_creature_count", "entry": 50120, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "SETUP: it uses the captured doodad display", "actor": "hexer", "metric": "owned_creature_display", "entry": 50120, "equals": 412985 },
+    { "action": "assert", "label": "CONTRACT: the Hexing Effigy renders at the summon scale 0.07", "actor": "hexer", "metric": "owned_creature_scale", "entry": 50120, "min": 0.06, "max": 0.08 },
+
+    { "action": "cast", "label": "Enter combat so the effigy may be placed", "actor": "shadow", "spell": 116, "target": "enemy" },
+    { "action": "wait", "label": "Let the opening cast land", "ms": 1500 },
+    { "action": "cast", "label": "Summon the Shadow Effigy", "actor": "shadow", "spell": 505339 },
+    { "action": "assert", "label": "SETUP: the Shadow Effigy is summoned", "actor": "shadow", "metric": "owned_creature_count", "entry": 50119, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "REGRESSION: the sibling keeps the captured 1.0 scale", "actor": "shadow", "metric": "owned_creature_scale", "entry": 50119, "min": 0.99, "max": 1.01 }
+  ]
+}

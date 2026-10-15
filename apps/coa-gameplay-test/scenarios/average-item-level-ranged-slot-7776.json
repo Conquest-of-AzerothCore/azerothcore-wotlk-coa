@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "The ranged slot counts toward the average item level (#7776)",
+  "contract": "Live CoA sends the character sheet's average item level (SMSG_UPDATE_OBJECT_ADDON field 5, read by UnitAverageItemLevel) over seventeen slots: every equipment slot except the shirt and the tabard, so the ranged slot (wand, bow, idol, totem, relic) and the off hand count. Live probes on 2026-09-02 returned 200/17 at level 34 and 701/16 at level 60; the off hand slot is left out while a two-handed weapon is wielded without an off hand item, which gives sixteen slots. A Fire Wand (item level 12) beside a one-handed Dreadblade therefore raises the average by 12/17 = 0.706, and swapping it for a Scorching Wand (item level 35) beside the two-handed Magus Long Staff raises it by 23/16 = 1.4375.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "necromancer", "race": 1, "class": 23, "level": 60, "ascension_client": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the character settle", "ms": 3000 },
+    { "action": "add_item", "actor": "necromancer", "item": 4088 },
+    { "action": "equip", "label": "Wield the one-handed Dreadblade (item level 47)", "actor": "necromancer", "item": 4088, "slot": 15 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "snapshot", "actor": "necromancer", "metric": "sent_average_item_level", "save_as": "one_hander_without_wand" },
+    { "action": "add_item", "actor": "necromancer", "item": 5069 },
+    { "action": "equip", "label": "Equip the Fire Wand (item level 12) in the ranged slot", "actor": "necromancer", "item": 5069, "slot": 17 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert",
+      "label": "The Fire Wand raises the average by 12/17 beside a one-handed weapon",
+      "actor": "necromancer",
+      "metric": "sent_average_item_level",
+      "relative_to": "one_hander_without_wand",
+      "min": 0.7,
+      "max": 0.71
+    },
+    { "action": "add_item", "actor": "necromancer", "item": 15276 },
+    { "action": "equip", "label": "Wield the two-handed Magus Long Staff (item level 58)", "actor": "necromancer", "item": 15276, "slot": 15 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "snapshot", "actor": "necromancer", "metric": "sent_average_item_level", "save_as": "two_hander_with_fire_wand" },
+    { "action": "add_item", "actor": "necromancer", "item": 5213 },
+    { "action": "equip", "label": "Replace the Fire Wand with the Scorching Wand (item level 35)", "actor": "necromancer", "item": 5213, "slot": 17 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert",
+      "label": "The 23 item levels gained in the ranged slot are averaged over sixteen slots beside a two-hander",
+      "actor": "necromancer",
+      "metric": "sent_average_item_level",
+      "relative_to": "two_hander_with_fire_wand",
+      "min": 1.43,
+      "max": 1.445
+    }
+  ]
+}

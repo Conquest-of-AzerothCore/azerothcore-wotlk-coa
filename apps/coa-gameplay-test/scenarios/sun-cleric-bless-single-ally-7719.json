@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric Bless: self and one ally, previous ally loses it (#7719)",
+  "contract": [
+    "#7719: Bless' own text is \"Bless yourself and an ally, restoring 5 % of their maximum health ... Can only",
+    "affect 1 ally at a time\", so the intended behaviour is: blessing an ally blesses the caster too, blessing a",
+    "second ally moves the ally half of it and the first ally loses it, and the caster keeps theirs. The aura",
+    "script applies the self half by casting Bless on the caster and tracks the single ally it blessed. This",
+    "scenario follows that text: bless the first ally (both hold it), then the second (the second ally holds it,",
+    "the first one does not, the caster still does). The self-cast path itself is not asserted: the harness's",
+    "self-target does not land the aura, although the same cast does in game."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "sc", "race": 1, "class": 27, "level": 60},
+    {"id": "mate", "race": 1, "class": 1, "level": 60},
+    {"id": "mate2", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI, level scaling and the login patch stream settle", "ms": 7000},
+    {"action": "learn", "actor": "sc", "spell": 804247},
+    {"action": "cast", "label": "Bless the first ally", "actor": "sc", "spell": 804247, "target": "mate"},
+    {
+      "action": "assert", "label": "the ally holds it", "actor": "mate", "metric": "aura",
+      "spell": 804247, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "the caster holds it too: bless yourself and an ally", "actor": "sc",
+      "metric": "aura", "spell": 804247, "equals": 1, "within_ms": 1000
+    },
+    {"action": "wait", "label": "Wait out Bless' own 15 s cooldown", "ms": 16000},
+    {"action": "cast", "label": "Bless a second ally", "actor": "sc", "spell": 804247, "target": "mate2"},
+    {
+      "action": "assert", "label": "the second ally holds it", "actor": "mate2", "metric": "aura",
+      "spell": 804247, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "REALITY: the first ally loses it", "actor": "mate", "metric": "aura",
+      "spell": 804247, "equals": 0, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "and the caster still holds theirs", "actor": "sc", "metric": "aura",
+      "spell": 804247, "equals": 1, "within_ms": 500
+    }
+  ]
+}

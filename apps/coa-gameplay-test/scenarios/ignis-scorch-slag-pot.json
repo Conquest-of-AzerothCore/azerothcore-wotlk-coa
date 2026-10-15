@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "name": "Ignis Scorch excludes Slag Pot occupants and resumes after release",
+  "contract": "A victim carrying Slag Pot aura 62717 is excluded from Scorch cone 62553 while nearby enemies without Slag Pot still take damage. Removing Slag Pot restores Scorch targeting. Expected behavior follows Classic encounter video linked in AzerothCore issue 27830. This tests native aura application, spell target selection and damage; vehicle seating and the complete Ignis encounter are not exercised.",
+  "timeout_ms": 30000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 8,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9467,
+    "y": 65,
+    "z": 56,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "protected",
+      "owner": "caster",
+      "entry": 36,
+      "distance": 3,
+      "level": 80,
+      "health": 500000
+    },
+    {
+      "id": "control",
+      "owner": "caster",
+      "entry": 36,
+      "distance": 6,
+      "level": 80,
+      "health": 500000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 62717
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 62553
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 62717,
+      "target": "protected"
+    },
+    {
+      "action": "assert",
+      "actor": "protected",
+      "metric": "aura",
+      "spell": 62717,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 62553,
+      "target": "control"
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "assert",
+      "label": "Unprotected enemy takes Scorch damage",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 62553,
+      "target": "control",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Slag Pot occupant is excluded from Scorch",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 62553,
+      "target": "protected",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Slag Pot has expired",
+      "actor": "protected",
+      "metric": "aura",
+      "spell": 62717,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 62553,
+      "target": "protected",
+      "save_as": "protected_damage_after_release"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 62553,
+      "target": "control"
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "assert",
+      "label": "Released enemy can take Scorch again",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 62553,
+      "target": "protected",
+      "relative_to": "protected_damage_after_release",
+      "min": 1
+    }
+  ]
+}

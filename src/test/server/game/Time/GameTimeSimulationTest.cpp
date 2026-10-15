@@ -179,6 +179,7 @@ TEST_F(GameTimeSimulationTest, AllGameClocksAgreeAfterAFastForward)
     SystemTimePoint const systemStart = GameTime::GetSystemTime();
     Milliseconds const gameMSTimeStart = GameTime::GetGameTimeMS();
     uint32 const msTimeStart = getMSTime();
+    Seconds const uptimeStart = GameTime::GetUptime();
     Milliseconds const elapsed = 10min;
 
     AdvanceBy(elapsed);
@@ -192,7 +193,7 @@ TEST_F(GameTimeSimulationTest, AllGameClocksAgreeAfterAFastForward)
     EXPECT_EQ(getMSTime(), uint32(GameTime::GetGameTimeMS().count()));
     EXPECT_EQ(GameTime::GetGameTime(),
         std::chrono::duration_cast<Seconds>(GameTime::GetSystemTime().time_since_epoch()));
-    EXPECT_EQ(GameTime::GetUptime(), GameTime::GetGameTime() - GameTime::GetStartTime());
+    EXPECT_EQ(GameTime::GetUptime() - uptimeStart, std::chrono::duration_cast<Seconds>(elapsed));
     EXPECT_GE(GameTime::GetSystemTime() - std::chrono::system_clock::now(), elapsed - 1min);
     EXPECT_LE(GameTime::GetSystemTime() - std::chrono::system_clock::now(), elapsed);
     EXPECT_GE(GameTime::Now() - std::chrono::steady_clock::now(), elapsed - 1min);
@@ -393,6 +394,30 @@ TEST_F(GameTimeSimulationTest, SystemAnchorStartsTheGameCalendarThereAndKeepsThe
     Advance(10ms);
     AdvanceBy(10min);
     EXPECT_EQ(GameTime::GetSystemTime() - anchor, 10min + 10ms);
+}
+
+TEST_F(GameTimeSimulationTest, UptimeIgnoresSystemCalendarChanges)
+{
+    GameTime::UpdateGameTimers();
+    TimePoint const realStart = std::chrono::steady_clock::now();
+    Seconds const before = GameTime::GetUptime();
+    GameTime::EnableSimulation();
+    GameTime::SetSimulatedSystemAnchor(std::chrono::system_clock::now() + 7h);
+    EXPECT_EQ(GameTime::TakeStep(0ms, 1ms), 0ms);
+    GameTime::UpdateGameTimers();
+
+    EXPECT_GE(GameTime::GetUptime(), before);
+    EXPECT_LE(GameTime::GetUptime() - before,
+        std::chrono::duration_cast<Seconds>(std::chrono::steady_clock::now() - realStart) + 1s);
+
+    Seconds const anchored = GameTime::GetUptime();
+    AdvanceBy(10s);
+    EXPECT_EQ(GameTime::GetUptime() - anchored, 10s);
+
+    GameTime::DisableSimulation();
+    EXPECT_GE(GameTime::GetUptime(), before);
+    EXPECT_LE(GameTime::GetUptime() - before,
+        std::chrono::duration_cast<Seconds>(std::chrono::steady_clock::now() - realStart) + 1s);
 }
 
 TEST_F(GameTimeSimulationTest, SystemAnchorNeverStartsTheGameCalendarBeforeTheRealClock)

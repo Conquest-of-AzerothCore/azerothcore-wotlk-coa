@@ -73,7 +73,7 @@
     },
     {
       "action": "equip",
-      "label": "Every member is geared for the queue: Random Classic Dungeon Mythic needs average item level 58 and PvE Power 350; 1940 / 15 = 129.3 item level, 6 x 45 + 96 = 366 PvE Power",
+      "label": "Every member is geared for the queue: Random Classic Dungeon Mythic needs average item level 58 and PvE Power 350; 1942 / 16 = 121.4 item level with the starting pants and boots, 6 x 45 + 96 = 366 PvE Power",
       "actor": "p1",
       "item": 1008202,
       "slot": 1
