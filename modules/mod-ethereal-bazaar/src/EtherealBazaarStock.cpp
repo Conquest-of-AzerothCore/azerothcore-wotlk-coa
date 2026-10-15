@@ -30,12 +30,12 @@ namespace
         switch (band)
         {
             case BazaarBand::Mid:
-                return sConfigMgr->GetOption<uint32>("EtherealBazaar.Slots.Mid", 3);
+                return sConfigMgr->GetOption<uint32>("EtherealBazaar.Slots.Mid", 8);
             case BazaarBand::Expensive:
-                return sConfigMgr->GetOption<uint32>("EtherealBazaar.Slots.Expensive", 1);
+                return sConfigMgr->GetOption<uint32>("EtherealBazaar.Slots.Expensive", 2);
             case BazaarBand::Cheap:
             default:
-                return sConfigMgr->GetOption<uint32>("EtherealBazaar.Slots.Cheap", 30);
+                return sConfigMgr->GetOption<uint32>("EtherealBazaar.Slots.Cheap", 79);
         }
     }
 

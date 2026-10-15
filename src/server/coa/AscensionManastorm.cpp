@@ -51,6 +51,7 @@
 #include "WorldScript.h"
 #include "WorldSession.h"
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <cmath>
 #include <deque>
@@ -75,6 +76,7 @@ namespace
     constexpr uint32 PortalAura = 93338;
     constexpr uint32 EventProgressRefresh = 1;
     constexpr uint32 EventCacheDelivery = 2;
+    constexpr std::array<uint32, 3> StarterItems = {254041, 97895, 254042};
 
     struct Request
     {
@@ -544,6 +546,7 @@ namespace
             }
             if (run.encounter->phase == Phase::Leaving && !player->IsBeingTeleported() && !OwnsScene(player, run))
             {
+                ClearStarterItems(player);
                 run.encounter = std::make_shared<Encounter>();
                 run.needsTransfer = false;
                 player->ClearScriptedPrivateInstance();
@@ -1231,11 +1234,17 @@ namespace
 
         void GiveStarterItems(Player* player)
         {
-            for (uint32 item : {254041u, 97895u, 254042u})
+            for (uint32 item : StarterItems)
                 if (!player->HasItemCount(item, 1, true))
                     if (!player->AddItem(item, 1))
                         ChatHandler(player->GetSession()).SendSysMessage(
                             "Make room in your bags, then ask Cogsley to replace your missing starter potions.");
+        }
+
+        void ClearStarterItems(Player* player)
+        {
+            for (uint32 item : StarterItems)
+                player->DestroyItemCount(item, player->GetItemCount(item, true), true);
         }
 
         void HealFromHeart(Player* player)

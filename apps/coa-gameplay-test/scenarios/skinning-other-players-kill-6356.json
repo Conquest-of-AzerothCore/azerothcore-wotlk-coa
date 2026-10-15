@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "A player can skin an emptied corpse another ungrouped player killed (#6356)",
+  "contract": [
+    "Requires CoALegendaryItems.DropChance=0: this scenario checks skinning an otherwise empty corpse.",
+    "Skinning 8613 carries SPELL_ATTR2_CANNOT_CAST_ON_TAPPED in the client's Spell.dbc, which made Spell::CheckCast",
+    "refuse with SPELL_FAILED_CANT_CAST_ON_TAPPED (18) every character who was not the loot recipient or in its",
+    "group. A corpse only becomes skinnable once its loot is gone, so another player's kill is skinnable by anyone",
+    "with the skill. Black Riding Wolf 5194 is a beast with skinning table 100001 and no creature loot or money, so",
+    "its corpse becomes skinnable as soon as it dies. The skinner never fights it and is not grouped with the killer."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -10285,
+    "y": 800,
+    "z": 53,
+    "o": 0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "killer",
+      "race": 1,
+      "class": 21,
+      "level": 15,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "skinner",
+      "race": 1,
+      "class": 21,
+      "level": 15
+    }
+  ],
+  "creatures": [
+    {
+      "id": "wolf",
+      "owner": "killer",
+      "entry": 5194,
+      "level": 15,
+      "health": 1,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "skinner",
+      "spell": 8613
+    },
+    {
+      "action": "set_skill",
+      "actor": "skinner",
+      "skill": 393,
+      "value": 75,
+      "maximum": 150
+    },
+    {
+      "action": "attack",
+      "actor": "killer",
+      "target": "wolf"
+    },
+    {
+      "action": "assert",
+      "actor": "wolf",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "skinner",
+      "spell": 8613,
+      "target": "wolf"
+    },
+    {
+      "action": "assert",
+      "label": "The skinner skins a corpse another player killed",
+      "actor": "skinner",
+      "metric": "spell_cast_count",
+      "spell": 8613,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The skinning is not refused as tapped",
+      "actor": "skinner",
+      "metric": "cast_failure",
+      "spell": 8613,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The skinning loot window opens for the skinner",
+      "actor": "skinner",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 2000
+    }
+  ]
+}

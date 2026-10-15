@@ -26,7 +26,9 @@ enum PetalkeeperSpells : uint32
     SPELL_RED_FLOWER = 521222,
     SPELL_PETALS = 521220,
     SPELL_RED_DREAM = 521451,
-    SPELL_RED_DREAM_HEAL = 521643
+    SPELL_RED_DREAM_HEAL = 521643,
+    SPELL_ENDURANCE_OF_THE_RANGER = 560809,
+    SPELL_ENDURANCE_OF_THE_RANGER_HEAL = 560808
 };
 
 enum PetalkeeperEntries : uint32
@@ -234,6 +236,26 @@ class aura_ascension_ranger_red_dream : public AuraScript
         OnEffectProc += AuraEffectProcFn(aura_ascension_ranger_red_dream::Heal, EFFECT_0, AuraType(354));
     }
 };
+
+class aura_ascension_ranger_endurance : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_ranger_endurance);
+
+    bool Validate(SpellInfo const*) override { return ValidateSpellInfo({SPELL_ENDURANCE_OF_THE_RANGER_HEAL}); }
+
+    void Heal(AuraEffect const* effect, ProcEventInfo&)
+    {
+        PreventDefaultAction();
+        Unit* owner = GetTarget();
+        if (owner && owner->IsAlive())
+            owner->CastSpell(owner, SPELL_ENDURANCE_OF_THE_RANGER_HEAL, true, nullptr, effect);
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(aura_ascension_ranger_endurance::Heal, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+    }
+};
 }
 
 void AddSC_AscensionRangerPetalkeeper()
@@ -242,5 +264,6 @@ void AddSC_AscensionRangerPetalkeeper()
     RegisterSpellScript(spell_ascension_ranger_red_flower);
     RegisterSpellScript(aura_ascension_ranger_petalkeeper);
     RegisterSpellScript(aura_ascension_ranger_red_dream);
+    RegisterSpellScript(aura_ascension_ranger_endurance);
     new ranger_petalkeeper_casts();
 }

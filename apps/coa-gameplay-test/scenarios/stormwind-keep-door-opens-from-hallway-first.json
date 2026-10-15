@@ -31,11 +31,10 @@
       "ms": 2000
     },
     {
-      "action": "use_gameobject",
+      "action": "use_nearby_gameobject",
       "label": "Try the door from the chamber side first",
       "actor": "p",
-      "entry": 2300653,
-      "nearby": true
+      "entry": 2300653
     },
     {
       "action": "assert",
@@ -90,11 +89,10 @@
       "max": -8281.0
     },
     {
-      "action": "use_gameobject",
+      "action": "use_nearby_gameobject",
       "label": "Open the door from the hallway",
       "actor": "p",
-      "entry": 2300653,
-      "nearby": true
+      "entry": 2300653
     },
     {
       "action": "assert",
@@ -146,11 +144,10 @@
       "max": -8276.3
     },
     {
-      "action": "use_gameobject",
+      "action": "use_nearby_gameobject",
       "label": "Try the door from the chamber side again",
       "actor": "p",
-      "entry": 2300653,
-      "nearby": true
+      "entry": 2300653
     },
     {
       "action": "assert",

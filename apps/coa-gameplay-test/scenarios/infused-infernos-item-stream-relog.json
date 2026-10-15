@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Infused, Infernos: item row streams at login when already owned",
+  "contract": "A character that already owns the Infused axe receives its Item patch row at login.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "warrior",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "ascension_client": true
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "add_item",
+      "actor": "warrior",
+      "item": 998102
+    },
+    {
+      "action": "equip",
+      "actor": "warrior",
+      "item": 998102,
+      "slot": 15
+    },
+    {
+      "action": "relog",
+      "actor": "warrior"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Axe still equipped after relog",
+      "actor": "warrior",
+      "metric": "item_count",
+      "item": 998102,
+      "equals": 1
+    }
+  ]
+}

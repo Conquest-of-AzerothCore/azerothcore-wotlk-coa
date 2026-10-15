@@ -289,7 +289,6 @@ enum DoctorSpells : uint32
     ArrowTalent = 707854,
     JungleFieldSpell = 505212,
     SentryRevealSpell = 505173,
-    VoodooProtectionSpell = 504921,
     Allcure = 804049,
     LinkTimer = 500992,
     SerpentAttackSpell = 573055,

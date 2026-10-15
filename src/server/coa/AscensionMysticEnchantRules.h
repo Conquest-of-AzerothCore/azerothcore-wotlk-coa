@@ -389,6 +389,15 @@ std::vector<Enchant const*> RevealPool(Catalog const& catalog, Character const& 
 Enchant const* RollReveal(Catalog const& catalog, Character const& character,
     std::function<bool(std::uint32_t item)> const& itemExists, std::function<bool(Enchant const&)> const& favored,
     double qualityUnit, double favoredUnit, double pickUnit);
+struct GuideEnchant
+{
+    std::uint32_t Spell = 0;
+    std::uint32_t Stacks = 1;
+    std::uint32_t Level = 0;
+};
+
+Slots GuideSlots(Catalog const& catalog, Character const& character, Slots const& current,
+    std::vector<GuideEnchant> const& guide);
 std::uint64_t LevelProgress(std::uint32_t level);
 std::uint64_t ReforgeProgressGain(Enchant const& enchant, double multiplier);
 std::uint32_t AddProgress(Progress& progress, std::uint64_t gain);

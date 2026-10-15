@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Exploring Ranazjar Isle earns one Realm First! achievement, once per realm (#6533)",
+  "contract": "#6533: realm-first achievements were earned in pairs and on several characters. Achievement.dbc (server and client) carries 'Realm First! Explore Ranazjar Isle in Desolace' twice, 7574 and 11574, flags 0x100 (realm first reach), each with one explore criterion on WorldMapOverlay 761 (AreaTable 2406), so one exploration completed both. A realm first is awarded once per realm: the first character to explore the isle earns exactly one of the two rows, and a second character exploring it afterwards earns neither. The server map gives area 2406 at both points used here; Ranazjar Isle is used because no other scenario visits it and the lock lasts for the server's lifetime, so the first player's assertion holds only on a server where nobody explored the isle before.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": 252.513, "y": 2963.7, "z": 1.64204, "o": 0.907571 },
+  "players": [
+    { "id": "first", "race": 1, "class": 1, "level": 20 },
+    { "id": "second", "race": 1, "class": 1, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 2000 },
+    { "action": "teleport", "actor": "first", "map": 1, "x": 251.116, "y": 2984.82, "z": 1.85461, "o": 6.22506 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "The first explorer earns Realm First! Explore Ranazjar Isle", "actor": "first", "metric": "has_achievement", "achievement": 11574, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "but not its duplicate row", "actor": "first", "metric": "has_achievement", "achievement": 7574, "equals": 0 },
+    { "action": "teleport", "actor": "second", "map": 1, "x": 251.116, "y": 2984.82, "z": 1.85461, "o": 6.22506 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "A second explorer does not earn the taken realm first", "actor": "second", "metric": "has_achievement", "achievement": 11574, "equals": 0 },
+    { "action": "assert", "label": "nor its duplicate row", "actor": "second", "metric": "has_achievement", "achievement": 7574, "equals": 0 }
+  ]
+}

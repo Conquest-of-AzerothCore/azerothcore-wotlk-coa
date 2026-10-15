@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Eldya wears a Night Elf woman and offers A Trail of Petals once Communion Banquet is handed in (#6260, #7206)",
+  "contract": [
+    "Report #6260: Eldya (161848) on the west guard tower of the Vulture Cult Eyrie (map 1, 10689.65, 531.76, 1437.81) gave a level 21 hero no quest. #7206 says she offered none after accepting Communion Banquet (1660016).",
+    "Eldya starts and ends only A Trail of Petals (1660017). Its quest_template_addon PrevQuestID is 1660016, and Questie (Bronzebeard AscensionQuestDB) lists 1660016 as its single prerequisite.",
+    "Expected: before Communion Banquet is handed in, Eldya offers nothing; once it is rewarded, Eldya shows an available quest and 1660017 can be taken. At level 21 the level 6 quest is trivial, so the marker may be the low-level one (status 2) instead of 8.",
+    "Model: her CoA display 652083 is not in the installed client, and the stand-in Evergrove Druid woman 20992 was reported as wrong. The user approved the Night Elf woman 4841 (Project Descension R1_DEFERRED.tsv:107; server and client CreatureDisplayInfo.dbc: NightElfFemale.mdx), so Eldya wears 4841. The model info pairs 4841 with 4842, both Night Elf women (model 56, extras 3037 and 3038, race 4, female), and the server picks either one, so the assert accepts 4841 or 4842; the old 20992 and 20991 stay outside. Client rendering is not observed."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": 10689.65, "y": 531.76, "z": 1437.81, "o": 4.67 },
+  "players": [
+    { "id": "hero", "race": 4, "class": 1, "level": 21 }
+  ],
+  "creatures": [
+    { "id": "eldya", "owner": "hero", "entry": 161848, "distance": 2, "level": 7 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "assert", "label": "Eldya wears a Night Elf woman display", "actor": "eldya", "metric": "display_id", "min": 4841, "max": 4842 },
+    { "action": "assert", "label": "Before Communion Banquet is handed in, A Trail of Petals cannot be taken", "actor": "hero", "metric": "quest_takeable", "quest": 1660017, "equals": 0 },
+    { "action": "assert", "label": "Eldya shows no available quest yet", "actor": "hero", "metric": "dialog_status", "entry": 161848, "max": 1, "within_ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: Communion Banquet objectives are done", "actor": "hero", "quest": 1660016 },
+    { "action": "reward_quest", "label": "Hand in Communion Banquet", "actor": "hero", "quest": 1660016 },
+    { "action": "assert", "label": "Communion Banquet is rewarded", "actor": "hero", "metric": "quest_rewarded", "quest": 1660016, "equals": 1 },
+    { "action": "assert", "label": "A Trail of Petals can now be taken", "actor": "hero", "metric": "quest_takeable", "quest": 1660017, "equals": 1 },
+    { "action": "assert", "label": "Eldya shows an available quest", "actor": "hero", "metric": "dialog_status", "entry": 161848, "min": 2, "max": 8, "within_ms": 3000 }
+  ]
+}

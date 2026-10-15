@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Login config carries the auction deposit rate the sell frame needs",
+  "contract": "Issues #7446, #7409 and #6695: the client's CalculateAuctionDeposit override (Interface\\FrameXML\\Util\\GlobalOverwrites.lua:196 in patch-B.MPQ) multiplies every non-vanity deposit by C_Config.GetRateConfig(\"RATE_AUCTION_DEPOSIT\") with no fallback. Without that key the sell frame raises a Lua error and Create Auction stays disabled. Expected: the login SMSG_UPDATE_CONFIGS (0x058D) packet names RATE_AUCTION_DEPOSIT.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "seller", "race": 1, "class": 1, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 1000 },
+    {
+      "action": "assert", "label": "Login sends one config packet", "actor": "seller",
+      "metric": "server_packets", "opcode": 1421, "equals": 1
+    },
+    {
+      "action": "assert", "label": "It carries the auction deposit rate", "actor": "seller",
+      "metric": "server_packet_contains", "opcode": 1421, "text": "RATE_AUCTION_DEPOSIT", "equals": 1
+    }
+  ]
+}

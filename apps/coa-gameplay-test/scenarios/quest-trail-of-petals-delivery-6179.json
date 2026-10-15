@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "A Trail of Petals counts a butterfly once its rescuer reaches Eldya, wherever the butterfly is (#6179, #6386, #7113)",
+  "contract": [
+    "Reports #6179, #6386 and #7113: butterflies freed in A Trail of Petals (1660017) follow the hero but are not counted at Eldya (161848) on the guard tower; they lag behind or cannot path up the stairs.",
+    "Quest data: objective 0 is [KC] Newborns saved (161846) x3, objective 1 is Butterfly (161847) x3. The butterfly SmartAI follows its summoner and credits 161847 when it is within INTERACTION_DISTANCE (5.5 yd) of Eldya, then hides after 5 s and despawns 5 s later.",
+    "Decided expectation: a delivery counts as soon as the summoner is within INTERACTION_DISTANCE of Eldya, regardless of where the butterfly is. The credit, its once-per-butterfly limit and the despawn stay as they were.",
+    "Fixture: the open Northshire ground of pyromancer-flame-step-dash-movement (map 0) so the butterfly can path, Eldya 35 yd away along +X, so the butterfly (run speed 8 yd/s) needs well over 2.5 s of game time to reach her. Before the fix the delivery assertion times out; after it the summoner check runs every second.",
+    "The harness cannot reproduce the guard tower stairs; it checks the decided rule, not the original pathing."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "hero", "race": 4, "class": 1, "level": 10 }
+  ],
+  "creatures": [
+    { "id": "eldya", "owner": "hero", "entry": 161848, "distance": 35, "level": 7 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: Communion Banquet objectives are done", "actor": "hero", "quest": 1660016 },
+    { "action": "reward_quest", "label": "Hand in Communion Banquet", "actor": "hero", "quest": 1660016 },
+    { "action": "prepare_quest", "label": "Accept A Trail of Petals", "actor": "hero", "quest": 1660017, "complete": false },
+    { "action": "summon_gameobject", "label": "Place a Baby Night Elf in front of the hero", "actor": "hero", "entry": 2300526, "distance": 2 },
+    { "action": "use_gameobject", "label": "Rescue the newborn", "actor": "hero", "entry": 2300526 },
+    {
+      "action": "assert", "label": "The rescue summons the hero's butterfly", "actor": "hero",
+      "metric": "owned_creature_count", "entry": 161847, "equals": 1, "within_ms": 8000
+    },
+    { "action": "assert", "label": "One newborn is saved", "actor": "hero", "metric": "quest_objective_count", "quest": 1660017, "index": 0, "equals": 1 },
+    { "action": "wait", "label": "The butterfly follows the hero away from Eldya", "ms": 2000 },
+    { "action": "assert", "label": "Control: no butterfly is delivered away from Eldya", "actor": "hero", "metric": "quest_objective_count", "quest": 1660017, "index": 1, "equals": 0 },
+    { "action": "banker_activate", "label": "Move the hero next to Eldya", "actor": "hero", "target": "eldya" },
+    {
+      "action": "assert", "label": "The butterfly is still far behind the hero", "actor": "hero",
+      "metric": "owned_creature_count", "entry": 161847, "min_distance": 20, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The butterfly is delivered while its rescuer stands at Eldya", "actor": "hero",
+      "metric": "quest_objective_count", "quest": 1660017, "index": 1, "equals": 1, "within_ms": 2500
+    },
+    { "action": "wait", "label": "Give the follow arrival check time to fire again", "ms": 8000 },
+    { "action": "assert", "label": "The butterfly counts only once", "actor": "hero", "metric": "quest_objective_count", "quest": 1660017, "index": 1, "equals": 1 },
+    { "action": "assert", "label": "The delivered butterfly despawns", "actor": "hero", "metric": "owned_creature_count", "entry": 161847, "equals": 0,
+      "within_ms": 5000 }
+  ]
+}

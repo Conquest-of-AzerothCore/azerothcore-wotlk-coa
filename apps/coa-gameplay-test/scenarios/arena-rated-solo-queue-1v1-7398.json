@@ -1,0 +1,195 @@
+{
+  "schema": 1,
+  "name": "Rated 1v1 solo queue: two solo players are matched into a rated arena and rated by their result",
+  "contract": "The Ascension PvP window's Rated SoloQ 1v1 button sends 0x05C1 with bracket 5. The player joins the rated 1v1 queue with a personal one-member arena team in the third arena slot instead of being told the bracket is unavailable. Two such players are matched into a rated arena; when one dies after the gates open, both personal teams record one season game and only the winner's records a season win.",
+  "timeout_ms": 480000,
+  "players": [
+    {
+      "id": "winner",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "loser",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8809.6,
+    "y": 625.0,
+    "z": 94.979,
+    "o": 2.1
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the characters settle",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "label": "The first player joins the rated 1v1 solo queue",
+      "actor": "winner",
+      "opcode": 1473,
+      "fields": [
+        {
+          "u32": 5
+        },
+        {
+          "u32": 8
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "label": "Let the join reach the world update",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "The player queues with a personal one-member team in the third slot",
+      "actor": "winner",
+      "metric": "arena_team_members",
+      "slot": 2,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "label": "The second player joins",
+      "actor": "loser",
+      "opcode": 1473,
+      "fields": [
+        {
+          "u32": 5
+        },
+        {
+          "u32": 8
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "label": "Let the queue match the two players",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "The first player enters the arena",
+      "actor": "winner",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 1
+        },
+        {
+          "u8": 14
+        },
+        {
+          "invited_battleground_type": "winner"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The second player enters the arena",
+      "actor": "loser",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 1
+        },
+        {
+          "u8": 14
+        },
+        {
+          "invited_battleground_type": "loser"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The first player is in the arena",
+      "actor": "winner",
+      "metric": "in_arena",
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The second player is in the arena",
+      "actor": "loser",
+      "metric": "in_arena",
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "label": "Wait for the arena gates to open",
+      "ms": 80000
+    },
+    {
+      "action": "die",
+      "label": "The second player falls; the match ends and the arena revives its dead",
+      "actor": "loser",
+      "revived": true
+    },
+    {
+      "action": "assert",
+      "label": "The winner's personal team records the game",
+      "actor": "winner",
+      "metric": "arena_team_season_games",
+      "slot": 2,
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "and the win",
+      "actor": "winner",
+      "metric": "arena_team_season_wins",
+      "slot": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The loser's personal team records the game",
+      "actor": "loser",
+      "metric": "arena_team_season_games",
+      "slot": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "without a win",
+      "actor": "loser",
+      "metric": "arena_team_season_wins",
+      "slot": 2,
+      "equals": 0
+    }
+  ]
+}

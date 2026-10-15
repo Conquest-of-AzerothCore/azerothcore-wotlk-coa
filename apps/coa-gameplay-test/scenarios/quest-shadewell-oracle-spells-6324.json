@@ -1,0 +1,94 @@
+{
+  "schema": 1,
+  "name": "Northshire: Shadewell Murloc Oracle casts Lightning Bolt and Healing Wave",
+  "contract": "The Shadewell Murloc Oracle (161717) fights with the Murloc Minor Oracle's caster kit: in combat it casts Lightning Bolt (9532) at its victim, and once it falls to 40% health or less it casts Healing Wave (332). It does not check damage, healing amounts, mana or timers.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8667.47,
+    "y": -496.94,
+    "z": 146.53,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 5
+    }
+  ],
+  "creatures": [
+    {
+      "id": "oracle",
+      "owner": "hero",
+      "entry": 161717,
+      "level": 4,
+      "health": 3000,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "attack",
+      "label": "Engage the Oracle",
+      "actor": "hero",
+      "target": "oracle"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Oracle fights the hero",
+      "actor": "oracle",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The Oracle casts Lightning Bolt at the hero",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "caster": "oracle",
+      "spell": 9532,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Oracle has not healed while above 40% health",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "caster": "oracle",
+      "spell": 332,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "label": "Drop the Oracle to about a third of its health",
+      "actor": "oracle",
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The hurt Oracle casts Healing Wave",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "caster": "oracle",
+      "spell": 332,
+      "min": 1,
+      "within_ms": 15000
+    }
+  ]
+}

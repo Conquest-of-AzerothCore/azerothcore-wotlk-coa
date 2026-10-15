@@ -85,6 +85,9 @@ namespace CoaMythicPlus
         std::vector<uint32> const& AffixSubstitutes() const { return _affixSubstitutes; }
         // MythicAffixes.dbc rows (all 16 fields) in which a disabled affix was swapped, as the client needs them.
         std::vector<std::array<uint32, 16>> const& SwappedAffixRows() const { return _swappedAffixRows; }
+        // An empty MythicAffixes.dbc row for a +1 key of this week. The table starts at +2; without a row for +1 the
+        // client falls back to its last row and shows that week's full set on a +1 key, which has no affixes.
+        std::array<uint32, 16> PlusOneAffixRow(uint32 rotation) const;
 
     private:
         std::unordered_map<uint32, std::vector<WingEncounter>> _wingEncounters;
@@ -97,6 +100,8 @@ namespace CoaMythicPlus
         std::unordered_map<uint32, Scaling> _scaling;
         std::unordered_map<uint32, std::vector<uint32>> _affixes;   // rotation << 16 | level
         std::vector<std::array<uint32, 16>> _swappedAffixRows;
+        uint32 _lastAffixRowId = 0;
+        uint32 _affixRowScale = 0;
     };
 }
 

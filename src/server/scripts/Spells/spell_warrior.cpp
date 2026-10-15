@@ -273,7 +273,7 @@ class spell_warr_deep_wounds : public SpellScript
             // include target dependant auras
             damage = target->MeleeDamageBonusTaken(caster, damage, BASE_ATTACK, GetSpellInfo());
             // apply percent damage mods
-            ApplyPct(damage, 16.0f * GetSpellInfo()->GetRank() / 6.0f);
+            ApplyPct(damage, 16.0f * sSpellMgr->AssertSpellInfo(sSpellMgr->GetSpellTwinSource(GetSpellInfo()->Id))->GetRank() / 6.0f);
             target->CastDelayedSpellWithPeriodicAmount(caster, SPELL_WARRIOR_DEEP_WOUNDS_RANK_PERIODIC, SPELL_AURA_PERIODIC_DAMAGE, damage, EFFECT_0);
 
             //caster->CastCustomSpell(target, SPELL_WARRIOR_DEEP_WOUNDS_RANK_PERIODIC, &damage, nullptr, nullptr, true);
@@ -420,7 +420,10 @@ class spell_warr_execute : public SpellScript
             int32 newRage = std::max<int32>(0, caster->GetPower(POWER_RAGE) - rageUsed);
 
             // Sudden Death rage save
-            if (AuraEffect* aurEff = caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_GENERIC, WARRIOR_ICON_ID_SUDDEN_DEATH, EFFECT_0))
+            AuraEffect* suddenDeath = caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_GENERIC, WARRIOR_ICON_ID_SUDDEN_DEATH, EFFECT_0);
+            if (!suddenDeath)
+                suddenDeath = caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_WARRIOR, WARRIOR_ICON_ID_SUDDEN_DEATH, EFFECT_0);
+            if (AuraEffect* aurEff = suddenDeath)
             {
                 int32 ragesave = aurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue() * 10;
                 newRage = std::max(newRage, ragesave);
@@ -502,7 +505,9 @@ class spell_warr_bloodthirst_heal : public SpellScript
 
     void HandleHeal(SpellEffIndex /*effIndex*/)
     {
-        if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_WARRIOR_BLOODTHIRST_DAMAGE))
+        if (AuraEffect const* buff = GetCaster()->GetAuraEffect(SPELL_WARRIOR_BLOODTHIRST, EFFECT_0))
+            SetEffectValue(GetCaster()->CountPctFromMaxHealth(buff->GetAmount()));
+        else if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_WARRIOR_BLOODTHIRST_DAMAGE))
             SetEffectValue(GetCaster()->CountPctFromMaxHealth(spellInfo->Effects[EFFECT_1].CalcValue(GetCaster())));
     }
 
@@ -746,10 +751,16 @@ class spell_warr_vigilance : public AuraScript
     void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
     {
         Unit* target = GetTarget();
-        target->CastSpell(target, SPELL_GEN_DAMAGE_REDUCTION_AURA, true);
+        if (GetSpellInfo()->HasAura(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN))
+            target->CastSpell(target, SPELL_GEN_DAMAGE_REDUCTION_AURA, true);
+        else
+        {
+            int32 reduction = GetSpellInfo()->Effects[EFFECT_0].CalcValue();
+            target->CastCustomSpell(target, SPELL_GEN_DAMAGE_REDUCTION_AURA, &reduction, nullptr, nullptr, true);
+        }
 
         if (Unit* caster = GetCaster())
-            target->CastSpell(caster, SPELL_WARRIOR_VIGILANCE_REDIRECT_THREAT, true);
+            target->CastSpell(caster, sSpellMgr->GetSpellTwinFor(SPELL_WARRIOR_VIGILANCE_REDIRECT_THREAT, GetId()), true);
     }
 
     void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
@@ -763,7 +774,8 @@ class spell_warr_vigilance : public AuraScript
             target->RemoveAurasDueToSpell(SPELL_GEN_DAMAGE_REDUCTION_AURA);
         }
 
-        target->GetThreatMgr().UnregisterRedirectThreat(SPELL_WARRIOR_VIGILANCE_REDIRECT_THREAT, GetCasterGUID());
+        target->GetThreatMgr().UnregisterRedirectThreat(sSpellMgr->GetSpellTwinFor(SPELL_WARRIOR_VIGILANCE_REDIRECT_THREAT, GetId()),
+            GetCasterGUID());
     }
 
     bool CheckProc(ProcEventInfo& /*eventInfo*/)
@@ -783,7 +795,7 @@ class spell_warr_vigilance : public AuraScript
         if (!procTarget)
             return;
 
-        GetTarget()->CastSpell(procTarget, SPELL_WARRIOR_VIGILANCE_PROC, true, nullptr, aurEff);
+        GetTarget()->CastSpell(procTarget, sSpellMgr->GetSpellTwinFor(SPELL_WARRIOR_VIGILANCE_PROC, GetId()), true, nullptr, aurEff);
     }
 
     void Register() override
@@ -837,7 +849,8 @@ class spell_warr_vigilance_trigger : public SpellScript
 
         // Remove Taunt cooldown
         if (Player* target = GetHitPlayer())
-            target->RemoveSpellCooldown(SPELL_WARRIOR_TAUNT, true);
+            for (uint32 taunt : sSpellMgr->GetSpellAndRelatives(SPELL_WARRIOR_TAUNT))
+                target->RemoveSpellCooldown(taunt, true);
     }
 
     void Register() override

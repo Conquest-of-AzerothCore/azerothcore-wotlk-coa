@@ -1,0 +1,222 @@
+{
+  "schema": 1,
+  "name": "Archmage Arugal completes the assigned Mythic Shadowfang Keep - Arugal's Rise",
+  "contract": "A Dungeon Finder group assigned Shadowfang Keep - Arugal's Rise (3321) at Mythic finishes the dungeon when Archmage Arugal is credited, although he is also the final boss of Shadowfang Keep (2008) on the same map and difficulty.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p1",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "p2",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "p3",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "p4",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "p5",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p2"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p3"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p4"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p5"
+    },
+    {
+      "action": "lfg_dungeon",
+      "label": "The group is assigned Shadowfang Keep - Arugal's Rise (Mythic)",
+      "actor": "p1",
+      "dungeon": 3321
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p1"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p2"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p3"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p4"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "p5"
+    },
+    {
+      "action": "assert",
+      "label": "p1 enters Shadowfang Keep",
+      "actor": "p1",
+      "metric": "map_id",
+      "equals": 33,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p1 is in the Mythic instance",
+      "actor": "p1",
+      "metric": "map_difficulty",
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p2 enters Shadowfang Keep",
+      "actor": "p2",
+      "metric": "map_id",
+      "equals": 33,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p2 is in the Mythic instance",
+      "actor": "p2",
+      "metric": "map_difficulty",
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p3 enters Shadowfang Keep",
+      "actor": "p3",
+      "metric": "map_id",
+      "equals": 33,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p3 is in the Mythic instance",
+      "actor": "p3",
+      "metric": "map_difficulty",
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p4 enters Shadowfang Keep",
+      "actor": "p4",
+      "metric": "map_id",
+      "equals": 33,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p4 is in the Mythic instance",
+      "actor": "p4",
+      "metric": "map_difficulty",
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p5 enters Shadowfang Keep",
+      "actor": "p5",
+      "metric": "map_id",
+      "equals": 33,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "p5 is in the Mythic instance",
+      "actor": "p5",
+      "metric": "map_difficulty",
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "encounter_credit",
+      "label": "Archmage Arugal, final boss of both Shadowfang Keep (Mythic) and Arugal's Rise, is credited",
+      "actor": "p1",
+      "entry": 4275
+    },
+    {
+      "action": "assert",
+      "label": "p1 finishes the assigned Arugal's Rise",
+      "actor": "p1",
+      "metric": "lfg_state",
+      "equals": 6,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p2 finishes the assigned Arugal's Rise",
+      "actor": "p2",
+      "metric": "lfg_state",
+      "equals": 6,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p3 finishes the assigned Arugal's Rise",
+      "actor": "p3",
+      "metric": "lfg_state",
+      "equals": 6,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p4 finishes the assigned Arugal's Rise",
+      "actor": "p4",
+      "metric": "lfg_state",
+      "equals": 6,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "p5 finishes the assigned Arugal's Rise",
+      "actor": "p5",
+      "metric": "lfg_state",
+      "equals": 6,
+      "within_ms": 5000
+    }
+  ]
+}

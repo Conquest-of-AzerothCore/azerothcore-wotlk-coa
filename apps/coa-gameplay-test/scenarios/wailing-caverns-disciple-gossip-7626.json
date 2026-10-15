@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Wailing Caverns: the Disciple of Naralex starts the event before the Fanglords die (#7626)",
+  "contract": [
+    "On live CoA the Disciple of Naralex 3678 at the entrance offered 'Let the event begin!' (gossip menu 201)",
+    "without Lady Anacondra, Lord Cobrahn, Lord Pythas or Lord Serpentis dead: the 2026-05-27 and 2026-06-08",
+    "combat logs show Mark of Naralex and the escort with only Anacondra killed during it, then Mutanus 3654.",
+    "Mythic+ 'Pit of the Fangs' (TimedDungeons 3318) needs Mutanus but not Pythas or Serpentis, who stand in the",
+    "other wing. In a fresh instance the option must therefore be offered."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 43, "x": -132.0, "y": 125.4, "z": -78.1, "o": 3.14},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 20}
+  ],
+  "creatures": [
+    {"id": "disciple", "owner": "hero", "entry": 3678, "distance": 3, "faction": 35, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 2000},
+    {"label": "SETUP: the hero is in Wailing Caverns", "action": "assert", "actor": "hero", "metric": "map_id",
+     "equals": 43},
+    {"label": "the hero opens the Disciple's gossip", "action": "gossip_hello", "actor": "hero",
+     "target": "disciple"},
+    {"label": "DISCRIMINATING: the Disciple offers one option with no Fanglord dead", "action": "assert",
+     "actor": "hero", "metric": "gossip_options", "equals": 1},
+    {"label": "the option starts the event", "action": "assert", "actor": "hero", "metric": "gossip_option_text",
+     "index": 0, "text": "Let the event begin!", "equals": 1}
+  ]
+}

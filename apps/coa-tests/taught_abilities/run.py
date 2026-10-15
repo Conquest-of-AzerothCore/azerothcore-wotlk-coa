@@ -28,6 +28,7 @@ method = runpy.run_path(str(HERE.parent / "client_compat/run.py"))["method"]
 catalog_text = runpy.run_path(str(HERE.parent / "coa_talent_catalog.py"))["catalog_text"]
 NEW_GRANTS = {804729: 804834, 561069: 801662, 92097: 804019, 92114: 800157,
               92119: 806291, 92131: 520326, 680750: 567524}
+ARCHIVED_NODES = {707717: 707876}
 REPLACEMENT_ROOTS = {
     (14, 9, 520853, 500028): 500610,
     (17, 18, 570727, 801059): 802581,
@@ -55,9 +56,13 @@ def check_data(header, catalog, replacement_header, dbc, trainer):
              if line.startswith("    {")]
     assert entries and len({entry[4] for entry in entries}) == len(entries), "Child ownership must be unique"
     assert not {entry[3] for entry in entries} & {entry[4] for entry in entries}, "Grant callbacks must not cycle"
-    for cls, spec, level, parent, _ in entries if catalog else ():
+    assert {entry[4]: entry[3] for entry in entries if entry[4] in ARCHIVED_NODES} == ARCHIVED_NODES
+    for cls, spec, level, parent, child in entries if catalog else ():
+        archived = child in ARCHIVED_NODES
+        assert not archived or not any(len(node) == 10 and child in node[7:] for node in nodes), child
         assert any(len(node) == 10 and node[1] == cls and node[2] == spec and
-                   node[6] == level and parent in node[7:] for node in nodes), (cls, spec, level, parent)
+                   (node[6] <= level if archived else node[6] == level) and parent in node[7:]
+                   for node in nodes), (cls, spec, level, parent)
     replacements = []
     replacement_roots = {}
     for cls, spec, parent, original, body in re.findall(

@@ -43,6 +43,8 @@ constexpr uint32 BAZAAR_VENDOR_STONES = 900010;
 // Heirlooms are gear, not cosmetics. They get their own entry so they do not
 // bury the convenience list.
 constexpr uint32 BAZAAR_VENDOR_HEIRLOOMS = 900011;
+// Keeper's Scrolls, a list of their own on the live server ("Consumables").
+constexpr uint32 BAZAAR_VENDOR_CONSUMABLES = 900012;
 
 // Ascension's own "Ethereal Cache of Wares". It is sold from the first row of
 // the rotating list and holds one random item out of the whole bazaar pool.

@@ -205,9 +205,10 @@ namespace PathToAscension
         if (!player || player->IsGameMaster())
             return false;
 
+        bool const starterMountBridge = GetSettings().starterMountBridge;
         for (uint32 id : trackingQuests.at(questId))
-            if (Tutorial const* tutorial = GetCatalog().Find(id);
-                tutorial && !Claimed(player, id) && Eligible(player, *tutorial))
+            if (Tutorial const* tutorial = GetCatalog().Find(id); tutorial && !Claimed(player, id)
+                && Eligible(player, *tutorial) && (starterMountBridge || !IsStarterMountTutorial(id)))
                 return true;
 
         return false;

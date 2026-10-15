@@ -212,6 +212,9 @@ int main(int, char** argv)
         added);
     Check(Row(searing, 1105676) && Row(searing, 1105676)->ReqLevel == 14,
         "Reborn Searing Pain trains at 14, its retuned level, not the stock trainer's 18");
+    std::vector<TrainerSpell> const rogue = TrainerSpells(data, reborn, 4, { Stock(674, 1000, 10) }, exists, added);
+    Check(Row(rogue, 1100674) && Row(rogue, 1100674)->ReqLevel == 10 && Row(rogue, 1100674)->MoneyCost == 1000,
+        "Reborn Dual Wield, which has no spell level, keeps the stock trainer row's level 10, not level 1");
     std::vector<TrainerSpell> const hunterTrainer = TrainerSpells(data, reborn, HUNTER,
         { Stock(14260, 100, 8), Stock(14261, 1000, 16) }, exists, added);
     Check(Row(hunterTrainer, 1101579) != nullptr,

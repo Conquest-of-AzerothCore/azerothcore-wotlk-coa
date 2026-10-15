@@ -42,6 +42,13 @@ constexpr std::array<char const*, 5> RATE_RESULTS = { "RATE_BUILD_OK", "RATE_BUI
 constexpr std::array<char const*, 4> DELETE_RESULTS = { "DELETE_BUILD_OK", "DELETE_BUILD_UNKNOWN",
     "DELETE_BUILD_NOT_FOUND", "DELETE_BUILD_NO_PERMISSION" };
 
+constexpr std::array<char const*, 7> ACTIVATE_RESULTS = { "ACTIVATE_BUILD_OK", "ACTIVATE_BUILD_FAILED",
+    "ACTIVATE_BUILD_NOT_FOUND", "ACTIVATE_BUILD_NEEDS_REPAIRS", "ACTIVATE_BUILD_ALREADY_ACTIVE",
+    "ACTIVATE_BUILD_NOT_WARCRAFT_REBORN", "ACTIVATE_BUILD_DRAFTED_BUILD_NOT_FOUND" };
+
+constexpr std::array<char const*, 4> DEACTIVATE_RESULTS = { "DEACTIVATE_BUILD_OK", "DEACTIVATE_BUILD_FAILED",
+    "DEACTIVATE_BUILD_NOT_FOUND", "DEACTIVATE_BUILD_NOT_ACTIVE" };
+
 enum Category : std::uint32_t
 {
     CATEGORY_NONE = 0,
@@ -96,6 +103,25 @@ enum DeleteResult : std::uint32_t
     DELETE_NO_PERMISSION = 3
 };
 
+enum ActivateResult : std::uint32_t
+{
+    ACTIVATE_OK = 0,
+    ACTIVATE_FAILED = 1,
+    ACTIVATE_NOT_FOUND = 2,
+    ACTIVATE_NEEDS_REPAIRS = 3,
+    ACTIVATE_ALREADY_ACTIVE = 4,
+    ACTIVATE_CLASS_MISMATCH = 5,
+    ACTIVATE_NOT_DRAFTED = 6
+};
+
+enum DeactivateResult : std::uint32_t
+{
+    DEACTIVATE_OK = 0,
+    DEACTIVATE_FAILED = 1,
+    DEACTIVATE_NOT_FOUND = 2,
+    DEACTIVATE_NOT_ACTIVE = 3
+};
+
 constexpr std::size_t MAX_TEXT = 0x80;
 constexpr std::size_t MAX_DESCRIPTION = 0x4000;
 constexpr std::size_t ID_LENGTH = 36;
@@ -108,6 +134,7 @@ constexpr std::uint32_t DIFFICULTIES = 5;
 constexpr std::array<std::uint32_t, 6> ROLE_VALUES = { 0, 1, 2, 4, 8, 15 };
 constexpr std::uint32_t FEATURED_FLAG = 1;
 constexpr std::size_t PAGE_BYTES = 0x6000;
+constexpr std::size_t SPECIALIZATIONS = 20;
 constexpr std::string_view DEFAULT_NAME = "Build Name";
 constexpr std::string_view DEFAULT_ICON = "inv_misc_questionmark";
 constexpr std::string_view DEFAULT_DESCRIPTION = "There is no description yet.";
@@ -359,6 +386,48 @@ inline std::uint32_t Delete(Build const* existing, std::uint32_t account, bool g
     if (existing->OwnerAccount != account && !gm)
         return DELETE_NO_PERMISSION;
     return DELETE_OK;
+}
+
+inline bool DraftCategory(std::uint32_t category)
+{
+    return category == CATEGORY_BUILD_DRAFT || category == CATEGORY_BUILD_DRAFT_END_GAME_PVE ||
+        category == CATEGORY_BUILD_DRAFT_END_GAME_PVP;
+}
+
+struct ActiveBuild
+{
+    std::string Id;
+    std::array<std::uint8_t, 2> Flags = {};
+};
+
+using ActiveBuilds = std::array<ActiveBuild, SPECIALIZATIONS>;
+
+inline std::uint32_t Activate(Build const* build, std::uint32_t playerClass, std::string const& active)
+{
+    if (!build)
+        return ACTIVATE_NOT_FOUND;
+    if (build->NeedsRepairs)
+        return ACTIVATE_NEEDS_REPAIRS;
+    if (DraftCategory(build->Category))
+        return ACTIVATE_NOT_DRAFTED;
+    if (build->Class != playerClass)
+        return ACTIVATE_CLASS_MISMATCH;
+    if (active == build->Id)
+        return ACTIVATE_ALREADY_ACTIVE;
+    return ACTIVATE_OK;
+}
+
+inline std::uint32_t Deactivate(bool exists, std::string const& id, std::string const& active)
+{
+    if (!active.empty() && active == id)
+        return DEACTIVATE_OK;
+    return exists ? DEACTIVATE_NOT_ACTIVE : DEACTIVATE_NOT_FOUND;
+}
+
+template <class Buffer>
+void WriteActiveBuild(Buffer& out, ActiveBuild const& active)
+{
+    out << active.Id << active.Flags[0] << active.Flags[1];
 }
 
 inline void Publish(Build& stored, Build const& submitted, Publisher const& publisher, std::uint64_t now)

@@ -7,6 +7,12 @@
 # Enable the compatibility packet filter.
 CoA.Enable = 1
 
+# Maximum crafted-item upgrade steps: 0 disables upgrade kits, 1 allows Refined,
+# 2 allows Superior, and 3 allows Masterwork. Default: 2. Values are clamped to 0-3.
+# Applies on startup and config reload; existing upgraded items remain unchanged.
+# Shirts, bags/quivers, Arclight Spanner and excluded ambiguous families cannot be upgraded.
+CoA.Crafting.MaxUpgradeSteps = 2
+
 # Apply the Ascension protocol settings to remote connections as well as loopback
 # (extension opcodes, ping interval, spell-modifier layout, class-10 mapping).
 # Enable only on realms dedicated to the matching Ascension client build.
@@ -249,6 +255,77 @@ HighRisk.GearChance = 50
 HighRisk.ResourceChance = 50
 HighRisk.GoldChance = 50
 
+###################################################################################################
+# RATED SOLO ARENA
+#
+#    RatedSoloArena.RoleBalanceWaitSeconds
+#        Description: Seconds the oldest rated solo queue entry waits before matchmaking may ignore the
+#                     healer balance (one healer per side or none). Balanced lineups stay preferred.
+#        Default:     60
+#                     0 - (Never relax the healer balance)
+
+RatedSoloArena.RoleBalanceWaitSeconds = 60
+
+#    RatedSoloArena.RoleBalance.2v2
+#    RatedSoloArena.RoleBalance.3v3
+#        Description: Whether rated solo lineups of the bracket require the healer balance until
+#                     RatedSoloArena.RoleBalanceWaitSeconds has elapsed. When disabled, any split is
+#                     accepted from the start and a role-balanced split is still preferred when one exists.
+#        Default:     0 - (2v2: double damage lineups allowed)
+#                     1 - (3v3: healer balance required)
+
+RatedSoloArena.RoleBalance.2v2 = 0
+RatedSoloArena.RoleBalance.3v3 = 1
+
+#    RatedSoloArena.Win.ArenaPoints.1v1
+#    RatedSoloArena.Win.ArenaPoints.2v2
+#    RatedSoloArena.Win.ArenaPoints.3v3
+#        Description: Arena Points granted to each winner of a rated solo or party match, by bracket.
+#        Default:     25 (1v1), 300 (2v2), 300 (3v3)
+
+RatedSoloArena.Win.ArenaPoints.1v1 = 25
+RatedSoloArena.Win.ArenaPoints.2v2 = 300
+RatedSoloArena.Win.ArenaPoints.3v3 = 300
+
+#    RatedSoloArena.Win.RunesOfAscension
+#        Description: Runes of Ascension (item 375250) granted to each winner of a rated solo or party match.
+#        Default:     25
+
+RatedSoloArena.Win.RunesOfAscension = 25
+
+#    RatedSoloArena.SeasonCap.PerWeek
+#        Description: Conquest cap on Arena Points earned from rated solo arena wins during the current
+#                     arena season. The cap grows by this amount at each weekly reset since the season
+#                     started (week 1 = one step).
+#        Default:     12000
+
+RatedSoloArena.SeasonCap.PerWeek = 12000
+
+#    RatedSoloArena.SeasonCap.Max
+#        Description: Upper limit of the season conquest cap.
+#        Default:     0 - (No limit)
+
+RatedSoloArena.SeasonCap.Max = 0
+
+#    RatedSoloArena.Tier.Combatant
+#        Description: Personal rating shown as the Combatant rank in the PvP frame. Combatant has no title.
+#        Default:     1400
+
+RatedSoloArena.Tier.Combatant = 1400
+
+#    RatedSoloArena.Title.Challenger
+#    RatedSoloArena.Title.Rival
+#    RatedSoloArena.Title.Duelist
+#    RatedSoloArena.Title.Gladiator
+#        Description: Personal rating in a rated solo bracket that grants the matching character title
+#                     the first time it is reached. Titles are never removed.
+#        Default:     1700 (Challenger), 2000 (Rival), 2300 (Duelist), 2600 (Gladiator)
+
+RatedSoloArena.Title.Challenger = 1700
+RatedSoloArena.Title.Rival = 2000
+RatedSoloArena.Title.Duelist = 2300
+RatedSoloArena.Title.Gladiator = 2600
+
 #    PvpPower.Enable
 #        Description: Item spells named "PvP Power (+N)" scale damage and healing at level 60, capped at
 #                     495 points. Damage +0.05% per point against players (and against uncontrolled
@@ -399,6 +476,15 @@ Ascension.CallboardCache.GoldMax = 15
 #        Default:     1
 
 CoA.DungeonTuning.Enable = 1
+
+#
+#    CoA.TestZoneBonus.AnnounceIntervalMinutes
+#        Description: How often every player is told which test zones are active and what they earn
+#                     there. The zones themselves live in coa_test_zone_bonus and are managed with
+#                     .testzone; making a zone a test zone is always announced. 0 turns the reminder off.
+#        Default:     15
+
+CoA.TestZoneBonus.AnnounceIntervalMinutes = 15
 
 CrowsCache.Enable = 0
 CrowsCache.IntervalSeconds = 10800

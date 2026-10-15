@@ -22,6 +22,7 @@
 #include "Tokenize.h"
 #include "World.h"
 #include <algorithm>
+#include <string_view>
 #include <unordered_set>
 
 namespace AscensionFreepick
@@ -271,19 +272,16 @@ std::vector<AscensionCoATalentState::KnownEntry> KnownEntries(Player const* play
     return known;
 }
 
-UploadResult ApplyUpload(Player* player, std::vector<AscensionCoATalentState::KnownEntry> const& upload)
+namespace
 {
-    std::vector<Entry> wanted;
-    for (AscensionCoATalentState::KnownEntry const& entry : upload)
-        wanted.push_back({ entry.EntryId, entry.Rank });
-
-    Build const base(Loaded, CurrentRealm, player->GetLevel(), StoredEntries(player), player->getClass());
+UploadResult ApplyEntries(Player* player, Build const& base, std::vector<Entry> const& wanted)
+{
     UnitCheck const unit = UnitRules(player);
     ApplyCheck const check = CheckApply(base, wanted, unit,
         { player->GetMoney(), player->GetItemCount(MARK_OF_ASCENSION_ITEM, false) });
     if (check.Result != UPDATE_OK)
     {
-        LOG_INFO("coa", "Refused free-pick upload of {} record(s) from {}: {} {} entry {} rank {}", upload.size(),
+        LOG_INFO("coa", "Refused free-pick upload of {} record(s) from {}: {} {} entry {} rank {}", wanted.size(),
             player->GetName(), UPDATE_RESULTS[check.Result], LEARN_RESULTS[check.Learn], check.Failed.EntryId,
             check.Failed.Rank);
         return { UPDATE_RESULTS[check.Result], check.Learn ? LEARN_RESULTS[check.Learn] : "", check.Failed.EntryId,
@@ -302,6 +300,32 @@ UploadResult ApplyUpload(Player* player, std::vector<AscensionCoATalentState::Kn
     LOG_INFO("coa", "Applied free-pick build of {}: {} entries, {} AE and {} TE spent, charged {} copper and {} marks",
         player->GetName(), next.Entries().size(), next.GlobalAE(0), next.GlobalTE(0), check.Money, check.Marks);
     return {};
+}
+}
+
+UploadResult ApplyUpload(Player* player, std::vector<AscensionCoATalentState::KnownEntry> const& upload)
+{
+    std::vector<Entry> wanted;
+    for (AscensionCoATalentState::KnownEntry const& entry : upload)
+        wanted.push_back({ entry.EntryId, entry.Rank });
+    return ApplyEntries(player, Build(Loaded, CurrentRealm, player->GetLevel(), StoredEntries(player),
+        player->getClass()), wanted);
+}
+
+UploadResult ApplyGuide(Player* player, std::vector<GuideSpell> const& spells, std::uint32_t primaryStat)
+{
+    Build const base(Loaded, CurrentRealm, player->GetLevel(), StoredEntries(player), player->getClass());
+    std::vector<Entry> kept;
+    for (Entry const& entry : base.Entries())
+        if (Row const* row = Loaded.Find(entry.EntryId); row && (row->Group == 1 || row->Has(ROW_RETAINED) ||
+            (row->Has(ROW_AUTOMATIC) && !row->AECost && !row->TECost)))
+            kept.push_back(entry);
+    std::vector<Entry> const wanted = FitGuide(Loaded, CurrentRealm, player->GetLevel(), player->getClass(),
+        GuideEntries(Loaded, CurrentRealm, player->GetLevel(), player->getClass(), spells, primaryStat), kept);
+    UploadResult const result = ApplyEntries(player, base, wanted);
+    if (std::string_view(result.Result) == UPDATE_RESULTS[UPDATE_OK])
+        SendSpecializationState(player);
+    return result;
 }
 
 std::uint32_t ActiveSpecialization(Player const* player)

@@ -4,7 +4,7 @@
 
 /*
  * Worldforged pickups - the CoA world object that hands out a Worldforged base item,
- * which every character may loot once and then never again.
+ * which every character may loot once per prestige cycle.
  *
  * The data (Database/Custom/worldforged-pickups.sql) restores the pickups themselves:
  * 1,555 objects - bags, buckets, bones, packets, caches - each one named after the base
@@ -19,7 +19,7 @@
  *   * ScriptName 'worldforged_pickup', the marker this module keys on. The captures have
  *     an empty ScriptName.
  *
- * This module supplies what data cannot: the per-character, permanent memory.
+ * This module supplies what data cannot: the per-character memory for the current prestige cycle.
  *
  *   * 'looted' is remembered per (character, spawn) in the characters database table
  *     character_worldforged_loot and in memory for the session.
@@ -63,10 +63,14 @@
  */
 
 #include "Bag.h"
+#include "CellImpl.h"
 #include "DatabaseEnv.h"
 #include "GameObject.h"
 #include "GameObjectAI.h"
 #include "GlobalScript.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "Group.h"
 #include "Item.h"
 #include "LootMgr.h"
 #include "Map.h"
@@ -77,6 +81,7 @@
 #include "SharedDefines.h"
 #include "World.h"
 
+#include <list>
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -139,6 +144,13 @@ public:
         _looted.erase(characterGuid);
     }
 
+    void QueueReset(uint32 characterGuid, CharacterDatabaseTransaction trans)
+    {
+        CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_WORLDFORGED_LOOT);
+        stmt->SetData(0, characterGuid);
+        trans->Append(stmt);
+    }
+
     // The item and the fact that this pickup is now spent for this character are written
     // together: item_instance, character_inventory and the ledger row commit as one. The
     // item is still ITEM_NEW here - nothing has written it yet, because it is only flushed
@@ -178,7 +190,7 @@ public:
         trans->Append("INSERT IGNORE INTO `{}` (`guid`, `spawn_id`, `entry`) VALUES ({}, {}, {})",
                       WorldforgedLootTable, characterGuid, spawnId, entry);
 
-        CharacterDatabase.CommitTransaction(trans);
+        CharacterDatabase.AsyncCommitTransaction(trans).m_future.get();
     }
 
 private:
@@ -282,11 +294,11 @@ public:
     }
 };
 
-// The last word on whether a pickup hands over its item, asked once per loot slot at the
-// moment the award is decided. Player::StoreLootItem calls LootItem::AllowedForPlayer for
-// every slot of a request, and everything a client can ask for - a click, an auto-store, a
-// group roll - goes through StoreLootItem, so a character who has spent this pickup cannot
-// be handed it again even while their old loot window is still open.
+// The last word on whether a pickup hands over its item, asked through
+// LootItem::AllowedForPlayer by every path that awards one: Player::StoreLootItem per slot of a
+// request, Group when it decides who may roll for an item, and the master looter's give. A
+// character who has spent this pickup cannot be handed it again, even while their old loot
+// window is still open.
 //
 // The hook's name reads backwards, so read it with the macro: ScriptMgrMacros.h's
 // CALL_ENABLED_BOOLEAN_HOOKS returns false as soon as any script returns true
@@ -310,11 +322,30 @@ public:
     }
 };
 
+// The moment the base item reaches a character, that pickup is spent for them.
+void RecordAward(Player* player, Item* item, ObjectGuid source)
+{
+    if (!player || !item || !source.IsGameObject())
+        return;
+
+    GameObject* go = player->GetMap()->GetGameObject(source);
+    if (!IsWorldforgedPickup(go))
+        return;
+
+    WorldforgedLootStore::Instance().Claim(player, item, go->GetSpawnId(), go->GetEntry());
+
+    // Make this client re-read the flags, so the pickup goes inert for this viewer now.
+    go->ForceValuesUpdateAtIndex(GAMEOBJECT_FLAGS);
+    go->ForceValuesUpdateAtIndex(GAMEOBJECT_DYNAMIC);
+}
+
 class worldforged_pickup_lifecycle : public PlayerScript
 {
 public:
     worldforged_pickup_lifecycle() : PlayerScript("worldforged_pickup_lifecycle",
-        {PLAYERHOOK_ON_LOAD_FROM_DB, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_LOOT_ITEM}) { }
+        {PLAYERHOOK_ON_LOAD_FROM_DB, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_LOOT_ITEM,
+            PLAYERHOOK_ON_GROUP_ROLL_REWARD_ITEM, PLAYERHOOK_ON_MASTER_LOOT_ITEM,
+            PLAYERHOOK_ON_COA_PRESTIGE, PLAYERHOOK_ON_COA_PRESTIGE_SAVED}) { }
 
     // Early enough that no gameobject has been sent to this client yet.
     void OnPlayerLoadFromDB(Player* player) override
@@ -327,22 +358,53 @@ public:
         WorldforgedLootStore::Instance().Unload(player->GetGUID().GetCounter());
     }
 
-    // The moment the base item leaves a pickup, that pickup is spent for this character -
-    // whether it was clicked, auto-stored or taken through the group window.
+    void OnPlayerCoAPrestige(Player* player, CharacterDatabaseTransaction trans) override
+    {
+        if (player && trans)
+            WorldforgedLootStore::Instance().QueueReset(player->GetGUID().GetCounter(), trans);
+    }
+
+    void OnPlayerCoAPrestigeSaved(Player* player) override
+    {
+        if (!player)
+            return;
+
+        WorldforgedLootStore::Instance().Unload(player->GetGUID().GetCounter());
+        if (!player->IsInWorld())
+            return;
+
+        std::list<GameObject*> pickups;
+        float const range = player->GetVisibilityRange();
+        Acore::GameObjectInRangeCheck check(player->GetPositionX(), player->GetPositionY(),
+            player->GetPositionZ(), range);
+        Acore::GameObjectListSearcher<Acore::GameObjectInRangeCheck> searcher(player, pickups, check);
+        Cell::VisitObjects(player, searcher, range);
+        for (GameObject* go : pickups)
+            if (IsWorldforgedPickup(go) && player->HaveAtClient(go))
+            {
+                go->ForceValuesUpdateAtIndex(GAMEOBJECT_FLAGS);
+                go->ForceValuesUpdateAtIndex(GAMEOBJECT_DYNAMIC);
+            }
+    }
+
+    // Clicked, auto-stored or picked from the group window.
     void OnPlayerLootItem(Player* player, Item* item, uint32 /*count*/, ObjectGuid lootguid) override
     {
-        if (!player || !item || !lootguid.IsGameObject())
-            return;
+        RecordAward(player, item, lootguid);
+    }
 
-        GameObject* go = player->GetMap()->GetGameObject(lootguid);
-        if (!IsWorldforgedPickup(go))
-            return;
+    // A pickup with group loot rules (Data15) hands its item to a group's roll winner, never
+    // through StoreLootItem.
+    void OnPlayerGroupRollRewardItem(Player* player, Item* item, uint32 /*count*/, RollVote /*voteType*/,
+        Roll* roll) override
+    {
+        if (Loot* loot = roll ? roll->getLoot() : nullptr)
+            RecordAward(player, item, loot->sourceWorldObjectGUID);
+    }
 
-        WorldforgedLootStore::Instance().Claim(player, item, go->GetSpawnId(), go->GetEntry());
-
-        // Make this client re-read the flags, so the pickup goes inert for this viewer now.
-        go->ForceValuesUpdateAtIndex(GAMEOBJECT_FLAGS);
-        go->ForceValuesUpdateAtIndex(GAMEOBJECT_DYNAMIC);
+    void OnPlayerMasterLootItem(Player* player, Item* item, uint32 /*count*/, ObjectGuid lootguid) override
+    {
+        RecordAward(player, item, lootguid);
     }
 };
 }

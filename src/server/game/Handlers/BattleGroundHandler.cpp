@@ -179,7 +179,8 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
         }
         else if (_player->InBattlegroundQueueForBattlegroundQueueType(BATTLEGROUND_QUEUE_2v2) ||
             _player->InBattlegroundQueueForBattlegroundQueueType(BATTLEGROUND_QUEUE_3v3) ||
-            _player->InBattlegroundQueueForBattlegroundQueueType(BATTLEGROUND_QUEUE_5v5)) // can't be already queued for arenas
+            _player->InBattlegroundQueueForBattlegroundQueueType(BATTLEGROUND_QUEUE_5v5) ||
+            _player->InBattlegroundQueueForBattlegroundQueueType(BATTLEGROUND_QUEUE_1v1)) // can't be already queued for arenas
         {
             err = ERR_BATTLEGROUND_QUEUED_FOR_RATED;
         }
@@ -235,7 +236,8 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
             }
             else if (member->InBattlegroundQueueForBattlegroundQueueType(BATTLEGROUND_QUEUE_2v2) ||
                 member->InBattlegroundQueueForBattlegroundQueueType(BATTLEGROUND_QUEUE_3v3) ||
-                member->InBattlegroundQueueForBattlegroundQueueType(BATTLEGROUND_QUEUE_5v5)) // can't be already queued for arenas
+                member->InBattlegroundQueueForBattlegroundQueueType(BATTLEGROUND_QUEUE_5v5) ||
+                member->InBattlegroundQueueForBattlegroundQueueType(BATTLEGROUND_QUEUE_1v1)) // can't be already queued for arenas
             {
                 err = ERR_BATTLEGROUND_QUEUED_FOR_RATED;
             }
@@ -722,6 +724,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
     uint32 arenaRating = 0;
     uint32 matchmakerRating = 0;
     uint32 previousOpponents = 0;
+    bool ratedFiveVersusFiveUnavailable = false;
 
     switch (arenaslot)
     {
@@ -732,11 +735,12 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
             arenatype = ARENA_TYPE_3v3;
             break;
         case 2:
-            if (!IsBot())
+            if (!isRated)
             {
-                ChatHandler(this).SendSysMessage("This arena bracket is not available yet.");
-                return;
+                arenatype = ARENA_TYPE_1v1;
+                break;
             }
+            ratedFiveVersusFiveUnavailable = !IsBot();
             arenatype = ARENA_TYPE_5v5;
             break;
         default:
@@ -784,6 +788,12 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
         WorldPacket data;
         sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, err);
         SendPacket(&data);
+        return;
+    }
+
+    if (ratedFiveVersusFiveUnavailable)
+    {
+        ChatHandler(this).SendSysMessage("This arena bracket is not available yet.");
         return;
     }
 

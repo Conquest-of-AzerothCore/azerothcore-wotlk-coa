@@ -46,11 +46,10 @@
       "within_ms": 3000
     },
     {
-      "action": "use_gameobject",
+      "action": "use_nearby_gameobject",
       "label": "Investigate the Boot",
       "actor": "p",
-      "entry": 2300675,
-      "nearby": true
+      "entry": 2300675
     },
     {
       "action": "assert",
@@ -75,11 +74,10 @@
       "ms": 3000
     },
     {
-      "action": "use_gameobject",
+      "action": "use_nearby_gameobject",
       "label": "Try to investigate the Boot again",
       "actor": "p",
-      "entry": 2300675,
-      "nearby": true
+      "entry": 2300675
     },
     {
       "action": "wait",
@@ -117,11 +115,10 @@
       "within_ms": 3000
     },
     {
-      "action": "use_gameobject",
+      "action": "use_nearby_gameobject",
       "label": "Investigate the Murloc Tool",
       "actor": "p",
-      "entry": 2300676,
-      "nearby": true
+      "entry": 2300676
     },
     {
       "action": "assert",

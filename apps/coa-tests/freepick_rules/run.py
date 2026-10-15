@@ -2,7 +2,8 @@ CLI_DESCRIPTION = """Check the free-pick Hero's Character Advancement rules with
 
 Compiles the free-pick rule code against the client DBC set the server loads (--dbc-dir), then checks the Hero
 essence budget, class and realm admission, masteries, choice groups, investments, the unit rules, and how a
-known-entries upload is accepted, reordered, refused and charged.
+known-entries upload is accepted, reordered, refused and charged, and which entries a followed Hero Architect
+build asks for at a level.
 No database, server build or game client is needed.
 """
 
@@ -175,6 +176,42 @@ int main(int, char** argv)
         "an unlearn nobody can pay for is BAD_UPDATE_COSTS");
     applied = CheckApply(Build(catalog, realm, 10, { { PURIFY, 1 } }), {}, nullptr, {});
     Check(applied.Result == UPDATE_OK && !applied.Money && !applied.Marks, "unlearning is free up to level 10");
+
+    Row const* bySpell = RowBySpell(catalog, realm, HERO_CLASS, PURIFY_SPELL);
+    Check(bySpell && bySpell->EntryId == PURIFY, "a Hero Architect build spell finds the entry that teaches it");
+    Check(!RowBySpell(catalog, realm, HERO_CLASS, 999999), "a spell no entry teaches finds nothing");
+    std::uint32_t const bearSpell = bear->Spells[0];
+    Row const* bearTeacher = RowBySpell(catalog, realm, HERO_CLASS, bearSpell);
+    Check(bearTeacher && bearTeacher->EntryId <= BEAR_FORM && ClassAdmits(catalog, *bearTeacher, HERO_CLASS),
+        "a spell several entries teach finds the lowest visible entry the Hero may learn, as the client does");
+    std::vector<GuideSpell> const guide = { { PURIFY_SPELL, 12 }, { bearSpell, 10 }, { 999999, 1 } };
+    std::vector<Entry> guided = GuideEntries(catalog, realm, 12, HERO_CLASS, guide, 0);
+    Check(bearTeacher && Holds(guided, PURIFY, 1) && Holds(guided, bearTeacher->EntryId, 1),
+        "a followed build at level 12 takes every spell of level 12 or below");
+    Check(Holds(guided, PATH_OF_STRENGTH, 1), "a Strength build also takes the Path of Strength");
+    Check(guided.size() == 3, "a spell no entry teaches adds nothing");
+    guided = GuideEntries(catalog, realm, 11, HERO_CLASS, guide, 1);
+    Check(!Holds(guided, PURIFY, 1) && guided.size() == 2 && Holds(guided, PATH_OF_AGILITY, 1),
+        "at level 11 the level 12 spell waits, and an Agility build takes the Path of Agility");
+    std::vector<Entry> const twice = GuideEntries(catalog, realm, 12, HERO_CLASS,
+        { { PURIFY_SPELL, 1 }, { PURIFY_SPELL, 2 } }, 2);
+    Check(twice.size() == 1 && Holds(twice, PURIFY, 2),
+        "a spell listed twice adds a second rank, and a Stamina build takes no path");
+    std::vector<Entry> fitted = FitGuide(catalog, realm, 9, HERO_CLASS, { { PURIFY, 1 }, { PATH_OF_STRENGTH, 1 } }, {});
+    Check(fitted.size() == 1 && Holds(fitted, PATH_OF_STRENGTH, 1),
+        "a followed entry the level does not allow yet waits, and the rest is still learned");
+    fitted = FitGuide(catalog, realm, 12, HERO_CLASS, { { BEAR_FORM, 1 }, { FERAL_SHAPESHIFT_MASTERY, 1 } }, {});
+    Check(Holds(fitted, FERAL_SHAPESHIFT_MASTERY, 1) && Holds(fitted, BEAR_FORM, 1) &&
+            PositionOf(fitted, FERAL_SHAPESHIFT_MASTERY) < PositionOf(fitted, BEAR_FORM),
+        "a followed entry listed before its requirement is learned after it");
+    fitted = FitGuide(catalog, realm, 12, HERO_CLASS, { { PATH_OF_AGILITY, 1 } }, { { PATH_OF_STRENGTH, 1 } });
+    Check(fitted.size() == 1 && Holds(fitted, PATH_OF_AGILITY, 1),
+        "the followed build's path replaces the path the character kept");
+    fitted = FitGuide(catalog, realm, 12, HERO_CLASS, { { PURIFY, 1 } }, { { PATH_OF_STRENGTH, 1 } });
+    Check(fitted.size() == 2 && Holds(fitted, PATH_OF_STRENGTH, 1), "a kept entry the build does not replace stays");
+    applied = CheckApply(base, GuideEntries(catalog, realm, 12, HERO_CLASS, { { PURIFY_SPELL, 12 } }, 0), nullptr, {});
+    Check(applied.Result == UPDATE_OK && Holds(applied.Entries, PURIFY, 1) && Holds(applied.Entries, PATH_OF_STRENGTH, 1),
+        "the followed build applies through the upload rules");
 
     std::unordered_map<std::uint32_t, std::vector<std::uint32_t>> const learnEffects = { LEARN_EFFECTS };
     LearnedSpells const learned = [&learnEffects](std::uint32_t spellId)

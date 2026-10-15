@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "Jasperlode Mine: a destroyed Mine Egg hatches one Mine Spider that attacks",
+  "contract": "Using a Mine Egg (128) hatches exactly one Mine Spider (43) next to it, and the spider attacks the player who used the egg. The egg is summoned for the player instead of using the world spawns, so it does not check the egg positions, the quest gate, the lock cast, loot or respawn.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9034.29,
+    "y": -556.42,
+    "z": 55.15,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "hero",
+      "entry": 128,
+      "distance": 2
+    },
+    {
+      "action": "wait",
+      "label": "Let the egg settle",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the egg exists beside the hero",
+      "actor": "hero",
+      "metric": "owned_gameobject_count",
+      "entry": 128,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Mine Spider is near before the egg is used",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 43,
+      "equals": 0
+    },
+    {
+      "action": "use_gameobject",
+      "label": "Destroy the egg",
+      "actor": "hero",
+      "entry": 128
+    },
+    {
+      "action": "assert",
+      "label": "The egg hatches a Mine Spider",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 43,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The hatched spider attacks the hero",
+      "actor": "hero",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "One use hatches exactly one spider",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 43,
+      "equals": 1
+    }
+  ]
+}

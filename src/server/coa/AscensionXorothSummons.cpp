@@ -106,6 +106,7 @@ struct npc_ascension_xoroth_summon : public ScriptedAI
             me->SetReactState(REACT_DEFENSIVE);
             if (me->GetEntry() == 50301)
             {
+                me->SetCreatorGUID(owner);
                 me->m_ControlledByPlayer = true;
                 me->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
                 me->SetByteValue(UNIT_FIELD_BYTES_2, 1, player->GetByteValue(UNIT_FIELD_BYTES_2, 1));

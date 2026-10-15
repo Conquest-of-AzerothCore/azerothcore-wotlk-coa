@@ -12,6 +12,7 @@ method = runpy.run_path(str(HERE.parent / "client_compat/run.py"))["method"]
 
 HARNESS = r'''
 #include <cassert>
+#include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <list>
@@ -20,6 +21,9 @@ HARNESS = r'''
 using uint8 = std::uint8_t;
 using uint32 = std::uint32_t;
 using uint64 = std::uint64_t;
+using Milliseconds = std::chrono::milliseconds;
+using namespace std::chrono_literals;
+#define CAST_AI(a, b) (dynamic_cast<a*>(b))
 // ENUMS
 enum SpellEffIndex : uint8 { EFFECT_0 = 0 };
 struct ObjectGuid
@@ -35,7 +39,31 @@ struct Position
     { return std::sqrt((x - other.x) * (x - other.x) + (y - other.y) * (y - other.y) + (z - other.z) * (z - other.z)); }
     bool operator==(Position const& other) const { return x == other.x && y == other.y && z == other.z && o == other.o; }
 };
+struct BasicEvent
+{
+    virtual ~BasicEvent() = default;
+    virtual bool Execute(uint64 eventTime, uint32 diff) = 0;
+};
+struct EventProcessor
+{
+    std::vector<std::pair<BasicEvent*, Milliseconds>> queue;
+    void AddEventAtOffset(BasicEvent* event, Milliseconds offset) { queue.emplace_back(event, offset); }
+    void Update()
+    {
+        std::vector<std::pair<BasicEvent*, Milliseconds>> due = std::move(queue);
+        queue.clear();
+        for (std::pair<BasicEvent*, Milliseconds> const& entry : due)
+            if (entry.first->Execute(0, 0))
+                delete entry.first;
+    }
+};
+struct MotionMaster
+{
+    MovementGeneratorType current = IDLE_MOTION_TYPE;
+    MovementGeneratorType GetCurrentMovementGeneratorType() const { return current; }
+};
 struct Player;
+struct TempSummon;
 struct Unit
 {
     Position pos;
@@ -46,6 +74,7 @@ struct Unit
 };
 struct CreatureAI
 {
+    virtual ~CreatureAI() = default;
     ReactStates const* reactOfMe = nullptr;
     std::vector<Unit*> targets;
     std::vector<ReactStates> reactsAtAttack;
@@ -58,6 +87,11 @@ struct CreatureAI
     }
     void Talk(uint8 id, Unit const* whisperTarget) { talks.emplace_back(id, whisperTarget); }
 };
+struct SmartAI : CreatureAI
+{
+    std::vector<bool> stops;
+    void StopFollow(bool complete) { stops.push_back(complete); }
+};
 struct Creature : Unit
 {
     uint32 entry = 0;
@@ -65,15 +99,23 @@ struct Creature : Unit
     ReactStates react = REACT_AGGRESSIVE;
     ObjectGuid summoner;
     CreatureAI ai;
+    SmartAI* smart = nullptr;
+    MotionMaster motion;
+    EventProcessor m_Events;
+    bool summoned = false;
     bool IsAlive() const { return alive; }
     bool IsInCombat() const { return combat; }
     void SetReactState(ReactStates state) { react = state; }
     CreatureAI* AI()
     {
+        if (smart)
+            return smart;
         ai.reactOfMe = &react;
         return &ai;
     }
     ObjectGuid GetSummonerGUID() const { return summoner; }
+    MotionMaster* GetMotionMaster() { return &motion; }
+    TempSummon* ToTempSummon();
 };
 struct TempSummon : Creature
 {
@@ -81,6 +123,7 @@ struct TempSummon : Creature
     uint32 duration = 0;
     bool personal = false;
 };
+TempSummon* Creature::ToTempSummon() { return summoned ? static_cast<TempSummon*>(this) : nullptr; }
 struct GameObject
 {
     Position pos;
@@ -94,6 +137,7 @@ struct SummonPropertiesEntry;
 struct Map
 {
     std::list<TempSummon> creatures;
+    std::vector<Creature*> residents;
 };
 constexpr float PlayerCombatReach = DEFAULT_COMBAT_REACH;
 struct Player : Unit
@@ -129,8 +173,16 @@ struct Player : Unit
         summon.type = type;
         summon.duration = duration;
         summon.summoner = guid;
+        summon.summoned = true;
         summon.personal = visibleBySummonerOnly;
         return &summon;
+    }
+    Creature* FindNearestCreature(uint32 entry, float range) const
+    {
+        for (Creature* creature : map->residents)
+            if (creature->entry == entry && pos.GetExactDist(creature->pos) <= range)
+                return creature;
+        return nullptr;
     }
     void KilledMonsterCredit(uint32 entry) { credits.push_back(entry); }
     int CastSpell(GameObject* target, uint32 spellId, bool triggered)
@@ -140,8 +192,21 @@ struct Player : Unit
         return 0;
     }
 };
+std::vector<Player*> WorldPlayers;
+namespace ObjectAccessor
+{
+Player* GetPlayer(Unit const&, ObjectGuid guid)
+{
+    for (Player* player : WorldPlayers)
+        if (player->guid == guid)
+            return player;
+    return nullptr;
+}
+}
 
 // SOURCE
+
+// DELIVERY
 
 struct Script
 {
@@ -295,6 +360,7 @@ void NewbornRescue()
     assert(butterfly.entry == 161847 && butterfly.type == TEMPSUMMON_TIMED_DESPAWN && butterfly.duration == 600000);
     assert(butterfly.summoner == player.guid && butterfly.personal && butterfly.pos == baby.pos);
     assert(baby.despawns == 1 && !baby.spawned);
+    assert(butterfly.m_Events.queue.size() == 1 && butterfly.m_Events.queue.back().second == 1s);
 
     script.TransformNewborn(EFFECT_0);
     assert(player.credits.size() == 1 && map.creatures.size() == 1 && baby.despawns == 1);
@@ -310,11 +376,58 @@ void NewbornRescue()
     assert(player.credits.size() == 1 && map.creatures.size() == 1 && baby.despawns == 1);
 }
 
+void ButterflyDelivery()
+{
+    Map map;
+    Player player = MakePlayer(map, 1);
+    Player bystander = MakePlayer(map, 2);
+    WorldPlayers = { &player, &bystander };
+    Creature eldya;
+    eldya.entry = 161848;
+    eldya.pos = Position(10790.0f, 470.0f, 1450.0f);
+    map.residents.push_back(&eldya);
+    GameObject baby;
+    Script script;
+    script.caster = &player;
+    script.hitGObj = &baby;
+    player.petals = QUEST_STATUS_INCOMPLETE;
+    script.TransformNewborn(EFFECT_0);
+    TempSummon& butterfly = map.creatures.back();
+    SmartAI smart;
+    butterfly.smart = &smart;
+    butterfly.motion.current = FOLLOW_MOTION_TYPE;
+
+    player.pos = Position(eldya.pos.x + 30.0f, eldya.pos.y, eldya.pos.z - 50.0f);
+    bystander.pos = Position(eldya.pos.x + 2.0f, eldya.pos.y, eldya.pos.z);
+    for (int tick = 0; tick < 3; ++tick)
+    {
+        butterfly.m_Events.Update();
+        assert(smart.stops.empty() && butterfly.m_Events.queue.size() == 1);
+        assert(butterfly.m_Events.queue.back().second == 1s);
+    }
+
+    player.pos = Position(eldya.pos.x + 5.0f, eldya.pos.y, eldya.pos.z);
+    butterfly.m_Events.Update();
+    assert(smart.stops == std::vector<bool>{ true } && butterfly.m_Events.queue.empty());
+
+    butterfly.motion.current = IDLE_MOTION_TYPE;
+    butterfly.m_Events.AddEventAtOffset(new ButterflyDeliveryAtSummoner(&butterfly), 1s);
+    butterfly.m_Events.Update();
+    assert(smart.stops.size() == 1 && butterfly.m_Events.queue.empty());
+
+    butterfly.motion.current = FOLLOW_MOTION_TYPE;
+    butterfly.alive = false;
+    butterfly.m_Events.AddEventAtOffset(new ButterflyDeliveryAtSummoner(&butterfly), 1s);
+    butterfly.m_Events.Update();
+    assert(smart.stops.size() == 1 && butterfly.m_Events.queue.empty());
+}
+
 int main()
 {
     MoonwellGates();
     RemnantPerPlayer();
     NewbornRescue();
+    ButterflyDelivery();
     return 0;
 }
 '''
@@ -325,16 +438,21 @@ def build_harness(source):
     quests = (ROOT / "src/server/game/Quests/QuestDef.h").read_text(encoding="utf-8")
     objects = (ROOT / "src/server/game/Entities/Object/Object.h").read_text(encoding="utf-8")
     units = (ROOT / "src/server/game/Entities/Unit/Unit.h").read_text(encoding="utf-8")
+    motion = (ROOT / "src/server/game/Movement/MotionMaster.h").read_text(encoding="utf-8")
     defines = (ROOT / "src/server/game/Entities/Object/ObjectDefines.h").read_text(encoding="utf-8")
     enums = "".join(method(text, "enum " + name) + ";\n" for text, name in (
-        (shared, "SpellCastResult"), (quests, "QuestStatus"), (objects, "TempSummonType"), (units, "ReactStates")))
-    enums += re.search(r"#define DEFAULT_COMBAT_REACH .*\n", defines).group(0)
+        (shared, "SpellCastResult"), (quests, "QuestStatus"), (objects, "TempSummonType"), (units, "ReactStates"),
+        (motion, "MovementGeneratorType")))
+    for define in ("DEFAULT_COMBAT_REACH", "INTERACTION_DISTANCE"):
+        enums += re.search(rf"#define {define} .*\n", defines).group(0)
     start = source.index("enum VultureCultMoonwell")
     body = source[start:source.index("class spell_coa_channeling_blessing_of_the_moon")]
     methods = "".join(method(source, signature).replace(") override\n", ")\n", 1) + "\n" for signature in (
         "SpellCastResult CheckAtEyrieMoonwell()", "void RaiseAberrantFleshRemnant(",
         "bool OnGossipHello(Player* player, GameObject* baby)", "void TransformNewborn("))
-    return HARNESS.replace("// ENUMS", enums).replace("// SOURCE", body).replace("// METHODS", methods)
+    delivery = source[source.index("class ButterflyDeliveryAtSummoner"):source.index("class go_coa_baby_night_elf")]
+    return (HARNESS.replace("// ENUMS", enums).replace("// SOURCE", body).replace("// DELIVERY", delivery)
+            .replace("// METHODS", methods))
 
 
 def compile_and_run(code):
@@ -393,7 +511,8 @@ def main():
           "aggroes on sight and gone 30 s after it idles, re-aimed only by its own summoner, never blocked or taken by "
           "another player's remnant, raised again after death or out of reach; the newborn rescue cast and effect "
           "only while the quest is incomplete, credit, a personal butterfly at the baby and the baby's despawn once "
-          "per spawn; and the spell, gameobject and migration bindings")
+          "per spawn; the butterfly delivered once its own summoner stands within interaction range of Eldya, never "
+          "for a bystander, a stopped follow or a dead butterfly; and the spell, gameobject and migration bindings")
 
 
 if __name__ == "__main__":

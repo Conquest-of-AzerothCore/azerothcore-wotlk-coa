@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Finishing the final boss of another wing on the same map completes the assigned Dungeon Finder dungeon",
-  "contract": "A group assigned Scarlet Monastery - Graveyard that finishes Herod, the final boss of the Armory wing of the same map, completes the dungeon it was assigned and every member receives the Classic Random completion quest of their bracket.",
+  "name": "A sibling wing's final boss does not complete the assigned Wailing Caverns wing (#7378)",
+  "contract": "A group assigned Wailing Caverns - Crag of the Everliving that finishes Skum, the final boss of Wailing Caverns - Winding Chasm on the same map, does not complete the Crag of the Everliving and receives no Classic Random completion quest. Verdan the Everliving, the wing's own final boss, then completes it and pays every member the quest and its Adventurer's Cache.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -68,9 +68,9 @@
     },
     {
       "action": "lfg_dungeon",
-      "label": "The group is assigned Scarlet Monastery - Graveyard",
+      "label": "The group is assigned Wailing Caverns - Crag of the Everliving",
       "actor": "p1",
-      "dungeon": 18
+      "dungeon": 1035
     },
     {
       "action": "lfg_teleport",
@@ -94,49 +94,99 @@
     },
     {
       "action": "assert",
-      "label": "p1 enters Scarlet Monastery",
+      "label": "p1 enters Wailing Caverns",
       "actor": "p1",
       "metric": "map_id",
-      "equals": 189,
+      "equals": 43,
       "within_ms": 15000
     },
     {
       "action": "assert",
-      "label": "p2 enters Scarlet Monastery",
+      "label": "p2 enters Wailing Caverns",
       "actor": "p2",
       "metric": "map_id",
-      "equals": 189,
+      "equals": 43,
       "within_ms": 15000
     },
     {
       "action": "assert",
-      "label": "p3 enters Scarlet Monastery",
+      "label": "p3 enters Wailing Caverns",
       "actor": "p3",
       "metric": "map_id",
-      "equals": 189,
+      "equals": 43,
       "within_ms": 15000
     },
     {
       "action": "assert",
-      "label": "p4 enters Scarlet Monastery",
+      "label": "p4 enters Wailing Caverns",
       "actor": "p4",
       "metric": "map_id",
-      "equals": 189,
+      "equals": 43,
       "within_ms": 15000
     },
     {
       "action": "assert",
-      "label": "p5 enters Scarlet Monastery",
+      "label": "p5 enters Wailing Caverns",
       "actor": "p5",
       "metric": "map_id",
-      "equals": 189,
+      "equals": 43,
       "within_ms": 15000
     },
     {
       "action": "encounter_credit",
-      "label": "Herod, final boss of Scarlet Monastery - Armory, is credited",
+      "label": "Skum, final boss of Wailing Caverns - Winding Chasm, is credited",
       "actor": "p1",
-      "entry": 3975
+      "entry": 3674
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "p1 is not rewarded the Classic Random 56-60 quest",
+      "actor": "p1",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "p2 is not rewarded the Classic Random 56-60 quest",
+      "actor": "p2",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "p3 is not rewarded the Classic Random 56-60 quest",
+      "actor": "p3",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "p4 is not rewarded the Classic Random 56-60 quest",
+      "actor": "p4",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "p5 is not rewarded the Classic Random 56-60 quest",
+      "actor": "p5",
+      "metric": "quest_rewarded",
+      "quest": 24886,
+      "equals": 0
+    },
+    {
+      "action": "encounter_credit",
+      "label": "Verdan the Everliving, final boss of Wailing Caverns - Crag of the Everliving, is credited",
+      "actor": "p1",
+      "entry": 5775
     },
     {
       "action": "assert",

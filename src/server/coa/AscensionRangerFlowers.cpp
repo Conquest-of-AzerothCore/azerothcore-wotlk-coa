@@ -29,8 +29,7 @@ enum RangerFlowerSpells : uint32
     SPELL_HIGHLANDER_READY = 712427,
     SPELL_HIGHLANDER_REDUCTION = 712428,
     SPELL_ADVANTAGE = 804329,
-    SPELL_FALCONS_CALL = 804715,
-    SPELL_FALCONS_CALL_SUMMON = 800251
+    SPELL_FALCONS_CALL = 804715
 };
 
 enum RangerFlowerEntries : uint32
@@ -285,8 +284,7 @@ public:
 
     void OnLoadSpellCustomAttr(SpellInfo* info) override
     {
-        if (info->SpellFamilyName != 27 ||
-            (info->Id != SPELL_GREEN_FLOWER && info->Id != SPELL_FALCONS_CALL_SUMMON))
+        if (info->SpellFamilyName != 27)
             return;
         SpellEffectInfo& effect = info->Effects[EFFECT_1];
         if (effect.Effect == SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN && effect.MiscValue == SPELL_FALCONS_CALL &&

@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "First-Class Experimental Teleporter carries players for 8 gold",
-  "contract": "The First-Class Experimental Teleporter (gameobject 323232, gossip text 61004) offers, in one menu, the character's own faction capitals, Booty Bay and the endgame zones Burning Steppes, Western Plaguelands, Silithus, Un'Goro Crater and Winterspring (user list 2026-10-08, Eastern Plaguelands removed by the user). Every jump costs 8 gold (user choice 2026-10-08) and is refused without the money, charging nothing. A jump starts 985513 'Experimental Teleporter', a 5 minute recharge during which the teleporter refuses with a notice. A city jump lands at the city's teleport point; a zone jump drops the character 120 yards above the zone's teleport point with Parachute 45472, applied after arrival when the jump crosses continents. The first jump completes Path to Ascension tutorial 31 and its achievement 87230.",
+  "name": "First-Class Experimental Teleporter: free capitals, 8 gold everywhere else",
+  "contract": "The First-Class Experimental Teleporter (gameobject 323232, gossip text 61004) shows the live server's menu: the character's two faction capitals (Stormwind and Ironforge, or Orgrimmar and Undercity) for free, then Western Plaguelands, Winterspring, Burning Steppes, Silithus, Un'Goro Crater, Azshara and Booty Bay for 8 gold each. Every option carries its picture (the mage teleport icon for a capital, the zone's achievement icon otherwise) at 64 pixels, and a paid one reads 'Name - 8' with the gold coin icon. A paid jump is refused without the money, charging nothing; a capital needs none. A jump starts 985513 'Experimental Teleporter', a 5 minute recharge during which the teleporter refuses with a notice. A city jump lands at the city's teleport point; a zone jump drops the character 120 yards above the zone's point with Parachute 45472, applied after arrival when the jump crosses continents. The first jump completes Path to Ascension tutorial 31 and its achievement 87230.",
   "timeout_ms": 120000,
   "players": [
     {
@@ -47,90 +47,90 @@
     },
     {
       "action": "assert",
-      "label": "an Alliance character is offered three capitals, Booty Bay and five endgame zones",
+      "label": "an Alliance character is offered two capitals, six zones and Booty Bay",
       "actor": "alliance",
       "metric": "gossip_options",
       "equals": 9
     },
     {
       "action": "assert",
-      "label": "its own capital Stormwind first",
+      "label": "Stormwind (free) with its picture, in the live order",
       "actor": "alliance",
       "metric": "gossip_option_text",
       "index": 0,
-      "text": "Stormwind",
+      "text": "|TInterface/ICONS/Spell_Arcane_TeleportStormWind:64:64:-34:0|t|rStormwind",
       "equals": 1
     },
     {
       "action": "assert",
-      "label": "then Ironforge",
+      "label": "Ironforge (free) with its picture, in the live order",
       "actor": "alliance",
       "metric": "gossip_option_text",
       "index": 1,
-      "text": "Ironforge",
+      "text": "|TInterface/ICONS/Spell_Arcane_TeleportIronForge:64:64:-34:0|t|rIronforge",
       "equals": 1
     },
     {
       "action": "assert",
-      "label": "then Darnassus",
+      "label": "Western Plaguelands - 8 gold with its picture, in the live order",
       "actor": "alliance",
       "metric": "gossip_option_text",
       "index": 2,
-      "text": "Darnassus",
+      "text": "|TInterface/ICONS/Achievement_Zone_WesternPlaguelands_01:64:64:-34:0|t|rWestern Plaguelands - 8 |TInterface/MoneyFrame/UI-GoldIcon:14:14:2:0|t",
       "equals": 1
     },
     {
       "action": "assert",
-      "label": "then Booty Bay",
+      "label": "Winterspring - 8 gold with its picture, in the live order",
       "actor": "alliance",
       "metric": "gossip_option_text",
       "index": 3,
-      "text": "Booty Bay",
+      "text": "|TInterface/ICONS/Achievement_Zone_Winterspring:64:64:-34:0|t|rWinterspring - 8 |TInterface/MoneyFrame/UI-GoldIcon:14:14:2:0|t",
       "equals": 1
     },
     {
       "action": "assert",
-      "label": "Burning Steppes",
+      "label": "Burning Steppes - 8 gold with its picture, in the live order",
       "actor": "alliance",
       "metric": "gossip_option_text",
       "index": 4,
-      "text": "Burning Steppes",
+      "text": "|TInterface/ICONS/Achievement_Zone_BurningSteppes_01:64:64:-34:0|t|rBurning Steppes - 8 |TInterface/MoneyFrame/UI-GoldIcon:14:14:2:0|t",
       "equals": 1
     },
     {
       "action": "assert",
-      "label": "Western Plaguelands",
+      "label": "Silithus - 8 gold with its picture, in the live order",
       "actor": "alliance",
       "metric": "gossip_option_text",
       "index": 5,
-      "text": "Western Plaguelands",
+      "text": "|TInterface/ICONS/Achievement_Zone_Silithus_01:64:64:-34:0|t|rSilithus - 8 |TInterface/MoneyFrame/UI-GoldIcon:14:14:2:0|t",
       "equals": 1
     },
     {
       "action": "assert",
-      "label": "Silithus",
+      "label": "Un'Goro Crater - 8 gold with its picture, in the live order",
       "actor": "alliance",
       "metric": "gossip_option_text",
       "index": 6,
-      "text": "Silithus",
+      "text": "|TInterface/ICONS/Achievement_Zone_UnGoroCrater_01:64:64:-34:0|t|rUn'Goro Crater - 8 |TInterface/MoneyFrame/UI-GoldIcon:14:14:2:0|t",
       "equals": 1
     },
     {
       "action": "assert",
-      "label": "Un'Goro Crater",
+      "label": "Azshara - 8 gold with its picture, in the live order",
       "actor": "alliance",
       "metric": "gossip_option_text",
       "index": 7,
-      "text": "Un'Goro Crater",
+      "text": "|TInterface/ICONS/Achievement_Zone_Azshara_01:64:64:-34:0|t|rAzshara - 8 |TInterface/MoneyFrame/UI-GoldIcon:14:14:2:0|t",
       "equals": 1
     },
     {
       "action": "assert",
-      "label": "Winterspring",
+      "label": "Booty Bay - 8 gold with its picture, in the live order",
       "actor": "alliance",
       "metric": "gossip_option_text",
       "index": 8,
-      "text": "Winterspring",
+      "text": "|TInterface/ICONS/Achievement_Zone_Stranglethorn_01:64:64:-34:0|t|rBooty Bay - 8 |TInterface/MoneyFrame/UI-GoldIcon:14:14:2:0|t",
       "equals": 1
     },
     {
@@ -143,36 +143,21 @@
     {
       "action": "gossip_select",
       "actor": "alliance",
-      "option": 2,
-      "label": "choose Darnassus"
+      "option": 1,
+      "label": "choose Ironforge"
     },
     {
       "action": "assert",
-      "label": "the character arrives in Kalimdor",
+      "label": "the character arrives in Ironforge",
       "actor": "alliance",
-      "metric": "map_id",
-      "equals": 1,
+      "metric": "position_x",
+      "min": -4924,
+      "max": -4913,
       "within_ms": 5000
     },
     {
       "action": "assert",
-      "label": "at Darnassus",
-      "actor": "alliance",
-      "metric": "position_x",
-      "min": 9944,
-      "max": 9955
-    },
-    {
-      "action": "assert",
-      "label": "and on the ground, without a parachute",
-      "actor": "alliance",
-      "metric": "position_z",
-      "min": 1335,
-      "max": 1347
-    },
-    {
-      "action": "assert",
-      "label": "no parachute for a city",
+      "label": "on the ground, without a parachute",
       "actor": "alliance",
       "metric": "aura",
       "spell": 45472,
@@ -180,11 +165,11 @@
     },
     {
       "action": "assert",
-      "label": "8 gold was charged",
+      "label": "a capital is free",
       "actor": "alliance",
       "metric": "carried_money",
       "relative_to": "purse",
-      "equals": -80000
+      "equals": 0
     },
     {
       "action": "assert",
@@ -206,7 +191,7 @@
       "action": "summon_gameobject",
       "actor": "alliance",
       "entry": 323232,
-      "label": "another teleporter in Darnassus"
+      "label": "another teleporter in Ironforge"
     },
     {
       "action": "use_gameobject",
@@ -217,8 +202,8 @@
     {
       "action": "gossip_select",
       "actor": "alliance",
-      "option": 0,
-      "label": "choose Stormwind"
+      "option": 2,
+      "label": "choose Western Plaguelands"
     },
     {
       "action": "wait",
@@ -228,8 +213,9 @@
       "action": "assert",
       "label": "the recharging teleporter refuses",
       "actor": "alliance",
-      "metric": "map_id",
-      "equals": 1
+      "metric": "position_x",
+      "min": -4924,
+      "max": -4913
     },
     {
       "action": "assert",
@@ -237,7 +223,7 @@
       "actor": "alliance",
       "metric": "carried_money",
       "relative_to": "purse",
-      "equals": -80000
+      "equals": 0
     },
     {
       "action": "assert",
@@ -274,63 +260,90 @@
     },
     {
       "action": "assert",
-      "label": "a Horde character is offered the same nine choices",
+      "label": "a Horde character is offered two capitals, six zones and Booty Bay",
       "actor": "horde",
       "metric": "gossip_options",
       "equals": 9
     },
     {
       "action": "assert",
-      "label": "Orgrimmar first",
+      "label": "Orgrimmar (free) with its picture, in the live order",
       "actor": "horde",
       "metric": "gossip_option_text",
       "index": 0,
-      "text": "Orgrimmar",
+      "text": "|TInterface/ICONS/Spell_Arcane_TeleportOrgrimmar:64:64:-34:0|t|rOrgrimmar",
       "equals": 1
     },
     {
       "action": "assert",
-      "label": "then Undercity",
+      "label": "Undercity (free) with its picture, in the live order",
       "actor": "horde",
       "metric": "gossip_option_text",
       "index": 1,
-      "text": "Undercity",
+      "text": "|TInterface/ICONS/Spell_Arcane_TeleportUnderCity:64:64:-34:0|t|rUndercity",
       "equals": 1
     },
     {
       "action": "assert",
-      "label": "then Thunder Bluff",
+      "label": "Western Plaguelands - 8 gold with its picture, in the live order",
       "actor": "horde",
       "metric": "gossip_option_text",
       "index": 2,
-      "text": "Thunder Bluff",
+      "text": "|TInterface/ICONS/Achievement_Zone_WesternPlaguelands_01:64:64:-34:0|t|rWestern Plaguelands - 8 |TInterface/MoneyFrame/UI-GoldIcon:14:14:2:0|t",
       "equals": 1
     },
     {
       "action": "assert",
-      "label": "then Booty Bay",
+      "label": "Winterspring - 8 gold with its picture, in the live order",
       "actor": "horde",
       "metric": "gossip_option_text",
       "index": 3,
-      "text": "Booty Bay",
+      "text": "|TInterface/ICONS/Achievement_Zone_Winterspring:64:64:-34:0|t|rWinterspring - 8 |TInterface/MoneyFrame/UI-GoldIcon:14:14:2:0|t",
       "equals": 1
     },
     {
       "action": "assert",
-      "label": "then the endgame zones",
+      "label": "Burning Steppes - 8 gold with its picture, in the live order",
       "actor": "horde",
       "metric": "gossip_option_text",
       "index": 4,
-      "text": "Burning Steppes",
+      "text": "|TInterface/ICONS/Achievement_Zone_BurningSteppes_01:64:64:-34:0|t|rBurning Steppes - 8 |TInterface/MoneyFrame/UI-GoldIcon:14:14:2:0|t",
       "equals": 1
     },
     {
       "action": "assert",
-      "label": "Winterspring last",
+      "label": "Silithus - 8 gold with its picture, in the live order",
+      "actor": "horde",
+      "metric": "gossip_option_text",
+      "index": 5,
+      "text": "|TInterface/ICONS/Achievement_Zone_Silithus_01:64:64:-34:0|t|rSilithus - 8 |TInterface/MoneyFrame/UI-GoldIcon:14:14:2:0|t",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Un'Goro Crater - 8 gold with its picture, in the live order",
+      "actor": "horde",
+      "metric": "gossip_option_text",
+      "index": 6,
+      "text": "|TInterface/ICONS/Achievement_Zone_UnGoroCrater_01:64:64:-34:0|t|rUn'Goro Crater - 8 |TInterface/MoneyFrame/UI-GoldIcon:14:14:2:0|t",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Azshara - 8 gold with its picture, in the live order",
+      "actor": "horde",
+      "metric": "gossip_option_text",
+      "index": 7,
+      "text": "|TInterface/ICONS/Achievement_Zone_Azshara_01:64:64:-34:0|t|rAzshara - 8 |TInterface/MoneyFrame/UI-GoldIcon:14:14:2:0|t",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Booty Bay - 8 gold with its picture, in the live order",
       "actor": "horde",
       "metric": "gossip_option_text",
       "index": 8,
-      "text": "Winterspring",
+      "text": "|TInterface/ICONS/Achievement_Zone_Stranglethorn_01:64:64:-34:0|t|rBooty Bay - 8 |TInterface/MoneyFrame/UI-GoldIcon:14:14:2:0|t",
       "equals": 1
     },
     {
@@ -343,8 +356,8 @@
     {
       "action": "gossip_select",
       "actor": "horde",
-      "option": 1,
-      "label": "choose Undercity without a copper"
+      "option": 2,
+      "label": "choose Western Plaguelands without a copper"
     },
     {
       "action": "wait",
@@ -375,11 +388,6 @@
       "equals": 0
     },
     {
-      "action": "money",
-      "actor": "horde",
-      "copper": 100000
-    },
-    {
       "action": "use_gameobject",
       "actor": "horde",
       "entry": 323232,
@@ -388,12 +396,12 @@
     {
       "action": "gossip_select",
       "actor": "horde",
-      "option": 5,
-      "label": "choose Western Plaguelands"
+      "option": 1,
+      "label": "choose Undercity, still without a copper"
     },
     {
       "action": "assert",
-      "label": "the character crosses to the Eastern Kingdoms",
+      "label": "a capital needs no money: the character crosses to the Eastern Kingdoms",
       "actor": "horde",
       "metric": "map_id",
       "equals": 0,
@@ -401,35 +409,18 @@
     },
     {
       "action": "assert",
-      "label": "over Western Plaguelands",
+      "label": "at Undercity",
       "actor": "horde",
       "metric": "position_x",
-      "min": 1723,
-      "max": 1734
+      "min": 1579,
+      "max": 1590
     },
     {
       "action": "assert",
-      "label": "high above the ground",
-      "actor": "horde",
-      "metric": "position_z",
-      "min": 179,
-      "max": 188
-    },
-    {
-      "action": "assert",
-      "label": "with a parachute once it has arrived",
-      "actor": "horde",
-      "metric": "aura",
-      "spell": 45472,
-      "equals": 1,
-      "within_ms": 3000
-    },
-    {
-      "action": "assert",
-      "label": "and 8 gold charged",
+      "label": "with nothing charged",
       "actor": "horde",
       "metric": "carried_money",
-      "equals": 20000
+      "equals": 0
     },
     {
       "action": "money",
@@ -451,29 +442,36 @@
     {
       "action": "gossip_select",
       "actor": "drop",
-      "option": 4,
-      "label": "choose Burning Steppes on the same continent"
+      "option": 7,
+      "label": "choose Azshara, across the sea"
     },
     {
       "action": "assert",
-      "label": "the character is over Burning Steppes",
+      "label": "the character crosses to Kalimdor",
+      "actor": "drop",
+      "metric": "map_id",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "over Azshara",
       "actor": "drop",
       "metric": "position_x",
-      "min": -8124,
-      "max": -8113,
-      "within_ms": 5000
+      "min": 3198,
+      "max": 3209
     },
     {
       "action": "assert",
       "label": "high above the ground",
       "actor": "drop",
       "metric": "position_z",
-      "min": 249,
-      "max": 258
+      "min": 273,
+      "max": 282
     },
     {
       "action": "assert",
-      "label": "with a parachute",
+      "label": "with a parachute once it has arrived",
       "actor": "drop",
       "metric": "aura",
       "spell": 45472,

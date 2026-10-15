@@ -305,6 +305,46 @@ void Ids()
     assert(id == "01234567-89ab-4def-bedc-ba9876543210");
     assert(FormatId({ 0, 0, 0, 0 }) == "00000000-0000-4000-8000-000000000000");
 }
+
+void Activation()
+{
+    Build build = Valid();
+    build.Id = "guide";
+    build.Class = HERO;
+    assert(Activate(nullptr, HERO, "") == ACTIVATE_NOT_FOUND);
+    assert(Activate(&build, HERO, "") == ACTIVATE_OK);
+    assert(Activate(&build, HERO, "other") == ACTIVATE_OK);
+    assert(Activate(&build, HERO, "guide") == ACTIVATE_ALREADY_ACTIVE);
+    assert(Activate(&build, 1, "") == ACTIVATE_CLASS_MISMATCH);
+    build.NeedsRepairs = 1;
+    assert(Activate(&build, HERO, "") == ACTIVATE_NEEDS_REPAIRS);
+    build.NeedsRepairs = 0;
+    for (std::uint32_t category : { CATEGORY_BUILD_DRAFT, CATEGORY_BUILD_DRAFT_END_GAME_PVE,
+        CATEGORY_BUILD_DRAFT_END_GAME_PVP })
+    {
+        build.Category = category;
+        assert(Activate(&build, HERO, "") == ACTIVATE_NOT_DRAFTED);
+    }
+    assert(std::string(ACTIVATE_RESULTS[ACTIVATE_OK]) == "ACTIVATE_BUILD_OK");
+    assert(std::string(ACTIVATE_RESULTS[ACTIVATE_CLASS_MISMATCH]) == "ACTIVATE_BUILD_NOT_WARCRAFT_REBORN");
+    assert(std::string(ACTIVATE_RESULTS[ACTIVATE_NOT_DRAFTED]) == "ACTIVATE_BUILD_DRAFTED_BUILD_NOT_FOUND");
+
+    assert(Deactivate(true, "guide", "guide") == DEACTIVATE_OK);
+    assert(Deactivate(false, "guide", "guide") == DEACTIVATE_OK);
+    assert(Deactivate(true, "guide", "other") == DEACTIVATE_NOT_ACTIVE);
+    assert(Deactivate(true, "guide", "") == DEACTIVATE_NOT_ACTIVE);
+    assert(Deactivate(false, "guide", "") == DEACTIVATE_NOT_FOUND);
+    assert(Deactivate(true, "", "") == DEACTIVATE_NOT_ACTIVE);
+    assert(std::string(DEACTIVATE_RESULTS[DEACTIVATE_NOT_ACTIVE]) == "DEACTIVATE_BUILD_NOT_ACTIVE");
+
+    Buffer out;
+    WriteActiveBuild(out, ActiveBuild{ "guide", { 1, 0 } });
+    assert(out.bytes == (std::vector<std::uint8_t>{ 'g', 'u', 'i', 'd', 'e', 0, 1, 0 }));
+    Buffer empty;
+    WriteActiveBuild(empty, ActiveBuild{});
+    assert(empty.bytes == (std::vector<std::uint8_t>{ 0, 0, 0 }));
+    assert(ActiveBuilds{}.size() == SPECIALIZATIONS);
+}
 }
 
 int main()
@@ -315,4 +355,5 @@ int main()
     Categories();
     Paging();
     Ids();
+    Activation();
 }

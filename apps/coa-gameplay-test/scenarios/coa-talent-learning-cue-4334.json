@@ -1,0 +1,333 @@
+{
+  "schema": 1,
+  "name": "Applying paid CoA talent points plays one learning cue (#4334)",
+  "contract": [
+    "The report describes the Level Up animation and sound when applying paid CoA talent points.",
+    "CharacterAdvancement entry6272 buys Mass Nightmare805114 for a level15 Cultist.",
+    "Harmless self-dummy spell47292 uses visual7265, cast kit6375, SpellLevelUp.mdx and sound1440 LevelUp.wav.",
+    "A successful new purchase sends exactly one completed cue to the learner and nearby observer.",
+    "No-op, rejected and removal-only uploads send no cue; character level and XP remain unchanged.",
+    "This checks native packet broadcasts and authored visual data, not client rendering or audible playback."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": 5064.31,
+    "y": 574.514,
+    "z": 15.0059,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 25,
+      "level": 15
+    },
+    {
+      "id": "observer",
+      "race": 1,
+      "class": 1,
+      "level": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_money",
+      "actor": "cultist",
+      "value": 1000000
+    },
+    {
+      "action": "assert",
+      "label": "Mass Nightmare starts unlearned",
+      "actor": "cultist",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 805114
+    },
+    {
+      "action": "snapshot",
+      "actor": "cultist",
+      "metric": "xp",
+      "save_as": "xp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cultist",
+      "metric": "spell_go_count",
+      "save_as": "cultist_cue",
+      "spell": 47292,
+      "caster": "cultist"
+    },
+    {
+      "action": "snapshot",
+      "actor": "observer",
+      "metric": "spell_go_count",
+      "save_as": "observer_cue",
+      "spell": 47292,
+      "caster": "cultist"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cultist",
+      "metric": "server_packets",
+      "save_as": "replies1",
+      "opcode": 1836
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "cultist",
+      "entry": 6272,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "label": "The upload receives one reply",
+      "actor": "cultist",
+      "metric": "server_packets",
+      "equals": 1,
+      "opcode": 1836,
+      "relative_to": "replies1",
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The paid purchase learns Mass Nightmare",
+      "actor": "cultist",
+      "metric": "knows_spell",
+      "equals": 1,
+      "spell": 805114
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Successful purchase: cultist receives exactly the successful purchase cue",
+      "actor": "cultist",
+      "metric": "spell_go_count",
+      "equals": 1,
+      "spell": 47292,
+      "caster": "cultist",
+      "relative_to": "cultist_cue"
+    },
+    {
+      "action": "assert",
+      "label": "Successful purchase: observer receives exactly the successful purchase cue",
+      "actor": "observer",
+      "metric": "spell_go_count",
+      "equals": 1,
+      "spell": 47292,
+      "caster": "cultist",
+      "relative_to": "observer_cue"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cultist",
+      "metric": "server_packets",
+      "save_as": "replies2",
+      "opcode": 1836
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "cultist",
+      "entry": 6272,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "label": "The upload receives one reply",
+      "actor": "cultist",
+      "metric": "server_packets",
+      "equals": 1,
+      "opcode": 1836,
+      "relative_to": "replies2",
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Unchanged upload: cultist receives exactly the successful purchase cue",
+      "actor": "cultist",
+      "metric": "spell_go_count",
+      "equals": 1,
+      "spell": 47292,
+      "caster": "cultist",
+      "relative_to": "cultist_cue"
+    },
+    {
+      "action": "assert",
+      "label": "Unchanged upload: observer receives exactly the successful purchase cue",
+      "actor": "observer",
+      "metric": "spell_go_count",
+      "equals": 1,
+      "spell": 47292,
+      "caster": "cultist",
+      "relative_to": "observer_cue"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cultist",
+      "metric": "server_packets",
+      "save_as": "replies3",
+      "opcode": 1836
+    },
+    {
+      "action": "client_packet",
+      "actor": "cultist",
+      "opcode": 1831,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 999999
+        },
+        {
+          "u32": 1
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The upload receives one reply",
+      "actor": "cultist",
+      "metric": "server_packets",
+      "equals": 1,
+      "opcode": 1836,
+      "relative_to": "replies3",
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Unknown entry is refused",
+      "actor": "cultist",
+      "metric": "server_packet_contains",
+      "equals": 1,
+      "opcode": 1836,
+      "text": "CA_UPDATE_ENTRIES_BAD_ENTRY"
+    },
+    {
+      "action": "assert",
+      "label": "Refusal preserves the existing paid talent",
+      "actor": "cultist",
+      "metric": "knows_spell",
+      "equals": 1,
+      "spell": 805114
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Refused upload: cultist receives exactly the successful purchase cue",
+      "actor": "cultist",
+      "metric": "spell_go_count",
+      "equals": 1,
+      "spell": 47292,
+      "caster": "cultist",
+      "relative_to": "cultist_cue"
+    },
+    {
+      "action": "assert",
+      "label": "Refused upload: observer receives exactly the successful purchase cue",
+      "actor": "observer",
+      "metric": "spell_go_count",
+      "equals": 1,
+      "spell": 47292,
+      "caster": "cultist",
+      "relative_to": "observer_cue"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cultist",
+      "metric": "server_packets",
+      "save_as": "replies4",
+      "opcode": 1836
+    },
+    {
+      "action": "advancement_rank",
+      "actor": "cultist",
+      "entry": 6272,
+      "rank": 0
+    },
+    {
+      "action": "assert",
+      "label": "The upload receives one reply",
+      "actor": "cultist",
+      "metric": "server_packets",
+      "equals": 1,
+      "opcode": 1836,
+      "relative_to": "replies4",
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Removal forgets the paid talent",
+      "actor": "cultist",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 805114
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Removal-only upload: cultist receives exactly the successful purchase cue",
+      "actor": "cultist",
+      "metric": "spell_go_count",
+      "equals": 1,
+      "spell": 47292,
+      "caster": "cultist",
+      "relative_to": "cultist_cue"
+    },
+    {
+      "action": "assert",
+      "label": "Removal-only upload: observer receives exactly the successful purchase cue",
+      "actor": "observer",
+      "metric": "spell_go_count",
+      "equals": 1,
+      "spell": 47292,
+      "caster": "cultist",
+      "relative_to": "observer_cue"
+    },
+    {
+      "action": "assert",
+      "label": "The learning effect does not level the character",
+      "actor": "cultist",
+      "metric": "level",
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "The learning effect grants no XP",
+      "actor": "cultist",
+      "metric": "xp",
+      "equals": 0,
+      "relative_to": "xp"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Primalist Ancient of War form and Hammer effectiveness",
-  "contract": "The twenty-second form selects the available Ancient of War display, reduces movement by thirty percent, keeps native auto-attack swinging and damaging, adds twenty points of melee/spell crit to the party, and increases Hammer of Life conversion from twenty to twenty-six percent. Expiry restores all modifiers; actual damage and healing copies are checked independently. Specialization 58 grants Infused With Power 503718 (ProcChance 20): effective Hammer of Life heals apply 503719, +5% critical strike chance to the party (SPELL_AURA_MOD_CRIT_PCT, BasePoints 4) for 10000 ms. The baseline Wildclaw's Hammer of Life heal on the ally sometimes applied it just before the crit baselines were taken, so the primalist and the ally read 5 points higher there and -5 after expiry while the ungrouped outsider did not; the scenario unlearns the unrelated proc and checks the buff is absent from the baselines.",
+  "contract": "The twenty-second form transforms into creature 346922 with its own Ancient of War form display 111212 (client scale 0.7) rather than NPC display 1461 at client scale 3.0 (#7519), reduces movement by thirty percent, keeps native auto-attack swinging and damaging, adds twenty points of melee/spell crit to the party, and increases Hammer of Life conversion from twenty to twenty-six percent. Expiry restores all modifiers; actual damage and healing copies are checked independently. Specialization 58 grants Infused With Power 503718 (ProcChance 20): effective Hammer of Life heals apply 503719, +5% critical strike chance to the party (SPELL_AURA_MOD_CRIT_PCT, BasePoints 4) for 10000 ms. The baseline Wildclaw's Hammer of Life heal on the ally sometimes applied it just before the crit baselines were taken, so the primalist and the ally read 5 points higher there and -5 after expiry while the ungrouped outsider did not; the scenario unlearns the unrelated proc and checks the buff is absent from the baselines.",
   "players": [
     {
       "id": "primalist",
@@ -414,7 +414,7 @@
       "action": "assert",
       "actor": "primalist",
       "metric": "display_id",
-      "equals": 1461,
+      "equals": 111212,
       "within_ms": 1000
     },
     {

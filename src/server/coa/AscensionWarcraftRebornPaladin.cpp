@@ -1,11 +1,13 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionWarcraftRebornPaladin.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
 #include "SpellInfo.h"
 #include "SpellScript.h"
 #include <algorithm>
+#include <array>
 #include <vector>
 
 namespace AscensionWarcraftReborn
@@ -16,6 +18,16 @@ constexpr uint32 BLESSING_OF_SANCTUARY_BUFF = 1167480;
 constexpr uint32 BLESSING_OF_SANCTUARY_ENERGIZE = 57319;
 constexpr uint32 RIGHTEOUS_DEFENSE_TAUNT = 1131790;
 constexpr std::size_t RIGHTEOUS_DEFENSE_TARGETS = 3;
+constexpr uint32 RIGHTEOUS_FURY = 1125780;
+constexpr std::array<uint32, 3> HEALING_LIGHT = { 1120237, 1120238, 1120239 };
+constexpr std::array<uint32, 3> SANCTIFIED_LIGHT = { 1120359, 1120360, 1120361 };
+constexpr uint32 HOLY_LIGHT_FLAG = 0x80000000;
+constexpr uint32 HOLY_SHOCK_FLAG = 0x00200000;
+
+bool IsOneOf(std::array<uint32, 3> const& spells, uint32 spellId)
+{
+    return std::find(spells.begin(), spells.end(), spellId) != spells.end();
+}
 
 class spell_ascension_reborn_blessing_of_sanctuary : public AuraScript
 {
@@ -106,6 +118,24 @@ class spell_ascension_reborn_righteous_defense : public SpellScript
     }
 };
 }
+}
+
+void ApplyAscensionWarcraftRebornPaladinContracts(SpellInfo* spellInfo)
+{
+    using namespace AscensionWarcraftReborn;
+    if (!spellInfo)
+        return;
+
+    if (spellInfo->Id == RIGHTEOUS_FURY)
+        for (SpellEffectInfo& effect : spellInfo->Effects)
+            if (effect.ApplyAuraName == SPELL_AURA_MOD_THREAT)
+                effect.RealPointsPerLevel = 0.0f;
+
+    if (IsOneOf(HEALING_LIGHT, spellInfo->Id) && spellInfo->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_ADD_PCT_MODIFIER)
+        spellInfo->Effects[EFFECT_0].SpellClassMask[0] |= HOLY_SHOCK_FLAG;
+
+    if (IsOneOf(SANCTIFIED_LIGHT, spellInfo->Id) && spellInfo->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_ADD_FLAT_MODIFIER)
+        spellInfo->Effects[EFFECT_0].SpellClassMask[0] |= HOLY_LIGHT_FLAG | HOLY_SHOCK_FLAG;
 }
 
 void AddAscensionWarcraftRebornPaladinScripts()

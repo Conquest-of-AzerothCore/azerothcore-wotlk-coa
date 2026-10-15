@@ -1305,6 +1305,13 @@ public:
                 data << field;
             player->SendDirectMessage(&data);
         }
+        for (uint32 rotation : { week, (week + 1) % 53 })
+        {
+            WorldPacket data(SMSG_PATCH_MYTHIC_AFFIXES, 16 * sizeof(uint32));
+            for (uint32 field : Data::Instance().PlusOneAffixRow(rotation))
+                data << field;
+            player->SendDirectMessage(&data);
+        }
     }
 
     void OnPlayerResurrect(Player* player, float /*restorePercent*/, bool& /*applySickness*/) override

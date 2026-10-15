@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "Config.h"
 #include "DBCStores.h"
 #include "Item.h"
 #include "ObjectMgr.h"
@@ -10,6 +11,7 @@
 #include "SpellScript.h"
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <iterator>
 #include <map>
 #include <set>
@@ -24,6 +26,19 @@ namespace
 {
 constexpr std::array<std::string_view, 3> QualityTiers{ "@Refined@", "@Superior@", "@Masterwork@" };
 constexpr int32 BaseTier = -1;
+std::atomic<uint32> MaxUpgradeSteps{ 2 };
+
+class UpgradeKitConfiguration : public WorldScript
+{
+public:
+    UpgradeKitConfiguration() : WorldScript("AscensionUpgradeKitConfiguration", {WORLDHOOK_ON_AFTER_CONFIG_LOAD}) { }
+
+    void OnAfterConfigLoad(bool) override
+    {
+        int32 const configured = sConfigMgr->GetOption<int32>("CoA.Crafting.MaxUpgradeSteps", 2);
+        MaxUpgradeSteps.store(uint32(std::clamp(configured, 0, 3)), std::memory_order_relaxed);
+    }
+};
 
 using AppearanceKey = std::tuple<std::string, uint32, uint32, uint32, uint32>;
 
@@ -44,6 +59,31 @@ int32 TierOf(ItemTemplate const& proto)
 {
     auto tier = std::find(QualityTiers.begin(), QualityTiers.end(), proto.Description);
     return tier == QualityTiers.end() ? BaseTier : int32(std::distance(QualityTiers.begin(), tier));
+}
+
+bool UpgradeAllowed(uint32 entry)
+{
+    ItemTemplate const* proto = sObjectMgr->GetItemTemplate(entry);
+    return proto && TierOf(*proto) != BaseTier
+        && uint32(TierOf(*proto) + 1) <= MaxUpgradeSteps.load(std::memory_order_relaxed);
+}
+
+bool ItemUpgradeAllowed(ItemTemplate const& proto)
+{
+    constexpr std::array<std::string_view, 8> blockedFamilies
+    {
+        "Reforged Blade of Heroes",
+        "Rituals of the New Moon",
+        "Crafted GUN 1",
+        "Crafted Shield 1",
+        "Crafted Sword 1",
+        "Crafted 1h mace 1",
+        "Slender Spellbook",
+        "Poison Staff",
+    };
+    return proto.InventoryType != INVTYPE_BODY && proto.Class != ITEM_CLASS_CONTAINER
+        && proto.Class != ITEM_CLASS_QUIVER && !proto.ContainerSlots && proto.ItemId != 6219
+        && std::find(blockedFamilies.begin(), blockedFamilies.end(), proto.Name1) == blockedFamilies.end();
 }
 
 AppearanceKey AppearanceOf(ItemTemplate const& proto)
@@ -82,7 +122,8 @@ void LinkQualityChains(UpgradeCatalog& catalog)
     for (auto const& [entry, recipes] : catalog.recipes)
     {
         ItemTemplate const* proto = sObjectMgr->GetItemTemplate(entry);
-        if (proto && TierOf(*proto) == BaseTier && variants.count(AppearanceOf(*proto)))
+        if (proto && ItemUpgradeAllowed(*proto) && TierOf(*proto) == BaseTier
+            && variants.count(AppearanceOf(*proto)))
             bases[AppearanceOf(*proto)].insert(entry);
     }
 
@@ -148,12 +189,15 @@ bool KitMatches(UpgradeCatalog const& catalog, uint32 kitEntry, uint32 targetEnt
 
 Item* CreateUpgradedCopy(Player* player, Item* item, uint32 entry)
 {
-    Item* upgraded = Item::CreateItem(entry, 1, player);
+    Item* upgraded = Item::CreateItem(entry, 1, player, true);
     if (!upgraded)
         return nullptr;
 
+    upgraded->SetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID, item->GetItemRandomPropertyId());
+    upgraded->SetUInt32Value(ITEM_FIELD_PROPERTY_SEED, item->GetItemSuffixFactor());
+
     player->UpdateEnchantmentDurations();
-    for (uint8 slot = PERM_ENCHANTMENT_SLOT; slot < MAX_INSPECTED_ENCHANTMENT_SLOT; ++slot)
+    for (uint8 slot = PERM_ENCHANTMENT_SLOT; slot < MAX_ENCHANTMENT_SLOT; ++slot)
     {
         EnchantmentSlot const enchantSlot = EnchantmentSlot(slot);
         if (uint32 enchant = item->GetEnchantmentId(enchantSlot))
@@ -226,7 +270,8 @@ class spell_ascension_upgrade_kit : public SpellScript
         Player* player = GetCaster()->ToPlayer();
         Item* kit = GetCastItem();
         Item* target = GetExplTargetItem();
-        if (!player || !kit || !target || target->GetOwnerGUID() != player->GetGUID() || target->IsInTrade())
+        if (!player || !kit || !target || target->GetOwnerGUID() != player->GetGUID() || target->IsInTrade()
+            || !ItemUpgradeAllowed(*target->GetTemplate()))
             return SPELL_FAILED_BAD_TARGETS;
 
         UpgradeCatalog const& catalog = Catalog();
@@ -239,6 +284,9 @@ class spell_ascension_upgrade_kit : public SpellScript
             player->SendEquipError(EQUIP_ERR_CAN_ONLY_DO_WITH_EMPTY_BAGS, target, nullptr);
             return SPELL_FAILED_DONT_REPORT;
         }
+
+        if (!UpgradeAllowed(next->second))
+            return SPELL_FAILED_BAD_TARGETS;
 
         if (!target->IsEquipped())
             return SPELL_CAST_OK;
@@ -256,12 +304,12 @@ class spell_ascension_upgrade_kit : public SpellScript
         PreventHitDefaultEffect(effIndex);
         Player* player = GetCaster()->ToPlayer();
         Item* target = GetHitItem();
-        if (!player || !target)
+        if (!player || !target || !ItemUpgradeAllowed(*target->GetTemplate()))
             return;
 
         UpgradeCatalog const& catalog = Catalog();
         auto next = catalog.next.find(target->GetEntry());
-        if (next != catalog.next.end())
+        if (next != catalog.next.end() && UpgradeAllowed(next->second))
             ReplaceItem(player, target, next->second, GetSpell());
     }
 
@@ -276,5 +324,6 @@ class spell_ascension_upgrade_kit : public SpellScript
 
 void AddSC_AscensionUpgradeKits()
 {
+    new UpgradeKitConfiguration();
     RegisterSpellScript(spell_ascension_upgrade_kit);
 }

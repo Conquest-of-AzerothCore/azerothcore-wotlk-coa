@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Path to Ascension: Novice Rider is not offered while the starter mount bridge is disabled (#6444)",
+  "contract": [
+    "Report #6444 part 2: Path to Ascension offers 'Path to Ascension: Novice Rider' (quests 4420430-4420439), which cannot be completed.",
+    "Tutorial.dbc rows 110-119 (one per race, Human 110 -> quest 4420430) are verified only by CheckStarterMountTutorial, which needs the starter mount that VisitStarterMountTrainer hands out, and that writer runs only with PathToAscension.StarterMountBridge.Enable. Its default, and the value in every test and realm config, is 0.",
+    "Decided expectation: while the bridge is disabled, IsQuestAvailable (the module's OnPlayerCanTakeQuest hook) does not offer the starter mount tutorials' quests. Other tracking quests keep their behaviour.",
+    "Before the change a level 10 Human can take 4420430 (tutorial 110: category 1, realm availability 1, expansion 3, no prerequisite, any class). This scenario assumes the module config keeps the bridge at 0 and Rewards/Tracking at 1, as the distributed config does."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "rider", "race": 1, "class": 1, "level": 10 }
+  ],
+  "location": { "map": 0, "x": -8833.38, "y": 628.628, "z": 94.0066, "o": 1.06535 },
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "Control: the Dungeon Diving tracking quest (tutorial 13) can still be taken",
+      "actor": "rider", "metric": "quest_takeable", "quest": 580144, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The Human Novice Rider quest cannot be taken while the bridge is disabled",
+      "actor": "rider", "metric": "quest_takeable", "quest": 4420430, "equals": 0
+    }
+  ]
+}

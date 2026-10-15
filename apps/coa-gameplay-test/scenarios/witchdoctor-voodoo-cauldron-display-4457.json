@@ -70,6 +70,14 @@
     },
     {
       "action": "assert",
+      "label": "The hidden helper draws nothing: it must not wear the shared caltrop doodad display that rendered over the player (#7675)",
+      "actor": "doctor",
+      "metric": "owned_creature_display",
+      "entry": 506011,
+      "equals": 11686
+    },
+    {
+      "action": "assert",
       "actor": "doctor",
       "metric": "owned_creature_visible",
       "entry": 506011,

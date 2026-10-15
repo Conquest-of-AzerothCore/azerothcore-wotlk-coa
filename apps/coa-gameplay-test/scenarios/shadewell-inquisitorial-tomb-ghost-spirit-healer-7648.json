@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Shadewell: a ghost released in the Secret Inquisitorial Dungeon reaches the Shadewell Spring Spirit Healer (#7648)",
+  "contract": "A player who dies in zone 10197 (Secret Inquisitorial Dungeon) releases at Shadewell Spring 6074 (-8594.75,-615.457,144.698), the graveyard linked to that zone, and its Spirit Healer 6491 stands about 9 yards from it. Death and spirit release use the native handlers.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8651.175,
+    "y": -279.6551,
+    "z": 54.34804,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 11
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "die",
+      "actor": "cleric"
+    },
+    {
+      "action": "release_spirit",
+      "actor": "cleric"
+    },
+    {
+      "action": "assert",
+      "label": "The released player is a ghost",
+      "actor": "cleric",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ghost lands at the Shadewell Spring graveyard",
+      "actor": "cleric",
+      "metric": "position_x",
+      "min": -8610,
+      "max": -8580,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "position_y",
+      "min": -630,
+      "max": -600
+    },
+    {
+      "action": "assert",
+      "label": "A Spirit Healer stands at the ghost's graveyard",
+      "actor": "cleric",
+      "metric": "nearby_creature_template",
+      "entry": 6491,
+      "equals": 6491
+    }
+  ]
+}
