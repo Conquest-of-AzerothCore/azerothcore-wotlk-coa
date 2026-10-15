@@ -1,0 +1,1 @@
+Its very important to extract the content of patch ZZ and then replace the files in client patches with its content for the manastorm UI to work The content that needs replaced is in the Patch B in the client
