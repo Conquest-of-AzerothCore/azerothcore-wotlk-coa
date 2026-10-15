@@ -28,7 +28,9 @@ enum RunemasterTravelSpells : uint32
     SPELL_WARP_DAMAGE = 500495,
     SPELL_WARP = 500587,
     SPELL_WARP_VISUAL = 500588,
-    SPELL_WARP_SUMMON = 500606
+    SPELL_WARP_SUMMON = 500606,
+    SPELL_BLADE_RIFT = 520237,
+    SPELL_BLADE_RIFT_PROC = 520238
 };
 
 enum RunemasterTravelCreatures : uint32
@@ -236,7 +238,11 @@ class spell_ascension_runemaster_travel : public SpellScript
         if (GetSpellInfo()->Id != SPELL_WARPDAGGER)
             return;
         PreventHitDefaultEffect(index);
-        StartTravel(GetCaster()->ToPlayer(), SPELL_WARPDAGGER);
+        Player* player = GetCaster()->ToPlayer();
+        if (!StartTravel(player, SPELL_WARPDAGGER))
+            return;
+        if (!GetSpell()->IsTriggered() && player->HasStealthAura() && player->HasAura(SPELL_BLADE_RIFT))
+            player->CastSpell(player, SPELL_BLADE_RIFT_PROC, true);
     }
 
     void ApplyShroudwalker()
