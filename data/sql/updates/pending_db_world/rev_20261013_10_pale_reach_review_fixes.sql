@@ -139,3 +139,13 @@ UPDATE `gameobject_loot_template` SET `MinCount` = 1, `MaxCount` = 1 WHERE `Entr
 
 -- No One to Bring Her Flowers names her Martha Argos; the gravestone object read "Agros".
 UPDATE `gameobject_template` SET `name` = 'Martha Argos Gravestone' WHERE `entry` = 2310431;
+
+-- #10: the Stormwind Keep door sticks from the keep side until the character first opens it from the hallway.
+UPDATE `gameobject_template` SET `ScriptName` = 'go_coa_stormwind_keep_door' WHERE `entry` = 2300653;
+
+DELETE FROM `gameobject` WHERE `guid` = 9999303;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `Comment`) VALUES
+(9999303, 2300653, 0, 0, 0, 1, 1, -8277.754, 268.841, 127.203, 5.3612, 0, 0, -0.444844, 0.895608, 300, 0, 1, 'Stormwind Keep: Petitioner''s Chamber hallway door, fitted to the keep doorway');
+
+-- They Grabbed Her By The Ankle: each clue counts once per character and then disappears for that character.
+UPDATE `gameobject_template` SET `ScriptName` = 'go_coa_shadewell_clue' WHERE `entry` BETWEEN 2300672 AND 2300676;

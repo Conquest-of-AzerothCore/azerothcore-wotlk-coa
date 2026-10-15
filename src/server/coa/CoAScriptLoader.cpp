@@ -309,6 +309,8 @@ void AddSC_AscensionFeatherOfAncients();
 void AddSC_AscensionVultureCultQuests();
 void AddSC_AscensionCaravanCarts();
 void AddSC_AscensionNorthshireRuins();
+void AddSC_AscensionStormwindKeepDoor();
+void AddSC_AscensionShadewellClues();
 void AddSC_AscensionCainManor();
 void AddSC_AscensionExperimentalTeleporter();
 void AddSC_AscensionThreeTotems();
@@ -587,6 +589,8 @@ void AddCoAScripts()
     AddSC_AscensionVultureCultQuests();
     AddSC_AscensionCaravanCarts();
     AddSC_AscensionNorthshireRuins();
+    AddSC_AscensionStormwindKeepDoor();
+    AddSC_AscensionShadewellClues();
     AddSC_AscensionCainManor();
     AddSC_AscensionExperimentalTeleporter();
     AddSC_AscensionThreeTotems();

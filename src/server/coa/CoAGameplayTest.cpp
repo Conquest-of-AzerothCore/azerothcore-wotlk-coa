@@ -2601,6 +2601,11 @@ private:
             GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
             return object ? uint32(object->GetGoState()) : 99;
         }
+        if (metric == "nearby_gameobject_at_client")
+        {
+            GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
+            return object && player->HaveAtClient(object) ? 1.0 : 0.0;
+        }
         if (metric == "loot_bloodforged")
         {
             Loot* window = nullptr;
@@ -4971,10 +4976,18 @@ private:
         }
         else if (action == "use_gameobject")
         {
-            std::list<GameObject*> objects = OwnedGameObjects(player, step.get<uint32>("entry"));
-            Require(objects.size() == 1, "Gameobject use needs exactly one owned object");
+            GameObject* object = nullptr;
+            if (step.get<bool>("nearby", false))
+                object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
+            else
+            {
+                std::list<GameObject*> objects = OwnedGameObjects(player, step.get<uint32>("entry"));
+                Require(objects.size() == 1, "Gameobject use needs exactly one owned object");
+                object = objects.front();
+            }
+            Require(object != nullptr, "No gameobject of that entry within 20 yards");
             WorldPacket packet(CMSG_GAMEOBJ_USE, 8);
-            packet << objects.front()->GetGUID();
+            packet << object->GetGUID();
             player->GetSession()->HandleGameObjectUseOpcode(packet);
             record.put("result", "submitted; verify effects with assertions");
         }
