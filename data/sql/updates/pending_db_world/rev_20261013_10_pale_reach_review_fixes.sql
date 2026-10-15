@@ -134,39 +134,5 @@ INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `e
 (9961474, 0, 0, 0, 1, 69, 0, ''),
 (9961498, 0, 0, 8, 1, 0, 0, '');
 
--- World map markers for Roadside Violence and A Sword for the North: each objective's area is its targets' spawn hull
--- widened by 8 yd (Stolen Goods; Road Bandits; Road Marauders), turn-ins at the QuestSuperTrack ender points 9109/9110.
-DELETE FROM `quest_poi` WHERE `QuestID` IN (175018, 175019);
-INSERT INTO `quest_poi` (`QuestID`, `id`, `ObjectiveIndex`, `MapID`, `WorldMapAreaId`, `Floor`, `Priority`, `Flags`) VALUES
-(175018, 0, 4, 0, 2062, 0, 0, 1),
-(175018, 1, -1, 0, 2062, 0, 0, 1),
-(175019, 0, 0, 0, 2062, 0, 0, 1),
-(175019, 1, 1, 0, 2062, 0, 0, 1),
-(175019, 2, -1, 0, 2062, 0, 0, 1);
-DELETE FROM `quest_poi_points` WHERE `QuestID` IN (175018, 175019);
-INSERT INTO `quest_poi_points` (`QuestID`, `Idx1`, `Idx2`, `X`, `Y`) VALUES
-(175018, 0, 0, -7908, 783),
-(175018, 0, 1, -7861, 764),
-(175018, 0, 2, -7791, 826),
-(175018, 0, 3, -7833, 879),
-(175018, 0, 4, -7844, 874),
-(175018, 0, 5, -7905, 817),
-(175018, 1, 0, -8071, 748),
-(175019, 0, 0, -8043, 830),
-(175019, 0, 1, -8029, 806),
-(175019, 0, 2, -8000, 789),
-(175019, 0, 3, -7855, 773),
-(175019, 0, 4, -7780, 863),
-(175019, 0, 5, -7777, 870),
-(175019, 0, 6, -7993, 844),
-(175019, 1, 0, -7907, 817),
-(175019, 1, 1, -7809, 816),
-(175019, 1, 2, -7791, 824),
-(175019, 1, 3, -7784, 850),
-(175019, 1, 4, -7800, 875),
-(175019, 1, 5, -7843, 876),
-(175019, 1, 6, -7876, 859),
-(175019, 2, 0, -8071, 751);
-
 -- Each Stolen Goods crate yields one Stolen Goods.
 UPDATE `gameobject_loot_template` SET `MinCount` = 1, `MaxCount` = 1 WHERE `Entry` = 2300635 AND `Item` = 559855;
