@@ -56,12 +56,16 @@ struct boss_gyth : public BossAI
 
     void Reset() override
     {
+        if (instance->GetBossState(DATA_WARCHIEF_REND_BLACKHAND) == DONE)
+        {
+            events.Reset();
+            return;
+        }
+
         if (instance->GetBossState(DATA_GYTH) == IN_PROGRESS)
         {
             instance->SetBossState(DATA_GYTH, NOT_STARTED);
-            // Rend died first and Gyth then wiped the party: keep Rend's corpse and loot.
-            if (instance->GetBossState(DATA_WARCHIEF_REND_BLACKHAND) != DONE)
-                summons.DespawnAll();
+            summons.DespawnAll();
             me->DespawnOrUnsummon();
         }
 
@@ -87,7 +91,6 @@ struct boss_gyth : public BossAI
 
     void EnterEvadeMode(EvadeReason why) override
     {
-        // A dead Rend stays DONE; FAIL would close the stadium exit again.
         if (instance->GetBossState(DATA_WARCHIEF_REND_BLACKHAND) != DONE)
             instance->SetBossState(DATA_WARCHIEF_REND_BLACKHAND, FAIL);
         BossAI::EnterEvadeMode(why);
