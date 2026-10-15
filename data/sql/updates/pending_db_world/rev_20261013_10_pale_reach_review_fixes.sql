@@ -29,3 +29,6 @@ DELETE FROM `creature` WHERE `guid` IN (9920754, 9920755) AND `id` = 164552;
 
 -- Playtest 2026-10-14: the wandering Graysky Guard on the keep road duplicates the road patrol (user decision).
 DELETE FROM `creature` WHERE `guid` = 9960838 AND `id` = 164173;
+
+-- #79: the client reports the use on click (filter 2 fired then); filter 1 runs the teleport from the open-lock cast's completion.
+UPDATE `smart_scripts` SET `event_param1` = 1 WHERE `entryorguid` IN (2310423, 2310427) AND `source_type` = 1 AND `id` = 0 AND `event_type` = 64;
