@@ -21,6 +21,7 @@
 #include "CreatureScript.h"
 #include "GameObjectAI.h"
 #include "GameObjectScript.h"
+#include "GameTime.h"
 #include "GridNotifiers.h"
 #include "InstanceMapScript.h"
 #include "InstanceScript.h"
@@ -91,6 +92,42 @@ struct instance_blackrock_spire : public InstanceScript
         VaelastraszState   = NOT_STARTED;
     }
 
+    void OnPlayerEnter(Player* player) override
+    {
+        InstanceScript::OnPlayerEnter(player);
+
+        // The balcony Rend despawns himself when he calls Gyth, with his 2h respawn pending. If
+        // the instance was unloaded before the arena was over, the encounter loads NOT_STARTED
+        // with no Rend to start it: bring him back now. Not while the arena runs, or a player
+        // returning from a corpse run would pull a second Rend into the fight.
+        if (GetBossState(DATA_WARCHIEF_REND_BLACKHAND) == DONE ||
+            GetBossState(DATA_WARCHIEF_REND_BLACKHAND) == IN_PROGRESS ||
+            GetBossState(DATA_GYTH) == IN_PROGRESS)
+            return;
+
+        if (!RendSpawnId)
+            for (auto const& [spawnId, data] : sObjectMgr->GetAllCreatureData())
+                if (data.id == NPC_WARCHIEF_REND_BLACKHAND && data.mapid == instance->GetId())
+                {
+                    RendSpawnId = spawnId;
+                    break;
+                }
+
+        time_t now = GameTime::GetGameTime().count();
+        if (!RendSpawnId || instance->GetCreatureRespawnTime(RendSpawnId) <= now)
+            return;
+
+        // A loaded grid may still hold him dead: respawn that one instead of creating a second Rend.
+        auto bounds = instance->GetCreatureBySpawnIdStore().equal_range(RendSpawnId);
+        for (auto itr = bounds.first; itr != bounds.second; ++itr)
+            if (!itr->second->IsAlive())
+            {
+                itr->second->Respawn();
+                return;
+            }
+        instance->SaveCreatureRespawnTime(RendSpawnId, now);
+    }
+
     void CreatureLooted(Creature* creature, LootType loot) override
     {
         switch (creature->GetEntry())
@@ -146,8 +183,12 @@ struct instance_blackrock_spire : public InstanceScript
             case NPC_WARCHIEF_REND_BLACKHAND:
                 if (GetBossState(DATA_GYTH) != IN_PROGRESS)
                     WarchiefRendBlackhand = creature->GetGUID();
+                if (creature->GetSpawnId())
+                    RendSpawnId = creature->GetSpawnId();
 
-                if (GetBossState(DATA_GYTH) == DONE)
+                // Key this on Rend's own state: Gyth can be DONE while Rend is not (Gyth died
+                // first, then the instance reloaded), and the arena could never start again.
+                if (creature->GetSpawnId() && GetBossState(DATA_WARCHIEF_REND_BLACKHAND) == DONE)
                     creature->DisappearAndDie();
                 break;
             case NPC_GYTH:
@@ -161,7 +202,7 @@ struct instance_blackrock_spire : public InstanceScript
                 break;
             case NPC_LORD_VICTOR_NEFARIUS:
                 LordVictorNefarius = creature->GetGUID();
-                if (GetBossState(DATA_GYTH) == DONE)
+                if (GetBossState(DATA_WARCHIEF_REND_BLACKHAND) == DONE)
                     creature->DisappearAndDie();
                 break;
             case NPC_FINKLE_EINHORN:
@@ -294,6 +335,14 @@ struct instance_blackrock_spire : public InstanceScript
                 {
                     if (Creature* rend = instance->GetCreature(WarchiefRendBlackhand))
                         rend->Respawn(true);
+                    else if (RendSpawnId)
+                    {
+                        // With dynamic respawn the balcony Rend left the map when he called Gyth,
+                        // so there is nobody to respawn. Bring him back in a few seconds, after
+                        // the evade has settled DATA_GYTH, so the arena can be started again.
+                        time_t respawnTime = GameTime::GetGameTime().count() + 5;
+                        instance->SaveCreatureRespawnTime(RendSpawnId, respawnTime);
+                    }
 
                     if (Creature* nefarius = instance->GetCreature(LordVictorNefarius))
                         nefarius->AI()->Talk(SAY_NEFARIUS_REND_WIPE);
@@ -634,6 +683,7 @@ protected:
     ObjectGuid OverlordWyrmthalak;
     ObjectGuid PyroguardEmberseer;
     ObjectGuid WarchiefRendBlackhand;
+    ObjectGuid::LowType RendSpawnId = 0;
     ObjectGuid Gyth;
     ObjectGuid LordVictorNefarius;
     ObjectGuid TheBeast;

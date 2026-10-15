@@ -111,6 +111,15 @@ struct boss_rend_blackhand : public BossAI
 
     void Reset() override
     {
+        // Rend is dead: a respawned balcony Rend must not reset the encounter (and close the
+        // stadium exit). Reset runs before OnCreatureCreate, which then removes him.
+        if (instance->GetBossState(DATA_WARCHIEF_REND_BLACKHAND) == DONE)
+        {
+            me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PREPARATION);
+            me->SetImmuneToAll(true);
+            return;
+        }
+
         _Reset();
 
         if (instance->GetBossState(DATA_GYTH) == IN_PROGRESS)
@@ -171,6 +180,11 @@ struct boss_rend_blackhand : public BossAI
     {
         instance->SetBossState(DATA_WARCHIEF_REND_BLACKHAND, FAIL);
         instance->SetBossState(DATA_GYTH, FAIL);
+        // Gyth's Reset only despawns him while DATA_GYTH is IN_PROGRESS, which is FAIL now:
+        // despawn a living Gyth here, or the next attempt summons a second one.
+        if (Creature* gyth = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_GYTH)))
+            if (gyth->IsAlive())
+                gyth->DespawnOrUnsummon();
         BossAI::EnterEvadeMode(why);
         me->DespawnOrUnsummon();
     }
@@ -204,6 +218,11 @@ struct boss_rend_blackhand : public BossAI
     {
         if (type == AREATRIGGER && data == AREATRIGGER_BLACKROCK_STADIUM)
         {
+            // Only the balcony Rend starts the arena. The dismounted Rend summoned by Gyth can be
+            // the nearest living Rend when a player crosses the trigger again mid-fight.
+            if (me->IsSummon() || instance->GetBossState(DATA_WARCHIEF_REND_BLACKHAND) == DONE)
+                return;
+
             if (!_gythEvent)
             {
                 _gythEvent = true;
