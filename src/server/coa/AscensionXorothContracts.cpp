@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionXoroth.h"
 #include "AscensionXorothData.h"
+#include "AscensionClientSpellPatches.h"
 #include "DBCStores.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -171,7 +172,10 @@ void ApplyContracts(SpellInfo* info)
         dummy(2);
     }
     if (id == 805677)
+    {
         info->CasterAuraSpell = 0;
+        Ascension::ClientSpellPatches::Instance().Register(id);
+    }
     if (id == 805965)
     {
         auto& e = info->Effects[0];
