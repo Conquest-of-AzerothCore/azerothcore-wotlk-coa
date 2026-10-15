@@ -57,3 +57,37 @@ INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `e
 DELETE FROM `smart_scripts` WHERE `entryorguid` = 164371 AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `action_type`, `action_param1`, `action_param2`, `target_type`, `comment`) VALUES
 (164371, 0, 0, 0, 7, 0, 100, 0, 91, 1, 0, 1, 'Raven - On evade - Clear sitting state before returning home; addon restores perch on arrival');
+
+-- #8: Lyrielle pauses at both ends of her keep corridor walk instead of turning instantly (pause length inferred).
+UPDATE `waypoint_data` SET `delay` = 5000 WHERE `id` = 99602080 AND `point` IN (1, 2);
+
+-- #37: the SpawnHelper Ealdir Ambusher clone standing on the Oldmist road by Paulo Roble has no live counterpart.
+DELETE FROM `creature` WHERE `guid` = 9920612 AND `id` = 9920070;
+
+-- #38: Paulo Roble lies dead, posed like the Graysky soldier corpses.
+UPDATE `creature_template` SET `unit_flags` = `unit_flags` | 768, `dynamicflags` = 32 WHERE `entry` = 164550;
+DELETE FROM `creature_template_addon` WHERE `entry` = 164550;
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
+(164550, 0, 0, 7, 1, 0, 0, '');
+
+-- #41: the three SpawnHelper Jagged Cave Ealdir clones (template 9920071) double the live-captured cave spawns.
+DELETE FROM `creature_addon` WHERE `guid` = 9920655;
+DELETE FROM `waypoint_data` WHERE `id` = 9921011;
+DELETE FROM `creature` WHERE `guid` IN (9920649, 9920651, 9920655) AND `id` = 9920071;
+
+-- #99: the Graysky soldiers on the Kharadol Bridge (beside its quest objects) are corpses; the Kingsway and manor soldiers stay alive.
+UPDATE `creature` SET `dynamicflags` = 32 WHERE `guid` IN (9960393, 9960394, 9960395, 9960396, 9960397) AND `id` = 164058;
+DELETE FROM `creature_addon` WHERE `guid` IN (9960393, 9960394, 9960395, 9960396, 9960397);
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
+(9960393, 0, 0, 7, 1, 0, 0, ''),
+(9960394, 0, 0, 7, 1, 0, 0, ''),
+(9960395, 0, 0, 7, 1, 0, 0, ''),
+(9960396, 0, 0, 7, 1, 0, 0, ''),
+(9960397, 0, 0, 7, 1, 0, 0, '');
+
+-- #101: all four Rockrend Guards are corpses (one already carried feign death).
+UPDATE `creature_template` SET `dynamicflags` = 32 WHERE `entry` = 164325;
+DELETE FROM `creature_addon` WHERE `guid` = 9960252;
+DELETE FROM `creature_template_addon` WHERE `entry` = 164325;
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
+(164325, 0, 0, 7, 1, 0, 0, '');
