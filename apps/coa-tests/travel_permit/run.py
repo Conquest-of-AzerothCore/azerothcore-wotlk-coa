@@ -21,10 +21,18 @@ def main():
     code += r'''
 constexpr uint32 GOSSIP_ICON_TAXI=1, DEFAULT_GOSSIP_MESSAGE=1;
 struct Item {uint32 id=977028;uint32 GetEntry()const{return id;}uint32 GetGUID()const{return 42;}};
+struct MapEntry {uint32 expansion;uint32 Expansion()const{return expansion;}};
+struct MapStore
+{
+    MapEntry azeroth{0},outland{1};
+    MapEntry const* LookupEntry(uint32 id)const{return id==530?&outland:&azeroth;}
+} sMapStore;
+struct Session {uint32 expansion=2;uint32 Expansion()const{return expansion;}};
 struct Player
 {
-    uint32 level=1;TeamId team=TEAM_ALLIANCE;bool alive=true,combat=false;
+    uint32 level=1;TeamId team=TEAM_ALLIANCE;bool alive=true,combat=false;Session session;
     std::vector<uint32> menu;uint32 shown=0,closed=0,teleports=0,destination=0;float x=0;
+    Session const* GetSession()const{return &session;}
     Player* ToPlayer(){return this;}uint32 GetLevel()const{return level;}uint32 getClass()const{return 29;}
     bool IsAlive()const{return alive;}bool IsInCombat()const{return combat;}TeamId GetTeamId()const{return team;}
     void TeleportTo(uint32 map,float tx,float,float,float){++teleports;destination=map;x=tx;}
@@ -79,6 +87,18 @@ int main()
         select.OnGossipSelect(&p,&item,SenderTravelPermit,actions[0]);assert(p.teleports==before);
         p.combat=false;p.alive=false;assert(spell.CheckCast()==SPELL_FAILED_CASTER_DEAD);
     }
+    for (TeamId team : {TEAM_ALLIANCE,TEAM_HORDE})
+    {
+        Player p;p.team=team;p.session.expansion=0;PermitSpell spell{&p,&item};spell.OpenMenu();
+        assert(p.shown==1 && p.menu.size()==3);
+        for (uint32 action:p.menu)
+            assert(Destinations[action].mapId!=530);
+        uint32 outland=team==TEAM_ALLIANCE?3:7;
+        assert(Destinations[outland].mapId==530 && Destinations[outland].team==team);
+        select.OnGossipSelect(&p,&item,SenderTravelPermit,outland);assert(!p.teleports);
+        p.session.expansion=1;select.OnGossipSelect(&p,&item,SenderTravelPermit,outland);
+        assert(p.teleports==1 && p.destination==530);
+    }
     Player p;PermitSpell spell{&p,&item};manager.missing=RACE_HUMAN;spell.OpenMenu();
     assert(p.menu.size()==3);select.OnGossipSelect(&p,&item,SenderTravelPermit,0);assert(!p.teleports);
     item.id=1;assert(!spell.Load());select.OnGossipSelect(&p,&item,SenderTravelPermit,1);assert(!p.teleports);
@@ -106,7 +126,8 @@ int main()
     assert db.execute("SELECT * FROM item_template ORDER BY entry").fetchall() == [
         (1,"keep"),(977028,"item_ascension_travel_permit")]
     assert db.execute("SELECT COUNT(*) FROM spell_script_names").fetchone() == (2,)
-    print("PASS: faction destinations, level/combat/death gates, stale selections, missing starts and SQL bindings")
+    print("PASS: faction destinations, session expansion maps, level/combat/death gates, stale selections, "
+          "missing starts and SQL bindings")
 
 
 if __name__ == "__main__":
