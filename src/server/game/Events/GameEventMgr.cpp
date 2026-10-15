@@ -1872,31 +1872,44 @@ void GameEventMgr::SendWorldStateUpdate(Player* player, uint16 eventId)
     }
 }
 
+// The hooks run AI actions (respawn, summon, despawn) that insert into or erase from the map's object store.
+// Either can invalidate the loop's iterator (an erase frees the node it stands on), so only the GUIDs are
+// collected and every object is looked up again right before its hook.
 class GameEventAIHookWorker
 {
 public:
-    GameEventAIHookWorker(uint16 eventId, bool activate) : _eventId(eventId), _activate(activate) { }
-
     void Visit(std::unordered_map<ObjectGuid, Creature*>& creatureMap)
     {
         for (auto const& p : creatureMap)
-            if (p.second->IsInWorld() && !p.second->IsDuringRemoveFromWorld() && p.second->FindMap() && p.second->IsAIEnabled && p.second->AI())
-                p.second->AI()->sOnGameEvent(_activate, _eventId);
+            _creatures.push_back(p.first);
     }
 
     void Visit(std::unordered_map<ObjectGuid, GameObject*>& gameObjectMap)
     {
         for (auto const& p : gameObjectMap)
-            if (p.second->IsInWorld() && p.second->FindMap() && p.second->AI())
-                p.second->AI()->OnGameEvent(_activate, _eventId);
+            _gameObjects.push_back(p.first);
     }
 
     template<class T>
     void Visit(std::unordered_map<ObjectGuid, T*>&) { }
 
+    void Run(Map* map, uint16 eventId, bool activate) const
+    {
+        for (ObjectGuid const& guid : _creatures)
+            if (Creature* creature = map->GetCreature(guid))
+                if (creature->IsInWorld() && !creature->IsDuringRemoveFromWorld() && creature->FindMap() &&
+                    creature->IsAIEnabled && creature->AI())
+                    creature->AI()->sOnGameEvent(activate, eventId);
+
+        for (ObjectGuid const& guid : _gameObjects)
+            if (GameObject* gameObject = map->GetGameObject(guid))
+                if (gameObject->IsInWorld() && gameObject->FindMap() && gameObject->AI())
+                    gameObject->AI()->OnGameEvent(activate, eventId);
+    }
+
 private:
-    uint16 _eventId;
-    bool _activate;
+    std::vector<ObjectGuid> _creatures;
+    std::vector<ObjectGuid> _gameObjects;
 };
 
 void GameEventMgr::RunSmartAIScripts(uint16 eventId, bool activate)
@@ -1905,9 +1918,10 @@ void GameEventMgr::RunSmartAIScripts(uint16 eventId, bool activate)
     //! Not entirely sure how this will affect units in non-loaded grids.
     sMapMgr->DoForAllMaps([eventId, activate](Map* map)
     {
-        GameEventAIHookWorker worker(eventId, activate);
+        GameEventAIHookWorker worker;
         TypeContainerVisitor<GameEventAIHookWorker, MapStoredObjectTypesContainer> visitor(worker);
         visitor.Visit(map->GetObjectsStore());
+        worker.Run(map, eventId, activate);
     });
 }
 
