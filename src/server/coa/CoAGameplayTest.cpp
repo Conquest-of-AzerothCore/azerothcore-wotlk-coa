@@ -3226,12 +3226,19 @@ private:
             time_t expiry = objects.front()->GetRespawnTime();
             return expiry ? std::max<time_t>(0, expiry - GameTime::GetGameTime().count()) * IN_MILLISECONDS : -1;
         }
-        if (metric == "dynamic_object" || metric == "dynamic_object_duration_ms")
+        if (metric == "dynamic_object" || metric == "dynamic_object_duration_ms" ||
+            metric == "dynamic_object_height")
         {
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown ground-effect spell");
             DynamicObject* object = player->GetDynObject(spell);
             if (metric == "dynamic_object")
                 return object && object->IsInWorld();
+            if (metric == "dynamic_object_height")
+            {
+                Require(object != nullptr, "Ground-effect height needs an existing ground effect");
+                return object->GetPositionZ() - object->GetMap()->GetHeight(object->GetPhaseMask(),
+                    object->GetPositionX(), object->GetPositionY(), MAX_HEIGHT);
+            }
             return object ? object->GetDuration() : 0;
         }
         if (metric == "charm_entry" || metric == "charm_aura_stacks")

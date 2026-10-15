@@ -268,8 +268,7 @@ struct npc_ascension_tinker_device : ScriptedAI
     EventMap events;
     std::set<ObjectGuid> used;
     uint32 spell = 0, explosionTargets = 0;
-    bool dropped = false;
-    float travelled = 0;
+    float travelled = 0, travelledAtLastFirepot = 0;
     bool exploded = false;
     bool Mobile() const
     {
@@ -397,6 +396,17 @@ struct npc_ascension_tinker_device : ScriptedAI
         if (id == 500601)
             player->CastSpell(me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),500753,true);
         me->DespawnOrUnsummon(100ms);
+    }
+    void DropFirepot(Player* player)
+    {
+        auto* info = sSpellMgr->GetSpellInfo(500601);
+        auto targets = Nearby(me,Radius(500601));
+        targets.remove_if([player](Unit* enemy) { return !player->IsValidAttackTarget(enemy); });
+        if (info->MaxAffectedTargets && targets.size() > info->MaxAffectedTargets)
+            targets.resize(info->MaxAffectedTargets);
+        for (Unit* enemy : targets)
+            Cast(me,enemy,500601);
+        player->CastSpell(me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),500753,true);
     }
     void DoAction(int32 action) override
     {
@@ -563,13 +573,10 @@ struct npc_ascension_tinker_device : ScriptedAI
                             Cast(me,enemy,entry == 500366 ? 712680 : 561269);
                     next = 5000;
                 }
-                if (entry == 226112 && travelled >= 3 && !dropped)
+                if (entry == 226112 && !exploded && travelled - travelledAtLastFirepot >= 3)
                 {
-                    dropped = true;
-                    for (Unit* enemy : Nearby(me,Radius(500601)))
-                        if (player->IsValidAttackTarget(enemy))
-                            Cast(me,enemy,500601);
-                    player->CastSpell(me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),500753,true);
+                    travelledAtLastFirepot = travelled;
+                    DropFirepot(player);
                 }
                 if (entry == 506051)
                     for (Unit* ally : Allies(player,me,Radius(570717)))
