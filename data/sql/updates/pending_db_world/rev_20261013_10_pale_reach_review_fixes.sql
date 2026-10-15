@@ -91,3 +91,16 @@ DELETE FROM `creature_addon` WHERE `guid` = 9960252;
 DELETE FROM `creature_template_addon` WHERE `entry` = 164325;
 INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
 (164325, 0, 0, 7, 1, 0, 0, '');
+
+-- #46: the SpawnHelper Graysky Horse overlapping the live-captured Graysky Guard Horse in the Graysky stall.
+DELETE FROM `creature` WHERE `guid` = 9920711 AND `id` = 164369;
+
+-- #112: the Daumor Gryphons roost in their nests like the perched ones (sit + aura 365372, 0.8 yd above the nest, nest facing);
+-- the four captured in flight above the nests move into the nearest free nests.
+DELETE FROM `creature_template_addon` WHERE `entry` = 164188;
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
+(164188, 0, 0, 1, 1, 0, 0, '365372');
+UPDATE `creature` SET `position_x` = -7243.9, `position_y` = 382.6, `position_z` = 475.79, `orientation` = 5.361, `MovementType` = 0, `wander_distance` = 0 WHERE `guid` = 9960382 AND `id` = 164188;
+UPDATE `creature` SET `position_x` = -7252.1, `position_y` = 395.1, `position_z` = 494.39, `orientation` = 4.426, `MovementType` = 0, `wander_distance` = 0 WHERE `guid` = 9960385 AND `id` = 164188;
+UPDATE `creature` SET `position_x` = -7242.0, `position_y` = 417.7, `position_z` = 478.54, `orientation` = 4.993, `MovementType` = 0, `wander_distance` = 0 WHERE `guid` = 9960386 AND `id` = 164188;
+UPDATE `creature` SET `position_x` = -7225.3, `position_y` = 468.5, `position_z` = 460.84, `orientation` = 0.399, `MovementType` = 0, `wander_distance` = 0 WHERE `guid` = 9960387 AND `id` = 164188;
