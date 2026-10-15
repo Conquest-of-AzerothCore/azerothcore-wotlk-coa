@@ -115,8 +115,7 @@ struct boss_auriaya : public BossAI
 
     void DespawnFormationMembers(bool onEvade = false)
     {
-        // Collect the GUIDs first: despawning takes the member out of the world,
-        // which erases it from the formation and would invalidate the member loop.
+        // Despawning a member erases it from the formation, so it cannot happen inside the member loop.
         std::vector<ObjectGuid> memberGuids;
         if (CreatureGroup* formation = me->GetFormation())
             for (auto const& [member, info] : formation->GetMembers())
