@@ -37,3 +37,7 @@ UPDATE `smart_scripts` SET `event_param1` = 1 WHERE `entryorguid` IN (2310423, 2
 DELETE FROM `gameobject` WHERE `guid` = 9999302;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `Comment`) VALUES
 (9999302, 2310437, 0, 0, 0, 1, 1, -7125.164, 1019.128, 296.522, 3.417428, 0, 0, 0.990504, -0.137481, 300, 0, 1, 'Pale Reach: Graysky mailbox by the Plucked Rook Inn door');
+
+-- #6: every Raven becomes a perched Possessed Crow (blue raven-aura eyes, sitting) from the Possessed Crow template addon (user decision).
+DELETE FROM `creature_addon` WHERE `guid` IN (9960029, 9960647, 9961725, 9961860, 9961932);
+UPDATE `creature` SET `id` = 164944, `MovementType` = 0, `wander_distance` = 0 WHERE `id` = 164371;
