@@ -79,7 +79,7 @@ METRICS = {
     'client_chat_lines_for', 'client_removals_keeping_buttons_for', 'client_placing_learns_for',
     'client_placing_supersedes_for', 'client_spell_rank_for',
     'client_spell_row_restored',
-    'spellbook_client_notable',
+    'spellbook_client_notable', 'spellbook_notify_id_mismatches',
     'spellbook_cues_in_last_buy', 'spellbook_last_buy_cued',
     'spellbook_silent_buys', 'spellbook_multi_announced_buys',
     'cast_speed_multiplier', 'spell_crit_chance', 'spell_power_cost', 'spell_damage_done', 'melee_damage_done',
@@ -694,7 +694,8 @@ def validate(scenario):
                     'spell_proc_count', 'spell_proc_chance', 'aura_proc_rate', 'temporary_spell_replacement',
                     'cast_failure',
                     'trainer_window_state', 'trainer_window_ability', 'spellbook_superseded_for',
-                    'spellbook_loud_supersedes_for', 'spellbook_client_notable', 'client_chat_lines_for',
+                    'spellbook_loud_supersedes_for', 'spellbook_client_notable',
+                    'spellbook_notify_id_mismatches', 'client_chat_lines_for',
                     'client_removals_keeping_buttons_for', 'client_placing_learns_for',
                     'client_placing_supersedes_for', 'client_spell_rank_for', 'client_spell_row_restored'}:
                 require('spell' in step, f'{where}: metric needs spell')
@@ -911,6 +912,7 @@ def validate(scenario):
                           'spellbook_misannounced_buys', 'spellbook_silent_buys',
                           'spellbook_multi_announced_buys',
                           'spellbook_notify_rows', 'spellbook_notified_spells',
+                          'spellbook_notify_id_mismatches',
                           'spellbook_unnotified_buys',
                           'trainer_list_packets', 'trainer_window_rows', 'trainer_window_state',
                           'trainer_window_ability', 'vendor_list_packets', 'vendor_items',

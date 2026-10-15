@@ -381,6 +381,7 @@ struct Actor
     std::set<uint32> announced;
     std::map<uint32, uint32> notifyRows;
     std::map<uint32, uint32> notifiedAt;
+    std::map<uint32, uint32> notifyIdMismatches;
     uint32 notifyRowTotal = 0;
     uint32 buysNotNotified = 0;
     uint32 packetOrdinal = 0;
@@ -696,6 +697,23 @@ std::unordered_map<uint32, uint32> const& NativeCustomAttributes()
     return attributes;
 }
 
+std::unordered_map<uint32, uint32> const& NativeCustomAttrRowIds()
+{
+    static std::unordered_map<uint32, uint32> const rowIds = []
+    {
+        std::unordered_map<uint32, uint32> ids;
+        ClientDBC table;
+        if (table.Load(sWorld->GetDataPath() + "dbc/SpellCustomAttr.dbc", 11))
+            for (uint32 index = 0; index < table.GetRecordCount(); ++index)
+            {
+                ClientDBC::Record const row = table.GetRecord(index);
+                ids[row.GetUInt32(1)] = row.GetUInt32(0);
+            }
+        return ids;
+    }();
+    return rowIds;
+}
+
 void ObservePacket(Actor& actor, WorldPacket const& packet)
 {
     ObserveExtensionPacket(actor, packet);
@@ -841,6 +859,9 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         actor.clientNotable[marked] = (thirdAttributes & 0x400) != 0;
         actor.clientQuiet[marked] = (fourthAttributes & 0x40000) != 0;
         actor.clientNoPlace[marked] = (fourthAttributes & 0x1000000) != 0;
+        auto const clientRow = NativeCustomAttrRowIds().find(marked);
+        if (clientRow != NativeCustomAttrRowIds().end() && clientRow->second != rowId)
+            ++actor.notifyIdMismatches[marked];
         ++actor.notifyRows[marked];
         ++actor.notifyRowTotal;
         actor.notifiedAt.emplace(marked, actor.packetOrdinal);
@@ -2503,6 +2524,12 @@ private:
             return player->GetTemporarySpellReplacement(spell);
         if (metric == "spellbook_rows" || metric == "spellbook_offers_spell" || metric == "spellbook_covers_spell")
             Require(CoASpellbook::Available(), "Spellbook metrics require mod-spellbook");
+        if (metric == "spellbook_notify_id_mismatches")
+        {
+            auto const& mismatches = _actors.at(step.get<std::string>("actor")).notifyIdMismatches;
+            auto const found = mismatches.find(spell);
+            return found == mismatches.end() ? 0.0 : double(found->second);
+        }
         if (metric == "spellbook_rows")
             return CoASpellbook::RowCount(player);
         if (metric == "spellbook_offers_spell")
