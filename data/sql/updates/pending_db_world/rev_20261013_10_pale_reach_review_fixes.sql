@@ -107,3 +107,7 @@ UPDATE `creature` SET `position_x` = -7225.3, `position_y` = 468.5, `position_z`
 
 -- Lord Cerios Locker stands in the Petitioner's Chamber (live spawn 634); the export dropped him in the air by the bandit cave.
 UPDATE `creature` SET `position_x` = -8318.84, `position_y` = 306.292, `position_z` = 126.932, `orientation` = 4.8799 WHERE `guid` = 9960200 AND `id` = 164219;
+
+-- The #6564 Stormwind Guard in attack stance by the bandit road; live sightings of 164427 are all inside Stormwind.
+DELETE FROM `creature_addon` WHERE `guid` = 9999104;
+DELETE FROM `creature` WHERE `guid` = 9999104 AND `id` = 164427;
