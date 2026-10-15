@@ -5,6 +5,7 @@
 #include "DBCStores.h"
 #include "Log.h"
 #include <algorithm>
+#include <array>
 #include <map>
 #include <set>
 
@@ -21,6 +22,17 @@ constexpr std::uint32_t SPELL_RANK_RANK = 3;
 constexpr std::uint32_t TRAINER_SPELL = 1;
 constexpr std::uint32_t SKILL_LINE_ABILITY_SKILL = 1;
 constexpr std::uint32_t SKILL_LINE_ABILITY_SPELL = 2;
+constexpr std::array<std::pair<std::uint32_t, std::uint32_t>, 1> TRAINER_RANK_REPLACEMENTS = {{
+    { 53023, 1148051 },
+}};
+
+std::uint32_t TrainerRank(std::uint32_t spellId, SpellExists const& exists)
+{
+    for (auto const& [stock, reborn] : TRAINER_RANK_REPLACEMENTS)
+        if (spellId == stock && exists(reborn))
+            return reborn;
+    return RebornSpell(spellId, exists);
+}
 
 bool Stock(Data const& data, Row const& row)
 {
@@ -195,7 +207,7 @@ std::vector<TrainerSpell> TrainerSpells(Data const& data, Realm const& realm, st
     for (TrainerSpell spell : stock)
     {
         maxLevel = std::max(maxLevel, spell.ReqLevel);
-        std::uint32_t const spellId = RebornSpell(spell.SpellId, exists);
+        std::uint32_t const spellId = TrainerRank(spell.SpellId, exists);
         if (spellId != spell.SpellId)
         {
             TrainerSpell const retuned = reborn(spellId);
