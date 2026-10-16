@@ -2,6 +2,7 @@
 #define MANASTORM_DATA_STORE_H
 
 #include "ManastormDefines.h"
+#include "CreatureData.h"
 
 #include <map>
 #include <vector>
@@ -26,6 +27,8 @@ public:
     bool Load();
 
     bool IsLoaded() const { return _loaded; }
+
+    CreatureData const* GetPrivateCreature(ObjectGuid::LowType spawnId) const;
 
     ManastormSegment const* GetSegmentById(
         uint32 segmentId) const;
@@ -84,10 +87,10 @@ public:
     std::size_t GetAffixCount() const { return _affixes.size(); }
     std::size_t GetAffixPolicyCount() const { return _affixPolicies.size(); }
 
-
 private:
     ManastormDataStore() = default;
 
+    bool LoadPrivateCreatures();
     bool LoadSegments();
     bool LoadSegmentSpawns();
     bool LoadCreaturePools();
@@ -101,6 +104,7 @@ private:
     bool LoadUnlockTriggers();
     bool LoadUnlockGrants();
 
+    std::map<ObjectGuid::LowType, CreatureData> _privateCreatures;
     bool _loaded = false;
     std::vector<ManastormSegment> _segments;
     std::map<uint32, ManastormScalingPoint> _scalingCurve;

@@ -12,6 +12,7 @@
 #include <unordered_map>
 #include "Log.h"
 #include "ObjectMgr.h"
+#include "MapMgr.h"
 
 #include <cmath>
 #include <cstring>
@@ -84,6 +85,58 @@ ManastormDataStore& ManastormDataStore::Instance()
     return instance;
 }
 
+CreatureData const* ManastormDataStore::GetPrivateCreature(ObjectGuid::LowType spawnId) const
+{
+    auto const itr = _privateCreatures.find(spawnId);
+    return itr == _privateCreatures.end() ? nullptr : &itr->second;
+}
+
+bool ManastormDataStore::LoadPrivateCreatures()
+{
+    _privateCreatures.clear();
+    WorldDatabasePreparedStatement* statement = WorldDatabase.GetPreparedStatement(WORLD_SEL_MANASTORM_PRIVATE_CREATURES);
+    PreparedQueryResult result = WorldDatabase.Query(statement);
+    if (!result)
+        return true;
+
+    do
+    {
+        Field* fields = result->Fetch();
+        CreatureData data;
+        data.spawnId = fields[0].Get<uint32>();
+        data.id = fields[1].Get<uint32>();
+        data.mapid = fields[2].Get<uint16>();
+        data.phaseMask = fields[3].Get<uint32>();
+        data.equipmentId = fields[4].Get<int8>();
+        data.posX = fields[5].Get<float>();
+        data.posY = fields[6].Get<float>();
+        data.posZ = fields[7].Get<float>();
+        data.orientation = fields[8].Get<float>();
+        data.spawntimesecs = fields[9].Get<uint32>();
+        data.wander_distance = fields[10].Get<float>();
+        data.currentwaypoint = fields[11].Get<uint32>();
+        data.curhealth = fields[12].Get<uint32>();
+        data.curmana = fields[13].Get<uint32>();
+        data.movementType = fields[14].Get<uint8>();
+        data.npcflag = fields[15].Get<uint32>();
+        data.unit_flags = fields[16].Get<uint32>();
+        data.dynamicflags = fields[17].Get<uint32>();
+        data.dbData = false;
+        data.spawnMask = 1;
+        if (!data.spawnId || !data.phaseMask || !sObjectMgr->GetCreatureTemplate(data.id)
+            || !sMapStore.LookupEntry(data.mapid) || !MapMgr::IsValidMapCoord(data.mapid, data.posX, data.posY, data.posZ, data.orientation)
+            || data.movementType > 2 || !std::isfinite(data.wander_distance) || data.wander_distance < 0.0f)
+        {
+            LOG_ERROR(LOG_FILTER, "Invalid Manastorm private creature record {}.", data.spawnId);
+            return false;
+        }
+        _privateCreatures.emplace(data.spawnId, data);
+    } while (result->NextRow());
+
+    LOG_INFO(LOG_FILTER, "Loaded {} SQL-backed Manastorm-only creature definitions.", _privateCreatures.size());
+    return true;
+}
+
 bool ManastormDataStore::Load()
 {
     _loaded = false;
@@ -97,8 +150,10 @@ bool ManastormDataStore::Load()
     _affixPolicies.clear();
     _unlocks.clear();
 
+    bool const privateCreaturesLoaded = LoadPrivateCreatures();
+
     bool const segmentsLoaded =
-        LoadSegments();
+        privateCreaturesLoaded && LoadSegments();
 
     bool const segmentSpawnsLoaded =
         segmentsLoaded &&
@@ -183,7 +238,6 @@ bool ManastormDataStore::Load()
 
     return _loaded;
 }
-
 
 bool ManastormDataStore::LoadHubReturns()
 {
@@ -695,11 +749,12 @@ bool ManastormDataStore::LoadSegmentSpawns()
                 "s.`segment_id`, "
                 "s.`spawn_guid`, "
                 "s.`flags`, "
-                "COALESCE(c.`map`, 4294967295), "
-                "COALESCE(c.`id`, 0) "
+                "COALESCE(c.`map`, p.`map`, 4294967295), "
+                "COALESCE(c.`id`, p.`id`, 0) "
                 "FROM `manastorm_segment_spawn` s "
                 "LEFT JOIN `creature` c "
                 "ON c.`guid` = s.`spawn_guid` "
+                "LEFT JOIN `manastorm_private_creature` p ON p.`guid` = s.`spawn_guid` "
                 "WHERE s.`enabled` = 1 "
                 "ORDER BY s.`segment_id`, s.`spawn_guid`");
 
@@ -1945,7 +2000,6 @@ bool ManastormDataStore::LoadUnlockGrants()
     return valid;
 }
 
-
 bool ManastormDataStore::LoadAffixes()
 {
     QueryResult countResult =
@@ -2414,7 +2468,6 @@ bool ManastormDataStore::LoadScalingCurve()
     return true;
 }
 
-
 bool ManastormDataStore::LoadGroupScaling()
 {
     QueryResult countResult = WorldDatabase.Query(
@@ -2562,7 +2615,6 @@ ManastormScalingPoint ManastormDataStore::GetScalingForDepth(uint32 depth) const
     return point;
 }
 
-
 ManastormScalingPoint ManastormDataStore::GetScalingForDepth(
     uint32 depth,
     uint32 memberCount) const
@@ -2599,7 +2651,6 @@ ManastormScalingPoint ManastormDataStore::GetScalingForDepth(
 
     return effective;
 }
-
 
 ManastormHubReturn const*
 ManastormDataStore::GetHubReturn(
@@ -2641,7 +2692,6 @@ ManastormDataStore::GetCreaturePoolById(
         ? nullptr
         : &itr->second;
 }
-
 
 ManastormAffixDefinition const*
 ManastormDataStore::GetAffixById(

@@ -170,6 +170,77 @@ int main() {
             result = subprocess.run([str(executable)], cwd=temporary, text=True, capture_output=True)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    def test_private_spawn_definitions_preserve_original_records(self):
+        baseline = (ROOT / "data/sql/base/db_world/creature.sql").read_text(encoding="utf-8")
+        sql = (MODULE / "data/sql/db-world/updates/zz_manastorm_private_creature_restoration.sql").read_text(encoding="utf-8")
+        rows = re.findall(r"^\((\d+),([^\n]+)\)[,;]$", sql, re.M)
+        self.assertEqual(len(rows), 14)
+        self.assertEqual(len({guid for guid, _ in rows}), 14)
+        self.assertNotRegex(sql, r"(?i)(?:INSERT INTO|UPDATE|DELETE FROM) `creature`")
+        self.assertNotIn("manastorm_segment_spawn", sql)
+        for guid, values in rows:
+            original = re.search(r"^\(" + guid + r",([^\n]+)\)[,;]$", baseline, re.M)
+            self.assertIsNotNone(original)
+            fields = [guid] + original[1].split(",")
+            expected = [fields[0], fields[1], fields[4], fields[8], fields[9], *fields[10:23]]
+            self.assertEqual([guid] + values.split(","), expected)
+
+    def test_private_spawn_production_admission_guard(self):
+        source = (ROOT / "src/server/game/Entities/Creature/Creature.cpp").read_text(encoding="utf-8")
+        start = source.index("bool Creature::LoadCreatureFromDB(")
+        start = source.index("{", start) + 1
+        end = source.index("    if (!allowDuplicate)", start)
+        guard = source[start:end]
+        fixture = r"""
+#include <cassert>
+struct CreatureData { int mapid; int spawnId; };
+struct Map { bool privateMap; int id;
+    bool IsScriptedPrivateInstance() const {return privateMap;}
+    int GetId() const {return id;}
+};
+struct ObjectMgr { bool native = false; bool GetCreatureData(int) const {return native;} } manager;
+auto sObjectMgr = &manager;
+bool allowed(int spawnId, Map* map, CreatureData const* privateData) {
+""" + guard + r"""
+return true;
+}
+int main() {
+    Map publicMap{false, 129}, privateMap{true, 129};
+    CreatureData data{129, 13366};
+    assert(!allowed(13366, nullptr, &data));
+    assert(allowed(13366, &publicMap, nullptr));
+    assert(!allowed(13366, &publicMap, &data));
+    assert(allowed(13366, &privateMap, &data));
+    assert(!allowed(31953, &privateMap, &data));
+    data.mapid = 329;
+    assert(!allowed(13366, &privateMap, &data));
+    data.mapid = 129;
+    manager.native = true;
+    assert(!allowed(13366, &privateMap, &data));
+    manager.native = false;
+    data.spawnId = 0;
+    assert(!allowed(0, &privateMap, &data));
+}
+"""
+        with tempfile.TemporaryDirectory(prefix="manastorm-private-") as directory:
+            temporary = Path(directory)
+            (temporary / "fixture.cpp").write_text(fixture, encoding="utf-8")
+            if os.name == "nt":
+                installs = Path(os.environ.get("ProgramFiles", "C:/Program Files")) / "Microsoft Visual Studio"
+                vcvars = next(installs.glob("2022/*/VC/Auxiliary/Build/vcvars64.bat"), None)
+                self.assertIsNotNone(vcvars)
+                command = f'cmd.exe /d /c call "{vcvars}" >nul && cl /nologo /std:c++20 /EHsc fixture.cpp /Fe:fixture.exe /Fo:fixture.obj'
+                executable = temporary / "fixture.exe"
+            else:
+                compiler = shutil.which("c++") or shutil.which("clang++") or shutil.which("g++")
+                self.assertIsNotNone(compiler)
+                command = [compiler, "-std=c++20", "fixture.cpp", "-o", "fixture"]
+                executable = temporary / "fixture"
+            compiled = subprocess.run(command, cwd=temporary, text=True, capture_output=True)
+            self.assertEqual(compiled.returncode, 0, compiled.stdout + compiled.stderr)
+            executed = subprocess.run([str(executable)], cwd=temporary, text=True, capture_output=True)
+            self.assertEqual(executed.returncode, 0, executed.stdout + executed.stderr)
+
     def test_native_config_uses_upstream_collector(self):
         source = (MODULE / "src/ManastormClientBridge.cpp").read_text(encoding="utf-8")
         self.assertIn("RegisterAscensionClientConfig(", source)

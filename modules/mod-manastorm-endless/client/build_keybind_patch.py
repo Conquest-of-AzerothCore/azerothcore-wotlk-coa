@@ -1,9 +1,7 @@
 """Build the verified CoA Manastorm client MPQ overlay.
 
-The overlay contains two narrowly scoped client fixes:
-1. UIParent.lua: allow the I-key PVE frame to reopen during an active Manastorm.
-2. ManastormQueue.xml: expose RewardDiv as a parentKey so Potential Rewards
-   anchor to the divider instead of nil/UIParent and rendering off-screen.
+The overlay contains the four corrected Interface files: the active-run I-key
+fix, reward divider XML, queue safety/quality fixes and empty-spell flyout guard.
 
 Uses the Unicode Windows StormLib API. Never modifies the input archive.
 """
@@ -15,6 +13,8 @@ import tempfile
 
 UI_MEMBER = b"Interface\\FrameXML\\UIParent.lua"
 QUEUE_MEMBER = b"Interface\\AddOns\\Ascension_Manastorm\\ManastormQueue.xml"
+QUEUE_LUA_MEMBER = b"Interface\\AddOns\\Ascension_Manastorm\\ManastormQueue.lua"
+FLYOUT_MEMBER = b"Interface\\AddOns\\Ascension_Manastorm\\ManastormLoadoutFlyout.lua"
 
 # Compatibility aliases used by older regression tooling.
 MEMBER = UI_MEMBER
@@ -60,6 +60,16 @@ def load_queue_patch():
             "ManastormQueue.xml does not contain the verified RewardDiv parentKey fix"
         )
     return data
+
+
+def overlay_members(ui_parent):
+    addon = QUEUE_SOURCE.parent
+    return [
+        (UI_MEMBER, ui_parent),
+        (QUEUE_MEMBER, load_queue_patch()),
+        (QUEUE_LUA_MEMBER, (addon / "ManastormQueue.lua").read_bytes()),
+        (FLYOUT_MEMBER, (addon / "ManastormLoadoutFlyout.lua").read_bytes()),
+    ]
 
 
 class ArchiveAPI:
@@ -160,13 +170,5 @@ if __name__ == "__main__":
 
     api = ArchiveAPI(args.stormlib)
     ui_parent = patch(api.read(args.archive, UI_MEMBER))
-    queue_xml = load_queue_patch()
-
-    api.create(
-        args.output.resolve(),
-        [
-            (UI_MEMBER, ui_parent),
-            (QUEUE_MEMBER, queue_xml),
-        ],
-    )
-    print("Verified Manastorm client overlay:", args.output)
+    api.create(args.output.resolve(), overlay_members(ui_parent))
+    print("Verified four-file Manastorm client overlay:", args.output)

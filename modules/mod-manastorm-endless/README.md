@@ -1,88 +1,44 @@
-# Upstream integration candidate
+# Manastorm upstream integration
 
-This checkout integrates upstream `dbb02f53c699f87b12a8b465d9671654ef9ceef6` with the
-SQL-backed feature branch. CoA transport dependencies now live in `src/server/coa`.
-The donor gameplay hooks are not registered; Manastorm configuration joins upstream's
-`RegisterAscensionClientConfig` collector. Chaotic Link additions include affix eligibility.
+This candidate preserves the SQL-driven shared backend and Mode 1. Mode 2 uses
+native Ascension transport; donor gameplay is not registered.
 
-Read [the installation review](docs/manual-sql-postinstall/INTEGRATION_INSTALL_REVIEW.md)
-before deploying. Original exports remain unchanged; generated review SQL is separate.
-Some historical implementation notes below describe earlier restoration stages.
+Start with the [installation guide](docs/manual-sql-postinstall/INTEGRATION_INSTALL_REVIEW.md).
+Use the [publication checklist](docs/PUBLICATION_CHECKLIST.md) before committing or publishing.
+The original manual SQL exports are preserved; prepare their non-destructive imports
+with the supplied generator, after mandatory module SQL. Do not import player history.
+The supported world database name is `acore_world`.
 
-# Shared Manastorm backend: client modes
+The integration includes private restoration of 14 upstream-removed creature spawns,
+Chaotic Link affix eligibility, the Ironaya activation correction, trusted native
+Manastorm addon support, and all four corrected client files under `client/overlay/`.
+See [client packaging instructions](client/Readme.txt). The old two-file MPQ is not
+the complete updated package.
 
-Both transports use `ManastormMgr`, the SQL generator, scaling, Hearts,
-resurrection charges, Chaotic Link, affixes and existing character progression.
-No donor Scene catalogue or donor reward/run service is used.
+## Realm configuration
 
-## Configuration and deployment
+For CoA: `CoA.ClassModel = "coa"`, `CoA.GameModeMask = 0`.
+For Wildcard: `CoA.ClassModel = "hero"`, `CoA.MapClass10ToWarrior = 0`,
+`CoA.GameModeMask = 64`, and `CoAChallenges.GameModes.Realm = WildCard`.
+Use `Manastorm.Enable = 1` and `Manastorm.ClientMode = 2` for native UI.
+The shared authserver supports `RealmCards.Realm.<realm ID>.GameMode` overrides:
+CoA card mode is 11 and Wildcard card mode is 6. These are not realm IDs.
+Local repack credentials, accounts, configs and databases are not part of source installation.
 
-```ini
-Manastorm.Enable = 1
-Manastorm.ClientMode = 2
-# Optional override; omitted defaults to <DataDir>/dbc/Manastorm.dbc:
-# Manastorm.NativeDBCPath = "C:/matching-client/DBFilesClient/Manastorm.dbc"
-```
+## Verification status
 
-The compatibility router always passes the three native requests to the shared
-module, including with default configuration. The donor gameplay hooks and
-packet queue are never registered. `Enable` and `ClientMode` require a restart. Mode 1 retains the `MANASTORM` addon transport and custom
-unlock toasts. Mode 2 emits only native completion/toasts.
+The integration compiled, both realms initialized the shared backend concurrently,
+and focused checks passed. The owner reports successful in-game CoA/Wildcard testing.
+This does not certify every encounter, Mode 1 regression, or a new zero-baseline install.
+The integration source base is upstream `dbb02f53c699f87b12a8b465d9671654ef9ceef6`;
+local test SQL was separately refreshed through `9dc61efcd2672c24b4f2a1caf600d4c7af8839e2`.
+That DB-only refresh did not merge the nine newer source commits.
 
-This implementation targets the provided CoA core and its vendored
-`mod-ascension-compat`. It reuses the donor's protocol serializers, type strings,
-gadget rank catalogue and **existing** `ascension_manastorm_loadout` prepared
-statements/storage. That table must already be installed from the core's native
-Manastorm migration. No schema files were changed or migrations applied here. Apply the pending world
-update `rev_20260920_00_manastorm_shared_tools.sql` through the normal updater
-when deploying; it binds the three existing baseline tools to the shared script
-and removes the obsolete donor potion binding.
-The loadout table is equipment storage, not a second progression authority.
-The core's existing Ascension connection settings and the original client's
-Manastorm UI/configuration must be enabled for that matching client.
+# Historical implementation notes
 
-## Native configuration and I-key reopening
-
-Mode 2 is the default; explicitly set Mode 1 for the reconstructed addon.
-The module publishes the native `SMSG_UPDATE_CONFIGS` (`0x58D`) at login:
-`CONFIG_MANASTORM_LOADOUTS_MAX` is integer 4; `CONFIG_MANASTORM_ENABLED`,
-`CONFIG_MANASTORM_END_GAME_ENABLED` and `CONFIG_MANASTORM_LOADOUTS_ENABLED`
-are one-byte booleans matching module enablement. The packet has integer,
-boolean, float, rate, integer-list and float-list sections, with length-prefixed
-keys. The client replaces all six maps on receipt. WorldSession therefore keeps
-a shared snapshot: both Manastorm and Challenges update their keys and send the
-complete snapshot, preserving each other regardless of login order. The snapshot
-is cleared on character logout. Mode 1 emits no Manastorm configuration packets.
-Verified in installed Extensions.dll: handler 0x10196C90 clears all six maps
-before reading them (clear calls at 0x10196D6Eâ€“0x10196DBC).
-The previous MS_SHARED handshake/addon has been removed from source and the
-specified client installation; no addon or C_Config override is needed.
-
-The original client's `ToggleLFDParentFrame` allows low-level players to open
-PVE only while `C_Manastorm.CanEnter(1)` is true. That is false inside a run.
-`client/build_keybind_patch.py` changes that guard to also accept
-`C_Manastorm.IsInManastorm()`. The same overlay now also carries one verified
-Ascension_Manastorm FrameXML correction: the Potential Rewards divider is exposed
-as `parentKey="RewardDiv"`. The stock queue Lua anchors Reward1 to
-`self.RewardDiv`; without that parent key the value is nil and the reward row
-anchors below UIParent/off-screen even though its item data and 0x6AD visibility
-state are valid. This is a client layout defect, not a reward opcode/data defect.
-
-The builder creates a readback-verified MPQ containing only the patched
-`Interface\\FrameXML\\UIParent.lua` and
-`Interface\\AddOns\\Ascension_Manastorm\\ManastormQueue.xml`. Original
-client MPQs are untouched. Restart the client after replacing
-`client/patch-ZZ.MPQ`; removing the overlay reverts both client fixes. No
-server packet is used to mutate FrameXML or execute arbitrary Lua.
-
-The packet receiver overrides the **const** WorldPacket hook actually dispatched
-by this core. Overriding the other overload compiles but silently misses requests.
-`tests/audit_regressions.py` exercises that exact dispatch path.
-`tests/native_protocol.cpp` models full client replacement and checks all six
-sections, both login orders, enabled/disabled updates, preservation of other
-module flags and logout reset. `tests/keybind_regression.py` exercises the actual
-patched UIParent function for active low-level reopening, hide, unavailable
-entry, eligible entry and ordinary Dungeon Finder behavior.
+The material below describes earlier restoration stages. Statements about missing
+rewards, vendored donor paths, old config transport and pending testing are historical,
+not current deployment instructions. Use the installation guide above for deployment.
 
 ## Native behavior
 

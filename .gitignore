@@ -151,3 +151,10 @@ __pycache__/
 !/modules/mod-portable-sawmill/
 !/modules/mod-coa-legendary-items/
 !/modules/mod-ethereal-bazaar/
+
+# Local Manastorm test runtime and duplicate client staging copies
+/ManastormTestRepack/
+/modules/mod-manastorm-endless/client/Corrected Addons Needs to get added to patch b/
+
+# Unrelated legacy client override; not part of the four-file Manastorm package
+/modules/mod-manastorm-endless/client/overlay/Interface/FrameXML/StaticPopup.lua

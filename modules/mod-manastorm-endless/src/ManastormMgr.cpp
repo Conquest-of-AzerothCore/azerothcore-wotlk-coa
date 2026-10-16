@@ -508,6 +508,44 @@ namespace
     constexpr float HALMGAR_SPAWN_X = 2118.58f;
     constexpr float HALMGAR_SPAWN_Y = 1695.32f;
 
+    bool RestorePrivateRouteCreatures(Map* map, ManastormRun& run, std::string& error)
+    {
+        ManastormSegment const& segment = run.GetSegment();
+        if (!map || !map->IsScriptedPrivateInstance() || map->GetId() != segment.MapId
+            || map->GetInstanceId() != run.GetInstanceId())
+        {
+            error = "Private route restoration received a different map or instance.";
+            return false;
+        }
+        for (ObjectGuid::LowType spawnId : segment.RouteSpawnIds)
+        {
+            if (sObjectMgr->GetCreatureData(spawnId))
+                continue;
+            CreatureData const* data = ManastormDataStore::Instance().GetPrivateCreature(spawnId);
+            if (!data)
+                continue;
+            if (data->mapid != segment.MapId)
+            {
+                error = "Private route creature map does not match its authored segment.";
+                return false;
+            }
+            map->LoadGrid(data->posX, data->posY);
+            if (map->GetCreatureBySpawnIdStore().contains(spawnId))
+                continue;
+            Creature* creature = new Creature();
+            if (!creature->LoadCreatureFromDB(spawnId, map, true, false, data))
+            {
+                delete creature;
+                error = "Unable to restore original private route spawn " + std::to_string(spawnId);
+                return false;
+            }
+            creature->setActive(true);
+            LOG_INFO(LOG_FILTER, "Restored Manastorm-only creature: segment={} instance={} spawn={} entry={}.",
+                segment.SegmentId, run.GetInstanceId(), spawnId, data->id);
+        }
+        return true;
+    }
+
     bool BootstrapRazelikhEncounter(
         Map* map,
         ManastormRun& run,
@@ -1547,8 +1585,13 @@ namespace
                 return false;
             }
 
+            // Native keystone SmartAI removes mask 33554434 after opening
+            // the seal. Completing only the instance door state skips it.
+            ironaya->RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
+            ironaya->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+
             LOG_INFO(LOG_FILTER,
-                "Opened native Ironaya seal in private Manastorm: "
+                "Unlocked native Ironaya in private Manastorm: "
                 "run={} segment={} instance={} spawn={} guid={}.",
                 run.GetRunId(), segment.SegmentId, run.GetInstanceId(),
                 spawnId, ironaya->GetGUID().GetRawValue());
@@ -5691,7 +5734,7 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
         {
             std::string bootstrapError;
 
-            if (!BootstrapSpecialEncounter(
+            if (!RestorePrivateRouteCreatures(map, *run, bootstrapError) || !BootstrapSpecialEncounter(
                     map,
                     *run,
                     bootstrapError))
