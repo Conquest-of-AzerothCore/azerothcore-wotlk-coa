@@ -521,3 +521,6 @@ UPDATE `creature_display_preset` SET `item_body` = 126805, `item_chest` = 19008,
 DELETE FROM `quest_offer_reward` WHERE `ID` = 175044;
 INSERT INTO `quest_offer_reward` (`ID`, `Emote1`, `Emote2`, `Emote3`, `Emote4`, `EmoteDelay1`, `EmoteDelay2`, `EmoteDelay3`, `EmoteDelay4`, `RewardText`, `VerifiedBuild`) VALUES
 (175044, 0, 0, 0, 0, 0, 0, 0, 0, '<Aisling sets down her cup and is quiet for a long moment.>$B$BPoor Alanna. She deserved a gentler end than the one that fool gave her.$B$BYou were right to come to me and not to Father Elroth. The Light has no answer for this.$B$BThe Three Sisters do. If anyone can undo what Carden did, it is them.', 0);
+
+-- Possessed Crow 9961171 moved with CoAWorldEdit (playtest 2026-10-16); it sits through the template addon.
+UPDATE `creature` SET `position_x` = -7624.051, `position_y` = 1186.906, `position_z` = 164.735, `orientation` = 4.8011, `wander_distance` = 0, `MovementType` = 0 WHERE `guid` = 9961171 AND `id` = 164944;
