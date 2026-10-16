@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "name": "Maraudon Normal: releasing at Landslide revives at the Pristine Waters start, not the Wicked Grotto (#7004)",
+  "contract": [
+    "A player who releases in a Normal dungeon is revived with half health at the nearest Dungeon Finder start of",
+    "the wings on that map (AscensionDungeonRelease, #7123). Maraudon's Normal wings start at Orange",
+    "(1019.69, -458.31), Purple, the Wicked Grotto side (752.91, -616.53), and Pristine Waters (495.702, 17.3372)",
+    "in lfg_dungeon_template; the area triggers 3133 and 3134 lead to the Orange and Purple starts. From",
+    "Landslide's spawn (356.681, -185.455) Pristine Waters is about 246 yards away, Purple about 585 and Orange",
+    "about 717, so a player who dies there is revived on map 349 at the Pristine Waters start. The report's core",
+    "predated #7123 and sent the player to the Purple start (#7004); this already works and guards the behaviour."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 349,
+    "x": 356.681,
+    "y": -185.455,
+    "z": -59.8156,
+    "o": 3.45575,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 49
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Maraudon",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 349
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the instance is Normal",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero stands at Landslide's spawn",
+      "actor": "hero",
+      "metric": "point_distance_2d",
+      "x": 356.681,
+      "y": -185.455,
+      "max": 5
+    },
+    {
+      "action": "die",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "The hero dies at Landslide",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "release_spirit",
+      "label": "Release the spirit inside Maraudon",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "The hero stays in Maraudon",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 349,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The hero is revived",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The hero is revived with half health",
+      "actor": "hero",
+      "metric": "health_pct",
+      "min": 49,
+      "max": 51
+    },
+    {
+      "action": "assert",
+      "label": "The hero stands at the Pristine Waters start",
+      "actor": "hero",
+      "metric": "point_distance_2d",
+      "x": 495.702,
+      "y": 17.3372,
+      "max": 3
+    },
+    {
+      "action": "assert",
+      "label": "The hero is not at the Wicked Grotto (Purple) start",
+      "actor": "hero",
+      "metric": "point_distance_2d",
+      "x": 752.91,
+      "y": -616.53,
+      "min": 100
+    }
+  ]
+}
