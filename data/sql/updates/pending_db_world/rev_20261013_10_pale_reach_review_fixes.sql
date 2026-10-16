@@ -515,3 +515,9 @@ UPDATE `creature_display_preset` SET `skin` = 8, `face` = 0, `hair` = 2, `facial
 -- Aisling's outfit (user's wardrobe picks against AscenSS 071126-233534): Umbral Undershirt of Lunar Communion 126805,
 -- Black Mageweave Vest 19008, Ritual Vials of the Bloodseeker 136777, Umbral Skirt of Lunar Communion 126796; feet unchanged.
 UPDATE `creature_display_preset` SET `item_body` = 126805, `item_chest` = 19008, `item_waist` = 136777, `item_legs` = 126796 WHERE `entry` = 164593 AND `display_id` = 50;
+
+-- The Singing Witch (175044): Aisling's turn-in text. No capture shows it (both filmed turn-ins click through the reward
+-- window); written in her voice from her gossip line and Triple Blessing's offer (inferred, 2026-10-16).
+DELETE FROM `quest_offer_reward` WHERE `ID` = 175044;
+INSERT INTO `quest_offer_reward` (`ID`, `Emote1`, `Emote2`, `Emote3`, `Emote4`, `EmoteDelay1`, `EmoteDelay2`, `EmoteDelay3`, `EmoteDelay4`, `RewardText`, `VerifiedBuild`) VALUES
+(175044, 0, 0, 0, 0, 0, 0, 0, 0, '<Aisling sets down her cup and is quiet for a long moment.>$B$BPoor Alanna. She deserved a gentler end than the one that fool gave her.$B$BYou were right to come to me and not to Father Elroth. The Light has no answer for this.$B$BThe Three Sisters do. If anyone can undo what Carden did, it is them.', 0);
