@@ -145,7 +145,7 @@ UPDATE `gameobject_template` SET `ScriptName` = 'go_coa_stormwind_keep_door' WHE
 
 DELETE FROM `gameobject` WHERE `guid` = 9999303;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `Comment`) VALUES
-(9999303, 2300653, 0, 0, 0, 1, 1, -8277.754, 268.841, 127.203, 5.3612, 0, 0, -0.444844, 0.895608, 300, 0, 1, 'Stormwind Keep: Petitioner''s Chamber hallway door, fitted to the keep doorway');
+(9999303, 2300653, 0, 0, 0, 1, 1, -8279.854, 269.369, 127.203, 3.7895, 0, 0, 0.947982, -0.318324, 300, 0, 1, 'Stormwind Keep: Petitioner''s Chamber hallway door, fitted to the keep doorway');
 
 -- They Grabbed Her By The Ankle: each clue counts once per character and then disappears for that character.
 UPDATE `gameobject_template` SET `ScriptName` = 'go_coa_shadewell_clue' WHERE `entry` BETWEEN 2300672 AND 2300676;
