@@ -151,9 +151,10 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, 
 UPDATE `gameobject_template` SET `ScriptName` = 'go_coa_shadewell_clue' WHERE `entry` BETWEEN 2300672 AND 2300676;
 
 -- #13: Road Bandit and Road Marauder outfits and weapons, picked from the user's in-game wardrobe lookup against footage.
--- Bandit: Shadowcraft Cap 22380, one Stiletto 2494. Marauder: Huntsman's Shoulders 1170, Armor 14790 and Boots 14791,
--- Alabaster Plate Leggings 21658, two Iron Skull Swords 25155.
-UPDATE `creature_display_preset` SET `item_head` = 22380 WHERE `entry` = 164020 AND `display_id` = 49;
-UPDATE `creature_display_preset` SET `item_shoulders` = 1170, `item_chest` = 14790, `item_legs` = 21658, `item_feet` = 14791 WHERE `entry` = 164021 AND `display_id` = 49;
+-- Both: Shadowcraft Cap 22380, Forest Garb 143957, Blackened Defias Gloves 22146, Alabaster Plate Leggings 21658,
+-- Huntsman's Boots 14791. The Marauder adds Huntsman's Shoulders 1170 and two Iron Skull Swords 25155; the Bandit
+-- carries one Stiletto 2494.
+UPDATE `creature_display_preset` SET `item_head` = 22380, `item_shoulders` = 0, `item_chest` = 143957, `item_hands` = 22146, `item_legs` = 21658, `item_feet` = 14791 WHERE `entry` = 164020 AND `display_id` = 49;
+UPDATE `creature_display_preset` SET `item_head` = 22380, `item_shoulders` = 1170, `item_chest` = 143957, `item_hands` = 22146, `item_legs` = 21658, `item_feet` = 14791 WHERE `entry` = 164021 AND `display_id` = 49;
 UPDATE `creature_equip_template` SET `ItemID1` = 2494, `ItemID2` = 0 WHERE `CreatureID` = 164020 AND `ID` = 1;
 UPDATE `creature_equip_template` SET `ItemID1` = 25155, `ItemID2` = 25155 WHERE `CreatureID` = 164021 AND `ID` = 1;
