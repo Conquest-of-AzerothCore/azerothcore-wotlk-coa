@@ -4,7 +4,6 @@
 #include "ConditionMgr.h"
 #include "Config.h"
 #include "Creature.h"
-#include "Formulas.h"
 #include "Group.h"
 #include "DatabaseEnv.h"
 #include "Log.h"
@@ -58,8 +57,7 @@ bool EligiblePlayer(Player const* player, Creature const* creature)
 {
     return player && player->GetSession() && !player->GetSession()->IsBot()
         && player->GetLevel() >= 15 && player->HasAura(HighRiskAura)
-        && player->IsAtLootRewardDistance(creature)
-        && creature->GetLevel() > Acore::XP::GetGrayLevel(player->GetLevel());
+        && player->IsAtLootRewardDistance(creature);
 }
 
 class Configuration : public WorldScript
@@ -203,8 +201,7 @@ public:
         if (!eligibleOwner)
             return;
 
-        unsigned targetLevel = std::clamp<unsigned>(
-            std::min<unsigned>(creature->GetLevel(), eligibleOwner->GetLevel()), 15, 60);
+        unsigned targetLevel = std::clamp<unsigned>(eligibleOwner->GetLevel(), 15, 60);
         unsigned quality = RollQuality(urand(0, 9999), current->rates[Band(targetLevel)]);
         if (!quality)
             return;

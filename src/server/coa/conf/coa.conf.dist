@@ -340,7 +340,8 @@ PvpPower.Enable = 0
 #    Bloodforged.Enable
 #        Description: Adds one independent Bloodforged roll to eligible open-world creature corpses
 #                     for High-Risk players from level 15, drawn from the reviewed catalogue in
-#                     coa_bloodforged_catalogue. Requires PvpPower.Enable.
+#                     coa_bloodforged_catalogue. The item and rate band follow the player's level,
+#                     whatever the creature's level. Requires PvpPower.Enable.
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
