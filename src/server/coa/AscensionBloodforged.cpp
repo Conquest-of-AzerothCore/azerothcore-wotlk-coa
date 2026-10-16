@@ -4,6 +4,7 @@
 #include "ConditionMgr.h"
 #include "Config.h"
 #include "Creature.h"
+#include "Formulas.h"
 #include "Group.h"
 #include "DatabaseEnv.h"
 #include "Log.h"
@@ -57,7 +58,8 @@ bool EligiblePlayer(Player const* player, Creature const* creature)
 {
     return player && player->GetSession() && !player->GetSession()->IsBot()
         && player->GetLevel() >= 15 && player->HasAura(HighRiskAura)
-        && player->IsAtLootRewardDistance(creature);
+        && player->IsAtLootRewardDistance(creature)
+        && creature->GetLevel() > Acore::XP::GetGrayLevel(player->GetLevel());
 }
 
 class Configuration : public WorldScript

@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Bloodforged drop on a grey High-Risk kill",
-  "contract": "Requires Bloodforged.Enable = 1 with Bloodforged.Rates55 = \"99.98 0.01 0.00\" (a rate that guarantees the roll), PvpPower.Enable = 1 and the catalogue SQL. The Bloodforged roll follows the looter's level, not the creature's: a level 60 High-Risk character kills a natural Riverpaw Mongrel (level 14, grey to them) and finds one Bloodforged item on the corpse.",
+  "name": "No Bloodforged drop on a grey High-Risk kill",
+  "contract": "Requires Bloodforged.Enable = 1 with Bloodforged.Rates55 = \"99.98 0.01 0.00\" (a rate that guarantees the roll), PvpPower.Enable = 1 and the catalogue SQL. A creature grey to the player gives no Bloodforged roll: a level 60 High-Risk character kills a natural Riverpaw Mongrel (level 14, grey to them), opens its corpse (the mongrel always carries coins) and finds no Bloodforged item.",
   "players": [
     {
       "id": "h",
@@ -74,8 +74,14 @@
     {
       "action": "assert",
       "actor": "h",
+      "metric": "loot_gold",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "h",
       "metric": "loot_bloodforged",
-      "equals": 1
+      "equals": 0
     }
   ]
 }
