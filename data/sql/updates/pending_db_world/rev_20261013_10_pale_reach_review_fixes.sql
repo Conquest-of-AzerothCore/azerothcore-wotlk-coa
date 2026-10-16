@@ -306,3 +306,7 @@ INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positio
 (99203470, 8, -7765.029, 775.088, 150.671, NULL, 0, 0, 0, 100),
 (99203470, 9, -7766.000, 772.000, 150.724, NULL, 0, 0, 0, 100),
 (99203470, 10, -7766.176, 772.220, 150.708, 2.2456, 10000, 0, 0, 100);
+
+-- Possessed Crows and Ravens are crow-sized: footage shows them a third of a crate's width, and the client's other
+-- displays of raven.m2 run at 0.5-0.75. Scale 0.65 by user choice (2026-10-15).
+UPDATE `creature_template_model` SET `DisplayScale` = 0.65 WHERE `CreatureID` IN (164371, 164944) AND `CreatureDisplayID` = 32546;
