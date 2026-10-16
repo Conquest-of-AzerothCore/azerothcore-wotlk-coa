@@ -490,3 +490,11 @@ INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positio
 (99613330, 26, -7650.000, 1250.300, 126.517, 3.4260, 5000, 0, 0, 100),
 (99613330, 27, -7643.500, 1252.200, 127.007, NULL, 0, 0, 0, 100),
 (99613330, 28, -7638.400, 1258.000, 127.439, NULL, 0, 0, 0, 100);
+
+-- Father Elroth's outfit, picked by the user from the wardrobe against AscenSS 071226-223752: Supreme Crown 23049,
+-- Twill Shoulderpads 13064, Truefaith Vestments 19716, Keller's Girdle 6986, Molten Footguards 155827, Spellforce Rod 1664.
+UPDATE `creature_display_preset` SET `item_head` = 23049, `item_shoulders` = 13064, `item_chest` = 19716, `item_waist` = 6986, `item_feet` = 155827 WHERE `entry` = 164013 AND `display_id` = 49;
+DELETE FROM `creature_equip_template` WHERE `CreatureID` = 164013;
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `ItemID2`, `ItemID3`, `VerifiedBuild`) VALUES
+(164013, 1, 1664, 0, 0, 0);
+UPDATE `creature` SET `equipment_id` = 1 WHERE `guid` = 9960193 AND `id` = 164013;
