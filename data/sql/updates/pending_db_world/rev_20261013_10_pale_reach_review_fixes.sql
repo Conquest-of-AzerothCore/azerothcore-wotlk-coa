@@ -310,3 +310,8 @@ INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positio
 -- Possessed Crows and Ravens are crow-sized: footage shows them a third of a crate's width, and the client's other
 -- displays of raven.m2 run at 0.5-0.75. Scale 0.65 by user choice (2026-10-15).
 UPDATE `creature_template_model` SET `DisplayScale` = 0.65 WHERE `CreatureID` IN (164371, 164944) AND `CreatureDisplayID` = 32546;
+
+-- #40 and #115: critter-sized Butterflies and Scadeald Beetles. The Scadeald Moth's moth_low.m2 at its display scale 0.15
+-- spans 1.2 yd; butterfly.m2 spans 7.2 yd and silithidscarab2.m2 is 5.6 yd long at scale 1.
+UPDATE `creature_template_model` SET `DisplayScale` = 0.17 WHERE `CreatureID` = 161847 AND `CreatureDisplayID` = 86531;
+UPDATE `creature_template_model` SET `DisplayScale` = 0.15 WHERE `CreatureID` = 164578 AND `CreatureDisplayID` = 95172;
