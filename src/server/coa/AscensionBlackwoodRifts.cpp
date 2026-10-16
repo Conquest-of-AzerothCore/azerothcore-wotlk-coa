@@ -14,13 +14,15 @@ namespace
 {
 constexpr uint32 SPELL_CLOSING_THE_BLACKWOOD_RIFT = 365373;
 constexpr uint32 QUEST_WHERE_THE_VEIL_WANES = 175048;
-constexpr uint32 ChannelEndToleranceMs = 400;
+constexpr int32 ChannelEndToleranceMs = 400;
 
-bool ChannelsAt(Player* player, GameObject* rift)
+Spell* ChannelAt(Player* player, GameObject* rift)
 {
     Spell* channel = player->GetCurrentSpell(CURRENT_CHANNELED_SPELL);
-    return channel && channel->GetSpellInfo()->Id == SPELL_CLOSING_THE_BLACKWOOD_RIFT &&
-        channel->m_targets.GetGOTargetGUID() == rift->GetGUID();
+    if (channel && channel->GetSpellInfo()->Id == SPELL_CLOSING_THE_BLACKWOOD_RIFT &&
+        channel->m_targets.GetGOTargetGUID() == rift->GetGUID())
+        return channel;
+    return nullptr;
 }
 
 struct go_coa_blackwood_rift : public GameObjectAI
@@ -34,29 +36,28 @@ struct go_coa_blackwood_rift : public GameObjectAI
 
         if (player->GetQuestStatus(QUEST_WHERE_THE_VEIL_WANES) == QUEST_STATUS_INCOMPLETE &&
             player->CastSpell(me, SPELL_CLOSING_THE_BLACKWOOD_RIFT, false) == SPELL_CAST_OK)
-            _channelMs[player->GetGUID()] = 0;
+            _remainingMs[player->GetGUID()] = sSpellMgr->GetSpellInfo(SPELL_CLOSING_THE_BLACKWOOD_RIFT)->GetDuration();
         return true;
     }
 
-    void UpdateAI(uint32 diff) override
+    void UpdateAI(uint32 /*diff*/) override
     {
-        SpellInfo const* closing = sSpellMgr->GetSpellInfo(SPELL_CLOSING_THE_BLACKWOOD_RIFT);
-        for (auto channel = _channelMs.begin(); channel != _channelMs.end();)
+        for (auto remaining = _remainingMs.begin(); remaining != _remainingMs.end();)
         {
-            channel->second += diff;
-            Player* player = ObjectAccessor::GetPlayer(*me, channel->first);
-            if (player && ChannelsAt(player, me))
+            Player* player = ObjectAccessor::GetPlayer(*me, remaining->first);
+            if (Spell* channel = player ? ChannelAt(player, me) : nullptr)
             {
-                ++channel;
+                remaining->second = channel->GetCastTimeRemaining();
+                ++remaining;
                 continue;
             }
 
-            bool const closed = player && closing && channel->second + ChannelEndToleranceMs >= uint32(closing->GetDuration());
-            channel = _channelMs.erase(channel);
+            bool const closed = player && remaining->second <= ChannelEndToleranceMs;
+            remaining = _remainingMs.erase(remaining);
             if (closed)
             {
                 player->KillCreditGO(me->GetEntry(), me->GetGUID());
-                _channelMs.clear();
+                _remainingMs.clear();
                 me->DespawnOrUnsummon();
                 return;
             }
@@ -64,7 +65,7 @@ struct go_coa_blackwood_rift : public GameObjectAI
     }
 
 private:
-    std::unordered_map<ObjectGuid, uint32> _channelMs;
+    std::unordered_map<ObjectGuid, int32> _remainingMs;
 };
 
 class blackwood_rift_channel : public GlobalScript
