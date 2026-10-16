@@ -113,3 +113,14 @@ exception and an upstream POSIX-permission test failing on Windows. These were n
 disabled. Resolve the maintainer exception before calling the full PR checks green.
 Local reports/repack logs are excluded from publication; this guide captures the
 installation-relevant findings without including credentials or database dumps.
+
+
+## Subsequent source synchronization
+
+The source now includes upstream `9021f8b741c0bf5e8744c2a918e2152b1e088cf4`.
+The sole Rend conflict was resolved by retaining the custom active-Gyth guard,
+state initialization, and upstream summon/completion protections. Manastorm
+backend and SQL files were preserved during the merge. The earlier builds and
+in-game acceptance apply to the preceding integration revision, not this new
+source synchronization. No rebuild, database import or repack deployment was
+performed for this merge; a build/runtime check of this revision remains pending.

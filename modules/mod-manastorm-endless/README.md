@@ -30,7 +30,7 @@ Local repack credentials, accounts, configs and databases are not part of source
 The integration compiled, both realms initialized the shared backend concurrently,
 and focused checks passed. The owner reports successful in-game CoA/Wildcard testing.
 This does not certify every encounter, Mode 1 regression, or a new zero-baseline install.
-The integration source base is upstream `dbb02f53c699f87b12a8b465d9671654ef9ceef6`;
+The initial integration source base was upstream `dbb02f53c699f87b12a8b465d9671654ef9ceef6`;
 local test SQL was separately refreshed through `9dc61efcd2672c24b4f2a1caf600d4c7af8839e2`.
 That DB-only refresh did not merge the nine newer source commits.
 
@@ -264,3 +264,14 @@ All changed translation units passed MSVC syntax checks. Focused style checks
 passed for the shared module/core and donor Manastorm file. The broader check
 also identified existing brace-formatting violations in `AscensionCompat.cpp`
 outside the changed routing block; those unrelated lines were left intact.
+
+
+## Subsequent source synchronization
+
+The source now includes upstream `9021f8b741c0bf5e8744c2a918e2152b1e088cf4`.
+The sole Rend conflict was resolved by retaining the custom active-Gyth guard,
+state initialization, and upstream summon/completion protections. Manastorm
+backend and SQL files were preserved during the merge. The earlier builds and
+in-game acceptance apply to the preceding integration revision, not this new
+source synchronization. No rebuild, database import or repack deployment was
+performed for this merge; a build/runtime check of this revision remains pending.

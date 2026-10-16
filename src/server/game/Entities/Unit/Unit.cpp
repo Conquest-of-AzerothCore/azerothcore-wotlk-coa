@@ -18612,6 +18612,25 @@ bool Unit::IsInDisallowedMountForm() const
         return false;
     }
 
+    // A display form whose spell asks to be allowed while mounted may coexist with the mount, so
+    // it does not block one. The form is kept, and entering it is what dismounts the caster.
+    for (auto const& pair : GetOwnedAuras())
+    {
+        SpellInfo const* auraInfo = pair.second->GetSpellInfo();
+        if (!auraInfo || !auraInfo->HasAttribute(SPELL_ATTR0_ALLOW_WHILE_MOUNTED))
+        {
+            continue;
+        }
+
+        for (SpellEffectInfo const& effect : auraInfo->Effects)
+        {
+            if (effect.IsAura() && effect.ApplyAuraName != SPELL_AURA_MOD_SHAPESHIFT)
+            {
+                return false;
+            }
+        }
+    }
+
     CreatureDisplayInfoEntry const* display = sCreatureDisplayInfoStore.LookupEntry(GetDisplayId());
     if (!display)
     {

@@ -53,6 +53,14 @@ static void CoABossProbeSmartCast(Creature* creature, uint32 spellId, int32 resu
         CoABossProbeSmartCastHook(creature, spellId, result, stage);
 }
 
+// CoA Normal dungeons (src/server/coa/CoADungeonNormal.cpp): stretches the repeat timer of the Ascension boss kit rows
+uint32 (*CoADungeonKitRepeatHook)(WorldObject const* source, uint32 eventId, uint32 repeat) = nullptr;
+
+static uint32 CoADungeonKitRepeat(WorldObject const* source, uint32 eventId, uint32 repeat)
+{
+    return CoADungeonKitRepeatHook ? CoADungeonKitRepeatHook(source, eventId, repeat) : repeat;
+}
+
 namespace
 {
     // Returns the GUID of whoever brought this object into the world: its owner/charmer if any,
@@ -3496,7 +3504,7 @@ void SmartScript::ProcessTimedAction(SmartScriptHolder& e, uint32 const& min, ui
     if (sConditionMgr->IsObjectMeetToConditions(info, conds))
     {
         ProcessAction(e, unit, var0, var1, bvar, spell, gob);
-        RecalcTimer(e, min, max);
+        RecalcTimer(e, CoADungeonKitRepeat(GetBaseObject(), e.event_id, min), CoADungeonKitRepeat(GetBaseObject(), e.event_id, max));
     }
     else
         RecalcTimer(e, 5000, 5000);

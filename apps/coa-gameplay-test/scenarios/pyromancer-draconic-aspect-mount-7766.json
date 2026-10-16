@@ -1,0 +1,206 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Draconic Aspect dismounts on cast and is cancelled by mounting (COA-7766)",
+  "contract": [
+    "Draconic Aspect (802117) shows the Dracthyr model 142067 while its aura is active; display 142067 uses",
+    "CreatureModelData 8772, which lacks CREATURE_MODEL_DATA_FLAGS_CAN_MOUNT.",
+    "Entering the form on a mount dismounts the caster and the form stays on. 802117 carries",
+    "SPELL_ATTR0_ALLOW_WHILE_MOUNTED, which exempts it from the engine's mounted-cast prevention at",
+    "Spell.cpp:6130-6139; Spell::CheckCasterAuras instead dismounts the caster and clears SPELL_AURA_MOUNTED,",
+    "then the cast completes normally, so the mount display is gone, the aura is up and the Dracthyr model is",
+    "shown. A taxi flight is the exception and is still answered with SPELL_FAILED_NOT_ON_TAXI (65).",
+    "Mounting while the form is active cancels the form and returns the native model. Because display 142067",
+    "cannot be mounted, Unit::IsInDisallowedMountForm used to report true and Spell::CheckCast refused the mount",
+    "with SPELL_FAILED_NOT_SHAPESHIFT (68); it now answers false for a display form whose spell carries",
+    "SPELL_ATTR0_ALLOW_WHILE_MOUNTED, so the mount is not refused. The aura script then puts",
+    "AURA_INTERRUPT_FLAG_MOUNT on 802117, and Unit::Mount removes auras carrying that flag after the mount",
+    "display is already set (Unit.cpp:11496 sets the mount, 11553 removes the flagged auras), so the mount lands",
+    "and the form and its model are released.",
+    "Evidence boundary: this observes native aura, display, cast-failure and mount state in a socketless",
+    "session. It does not cover the flight-master/taxi branch (SPELL_FAILED_NOT_ON_TAXI), rendered client",
+    "appearance, animations or mount speed."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": 1662.44,
+    "y": -4405.14,
+    "z": 18.0879,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 6,
+      "class": 24,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login settle",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "display_id",
+      "save_as": "native"
+    },
+    {
+      "action": "set_skill",
+      "label": "Riding skill for the mount",
+      "actor": "p",
+      "skill": 762,
+      "value": 150,
+      "maximum": 150
+    },
+    {
+      "action": "learn",
+      "label": "Learn the mount and the form so neither cast can fail on a missing spellbook entry",
+      "actor": "p",
+      "spell": 900960
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 802117
+    },
+    {
+      "action": "cast",
+      "label": "Mount up first",
+      "actor": "p",
+      "spell": 900960
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the mount is up",
+      "actor": "p",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Clear the mount's global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Enter Draconic Aspect while mounted",
+      "actor": "p",
+      "spell": 802117
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING (R1): casting the form dismounts the caster",
+      "actor": "p",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING (R1): the form is accepted, not refused",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 802117,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING (R2): the form survives the dismount",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 802117,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "R2: the Dracthyr model is shown",
+      "actor": "p",
+      "metric": "display_id",
+      "equals": 142067,
+      "within_ms": 4000
+    },
+    {
+      "action": "cast",
+      "label": "Mount up while the form is active",
+      "actor": "p",
+      "spell": 900960
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING (R3): the mount lands instead of being refused",
+      "actor": "p",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING (R3): mounting cancels Draconic Aspect",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 802117,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "R3: the native model is restored by the mount",
+      "actor": "p",
+      "metric": "display_id",
+      "relative_to": "native",
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "cancel_mount",
+      "label": "CONTROL: dismount through the client's mount-cancel request",
+      "actor": "p"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the mount is gone",
+      "actor": "p",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: cast the form on foot",
+      "actor": "p",
+      "spell": 802117
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the on-foot cast is accepted and applies the form",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 802117,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Restore the native state",
+      "actor": "p",
+      "spell": 802117,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Leaving the form restores the native model",
+      "actor": "p",
+      "metric": "display_id",
+      "relative_to": "native",
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

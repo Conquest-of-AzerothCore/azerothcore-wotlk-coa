@@ -1,0 +1,148 @@
+{
+  "schema": 1,
+  "name": "Normal dungeons: boss kit spells deal Normal damage, never a one-shot",
+  "contract": "On Normal, a boss kit spell listed in coa_dungeon_normal_spell_damage deals Ascension's own Normal rank damage when its caster is below level 50: Aku'mai's level-60 Poison Bolt Storm (2102617) hits like its Normal rank 2102615 at the caster's level, 285 of 937.5 direct (0.304) and 8 per 3 s instead of 75 per 2 s on the poison (0.0711). A caster of level 50 or more deals the Heroic damage / 1.66 * 0.85 instead (0.703 / 1.66 * 0.85 = 0.36). A kit spell that is its own Normal rank (Nightmare Rift 2102729) keeps its value, and a spell outside the kits (Poison Cloud 3815) is untouched. No single hit takes more than 25% of a player's maximum health from an area spell. Measured on the module damage-taken hooks from a fixed 1000, with each caster at the level of the player it hits so level scaling stays out of the figures.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 48,
+    "x": -151.89,
+    "y": 106.96,
+    "z": -39.87,
+    "o": 4.53,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 28
+    },
+    {
+      "id": "healer",
+      "race": 1,
+      "class": 1,
+      "level": 28
+    },
+    {
+      "id": "veteran",
+      "race": 1,
+      "class": 1,
+      "level": 55
+    }
+  ],
+  "creatures": [
+    {
+      "id": "akumai",
+      "owner": "tank",
+      "entry": 4829,
+      "level": 28,
+      "health": 100000,
+      "distance": 6
+    },
+    {
+      "id": "elder",
+      "owner": "veteran",
+      "entry": 4829,
+      "level": 55,
+      "health": 100000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "set_health",
+      "actor": "healer",
+      "value": 1000,
+      "maximum": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "veteran",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the group is in Blackfathom Deeps",
+      "actor": "tank",
+      "metric": "map_id",
+      "equals": 48
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the instance is Normal",
+      "actor": "tank",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Poison Bolt Storm from a level 28 Aku'mai hits like Ascension's Normal rank",
+      "actor": "tank",
+      "metric": "script_spell_damage_taken",
+      "spell": 2102617,
+      "target": "akumai",
+      "min": 302,
+      "max": 305
+    },
+    {
+      "action": "assert",
+      "label": "and its poison ticks like the Normal rank's",
+      "actor": "tank",
+      "metric": "script_periodic_damage_taken",
+      "spell": 2102617,
+      "target": "akumai",
+      "min": 70,
+      "max": 72
+    },
+    {
+      "action": "assert",
+      "label": "A level 55 caster deals the Heroic damage / 1.66 * 0.85",
+      "actor": "veteran",
+      "metric": "script_spell_damage_taken",
+      "spell": 2102617,
+      "target": "elder",
+      "min": 359,
+      "max": 361
+    },
+    {
+      "action": "assert",
+      "label": "Nightmare Rift is already the Normal rank and keeps its value",
+      "actor": "tank",
+      "metric": "script_spell_damage_taken",
+      "spell": 2102729,
+      "target": "akumai",
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Poison Cloud is no kit spell and stays untouched",
+      "actor": "tank",
+      "metric": "script_spell_damage_taken",
+      "spell": 3815,
+      "target": "akumai",
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "No area hit takes more than a quarter of a 1000 health healer",
+      "actor": "healer",
+      "metric": "script_spell_damage_taken",
+      "spell": 2102617,
+      "target": "akumai",
+      "equals": 250
+    }
+  ]
+}

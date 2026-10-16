@@ -387,6 +387,8 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_1].SpellClassMask = flag96(0, 0, 1073741824);
     if (id == SenjinWisdom)
         info->Effects[EFFECT_0].SpellClassMask = flag96(0, 0, 1073741824);
+    if (id == VoljinBlessing)
+        dummy(EFFECT_0);
     if (id == RageBrewBuff)
         info->Effects[EFFECT_1].BasePoints = 14;
     if (id == Voice)
@@ -441,6 +443,13 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_2].Effect = 0;
     if (id == BigVoodoo)
         info->Effects[EFFECT_1].TargetB = SpellImplicitTargetInfo(TARGET_DEST_DYNOBJ_ALLY);
+    if (id == BigVoodooField)
+    {
+        info->AttributesEx3 &= ~SPELL_ATTR3_ONLY_ON_PLAYER;
+        for (SpellEffectInfo& effect : info->Effects)
+            if (effect.Effect == SPELL_EFFECT_APPLY_AREA_AURA_OWNER)
+                effect.Effect = SPELL_EFFECT_APPLY_AREA_AURA_PET;
+    }
     if (id == VoodooCauldron)
         info->Effects[EFFECT_2].Effect = 0;
     if (id == WarGolem)
@@ -454,7 +463,7 @@ void ApplyContracts(SpellInfo* info)
         absorb.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
     }
     for (uint32 child : {WardHeal, SpiritManaTick, Cleanse, SereneField, DarkField, JungleFieldSpell, SwiftField,
-                         CauldronBuff, BigVoodooField})
+                         CauldronBuff})
         if (id == child)
             for (SpellEffectInfo& effect : info->Effects)
                 if (effect.IsEffect())

@@ -478,6 +478,33 @@ Ascension.CallboardCache.GoldMax = 15
 CoA.DungeonTuning.Enable = 1
 
 #
+#    CoA.DungeonNormal.Enable
+#        Description: Normal tuning of the Ascension boss kits in 5-man dungeons. The kit spells listed
+#                     in coa_dungeon_normal_spell_damage deal Ascension's Normal rank damage (casters
+#                     below level 50) or the Heroic damage / 1.66 * 0.85, without the dungeon creature
+#                     damage scaling, and their repeat timers run longer.
+#        Default:     1
+
+CoA.DungeonNormal.Enable = 1
+
+#
+#    CoA.DungeonNormal.RepeatFactor
+#        Description: How much longer a boss kit spell takes to come back on Normal (1.1 = 10% longer).
+#        Default:     1.1
+
+CoA.DungeonNormal.RepeatFactor = 1.1
+
+#
+#    CoA.DungeonNormal.AreaHitCapPct
+#    CoA.DungeonNormal.TargetHitCapPct
+#        Description: On Normal no single hit of a boss kit spell deals more than this share of the
+#                     player's maximum health: area spells / single target spells. 0 turns a cap off.
+#        Default:     25, 40
+
+CoA.DungeonNormal.AreaHitCapPct = 25
+CoA.DungeonNormal.TargetHitCapPct = 40
+
+#
 #    CoA.TestZoneBonus.AnnounceIntervalMinutes
 #        Description: How often every player is told which test zones are active and what they earn
 #                     there. The zones themselves live in coa_test_zone_bonus and are managed with

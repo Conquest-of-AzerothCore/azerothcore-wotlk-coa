@@ -45,8 +45,19 @@ new files listed above deliberately; an untracked file is not included by a push
 Check that no repack/local settings or credentials are staged. No commit or push
 is performed by following the installation guide or generating review SQL.
 
-The source merge base is upstream dbb02f53c699f87b12a8b465d9671654ef9ceef6.
+The initial source merge base was upstream dbb02f53c699f87b12a8b465d9671654ef9ceef6.
 The later 9dc61efcd2672c24b4f2a1caf600d4c7af8839e2 refresh was DB-only, not a new
 source merge. Publication to a new repository is separate from a future upstream
 PR; preserve this distinction in its description. Local build/test reports show
 scoped success, not a fully green upstream CI run.
+
+
+## Subsequent source synchronization
+
+The source now includes upstream `9021f8b741c0bf5e8744c2a918e2152b1e088cf4`.
+The sole Rend conflict was resolved by retaining the custom active-Gyth guard,
+state initialization, and upstream summon/completion protections. Manastorm
+backend and SQL files were preserved during the merge. The earlier builds and
+in-game acceptance apply to the preceding integration revision, not this new
+source synchronization. No rebuild, database import or repack deployment was
+performed for this merge; a build/runtime check of this revision remains pending.

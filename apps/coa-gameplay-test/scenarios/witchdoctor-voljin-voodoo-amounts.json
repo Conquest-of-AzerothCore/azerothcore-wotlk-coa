@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "name": "Vol'jin's Blessing must not rewrite Big Bad Voodoo's amounts (#7788 tooltips)",
+  "contract": [
+    "Vol'jin's Blessing 706577 is a passive family-19 aura carrying one SPELL_AURA_ADD_FLAT_MODIFIER effect with op SPELLMOD_EFFECT2, base +20 and an empty class mask, and SpellAffect.dbc names no targets for it.",
+    "SpellInfo::IsAffectedBySpellMod falls through to IsAffected(19, empty mask), which matches every family-19 spell, so the +20 lands on effect index 1 of all Witch Doctor spells while the talent's documented behavior (Shadow Avatar shortening Spirit Glaive's cooldown) lives in script and needs no modifier.",
+    "On a Witch Doctor carrying Vol'jin's Blessing the field 802718 read -30% damage dealt instead of -50%, and the ally aura 802719 read 0% damage taken instead of -20%, while the spellbook still promises 50% and 20%: the buff tooltips faithfully reported corrupted gameplay.",
+    "AscensionWitchDoctorCompletion.cpp therefore neutralizes Vol'jin's Blessing's modifier effect, so Big Bad Voodoo keeps its -50% damage, -50% healing and -20% ally protection with the talent learned."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "doctor",
+      "spell": 706577
+    },
+    {
+      "action": "assert",
+      "label": "Vol'jin's Blessing applies its passive aura on learn",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 706577,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Vol'jin's Blessing leaves the field's damage-dealt slot at -50%",
+      "actor": "doctor",
+      "metric": "spell_modifier",
+      "spell": 802718,
+      "op": 12,
+      "base": -50,
+      "equals": -50
+    },
+    {
+      "action": "assert",
+      "label": "Vol'jin's Blessing leaves the field's healing-done slot at -50%",
+      "actor": "doctor",
+      "metric": "spell_modifier",
+      "spell": 802718,
+      "op": 23,
+      "base": -50,
+      "equals": -50
+    },
+    {
+      "action": "assert",
+      "label": "Vol'jin's Blessing leaves the ally damage-taken slot at -20%",
+      "actor": "doctor",
+      "metric": "spell_modifier",
+      "spell": 802719,
+      "op": 12,
+      "base": -20,
+      "equals": -20
+    },
+    {
+      "action": "learn",
+      "actor": "doctor",
+      "spell": 802719
+    },
+    {
+      "action": "cast",
+      "actor": "doctor",
+      "spell": 802719
+    },
+    {
+      "action": "assert",
+      "label": "Big Bad Voodoo is cast",
+      "actor": "doctor",
+      "metric": "spell_go_count",
+      "spell": 802719,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the spirit apply its field",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The Witch Doctor receives the field from the spirit",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 802718,
+      "equals": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "The field still reduces damage dealt by 50% with Vol'jin's Blessing learned",
+      "actor": "doctor",
+      "metric": "aura_amount",
+      "spell": 802718,
+      "effect": 1,
+      "equals": -50
+    },
+    {
+      "action": "assert",
+      "label": "The field still reduces healing done by 50% with Vol'jin's Blessing learned",
+      "actor": "doctor",
+      "metric": "aura_amount",
+      "spell": 802718,
+      "effect": 2,
+      "equals": -50
+    }
+  ]
+}
