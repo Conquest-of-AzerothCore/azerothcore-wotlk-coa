@@ -34,6 +34,9 @@ struct go_coa_blackwood_rift : public GameObjectAI
         if (reportUse)
             return false;
 
+        if (!me->isSpawned())
+            return true;
+
         if (player->GetQuestStatus(QUEST_WHERE_THE_VEIL_WANES) == QUEST_STATUS_INCOMPLETE &&
             player->CastSpell(me, SPELL_CLOSING_THE_BLACKWOOD_RIFT, false) == SPELL_CAST_OK)
             _remainingMs[player->GetGUID()] = sSpellMgr->GetSpellInfo(SPELL_CLOSING_THE_BLACKWOOD_RIFT)->GetDuration();
