@@ -290,3 +290,19 @@ INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positio
 (99203460, 8, -7801.827, 791.207, 150.644, NULL, 0, 0, 0, 100),
 (99203460, 9, -7803.759, 791.690, 150.644, NULL, 0, 0, 0, 100),
 (99203460, 10, -7811.000, 792.500, 150.644, 0.464, 10000, 0, 0, 100);
+
+-- Graysky Soldier patrol 9920347 in the manor, from CoAWorldEdit (playtest 2026-10-15). Repeated route nodes at one spot
+-- are kept once.
+UPDATE `creature` SET `position_x` = -7771.000, `position_y` = 784.000, `position_z` = 149.966, `orientation` = 3.0000 WHERE `guid` = 9920347 AND `id` = 164027;
+DELETE FROM `waypoint_data` WHERE `id` = 99203470;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `move_type`, `action`, `action_chance`) VALUES
+(99203470, 1, -7771.000, 784.000, 149.966, NULL, 0, 0, 0, 100),
+(99203470, 2, -7765.461, 776.383, 150.581, 5.0341, 7000, 0, 0, 100),
+(99203470, 3, -7766.000, 772.000, 150.724, NULL, 0, 0, 0, 100),
+(99203470, 4, -7768.726, 775.407, 150.482, NULL, 0, 0, 0, 100),
+(99203470, 5, -7770.458, 780.206, 150.255, NULL, 0, 0, 0, 100),
+(99203470, 6, -7771.000, 784.000, 149.966, NULL, 0, 0, 0, 100),
+(99203470, 7, -7766.591, 779.775, 150.354, NULL, 0, 0, 0, 100),
+(99203470, 8, -7765.029, 775.088, 150.671, NULL, 0, 0, 0, 100),
+(99203470, 9, -7766.000, 772.000, 150.724, NULL, 0, 0, 0, 100),
+(99203470, 10, -7766.176, 772.220, 150.708, 2.2456, 10000, 0, 0, 100);
