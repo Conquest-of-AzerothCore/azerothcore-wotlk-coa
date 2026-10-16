@@ -455,9 +455,9 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 -- Sir Aldrin Nublar patrols his level of the Cresthairn crypt (user request 2026-10-15): the central corridor past both live
 -- capture spots, Alanna's room, the round room and the south-east room, pausing 5 s in each room. Route laid along the
 -- corridor centre lines from the WMO geometry. The second capture spawn 9961919 is the same knight seen elsewhere on it.
-DELETE FROM `creature_addon` WHERE `guid` IN (9961333, 9961919);
 DELETE FROM `creature` WHERE `guid` = 9961919 AND `id` = 164053;
 UPDATE `creature` SET `position_x` = -7636.250, `position_y` = 1261.250, `position_z` = 127.058, `wander_distance` = 0, `MovementType` = 2 WHERE `guid` = 9961333 AND `id` = 164053;
+DELETE FROM `creature_addon` WHERE `guid` IN (9961333, 9961919);
 INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
 (9961333, 99613330, 0, 0, 1, 0, 0, '');
 DELETE FROM `waypoint_data` WHERE `id` = 99613330;
