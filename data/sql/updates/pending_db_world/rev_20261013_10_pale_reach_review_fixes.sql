@@ -418,3 +418,36 @@ INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `e
 
 -- Tin Vein 9991110 in Nightweave Cave moved with CoAWorldEdit (playtest 2026-10-15).
 UPDATE `gameobject` SET `position_x` = -7515.176, `position_y` = 1271.890, `position_z` = 65.412, `orientation` = 0.7854, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.382683, `rotation3` = 0.92388 WHERE `guid` = 9991110 AND `id` = 1732;
+
+-- Carden's Diary (2300689) offers No Matter the Cost (175043) until the quest is taken; afterwards reading it shows the
+-- journal itself, the quest's own text (the only recorded writing; AscenSS 071126-233952, c3a0y5pCKpE 14:51).
+UPDATE `gameobject_template` SET `ScriptName` = 'go_coa_cardens_diary' WHERE `entry` = 2300689;
+DELETE FROM `npc_text` WHERE `ID` = 2300689;
+INSERT INTO `npc_text` (`ID`, `text0_0`, `text0_1`, `BroadcastTextID0`, `lang0`, `Probability0`) VALUES
+(2300689, '<Journal found beside a man''s body.>$B$B“My dearest Alanna. The days wither away without your smile. Often, I find myself remembering how we made the impossible possible; an Ealdir and a Crusader, hopelessly in love. Ready for anything. Willing to defy our own; the Light, the gods of the woods.$B$BYou know me well, Alanna. So you know what I intend to do. If we made the impossible possible once before, why not try again?$B$BThis is my promise:$B$BI will bring you back, no matter the cost. And I know where to begin:$B$BThe Three Sisters from your stories.”', '<Journal found beside a man''s body.>$B$B“My dearest Alanna. The days wither away without your smile. Often, I find myself remembering how we made the impossible possible; an Ealdir and a Crusader, hopelessly in love. Ready for anything. Willing to defy our own; the Light, the gods of the woods.$B$BYou know me well, Alanna. So you know what I intend to do. If we made the impossible possible once before, why not try again?$B$BThis is my promise:$B$BI will bring you back, no matter the cost. And I know where to begin:$B$BThe Three Sisters from your stories.”', 0, 0, 1);
+
+-- Restless Corpses 9960181 and 9961693 removed from the Cresthairn church stairwell with CoAWorldEdit (playtest 2026-10-15).
+DELETE FROM `creature_addon` WHERE `guid` IN (9960181, 9961693);
+DELETE FROM `creature` WHERE `guid` IN (9960181, 9961693) AND `id` = 164051;
+
+-- Father Elroth welcomes only a player who carries Aid for Cresthairn (175011), the quest that sends them to him
+-- (playtest 2026-10-15: he greeted on every return).
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 22 AND `SourceGroup` = 1 AND `SourceEntry` = 164013 AND `SourceId` = 0;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(22, 1, 164013, 0, 0, 47, 0, 175011, 10, 0, 0, 0, 0, '', 'Father Elroth - welcome only while Aid for Cresthairn is in the log');
+
+-- Alanna keeps her live spawn (capture 653) facing and cowers as in the user's playtest screenshot (emote state 431).
+UPDATE `creature` SET `position_x` = -7611.7, `position_y` = 1333.53, `position_z` = 126.466, `orientation` = 0.9798 WHERE `guid` = 9960209 AND `id` = 164374;
+DELETE FROM `creature_addon` WHERE `guid` = 9960209;
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
+(9960209, 0, 0, 0, 1, 431, 0, '');
+
+-- Restless Corpse and Exhumed Risen loot as seen in the crypt (YzysjpunNbs 10:24-16:40): copper and Linen Cloth (1 or 3) or
+-- Wool Cloth (1-2). Money matches the same-level Jagged Cave Ealdir; the cloth chances are estimates from a handful of kills.
+UPDATE `creature_template` SET `lootid` = `entry`, `mingold` = 16, `maxgold` = 50 WHERE `entry` IN (164051, 164052);
+DELETE FROM `creature_loot_template` WHERE `Entry` IN (164051, 164052);
+INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`, `MinCount`, `MaxCount`, `Comment`) VALUES
+(164051, 2589, 0, 20, 0, 1, 0, 1, 3, 'Restless Corpse - Linen Cloth'),
+(164051, 2592, 0, 30, 0, 1, 0, 1, 2, 'Restless Corpse - Wool Cloth'),
+(164052, 2589, 0, 20, 0, 1, 0, 1, 3, 'Exhumed Risen - Linen Cloth'),
+(164052, 2592, 0, 30, 0, 1, 0, 1, 2, 'Exhumed Risen - Wool Cloth');

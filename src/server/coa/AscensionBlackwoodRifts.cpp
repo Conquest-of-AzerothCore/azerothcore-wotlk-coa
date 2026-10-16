@@ -43,7 +43,7 @@ struct go_coa_blackwood_rift : public GameObjectAI
         return true;
     }
 
-    void UpdateAI(uint32 /*diff*/) override
+    void UpdateAI(uint32) override
     {
         for (auto remaining = _remainingMs.begin(); remaining != _remainingMs.end();)
         {
