@@ -158,3 +158,12 @@ UPDATE `creature_display_preset` SET `item_head` = 22380, `item_shoulders` = 0, 
 UPDATE `creature_display_preset` SET `item_head` = 22380, `item_shoulders` = 1170, `item_chest` = 143957, `item_hands` = 22146, `item_legs` = 21658, `item_feet` = 14791 WHERE `entry` = 164021 AND `display_id` = 49;
 UPDATE `creature_equip_template` SET `ItemID1` = 2494, `ItemID2` = 0 WHERE `CreatureID` = 164020 AND `ID` = 1;
 UPDATE `creature_equip_template` SET `ItemID1` = 25155, `ItemID2` = 25155 WHERE `CreatureID` = 164021 AND `ID` = 1;
+
+-- Shadewell murlocs added near the keep with CoAWorldEdit (playtest 2026-10-15), at their final in-game positions.
+DELETE FROM `creature` WHERE `guid` IN (9999205, 9999206, 9999207, 9999208, 9999209, 9999210);
+INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`, `Comment`) VALUES
+(9999205, 164023, 0, 1, 1, 0, -8173.206, 289.181, 118.554, 2.7614, 120, 0, 0, 'Shadewell Murloc Raider, user world edit 2026-10-15'),
+(9999206, 164023, 0, 1, 1, 0, -8181.908, 271.384, 118.584, 2.9507, 120, 0, 0, 'Shadewell Murloc Raider, user world edit 2026-10-15'),
+(9999208, 164024, 0, 1, 1, 0, -8146.657, 321.627, 119.535, 2.7190, 120, 0, 0, 'Shadewell Murloc Seer, user world edit 2026-10-15'),
+(9999209, 164024, 0, 1, 1, 0, -8181.556, 251.334, 121.021, 2.1771, 120, 0, 0, 'Shadewell Murloc Seer, user world edit 2026-10-15'),
+(9999210, 164023, 0, 1, 1, 0, -8245.872, 253.917, 118.931, 0.3628, 120, 0, 0, 'Shadewell Murloc Raider, user world edit 2026-10-15');
