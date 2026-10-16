@@ -539,3 +539,22 @@ DELETE FROM `creature_display_preset` WHERE `entry` = 164134;
 INSERT INTO `creature_display_preset` (`entry`, `display_id`, `race`, `gender`, `class`, `skin`, `face`, `hair`, `haircolor`, `facialhair`, `guild_id`, `item_head`, `item_shoulders`, `item_body`, `item_chest`, `item_waist`, `item_legs`, `item_feet`, `item_wrists`, `item_hands`, `item_back`, `item_tabard`) VALUES
 (164134, 49, 1, 0, 1, 9, 9, 9, 0, 9, 0, 0, 41081, 0, 144757, 51757, 153475, 144756, 144761, 144758, 21569, 170301),
 (164134, 50, 1, 1, 1, 2, 3, 5, 1, 6, 0, 0, 41081, 0, 144757, 51757, 153475, 144756, 144761, 144758, 21569, 170301);
+
+-- #15: Dunshire, Cresthairn and Graysky Guards carry a sword and a round shield (wJ2j4NOgjRI 41:36, DuWTvw19xtg 33:56):
+-- Iron-Grip Shortsword 36517 and Sentry Buckler 3743, user's wardrobe picks (2026-10-16).
+DELETE FROM `creature_equip_template` WHERE `CreatureID` IN (164124, 164134, 164173, 164323, 164488, 164552, 164563, 9920072, 9920073);
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `ItemID2`, `ItemID3`, `VerifiedBuild`) VALUES
+(164124, 1, 36517, 3743, 0, 0),
+(164134, 1, 36517, 3743, 0, 0),
+(164173, 1, 36517, 3743, 0, 0),
+(164323, 1, 36517, 3743, 0, 0),
+(164488, 1, 36517, 3743, 0, 0),
+(164552, 1, 36517, 3743, 0, 0),
+(164563, 1, 36517, 3743, 0, 0),
+(9920072, 1, 36517, 3743, 0, 0),
+(9920073, 1, 36517, 3743, 0, 0);
+UPDATE `creature` SET `equipment_id` = 1 WHERE `id` IN (164124, 164134, 164173, 164323, 164488, 164552, 164563, 9920072, 9920073);
+
+-- Extra Dunshire Guards removed with CoAWorldEdit (playtest 2026-10-16).
+DELETE FROM `creature` WHERE `guid` IN (9960886, 9920418, 9920419, 9960892, 9960885) AND `id` = 164124;
+DELETE FROM `creature_addon` WHERE `guid` IN (9960886, 9920418, 9920419, 9960892, 9960885);
