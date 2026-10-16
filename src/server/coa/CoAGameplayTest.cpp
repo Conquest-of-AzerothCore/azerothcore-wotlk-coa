@@ -4738,6 +4738,11 @@ private:
                 return !creature->IsInWorld() || (action == "attack_nearby") != creature->IsAlive();
             });
             Require(!creatures.empty(), "No matching nearby creature among " + std::to_string(found));
+            if (action == "loot_nearby")
+                creatures.sort([player](Creature* left, Creature* right)
+                {
+                    return player->isAllowedToLoot(left) && !player->isAllowedToLoot(right);
+                });
             WorldPacket packet(action == "attack_nearby" ? CMSG_ATTACKSWING : CMSG_LOOT, 8);
             packet << creatures.front()->GetGUID();
             if (action == "attack_nearby")
