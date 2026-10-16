@@ -92,6 +92,7 @@ void AddAscensionWarcraftRebornRogueScripts();
 void AddAscensionWarcraftRebornPriestScripts();
 void AddAscensionWarcraftRebornShamanScripts();
 void AddAscensionWarcraftRebornMageScripts();
+void AddAscensionWarcraftRebornWarlockScripts();
 void AddAscensionWarcraftRebornDruidScripts();
 void AddAscensionTamingScripts();
 void AddAscensionBarnabusWhistleScripts();
@@ -674,6 +675,7 @@ void AddCoAScripts()
     AddAscensionWarcraftRebornPriestScripts();
     AddAscensionWarcraftRebornShamanScripts();
     AddAscensionWarcraftRebornMageScripts();
+    AddAscensionWarcraftRebornWarlockScripts();
     AddAscensionWarcraftRebornDruidScripts();
     AddAscensionTamingScripts();
     AddAscensionBarnabusWhistleScripts();

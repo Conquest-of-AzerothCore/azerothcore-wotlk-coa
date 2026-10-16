@@ -1643,10 +1643,10 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         switch (sSpellMgr->GetSpellTwinSource(aurEff->GetId()))
                         {
                             case 53759:
-                                spellId = 60947;
+                                spellId = sSpellMgr->GetSpellTwinFor(60947, aurEff->GetId());
                                 break;
                             case 53754:
-                                spellId = 60946;
+                                spellId = sSpellMgr->GetSpellTwinFor(60946, aurEff->GetId());
                                 break;
                             default:
                                 LOG_ERROR("spells.aura", "Aura::HandleAuraSpecificMods: Unknown rank of Improved Fear ({}) found", aurEff->GetId());
