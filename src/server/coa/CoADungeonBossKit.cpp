@@ -3,6 +3,7 @@
  */
 
 #include "AllCreatureScript.h"
+#include "CoADungeonNormal.h"
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "DatabaseEnv.h"
@@ -214,7 +215,7 @@ public:
                 timer = 250;
                 continue;
             }
-            timer = kit.repeatMin ? int32(KitRoll(kit.repeatMin, kit.repeatMax)) : -1;
+            timer = kit.repeatMin ? int32(CoADungeonNormal::KitRepeat(me, KitRoll(kit.repeatMin, kit.repeatMax))) : -1;
             if (kit.event == KIT_HEALTH && kit.repeatMin)
                 timer = std::max(timer, 1);
         }

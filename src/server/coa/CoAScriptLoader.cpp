@@ -47,6 +47,7 @@ void AddSC_CoABossProbe();
 void AddSC_CoADungeonSpellDamage();
 void AddSC_CoACreatureScaling();
 void AddSC_CoADungeonBossKit();
+void AddSC_CoADungeonNormal();
 void AddSC_CoADungeonCompletion();
 void AddSC_CoADungeonSpoils();
 void AddSC_CoADungeonTuning();
@@ -706,6 +707,7 @@ void AddCoAScripts()
     AddSC_CoADungeonSpellDamage();
     AddSC_CoACreatureScaling();
     AddSC_CoADungeonBossKit();
+    AddSC_CoADungeonNormal();
     AddSC_CoADungeonCompletion();
     AddSC_CoADungeonSpoils();
     AddSC_CoADungeonTuning();
