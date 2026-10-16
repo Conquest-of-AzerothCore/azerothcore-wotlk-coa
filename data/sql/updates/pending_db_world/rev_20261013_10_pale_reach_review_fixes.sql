@@ -451,3 +451,42 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 (164051, 2592, 0, 30, 0, 1, 0, 1, 2, 'Restless Corpse - Wool Cloth'),
 (164052, 2589, 0, 20, 0, 1, 0, 1, 3, 'Exhumed Risen - Linen Cloth'),
 (164052, 2592, 0, 30, 0, 1, 0, 1, 2, 'Exhumed Risen - Wool Cloth');
+
+-- Sir Aldrin Nublar patrols his level of the Cresthairn crypt (user request 2026-10-15): the central corridor past both live
+-- capture spots, Alanna's room, the round room and the south-east room, pausing 5 s in each room. Route laid along the
+-- corridor centre lines from the WMO geometry. The second capture spawn 9961919 is the same knight seen elsewhere on it.
+DELETE FROM `creature_addon` WHERE `guid` IN (9961333, 9961919);
+DELETE FROM `creature` WHERE `guid` = 9961919 AND `id` = 164053;
+UPDATE `creature` SET `position_x` = -7636.250, `position_y` = 1261.250, `position_z` = 127.058, `wander_distance` = 0, `MovementType` = 2 WHERE `guid` = 9961333 AND `id` = 164053;
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
+(9961333, 99613330, 0, 0, 1, 0, 0, '');
+DELETE FROM `waypoint_data` WHERE `id` = 99613330;
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `move_type`, `action`, `action_chance`) VALUES
+(99613330, 1, -7636.250, 1261.250, 127.058, NULL, 0, 0, 0, 100),
+(99613330, 2, -7644.300, 1270.000, 127.058, NULL, 0, 0, 0, 100),
+(99613330, 3, -7632.000, 1287.500, 127.040, NULL, 0, 0, 0, 100),
+(99613330, 4, -7620.400, 1301.500, 127.045, NULL, 0, 0, 0, 100),
+(99613330, 5, -7620.400, 1306.000, 127.045, NULL, 0, 0, 0, 100),
+(99613330, 6, -7627.000, 1314.500, 127.045, NULL, 0, 0, 0, 100),
+(99613330, 7, -7626.070, 1317.000, 127.048, NULL, 0, 0, 0, 100),
+(99613330, 8, -7621.200, 1323.500, 126.510, NULL, 0, 0, 0, 100),
+(99613330, 9, -7620.400, 1330.600, 126.789, 1.4586, 5000, 0, 0, 100),
+(99613330, 10, -7621.200, 1323.500, 126.510, NULL, 0, 0, 0, 100),
+(99613330, 11, -7626.070, 1317.000, 127.048, NULL, 0, 0, 0, 100),
+(99613330, 12, -7628.500, 1315.570, 127.045, NULL, 0, 0, 0, 100),
+(99613330, 13, -7630.500, 1315.930, 127.045, NULL, 0, 0, 0, 100),
+(99613330, 14, -7639.800, 1324.100, 127.045, NULL, 0, 0, 0, 100),
+(99613330, 15, -7651.500, 1309.500, 126.843, NULL, 0, 0, 0, 100),
+(99613330, 16, -7657.600, 1303.600, 126.494, 3.9103, 5000, 0, 0, 100),
+(99613330, 17, -7643.000, 1319.000, 127.045, NULL, 0, 0, 0, 100),
+(99613330, 18, -7635.000, 1319.400, 127.045, NULL, 0, 0, 0, 100),
+(99613330, 19, -7620.400, 1305.500, 127.045, NULL, 0, 0, 0, 100),
+(99613330, 20, -7632.000, 1287.500, 127.040, NULL, 0, 0, 0, 100),
+(99613330, 21, -7644.300, 1272.500, 127.058, NULL, 0, 0, 0, 100),
+(99613330, 22, -7644.300, 1268.000, 127.058, NULL, 0, 0, 0, 100),
+(99613330, 23, -7638.700, 1261.500, 127.058, NULL, 0, 0, 0, 100),
+(99613330, 24, -7638.400, 1258.000, 127.439, NULL, 0, 0, 0, 100),
+(99613330, 25, -7643.500, 1252.200, 127.007, NULL, 0, 0, 0, 100),
+(99613330, 26, -7650.000, 1250.300, 126.517, 3.4260, 5000, 0, 0, 100),
+(99613330, 27, -7643.500, 1252.200, 127.007, NULL, 0, 0, 0, 100),
+(99613330, 28, -7638.400, 1258.000, 127.439, NULL, 0, 0, 0, 100);
