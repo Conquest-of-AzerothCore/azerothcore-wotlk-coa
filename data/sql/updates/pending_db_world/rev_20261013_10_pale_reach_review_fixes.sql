@@ -291,17 +291,25 @@ INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positio
 (99203460, 9, -7803.759, 791.690, 150.644, NULL, 0, 0, 0, 100),
 (99203460, 10, -7811.000, 792.500, 150.644, 0.464, 10000, 0, 0, 100);
 
--- Graysky Soldier 9920347 waits at the end of the walkway, then circles the fountain by Cadmilla and returns: the user's
--- CoAWorldEdit route of 2026-10-15 19:48, first lap only (its later nodes repeated a teleport position).
-UPDATE `creature` SET `position_x` = -7767.677, `position_y` = 779.432, `position_z` = 150.329, `orientation` = 5.3412 WHERE `guid` = 9920347 AND `id` = 164027;
+-- Graysky Soldier 9920347 stands 5 s at the end of the Darengar Manor garden walkway facing the Gilneas fountain
+-- (-7752.58, 757.57), walks once round it 6.75 yd out (clear of the benches and cypress planters), and returns.
+UPDATE `creature` SET `position_x` = -7759.400, `position_y` = 765.900, `position_z` = 151.258, `orientation` = 5.3984 WHERE `guid` = 9920347 AND `id` = 164027;
 DELETE FROM `waypoint_data` WHERE `id` = 99203470;
 INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `move_type`, `action`, `action_chance`) VALUES
-(99203470, 1, -7767.677, 779.432, 150.329, 5.3412, 5000, 0, 0, 100),
-(99203470, 2, -7765.567, 775.513, 150.623, NULL, 0, 0, 0, 100),
-(99203470, 3, -7768.165, 774.701, 150.524, NULL, 0, 0, 0, 100),
-(99203470, 4, -7769.959, 778.817, 150.365, NULL, 0, 0, 0, 100),
-(99203470, 5, -7770.845, 782.910, 150.057, NULL, 0, 0, 0, 100),
-(99203470, 6, -7768.362, 781.473, 150.220, NULL, 0, 0, 0, 100);
+(99203470, 1, -7759.400, 765.900, 151.258, 5.3984, 5000, 0, 0, 100),
+(99203470, 2, -7756.856, 762.793, 151.345, NULL, 0, 0, 0, 100),
+(99203470, 3, -7758.895, 759.955, 151.306, NULL, 0, 0, 0, 100),
+(99203470, 4, -7759.241, 756.478, 151.300, NULL, 0, 0, 0, 100),
+(99203470, 5, -7757.803, 753.294, 151.306, NULL, 0, 0, 0, 100),
+(99203470, 6, -7754.965, 751.255, 151.291, NULL, 0, 0, 0, 100),
+(99203470, 7, -7751.488, 750.909, 151.288, NULL, 0, 0, 0, 100),
+(99203470, 8, -7748.304, 752.347, 151.342, NULL, 0, 0, 0, 100),
+(99203470, 9, -7746.265, 755.185, 151.353, NULL, 0, 0, 0, 100),
+(99203470, 10, -7745.919, 758.662, 151.326, NULL, 0, 0, 0, 100),
+(99203470, 11, -7747.357, 761.846, 151.320, NULL, 0, 0, 0, 100),
+(99203470, 12, -7750.195, 763.885, 151.282, NULL, 0, 0, 0, 100),
+(99203470, 13, -7753.672, 764.231, 151.290, NULL, 0, 0, 0, 100),
+(99203470, 14, -7756.856, 762.793, 151.345, NULL, 0, 0, 0, 100);
 
 -- Possessed Crows and Ravens are crow-sized: footage shows them a third of a crate's width, and the client's other
 -- displays of raven.m2 run at 0.5-0.75. Scale 0.65 by user choice (2026-10-15).
