@@ -116,6 +116,20 @@ public:
                         onyxia->AI()->DoAction(ACTION_WHELP_SUMMONED);
                     }
                     break;
+                // Basalthane is dead for this lockout: the pillars stay shattered across
+                // a reload, same as the pillar creatures in OnCreatureCreate.
+                case GO_FIRE_PILLAR_VISUAL_1:
+                case GO_FIRE_PILLAR_VISUAL_2:
+                case GO_FIRE_PILLAR_VISUAL_3:
+                    if (basalthanePillarsShattered)
+                        go->SetGoState(GO_STATE_READY);
+                    break;
+                case GO_FIRE_PILLAR_COLLISION_1:
+                case GO_FIRE_PILLAR_COLLISION_2:
+                case GO_FIRE_PILLAR_COLLISION_3:
+                    if (basalthanePillarsShattered)
+                        go->SetPhaseMask(PHASEMASK_FIRE_PILLAR_HIDDEN, false);
+                    break;
             }
         }
 

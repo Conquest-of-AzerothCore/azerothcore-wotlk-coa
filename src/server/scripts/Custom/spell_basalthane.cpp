@@ -173,6 +173,18 @@ namespace
     constexpr uint32 ENTRY_PILLAR_2 = 10187; // Crumbling Pillar
     constexpr uint32 ENTRY_PILLAR_3 = 10188; // Searing Pillar
     constexpr uint32 PILLAR_ENTRIES[] = { ENTRY_PILLAR_1, ENTRY_PILLAR_2, ENTRY_PILLAR_3 };
+    // The pillar creatures are invisible markers (CREATURE_FLAG_EXTRA_TRIGGER, display
+    // 200003 - same as live). What players actually see is a pair of live "Fire Pillar"
+    // gameobjects spawned on each marker (SUB gameobject dump 2026-10-04): a spike visual
+    // whose GO state drives its animation (ACTIVE = Open/Opened, spike up; READY = Close
+    // then Closed, the shattered plate) and an invisible collision object. A pair belongs
+    // to the pillar creature it stands on.
+    constexpr uint32 GO_FIRE_PILLAR_VISUALS[] = { 348503, 348504, 348505 };
+    constexpr uint32 GO_FIRE_PILLAR_COLLISIONS[] = { 348506, 348507, 348508 };
+    constexpr float PILLAR_GO_LINK_RANGE = 3.0f;
+    // Phase no player is ever in - hides a shattered pillar's collision without
+    // despawning it (dynamic respawn mode destroys despawned objects, see ShatterPillar).
+    constexpr uint32 PHASEMASK_PILLAR_HIDDEN = 0x40000000;
     // CONFIRMED 2026-10-02 (user's own in-game knowledge, later refined after they asked
     // someone who ran this encounter on real Ascension): each pillar does something
     // different when it shatters, beyond the shared Igneous Impact/Caught in the Blast/
@@ -635,9 +647,29 @@ namespace
     // destroyed/recreated) instead of its live ObjectGuid, and restore via
     // Map::ProcessCreatureRespawn() - the same spawn-ID-based respawn machinery AC's own
     // respawn timer uses, called directly instead of waiting for the timer.
+    // Puts the Fire Pillar gameobject pairs into their shattered or standing state:
+    // the visual plays Close/Open through its GO state, the collision is phased out or
+    // back in. With a position only the pair standing on it is touched; without one,
+    // every pair on the map is (wipe/evade restore, when the marker may not exist).
+    void SetPillarGameObjects(Map* map, Position const* pillarPos, bool shattered)
+    {
+        for (auto const& [spawnId, go] : map->GetGameObjectBySpawnIdStore())
+        {
+            if (pillarPos && go->GetExactDist2d(pillarPos) > PILLAR_GO_LINK_RANGE)
+                continue;
+
+            uint32 const entry = go->GetEntry();
+            if (std::find(std::begin(GO_FIRE_PILLAR_VISUALS), std::end(GO_FIRE_PILLAR_VISUALS), entry) != std::end(GO_FIRE_PILLAR_VISUALS))
+                go->SetGoState(shattered ? GO_STATE_READY : GO_STATE_ACTIVE);
+            else if (std::find(std::begin(GO_FIRE_PILLAR_COLLISIONS), std::end(GO_FIRE_PILLAR_COLLISIONS), entry) != std::end(GO_FIRE_PILLAR_COLLISIONS))
+                go->SetPhaseMask(shattered ? PHASEMASK_PILLAR_HIDDEN : PHASEMASK_NORMAL, true);
+        }
+    }
+
     void ShatterPillar(Creature* boss, Creature* pillar)
     {
         StateFor(boss).hiddenPillars.insert(pillar->GetSpawnId());
+        SetPillarGameObjects(boss->GetMap(), pillar, true);
         pillar->KillSelf();
         pillar->SetCorpseRemoveTime(0);
     }
@@ -654,6 +686,7 @@ namespace
         for (ObjectGuid::LowType spawnId : state.hiddenPillars)
             RestorePillar(boss->GetMap(), spawnId);
         state.hiddenPillars.clear();
+        SetPillarGameObjects(boss->GetMap(), nullptr, false);
     }
 
     // Both real per-difficulty values pulled directly from Spell.dbc (Ascension's own
