@@ -339,19 +339,12 @@ INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `ItemID2`,
 (164372, 1, 2075359, 0, 0, 0);
 UPDATE `creature` SET `equipment_id` = 1 WHERE `guid` = 9920636 AND `id` = 164372;
 
--- #77: Horned Ones are near-black silhouettes on live (YzysjpunNbs 28:36). Shadowform 63359 is a cosmetic dummy aura with the
--- Shadowform visual and no stat effect; user choice 2026-10-15.
-DELETE FROM `creature_template_addon` WHERE `entry` = 164373;
-INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
-(164373, 0, 0, 0, 1, 0, 0, '63359');
-UPDATE `creature_addon` SET `auras` = '63359' WHERE `guid` IN (9920664, 9920666, 9920676, 9920683);
-
 -- #78: closing a Blackwood Rift is the 10 s channel 365373 at the rift (broken by damage or movement); only a finished
 -- channel counts, and the rift then vanishes until its 60 s respawn.
 UPDATE `gameobject_template` SET `ScriptName` = 'go_coa_blackwood_rift' WHERE `entry` = 2300660;
 
 -- Nightweave Cave thinned and two Horned One patrols, plus a duplicate Scadeald Bear, from CoAWorldEdit (playtest
--- 2026-10-15 21:25). Patrolling Horned Ones carry the Shadowform 63359 on their own addon row, which replaces the template's.
+-- 2026-10-15 21:25).
 DELETE FROM `creature_addon` WHERE `guid` IN (9961584, 9961582, 9961571, 9961572, 9961568, 9920675, 9961573, 9961799, 9961778, 9961547, 9920664, 9920663, 9961430, 9961874, 9961434, 9961886, 9920679, 9961594, 9961813, 9961587, 9920680, 9961791, 9920666, 9961143, 9961132, 9961144, 9961593);
 DELETE FROM `creature` WHERE `guid` IN (9961584, 9961582, 9961571, 9961572, 9961568, 9920675, 9961573, 9961799, 9961778, 9961547, 9920664, 9920663, 9961430, 9961874, 9961434, 9961886, 9920679, 9961594, 9961813, 9961587, 9920680, 9961791, 9920666, 9961143, 9961132, 9961144) AND `id` = 164373;
 DELETE FROM `creature` WHERE `guid` = 9961593 AND `id` = 164039;
@@ -359,8 +352,8 @@ UPDATE `creature` SET `position_x` = -7458.684, `position_y` = 1277.388, `positi
 UPDATE `creature` SET `position_x` = -7474.972, `position_y` = 1322.493, `position_z` = 58.127, `orientation` = 2.0459, `wander_distance` = 0, `MovementType` = 2 WHERE `guid` = 9961590 AND `id` = 164373;
 DELETE FROM `creature_addon` WHERE `guid` IN (9961863, 9961590);
 INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
-(9961863, 99618630, 0, 0, 1, 0, 0, '63359'),
-(9961590, 99615900, 0, 0, 1, 0, 0, '63359');
+(9961863, 99618630, 0, 0, 1, 0, 0, ''),
+(9961590, 99615900, 0, 0, 1, 0, 0, '');
 DELETE FROM `waypoint_data` WHERE `id` IN (99618630, 99615900);
 INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `move_type`, `action`, `action_chance`) VALUES
 (99618630, 1, -7458.684, 1277.388, 61.566, NULL, 0, 0, 0, 100),
@@ -422,3 +415,6 @@ UPDATE `creature` SET `orientation` = 1.4835 WHERE `guid` = 9920636 AND `id` = 1
 DELETE FROM `creature_addon` WHERE `guid` = 9920636;
 INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
 (9920636, 0, 0, 7, 1, 0, 0, '');
+
+-- Tin Vein 9991110 in Nightweave Cave moved with CoAWorldEdit (playtest 2026-10-15).
+UPDATE `gameobject` SET `position_x` = -7515.176, `position_y` = 1271.890, `position_z` = 65.412, `orientation` = 0.7854, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.382683, `rotation3` = 0.92388 WHERE `guid` = 9991110 AND `id` = 1732;
