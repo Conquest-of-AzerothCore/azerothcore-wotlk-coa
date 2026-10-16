@@ -507,3 +507,7 @@ UPDATE `creature_display_preset` SET `item_shoulders` = 0 WHERE `entry` = 164131
 -- every option): skin 8, short spiky hair 2 in dark grey 8, full beard 4, Gray Woolen Shirt 7947, Bloodsail Pants 30123,
 -- Moldy Leather Boots 30472.
 UPDATE `creature_display_preset` SET `skin` = 8, `face` = 0, `hair` = 2, `haircolor` = 8, `facialhair` = 4, `item_body` = 7947, `item_legs` = 30123, `item_feet` = 30472 WHERE `entry` = 164127 AND `display_id` = 49;
+
+-- Innkeeper Auvrel's look (user's wardrobe picks against YzysjpunNbs 17:40): Torric Graven's skin 8, short spiky hair 2 and
+-- full beard 4 in his own dark hair colour, Chestguard of Ensnared Nobility 147169, Bloodsail Pants 30123, Shadowweave Boots 1979.
+UPDATE `creature_display_preset` SET `skin` = 8, `face` = 0, `hair` = 2, `facialhair` = 4, `item_body` = 0, `item_chest` = 147169, `item_legs` = 30123, `item_feet` = 1979 WHERE `entry` = 164131 AND `display_id` = 49;
