@@ -66,10 +66,10 @@ DestinyWeaver.Scaling.WorldMaps = "0 1"
 #                     inside the entry's TargetLevelMin-MaxLevel band; an entry whose levels lie outside
 #                     1-60 uses 15-59, and a map listed by several entries covers all of them. A
 #                     dungeon that is not listed keeps its authored levels.
-#        Default:     "1 4 6 8 10 12 14 16 18 20 22 24 26 28 163 164 165 272 273"
+#        Default:     "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601"
 #        Reloadable:  yes (.reload config)
 
-DestinyWeaver.Scaling.DungeonIds = "1 4 6 8 10 12 14 16 18 20 22 24 26 28 163 164 165 272 273"
+DestinyWeaver.Scaling.DungeonIds = "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601"
 
 #    DestinyWeaver.ExperienceBonusControl
 #        Description: Whether the Experience Bonus Control service exists at all. A character who

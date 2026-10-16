@@ -99,8 +99,9 @@ namespace
     constexpr uint32 UNIT_DYNFLAG_LEVEL_SCALING = 0x100;
 
     /// The dungeon finder entries whose dungeons scale: the classic five-player dungeons the client's own
-    /// scaling list names.
-    constexpr char DEFAULT_SCALING_DUNGEONS[] = "1 4 6 8 10 12 14 16 18 20 22 24 26 28 163 164 165 272 273";
+    /// scaling list names, plus Blackrock Depths, Lower and Upper Blackrock Spire, Dire Maul, Stratholme
+    /// and Scholomance, the classic dungeons the client list leaves out.
+    constexpr char DEFAULT_SCALING_DUNGEONS[] = "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601";
 
     /// Where a view can exist at all: the open-world maps, and the classic dungeons with the band their
     /// creatures are held inside. Built on every config load and at startup, and published whole, so a
