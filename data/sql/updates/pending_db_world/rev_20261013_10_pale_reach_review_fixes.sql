@@ -349,3 +349,56 @@ UPDATE `creature_addon` SET `auras` = '63359' WHERE `guid` IN (9920664, 9920666,
 -- #78: closing a Blackwood Rift is the 10 s channel 365373 at the rift (broken by damage or movement); only a finished
 -- channel counts, and the rift then vanishes until its 60 s respawn.
 UPDATE `gameobject_template` SET `ScriptName` = 'go_coa_blackwood_rift' WHERE `entry` = 2300660;
+
+-- Nightweave Cave thinned and two Horned One patrols, plus a duplicate Scadeald Bear, from CoAWorldEdit (playtest
+-- 2026-10-15 21:25). Patrolling Horned Ones carry the Shadowform 63359 on their own addon row, which replaces the template's.
+DELETE FROM `creature_addon` WHERE `guid` IN (9961584, 9961582, 9961571, 9961572, 9961568, 9920675, 9961573, 9961799, 9961778, 9961547, 9920664, 9920663, 9961430, 9961874, 9961434, 9961886, 9920679, 9961594, 9961813, 9961587, 9920680, 9961791, 9920666, 9961143, 9961132, 9961144, 9961593);
+DELETE FROM `creature` WHERE `guid` IN (9961584, 9961582, 9961571, 9961572, 9961568, 9920675, 9961573, 9961799, 9961778, 9961547, 9920664, 9920663, 9961430, 9961874, 9961434, 9961886, 9920679, 9961594, 9961813, 9961587, 9920680, 9961791, 9920666, 9961143, 9961132, 9961144) AND `id` = 164373;
+DELETE FROM `creature` WHERE `guid` = 9961593 AND `id` = 164039;
+UPDATE `creature` SET `position_x` = -7458.684, `position_y` = 1277.388, `position_z` = 61.566, `orientation` = 1.0029, `wander_distance` = 0, `MovementType` = 2 WHERE `guid` = 9961863 AND `id` = 164373;
+UPDATE `creature` SET `position_x` = -7474.972, `position_y` = 1322.493, `position_z` = 58.127, `orientation` = 2.0459, `wander_distance` = 0, `MovementType` = 2 WHERE `guid` = 9961590 AND `id` = 164373;
+DELETE FROM `creature_addon` WHERE `guid` IN (9961863, 9961590);
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
+(9961863, 99618630, 0, 0, 1, 0, 0, '63359'),
+(9961590, 99615900, 0, 0, 1, 0, 0, '63359');
+DELETE FROM `waypoint_data` WHERE `id` IN (99618630, 99615900);
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `move_type`, `action`, `action_chance`) VALUES
+(99618630, 1, -7458.684, 1277.388, 61.566, NULL, 0, 0, 0, 100),
+(99618630, 2, -7449.026, 1303.605, 67.705, NULL, 0, 0, 0, 100),
+(99618630, 3, -7452.468, 1321.669, 71.915, NULL, 0, 0, 0, 100),
+(99618630, 4, -7463.390, 1340.723, 73.025, NULL, 0, 0, 0, 100),
+(99618630, 5, -7481.990, 1357.149, 73.962, NULL, 0, 0, 0, 100),
+(99618630, 6, -7498.240, 1350.308, 73.787, NULL, 0, 0, 0, 100),
+(99618630, 7, -7507.902, 1333.373, 73.917, NULL, 0, 0, 0, 100),
+(99618630, 8, -7499.794, 1315.604, 74.091, NULL, 0, 0, 0, 100),
+(99618630, 9, -7494.574, 1298.027, 74.165, 5.1796, 10000, 0, 0, 100),
+(99615900, 1, -7474.972, 1322.493, 58.127, NULL, 0, 0, 0, 100),
+(99615900, 2, -7500.063, 1331.039, 58.051, NULL, 0, 0, 0, 100),
+(99615900, 3, -7521.951, 1324.153, 60.630, NULL, 0, 0, 0, 100),
+(99615900, 4, -7542.620, 1315.593, 64.818, NULL, 0, 0, 0, 100),
+(99615900, 5, -7547.977, 1298.214, 64.917, NULL, 0, 0, 0, 100),
+(99615900, 6, -7548.169, 1285.602, 65.066, NULL, 0, 0, 0, 100),
+(99615900, 7, -7529.270, 1285.483, 64.819, NULL, 0, 0, 0, 100),
+(99615900, 8, -7511.833, 1277.711, 64.962, NULL, 0, 0, 0, 100),
+(99615900, 9, -7494.700, 1266.442, 65.194, NULL, 0, 0, 0, 100),
+(99615900, 10, -7485.189, 1271.496, 63.898, NULL, 0, 0, 0, 100),
+(99615900, 11, -7471.376, 1280.529, 60.495, NULL, 0, 0, 0, 100),
+(99615900, 12, -7463.159, 1272.900, 60.139, NULL, 0, 0, 0, 100),
+(99615900, 13, -7471.002, 1254.207, 60.897, NULL, 0, 0, 0, 100),
+(99615900, 14, -7482.830, 1246.147, 61.208, NULL, 0, 0, 0, 100),
+(99615900, 15, -7499.459, 1239.731, 60.697, NULL, 0, 0, 0, 100),
+(99615900, 16, -7516.095, 1231.828, 57.108, NULL, 0, 0, 0, 100),
+(99615900, 17, -7522.411, 1214.071, 56.430, NULL, 0, 0, 0, 100),
+(99615900, 18, -7527.335, 1195.088, 58.054, 4.4767, 10000, 0, 0, 100),
+(99615900, 19, -7549.366, 1196.035, 60.167, NULL, 0, 0, 0, 100),
+(99615900, 20, -7555.770, 1208.018, 63.227, NULL, 0, 0, 0, 100),
+(99615900, 21, -7552.028, 1224.466, 66.130, NULL, 0, 0, 0, 100),
+(99615900, 22, -7535.740, 1245.801, 67.294, 1.0492, 10000, 0, 0, 100);
+
+-- Ealdir Ambusher 9961381 removed with CoAWorldEdit (playtest 2026-10-15).
+DELETE FROM `creature_addon` WHERE `guid` = 9961381;
+DELETE FROM `creature` WHERE `guid` = 9961381 AND `id` = 164926;
+
+-- Raven 9961736 on the ground removed with CoAWorldEdit (playtest 2026-10-15).
+DELETE FROM `creature_addon` WHERE `guid` = 9961736;
+DELETE FROM `creature` WHERE `guid` = 9961736 AND `id` = 164371;

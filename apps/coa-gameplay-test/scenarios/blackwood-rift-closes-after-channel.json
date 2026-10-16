@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Where the Veil Wanes: a Blackwood Rift closes only after the 10 second Closing the Blackwood Rift channel",
-  "contract": "Review item #78: on live, closing a Blackwood Rift (gameobject 2300660, quest 175048 objective 2, -2300660 x3) is the client spell 365373 'Closing the Blackwood Rift', a 10 s channel at the rift; only a finished channel counts, being attacked breaks it, and the rift then vanishes until its 60 s respawn. The PR's rift was a plain goober that credited on the click. The case joins world phase 1 beside rift 9920640 and uses the world spawn. The three Horned Ones guarding it are killed first so no attack breaks the channel.",
+  "contract": "Review item #78: on live, closing a Blackwood Rift (gameobject 2300660, quest 175048 objective 2, -2300660 x3) is the client spell 365373 'Closing the Blackwood Rift', a 10 s channel at the rift; only a finished channel counts, being attacked breaks it, and the rift then vanishes until its 60 s respawn. The PR's rift was a plain goober that credited on the click. The case joins world phase 1 beside rift 9920640 and uses the world spawn. The two Horned Ones guarding it are killed first so no attack breaks the channel.",
   "timeout_ms": 90000,
   "location": {
     "map": 0,
@@ -38,21 +38,14 @@
     },
     {
       "action": "attack_nearby",
-      "label": "Clear Horned One 1 of 3 by the rift",
+      "label": "Clear Horned One 1 of 2 by the rift",
       "actor": "p",
       "entry": 164373,
       "kill": true
     },
     {
       "action": "attack_nearby",
-      "label": "Clear Horned One 2 of 3 by the rift",
-      "actor": "p",
-      "entry": 164373,
-      "kill": true
-    },
-    {
-      "action": "attack_nearby",
-      "label": "Clear Horned One 3 of 3 by the rift",
+      "label": "Clear Horned One 2 of 2 by the rift",
       "actor": "p",
       "entry": 164373,
       "kill": true
