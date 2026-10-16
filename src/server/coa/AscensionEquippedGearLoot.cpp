@@ -1,4 +1,5 @@
 #include "AscensionEquippedGearLoot.h"
+#include "AscensionBloodforging.h"
 #include "AscensionCreaturePreset.h"
 #include "Config.h"
 #include "Creature.h"
@@ -90,7 +91,7 @@ bool Wearable(ItemTemplate const& item)
         && !item.HasFlag(ITEM_FLAG_DEPRECATED) && !item.HasFlag(ITEM_FLAG_CONJURED)
         && !item.StartQuest && !item.RequiredSkill && !item.RequiredSpell && !item.RandomProperty && !item.RandomSuffix
         && !item.RequiredHonorRank && !item.RequiredReputationFaction
-        && !PlaceholderName(item.Name1);
+        && !PlaceholderName(item.Name1) && !Bloodforging::IsBloodforged(item);
 }
 
 uint32 GearLevel(ItemTemplate const& item)

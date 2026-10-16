@@ -16,6 +16,7 @@ enum class Method
 
 uint32 FindEntry(ItemTemplate const& source, Method method = Method::BloodyJar);
 bool Convert(Item& item, Method method = Method::BloodyJar);
+bool IsBloodforged(ItemTemplate const& item);
 }
 
 #endif

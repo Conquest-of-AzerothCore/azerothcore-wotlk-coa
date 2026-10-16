@@ -53,11 +53,6 @@ using Appearance = std::tuple<std::string, uint32, uint32, uint32, uint32>;
 using Catalogue = std::map<Appearance, std::vector<uint32>>;
 using Rank = std::tuple<uint32, uint32, uint32>;
 
-bool IsBloodforged(ItemTemplate const& item)
-{
-    return item.Name1.starts_with("Bloodforged ") && item.Description.find("Bloodforged") != std::string::npos;
-}
-
 bool BloodforgedTier(ItemTemplate const& item, bool heroic)
 {
     return IsBloodforged(item) && (item.Description.find("Heroic") != std::string::npos) == heroic
@@ -283,6 +278,11 @@ public:
             player->GetSession()->SendItemQuerySingleResponse(BloodyJar);
     }
 };
+}
+
+bool IsBloodforged(ItemTemplate const& item)
+{
+    return item.Name1.starts_with("Bloodforged ") && item.Description.find("Bloodforged") != std::string::npos;
 }
 
 uint32 FindEntry(ItemTemplate const& source, Method method)
