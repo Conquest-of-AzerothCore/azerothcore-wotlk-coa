@@ -453,10 +453,27 @@ class spell_ascension_pyromancer_ability : public SpellScript
         OnEffectHitTarget += SpellEffectFn(spell_ascension_pyromancer_ability::Effect, EFFECT_ALL, SPELL_EFFECT_ANY);
     }
 };
+
+class spell_ascension_pyromancer_pillar_of_flame : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_pyromancer_pillar_of_flame);
+
+    void FilterPrimaryTarget(std::list<WorldObject*>& targets)
+    {
+        if (Unit* victim = GetExplTargetUnit())
+            targets.remove(victim);
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ascension_pyromancer_pillar_of_flame::FilterPrimaryTarget, EFFECT_1, TARGET_UNIT_DEST_AREA_ENEMY);
+    }
+};
 }
 void AddSC_AscensionPyromancerAbilities()
 {
     new pyromancer_spells();
     RegisterSpellScript(spell_ascension_pyromancer_resource);
     RegisterSpellScript(spell_ascension_pyromancer_ability);
+    RegisterSpellScript(spell_ascension_pyromancer_pillar_of_flame);
 }
