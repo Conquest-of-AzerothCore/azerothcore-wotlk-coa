@@ -558,3 +558,6 @@ UPDATE `creature` SET `equipment_id` = 1 WHERE `id` IN (164124, 164134, 164173, 
 -- Extra Dunshire Guards removed with CoAWorldEdit (playtest 2026-10-16).
 DELETE FROM `creature` WHERE `guid` IN (9960886, 9920418, 9920419, 9960892, 9960885) AND `id` = 164124;
 DELETE FROM `creature_addon` WHERE `guid` IN (9960886, 9920418, 9920419, 9960892, 9960885);
+
+-- Torric Graven wears the vest Ulira Greyvale wears (Gilnean Footpad's Tunic 54934) over his Gray Woolen Shirt (user, 2026-10-16).
+UPDATE `creature_display_preset` SET `item_chest` = 54934 WHERE `entry` = 164127 AND `display_id` = 49;
