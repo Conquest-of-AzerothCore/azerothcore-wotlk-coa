@@ -1,0 +1,473 @@
+{
+  "schema": 1,
+  "name": "Heroic and Mythic dungeon bosses drop their own tier and a Mark of Triumph (#7513)",
+  "contract": "#7513: the Ring of Law bosses dropped no Mythic items, because their Heroic and Mythic templates still used the Normal loot list. Every Ring of Law boss now drops one item of the Ring of Law pool per kill in the tier of the instance: item level 64 on Mythic, 61 on Heroic, epic. The Scarlet Monastery bosses had the same gap; Herod on Mythic drops one of his Mythic items. Each kill of a dungeon boss on Heroic or Mythic gives every player in the instance one Mark of Triumph (1414502); on Normal it gives none. A boss with a single item of its own (Aggem Thorncurse) also draws from the Shared Dungeon Loot (AtlasLoot, pages Heroic 1-3, in the instance's tier): its own item half the time, otherwise one shared item, so a Mythic kill still drops exactly one epic of item level 64.",
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "normal",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "armory",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "kraul",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "mythic",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 230,
+      "x": 730.85,
+      "y": -68.85,
+      "z": -72.0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Blackrock Depths on Mythic",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 9027,
+      "as": "gorosh",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "mythic",
+      "entry": 9027,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Gorosh the Dervish dies",
+      "actor": "gorosh",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "The kill on Mythic gives a Mark of Triumph",
+      "actor": "mythic",
+      "metric": "item_count",
+      "item": 1414502,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "mythic",
+      "target": "gorosh"
+    },
+    {
+      "action": "assert",
+      "label": "One epic item on the corpse",
+      "actor": "mythic",
+      "metric": "loot_count",
+      "quality": 4,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "It is a Mythic item of the Ring of Law pool (item level 64)",
+      "actor": "mythic",
+      "metric": "loot_gear_item_level",
+      "equals": 64
+    },
+    {
+      "action": "close_loot",
+      "actor": "mythic"
+    },
+    {
+      "action": "set_health",
+      "actor": "heroic",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 230,
+      "x": 730.85,
+      "y": -68.85,
+      "z": -72.0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Blackrock Depths on Heroic",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "summon",
+      "actor": "heroic",
+      "entry": 9031,
+      "as": "anubshiah",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "heroic",
+      "entry": 9031,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Anub'shiah dies",
+      "actor": "anubshiah",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "The kill on Heroic gives a Mark of Triumph",
+      "actor": "heroic",
+      "metric": "item_count",
+      "item": 1414502,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "heroic",
+      "target": "anubshiah"
+    },
+    {
+      "action": "assert",
+      "label": "One epic item on the corpse",
+      "actor": "heroic",
+      "metric": "loot_count",
+      "quality": 4,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "It is a Heroic item of the Ring of Law pool (item level 61)",
+      "actor": "heroic",
+      "metric": "loot_gear_item_level",
+      "equals": 61
+    },
+    {
+      "action": "close_loot",
+      "actor": "heroic"
+    },
+    {
+      "action": "set_health",
+      "actor": "normal",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "normal",
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "normal",
+      "map": 230,
+      "x": 730.85,
+      "y": -68.85,
+      "z": -72.0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Blackrock Depths on Normal",
+      "actor": "normal",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "normal",
+      "entry": 9032,
+      "as": "hedrum",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "normal",
+      "entry": 9032,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Hedrum the Creeper dies",
+      "actor": "hedrum",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "A Normal kill gives no Mark of Triumph",
+      "actor": "normal",
+      "metric": "item_count",
+      "item": 1414502,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "armory",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "armory",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "armory",
+      "map": 189,
+      "x": 1688.99,
+      "y": 1053.48,
+      "z": 18.68
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Scarlet Monastery on Mythic",
+      "actor": "armory",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "armory",
+      "entry": 3975,
+      "as": "herod",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "armory",
+      "entry": 3975,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Herod dies",
+      "actor": "herod",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 20000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "armory",
+      "target": "herod"
+    },
+    {
+      "action": "assert",
+      "label": "Herod on Mythic drops one of his Mythic items (item level 64)",
+      "actor": "armory",
+      "metric": "loot_gear_item_level",
+      "equals": 64
+    },
+    {
+      "action": "close_loot",
+      "actor": "armory"
+    },
+    {
+      "action": "set_health",
+      "actor": "kraul",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "kraul",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "kraul",
+      "map": 47,
+      "x": 1942.5,
+      "y": 1544.2,
+      "z": 82.5
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Razorfen Kraul on Mythic",
+      "actor": "kraul",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "kraul",
+      "entry": 4424,
+      "as": "aggem",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "kraul",
+      "entry": 4424,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Aggem Thorncurse dies",
+      "actor": "aggem",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "kraul",
+      "target": "aggem"
+    },
+    {
+      "action": "assert",
+      "label": "Aggem on Mythic drops exactly one epic",
+      "actor": "kraul",
+      "metric": "loot_count",
+      "quality": 4,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "his own item or a Shared Dungeon Loot item, both Mythic (item level 64)",
+      "actor": "kraul",
+      "metric": "loot_gear_item_level",
+      "equals": 64
+    },
+    {
+      "action": "close_loot",
+      "actor": "kraul"
+    }
+  ]
+}
