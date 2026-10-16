@@ -411,7 +411,7 @@ INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `e
 DELETE FROM `creature` WHERE `guid` = 9920656 AND `id` = 164043;
 
 -- More Jagged Cave Ealdir edits with CoAWorldEdit (playtest 2026-10-15): three removed, 9920658 kneels.
-DELETE FROM `creature_addon` WHERE `guid` IN (9961507, 9961512, 9961484, 9920658);
 DELETE FROM `creature` WHERE `guid` IN (9961507, 9961512, 9961484) AND `id` = 164043;
+DELETE FROM `creature_addon` WHERE `guid` IN (9961507, 9961512, 9961484, 9920658);
 INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
 (9920658, 0, 0, 8, 1, 0, 0, '');
