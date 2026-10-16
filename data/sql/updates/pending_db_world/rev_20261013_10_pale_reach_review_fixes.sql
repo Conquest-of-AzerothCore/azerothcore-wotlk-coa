@@ -561,3 +561,48 @@ DELETE FROM `creature_addon` WHERE `guid` IN (9960886, 9920418, 9920419, 9960892
 
 -- Torric Graven wears the vest Ulira Greyvale wears (Gilnean Footpad's Tunic 54934) over his Gray Woolen Shirt (user, 2026-10-16).
 UPDATE `creature_display_preset` SET `item_chest` = 54934 WHERE `entry` = 164127 AND `display_id` = 49;
+
+-- Graysky Royal Guards (164222) carry two Iron-Grip Shortswords 36517, the Graysky Guard sword (user, 2026-10-16).
+DELETE FROM `creature_equip_template` WHERE `CreatureID` = 164222;
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `ItemID2`, `ItemID3`, `VerifiedBuild`) VALUES
+(164222, 1, 36517, 36517, 0, 0);
+UPDATE `creature` SET `equipment_id` = 1 WHERE `id` = 164222;
+
+-- The two Coldmere Keep balcony Royal Guards walk their own balcony end to end and back, 5 s at each end; routes laid
+-- down the balcony centres from the keep geometry, and the two balconies never meet (user request 2026-10-16).
+UPDATE `creature` SET `position_x` = -7204.7, `position_y` = 1288.5, `position_z` = 321.387, `wander_distance` = 0, `MovementType` = 2 WHERE `guid` = 9960264 AND `id` = 164222;
+UPDATE `creature` SET `position_x` = -7280.5, `position_y` = 1272.0, `position_z` = 321.874, `wander_distance` = 0, `MovementType` = 2 WHERE `guid` = 9960836 AND `id` = 164222;
+DELETE FROM `creature_addon` WHERE `guid` IN (9960264, 9960836);
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
+(9960264, 99602640, 0, 0, 1, 0, 0, ''),
+(9960836, 99608360, 0, 0, 1, 0, 0, '');
+DELETE FROM `waypoint_data` WHERE `id` IN (99602640, 99608360);
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `move_type`, `action`, `action_chance`) VALUES
+(99602640, 1, -7204.7, 1288.5, 321.387, 5.0736, 5000, 0, 0, 100),
+(99602640, 2, -7203.0, 1284.0, 321.387, NULL, 0, 0, 0, 100),
+(99602640, 3, -7201.83, 1276.0, 321.387, NULL, 0, 0, 0, 100),
+(99602640, 4, -7196.22, 1266.0, 321.387, NULL, 0, 0, 0, 100),
+(99602640, 5, -7193.5, 1258.5, 321.387, NULL, 0, 0, 0, 100),
+(99602640, 6, -7192.11, 1251.5, 321.387, NULL, 0, 0, 0, 100),
+(99602640, 7, -7185.7, 1237.0, 321.387, 1.9870, 5000, 0, 0, 100),
+(99602640, 8, -7192.11, 1251.5, 321.387, NULL, 0, 0, 0, 100),
+(99602640, 9, -7193.5, 1258.5, 321.387, NULL, 0, 0, 0, 100),
+(99602640, 10, -7196.22, 1266.0, 321.387, NULL, 0, 0, 0, 100),
+(99602640, 11, -7201.83, 1276.0, 321.387, NULL, 0, 0, 0, 100),
+(99602640, 12, -7203.0, 1284.0, 321.387, NULL, 0, 0, 0, 100),
+(99608360, 1, -7280.5, 1272.0, 321.874, 4.8580, 5000, 0, 0, 100),
+(99608360, 2, -7280.06, 1269.0, 321.874, NULL, 0, 0, 0, 100),
+(99608360, 3, -7275.56, 1257.0, 321.387, NULL, 0, 0, 0, 100),
+(99608360, 4, -7270.67, 1250.0, 321.387, NULL, 0, 0, 0, 100),
+(99608360, 5, -7268.5, 1239.0, 321.387, NULL, 0, 0, 0, 100),
+(99608360, 6, -7265.72, 1231.5, 321.387, NULL, 0, 0, 0, 100),
+(99608360, 7, -7262.83, 1227.0, 321.387, NULL, 0, 0, 0, 100),
+(99608360, 8, -7261.44, 1223.5, 321.387, NULL, 0, 0, 0, 100),
+(99608360, 9, -7254.4, 1201.0, 321.856, 1.8740, 5000, 0, 0, 100),
+(99608360, 10, -7261.44, 1223.5, 321.387, NULL, 0, 0, 0, 100),
+(99608360, 11, -7262.83, 1227.0, 321.387, NULL, 0, 0, 0, 100),
+(99608360, 12, -7265.72, 1231.5, 321.387, NULL, 0, 0, 0, 100),
+(99608360, 13, -7268.5, 1239.0, 321.387, NULL, 0, 0, 0, 100),
+(99608360, 14, -7270.67, 1250.0, 321.387, NULL, 0, 0, 0, 100),
+(99608360, 15, -7275.56, 1257.0, 321.387, NULL, 0, 0, 0, 100),
+(99608360, 16, -7280.06, 1269.0, 321.874, NULL, 0, 0, 0, 100);
