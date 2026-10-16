@@ -502,3 +502,8 @@ UPDATE `creature` SET `equipment_id` = 1 WHERE `guid` = 9960193 AND `id` = 16401
 -- Innkeeper Auvrel wore shoulder display 87660 (lshoulder_leather_draenordungeon_c_01), whose model the client lacks, so it
 -- drew as placeholder cubes; live footage (YzysjpunNbs 17:40) shows him without shoulders.
 UPDATE `creature_display_preset` SET `item_shoulders` = 0 WHERE `entry` = 164131 AND `display_id` = 49;
+
+-- Torric Graven's look from AscenSS 071126-233604 and 233703 (user's wardrobe picks; customization matched by rendering
+-- every option): skin 8, spiky swept hair 13 in dark grey 8, full beard 4, Gray Woolen Shirt 7947, Bloodsail Pants 30123,
+-- Moldy Leather Boots 30472.
+UPDATE `creature_display_preset` SET `skin` = 8, `face` = 0, `hair` = 13, `haircolor` = 8, `facialhair` = 4, `item_body` = 7947, `item_legs` = 30123, `item_feet` = 30472 WHERE `entry` = 164127 AND `display_id` = 49;
