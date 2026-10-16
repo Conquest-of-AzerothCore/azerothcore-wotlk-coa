@@ -78,9 +78,13 @@ bool StrikeHurricane(Unit* player, Aura* aura)
         float(strikes % HURRICANE_STRIKE_DIRECTIONS) * 2.0f * float(M_PI) / float(HURRICANE_STRIKE_DIRECTIONS);
     float const x = target->GetPositionX() + std::cos(angle) * HURRICANE_STRIKE_DISTANCE;
     float const y = target->GetPositionY() + std::sin(angle) * HURRICANE_STRIKE_DISTANCE;
-    float z = player->GetMap()->GetHeight(x, y, MAX_HEIGHT);
-    if (z <= INVALID_HEIGHT)
-        z = target->GetPositionZ();
+    float z = target->GetPositionZ();
+    if (!player->IsUnderWater())
+    {
+        float const ground = player->GetMap()->GetHeight(x, y, MAX_HEIGHT);
+        if (ground > INVALID_HEIGHT)
+            z = ground;
+    }
     player->NearTeleportTo(x, y, z, player->GetOrientation());
     player->SetFacingToObject(target);
     player->CastSpell(target,
