@@ -330,3 +330,18 @@ UPDATE `creature_template_model` SET `DisplayScale` = 0.15 WHERE `CreatureID` = 
 DELETE FROM `quest_request_items` WHERE `ID` = 175048;
 INSERT INTO `quest_request_items` (`ID`, `EmoteOnComplete`, `EmoteOnIncomplete`, `CompletionText`, `VerifiedBuild`) VALUES
 (175048, 0, 0, '<Holga''s breathing is shallow and ragged.>$B$BYou came back... Are the rifts closed? Do the Horned Ones still walk in that cave?', 0);
+
+-- #76: Holga wears Deadly Gladiator's Kodohide Robes 49045 and holds a Shadow Council Kris 2075359, picked by the user from
+-- the wardrobe against AscenSS 071226-222341 and 072526-190028.
+UPDATE `creature_display_preset` SET `item_chest` = 49045 WHERE `entry` = 164372 AND `display_id` = 50;
+DELETE FROM `creature_equip_template` WHERE `CreatureID` = 164372;
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `ItemID2`, `ItemID3`, `VerifiedBuild`) VALUES
+(164372, 1, 2075359, 0, 0, 0);
+UPDATE `creature` SET `equipment_id` = 1 WHERE `guid` = 9920636 AND `id` = 164372;
+
+-- #77: Horned Ones are near-black silhouettes on live (YzysjpunNbs 28:36). Shadowform 63359 is a cosmetic dummy aura with the
+-- Shadowform visual and no stat effect; user choice 2026-10-15.
+DELETE FROM `creature_template_addon` WHERE `entry` = 164373;
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
+(164373, 0, 0, 0, 1, 0, 0, '63359');
+UPDATE `creature_addon` SET `auras` = '63359' WHERE `guid` IN (9920664, 9920666, 9920676, 9920683);
