@@ -761,10 +761,11 @@ class spell_sha_fire_nova : public SpellScript
     bool Validate(SpellInfo const* spellInfo) override
     {
         SpellInfo const* firstRankSpellInfo = sSpellMgr->GetSpellInfo(SPELL_SHAMAN_FIRE_NOVA_R1);
-        if (!firstRankSpellInfo || !spellInfo->IsRankOf(firstRankSpellInfo))
+        SpellInfo const* stockRank = sSpellMgr->GetSpellInfo(sSpellMgr->GetSpellTwinSource(spellInfo->Id));
+        if (!firstRankSpellInfo || !stockRank || !stockRank->IsRankOf(firstRankSpellInfo))
             return false;
 
-        uint8 rank = spellInfo->GetRank();
+        uint8 rank = stockRank->GetRank();
         if (!sSpellMgr->GetSpellWithRank(SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1, rank, true))
             return false;
         return true;
@@ -792,9 +793,10 @@ class spell_sha_fire_nova : public SpellScript
         Unit* caster = GetCaster();
         if (Creature* totem = caster->GetMap()->GetCreature(caster->m_SummonSlot[1]))
         {
-            uint8 rank = GetSpellInfo()->GetRank();
+            uint32 const spellId = GetSpellInfo()->Id;
+            uint8 rank = sSpellMgr->GetSpellInfo(sSpellMgr->GetSpellTwinSource(spellId))->GetRank();
             if (totem->IsTotem())
-                caster->CastSpell(totem, sSpellMgr->GetSpellWithRank(SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1, rank), true);
+                caster->CastSpell(totem, sSpellMgr->GetSpellTwinFor(sSpellMgr->GetSpellWithRank(SPELL_SHAMAN_FIRE_NOVA_TRIGGERED_R1, rank), spellId), true);
         }
     }
 
@@ -858,16 +860,11 @@ class spell_sha_healing_stream_totem : public SpellScript
             {
                 if (Unit* owner = caster->GetOwner())
                 {
+                    if (triggeringSpell && sSpellMgr->GetSpellTwinSource(triggeringSpell->Id) != triggeringSpell->Id)
+                        damage = triggeringSpell->Effects[EFFECT_0].CalcValue(owner);
+
                     if (triggeringSpell)
                         damage = int32(owner->SpellHealingBonusDone(target, triggeringSpell, damage, HEAL, effIndex));
-
-                    // Restorative Totems
-                    if (AuraEffect* dummy = owner->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, SHAMAN_ICON_ID_RESTORATIVE_TOTEMS, 1))
-                        AddPct(damage, dummy->GetAmount());
-
-                    // Glyph of Healing Stream Totem
-                    if (AuraEffect const* aurEff = owner->GetAuraEffect(SPELL_SHAMAN_GLYPH_OF_HEALING_STREAM_TOTEM, EFFECT_0))
-                        AddPct(damage, aurEff->GetAmount());
 
                     damage = int32(target->SpellHealingBonusTaken(owner, triggeringSpell, damage, HEAL));
                 }
@@ -1857,7 +1854,8 @@ class spell_sha_lightning_shield : public AuraScript
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
     {
         PreventDefaultAction();
-        uint32 triggerSpell = sSpellMgr->GetSpellWithRank(SPELL_SHAMAN_LIGHTNING_SHIELD_DAMAGE_R1, aurEff->GetSpellInfo()->GetRank());
+        uint8 const rank = sSpellMgr->GetSpellInfo(sSpellMgr->GetSpellTwinSource(aurEff->GetId()))->GetRank();
+        uint32 triggerSpell = sSpellMgr->GetSpellTwinFor(sSpellMgr->GetSpellWithRank(SPELL_SHAMAN_LIGHTNING_SHIELD_DAMAGE_R1, rank), aurEff->GetId());
         eventInfo.GetActionTarget()->CastSpell(eventInfo.GetActor(), triggerSpell, aurEff);
     }
 
