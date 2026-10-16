@@ -511,3 +511,7 @@ UPDATE `creature_display_preset` SET `skin` = 8, `face` = 0, `hair` = 2, `hairco
 -- Innkeeper Auvrel's look (user's wardrobe picks against YzysjpunNbs 17:40): Torric Graven's skin 8, short spiky hair 2 and
 -- full beard 4 in his own dark hair colour, Chestguard of Ensnared Nobility 147169, Bloodsail Pants 30123, Shadowweave Boots 1979.
 UPDATE `creature_display_preset` SET `skin` = 8, `face` = 0, `hair` = 2, `facialhair` = 4, `item_body` = 0, `item_chest` = 147169, `item_legs` = 30123, `item_feet` = 1979 WHERE `entry` = 164131 AND `display_id` = 49;
+
+-- Aisling's outfit (user's wardrobe picks against AscenSS 071126-233534): Umbral Undershirt of Lunar Communion 126805,
+-- Black Mageweave Vest 19008, Ritual Vials of the Bloodseeker 136777, Umbral Skirt of Lunar Communion 126796; feet unchanged.
+UPDATE `creature_display_preset` SET `item_body` = 126805, `item_chest` = 19008, `item_waist` = 136777, `item_legs` = 126796 WHERE `entry` = 164593 AND `display_id` = 50;
