@@ -146,8 +146,8 @@ void BuildTrainers()
             SpellInfo const* info = sSpellMgr->AssertSpellInfo(spellId);
             TrainerSpell row;
             row.SpellId = spellId;
-            row.ReqLevel = std::clamp<uint32>(info->SpellLevel, 1, 255);
-            auto const price = prices.upper_bound(row.ReqLevel);
+            row.ReqLevel = std::min<uint32>(info->SpellLevel, 255);
+            auto const price = prices.upper_bound(std::max<uint32>(row.ReqLevel, 1));
             row.MoneyCost = price == prices.begin() ? 0 : std::prev(price)->second;
             return row;
         };

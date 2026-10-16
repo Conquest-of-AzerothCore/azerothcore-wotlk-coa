@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Northshire class trainers take in their class letter quests, part A (#6225)",
+  "contract": [
+    "Report #6225: the CoA class trainers in Northshire Abbey cannot be interacted with, so the class letter quests from Marshal McBride cannot be handed in.",
+    "creature_questender names each trainer as the ender of its class letter quest; this part covers Niki Thesla (502770), Vanguard Gus (50324), Brother William (50280), Owen of Moonbrook (503410), Soridormi (50282), Halbert the Scoundrel (502923), Koby the Incinerator (50340).",
+    "Each trainer template carries npcflag 51 (gossip, quest giver, trainer); a fixture keeps its template data, so it is a quest giver exactly when the shipped template is.",
+    "Each character of the quest's class holds its completed letter quest and must be able to hand it in to its own trainer (quest status 6, rewarded)."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "c16", "race": 1, "class": 16, "level": 8 },
+    { "id": "c18", "race": 1, "class": 18, "level": 8 },
+    { "id": "c19", "race": 1, "class": 19, "level": 8 },
+    { "id": "c21", "race": 1, "class": 21, "level": 8 },
+    { "id": "c22", "race": 1, "class": 22, "level": 8 },
+    { "id": "c23", "race": 1, "class": 23, "level": 8 },
+    { "id": "c24", "race": 1, "class": 24, "level": 8 }
+  ],
+  "location": { "map": 0, "x": -8911.92, "y": -217.354, "z": 81.94, "o": 0 },
+  "creatures": [
+    { "id": "trainer16", "owner": "c16", "entry": 502770, "level": 10, "distance": 2, "faction": 35 },
+    { "id": "trainer18", "owner": "c18", "entry": 50324, "level": 10, "distance": 2, "faction": 35 },
+    { "id": "trainer19", "owner": "c19", "entry": 50280, "level": 10, "distance": 2, "faction": 35 },
+    { "id": "trainer21", "owner": "c21", "entry": 503410, "level": 10, "distance": 2, "faction": 35 },
+    { "id": "trainer22", "owner": "c22", "entry": 50282, "level": 10, "distance": 2, "faction": 35 },
+    { "id": "trainer23", "owner": "c23", "entry": 502923, "level": 10, "distance": 2, "faction": 35 },
+    { "id": "trainer24", "owner": "c24", "entry": 50340, "level": 10, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: the Stormbringer letter quest 49976 is complete", "actor": "c16", "quest": 49976 },
+    { "action": "assert", "label": "The Stormbringer letter quest is ready to hand in", "actor": "c16", "metric": "quest_status", "quest": 49976, "equals": 1 },
+    { "action": "quest_turn_in", "label": "Hand it in to Niki Thesla", "actor": "c16", "quest": 49976, "entry": 502770, "reward": 0 },
+    { "action": "assert", "label": "Niki Thesla takes the quest in", "actor": "c16", "metric": "quest_status", "quest": 49976, "equals": 6, "within_ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: the Guardian letter quest 49977 is complete", "actor": "c18", "quest": 49977 },
+    { "action": "assert", "label": "The Guardian letter quest is ready to hand in", "actor": "c18", "metric": "quest_status", "quest": 49977, "equals": 1 },
+    { "action": "quest_turn_in", "label": "Hand it in to Vanguard Gus", "actor": "c18", "quest": 49977, "entry": 50324, "reward": 0 },
+    { "action": "assert", "label": "Vanguard Gus takes the quest in", "actor": "c18", "metric": "quest_status", "quest": 49977, "equals": 6, "within_ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: the Templar letter quest 49978 is complete", "actor": "c19", "quest": 49978 },
+    { "action": "assert", "label": "The Templar letter quest is ready to hand in", "actor": "c19", "metric": "quest_status", "quest": 49978, "equals": 1 },
+    { "action": "quest_turn_in", "label": "Hand it in to Brother William", "actor": "c19", "quest": 49978, "entry": 50280, "reward": 0 },
+    { "action": "assert", "label": "Brother William takes the quest in", "actor": "c19", "metric": "quest_status", "quest": 49978, "equals": 6, "within_ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: the Ranger letter quest 49980 is complete", "actor": "c21", "quest": 49980 },
+    { "action": "assert", "label": "The Ranger letter quest is ready to hand in", "actor": "c21", "metric": "quest_status", "quest": 49980, "equals": 1 },
+    { "action": "quest_turn_in", "label": "Hand it in to Owen of Moonbrook", "actor": "c21", "quest": 49980, "entry": 503410, "reward": 0 },
+    { "action": "assert", "label": "Owen of Moonbrook takes the quest in", "actor": "c21", "metric": "quest_status", "quest": 49980, "equals": 6, "within_ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: the Chronomancer letter quest 49981 is complete", "actor": "c22", "quest": 49981 },
+    { "action": "assert", "label": "The Chronomancer letter quest is ready to hand in", "actor": "c22", "metric": "quest_status", "quest": 49981, "equals": 1 },
+    { "action": "quest_turn_in", "label": "Hand it in to Soridormi", "actor": "c22", "quest": 49981, "entry": 50282, "reward": 0 },
+    { "action": "assert", "label": "Soridormi takes the quest in", "actor": "c22", "metric": "quest_status", "quest": 49981, "equals": 6, "within_ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: the Necromancer letter quest 49982 is complete", "actor": "c23", "quest": 49982 },
+    { "action": "assert", "label": "The Necromancer letter quest is ready to hand in", "actor": "c23", "metric": "quest_status", "quest": 49982, "equals": 1 },
+    { "action": "quest_turn_in", "label": "Hand it in to Halbert the Scoundrel", "actor": "c23", "quest": 49982, "entry": 502923, "reward": 0 },
+    { "action": "assert", "label": "Halbert the Scoundrel takes the quest in", "actor": "c23", "metric": "quest_status", "quest": 49982, "equals": 6, "within_ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: the Pyromancer letter quest 49983 is complete", "actor": "c24", "quest": 49983 },
+    { "action": "assert", "label": "The Pyromancer letter quest is ready to hand in", "actor": "c24", "metric": "quest_status", "quest": 49983, "equals": 1 },
+    { "action": "quest_turn_in", "label": "Hand it in to Koby the Incinerator", "actor": "c24", "quest": 49983, "entry": 50340, "reward": 0 },
+    { "action": "assert", "label": "Koby the Incinerator takes the quest in", "actor": "c24", "metric": "quest_status", "quest": 49983, "equals": 6, "within_ms": 3000 }
+  ]
+}

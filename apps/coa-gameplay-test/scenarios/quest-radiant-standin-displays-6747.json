@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Radiance Town: the Radiant cult and the Radiant One Disguise use radiation-suit stand-ins (#6747)",
+  "contract": "The CoA displays 652021-652047 for Radiance Town (Coldridge Valley, quest 1660009) are missing from every client, so rev_20260925_10_coa_dunmorogh_radiance.sql gave the cult and the disguise looks plain villager stand-ins (3765/3766/6975/6921, 6936). The user approved inferred radiation-suit stand-ins on 2026-10-15, based on GO 520704 Radiant Helmet (diving helmet), the plate Radiant Armor Piece, the quest 1660008 helmet line and the Fanatic chat line about the stars. The disguise looks 161778-161781 and His Radiant Majesty 161775 each have one template model and must select 25525, 141780, 32697, 27657 and 10089 (scale 1.25). Radiant Fanatic 161772 and Radiant Devotee 161786 pick one of four models at random; each new set starts at 25525 and 14656 while every old model is below 7000. Radiant Guard 161773 keeps 6981/6982, which overlap its old set, so a random pick cannot tell them apart. This checks server display selection, not client rendering.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 3,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "label": "Let the player finish logging in", "ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: dwarf male disguise 161778 is the diving suit 25525, not villager 3765",
+      "actor": "hero", "metric": "creature_model_display", "entry": 161778, "equals": 25525 },
+    { "action": "assert", "label": "DISCRIMINATING: dwarf female disguise 161779 is the space suit 141780, not villager 3766",
+      "actor": "hero", "metric": "creature_model_display", "entry": 161779, "equals": 141780 },
+    { "action": "assert", "label": "DISCRIMINATING: gnome female disguise 161780 is the diving suit 32697, not 6975",
+      "actor": "hero", "metric": "creature_model_display", "entry": 161780, "equals": 32697 },
+    { "action": "assert", "label": "DISCRIMINATING: gnome male disguise 161781 is the diving suit 27657, not 6921",
+      "actor": "hero", "metric": "creature_model_display", "entry": 161781, "equals": 27657 },
+    { "action": "assert", "label": "DISCRIMINATING: His Radiant Majesty 161775 is the brass diving suit 10089, not 6936",
+      "actor": "hero", "metric": "creature_model_display", "entry": 161775, "equals": 10089 },
+    { "action": "assert", "label": "His Radiant Majesty keeps scale 1.25",
+      "actor": "hero", "metric": "creature_model_scale", "entry": 161775, "min": 1.249, "max": 1.251 },
+    { "action": "assert", "label": "DISCRIMINATING: Radiant Fanatic 161772 picks a suit from 25525-141780, not a villager below 7000",
+      "actor": "hero", "metric": "creature_model_display", "entry": 161772, "min": 25525, "max": 141780 },
+    { "action": "assert", "label": "DISCRIMINATING: Radiant Devotee 161786 picks a suit from 14656-47043, not a villager below 7000",
+      "actor": "hero", "metric": "creature_model_display", "entry": 161786, "min": 14656, "max": 47043 }
+  ]
+}

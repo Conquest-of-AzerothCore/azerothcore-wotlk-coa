@@ -67,7 +67,7 @@ METRICS = {
     'owned_creature_count', 'owned_creature_spacing', 'owned_creature_weapon_damage_min',
     'owned_creature_spell_hit_chance', 'owned_creature_attackable', 'owned_creature_victim',
     'charm_entry', 'charm_aura_stacks', 'controls_self', 'viewpoint_entry', 'seer_entry', 'private_instance',
-    'dynamic_object', 'dynamic_object_duration_ms', 'gossip_options', 'gossip_option_text',
+    'dynamic_object', 'dynamic_object_duration_ms', 'dynamic_object_height', 'gossip_options', 'gossip_option_text',
     'owned_gameobject_count', 'gameobject_remaining_ms', 'gameobject_display', 'gameobject_scale', 'at_homebind',
     'spellbook_rows', 'spellbook_offers_spell', 'spellbook_covers_spell', 'spellbook_learned_alerts',
     'spellbook_buy_succeeded', 'spellbook_buy_failed',
@@ -79,7 +79,7 @@ METRICS = {
     'client_chat_lines_for', 'client_removals_keeping_buttons_for', 'client_placing_learns_for',
     'client_placing_supersedes_for', 'client_spell_rank_for',
     'client_spell_row_restored',
-    'spellbook_client_notable',
+    'spellbook_client_notable', 'spellbook_notify_id_mismatches',
     'spellbook_cues_in_last_buy', 'spellbook_last_buy_cued',
     'spellbook_silent_buys', 'spellbook_multi_announced_buys',
     'cast_speed_multiplier', 'spell_crit_chance', 'spell_power_cost', 'spell_damage_done', 'melee_damage_done',
@@ -117,7 +117,7 @@ METRICS = {
     'quest_menu_items', 'quest_menu_has', 'player_setting', 'server_packets', 'server_packet_u8', 'server_packet_u32',
     'server_packet_float', 'server_packet_contains',
     'known_entry_rank',
-    'pet_autocast_enabled', 'combo_points', 'game_mode_mask', 'owned_creature_spell_proc_count',
+    'pet_autocast_enabled', 'pet_react_state', 'pet_player_react_state', 'combo_points', 'game_mode_mask', 'owned_creature_spell_proc_count',
     'player_class', 'cached_class', 'at_login_flag', 'wildcard_starter_spells_known', 'action_bar_unknown_spells',
     'wildcard_spells_known', 'wildcard_cards_pending', 'wildcard_cards_collected', 'wildcard_roll_cards_set',
     'wildcard_roll_cards_used', 'wildcard_bonus_pack_progress',
@@ -158,7 +158,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'min_level', 'max_level', 'min_home_distance'}
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
-    'set_moving': ({'actor', 'enabled'}, {'actor', 'enabled'}),
+    'set_moving': ({'actor', 'enabled'}, {'actor', 'enabled', 'flag'}),
     'level_scaling_packet': ({'actor', 'value'}, {'actor', 'value'}),
     'client_packet': ({'actor', 'opcode'},
                       {'actor', 'opcode', 'fields', 'consumed', 'early', 'cast_before', 'pet_loading_before'}),
@@ -211,6 +211,7 @@ ACTIONS = {
     'area_trigger': ({'actor', 'id'}, {'actor', 'id'}),
     'trainer_buy': ({'actor', 'spell'}, {'actor', 'spell', 'target'}),
     'pet_autocast': ({'actor', 'spell', 'enabled'}, {'actor', 'spell', 'enabled'}),
+    'pet_stance': ({'actor', 'stance'}, {'actor', 'stance'}),
     'gossip_select': ({'actor', 'option'}, {'actor', 'option', 'code', 'code_actor'}),
     'who': ({'actor'}, {'actor', 'target', 'race_mask', 'class_mask'}),
     'open_item': ({'actor', 'item'}, {'actor', 'item'}),
@@ -448,6 +449,9 @@ def validate(scenario):
             number(step['owned_entry'], f'{where}.owned_entry', 1, 2**32 - 1, True)
         if action in {'pvp', 'set_moving'}:
             require(type(step['enabled']) is bool, f'{where}: enabled must be boolean')
+        if action == 'set_moving' and 'flag' in step:
+            require(step['flag'] in {'forward', 'backward', 'strafe_left', 'strafe_right'},
+                f'{where}: flag must be forward, backward, strafe_left or strafe_right')
         if 'all_specs' in step:
             require(type(step['all_specs']) is bool, f'{where}: all_specs must be boolean')
         if action == 'talent' and 'command' in step:
@@ -674,7 +678,7 @@ def validate(scenario):
                     'knows_spell', 'cooldown_ms', 'global_cooldown_ms', 'spell_charges', 'cast_remaining_ms', 'has_talent',
                     'pet_knows_spell', 'client_knows_spell', 'client_spellbook_copies',
                     'pet_aura_stacks', 'pet_aura_duration_ms', 'charm_aura_stacks', 'spell_active',
-                    'dynamic_object', 'dynamic_object_duration_ms', 'spell_power_cost',
+                    'dynamic_object', 'dynamic_object_duration_ms', 'dynamic_object_height', 'spell_power_cost',
                     'spell_damage_done', 'spell_damage_taken', 'spell_healing_taken', 'spell_hit_bonus_taken',
                     'spell_cast_count', 'spell_go_count', 'spell_modifier', 'spell_cast_time_ms',
                     'client_cast_time_ms', 'client_attributes', 'client_spell_targets',
@@ -690,7 +694,8 @@ def validate(scenario):
                     'spell_proc_count', 'spell_proc_chance', 'aura_proc_rate', 'temporary_spell_replacement',
                     'cast_failure',
                     'trainer_window_state', 'trainer_window_ability', 'spellbook_superseded_for',
-                    'spellbook_loud_supersedes_for', 'spellbook_client_notable', 'client_chat_lines_for',
+                    'spellbook_loud_supersedes_for', 'spellbook_client_notable',
+                    'spellbook_notify_id_mismatches', 'client_chat_lines_for',
                     'client_removals_keeping_buttons_for', 'client_placing_learns_for',
                     'client_placing_supersedes_for', 'client_spell_rank_for', 'client_spell_row_restored'}:
                 require('spell' in step, f'{where}: metric needs spell')
@@ -898,7 +903,8 @@ def validate(scenario):
                           'pet_knows_spell', 'pet_distance', 'pet_casting', 'pet_loading',
                           'owned_creature_count', 'owned_creature_spacing', 'charm_entry',
                           'charm_aura_stacks', 'controls_self', 'private_instance',
-                          'dynamic_object', 'dynamic_object_duration_ms', 'gossip_options', 'gossip_option_text',
+                          'dynamic_object', 'dynamic_object_duration_ms', 'dynamic_object_height',
+                          'gossip_options', 'gossip_option_text',
                           'owned_gameobject_count', 'gameobject_remaining_ms', 'gameobject_display', 'gameobject_scale',
                           'at_homebind',
                           'spellbook_rows', 'spellbook_offers_spell', 'spellbook_covers_spell',
@@ -907,6 +913,7 @@ def validate(scenario):
                           'spellbook_misannounced_buys', 'spellbook_silent_buys',
                           'spellbook_multi_announced_buys',
                           'spellbook_notify_rows', 'spellbook_notified_spells',
+                          'spellbook_notify_id_mismatches',
                           'spellbook_unnotified_buys',
                           'trainer_list_packets', 'trainer_window_rows', 'trainer_window_state',
                           'trainer_window_ability', 'vendor_list_packets', 'vendor_items',

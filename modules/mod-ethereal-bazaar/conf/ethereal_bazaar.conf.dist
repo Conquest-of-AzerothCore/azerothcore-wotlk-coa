@@ -21,14 +21,15 @@ EtherealBazaar.RotationMaxHours = 6
 # 1000 tokens, 440 between 1000 and 1500, and 190 above. Equal slot counts
 # would make an expensive item come round far MORE often than a cheap one,
 # because it is drawn from a much smaller bag. With the numbers below a given
-# cheap item returns about every 27 days, a mid one every 36, an expensive one
-# every 48, at four rotations a day.
+# cheap item returns about every 10 days, a mid one every 14, an expensive one
+# every 24, at four rotations a day. Together with the cache row they fill the
+# nine pages of ten the live Bazaar showed.
 #
 # If you change the pool, check those three numbers again before you change
 # these. Slots follow the size of the band, not how rare the item should feel.
-EtherealBazaar.Slots.Cheap = 30
-EtherealBazaar.Slots.Mid = 3
-EtherealBazaar.Slots.Expensive = 1
+EtherealBazaar.Slots.Cheap = 79
+EtherealBazaar.Slots.Mid = 8
+EtherealBazaar.Slots.Expensive = 2
 
 #
 # The module logs under "module.bazaar": what the pool holds, what each

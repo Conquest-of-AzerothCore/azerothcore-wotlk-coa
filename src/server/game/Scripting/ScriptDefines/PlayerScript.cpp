@@ -1049,6 +1049,12 @@ void ScriptMgr::OnPlayerGetAmmoDisplay(Player* player, SpellInfo const* spellInf
         script->OnPlayerGetAmmoDisplay(player, spellInfo, displayId, inventoryType));
 }
 
+void ScriptMgr::OnPlayerGetShapeshiftModel(Player* player, uint8 form, uint32 spellId, uint32& modelId)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_GET_SHAPESHIFT_MODEL,
+        script->OnPlayerGetShapeshiftModel(player, form, spellId, modelId));
+}
+
 void ScriptMgr::OnPlayerNormalizeActionButtonSpell(Player* player, uint32& action, bool loading)
 {
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_NORMALIZE_ACTION_BUTTON_SPELL, script->OnPlayerNormalizeActionButtonSpell(player, action, loading));

@@ -1,0 +1,151 @@
+{
+  "schema": 1,
+  "name": "Stormwind Stockade: Targorr the Dread's Berserker Leap lands on a player (#7589)",
+  "contract": [
+    "Berserker Leap 2102736 is a 3 s, 40 yd jump to a destination (target flag 0x40, JUMP_DEST plus missile 2102737).",
+    "Targorr the Dread's Ascension kit casts it every 15-17 s; in the live 2026-05-25 Stockade log it landed on",
+    "players other than the tank, so it must leap to a player instead of onto Targorr's own position.",
+    "A Stormwind Guard holds Targorr 20 yd from the only player on his threat list, a mage who chilled him once.",
+    "Before he jumps, Berserker Leap Dest Area 2102735 (4 yd dummy area aura, 3.5 s) marks the landing spot."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 34,
+    "x": 127.0,
+    "y": 1.25,
+    "z": -25.5,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "mage",
+      "race": 1,
+      "class": 8,
+      "level": 30,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "guard",
+      "owner": "mage",
+      "entry": 1423,
+      "faction": 11,
+      "level": 30,
+      "health": 1000000,
+      "reaction": 2,
+      "distance": 20
+    },
+    {
+      "id": "boss",
+      "owner": "mage",
+      "entry": 1696,
+      "level": 24,
+      "health": 400000,
+      "reaction": 2,
+      "distance": 22
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "mage",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "spell": 116
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the mage is in the Stockade",
+      "actor": "mage",
+      "metric": "map_id",
+      "equals": 34
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Stormwind Guard fights Targorr",
+      "actor": "boss",
+      "metric": "victim",
+      "target": "guard",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "cast",
+      "label": "The mage joins Targorr's threat list from range",
+      "actor": "mage",
+      "spell": 116,
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Targorr is in combat with the mage",
+      "actor": "mage",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Targorr stays on the guard, out of the mage's reach",
+      "actor": "boss",
+      "metric": "distance",
+      "target": "mage",
+      "min": 15
+    },
+    {
+      "action": "set_health",
+      "actor": "mage",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "assert",
+      "label": "The landing area 2102735 marks the mage before the leap",
+      "actor": "mage",
+      "metric": "aura",
+      "spell": 2102735,
+      "equals": 1,
+      "within_ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the landing area appears while Targorr is still away from the mage",
+      "actor": "boss",
+      "metric": "distance",
+      "target": "mage",
+      "min": 15
+    },
+    {
+      "action": "assert",
+      "label": "Targorr leaps onto the mage",
+      "actor": "boss",
+      "metric": "distance",
+      "target": "mage",
+      "max": 6,
+      "within_ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Targorr reached the mage by leaping, not by switching to the mage",
+      "actor": "boss",
+      "metric": "victim",
+      "target": "guard",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the leap was Berserker Leap",
+      "actor": "mage",
+      "metric": "spell_go_count",
+      "entry": 1696,
+      "spell": 2102736,
+      "min": 1
+    }
+  ]
+}

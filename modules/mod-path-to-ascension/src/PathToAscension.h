@@ -131,6 +131,7 @@ namespace PathToAscension
     bool IsLegacyAvailable(uint32 tutorialId);
     bool IsExpansionOffered(Tutorial const& tutorial);
     bool IsCallbackImplemented(uint32 tutorialId);
+    bool IsStarterMountTutorial(uint32 tutorialId);
     bool IsCallBoard(uint32 entry);
 
     void ConfigureRewards();

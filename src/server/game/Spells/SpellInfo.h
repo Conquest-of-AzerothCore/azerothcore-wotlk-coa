@@ -364,8 +364,8 @@ public:
     // Runtime-only opt-in for explicitly authored coefficients. Rank base
     // growth still uses the original SpellLevel and MaxLevel metadata.
     bool IgnoreSpellLevelPenalty = false;
-    uint32 Stances;
-    uint32 StancesNot;
+    uint64 Stances;
+    uint64 StancesNot;
     uint32 Targets;
     uint32 TargetCreatureType;
     uint32 RequiresSpellFocus;

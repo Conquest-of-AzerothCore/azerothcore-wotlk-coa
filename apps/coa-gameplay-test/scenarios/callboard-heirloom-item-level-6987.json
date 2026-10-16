@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "The Callboard gives heirlooms no item level, like the character sheet (#6987)",
-  "contract": "The Callboard's highest reached item level (criterion 80129, saved in core.callboard.itemlevel) and its generic cache tier use the same equipped average item level the character sheet shows: fifteen slots without shirt, tabard, off hand and ranged, an heirloom counted as item level 0 and every other item at its template item level. A level 44 character wearing six heirlooms over its item level 1 starter pants and boots therefore averages (6 x 0 + 2) / 15 = 0.13 and reaches item level 0, not the 41 that counting each heirloom as 2.33 times the level gave. A value an earlier build saved higher than the equipped average is lowered once at the next login; a reached value saved after that correction is a high-water mark and survives later logins.",
+  "contract": "The Callboard's highest reached item level (criterion 80129, saved in core.callboard.itemlevel) and its generic cache tier use the same equipped average item level the character sheet shows: seventeen slots without shirt and tabard, an heirloom counted as item level 0 and every other item at its template item level. A level 44 character wearing six heirlooms over its item level 1 starter pants and boots therefore averages (6 x 0 + 2) / 17 = 0.12 and reaches item level 0, not the 41 that counting each heirloom as 2.33 times the level gave. A value an earlier build saved higher than the equipped average is lowered once at the next login; a reached value saved after that correction is a high-water mark and survives later logins.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -29,11 +29,11 @@
     { "action": "wait", "ms": 1500 },
     {
       "action": "assert",
-      "label": "The character sheet shows six heirlooms and the item level 1 starter pants and boots as 0.13",
+      "label": "The character sheet shows six heirlooms and the item level 1 starter pants and boots as 0.12",
       "actor": "barbarian",
       "metric": "sent_average_item_level",
-      "min": 0.12,
-      "max": 0.14
+      "min": 0.11,
+      "max": 0.125
     },
     {
       "action": "assert",

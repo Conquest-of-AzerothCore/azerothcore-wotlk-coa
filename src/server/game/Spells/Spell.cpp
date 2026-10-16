@@ -7000,6 +7000,18 @@ SpellCastResult Spell::CheckCasterAuras(bool preventionOnly) const
     if (m_spellInfo->HasAttribute(SPELL_ATTR6_NOT_AN_ATTACK))
         return SPELL_CAST_OK;
 
+    // Draconic Aspect carries SPELL_ATTR0_ALLOW_WHILE_MOUNTED, which exempts it from the mounted
+    // cast prevention below. Entering it on a mount dismounts the caster instead of being refused;
+    // a taxi flight is the exception, where the form is not allowed at all.
+    if (m_spellInfo->Id == 802117 && m_caster->IsMounted())
+    {
+        if (m_caster->IsInFlight())
+            return SPELL_FAILED_NOT_ON_TAXI;
+
+        m_caster->Dismount();
+        m_caster->RemoveAurasByType(SPELL_AURA_MOUNTED);
+    }
+
     uint8 school_immune = 0;
     uint64 mechanic_immune = 0;
     uint32 dispel_immune = 0;

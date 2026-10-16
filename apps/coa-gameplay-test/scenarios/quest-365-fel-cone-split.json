@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Fel Cone: the lootable cone is an invisible size 1 chest beside a decorative cone (#365)",
+  "contract": [
+    "Report #365: the quest sparkle of a Fel Cone in Teldrassil is far too big.",
+    "Live CoA gameobject caches (2026-09-04..09) and the SUB dump (2026-10-04) give Fel Cone 1673 type 3 with the invisible-cube display 980926 at size 1, and a separate decorative Fel Cone 661673 type 5 with display 425 at size 2.5; the ascension-data catalogue places a 661673 at 1673 spawn 49746 (9303.36, 763.68).",
+    "At that spawn a Night Elf on Seek Redemption! (489) sees one lootable 1673 that is active for the quest and one decorative 661673 beside it.",
+    "A 1673 chest uses display 980926 at scale 1 and still yields the quest-only Fel Cone (3418), so the quest stays obtainable."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 1, "x": 9303.36, "y": 763.68, "z": 1311.5, "o": 0.0 },
+  "players": [
+    { "id": "elf", "race": 4, "class": 1, "level": 6 }
+  ],
+  "creatures": [
+    { "id": "kyra", "owner": "elf", "entry": 2081, "level": 12, "distance": 3, "faction": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
+    { "action": "prepare_quest", "label": "Fixture: Zenn's Bidding is complete", "actor": "elf", "quest": 488 },
+    { "action": "reward_quest", "label": "Fixture: Zenn's Bidding is rewarded", "actor": "elf", "quest": 488 },
+    { "action": "quest_accept", "label": "The elf takes Seek Redemption! from Sentinel Kyra Starsong", "actor": "elf",
+      "quest": 489, "entry": 2081 },
+    { "action": "assert", "label": "Seek Redemption! is in progress", "actor": "elf", "metric": "quest_status",
+      "quest": 489, "equals": 3, "within_ms": 3000 },
+    { "action": "assert", "label": "The elf carries no Fel Cone yet", "actor": "elf", "metric": "item_count",
+      "item": 3418, "equals": 0 },
+
+    { "action": "set_phase", "actor": "elf", "value": 1 },
+    { "action": "teleport", "actor": "elf", "map": 1, "x": 9303.36, "y": 763.68, "z": 1311.5, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "One lootable Fel Cone stands at spawn 49746", "actor": "elf",
+      "metric": "nearby_gameobject_count", "entry": 1673, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "It is active for Seek Redemption!", "actor": "elf",
+      "metric": "nearby_gameobject_quest_active", "entry": 1673, "equals": 1 },
+    { "action": "assert", "label": "A decorative Fel Cone stands beside it", "actor": "elf",
+      "metric": "nearby_gameobject_count", "entry": 661673, "equals": 1 },
+    { "action": "assert", "label": "The decorative cone carries no quest sparkle", "actor": "elf",
+      "metric": "nearby_gameobject_quest_active", "entry": 661673, "equals": 0 },
+
+    { "action": "summon_gameobject", "actor": "elf", "entry": 1673 },
+    { "action": "assert", "label": "The lootable Fel Cone uses the invisible cube display", "actor": "elf",
+      "metric": "gameobject_display", "entry": 1673, "equals": 980926 },
+    { "action": "assert", "label": "The lootable Fel Cone has scale 1", "actor": "elf",
+      "metric": "gameobject_scale", "entry": 1673, "min": 0.99, "max": 1.01 },
+    { "action": "wait", "label": "Let the chest become ready", "ms": 1000 },
+    { "action": "loot_gameobject", "actor": "elf", "entry": 1673 },
+    { "action": "loot_slot", "label": "The cone's quest loot holds a Fel Cone", "actor": "elf", "item": 3418 },
+    { "action": "assert", "label": "The elf picks up the Fel Cone", "actor": "elf", "metric": "item_count",
+      "item": 3418, "equals": 1, "within_ms": 2000 },
+    { "action": "close_loot", "actor": "elf" }
+  ]
+}

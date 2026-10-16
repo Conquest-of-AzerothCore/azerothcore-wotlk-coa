@@ -1,0 +1,149 @@
+{
+  "schema": 1,
+  "name": "Dire Maul East: only one Ironbark is visible before and after Zevrim Thornhoof dies",
+  "contract": "Before Zevrim Thornhoof dies, Old Ironbark (11491) is visible and Ironbark the Redeemed (14241) is hidden; after his death Old Ironbark despawns and Ironbark the Redeemed becomes visible, so a player never sees both. It does not cover Ironbark the Redeemed's walk to the door or a reloaded instance.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 429,
+    "x": -70.0,
+    "y": -276.0,
+    "z": -57.7,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "zevrim",
+      "owner": "hero",
+      "entry": 11490,
+      "level": 60,
+      "health": 2000,
+      "distance": 3,
+      "reaction": 2
+    },
+    {
+      "id": "old",
+      "owner": "hero",
+      "entry": 11491,
+      "level": 60,
+      "distance": 8
+    },
+    {
+      "id": "redeemed",
+      "owner": "hero",
+      "entry": 14241,
+      "level": 60,
+      "distance": 14
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Old Ironbark is there before Zevrim Thornhoof dies",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 11491,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Ironbark the Redeemed is spawned before Zevrim Thornhoof dies",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 14241,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Old Ironbark is visible before Zevrim Thornhoof dies",
+      "actor": "hero",
+      "metric": "can_detect",
+      "target": "old",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Ironbark the Redeemed is hidden before Zevrim Thornhoof dies",
+      "actor": "hero",
+      "metric": "can_detect",
+      "target": "redeemed",
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "zevrim"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "zevrim"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Zevrim Thornhoof fights the hero",
+      "actor": "zevrim",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_health",
+      "actor": "zevrim",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Zevrim Thornhoof dies",
+      "actor": "zevrim",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Old Ironbark despawns after Zevrim Thornhoof dies",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 11491,
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Ironbark the Redeemed is visible after Zevrim Thornhoof dies",
+      "actor": "hero",
+      "metric": "can_detect",
+      "target": "redeemed",
+      "equals": 1
+    }
+  ]
+}

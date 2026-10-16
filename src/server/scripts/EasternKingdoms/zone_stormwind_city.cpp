@@ -101,9 +101,9 @@ public:
                     break;
                 case 16:
                     SetEscortPaused(true);
-                    if (Creature* pMarzon = me->SummonCreature(NPC_MARZON_BLADE, -8411.360352f, 480.069733f, 123.760895f, 4.941504f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1000))
+                    if (Creature* pMarzon = me->SummonCreature(NPC_MARZON_BLADE, -8304.5f, 290.0f, 156.833f, 3.638f, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 1000))
                     {
-                        pMarzon->GetMotionMaster()->MovePoint(0, -8408.000977f, 468.611450f, 123.759903f);
+                        pMarzon->GetMotionMaster()->MovePoint(0, -8316.5f, 283.5f, 156.833f);
                         MarzonGUID = pMarzon->GetGUID();
                     }
                     uiTimer = 2000;

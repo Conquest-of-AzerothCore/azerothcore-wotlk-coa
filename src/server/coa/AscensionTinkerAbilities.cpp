@@ -98,8 +98,12 @@ public:
     void OnSpellPrepare(Spell* spell, Unit* caster, SpellInfo const* info) override
     {
         Player* player = Owner(caster);
-        if (player == caster && player && info->SpellFamilyName == 34 && spell->getState() == SPELL_STATE_PREPARING)
+        if (!player || player != caster || info->SpellFamilyName != 34)
+            return;
+        if (spell->getState() == SPELL_STATE_PREPARING)
             Snapshot(player,spell);
+        if (Named(info,801005) && spell->GetScriptValue(707272))
+            player->GetGlobalCooldownMgr().CancelGlobalCooldown(info);
     }
     void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const* info) override
     {

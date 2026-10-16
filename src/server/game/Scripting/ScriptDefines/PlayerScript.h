@@ -258,6 +258,7 @@ enum PlayerHook
     PLAYERHOOK_ON_COA_PRESTIGE,
     PLAYERHOOK_ON_COA_PRESTIGE_SAVED,
     PLAYERHOOK_ON_MASTER_LOOT_ITEM,
+    PLAYERHOOK_ON_GET_SHAPESHIFT_MODEL,
     PLAYERHOOK_END
 };
 
@@ -692,6 +693,9 @@ public:
     // Cosmetic fields of outgoing spell-start/go packets. Does not change ammunition or damage.
     virtual void OnPlayerGetAmmoDisplay(Player* /*player*/, SpellInfo const* /*spellInfo*/,
         uint32& /*displayId*/, uint32& /*inventoryType*/) { }
+
+    // Model the player takes in a shapeshift form; leaving modelId at 0 keeps the form's own model.
+    virtual void OnPlayerGetShapeshiftModel(Player* /*player*/, uint8 /*form*/, uint32 /*spellId*/, uint32& /*modelId*/) { }
 
     [[nodiscard]] virtual bool OnPlayerCanEquipItem(Player* /*player*/, uint8 /*slot*/, uint16& /*dest*/, Item* /*pItem*/, bool /*swap*/, bool /*not_loading*/) { return true; }
 

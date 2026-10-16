@@ -21,6 +21,7 @@ void AddSC_spell_basalthane();
 void AddSC_spell_coa_stormwind_quests();
 void AddSC_cs_coa_gameobject_scale();
 void AddSC_cs_coa_npc_pose();
+void AddSC_spell_infernos_items();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -31,4 +32,5 @@ void AddCustomScripts()
     AddSC_spell_coa_stormwind_quests();
     AddSC_cs_coa_gameobject_scale();
     AddSC_cs_coa_npc_pose();
+    AddSC_spell_infernos_items();
 }

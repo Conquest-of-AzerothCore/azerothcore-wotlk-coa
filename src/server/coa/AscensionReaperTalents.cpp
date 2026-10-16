@@ -3,6 +3,7 @@
 #include "CellImpl.h"
 #include "GridNotifiersImpl.h"
 #include "ObjectAccessor.h"
+#include "ObjectMgr.h"
 #include "Random.h"
 #include "Player.h"
 #include "ScriptedCreature.h"
@@ -61,6 +62,14 @@ enum ReaperTalentSpells : uint32
     SPELL_DOMINION_ARMOR = 804000,
     SPELL_DARK_SOUL_STAMINA = 707091
 };
+
+enum ReaperGuardians : uint32
+{
+    NPC_SPECTRAL_WARDEN = 100481,
+    NPC_SPECTRAL_SCYTHE = 250305
+};
+
+constexpr float SpectralGuardianDamageScale = 1.3f;
 
 Unit* HostileTargetInRange(Player* player, uint32 spellId)
 {
@@ -472,6 +481,32 @@ struct npc_ascension_reaper_spectral_warden : public ScriptedAI
     }
 };
 
+class reaper_spectral_guardian_stats : public PlayerScript
+{
+public:
+    reaper_spectral_guardian_stats() : PlayerScript("reaper_spectral_guardian_stats",
+        {PLAYERHOOK_ON_AFTER_GUARDIAN_INIT_STATS_FOR_LEVEL}) { }
+
+    void OnPlayerAfterGuardianInitStatsForLevel(Player* player, Guardian* guardian) override
+    {
+        if (!player || player->getClass() != CLASS_REAPER || !guardian ||
+            (guardian->GetEntry() != NPC_SPECTRAL_WARDEN && guardian->GetEntry() != NPC_SPECTRAL_SCYTHE))
+            return;
+
+        CreatureTemplate const* info = guardian->GetCreatureTemplate();
+        CreatureBaseStats const* stats = sObjectMgr->GetCreatureBaseStats(guardian->GetLevel(), info->unit_class);
+        float const damage = stats->GenerateBaseDamage(info) * SpectralGuardianDamageScale;
+        for (WeaponAttackType attack : {BASE_ATTACK, OFF_ATTACK, RANGED_ATTACK})
+        {
+            guardian->SetBaseWeaponDamage(attack, MINDAMAGE, damage);
+            guardian->SetBaseWeaponDamage(attack, MAXDAMAGE, damage * 1.5f);
+        }
+        guardian->SetStatFlatModifier(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(stats->AttackPower));
+        guardian->SetStatFlatModifier(UNIT_MOD_ATTACK_POWER_RANGED, BASE_VALUE, float(stats->RangedAttackPower));
+        guardian->UpdateAllStats();
+    }
+};
+
 class reaper_talent_events : public UnitScript
 {
 public:
@@ -576,5 +611,6 @@ void AddSC_AscensionReaperTalents()
     RegisterSpellScript(aura_ascension_reaper_ghastly_form);
     RegisterSpellScript(spell_ascension_reaper_weakened_souls);
     RegisterCreatureAI(npc_ascension_reaper_spectral_warden);
+    new reaper_spectral_guardian_stats();
     new reaper_talent_events();
 }

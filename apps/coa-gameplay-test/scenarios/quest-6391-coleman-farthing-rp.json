@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Brill: turning in 'Deaths in the Family' to Coleman Farthing plays his yell and thank-you (#6391)",
+  "contract": [
+    "When 'Deaths in the Family' (354) is rewarded at Coleman Farthing 1500 he yells creature_text group 0",
+    "(broadcast 2631) about 1 s later and says group 1 (broadcast 2632) to the player about 5 s after that, as",
+    "TrinityCore 2017_09_26_12_world_335.sql scripts it and Wowhead Classic records both quotes for him.",
+    "'The Haunted Mills' (362), also ended by Coleman, is the negative control and plays no RP.",
+    "SMSG_MESSAGECHAT 150 starts with the one-byte chat type and the int32 language; both texts use Orcish 1, so the",
+    "first uint32 is 270 for the MONSTER_YELL 14 and 268 for the MONSTER_SAY 12. This verifies server packet delivery",
+    "to the socketless session, not client chat rendering or the questgiver flag toggle."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": 2262.26, "y": 244.257, "z": 33.717, "o": 3.42085},
+  "players": [
+    {"id": "hero", "race": 5, "class": 1, "level": 15}
+  ],
+  "creatures": [
+    {"id": "coleman", "owner": "hero", "entry": 1500, "distance": 3, "faction": 68, "level": 15}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"label": "SETUP: 'The Haunted Mills' is ready to turn in", "action": "prepare_quest", "actor": "hero",
+     "quest": 362},
+    {"label": "SETUP: 362 is complete", "action": "assert", "actor": "hero", "metric": "quest_status",
+     "quest": 362, "equals": 1},
+    {"action": "snapshot", "actor": "hero", "metric": "server_packets", "opcode": 150, "row": 270,
+     "save_as": "yells_before"},
+    {"label": "the hero turns in 362 to Coleman", "action": "client_packet", "actor": "hero", "opcode": 398,
+     "consumed": false, "fields": [{"actor_guid": "coleman"}, {"u32": 362}, {"u32": 0}]},
+    {"label": "362 is rewarded", "action": "assert", "actor": "hero", "metric": "quest_rewarded", "quest": 362,
+     "equals": 1, "within_ms": 3000},
+    {"action": "wait", "ms": 3000},
+    {"label": "CONTROL: 362 plays no yell", "action": "assert", "actor": "hero", "metric": "server_packets",
+     "opcode": 150, "row": 270, "relative_to": "yells_before", "equals": 0},
+    {"label": "SETUP: 'Deaths in the Family' is ready to turn in", "action": "prepare_quest", "actor": "hero",
+     "quest": 354},
+    {"label": "SETUP: 354 is complete", "action": "assert", "actor": "hero", "metric": "quest_status",
+     "quest": 354, "equals": 1},
+    {"label": "the hero turns in 354 to Coleman", "action": "client_packet", "actor": "hero", "opcode": 398,
+     "consumed": false, "fields": [{"actor_guid": "coleman"}, {"u32": 354}, {"u32": 0}]},
+    {"label": "354 is rewarded", "action": "assert", "actor": "hero", "metric": "quest_rewarded", "quest": 354,
+     "equals": 1, "within_ms": 3000},
+    {"label": "DISCRIMINATING: Coleman yells about the Agamands", "action": "assert", "actor": "hero",
+     "metric": "server_packet_contains", "opcode": 150, "row": 270,
+     "text": "Hah!  Eternal undeath to the cursed Agamands!", "equals": 1, "within_ms": 4000},
+    {"label": "DISCRIMINATING: Coleman thanks the hero", "action": "assert", "actor": "hero",
+     "metric": "server_packet_contains", "opcode": 150, "row": 268,
+     "text": "You have tempered the cold rage in my heart.", "equals": 1, "within_ms": 9000},
+    {"label": "the yell is sent once", "action": "assert", "actor": "hero", "metric": "server_packets",
+     "opcode": 150, "row": 270, "relative_to": "yells_before", "equals": 1}
+  ]
+}

@@ -110,6 +110,14 @@
       "metric": "spellbook_client_notable",
       "spell": 680904,
       "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Every pushed row carried the row id the client's own table holds for it",
+      "actor": "caster",
+      "metric": "spellbook_notify_id_mismatches",
+      "spell": 680904,
+      "equals": 0
     }
   ]
 }

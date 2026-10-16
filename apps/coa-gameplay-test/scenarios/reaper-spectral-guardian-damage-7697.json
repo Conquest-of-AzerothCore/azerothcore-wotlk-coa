@@ -1,0 +1,211 @@
+{
+  "schema": 1,
+  "name": "Reaper Spectral Warden and Spectral Scythe hit with their owner's level of weapon damage (#7697)",
+  "contract": [
+    "Spectral Warden 100481 (spell 805716) and Spectral Scythe 250305 (spell 500484) are guardians with a",
+    "pinned 1/1 creature_template level band. Creature::SelectLevel writes level-1 creature_classlevelstats",
+    "weapon damage when the summon is created and Guardian::InitStatsForLevel raises only the level, so a",
+    "level-43 Reaper's guardians kept their level-1 white hit of 3 damage.",
+    "reaper_spectral_guardian_stats re-derives base weapon damage and attack power from creature_classlevelstats",
+    "at the guardian's level in OnPlayerAfterGuardianInitStatsForLevel, as ranger_wingman_companions does.",
+    "owned_creature_weapon_damage_min reports the lowest value across all copies. Expected: a level-60 Reaper's",
+    "guardians report level-60 minimum weapon damage, more than twice a level-20 Reaper's guardians."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "reaper",
+      "race": 5,
+      "class": 30,
+      "level": 60
+    },
+    {
+      "id": "novice",
+      "race": 5,
+      "class": 30,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the characters settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 805716
+    },
+    {
+      "action": "learn",
+      "actor": "novice",
+      "spell": 805716
+    },
+    {
+      "action": "set_power",
+      "actor": "reaper",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "novice",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Level-80 Spectral Warden",
+      "actor": "reaper",
+      "spell": 805716
+    },
+    {
+      "action": "cast",
+      "label": "Level-20 Spectral Warden",
+      "actor": "novice",
+      "spell": 805716
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the level-60 Reaper has a Spectral Warden",
+      "actor": "reaper",
+      "metric": "owned_creature_count",
+      "entry": 100481,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the level-20 Reaper has a Spectral Warden",
+      "actor": "novice",
+      "metric": "owned_creature_count",
+      "entry": 100481,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "novice",
+      "metric": "owned_creature_weapon_damage_min",
+      "entry": 100481,
+      "save_as": "novice_warden"
+    },
+    {
+      "action": "assert",
+      "label": "A level-20 Spectral Warden hits harder than a level-1 one",
+      "actor": "novice",
+      "metric": "owned_creature_weapon_damage_min",
+      "entry": 100481,
+      "min": 5
+    },
+    {
+      "action": "assert",
+      "label": "A level-60 Spectral Warden has level-60 weapon damage",
+      "actor": "reaper",
+      "metric": "owned_creature_weapon_damage_min",
+      "entry": 100481,
+      "min": 25
+    },
+    {
+      "action": "assert",
+      "label": "Spectral Warden weapon damage scales with the owner's level",
+      "actor": "reaper",
+      "metric": "owned_creature_weapon_damage_min",
+      "entry": 100481,
+      "ratio_to": "novice_warden",
+      "min": 2.5
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 500484
+    },
+    {
+      "action": "learn",
+      "actor": "novice",
+      "spell": 500484
+    },
+    {
+      "action": "grant_resource",
+      "actor": "reaper",
+      "spell": 500363,
+      "amount": 1
+    },
+    {
+      "action": "grant_resource",
+      "actor": "novice",
+      "spell": 500363,
+      "amount": 1
+    },
+    {
+      "action": "cast",
+      "label": "Level-80 Spectral Scythe",
+      "actor": "reaper",
+      "spell": 500484
+    },
+    {
+      "action": "cast",
+      "label": "Level-20 Spectral Scythe",
+      "actor": "novice",
+      "spell": 500484
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the level-60 Reaper has a Spectral Scythe",
+      "actor": "reaper",
+      "metric": "owned_creature_count",
+      "entry": 250305,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the level-20 Reaper has a Spectral Scythe",
+      "actor": "novice",
+      "metric": "owned_creature_count",
+      "entry": 250305,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "novice",
+      "metric": "owned_creature_weapon_damage_min",
+      "entry": 250305,
+      "save_as": "novice_scythe"
+    },
+    {
+      "action": "assert",
+      "label": "A level-20 Spectral Scythe hits harder than a level-1 one",
+      "actor": "novice",
+      "metric": "owned_creature_weapon_damage_min",
+      "entry": 250305,
+      "min": 5
+    },
+    {
+      "action": "assert",
+      "label": "A level-60 Spectral Scythe has level-60 weapon damage",
+      "actor": "reaper",
+      "metric": "owned_creature_weapon_damage_min",
+      "entry": 250305,
+      "min": 25
+    },
+    {
+      "action": "assert",
+      "label": "Spectral Scythe weapon damage scales with the owner's level",
+      "actor": "reaper",
+      "metric": "owned_creature_weapon_damage_min",
+      "entry": 250305,
+      "ratio_to": "novice_scythe",
+      "min": 2.5
+    }
+  ]
+}

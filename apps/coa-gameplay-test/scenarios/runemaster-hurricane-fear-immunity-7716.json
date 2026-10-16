@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Runemaster Hurricane cannot be feared (#7716)",
+  "contract": [
+    "#7716: a Spirit Mage (class 32, the Runemaster) was feared while Hurricane (645435) was active, and the",
+    "ability is a 2 s self-lock whose tooltip only promises increased dodge at the price of not using spells or",
+    "abilities. Its client row grants no control immunity: effect 2 is SPELL_AURA_ALLOW_ONLY_ABILITY (263) on the",
+    "caster, which is exactly that lock. The immunity is scripted, in this fork's own idiom - AscensionCultistAuras'",
+    "Immunity() helper is Unit::ApplySpellImmune(source, IMMUNITY_MECHANIC, mechanic, apply) - and nothing granted",
+    "it for this ability. aura_ascension_runemaster_hurricane now applies IMMUNITY_MECHANIC MECHANIC_FEAR for the",
+    "ability's own id while its aura is up and removes it in End before End's early-outs, so the immunity lasts",
+    "exactly as long as the ability and covers both the Runemaster Hurricane and its Wildcard sibling. The scenario",
+    "drives the real cast path with a hostile caster - Fear (5782) from a unit of hostile faction, the same shape the",
+    "stun-immunity scenario uses: while the ability is running the fear does not land, and the same fear from the",
+    "same caster lands as soon as the ability has ended, which is also the control that the fear can land at all.",
+    "The ability itself must still work: its aura applies, its strike lands and it ends on its own."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 60, "health": 1000000, "distance": 5},
+    {"id": "fearer", "owner": "rm", "entry": 36, "faction": 14, "level": 60, "health": 100000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI, level scaling and the login patch stream settle", "ms": 7000},
+    {"action": "learn", "actor": "rm", "spell": 197},
+    {"action": "add_item", "actor": "rm", "item": 12784},
+    {"action": "equip", "label": "Hurricane requires a main-hand weapon", "actor": "rm", "item": 12784, "slot": 15},
+    {"action": "learn", "actor": "rm", "spell": 645435},
+    {
+      "action": "cast", "label": "Start the ability", "actor": "rm", "spell": 645435, "target": "dummy"
+    },
+    {
+      "action": "assert", "label": "the ability is running", "actor": "rm", "metric": "aura",
+      "spell": 645435, "equals": 1, "within_ms": 500
+    },
+    {
+      "action": "cast", "label": "Fear while the ability is running", "actor": "fearer", "spell": 5782,
+      "target": "rm"
+    },
+    {
+      "action": "assert", "label": "the Runemaster cannot be feared while the ability is running", "actor": "rm",
+      "metric": "aura", "spell": 5782, "equals": 0, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "the ability still lands a strike", "actor": "rm",
+      "metric": "spell_damage_count", "spell": 645437, "target": "dummy", "min": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "the ability ends on its own", "actor": "rm", "metric": "aura",
+      "spell": 645435, "equals": 0, "within_ms": 4000
+    },
+    {
+      "action": "cast", "label": "CONTROL: the same fear once the ability has ended", "actor": "fearer",
+      "spell": 5782, "target": "rm"
+    },
+    {
+      "action": "assert", "label": "CONTROL: the immunity ends with the ability, so the fear lands", "actor": "rm",
+      "metric": "aura", "spell": 5782, "equals": 1, "within_ms": 4000
+    }
+  ]
+}

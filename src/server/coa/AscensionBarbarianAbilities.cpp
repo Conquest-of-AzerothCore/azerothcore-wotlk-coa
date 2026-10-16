@@ -14,12 +14,15 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include <algorithm>
+#include <cmath>
 #include <set>
 #include <vector>
 
 namespace
 {
 using namespace AscensionBarbarian;
+
+constexpr uint32 SPELL_WHIRLING_ADVANCE = 500919;
 
 class spell_ascension_barbarian_ability : public SpellScript
 {
@@ -38,6 +41,25 @@ class spell_ascension_barbarian_ability : public SpellScript
         if (GetCaster()->HasUnitState(UNIT_STATE_ROOT))
             return SPELL_FAILED_ROOTED;
         return SPELL_CAST_OK;
+    }
+
+    void Advance(SpellDestination& destination)
+    {
+        Player* player = GetCaster() ? GetCaster()->ToPlayer() : nullptr;
+        if (!player)
+            return;
+        float forward = player->HasUnitMovementFlag(MOVEMENTFLAG_BACKWARD) ? -1.0f
+                        : player->HasUnitMovementFlag(MOVEMENTFLAG_FORWARD) ? 1.0f : 0.0f;
+        float strafe = player->HasUnitMovementFlag(MOVEMENTFLAG_STRAFE_LEFT) ? 1.0f
+                       : player->HasUnitMovementFlag(MOVEMENTFLAG_STRAFE_RIGHT) ? -1.0f : 0.0f;
+        if (!forward && !strafe)
+            return;
+        float distance = GetSpellInfo()->Effects[EFFECT_1].CalcRadius(player);
+        if (distance < player->GetCombatReach())
+            distance = player->GetCombatReach();
+        Position position = player->GetPosition();
+        player->MovePositionToFirstCollision(position, distance, std::atan2(strafe, forward));
+        destination.Relocate(position);
     }
 
     void Select(std::list<WorldObject*>& targets)
@@ -168,6 +190,9 @@ class spell_ascension_barbarian_ability : public SpellScript
         }
         if (info && info->HasEffect(SPELL_EFFECT_CHARGE_DEST))
             OnCheckCast += SpellCheckCastFn(spell_ascension_barbarian_ability::CheckRoot);
+        if (info && sSpellMgr->GetFirstSpellInChain(info->Id) == SPELL_WHIRLING_ADVANCE)
+            OnDestinationTargetSelect += SpellDestinationTargetSelectFn(
+                spell_ascension_barbarian_ability::Advance, EFFECT_1, TARGET_DEST_CASTER_FRONT);
         AfterHit += SpellHitFn(spell_ascension_barbarian_ability::Hit);
         AfterCast += SpellCastFn(spell_ascension_barbarian_ability::Finish);
     }

@@ -899,8 +899,9 @@ SpellInfo::SpellInfo(SpellEntry const* spellEntry)
     AttributesEx6 = spellEntry->AttributesEx6;
     AttributesEx7 = spellEntry->AttributesEx7;
     AttributesCu = 0;
-    Stances = spellEntry->Stances;
-    StancesNot = spellEntry->StancesNot;
+    // Form masks are 64-bit in the client (forms 33-64 in the high words); CoA's own forms are numbered above 32.
+    Stances = uint64(spellEntry->Stances) | (uint64(spellEntry->StancesHigh) << 32);
+    StancesNot = uint64(spellEntry->StancesNot) | (uint64(spellEntry->StancesNotHigh) << 32);
     Targets = spellEntry->Targets;
     TargetCreatureType = spellEntry->TargetCreatureType;
     RequiresSpellFocus = spellEntry->RequiresSpellFocus;
@@ -1693,7 +1694,7 @@ SpellCastResult SpellInfo::CheckShapeshift(uint32 form) const
             (Effects[0].Effect == SPELL_EFFECT_LEARN_SPELL || Effects[1].Effect == SPELL_EFFECT_LEARN_SPELL || Effects[2].Effect == SPELL_EFFECT_LEARN_SPELL))
         return SPELL_CAST_OK;
 
-    uint32 stanceMask = (form ? 1 << (form - 1) : 0);
+    uint64 stanceMask = (form ? uint64(1) << (form - 1) : 0);
 
     if (stanceMask & StancesNot)                 // can explicitly not be casted in this stance
         return SPELL_FAILED_NOT_SHAPESHIFT;
@@ -3096,9 +3097,11 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask, S
             case POWER_MANA:
                 powerCost += int32(CalculatePct(UsesMaxManaForCost ? caster->GetMaxPower(POWER_MANA) : caster->GetCreateMana(), ManaCostPercentage));
                 break;
+            case POWER_ENERGY:
+                powerCost += int32(CalculatePct(caster->GetCreatePowers(POWER_ENERGY), ManaCostPercentage));
+                break;
             case POWER_RAGE:
             case POWER_FOCUS:
-            case POWER_ENERGY:
             case POWER_HAPPINESS:
                 powerCost += int32(CalculatePct(caster->GetMaxPower(Powers(PowerType)), ManaCostPercentage));
                 break;

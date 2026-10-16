@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "name": "Flask of the North works for CoA classes instead of crashing the server (COA-6019)",
+  "contract": [
+    "Flask of the North (item 47499, spell 67019) picks its buff in spell_item_flask_of_the_north by class, and",
+    "only the ten stock classes had a case. A CoA class left the list empty, and possibleSpells[irand(0, -1)] read out",
+    "of bounds and crashed the world server. Any other class now gets the spell power flask (67016) when its spell",
+    "power is above its attack power, and the attack power flask (67017) otherwise. Stock classes keep their cases.",
+    "The item needs Alchemy, so the scenario casts 67019 itself, the spell the item would cast."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    },
+    {
+      "id": "melee",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    },
+    {
+      "id": "mage",
+      "race": 1,
+      "class": 8,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 67019
+    },
+    {
+      "action": "learn",
+      "actor": "melee",
+      "spell": 67019
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "spell": 67019
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture +2000 spell damage",
+      "actor": "caster",
+      "spell": 44505,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "label": "A Pyromancer casts Flask of the North (67019)",
+      "actor": "caster",
+      "spell": 67019
+    },
+    {
+      "action": "cast",
+      "label": "A Barbarian casts Flask of the North (67019)",
+      "actor": "melee",
+      "spell": 67019
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: a Mage casts Flask of the North (67019)",
+      "actor": "mage",
+      "spell": 67019
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Pyromancer gets the spell power flask and the server is still up",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 67016,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Barbarian gets the attack power flask",
+      "actor": "melee",
+      "metric": "aura",
+      "spell": 67017,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mage keeps its stock spell power flask",
+      "actor": "mage",
+      "metric": "aura",
+      "spell": 67016,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

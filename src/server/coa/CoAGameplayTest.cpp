@@ -381,6 +381,7 @@ struct Actor
     std::set<uint32> announced;
     std::map<uint32, uint32> notifyRows;
     std::map<uint32, uint32> notifiedAt;
+    std::map<uint32, uint32> notifyIdMismatches;
     uint32 notifyRowTotal = 0;
     uint32 buysNotNotified = 0;
     uint32 packetOrdinal = 0;
@@ -696,6 +697,23 @@ std::unordered_map<uint32, uint32> const& NativeCustomAttributes()
     return attributes;
 }
 
+std::unordered_map<uint32, uint32> const& NativeCustomAttrRowIds()
+{
+    static std::unordered_map<uint32, uint32> const rowIds = []
+    {
+        std::unordered_map<uint32, uint32> ids;
+        ClientDBC table;
+        if (table.Load(sWorld->GetDataPath() + "dbc/SpellCustomAttr.dbc", 11))
+            for (uint32 index = 0; index < table.GetRecordCount(); ++index)
+            {
+                ClientDBC::Record const row = table.GetRecord(index);
+                ids[row.GetUInt32(1)] = row.GetUInt32(0);
+            }
+        return ids;
+    }();
+    return rowIds;
+}
+
 void ObservePacket(Actor& actor, WorldPacket const& packet)
 {
     ObserveExtensionPacket(actor, packet);
@@ -841,6 +859,9 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         actor.clientNotable[marked] = (thirdAttributes & 0x400) != 0;
         actor.clientQuiet[marked] = (fourthAttributes & 0x40000) != 0;
         actor.clientNoPlace[marked] = (fourthAttributes & 0x1000000) != 0;
+        auto const clientRow = NativeCustomAttrRowIds().find(marked);
+        if (clientRow != NativeCustomAttrRowIds().end() && clientRow->second != rowId)
+            ++actor.notifyIdMismatches[marked];
         ++actor.notifyRows[marked];
         ++actor.notifyRowTotal;
         actor.notifiedAt.emplace(marked, actor.packetOrdinal);
@@ -2503,6 +2524,12 @@ private:
             return player->GetTemporarySpellReplacement(spell);
         if (metric == "spellbook_rows" || metric == "spellbook_offers_spell" || metric == "spellbook_covers_spell")
             Require(CoASpellbook::Available(), "Spellbook metrics require mod-spellbook");
+        if (metric == "spellbook_notify_id_mismatches")
+        {
+            auto const& mismatches = _actors.at(step.get<std::string>("actor")).notifyIdMismatches;
+            auto const found = mismatches.find(spell);
+            return found == mismatches.end() ? 0.0 : double(found->second);
+        }
         if (metric == "spellbook_rows")
             return CoASpellbook::RowCount(player);
         if (metric == "spellbook_offers_spell")
@@ -3226,12 +3253,19 @@ private:
             time_t expiry = objects.front()->GetRespawnTime();
             return expiry ? std::max<time_t>(0, expiry - GameTime::GetGameTime().count()) * IN_MILLISECONDS : -1;
         }
-        if (metric == "dynamic_object" || metric == "dynamic_object_duration_ms")
+        if (metric == "dynamic_object" || metric == "dynamic_object_duration_ms" ||
+            metric == "dynamic_object_height")
         {
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown ground-effect spell");
             DynamicObject* object = player->GetDynObject(spell);
             if (metric == "dynamic_object")
                 return object && object->IsInWorld();
+            if (metric == "dynamic_object_height")
+            {
+                Require(object != nullptr, "Ground-effect height needs an existing ground effect");
+                return object->GetPositionZ() - object->GetMap()->GetHeight(object->GetPhaseMask(),
+                    object->GetPositionX(), object->GetPositionY(), MAX_HEIGHT);
+            }
             return object ? object->GetDuration() : 0;
         }
         if (metric == "charm_entry" || metric == "charm_aura_stacks")
@@ -3427,6 +3461,19 @@ private:
                 if (pet->GetPetAutoSpellOnPos(index) == spell)
                     return 1;
             return 0;
+        }
+        if (metric == "pet_react_state")
+        {
+            Pet* pet = player->GetPet();
+            Require(pet != nullptr, "Pet react state observation needs a current pet");
+            return pet->GetReactState();
+        }
+        if (metric == "pet_player_react_state")
+        {
+            Pet* pet = player->GetPet();
+            Require(pet != nullptr, "Pet player react state observation needs a current pet");
+            CharmInfo* charmInfo = pet->GetCharmInfo();
+            return charmInfo ? charmInfo->GetPlayerReactState() : -1;
         }
         if (metric == "pet_loading")
         {
@@ -4437,10 +4484,20 @@ private:
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell: " + std::to_string(spell));
         if (action == "set_moving")
         {
-            if (step.get<bool>("enabled"))
-                player->AddUnitMovementFlag(MOVEMENTFLAG_FORWARD);
+            std::string const direction = step.get<std::string>("flag", "forward");
+            uint32 movementFlag = MOVEMENTFLAG_FORWARD;
+            if (direction == "backward")
+                movementFlag = MOVEMENTFLAG_BACKWARD;
+            else if (direction == "strafe_left")
+                movementFlag = MOVEMENTFLAG_STRAFE_LEFT;
+            else if (direction == "strafe_right")
+                movementFlag = MOVEMENTFLAG_STRAFE_RIGHT;
             else
-                player->RemoveUnitMovementFlag(MOVEMENTFLAG_FORWARD);
+                Require(direction == "forward", "Unknown movement flag: " + direction);
+            if (step.get<bool>("enabled"))
+                player->AddUnitMovementFlag(movementFlag);
+            else
+                player->RemoveUnitMovementFlag(movementFlag);
         }
         else if (action == "stop_attack")
         {
@@ -4949,6 +5006,17 @@ private:
             creature->SetPhaseMask(player->GetPhaseMask(), true);
             _targets.emplace(id, Target{ creature->GetMapId(), creature->GetInstanceId(), creature->GetGUID() });
             record.put("result", creature->GetCreatureTemplate()->Entry);
+        }
+        else if (action == "pet_stance")
+        {
+            Pet* pet = player->GetPet();
+            Require(pet != nullptr, "Pet stance requires a current pet");
+            uint32 const stance = step.get<uint32>("stance");
+            Require(stance == REACT_PASSIVE || stance == REACT_DEFENSIVE || stance == REACT_AGGRESSIVE,
+                "Pet stance must be a react state");
+            WorldPacket packet(CMSG_PET_ACTION, 20);
+            packet << pet->GetGUID() << uint32(stance | (uint32(ACT_REACTION) << 24)) << ObjectGuid::Empty;
+            player->GetSession()->HandlePetAction(packet);
         }
         else if (action == "attack")
         {
