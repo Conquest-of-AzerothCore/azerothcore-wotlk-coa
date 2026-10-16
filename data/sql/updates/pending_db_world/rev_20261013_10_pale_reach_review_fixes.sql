@@ -415,3 +415,10 @@ DELETE FROM `creature` WHERE `guid` IN (9961507, 9961512, 9961484) AND `id` = 16
 DELETE FROM `creature_addon` WHERE `guid` IN (9961507, 9961512, 9961484, 9920658);
 INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
 (9920658, 0, 0, 8, 1, 0, 0, '');
+
+-- #76: Holga lies stretched out along the shore with her kris in hand (AscenSS 071226-222341): the dead stand state, facing
+-- along the water's edge, weapon drawn.
+UPDATE `creature` SET `orientation` = 1.4835 WHERE `guid` = 9920636 AND `id` = 164372;
+DELETE FROM `creature_addon` WHERE `guid` = 9920636;
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
+(9920636, 0, 0, 7, 1, 0, 0, '');
