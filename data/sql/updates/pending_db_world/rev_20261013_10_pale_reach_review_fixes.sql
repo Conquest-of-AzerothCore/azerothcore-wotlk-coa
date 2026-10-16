@@ -402,3 +402,10 @@ DELETE FROM `creature` WHERE `guid` = 9961381 AND `id` = 164926;
 -- Raven 9961736 on the ground removed with CoAWorldEdit (playtest 2026-10-15).
 DELETE FROM `creature_addon` WHERE `guid` = 9961736;
 DELETE FROM `creature` WHERE `guid` = 9961736 AND `id` = 164371;
+
+-- Jagged Cave Ealdir: 9920657 moved and asleep, 9920656 removed, with CoAWorldEdit (playtest 2026-10-15).
+UPDATE `creature` SET `position_x` = -7338.697, `position_y` = 1202.354, `position_z` = 62.948, `orientation` = 5.5982, `wander_distance` = 0, `MovementType` = 0 WHERE `guid` = 9920657 AND `id` = 164043;
+DELETE FROM `creature_addon` WHERE `guid` IN (9920656, 9920657);
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
+(9920657, 0, 0, 3, 1, 0, 0, '');
+DELETE FROM `creature` WHERE `guid` = 9920656 AND `id` = 164043;
