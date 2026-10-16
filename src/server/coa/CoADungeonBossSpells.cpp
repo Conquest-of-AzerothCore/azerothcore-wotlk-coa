@@ -116,6 +116,7 @@ namespace
         PrepareSpellScript(spell_coa_massive_fire_nova);
 
         static constexpr uint32 EarthPillar = 663030;
+        static constexpr uint32 NovaLanded = 1;
 
         void Cover(std::list<WorldObject*>& targets)
         {
@@ -146,10 +147,20 @@ namespace
             });
         }
 
+        void Crumble()
+        {
+            std::list<Creature*> pillars;
+            GetCaster()->GetCreatureListWithEntryInGrid(pillars, EarthPillar, 80.0f);
+            for (Creature* pillar : pillars)
+                if (pillar->IsAlive() && pillar->IsAIEnabled)
+                    pillar->AI()->SetData(NovaLanded, NovaLanded);
+        }
+
         void Register() override
         {
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_coa_massive_fire_nova::Cover, EFFECT_0,
                 TARGET_UNIT_SRC_AREA_ENEMY);
+            AfterCast += SpellCastFn(spell_coa_massive_fire_nova::Crumble);
         }
     };
 
