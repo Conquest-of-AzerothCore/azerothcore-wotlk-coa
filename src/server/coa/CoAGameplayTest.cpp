@@ -2818,13 +2818,15 @@ private:
             uint32 const minLevel = step.get<uint32>("min_level", 1);
             uint32 const maxLevel = step.get<uint32>("max_level", 255);
             float const minHomeDistance = step.get<float>("min_home_distance", 0.0f);
+            uint32 const auraSpell = step.get<uint32>("spell", 0);
             return std::count_if(creatures.begin(), creatures.end(),
-                [minLevel, maxLevel, minHomeDistance](Creature* creature)
+                [minLevel, maxLevel, minHomeDistance, auraSpell](Creature* creature)
                 {
                     return creature->IsInWorld() && creature->IsAlive()
                         && creature->GetLevel() >= minLevel && creature->GetLevel() <= maxLevel
                         && (minHomeDistance == 0.0f
-                            || creature->GetExactDist2d(creature->GetHomePosition()) >= minHomeDistance);
+                            || creature->GetExactDist2d(creature->GetHomePosition()) >= minHomeDistance)
+                        && (!auraSpell || creature->HasAura(auraSpell));
                 });
         }
         if (metric == "carried_money")

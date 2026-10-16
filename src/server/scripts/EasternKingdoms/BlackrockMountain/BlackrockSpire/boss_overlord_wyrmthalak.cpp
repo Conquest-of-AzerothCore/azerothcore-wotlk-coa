@@ -24,7 +24,8 @@ enum Spells
     SPELL_BLASTWAVE                 = 11130,
     SPELL_SHOUT                     = 23511,
     SPELL_CLEAVE                    = 20691,
-    SPELL_KNOCKAWAY                 = 20686
+    SPELL_KNOCKAWAY                 = 20686,
+    SPELL_NERF_SUMMONS              = 210866
 };
 
 enum Events
@@ -63,6 +64,12 @@ struct boss_overlord_wyrmthalak : public BossAI
         events.ScheduleEvent(EVENT_SHOUT, 2s);
         events.ScheduleEvent(EVENT_CLEAVE, 6s);
         events.ScheduleEvent(EVENT_KNOCK_AWAY, 12s);
+    }
+
+    void JustSummoned(Creature* summon) override
+    {
+        BossAI::JustSummoned(summon);
+        summon->CastSpell(summon, SPELL_NERF_SUMMONS, true);
     }
 
     void JustDied(Unit* /*killer*/) override

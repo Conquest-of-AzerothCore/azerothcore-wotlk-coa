@@ -24,7 +24,7 @@ class RunnerTests(unittest.TestCase):
                 run.validate(self.scenario)
 
     def test_nearby_creature_count_filters_require_valid_scope_and_ranges(self):
-        for filters in ({}, {'min_level': 16, 'max_level': 17}, {'min_home_distance': 1}):
+        for filters in ({}, {'min_level': 16, 'max_level': 17}, {'min_home_distance': 1}, {'spell': 210866}):
             scenario = copy.deepcopy(self.scenario)
             scenario['steps'].append({'action': 'assert', 'actor': 'caster',
                                      'metric': 'nearby_creature_count', 'entry': 2070, 'equals': 2, **filters})
@@ -33,7 +33,8 @@ class RunnerTests(unittest.TestCase):
         for filters in ({'min_level': 0}, {'max_level': 256}, {'min_level': 17, 'max_level': 16},
                         {'min_level': '16'}, {'min_level': True}, {'max_level': 16.5},
                         {'min_home_distance': -1}, {'min_home_distance': float('nan')},
-                        {'min_home_distance': float('inf')}, {'min_home_distance': True}):
+                        {'min_home_distance': float('inf')}, {'min_home_distance': True},
+                        {'spell': 0}, {'spell': '210866'}, {'spell': True}):
             scenario = copy.deepcopy(self.scenario)
             scenario['steps'].append({'action': 'assert', 'actor': 'caster',
                                      'metric': 'nearby_creature_count', 'entry': 2070, 'equals': 2, **filters})
