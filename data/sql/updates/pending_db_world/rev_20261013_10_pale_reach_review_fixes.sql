@@ -498,3 +498,7 @@ DELETE FROM `creature_equip_template` WHERE `CreatureID` = 164013;
 INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `ItemID2`, `ItemID3`, `VerifiedBuild`) VALUES
 (164013, 1, 1664, 0, 0, 0);
 UPDATE `creature` SET `equipment_id` = 1 WHERE `guid` = 9960193 AND `id` = 164013;
+
+-- Innkeeper Auvrel wore shoulder display 87660 (lshoulder_leather_draenordungeon_c_01), whose model the client lacks, so it
+-- drew as placeholder cubes; live footage (YzysjpunNbs 17:40) shows him without shoulders.
+UPDATE `creature_display_preset` SET `item_shoulders` = 0 WHERE `entry` = 164131 AND `display_id` = 49;
