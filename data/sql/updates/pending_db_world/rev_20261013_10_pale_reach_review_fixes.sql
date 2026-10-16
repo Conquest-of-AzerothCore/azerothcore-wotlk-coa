@@ -324,3 +324,9 @@ UPDATE `creature_template_model` SET `DisplayScale` = 0.65 WHERE `CreatureID` IN
 -- spans 1.2 yd; butterfly.m2 spans 7.2 yd and silithidscarab2.m2 is 5.6 yd long at scale 1.
 UPDATE `creature_template_model` SET `DisplayScale` = 0.17 WHERE `CreatureID` = 161847 AND `CreatureDisplayID` = 86531;
 UPDATE `creature_template_model` SET `DisplayScale` = 0.15 WHERE `CreatureID` = 164578 AND `CreatureDisplayID` = 95172;
+
+-- Where the Veil Wanes (175048): Holga's progress text. No capture shows it; written in her voice from the offer and
+-- completion texts (inferred, 2026-10-15).
+DELETE FROM `quest_request_items` WHERE `ID` = 175048;
+INSERT INTO `quest_request_items` (`ID`, `EmoteOnComplete`, `EmoteOnIncomplete`, `CompletionText`, `VerifiedBuild`) VALUES
+(175048, 0, 0, '<Holga''s breathing is shallow and ragged.>$B$BYou came back... Are the rifts closed? Do the Horned Ones still walk in that cave?', 0);
