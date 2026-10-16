@@ -345,3 +345,7 @@ DELETE FROM `creature_template_addon` WHERE `entry` = 164373;
 INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
 (164373, 0, 0, 0, 1, 0, 0, '63359');
 UPDATE `creature_addon` SET `auras` = '63359' WHERE `guid` IN (9920664, 9920666, 9920676, 9920683);
+
+-- #78: closing a Blackwood Rift is the 10 s channel 365373 at the rift (broken by damage or movement); only a finished
+-- channel counts, and the rift then vanishes until its 60 s respawn.
+UPDATE `gameobject_template` SET `ScriptName` = 'go_coa_blackwood_rift' WHERE `entry` = 2300660;
