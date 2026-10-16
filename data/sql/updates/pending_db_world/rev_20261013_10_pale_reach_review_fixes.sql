@@ -523,3 +523,8 @@ INSERT INTO `quest_offer_reward` (`ID`, `Emote1`, `Emote2`, `Emote3`, `Emote4`, 
 
 -- Possessed Crow 9961171 moved with CoAWorldEdit (playtest 2026-10-16); it sits through the template addon.
 UPDATE `creature` SET `position_x` = -7624.051, `position_y` = 1186.906, `position_z` = 164.735, `orientation` = 4.8011, `wander_distance` = 0, `MovementType` = 0 WHERE `guid` = 9961171 AND `id` = 164944;
+
+-- The Flowers That Sing (175331): Aisling's turn-in text from live footage (DuWTvw19xtg 34:17).
+DELETE FROM `quest_offer_reward` WHERE `ID` = 175331;
+INSERT INTO `quest_offer_reward` (`ID`, `Emote1`, `Emote2`, `Emote3`, `Emote4`, `EmoteDelay1`, `EmoteDelay2`, `EmoteDelay3`, `EmoteDelay4`, `RewardText`, `VerifiedBuild`) VALUES
+(175331, 0, 0, 0, 0, 0, 0, 0, 0, 'Snowsong. A special plant, as you have surely noticed.$B$BI was beginning to think Hilda and Zelda had forgotten me.$B$BHere, for your trouble.', 0);
