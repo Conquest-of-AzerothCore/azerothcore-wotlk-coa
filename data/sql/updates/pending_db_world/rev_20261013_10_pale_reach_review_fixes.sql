@@ -418,10 +418,3 @@ INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `e
 
 -- Tin Vein 9991110 in Nightweave Cave moved with CoAWorldEdit (playtest 2026-10-15).
 UPDATE `gameobject` SET `position_x` = -7515.176, `position_y` = 1271.890, `position_z` = 65.412, `orientation` = 0.7854, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.382683, `rotation3` = 0.92388 WHERE `guid` = 9991110 AND `id` = 1732;
-
--- #77: Horned Ones are near-black silhouettes on live (YzysjpunNbs 28:36; user). Vertex Color Black 39662 is a cosmetic dummy
--- aura whose visual only tints the model black (the tint part of Shadowform without its translucency and feet fire).
-DELETE FROM `creature_template_addon` WHERE `entry` = 164373;
-INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
-(164373, 0, 0, 0, 1, 0, 0, '39662');
-UPDATE `creature_addon` SET `auras` = '39662' WHERE `guid` IN (9920676, 9920683, 9961863, 9961590);
