@@ -291,8 +291,8 @@ INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positio
 (99203460, 9, -7803.759, 791.690, 150.644, NULL, 0, 0, 0, 100),
 (99203460, 10, -7811.000, 792.500, 150.644, 0.464, 10000, 0, 0, 100);
 
--- Graysky Soldier 9920347 circles the fountain by Cadmilla: CoAWorldEdit route of 2026-10-15 19:48, repeated nodes kept
--- once, and the loop closes round the west side (the user's nodes 3-6) instead of cutting across the fountain.
+-- Graysky Soldier 9920347 waits at the end of the walkway, then circles the fountain by Cadmilla and returns: the user's
+-- CoAWorldEdit route of 2026-10-15 19:48, first lap only (its later nodes repeated a teleport position).
 UPDATE `creature` SET `position_x` = -7767.677, `position_y` = 779.432, `position_z` = 150.329, `orientation` = 5.3412 WHERE `guid` = 9920347 AND `id` = 164027;
 DELETE FROM `waypoint_data` WHERE `id` = 99203470;
 INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `move_type`, `action`, `action_chance`) VALUES
@@ -301,15 +301,7 @@ INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positio
 (99203470, 3, -7768.165, 774.701, 150.524, NULL, 0, 0, 0, 100),
 (99203470, 4, -7769.959, 778.817, 150.365, NULL, 0, 0, 0, 100),
 (99203470, 5, -7770.845, 782.910, 150.057, NULL, 0, 0, 0, 100),
-(99203470, 6, -7768.362, 781.473, 150.220, NULL, 0, 0, 0, 100),
-(99203470, 7, -7765.851, 777.555, 150.495, NULL, 0, 0, 0, 100),
-(99203470, 8, -7765.687, 772.997, 150.707, NULL, 0, 0, 0, 100),
-(99203470, 9, -7766.180, 772.220, 150.695, NULL, 0, 0, 0, 100),
-(99203470, 10, -7766.951, 774.105, 150.573, NULL, 0, 0, 0, 100),
-(99203470, 11, -7768.165, 774.701, 150.524, NULL, 0, 0, 0, 100),
-(99203470, 12, -7769.959, 778.817, 150.365, NULL, 0, 0, 0, 100),
-(99203470, 13, -7770.845, 782.910, 150.057, NULL, 0, 0, 0, 100),
-(99203470, 14, -7768.362, 781.473, 150.220, NULL, 0, 0, 0, 100);
+(99203470, 6, -7768.362, 781.473, 150.220, NULL, 0, 0, 0, 100);
 
 -- Possessed Crows and Ravens are crow-sized: footage shows them a third of a crate's width, and the client's other
 -- displays of raven.m2 run at 0.5-0.75. Scale 0.65 by user choice (2026-10-15).
