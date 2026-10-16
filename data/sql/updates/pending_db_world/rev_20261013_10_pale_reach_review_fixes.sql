@@ -528,3 +528,14 @@ UPDATE `creature` SET `position_x` = -7624.051, `position_y` = 1186.906, `positi
 DELETE FROM `quest_offer_reward` WHERE `ID` = 175331;
 INSERT INTO `quest_offer_reward` (`ID`, `Emote1`, `Emote2`, `Emote3`, `Emote4`, `EmoteDelay1`, `EmoteDelay2`, `EmoteDelay3`, `EmoteDelay4`, `RewardText`, `VerifiedBuild`) VALUES
 (175331, 0, 0, 0, 0, 0, 0, 0, 0, 'Snowsong. A special plant, as you have surely noticed.$B$BI was beginning to think Hilda and Zelda had forgotten me.$B$BHere, for your trouble.', 0);
+
+-- Cresthairn Guard (164134) dresses like the Dunshire Guard (user, 2026-10-16): the Graysky set without the helmet, male and
+-- female bodies like 164124.
+DELETE FROM `creature_template_model` WHERE `CreatureID` = 164134;
+INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, `VerifiedBuild`) VALUES
+(164134, 0, 49, 1, 1, 0),
+(164134, 1, 50, 1, 1, 0);
+DELETE FROM `creature_display_preset` WHERE `entry` = 164134;
+INSERT INTO `creature_display_preset` (`entry`, `display_id`, `race`, `gender`, `class`, `skin`, `face`, `hair`, `haircolor`, `facialhair`, `guild_id`, `item_head`, `item_shoulders`, `item_body`, `item_chest`, `item_waist`, `item_legs`, `item_feet`, `item_wrists`, `item_hands`, `item_back`, `item_tabard`) VALUES
+(164134, 49, 1, 0, 1, 9, 9, 9, 0, 9, 0, 0, 41081, 0, 144757, 51757, 153475, 144756, 144761, 144758, 21569, 170301),
+(164134, 50, 1, 1, 1, 2, 3, 5, 1, 6, 0, 0, 41081, 0, 144757, 51757, 153475, 144756, 144761, 144758, 21569, 170301);
