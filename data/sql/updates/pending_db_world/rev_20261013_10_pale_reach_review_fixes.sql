@@ -273,23 +273,28 @@ INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positio
 (99607380, 89, -8217.71, 408.49, 117.08, NULL, 0, 0, 0, 100),
 (99607380, 90, -8211.5, 408.7, 116.99, NULL, 0, 0, 0, 100);
 
--- Graysky Soldier patrol 9920346 and two moved Graysky Soldiers in the manor, from CoAWorldEdit (playtest 2026-10-15).
--- Repeated route nodes at one spot are kept once.
+-- Two Graysky Soldiers moved in the manor, from CoAWorldEdit (playtest 2026-10-15).
 UPDATE `creature` SET `position_x` = -7796.931, `position_y` = 788.575, `position_z` = 143.508, `orientation` = 5.5509 WHERE `guid` = 9960869 AND `id` = 164027;
 UPDATE `creature` SET `position_x` = -7798.260, `position_y` = 780.533, `position_z` = 143.507, `orientation` = 2.4643 WHERE `guid` = 9960878 AND `id` = 164027;
-UPDATE `creature` SET `position_x` = -7805.994, `position_y` = 792.000, `position_z` = 150.644, `orientation` = 3.1416 WHERE `guid` = 9920346 AND `id` = 164027;
+
+-- Graysky Soldier patrol 9920346 through the manor's three floors, from CoAWorldEdit (playtest 2026-10-15 20:32).
+UPDATE `creature` SET `position_x` = -7799.049, `position_y` = 808.671, `position_z` = 148.995, `orientation` = 0.7563 WHERE `guid` = 9920346 AND `id` = 164027;
 DELETE FROM `waypoint_data` WHERE `id` = 99203460;
 INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `delay`, `move_type`, `action`, `action_chance`) VALUES
-(99203460, 1, -7805.994, 792.000, 150.644, 3.1416, 5000, 0, 0, 100),
-(99203460, 2, -7811.000, 792.500, 150.644, NULL, 0, 0, 0, 100),
-(99203460, 3, -7804.000, 794.000, 150.644, NULL, 0, 0, 0, 100),
-(99203460, 4, -7802.337, 792.753, 150.644, NULL, 0, 0, 0, 100),
-(99203460, 5, -7799.903, 790.711, 150.644, NULL, 0, 0, 0, 100),
-(99203460, 6, -7801.000, 787.000, 150.644, NULL, 0, 0, 0, 100),
-(99203460, 7, -7801.000, 788.724, 150.644, NULL, 0, 0, 0, 100),
-(99203460, 8, -7801.827, 791.207, 150.644, NULL, 0, 0, 0, 100),
-(99203460, 9, -7803.759, 791.690, 150.644, NULL, 0, 0, 0, 100),
-(99203460, 10, -7811.000, 792.500, 150.644, 0.464, 10000, 0, 0, 100);
+(99203460, 1, -7799.049, 808.671, 148.995, NULL, 0, 0, 0, 100),
+(99203460, 2, -7790.102, 818.000, 148.995, NULL, 0, 0, 0, 100),
+(99203460, 3, -7786.240, 817.268, 148.995, NULL, 0, 0, 0, 100),
+(99203460, 4, -7784.765, 814.077, 148.995, NULL, 0, 0, 0, 100),
+(99203460, 5, -7789.397, 807.824, 148.995, NULL, 0, 0, 0, 100),
+(99203460, 6, -7795.253, 804.296, 148.995, NULL, 0, 0, 0, 100),
+(99203460, 7, -7799.652, 800.717, 150.644, NULL, 0, 0, 0, 100),
+(99203460, 8, -7812.287, 788.612, 150.644, 3.8115, 5000, 0, 0, 100),
+(99203460, 9, -7802.502, 777.307, 157.930, NULL, 0, 0, 0, 100),
+(99203460, 10, -7795.450, 782.044, 157.930, NULL, 0, 0, 0, 100),
+(99203460, 11, -7797.667, 790.739, 157.926, NULL, 0, 0, 0, 100),
+(99203460, 12, -7796.546, 798.903, 157.928, NULL, 0, 0, 0, 100),
+(99203460, 13, -7795.417, 805.436, 157.928, NULL, 0, 0, 0, 100),
+(99203460, 14, -7793.421, 809.195, 157.928, 0.8184, 10000, 0, 0, 100);
 
 -- Graysky Soldier 9920347 stands 5 s at the end of the Darengar Manor garden walkway facing the Gilneas fountain
 -- (-7752.58, 757.57), walks once round it 6.75 yd out (clear of the benches and cypress planters), and returns.
