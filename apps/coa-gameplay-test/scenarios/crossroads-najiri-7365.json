@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Crossroads: Naj'iri sits beside Raj'iri, declines her unprompted and agrees after Dancing to the Beat",
-  "contract": "Raj'iri 41719 gives and takes 'Play It by Ear' 255078 and takes 'Dancing to the Beat' 255080 at The Crossroads; her sister Naj'iri 741719 sits next to her (#7365). A live capture (#7385) shows Raj'iri at level 15 and Naj'iri at level 8 beside her, and Raj'iri saying 'Feel like dancin' now?' answered by Naj'iri's 'Not really mon...' while the player only took other Crossroads quests; live footage puts Raj'iri's 'How about now mon?' about a minute later. rev_20261010_98 only added the templates and lines, so no Naj'iri existed and nobody spoke. This case walks onto Raj'iri's world spawn 9010700, counts the living Raj'iri at level 15 and Naj'iri at level 8 within 60 yd, and waits without any quest action for Naj'iri's decline, which reaches the player as SMSG_MESSAGECHAT 150 of type CHAT_MSG_MONSTER_SAY 12 in universal language 0, so its first uint32 is 12. It then rewards 255078, 255079 and 255080 through the native reward path and expects Naj'iri's 'Alright, just for a bit...'. Before rev_20261012_03 Naj'iri is missing and neither line is sent. Raj'iri's dance and Naj'iri's sitting and dancing are client-visible and are not observed here.",
+  "contract": "Raj'iri 41719 gives and takes 'Play It by Ear' 255078 and takes 'Dancing to the Beat' 255080 at The Crossroads; her sister Naj'iri 741719 sits next to her (#7365). A live capture (#7385) shows Raj'iri at level 15 and Naj'iri at level 8 beside her, and Raj'iri saying 'Feel like dancin' now?' answered by Naj'iri's 'Not really mon...' while the player only took other Crossroads quests; live footage puts Raj'iri's 'How about now mon?' about a minute later. rev_20261010_98 only added the templates and lines, so no Naj'iri existed and nobody spoke. This case walks onto Raj'iri's world spawn 9010700, counts the living Raj'iri at level 15 and Naj'iri at level 8 within 60 yd, and waits without any quest action for Naj'iri's decline, which reaches the player as SMSG_MESSAGECHAT 150 of type CHAT_MSG_MONSTER_SAY 12 in universal language 0, so its first uint32 is 12. It then rewards 255078 and 255079 as setup and hands 255080 in at Raj'iri through the questgiver packet handlers, the path that reaches her SmartAI, and expects Naj'iri's 'Alright, just for a bit...'. Before rev_20261012_03 Naj'iri is missing and neither line is sent. Raj'iri's dance and Naj'iri's sitting and dancing are client-visible and are not observed here.",
   "timeout_ms": 120000,
   "location": {
     "map": 1,
@@ -109,10 +109,12 @@
       "quest": 255080
     },
     {
-      "action": "reward_quest",
-      "label": "Turn in 'Dancing to the Beat', which starts the sisters' last exchange and Naj'iri's dance",
+      "action": "quest_turn_in",
+      "label": "Hand 'Dancing to the Beat' in at Raj'iri, which starts the sisters' last exchange and Naj'iri's dance",
       "actor": "p",
-      "quest": 255080
+      "quest": 255080,
+      "entry": 41719,
+      "reward": 0
     },
     {
       "action": "assert",
