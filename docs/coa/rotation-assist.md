@@ -52,8 +52,10 @@ The adaptation retains 1,571 rules across 70 specialization profiles. It keeps `
 `cast heal`, `cast heal party` and `cast heal tank` actions with readiness, missing debuff, aura
 presence/absence/stacks, self/target health, mana or resource conditions. Rules are sorted by descending upstream
 priority with original row order breaking ties; identical rules are deduplicated. Mana thresholds are 15%/40%;
-health thresholds are 25%/45%/65%, matching the upstream defaults. Runtime spell data requires a matching damage or
-healing effect (including periodic and triggered effects) and excludes automatic repeat attacks, movement,
+health thresholds are 25%/45%/65%, matching the upstream defaults. Resource thresholds use the percentage of
+maximum power. Target-aura conditions accept effects from any caster, as upstream does. Runtime spell data
+requires a matching damage or healing effect (including periodic and triggered effects) and excludes automatic
+repeat attacks, movement,
 taunting, summoning and other manual actions. Damage implemented entirely by a script without a damage effect in
 its effective spell data stays manual. An unavailable or unknown rule falls through. This is a source snapshot, not
 a live dependency or a claim that all 70 rotations have been measured in game.
@@ -63,5 +65,6 @@ a live dependency or a claim that all 70 rotations have been measured in game.
 The `rotation_assist` harness checks the imported priorities, condition boundaries, missing/unavailable spells and
 selection of at most one action. The `rotation-assist` gameplay scenario exercises the ordinary player command,
 selected-target requirement, native spell effects, resource costs, cooldowns and idle behavior. The
-`rotation-assist-profile` scenario checks Incineration against a competing fallback spell. Run them through
+`rotation-assist-profile` scenario checks Incineration against a competing fallback spell.
+`rotation-assist-target-aura` checks a matching target debuff from another caster. Run them through
 `tools/verify_all.py` as described in [verification](verification.md).

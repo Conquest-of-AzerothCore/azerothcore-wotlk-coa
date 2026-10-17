@@ -50,10 +50,13 @@ namespace
     {
         std::string const wanted = SpellName(name);
         uint32 stacks = 0;
-        for (auto const& [id, aura] : unit->GetOwnedAuras())
+        for (auto const& [id, application] : unit->GetAppliedAuras())
+        {
+            Aura const* aura = application->GetBase();
             if ((!caster || aura->GetCasterGUID() == caster) &&
                 SpellName(aura->GetSpellInfo()->SpellName[0]) == wanted)
                 stacks = std::max<uint32>(stacks, aura->GetStackAmount());
+        }
         return stacks;
     }
 
@@ -194,7 +197,7 @@ namespace
         {
             case RuleCondition::MissingDebuff:
             case RuleCondition::TargetAura:
-                return AuraStacks(target, rule.Argument, player->GetGUID());
+                return AuraStacks(target, rule.Argument);
             case RuleCondition::HasAura:
             case RuleCondition::MissingAura:
             case RuleCondition::AuraStacks:
@@ -206,8 +209,10 @@ namespace
             case RuleCondition::Mana:
                 return player->GetMaxPower(POWER_MANA) ? player->GetPowerPct(POWER_MANA) : 100.0f;
             case RuleCondition::Resource:
-                return rule.Argument == "energy" ? player->GetPower(POWER_ENERGY) :
-                    player->GetPower(POWER_RUNIC_POWER) / 10.0f;
+            {
+                Powers const power = rule.Argument == "energy" ? POWER_ENERGY : POWER_RUNIC_POWER;
+                return player->HasActivePowerType(power) ? player->GetPowerPct(power) : 0.0f;
+            }
             case RuleCondition::Ready:
                 return 0;
         }
