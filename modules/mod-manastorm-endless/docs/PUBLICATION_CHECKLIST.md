@@ -24,8 +24,8 @@ The publication diff must include:
 - The module README, installation guide, this checklist and root `.gitignore`.
 
 The original exports and preparation tool are already part of source; retain them.
-Generate manual post-install review SQL with the documented command. Generated
-copies under `.agents/plans` need not be committed and contain no extra secret step.
+Commit the two `zz_manastorm_snapshot_*` updates they generate; the integration test
+fails when those files no longer match the exports.
 
 ## Exclude
 

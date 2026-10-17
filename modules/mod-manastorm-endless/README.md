@@ -5,8 +5,8 @@ native Ascension transport; donor gameplay is not registered.
 
 Start with the [installation guide](docs/manual-sql-postinstall/INTEGRATION_INSTALL_REVIEW.md).
 Use the [publication checklist](docs/PUBLICATION_CHECKLIST.md) before committing or publishing.
-The original manual SQL exports are preserved; prepare their non-destructive imports
-with the supplied generator, after mandatory module SQL. Do not import player history.
+The original manual SQL exports are preserved; the updater applies their generated
+non-destructive snapshot updates after the other module SQL. Do not import player history.
 The supported world database name is `acore_world`.
 
 The integration includes private restoration of 14 upstream-removed creature spawns,

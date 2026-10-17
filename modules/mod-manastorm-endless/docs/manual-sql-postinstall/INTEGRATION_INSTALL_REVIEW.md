@@ -35,24 +35,20 @@ or exhaustive encounter/Mode 1 acceptance.
    rules: the authored Manastorm table exports do not replace shared core tables.
    Include `zz_manastorm_private_creature_restoration.sql` and the matching C++
    changes together. It restores 14 definitions only in private Manastorm stages.
-4. Generate the authored post-install imports from the unchanged exports. Run this
-   single command from the repository root, using a fresh output directory:
-
-   ```text
-   python -B modules/mod-manastorm-endless/docs/manual-sql-postinstall/prepare_postinstall.py --output-dir .agents/plans/manastorm-postinstall
-   ```
-
-   The generator only writes review files; it never connects to a database.
-5. Review target-only enabled routes/brackets, then import `01_game_tele_REVIEW.sql`
-   followed by `02_manastorm_world_REVIEW.sql` into `acore_world` with the `mysql`
-   client, which stops at the first error. The teleport import checks its own IDs:
-   it overwrites only rows carrying the authored name or the name the module SQL gave
-   that ID. Any other teleport on those IDs is listed as `foreign_teleport_id` and the
-   import stops on `manastorm_teleport_ids_free` before changing anything; move that
-   teleport, then rerun. These are manual post-install inputs, not automatic updates.
-   They preserve all 163 authored teleport tuples and 135197 world row tuples.
-   The final world import repairs link/route/affix eligibility bits. Do not replay
-   older foundation/policy files afterward: they can overwrite authored tuning.
+4. The same updater run applies the authored snapshot after all other module SQL:
+   `zz_manastorm_snapshot_1_game_tele.sql`, then `zz_manastorm_snapshot_2_world.sql`
+   in `data/sql/db-world/updates/`. They are generated from the unchanged exports;
+   after changing an export, regenerate them from the repository root with
+   `python -B modules/mod-manastorm-endless/docs/manual-sql-postinstall/prepare_postinstall.py`
+   (`--check` only reports stale files). The generator never connects to a database.
+5. The teleport update checks its own IDs: it overwrites only rows carrying the
+   authored name or the name the module SQL gave that ID. Any other teleport on those
+   IDs is listed as `foreign_teleport_id` and the update stops on
+   `manastorm_teleport_ids_free` before changing anything, which stops worldserver
+   startup; move that teleport, then restart. The snapshot preserves all 163 authored
+   teleport tuples and 135197 world row tuples, and the world update ends by repairing
+   link/route/affix eligibility bits. Do not replay older foundation/policy files
+   afterward: they can overwrite authored tuning.
 6. Install all four corrected client files as described in `client/Readme.txt`.
    Restart with the new worldserver for trusted-addon support. Confirm the log
    reports `Shared Manastorm backend initialized` and no SQL update failure.
@@ -60,7 +56,7 @@ or exhaustive encounter/Mode 1 acceptance.
 Never import `CharactersManastormEXPORT-RunThisInCharacterDB.sql` into a fresh PTR
 or over its existing player state. It is preserved historical data, not a required
 installation input. Do not import the raw world dump as a table-replacement script;
-use the explicit-column imports generated above.
+the snapshot updates above already carry it as explicit-column upserts.
 
 ## Recorded prerequisite failure and resolution
 
@@ -78,7 +74,7 @@ and validation-gated 03 are automatically discoverable. Preserve updater history
 and do not manually rerun those already-applied files. Existing cache preflights
 must pass; do not disable validation to force installation.
 
-## What the generated imports preserve
+## What the snapshot updates preserve
 
 - No DROP, TRUNCATE, table replacement or foreign-key disabling.
 - Explicit columns and primary-key upserts preserve authored enabled states,
@@ -86,7 +82,7 @@ must pass; do not disable validation to force installation.
 - Three exported unlock-message source-metadata columns are added only if absent.
 - Linked rows gain RouteCreature and AffixEligible without changing other flags
   or enabled states. Eligibility does not force an affix roll on every creature.
-- Target-only rows remain. Teleport IDs held by a foreign teleport stop the import
+- Target-only rows remain. Teleport IDs held by a foreign teleport stop the update
   before any change.
 - MySQL backslash string escaping is required; do not use NO_BACKSLASH_ESCAPES.
 - No accounts, character history, balances or loadouts are imported.
