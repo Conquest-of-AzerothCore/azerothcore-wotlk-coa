@@ -17,6 +17,7 @@
 #include "AllItemScript.h"
 #include "AllSpellScript.h"
 #include "AscensionChangelogCompat.h"
+#include "AscensionAverageItemLevel.h"
 #include "AscensionCompatOpcodes.h"
 #include "AscensionCharacterSelection.h"
 #include "AscensionManastorm.h"

@@ -1,5 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionFelCommutation.h"
+#include "AscensionFelCommutationPolicy.h"
 #include "AscensionHighRiskPolicy.h"
 #include "AscensionBloodforging.h"
 #include "Bag.h"
@@ -340,6 +342,7 @@ void Drop(Player* player)
 
     std::vector<Item*> gear;
     std::vector<Item*> resources;
+    std::vector<Item*> insurable;
     auto add = [&](Item* item)
     {
         if (!Transferable(item))
@@ -347,7 +350,11 @@ void Drop(Player* player)
         if (item->GetTemplate()->Class == ITEM_CLASS_TRADE_GOODS)
             resources.push_back(item);
         else
+        {
             gear.push_back(item);
+            if (item->IsEquipped() && FelCommutation::Insurable(item->GetSlot() + 1))
+                insurable.push_back(item);
+        }
     };
     for (uint8 slot = EQUIPMENT_SLOT_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)
         add(player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot));
@@ -370,15 +377,17 @@ void Drop(Player* player)
             choose(gear);
     if (roll_chance_f(resourceChance.load()))
         choose(resources);
-    uint32 gold = roll_chance_f(goldChance.load()) ? GoldLoss(player->GetMoney(), urand(1, 5)) : 0;
-    if (losses.empty() && !gold)
+    uint32 const insuranceFee = FelCommutation::Shield(player, insurable, losses);
+    uint32 const carried = player->GetMoney() > insuranceFee ? player->GetMoney() - insuranceFee : 0;
+    uint32 gold = roll_chance_f(goldChance.load()) ? GoldLoss(carried, urand(1, 5)) : 0;
+    if (losses.empty() && !gold && !insuranceFee)
     {
         std::vector<unsigned> available;
         if (!gear.empty() && gearChance > 0.0f)
             available.push_back(0);
         if (!resources.empty() && resourceChance > 0.0f)
             available.push_back(1);
-        if (player->GetMoney() && goldChance > 0.0f)
+        if (carried && goldChance > 0.0f)
             available.push_back(2);
         if (!available.empty())
             switch (available[urand(0, available.size() - 1)])
@@ -390,11 +399,11 @@ void Drop(Player* player)
                     choose(resources);
                     break;
                 case 2:
-                    gold = std::max(uint32(1), GoldLoss(player->GetMoney(), urand(1, 5)));
+                    gold = std::max(uint32(1), GoldLoss(carried, urand(1, 5)));
                     break;
             }
     }
-    if (losses.empty() && !gold)
+    if (losses.empty() && !gold && !insuranceFee)
     {
         ChatHandler(player->GetSession()).SendSysMessage(
             "No High-Risk chest was created: you have no eligible items or money to lose.");
@@ -403,6 +412,7 @@ void Drop(Player* player)
         return;
     }
 
+    FelCommutation::ReportLoss(player, insuranceFee, gold);
     std::lock_guard<std::mutex> lock(mutex);
     Chest chest;
     chest.id = ++nextId;
@@ -410,13 +420,13 @@ void Drop(Player* player)
     chest.map = player->GetMapId();
     chest.phase = player->GetPhaseMask();
     chest.position.Relocate(player);
-    chest.gold = gold;
+    chest.gold = gold + insuranceFee;
     auto transaction = CharacterDatabase.BeginTransaction();
     transaction->Append(
         "INSERT INTO highrisk_chest (id,owner,map,phase,x,y,z,o,gold,original_gold) "
         "VALUES ({},{},{},{},{},{},{},{},{},{})", chest.id, chest.owner, chest.map, chest.phase,
         chest.position.GetPositionX(), chest.position.GetPositionY(), chest.position.GetPositionZ(),
-        chest.position.GetOrientation(), gold, gold);
+        chest.position.GetOrientation(), chest.gold, chest.gold);
 
     uint8 slot = 0;
     for (Item* item : losses)
@@ -435,7 +445,7 @@ void Drop(Player* player)
             chest.id, uint32(slot), stored.guid, stored.entry, stored.count);
         chest.items.emplace(slot++, stored);
     }
-    player->ModifyMoney(-int32(gold));
+    player->ModifyMoney(-int32(chest.gold));
     player->SaveInventoryAndGoldToDB(transaction);
     Commit(transaction);
     for (Item* item : losses)
@@ -445,7 +455,7 @@ void Drop(Player* player)
     ChatHandler(player->GetSession()).SendSysMessage(
         "Your High-Risk losses are in a chest at your death location. Any High-Risk player can recover them.");
     LOG_INFO("server.worldserver", "High Risk chest {} created for {}: {} items, {} copper",
-        found->first, player->GetGUID().ToString(), losses.size(), gold);
+        found->first, player->GetGUID().ToString(), losses.size(), chest.gold);
 }
 
 class RiskWorld final : public WorldScript

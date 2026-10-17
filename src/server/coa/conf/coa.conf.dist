@@ -330,6 +330,55 @@ RatedSoloArena.Title.Rival = 2000
 RatedSoloArena.Title.Duelist = 2300
 RatedSoloArena.Title.Gladiator = 2600
 
+#    HighRisk.FelCommutation.Enable
+#        Description: Fel Commutation. A High-Risk character switches it on and picks the equipment slots to
+#                     insure in the window at the Fel Commutation Portal (object 8000053). While on, items in
+#                     insured slots that a High-Risk death would drop are kept if the character carries
+#                     enough gold for all of their fees, and the fees go into the death chest. If the gold
+#                     is short, the character keeps it and the items drop. The normal gold loss
+#                     (HighRisk.GoldChance) still applies on top, from the gold left after the fees; the
+#                     death message shows the two parts separately.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+HighRisk.FelCommutation.Enable = 0
+
+#    HighRisk.FelCommutation.FeeMultiplier
+#        Description: Multiplier applied to each item's fee. The base fee of an item is its item level times
+#                     the client's rate band for that level (for example 179 x 2750 copper).
+#        Default:     1.0
+
+HighRisk.FelCommutation.FeeMultiplier = 1.0
+
+#    HighRisk.FelCommutation.MaxSlots
+#        Description: Equipment slots a character may insure at once. 0 means no limit.
+#        Default:     3
+
+HighRisk.FelCommutation.MaxSlots = 3
+
+#    HighRisk.FelCommutation.AltarRange
+#        Description: Distance in yards within which the portal must stand for the switch to be accepted.
+#        Default:     20
+
+HighRisk.FelCommutation.AltarRange = 20
+
+#    HighRisk.FelCommutation.ToggleAnywhere
+#        Description: Accept the switch without a portal nearby (for example from a companion).
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+HighRisk.FelCommutation.ToggleAnywhere = 0
+
+#    HighRisk.FelCommutation.ClickToggle
+#        Description: Show an Activate/Deactivate button in the Fel Commutation window that switches
+#                     Fel Commutation for all equipped gear. Using the portal only opens or closes the
+#                     window. The original client still sends the switch itself when the portal is used
+#                     (its Extensions.dll raises GAMEOBJECT_USED and its Lua sends the switch packet).
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+HighRisk.FelCommutation.ClickToggle = 0
+
 #    PvpPower.Enable
 #        Description: Item spells named "PvP Power (+N)" scale damage and healing at level 60, capped at
 #                     495 points. Damage +0.05% per point against players (and against uncontrolled
