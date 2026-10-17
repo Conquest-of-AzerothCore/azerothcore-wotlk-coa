@@ -284,13 +284,20 @@ class spell_ascension_tinker_tracer : public SpellScript
         if (_remaining <= 0)
             return;
 
-        if (Aura* aura = GetHitAura())
-            if (IsTracerMark(aura->GetSpellInfo()))
-            {
-                aura->SetDuration(_remaining);
-                if (AuraEffect* effect = aura->GetEffect(EFFECT_2))
-                    effect->SetPeriodicTimer(_periodicTimer);
-            }
+        Aura* aura = GetHitAura();
+        if (!aura || !IsTracerMark(aura->GetSpellInfo()))
+            return;
+
+        if (aura->GetStackAmount() < aura->GetSpellInfo()->CalcMaxAuraStacks(GetCaster()))
+        {
+            if (AuraEffect* effect = aura->GetEffect(EFFECT_2))
+                effect->SetPeriodicTimer(aura->GetDuration());
+            return;
+        }
+
+        aura->SetDuration(_remaining);
+        if (AuraEffect* effect = aura->GetEffect(EFFECT_2))
+            effect->SetPeriodicTimer(_periodicTimer);
     }
 
     void Register() override
@@ -337,7 +344,7 @@ class aura_ascension_tinker_tracer : public AuraScript
     void Register() override
     {
         AfterEffectApply += AuraEffectApplyFn(aura_ascension_tinker_tracer::Reveal,
-            EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+            EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
         DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(aura_ascension_tinker_tracer::ExplodeAtExpiry,
             EFFECT_2, SPELL_AURA_PERIODIC_DAMAGE);
         OnEffectPeriodic += AuraEffectPeriodicFn(aura_ascension_tinker_tracer::OneExplosion,

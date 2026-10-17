@@ -1,0 +1,415 @@
+{
+  "schema": 1,
+  "name": "Tracer mark at five stacks always explodes once with linear scaling (#7959)",
+  "contract": [
+    "Tracer Augmentation (653245) marks stack to five without Rocket Barrage. Every ranged hit refreshes the",
+    "five-second window, so five Bomb Tosses must reach five marks with no explosion during the build. At the",
+    "cap the duration stops refreshing and counts down, then the mark explodes exactly once and is gone.",
+    "The engine multiplies the periodic tick by the stack count natively, so a one-mark baseline boom and the",
+    "five-mark boom must stand in a 1:5 ratio: linear scaling, never squared."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "tinker",
+      "item": 450265
+    },
+    {
+      "action": "equip",
+      "actor": "tinker",
+      "item": 450265,
+      "slot": 17
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "equipped_item",
+      "slot": 17,
+      "equals": 450265
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 801005
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 653245
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 653245
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 653246,
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "Tracer Augmentation is active on the gun"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "client_packet",
+      "actor": "tinker",
+      "opcode": 317,
+      "fields": [
+        {
+          "actor_guid": "dummy"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801005,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 801005,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "Baseline Bomb Toss lands"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura_stacks",
+      "spell": 653247,
+      "caster": "tinker",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Baseline one mark"
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "metric": "aura_amount",
+      "spell": 653247,
+      "caster": "tinker",
+      "effect": 2,
+      "save_as": "amt1"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 653247,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 7000,
+      "label": "Baseline one-mark boom fires at expiry"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_damage_total",
+      "spell": 653247,
+      "target": "dummy",
+      "save_as": "boom1"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 653247,
+      "caster": "tinker",
+      "equals": 0,
+      "within_ms": 1000,
+      "label": "Baseline mark is gone"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 801005
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801005,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 801005,
+      "target": "dummy",
+      "equals": 2,
+      "within_ms": 3000,
+      "label": "Build toss one lands"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura_stacks",
+      "spell": 653247,
+      "caster": "tinker",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Build restarts at one mark"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 801005
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801005,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 801005,
+      "target": "dummy",
+      "equals": 3,
+      "within_ms": 3000,
+      "label": "Build toss two lands"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura_stacks",
+      "spell": 653247,
+      "caster": "tinker",
+      "equals": 2,
+      "within_ms": 1000,
+      "label": "Two marks"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 801005
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801005,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 801005,
+      "target": "dummy",
+      "equals": 4,
+      "within_ms": 3000,
+      "label": "Build toss three lands"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura_stacks",
+      "spell": 653247,
+      "caster": "tinker",
+      "equals": 3,
+      "within_ms": 1000,
+      "label": "Three marks"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 801005
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801005,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 801005,
+      "target": "dummy",
+      "equals": 5,
+      "within_ms": 3000,
+      "label": "Build toss four lands"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura_stacks",
+      "spell": 653247,
+      "caster": "tinker",
+      "equals": 4,
+      "within_ms": 1000,
+      "label": "Four marks"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 801005
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801005,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 801005,
+      "target": "dummy",
+      "equals": 6,
+      "within_ms": 3000,
+      "label": "Build toss five lands"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura_stacks",
+      "spell": 653247,
+      "caster": "tinker",
+      "equals": 5,
+      "within_ms": 1000,
+      "label": "Five marks reached"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura_amount",
+      "spell": 653247,
+      "caster": "tinker",
+      "effect": 2,
+      "ratio_to": "amt1",
+      "min": 4.9,
+      "max": 5.1,
+      "label": "Stored tick scales linearly to five marks"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura_duration_ms",
+      "spell": 653247,
+      "caster": "tinker",
+      "min": 1500,
+      "label": "The capped mark keeps a live countdown instead of firing instantly"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 653247,
+      "target": "dummy",
+      "equals": 1,
+      "label": "No explosion during the build to five marks"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 653247,
+      "target": "dummy",
+      "equals": 2,
+      "within_ms": 6000,
+      "label": "The five marks always explode when the countdown ends"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 653247,
+      "caster": "tinker",
+      "equals": 0,
+      "within_ms": 1000,
+      "label": "No stuck marks after the explosion"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_total",
+      "spell": 653247,
+      "target": "dummy",
+      "relative_to": "boom1",
+      "ratio_to": "boom1",
+      "min": 4.5,
+      "max": 5.5,
+      "label": "Five-mark boom deals five baseline booms, never twenty-five"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 653247,
+      "target": "dummy",
+      "equals": 2,
+      "label": "The five marks explode only once"
+    }
+  ]
+}
