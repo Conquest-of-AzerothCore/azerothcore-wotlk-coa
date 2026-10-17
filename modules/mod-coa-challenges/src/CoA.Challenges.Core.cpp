@@ -16,7 +16,9 @@ namespace CoAChallenges
  *   SMSG 0x58D: u32 n_int,  n_int   x {str,u32},
  *               u32 n_bool, n_bool  x {str,u8},
  *               u32 n_float,n_float x {str,float},
- *               u32 n_rate, n_rate  x {str,float};  str = u32 len + bytes.
+ *               u32 n_rate, n_rate  x {str,float}, then integer-list and
+ *               float-list maps (empty counts when unused); str = u32 len + bytes.
+ *   This REPLACES all six maps; the CoA collector includes every registered producer.
  *   CMSG 0x592: u32 challengeID, u32 level.            (confirmed live: 188,1)
  *   SMSG 0x593 (CHALLENGE_START_RESPONSE): u32 id, u32 level, u32 code,
  *               u32, u32, u8 + {u32 len, bytes} response string.

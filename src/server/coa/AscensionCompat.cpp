@@ -12,6 +12,7 @@
 #include "AscensionVenomancer.h"
 #include "AscensionTinker.h"
 #include "AscensionSunCleric.h"
+#include "AscensionXoroth.h"
 #include "AllCreatureScript.h"
 #include "AllItemScript.h"
 #include "AllSpellScript.h"
@@ -1087,8 +1088,24 @@ public:
                     ++learned;
             }
         }
+        bool barChanged = false;
         for (auto const& [id, replacement] : replacements)
+        {
             player->SetTemporarySpellReplacement(id, replacement);
+            if (!replacement)
+                continue;
+            for (uint8 button = 0; button < MAX_ACTION_BUTTONS; ++button)
+            {
+                ActionButton const* action = player->GetActionButton(button);
+                if (action && action->GetType() == ACTION_BUTTON_SPELL && action->GetAction() == id)
+                {
+                    player->addActionButton(button, replacement, ACTION_BUTTON_SPELL);
+                    barChanged = true;
+                }
+            }
+        }
+        if (barChanged)
+            player->SendInitialActionButtons();
         return learned;
     }
 
@@ -1480,10 +1497,14 @@ public:
     WorldSession* session = player->GetSession();
     uint32 const slot = ActiveSlot(player);
     session->GetQueryProcessor().AddCallback(CharacterDatabase.AsyncQuery(actionsStmt)
-        .WithPreparedCallback([session, slot](PreparedQueryResult result)
+        .WithPreparedCallback([this, session, slot](PreparedQueryResult result)
         {
             if (Player* owner = session->GetPlayer(); owner && ActiveSlot(owner) == slot)
+            {
                 owner->LoadActions(result);
+                SynchronizeTalentReplacements(owner);
+                owner->SendInitialActionButtons();
+            }
         }));
   }
 
@@ -2497,6 +2518,8 @@ public:
     uint32 granted = SynchronizeProgression(player);
     if (restoreStoredBuild)
       RestoreBarButtons(player, specializationId, previousSpecialization);
+    else
+      player->SendInitialActionButtons();
     ChatHandler(player->GetSession())
         .PSendSysMessage(
             "Activated specialization {}. Stored the build of specialization {}, removed {} old talent "
@@ -4883,7 +4906,7 @@ private:
     if (!info)
       return;
 
-    if (info->Id == AscensionSunCleric::DawnCast)
+    if (info->Id == AscensionSunCleric::DawnCast || info->Id == AscensionXoroth::SPELL_SACRIFICIAL_CIRCLE)
     {
       row.Values[SPELL_WIRE_SLOT(SPELL_CASTER_AURA_SPELL_FIELD)] = info->CasterAuraSpell;
       row.Values[SPELL_WIRE_SLOT(SPELL_EXCLUDE_CASTER_AURA_SPELL_FIELD)] = info->ExcludeCasterAuraSpell;
@@ -7198,7 +7221,8 @@ public:
 
         static std::unordered_set<std::string_view> const secureAscensionAddons = {
             "AscensionUI", "Ascension_Collections", "Ascension_CompactRaidFrames", "Ascension_EnchantCollection",
-            "Ascension_HelpUI", "Ascension_InspectUI", "Ascension_MythicPlus", "Ascension_SeasonCollection",
+            "Ascension_HelpUI", "Ascension_InspectUI", "Ascension_Manastorm", "Ascension_MythicPlus",
+            "Ascension_SeasonCollection",
             "Ascension_TicketUI", "Ascension_UIDevelopmentTools", "Ascension_WildCard",
         };
 
@@ -7935,8 +7959,8 @@ public:
         MODULE_EXTENSION_OPCODES.end())
       return true;
 
-    if (QueueAscensionManastormPacket(session, packet))
-      return false;
+    if (opcode == 0x651 || opcode == 0x665 || opcode == 0x689)
+      return true;
 
     if (opcode == CMSG_QUERY_CUSTOM_STORE || opcode == CMSG_PURCHASE_CUSTOM_STORE_ITEM)
     {

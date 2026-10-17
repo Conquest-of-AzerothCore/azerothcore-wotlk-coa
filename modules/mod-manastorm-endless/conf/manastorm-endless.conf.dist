@@ -1,0 +1,20 @@
+[worldserver]
+
+# Enable/disable the Manastorm gameplay module (requires restart).
+Manastorm.Enable = 1
+
+# Client integration mode (requires restart):
+#   1 = reconstructed 3.3.5 client addon transport (MANASTORM addon prefix)
+#   2 = original Ascension native Manastorm protocol (uses the included CoA native opcode bridge)
+Manastorm.ClientMode = 2
+
+# Matching original client Manastorm.dbc, read-only identity validation in Mode 2.
+# Default when omitted: <DataDir>/dbc/Manastorm.dbc.
+# Manastorm.NativeDBCPath = "C:/path/to/matching/Manastorm.dbc"
+# This module exclusively owns Manastorm requests and gameplay.
+# The compatibility donor run service is never registered.
+# AscensionCompat.Enable / remote-client admission remain core connection settings.
+
+# Native Mobility covers all 36 listed class spell families automatically in Mode 2.
+# Runtime supporting auras follow the active mixture and are removed outside your Manastorm stage.
+# Requires the matching <DataDir>/dbc/Spell.dbc. No client files or SQL edits are needed.

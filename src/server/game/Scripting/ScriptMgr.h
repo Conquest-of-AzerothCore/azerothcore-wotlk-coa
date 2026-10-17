@@ -367,6 +367,7 @@ public: /* PlayerScript */
     void OnPlayerTemporarySpellLearnNotice(Player* player, uint32 spellId, bool sent);
     void OnPlayerTemporarySpellRemoveNotice(Player* player, uint32 spellId, bool sent);
     void OnPlayerSpellChargeConsumed(Player* player, SpellInfo const* spellInfo, Spell* spell, uint32 recoveryMs, uint64 nowEpochMs);
+    void OnPlayerSendSpellChargeStates(Player const* player);
     void OnPlayerSpellCooldownCalculated(Player* player, SpellInfo const* spellInfo, Spell* spell, uint32 recoveryMs);
     void OnPlayerDelete(ObjectGuid guid, uint32 accountId);
     void OnPlayerFailedDelete(ObjectGuid guid, uint32 accountId);
@@ -617,6 +618,7 @@ public: /* UnitScript */
     void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo);
     void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* spellInfo,
         uint8 effectIndex, float& value);
+    void ResolveSpellCast(Unit* caster, SpellInfo const*& spellInfo);
     void ModifyHealReceived(Unit* target, Unit* healer, uint32& addHealth, SpellInfo const* spellInfo);
     void OnBeforeHealAbsorb(HealInfo& healInfo);
     void OnAfterAuraEffectCalculateAmount(AuraEffect const* effect, Unit* caster, int32& amount);

@@ -1868,6 +1868,7 @@ public:
     void RemoveCategoryCooldown(uint32 cat);
     void RemoveArenaSpellCooldowns(bool removeActivePetCooldowns = false);
     void RemoveAllSpellCooldown();
+    void RemoveActivePetSpellCooldowns();
     void _LoadSpellCooldowns(PreparedQueryResult result);
     void _SaveSpellCooldowns(CharacterDatabaseTransaction trans, bool logout);
     [[nodiscard]] SpellChargeState GetSpellCharges(SpellInfo const* spellInfo) const;
@@ -2174,8 +2175,15 @@ public:
 
     // Ephemeral instances never replace ordinary dungeon bindings or saved login positions.
     void PrepareScriptedPrivateInstance(uint32 mapId, WorldLocation const& returnLocation,
-        ObjectGuid owner = ObjectGuid::Empty, std::set<ObjectGuid> const& members = {})
+        ObjectGuid owner = ObjectGuid::Empty, std::set<ObjectGuid> const& members = {}, bool databaseSpawns = false)
     {
+        if (_scriptedPrivateMapId == MAPID_INVALID)
+        {
+            _scriptedPrivateReturnDungeonDifficulty = GetDungeonDifficulty();
+            _scriptedPrivateReturnRaidDifficulty = GetRaidDifficulty();
+        }
+
+        _scriptedPrivateDatabaseSpawns = databaseSpawns;
         _scriptedPrivateMapId = mapId;
         _scriptedPrivateInstanceId = 0;
         _scriptedPrivateReturn = returnLocation;
@@ -2184,6 +2192,7 @@ public:
         _scriptedPrivateMembers.insert(GetGUID());
     }
     void SetScriptedPrivateInstanceId(uint32 id) { _scriptedPrivateInstanceId = id; }
+    bool LoadsScriptedPrivateDatabaseSpawns() const { return _scriptedPrivateDatabaseSpawns; }
     uint32 GetScriptedPrivateMapId() const { return _scriptedPrivateMapId; }
     uint32 GetScriptedPrivateInstanceId() const { return _scriptedPrivateInstanceId; }
     ObjectGuid GetScriptedPrivateOwner() const { return _scriptedPrivateOwner; }
@@ -2191,7 +2200,9 @@ public:
     WorldLocation const& GetScriptedPrivateReturn() const { return _scriptedPrivateReturn; }
     void ClearScriptedPrivateInstance()
     {
-        _scriptedPrivateMapId = _scriptedPrivateInstanceId = 0;
+        _scriptedPrivateDatabaseSpawns = false;
+        _scriptedPrivateMapId = MAPID_INVALID;
+        _scriptedPrivateInstanceId = 0;
         _scriptedPrivateOwner.Clear();
         _scriptedPrivateMembers.clear();
     }
@@ -2908,9 +2919,15 @@ protected:
     void _SaveStats(CharacterDatabaseTransaction trans);
     void _SaveCharacter(bool create, CharacterDatabaseTransaction trans);
 
-    uint32 _scriptedPrivateMapId = 0;
+    bool _scriptedPrivateDatabaseSpawns = false;
+
+    // Map 0 is Eastern Kingdoms, so zero cannot represent "no private map".
+    // MAPID_INVALID preserves Map 0 as a valid scripted-private destination.
+    uint32 _scriptedPrivateMapId = MAPID_INVALID;
     uint32 _scriptedPrivateInstanceId = 0;
     WorldLocation _scriptedPrivateReturn;
+    Difficulty _scriptedPrivateReturnDungeonDifficulty = DUNGEON_DIFFICULTY_NORMAL;
+    Difficulty _scriptedPrivateReturnRaidDifficulty = RAID_DIFFICULTY_10MAN_NORMAL;
     ObjectGuid _scriptedPrivateOwner;
     std::set<ObjectGuid> _scriptedPrivateMembers;
     void _SaveInstanceTimeRestrictions(CharacterDatabaseTransaction trans);

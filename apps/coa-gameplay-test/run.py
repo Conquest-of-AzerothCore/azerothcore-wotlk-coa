@@ -86,8 +86,8 @@ METRICS = {
     'who_count', 'who_class', 'player_name', 'name_lookup', 'loot_count', 'loot_entry', 'loot_received',
     'loot_gold', 'loot_bloodforged', 'loot_required_level', 'loot_item_level', 'loot_base_entry', 'loot_item_armor',
     'carried_item_level', 'carried_item_required_level', 'carried_item_armor', 'carried_item_scaling_level',
-    'nearby_gameobject_count', 'nearby_gameobject_quest_active', 'nearby_gameobject_state', 'nearby_creature_count',
-    'nearby_gameobject_at_client',
+    'nearby_gameobject_count', 'nearby_gameobject_quest_active', 'nearby_gameobject_state', 'nearby_gameobject_scale',
+    'nearby_creature_count', 'nearby_gameobject_at_client',
     'carried_money',
     'channel_object_entry',
     'quest_rewarded', 'has_achievement', 'has_title', 'spell_damage_taken', 'melee_damage_taken', 'spell_healing_taken',
@@ -651,6 +651,8 @@ def validate(scenario):
             if metric == 'nearby_creature_count':
                 require(step['actor'] in player_ids, f'{where}: creature count needs a player')
                 number(step.get('entry'), f'{where}.entry', 1, 2**32 - 1, True)
+                if 'spell' in step:
+                    number(step['spell'], f'{where}.spell', 1, 2**32 - 1, True)
             for field in ('min_level', 'max_level', 'min_home_distance'):
                 if field in step:
                     require(metric == 'nearby_creature_count',

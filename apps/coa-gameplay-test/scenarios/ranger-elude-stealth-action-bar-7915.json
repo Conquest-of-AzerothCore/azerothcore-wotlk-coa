@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Elude pages to the shared stealth action bar (#7915)",
+  "contract": [
+    "Elude 801345 applies SPELL_AURA_MOD_SHAPESHIFT to the client's Stealth form",
+    "30, whose SpellShapeshiftForm.dbc row carries BonusActionBar 1. rev_20261015_06",
+    "set the streamed override to 0 for Runeshroud's sake, which also stopped the",
+    "bar switch for Elude and Rogue stealth. With form 30 restored to 1, casting",
+    "Elude must leave the Ranger stealthed and the login patch stream must carry",
+    "row 30 with bonus action bar 1. Runeshroud paging to the shared stealth bar",
+    "is the pre-existing behavior; a private bar for it needs its own form and",
+    "stays a follow-up. Socketless packet construction does not establish how the",
+    "client pages its bar."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "ranger", "race": 1, "class": 21, "level": 54}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the login patch stream finish", "ms": 6000},
+    {
+      "action": "assert", "label": "Stealth form row reaches the client", "actor": "ranger",
+      "metric": "server_packets", "opcode": 2377, "row": 30, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Stealth form pages to the stealth action bar", "actor": "ranger",
+      "metric": "server_packet_u32", "opcode": 2377, "row": 30, "index": 1, "equals": 1
+    },
+    {
+      "action": "learn", "label": "Learn Elude", "actor": "ranger",
+      "spell": 801345
+    },
+    {
+      "action": "cast", "label": "Cast Elude", "actor": "ranger",
+      "spell": 801345
+    },
+    {
+      "action": "assert", "label": "Elude stealth is active", "actor": "ranger",
+      "metric": "aura", "spell": 801345,
+      "equals": 1, "within_ms": 3000
+    }
+  ]
+}

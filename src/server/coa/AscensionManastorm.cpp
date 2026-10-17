@@ -247,6 +247,8 @@ namespace
 
         SpellCastResult CheckUtility(Player* player, uint32 spell)
         {
+            if (!enabled.load())
+                return SPELL_CAST_OK;
             Gadget const* gadget = FindGadget(spell);
             if (!gadget && spell != 254440 && spell != 93309 && spell != 93311)
                 return SPELL_CAST_OK;
@@ -801,8 +803,6 @@ namespace
             else if (run.encounter->guards.erase(unit->GetGUID()))
             {
                 UpdateLink(player, run);
-                if (GameObject* heart = map->SummonGameObject(80779, unit->GetPosition(), 0, 0, 0, 1, 60))
-                    run.encounter->hearts[heart->GetGUID()] = GameTime::GetGameTime().count() + 60;
                 if (!run.encounter->treasureSpawned && roll_chance_f(std::min(10.0f, 2.0f + run.encounter->depth * 0.015f)))
                 {
                     run.encounter->treasureSpawned = true;
@@ -2083,21 +2083,7 @@ namespace
     };
 }
 
-bool QueueAscensionManastormPacket(WorldSession* session, WorldPacket const& packet)
+void AddAscensionManastormItemScripts()
 {
-    return ManastormService::Get().Queue(session, packet);
-}
-
-void AddAscensionManastormScripts()
-{
-    new ManastormWorld();
-    new ManastormMaps();
-    new ManastormPlayers();
-    new ManastormUnits();
-    new ManastormSpells();
-    new ManastormLoot();
     new item_ascension_manastorm_cache();
-    RegisterSpellScript(spell_ascension_manastorm_potion);
-    new ManastormGuides();
-    new ManastormCommands();
 }

@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "Bloodforged roll follows the player's level",
+  "contract": "Requires Bloodforged.Enable = 1 with Bloodforged.Rates45 = \"0.02 0.01 0.00\" (a rate that almost never drops) and Bloodforged.Rates55 = \"99.98 0.01 0.00\" (a rate that guarantees the roll), PvpPower.Enable = 1 and the catalogue SQL. The rate band follows the looter's level, not the creature's: a level 55 High-Risk character kills a natural Diseased Black Bear (level 51-52, not grey to them, in the level 45 band) and finds one Bloodforged item rolled from the level 55 band.",
+  "players": [
+    {
+      "id": "h",
+      "race": 2,
+      "class": 1,
+      "level": 55,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": 1488.4,
+    "y": -1214.0,
+    "z": 63.5,
+    "o": 0
+  },
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "h",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "h",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "set_phase",
+      "actor": "h",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "nearby_creature_count",
+      "entry": 1815,
+      "min_level": 48,
+      "max_level": 54,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "h",
+      "entry": 1815,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "loot_nearby",
+      "actor": "h",
+      "entry": 1815
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "loot_bloodforged",
+      "equals": 1
+    }
+  ]
+}

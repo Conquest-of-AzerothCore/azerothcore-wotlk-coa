@@ -240,6 +240,7 @@ enum PlayerHook
     PLAYERHOOK_ON_PLAYER_BREATH_INVERTED,
     PLAYERHOOK_ON_CAN_REGENERATE,
     PLAYERHOOK_ON_CAN_ENERGIZE,
+    PLAYERHOOK_ON_SEND_SPELL_CHARGE_STATES,
     PLAYERHOOK_ON_GET_MAX_ALLOWED_LEVEL,
     PLAYERHOOK_ON_HAS_NO_BONUS_EXPERIENCE,
     PLAYERHOOK_ON_HONORABLE_KILLING_BLOW,
@@ -444,6 +445,9 @@ public:
     // is gone
     virtual void OnPlayerTemporarySpellRemoveNotice(Player* /*player*/, uint32 /*spellId*/, bool /*sent*/) { }
     virtual void OnPlayerSpellChargeConsumed(Player* /*player*/, SpellInfo const* /*spellInfo*/, Spell* /*spell*/, uint32 /*recoveryMs*/, uint64 /*nowEpochMs*/) { }
+
+    // Append charge displays backed by module-owned state after the core's full client reset.
+    virtual void OnPlayerSendSpellChargeStates(Player const* /*player*/) { }
     virtual void OnPlayerSpellCooldownCalculated(Player* /*player*/, SpellInfo const* /*spellInfo*/, Spell* /*spell*/, uint32 /*recoveryMs*/) { }
 
     // Called when a player is bound to an instance

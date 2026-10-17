@@ -15,6 +15,7 @@ enum ChronomancerMovement : uint32
 {
     InfiniteClone = 50071,
     CloneAppearance = 45204,
+    InfiniteCloneAura = 704154,
     Rewind = 801294,
     RewindSlow = 572883,
     Backtrack = 706973,
@@ -51,6 +52,7 @@ struct npc_ascension_infinite_clone : ScriptedAI
         me->SetReactState(REACT_PASSIVE);
         me->SetUnitFlag(UNIT_FLAG_DISABLE_MOVE);
         player->CastSpell(me, CloneAppearance, true);
+        player->CastSpell(player, InfiniteCloneAura, true);
 
         std::list<Creature*> previous;
         player->GetAllMinionsByEntry(previous, InfiniteClone);
@@ -83,7 +85,7 @@ class spell_ascension_rewind : public SpellScript
 
     bool Validate(SpellInfo const*) override
     {
-        return ValidateSpellInfo({RewindSlow, CloneAppearance});
+        return ValidateSpellInfo({RewindSlow, CloneAppearance, InfiniteCloneAura});
     }
 
     SpellCastResult CheckClone()
@@ -105,6 +107,7 @@ class spell_ascension_rewind : public SpellScript
         uint32 health = std::min(ai->health, player->GetMaxHealth());
         uint32 mana = std::min(ai->mana, player->GetMaxPower(POWER_MANA));
         player->CastSpell(player, RewindSlow, true);
+        player->RemoveAurasDueToSpell(InfiniteCloneAura, player->GetGUID());
         clone->ToTempSummon()->UnSummon();
         player->NearTeleportTo(origin, true);
         player->SetHealth(health);

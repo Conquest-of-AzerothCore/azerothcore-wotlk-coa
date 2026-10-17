@@ -37,6 +37,17 @@
 #include "World.h"
 #include "WorldPacket.h"
 
+namespace
+{
+uint64 MakeScriptedPrivateMapKey(
+    uint32 mapId,
+    uint32 instanceId)
+{
+    return (uint64(mapId) << 32) |
+        uint64(instanceId);
+}
+}
+
 MapMgr::MapMgr()
 {
     i_timer[3].SetInterval(sWorld->getIntConfig(CONFIG_INTERVAL_MAPUPDATE));
@@ -112,8 +123,143 @@ Map* MapMgr::FindBaseNonInstanceMap(uint32 mapId) const
     return map;
 }
 
+Map* MapMgr::CreateScriptedPrivateWorldMap(
+    uint32 mapId,
+    Player* player)
+{
+    if (!player ||
+        player->GetScriptedPrivateMapId() !=
+            mapId)
+    {
+        return nullptr;
+    }
+
+    MapEntry const* entry =
+        sMapStore.LookupEntry(mapId);
+
+    if (!entry ||
+        entry->Instanceable() ||
+        entry->IsBattlegroundOrArena() ||
+        player->GetScriptedPrivateMembers().empty())
+    {
+        return nullptr;
+    }
+
+    uint32 instanceId =
+        player->GetScriptedPrivateInstanceId();
+
+    if (instanceId)
+    {
+        Map* existing =
+            FindScriptedPrivateWorldMap(
+                mapId,
+                instanceId);
+
+        if (!existing ||
+            !existing->IsScriptedPrivateInstance() ||
+            existing->GetScriptedPrivateOwner() !=
+                player->GetScriptedPrivateOwner() ||
+            !existing->IsScriptedPrivateMember(
+                player->GetGUID()))
+        {
+            return nullptr;
+        }
+
+        return existing;
+    }
+
+    instanceId =
+        GenerateInstanceId();
+
+    player->SetScriptedPrivateInstanceId(
+        instanceId);
+
+    Map* parent =
+        CreateBaseMap(mapId);
+
+    if (!parent ||
+        parent->Instanceable())
+    {
+        return nullptr;
+    }
+
+    uint64 const key =
+        MakeScriptedPrivateMapKey(
+            mapId,
+            instanceId);
+
+    std::lock_guard<std::mutex> guard(Lock);
+
+    if (_scriptedPrivateWorldMaps.find(key) !=
+        _scriptedPrivateWorldMaps.end())
+    {
+        return nullptr;
+    }
+
+    Map* map =
+        new Map(
+            mapId,
+            instanceId,
+            REGULAR_DIFFICULTY,
+            parent);
+
+    map->SetScriptedPrivateOwner(
+        player->GetScriptedPrivateOwner(),
+        player->GetScriptedPrivateMembers(),
+        player->LoadsScriptedPrivateDatabaseSpawns());
+
+    _scriptedPrivateWorldMaps.emplace(
+        key,
+        map);
+
+    map->OnCreateMap();
+
+    LOG_DEBUG(
+        "maps",
+        "Created scripted-private world map {} instance {} for owner {} with {} member(s), databaseSpawns={}.",
+        mapId,
+        instanceId,
+        player->GetScriptedPrivateOwner().ToString(),
+        player->GetScriptedPrivateMembers().size(),
+        player->LoadsScriptedPrivateDatabaseSpawns());
+
+    return map;
+}
+
+Map* MapMgr::FindScriptedPrivateWorldMap(
+    uint32 mapId,
+    uint32 instanceId) const
+{
+    if (!instanceId)
+        return nullptr;
+
+    auto itr =
+        _scriptedPrivateWorldMaps.find(
+            MakeScriptedPrivateMapKey(
+                mapId,
+                instanceId));
+
+    return itr ==
+        _scriptedPrivateWorldMaps.end()
+        ? nullptr
+        : itr->second;
+}
+
 Map* MapMgr::CreateMap(uint32 id, Player* player)
 {
+    MapEntry const* entry =
+        sMapStore.LookupEntry(id);
+
+    if (entry &&
+        player &&
+        player->GetScriptedPrivateMapId() == id &&
+        !entry->Instanceable())
+    {
+        return CreateScriptedPrivateWorldMap(
+            id,
+            player);
+    }
+
     Map* m = CreateBaseMap(id);
 
     if (m && m->Instanceable())
@@ -124,6 +270,17 @@ Map* MapMgr::CreateMap(uint32 id, Player* player)
 
 Map* MapMgr::FindMap(uint32 mapid, uint32 instanceId) const
 {
+    if (instanceId)
+    {
+        if (Map* privateWorld =
+            FindScriptedPrivateWorldMap(
+                mapid,
+                instanceId))
+        {
+            return privateWorld;
+        }
+    }
+
     Map* map = FindBaseMap(mapid);
     if (!map)
         return nullptr;
@@ -140,22 +297,40 @@ Map::EnterState MapMgr::PlayerCannotEnter(uint32 mapid, Player* player, bool log
     if (!entry)
         return Map::CANNOT_ENTER_NO_ENTRY;
 
-    if (!entry->IsDungeon())
-        return Map::CAN_ENTER;
-
+    // Scripted-private transfers are an explicit opt-in path and are checked
+    // before ordinary map-type rules. This is what permits a private copy of
+    // an otherwise public world map without changing Map.dbc semantics.
     if (player->GetScriptedPrivateMapId() == mapid)
     {
-        if (!entry->IsNonRaidDungeon() || player->GetScriptedPrivateMembers().size() > 5)
-            return Map::CANNOT_ENTER_INSTANCE_BIND_MISMATCH;
-        if (uint32 id = player->GetScriptedPrivateInstanceId())
+        if (player->GetScriptedPrivateMembers().empty())
         {
-            Map* destination = FindMap(mapid, id);
-            if (!destination || !destination->IsScriptedPrivateInstance())
-                return Map::CANNOT_ENTER_UNSPECIFIED_REASON;
-            return destination->CannotEnter(player, loginCheck);
+            return Map::CANNOT_ENTER_INSTANCE_BIND_MISMATCH;
         }
-        return Map::CAN_ENTER; // Creation remains in the normal worldport-ack path.
+
+        if (uint32 id =
+            player->GetScriptedPrivateInstanceId())
+        {
+            Map* destination =
+                FindMap(
+                    mapid,
+                    id);
+
+            if (!destination ||
+                !destination->IsScriptedPrivateInstance())
+            {
+                return Map::CANNOT_ENTER_UNSPECIFIED_REASON;
+            }
+
+            return destination->CannotEnter(
+                player,
+                loginCheck);
+        }
+
+        return Map::CAN_ENTER;
     }
+
+    if (!entry->IsDungeon())
+        return Map::CAN_ENTER;
 
     InstanceTemplate const* instance = sObjectMgr->GetInstanceTemplate(mapid);
     if (!instance)
@@ -317,6 +492,46 @@ void MapMgr::Update(uint32 diff)
             iter->second->Update(uint32(full ? i_timer[mapUpdateStep].GetCurrent() : 0), diff);
     }
 
+    for (auto privateItr =
+            _scriptedPrivateWorldMaps.begin();
+        privateItr !=
+            _scriptedPrivateWorldMaps.end();)
+    {
+        Map* map =
+            privateItr->second;
+
+        bool const full =
+            mapUpdateStep == 0;
+
+        uint32 const mapDiff =
+            uint32(
+                full
+                ? i_timer[0].GetCurrent()
+                : 0);
+
+        if (map->CanUnload(mapDiff))
+        {
+            map->UnloadAll();
+            delete map;
+            privateItr =
+                _scriptedPrivateWorldMaps.erase(
+                    privateItr);
+            continue;
+        }
+
+        if (m_updater.activated())
+            m_updater.schedule_update(
+                *map,
+                mapDiff,
+                diff);
+        else
+            map->Update(
+                mapDiff,
+                diff);
+
+        ++privateItr;
+    }
+
     if (m_updater.activated())
         m_updater.wait();
 
@@ -327,6 +542,16 @@ void MapMgr::Update(uint32 diff)
             bool full = ((mapUpdateStep == 0 && !iter->second->IsBattlegroundOrArena() && !iter->second->IsDungeon()) || (mapUpdateStep == 1 && iter->second->IsBattlegroundOrArena()) || (mapUpdateStep == 2 && iter->second->IsDungeon()));
             if (full)
                 iter->second->DelayedUpdate(uint32(i_timer[mapUpdateStep].GetCurrent()));
+        }
+
+        if (mapUpdateStep == 0)
+        {
+            for (auto const& privatePair :
+                _scriptedPrivateWorldMaps)
+            {
+                privatePair.second->DelayedUpdate(
+                    uint32(i_timer[0].GetCurrent()));
+            }
         }
 
         i_timer[mapUpdateStep].SetCurrent(0);
@@ -368,6 +593,18 @@ bool MapMgr::IsValidMAP(uint32 mapid, bool startUp)
 
 void MapMgr::UnloadAll()
 {
+    for (auto privateItr =
+            _scriptedPrivateWorldMaps.begin();
+        privateItr !=
+            _scriptedPrivateWorldMaps.end();)
+    {
+        privateItr->second->UnloadAll();
+        delete privateItr->second;
+        privateItr =
+            _scriptedPrivateWorldMaps.erase(
+                privateItr);
+    }
+
     for (MapMapType::iterator iter = i_maps.begin(); iter != i_maps.end();)
     {
         iter->second->UnloadAll();

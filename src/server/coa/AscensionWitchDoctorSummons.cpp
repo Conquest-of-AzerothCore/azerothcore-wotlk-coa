@@ -190,6 +190,7 @@ namespace
 {
 using namespace AscensionWitchDoctor;
 constexpr uint32 NpcHauntVisage = 840000;
+constexpr uint32 BwonsamdiDisplay = 142802;
 constexpr float HauntRunDistance = 25.0f;
 class npc_ascension_witch_doctor : public ScriptedAI
 {
@@ -248,6 +249,13 @@ class npc_ascension_witch_doctor : public ScriptedAI
         {
             me->SetMaxHealth(std::max(100u, uint32(player->GetStat(STAT_INTELLECT) * 8)));
             me->SetHealth(me->GetMaxHealth());
+        }
+        if (me->GetEntry() == NpcBwonsamdi)
+        {
+            me->SetDisplayId(BwonsamdiDisplay);
+            me->SetEmoteState(EMOTE_STATE_DANCE);
+            me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
+            me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
         }
         if (me->GetEntry() == NpcMarionette)
             _timer = 2000;
@@ -499,8 +507,8 @@ class npc_ascension_witch_doctor : public ScriptedAI
             }
             _timer = 1500;
         }
-        if (entry == NpcBwonsamdi && player->IsWithinDistInMap(me, 15.0f))
-            Field(player, BigVoodooField);
+        if (entry == NpcBwonsamdi)
+            Field(me, BigVoodooField);
         if (entry == NpcMarionette)
         {
             if (++_marionetteTicks <= 4 && (player->HasAura(Marionette) || _age >= 8000))

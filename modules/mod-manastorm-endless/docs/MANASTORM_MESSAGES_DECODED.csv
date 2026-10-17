@@ -1,0 +1,292 @@
+MessageID,NativeDifficulty,Depth,GameEventID,Title,Description
+1,0,18,0,Unlocked Iskarr Village!,You have unlocked Iskarr Village in your next Manastorm!
+2,0,10,0,Unlocked the Grim Marsh!,You have unlocked the Grim Marsh in your next Manastorm!
+3,0,25,0,Unlocked the Temple of Eternity!,You have unlocked The Temple of Eternity in your next Manastorm!
+4,0,45,0,Unlocked Gadgetzan's End!,You have unlocked Gadgetzan's End in your next Manastorm!
+5,0,100,0,Unlocked Corestone of Dalaran!,You have unlocked Corestone of Dalaran in your next Manastorm!
+6,0,48,0,Unlocked the Forgotten Mine!,You have unlocked the Forgotten Mine in your next Manastorm!
+7,0,55,0,Unlocked the Altar of Storms!,You have unlocked the Altar of Storms in your next Manastorm!
+8,0,60,0,Unlocked Caer Darrow!,You have unlocked Caer Darrow in your next Manastorm!
+9,0,75,0,Unlocked The Tainted Scar: Part II!,You have unlocked the Tainted Scar: Part II in your next Manastorm!
+10,0,85,0,Unlocked the Scarlet Mage Tower!,You have unlocked the Scarlet Mage Tower in your next Manastorm!
+11,0,95,0,Unlocked Lost Rigger Cove Docks!,You have unlocked the Lost Rigger Cove in your next Manastorm!
+12,2,18,0,Unlocked Iskarr Village!,You have unlocked Iskarr Village in your next Manastorm!
+13,2,10,0,Unlocked the Grim Marsh!,You have unlocked the Grim Marsh in your next Manastorm!
+14,2,25,0,Unlocked the Temple of Eternity!,You have unlocked the Temple of Eternity in your next Manastorm!
+15,2,45,0,Unlocked Gadgetzan's End!,You have unlocked Gadgetzan's End in your next Manastorm!
+16,2,100,0,Unlocked Corestone of Dalaran!,You have unlocked Corestone of Dalaran in your next Manastorm!
+17,2,48,0,Unlocked the Forgotten Mine!,You have unlocked the Forgotten Mine in your next Manastorm!
+18,2,55,0,Unlocked the Altar of Storms!,You have unlocked the Altar of Storms in your next Manastorm!
+19,2,60,0,Unlocked Caer Darrow!,You have unlocked Caer Darrow in your next Manastorm!
+20,2,75,0,Unlocked The Tainted Scar: Part II!,You have unlocked the Tainted Scar: Part II in your next Manastorm!
+21,2,85,0,Unlocked the Scarlet Mage Tower!,You have unlocked the Scarlet Mage Tower in your next Manastorm!
+22,2,95,0,Unlocked Lost Rigger Cove Docks!,You have unlocked the Lost Rigger Cove in your next Manastorm!
+23,2,105,0,Unlocked Temple of Bethlekk!,You have unlocked The Temple of Bethlekk in your next Manastorm!
+24,2,115,130,Unlocked Shadra'zaar!,You have unlocked Shadra'zaar in your next Manastorm!
+25,2,130,130,Unlocked Naze of Shirvallah!,You have unlocked Naze of Shirvallah in your next Manastorm!
+26,2,145,130,Zul'Gurub Wings Unlocked,You have unlocked The Coil and Hakkari Grounds in future Manastorms!
+28,2,175,130,Unlocked The Bloodfire Pit!,You have unlocked The Bloodfire Pit in your next Manastorm!
+29,2,190,130,Unlocked Altar of Hir'eek!,You have unlocked the Altar of Hir'eek in your next Manastorm!
+30,2,205,130,Unlocked Altar of the Blood God!,You have unlocked Altar of the Blood God in your next Manastorm!
+31,2,220,132,Unlocked Gehennas!,You have unlocked Gehennas in your next Manastorm!
+32,2,235,132,Unlocked Lucifron!,You have unlocked Molten Core Part 2/9 in your next Manastorm!
+33,2,250,132,Unlocked Magmadar!,You have unlocked Magmadar in your next Manastorm!
+34,2,265,132,Unlocked Garr!,You have unlocked Garr in your next Manastorm!
+35,2,280,132,Unlocked Shazzrah!,You have unlocked Shazzrah in your next Manastorm!
+36,2,295,132,Unlocked Baron Geddon!,You have unlocked Baron Geddon in your next Manastorm!
+37,2,310,132,Unlocked Sulfuron Harbinger!,You have unlocked Sulfuron Harbinger in your next Manastorm!
+38,2,335,132,Unlocked Golemagg the Incinerator!,You have unlocked Golemagg the Incinerator in your next Manastorm!
+39,2,425,134,Unlocked Vaelastrasz the Corrupt!,You have unlocked Vaelastrasz the Corrupt in your next Manastoorm!
+40,2,440,134,Unlocked Broodlord Lashlayer!,You have unlocked Broodlord Lashlayer in your next Manastorm!
+41,2,455,134,Unlocked Firemaw!,You have unlocked Firemaw in your next Manastorm!
+42,2,470,134,Unlocked Chromaggus!,You have unlocked Chromaggus in your next Manastorm!
+43,2,510,135,Unlocked the Ruins of Ahn'Qiraj!,You have unlocked Kurinnaxx in your next Manastorm!
+44,2,525,135,Unlocked General's Terrace!,You have unlocked General Rajaxx in your next Manastorm!
+45,2,540,135,Unlocked The Hatchery!,You have unlocked Buru the Gorger in your next Manastorm!
+46,2,555,135,Unlocked The Comb!,You have unlocked Ayamiss the Hunter in your next Manastorm!
+47,2,570,135,Unlocked The Reservoir!,You have unlocked Moam in your next Manastorm!
+48,2,595,135,Unlocked Watchers' Terrace!,You have unlocked Ossirian the Unscarred in your next Manastorm!
+49,2,610,137,Unlocked The Prophet Skeram!,You have unlocked The Prophet Skeram in your next Manastorm!
+50,2,625,137,Unlocked Battleguard Sartura!,You have unlocked Battleguard Sartura in your next Manastorm!
+51,2,640,137,Unlocked Fankriss the Unyielding!,You have unlocked Fankriss the Unyielding in your next Manastorm!
+52,2,655,137,Unlocked Viscidus!,You have unlocked Viscidus in your next Manastorm!
+53,2,670,137,Unlocked Huhuran!,You have unlocked Huhuran in your next Manastorm!
+54,2,685,137,Unlocked Twin Emperors!,You have unlocked the Twin Emperors in your next Manastorm!
+55,2,700,137,Unlocked Ouro!,You have unlocked Ouro in your next Manastorm!
+56,2,725,137,Unlocked C'thun!,You have unlocked C'thun in your next Manastorms!
+57,2,740,139,Naxxramas Unlocked,You have unlocked the Naxxramas map and creatures in future Manastorms!
+58,2,755,139,Unlocked Grand Widow Faerlina!,You have unlocked Grand Widow Faerlina in your next Manastorm!
+59,2,770,139,Unlocked Maexxna!,You have unlocked Maexxna in your next Manastorm!
+60,2,785,139,Unlocked Noth the Plaguebringer!,You have unlocked Noth the Plaguebringer in your next Manastorm!
+61,2,800,139,Unlocked Heigan the Unclean!,You have unlocked Heigan the Unclean in your next Manastorm!
+62,2,815,139,Unlocked Loatheb!,You have unlocked Loatheb in your next Manastorm!
+63,2,830,139,Unlocked Patchwerk!,You have unlocked Patchwerk in your next Manastorm!
+64,2,845,139,Unlocked Grobbulus!,You have unlocked Grobbulus in your next Manastorm!
+65,2,860,139,Unlocked Gluth!,You have unlocked Gluth in your next Manastorm!
+66,2,875,139,Unlocked Thaddius!,You have unlocked Thaddius in your next Manastorm!
+67,2,890,139,Unlocked Instructor Razuvious!,You have unlocked Instructor Razuvious in your next Manastorm!
+68,2,905,139,Unlocked Gothik the Harvester!,You have unlocked Gothik the Harvester in your next Manastorm!
+69,2,920,139,Unlocked Sapphiron!,You have unlocked Frostwyrm Lair Part 1 in your next Manastorm!
+70,2,945,139,Unlocked Kel'thuzad!,You have unlocked Kel'thuzad in your next Manastorm!
+255,0,19,0,Iskarr Village Unlocked,You have unlocked the Iskarr Village map and creatures in future Manastorms!
+256,0,11,0,The Grim Marsh Unlocked,You have unlocked the Grim Marsh map and creatures in future Manastorms!
+257,0,26,0,Temple of Eternity Unlocked,You have unlocked the Temple of Eternity map and creatures in future Manastorms!
+258,0,46,0,Gadzetzan's End Unlocked,You have unlocked the Gadzetzan's End map and creatures in future Manastorms!
+259,0,101,0,Dalaran Crater Unlocked,You have unlocked the Dalaran Crater map and creatures in future Manastorms!
+260,0,49,0,Forgotten Mine Unlocked,You have unlocked the Forgotten Mine map and creatures in future Manastorms!
+261,0,56,0,Altar of Storms Unlocked,You have unlocked the Altar of Storms map and creatures in future Manastorms!
+262,0,61,0,Caer Darrow Unlocked,You have unlocked the Caer Darrow map and creatures in future Manastorms!
+263,0,96,0,Admiral Seastomper Defeated!,You have unlocked Admiral Seastomper in future Manastorms!
+264,0,76,0,Archmage Allistarj Defeated!,You have unlocked Archmage Allistarj in future Manastorms!
+265,0,8600,0,Archmage Adeline Defeated!,You have unlocked Archmage Adeline in future Manastorms!
+266,2,19,0,Iskarr Village Unlocked,You have unlocked the Iskarr Village map and creatures in future Manastorms!
+267,2,11,0,The Grim Marsh Unlocked,You have unlocked the Grim Marsh map and creatures in future Manastorms!
+268,2,26,0,Temple of Eternity Unlocked,You have unlocked the Temple of Eternity map and creatures in future Manastorms!
+269,2,46,0,Gadzetzan's End Unlocked,You have unlocked the Gadzetzan's End map and creatures in future Manastorms!
+270,2,101,0,Dalaran Crater Unlocked,You have unlocked the Dalaran Crater map and creatures in future Manastorms!
+271,2,49,0,Forgotten Mine Unlocked,You have unlocked the Forgotten Mine map and creatures in future Manastorms!
+272,2,56,0,Altar of Storms Unlocked,You have unlocked the Altar of Storms map and creatures in future Manastorms!
+273,2,61,0,Caer Darrow Unlocked,You have unlocked the Caer Darrow map and creatures in future Manastorms!
+274,2,96,0,Admiral Seastomper Defeated!,You have unlocked Admiral Seastomper in future Manastorms!
+275,2,76,0,Archmage Allistarj Defeated!,You have unlocked Archmage Allistarj in future Manastorms!
+276,2,8600,0,Archmage Adeline Defeated!,You have unlocked Archmage Adeline in future Manastorms!
+277,2,106,130,Zul'Gurub Unlocked,You have unlocked the Zul'Gurub map and creatures in future Manastorms!
+278,2,116,130,High Priestess Mar'li Defeated!,You have unlocked High Priestess Mar'li in future Manastorms!
+279,2,131,130,High Priest Thekal Defeated!,You have unlocked High Priest Thekal in future Manastorms!
+280,2,146,130,Bloodlord Mandokir Defeated!,You have unlocked Bloodlord Mandokir in future Manastorms!
+282,2,176,130,Jin'do the Hexxer Defeated!,You have unlocked Jin'do the Hexxer in future Manastorms!
+283,2,191,130,High Priestess Jeklik Defeated!,You have unlocked High Priestess Jeklik in future Manastorms!
+284,2,206,130,Hakkar Defeated!,You have unlocked Hakkar in future Manastorms!
+285,2,221,132,Molten Core Unlocked,You have unlocked the Molten Core map and creatures in future Manastorms!
+286,2,236,132,Lucifron Defeated!,You have unlocked Lucifron in future Manastorms!
+287,2,251,132,Magmadar Defeated!,You have unlocked Magmadar in future Manastorms!
+288,2,266,132,Garr Defeated!,You have unlocked Garr in future Manastorms!
+289,2,281,132,Shazzrah Defeated!,You have unlocked Shazzrah in future Manastorms!
+290,2,296,132,Baron Geddon Defeated!,You have unlocked Baron Geddon in future Manastorms!
+291,2,311,132,Sulfuron Harbinger Defeated!,You have unlocked Sulfuron Harbinger in future Manastorms!
+292,2,336,132,Golemagg the Incinerator Defeated!,You have unlocked Golemagg the Incinerator in future Manastorms!
+293,2,426,134,Vaelastrasz the Corrupt Defeated!,You have unlocked Vaelastrasz the Corrupt in future Manastorms!
+294,2,441,134,Broodlord Lashlayer Defeated!,You have unlocked Broodlord Lashlayer in future Manastorms!
+295,2,456,134,Firemaw Defeated!,You have unlocked Firemaw in future Manastorms!
+296,2,471,134,Chromaggus Defeated!,You have unlocked Chromaggus in future Manastorms!
+297,2,511,135,Ruins of Ahn'Qiraj Unlocked,You have unlocked the Ruins of Ahn'Qiraj map and creatures in future Manastorms!
+298,2,526,135,General Rajaxx Defeated!,You have unlocked General Rajaxx in future Manastorms!
+299,2,541,135,Buru the Gorger Defeated!,You have unlocked Buru the Gorger in future Manastorms!
+300,2,556,135,Ayamiss the Hunter Defeated!,You have unlocked Ayamiss the Hunter in future Manastorms!
+301,2,571,135,Moam Defeated!,You have unlocked Moam in future Manastorms!
+302,2,596,135,Ossirian the Unscarred Defeated!,You have unlocked Ossirian the Unscarred in future Manastorms!
+303,2,611,137,Ahn'Qiraj Temple Unlocked,You have unlocked the Ahn'Qiraj Temple map and creatures in future Manastorms!
+304,2,626,137,Battleguard Sartura Defeated!,You have unlocked Battleguard Sartura in future Manastorms!
+305,2,641,137,Fankriss the Unyielding Defeated!,You have unlocked Fankriss the Unyielding in future Manastorms!
+306,2,656,137,Viscidus Defeated!,You have unlocked Viscidus in future Manastorms!
+307,2,671,137,Princess Huhuran Defeated!,You have unlocked Princess Huhuran in future Manastorms!
+308,2,686,137,Twin Emperors Defeated!,You have unlocked the Twin Emperors in future Manastorms!
+309,2,701,137,Ouro Defeated!,You have unlocked Ouro in future Manastorms!
+310,2,726,137,C'thun Defeated!,You have unlocked C'thun in future Manastorms!
+311,2,741,139,Anub'Rekhan Defeated!,You have unlocked Anub'Rekhan in future Manastorms!
+312,2,756,139,Grand Widow Faerlina Defeated!,You have unlocked Grand Widow Faerlina in future Manastorms!
+313,2,771,139,Maexxna Defeated!,You have unlocked Maexxna in future Manastorms!
+314,2,786,139,Noth the Plaguebringer Defeated!,You have unlocked Noth the Plaguebringer in future Manastorms!
+315,2,801,139,Heigan the Unclean Defeated!,You have unlocked Heigan the Unclean in future Manastorms!
+316,2,816,139,Loatheb Defeated!,You have unlocked Loatheb in future Manastorms!
+317,2,831,139,Patchwerk Defeated!,You have unlocked Patchwerk in future Manastorms!
+318,2,846,139,Grobbulus Defeated!,You have unlocked Grobbulus in future Manastorms!
+319,2,861,139,Gluth Defeated!,You have unlocked Gluth in future Manastorms!
+320,2,876,139,Thaddius Defeated!,You have unlocked Thaddius in future Manastorms!
+321,2,891,139,Instructor Razuvious Defeated!,You have unlocked Instructor Razuvious in future Manastorms!
+322,2,906,139,Gothik the Harvester Defeated!,You have unlocked Gothik the Harvester in future Manastorms!
+323,2,921,139,Sapphiron Defeated!,You have unlocked Sapphiron in future Manastorms!
+324,2,946,139,Kel'Thuzad Defeated!,You have unlocked Kel'Thuzad in future Manastorms!
+382,2,102550,0,Unlocked Heroic Sunwell Plateau Items!,You have unlocked Heroic Sunwell Plateau equipment in the Manastorm!
+383,2,102400,0,Unlocked Sunwell Plateau Items!,You have unlocked Sunwell Plateau equipment in the Manastorm!
+385,2,706,182,Unlocked Heroic Hyjal Summit Items!,You have unlocked Heroic Hyjal Summit equipment in the Manastorm!
+386,2,676,183,Unlocked Black Temple Items!,You have unlocked Black Temple equipment in the Manastorm!
+387,2,890,139,Unlocked Hyjal Summit Items!,You have unlocked Hyjal Summit equipment in the Manastorm!
+388,2,586,181,Unlocked Zul'Aman Heroic Items!,You have unlocked Zul'Aman Heroic equipment in the Manastorm!
+389,2,556,181,Unlocked Zul'Aman Items!,You have unlocked Zul'Aman equipment in the Manastorm!
+390,2,570,179,Unlocked Heroic Tempest Keep Items!,You have unlocked Heroic Tempest Keep equipment in the Manastorm!
+392,2,470,179,Unlocked Tempest Keep Items!,You have unlocked Tempest Keep equipment in the Manastorm!
+393,2,410,342,Unlocked Heroic Magtheridon's Lair Items!,You have unlocked Heroic Magtheridon's Lair equipment in the Manastorm!
+394,2,226,176,Unlocked Heroic Gruul's Lair Items!,You have unlocked Heroic Gruul's Lair equipment in the Manastorm!
+395,2,196,177,Unlocked Heroic Karazhan Items!,You have unlocked Heroic Karazhan equipment in the Manastorm!
+396,2,280,174,Unlocked Magtheridon's Lair Items!,You have unlocked Magtheridon's Lair equipment in the Manastorm!
+397,2,136,176,Unlocked Gruul's Lair Items!,You have unlocked Gruul's Lair equipment in the Manastorm!
+398,2,106,177,Unlocked Karazhan Items!,You have unlocked Karazhan equipment in the Manastorm!
+400,2,946,139,Unlocked Mythic Naxxramas Items!,You have unlocked Mythic Naxxramas equipment in the Manastorm!
+402,2,890,139,Unlocked Heroic Naxxramas Items!,You have unlocked Heroic Naxxramas equipment in the Manastorm!
+404,2,685,137,Unlocked Mythic Temple of Ahn'Qiraj Items!,You have unlocked Mythic Temple of Ahn'Qiraj equipment in the Manastorm!
+405,2,656,137,Unlocked Heroic Temple of Ahn'Qiraj Items!,You have unlocked Heroic Temple of Ahn'Qiraj equipment in the Manastorm!
+406,2,610,137,Unlocked Temple of Ahn'Qiraj Items!,You have unlocked Temple of Ahn'Qiraj equipment in the Manastorm!
+407,2,570,135,Unlocked Mythic Ruins of Ahn'Qiraj Items!,You have unlocked Mythic Ruins of Ahn'Qiraj equipment in the Manastorm!
+409,2,540,135,Unlocked Heroic Ruins of Ahn'Qiraj Items!,You have unlocked Heroic Ruins of Ahn'Qiraj equipment in the Manastorm!
+410,2,510,135,Unlocked Ruins of Ahn'Qiraj Items!,You have unlocked Ruins of Ahn'Qiraj equipment in the Manastorm!
+411,2,470,134,Unlocked Mythic Blackwing Lair Items!,You have unlocked Mythic Blackwing Lair equipment in the Manastorm!
+412,2,455,134,Unlocked Heroic Blackwing Lair Items!,You have unlocked Heroic Blackwing Lair equipment in the Manastorm!
+413,2,410,134,Unlocked Blackwing Lair Items!,You have unlocked Blackwing Lair equipment in the Manastorm!
+418,2,350,132,Unlocked Mythic Molten Core Items!,You have unlocked Mythic Molten Core equipment in the Manastorm!
+420,2,280,132,Unlocked Heroic Molten Core Items!,You have unlocked Heroic Molten Core equipment in the Manastorm!
+421,2,220,132,Unlocked Molten Core Items!,You have unlocked Molten Core equipment in the Manastorm!
+422,2,300,130,Unlocked Mythic Zul'Gurub Items!,You have unlocked Mythic Zul'Gurub equipment in the Manastorm!
+423,2,200,730,Unlocked Mythic Dungeons Items!,You have unlocked Mythic Dungeons equipment in the Manastorm!
+424,2,150,130,Unlocked Heroic Zul'Gurub Items!,You have unlocked Heroic Zul'Gurub equipment in the Manastorm!
+425,2,105,130,Unlocked Zul'Gurub Items!,You have unlocked Zul'Gurub equipment in the Manastorm!
+426,2,49,396,Unlocked Heroic Dungeons Items!,You have unlocked Heroic Dungeons equipment in the Manastorm!
+440,2,365,155,Unlocked Onyxia's Lair!,You have unlocked Onyxia's Lair in your next Manastorm!
+441,2,366,155,Defeated Onyxia!,You have unlocked Onyxia's in future Manastorms!
+500,2,350,132,Unlocked Ragnaros' Lair!,You have unlocked Ragnaros' Lair in your next Manastorm!
+501,2,351,132,Defeated Ragnaros!,You have unlocked Ragnaros in future Manastorms!
+600,0,78,173,Unlocked Demon's Tears!,You have unlocked Demon's Tears in your next Manastorm!
+601,2,78,173,Unlocked Demon's Tears!,You have unlocked Demon's Tears in your next Manastorm!
+603,0,5,0,Unlocked Moonbrook!,You have unlocked Moonbrook in your next Manastorm!
+604,2,5,0,Unlocked Moonbrook!,You have unlocked Moonbrook in your next Manastorm!
+607,0,6,0,Moonbrook Unlocked,You have unlocked the Moonbrook map and creatures in future Manastorms!
+608,2,6,0,Moonbrook Unlocked,You have unlocked the Moonbrook map and creatures in future Manastorms!
+615,0,35,0,Unlocked Purgation Isle!,You have unlocked Purgation Isle in your next Manastorm!
+616,2,35,0,Unlocked Purgation Isle!,You have unlocked Purgation Isle in your next Manastorm!
+619,0,36,0,Purgation Isle Unlocked,You have unlocked the Purgation Isle map and creatures in future Manastorms!
+620,2,36,0,Purgation Isle Unlocked,You have unlocked the Purgation Isle map and creatures in future Manastorms!
+622,2,108,0,Unlocked Nyx and Nocturna in your next Manastorm!,You have unlocked Nyx and Nocturna in your next Manastorm!
+625,2,128,0,"Unlocked Mechatron, Techtronic Sentinel in your next Manastorm!",You have unlocked Tinkertech Showdown in your next Manastorm!
+700,2,38,0,Unlocked Mazthoril!,You have unlocked Mazthoril in your next Manastorm!
+701,0,38,0,Unlocked Mazthoril!,You have unlocked Mazthoril in your next Manastorm!
+702,0,39,0,Manaclaw Defeated!,You have unlocked Manaclaw in future Manastorms!
+703,2,39,0,Manaclaw Defeated!,You have unlocked Manaclaw in future Manastorms!
+704,0,50,0,Unlocked Lost Rigger Cove Camp!,You have unlocked the Lost Rigger Cove Camp in your next Manastorm!
+705,2,50,0,Unlocked Lost Rigger Cove Camp!,You have unlocked the Lost Rigger Cove Camp in your next Manastorm!
+706,2,51,0,Andre Firebeard Defeated!,You have unlocked Andre Firebeard in future Manastorms!
+707,0,51,0,Andre Firebeard Defeated!,You have unlocked Andre Firebeard in future Manastorms!
+721,2,65,0,Unlocked Ruins of Alterac!,You have unlocked Ruins of Alterac in your next Manastorm!
+722,2,66,0,Muckrake Defeated!,You have unlocked Ruins of Alterac in future Manastorms!
+723,0,65,0,Unlocked Ruins of Alterac!,You have unlocked Ruins of Alterac in your next Manastorm!
+724,0,66,0,Muckrake Defeated!,You have unlocked Ruins of Alterac in future Manastorms!
+725,0,91,0,Razelikh the Defiler Defeated!,You have unlocked Razelikh the Defiler in future Manastorms!
+726,2,91,0,Razelikh the Defiler Defeated!,You have unlocked Razelikh the Defiler in future Manastorms!
+727,0,90,0,Unlocked the Dark Portal!,You have unlocked the Dark Portal in your next Manastorm!
+728,2,90,0,Unlocked the Dark Portal!,You have unlocked the Dark Portal in your next Manastorm!
+730,0,102,0,Unlocked The Rookery!,You have unlocked The Rookery in your next Manastorm!
+731,2,102,0,Unlocked The Rookery!,You have unlocked The Rookery in your next Manastorm!
+732,0,103,0,Spire Throne Unlocked,You have unlocked Solakar Flamewreath and the Spire Throne in future Manastorms!
+733,2,103,0,Spire Throne Unlocked,You have unlocked Solakar Flamewreath and the Spire Throne in future Manastorms!
+736,0,104,0,Blackrock Stadium Unlocked,You have unlocked General Drakkisath and Blackrock Stadium in future Manastorms!
+737,2,104,0,Blackrock Stadium Unlocked,You have unlocked General Drakkisath and Blackrock Stadium in future Manastorms!
+740,0,395,0,Defeated Warchief Rend Blackhand!,You have unlocked Warchief Rend Blackhand in future Manastorms!
+741,2,380,0,Warchief Rend Blackhand Defeated,You have unlocked Warchief Rend Blackhand in future Manastorms!
+742,2,410,134,Unlocked Razorgore the Untamed!,You have unlocked Razorgore the Untamed in your next Manastoorm!
+743,2,411,134,Blackwing Lair Unlocked,You have unlocked the Blackwing Lair map and creatures in future Manastorms!
+800,0,70,0,Unlocked The Tainted Scar: Part I!,You have unlocked the Tainted Scar: Part I in your next Manastorm!
+801,2,70,0,Unlocked The Tainted Scar: Part I!,You have unlocked the Tainted Scar: Part I in your next Manastorm!
+802,0,71,0,Grol the Destroyer Defeated!,You have unlocked Grol the Destroyer in future Manastorms!
+803,2,71,0,Grol the Destroyer Defeated!,You have unlocked Grol the Destroyer in future Manastorms!
+804,0,11,0,On Death Affix: Mana Bomb Unlocked,You have unlocked On Death Affix: Mana Bomb affix in future manastorms
+805,0,13,0,On Death Affix: Lightning Rod Unlocked,You have unlocked On Death Affix: Lightning Rod affix in future manastorms
+806,0,26,0,On Death Affix: Vortex Unlocked,You have unlocked On Death Affix: Vortex affix in future manastorms
+807,0,16,0,Passive Affix: Rampaging Unlocked,You have unlocked Passive Affix: Rampaging affix in future manastorms
+808,0,19,0,On Death Affix: Aethyric Winds Unlocked,You have unlocked On Death Affix: Aethyric Winds affix in future manastorms
+809,0,23,0,Passive Affix: Tribal Fury Unlocked,You have unlocked Passive Affix: Tribal Fury affix in future manastorms
+810,0,28,0,Passive Affix: Stalwart Unlocked,You have unlocked Passive Affix: Stalwart affix in future manastorms
+811,0,21,0,On Death Affix: Cold Snap Unlocked,You have unlocked On Death Affix: Cold Snap affix in future manastorms
+812,0,33,0,Passive Affix: Wild Magics Unlocked,You have unlocked Passive Affix: Wild Magics affix in future manastorms
+813,0,101,0,On Death Affix: Overwhelming Energy Unlocked,You have unlocked On Death Affix: Overwhelming Energy affix in future manastorms
+814,0,41,0,Passive Affix: Reflecting Unlocked,You have unlocked Passive Affix: Reflecting affix in future manastorms
+815,0,39,0,On Death Affix: Runes of Power Unlocked,You have unlocked On Death Affix: Runes of Power affix in future manastorms
+816,0,61,0,On Death Affix: Bone Storm Unlocked,You have unlocked On Death Affix: Bone Storm affix in future manastorms
+817,2,11,0,On Death Affix: Mana Bomb Unlocked,You have unlocked On Death Affix: Mana Bomb affix in future manastorms
+818,2,13,0,On Death Affix: Lightning Rod Unlocked,You have unlocked On Death Affix: Lightning Rod affix in future manastorms
+819,2,26,0,On Death Affix: Vortex Unlocked,You have unlocked On Death Affix: Vortex affix in future manastorms
+820,2,16,0,Passive Affix: Rampaging Unlocked,You have unlocked Passive Affix: Rampaging affix in future manastorms
+821,2,19,0,On Death Affix: Aethyric Winds Unlocked,You have unlocked On Death Affix: Aethyric Winds affix in future manastorms
+822,2,23,0,Passive Affix: Tribal Fury Unlocked,You have unlocked Passive Affix: Tribal Fury affix in future manastorms
+823,2,28,0,Passive Affix: Stalwart Unlocked,You have unlocked Passive Affix: Stalwart affix in future manastorms
+824,2,21,0,On Death Affix: Cold Snap Unlocked,You have unlocked On Death Affix: Cold Snap affix in future manastorms
+825,2,33,0,Passive Affix: Wild Magics Unlocked,You have unlocked Passive Affix: Wild Magics affix in future manastorms
+826,2,101,0,On Death Affix: Overwhelming Energy Unlocked,You have unlocked On Death Affix: Overwhelming Energy affix in future manastorms
+827,2,41,0,Passive Affix: Reflecting Unlocked,You have unlocked Passive Affix: Reflecting affix in future manastorms
+828,2,39,0,On Death Affix: Runes of Power Unlocked,You have unlocked On Death Affix: Runes of Power affix in future manastorms
+829,2,61,0,On Death Affix: Bone Storm Unlocked,You have unlocked On Death Affix: Bone Storm affix in future manastorms
+830,0,31,0,On Death Affix: Fungal Unlocked,You have unlocked On Death Affix: Fungal affix in future manastorms
+831,2,31,0,On Death Affix: Fungal Unlocked,You have unlocked On Death Affix: Fungal affix in future manastorms
+1002,0,120,173,Unlocked Rezira's Realm!,You have unlocked Rezira's Realms in your next Manastorm!
+1003,2,120,173,Unlocked Rezira's Realm!,You have unlocked Rezira's Realms in your next Manastorm!
+1005,0,79,173,Demon's Tears Unlocked,You have unlocked the Demon's Tears map and creatures in future Manastorms!
+1006,2,79,173,Demon's Tears Unlocked,You have unlocked the Demon's Tears map and creatures in future Manastorms!
+1007,0,121,173,Rezira the Seers Unlocked,You have unlocked the Rezira the Seers map and creatures in future Manastorms!
+1008,2,121,173,Rezira the Seers Unlocked,You have unlocked the Rezira the Seers map and creatures in future Manastorms!
+1011,0,140,173,Unlocked The Path of Many Faces!,You have unlocked The Path of Many Faces in your next Manastorm!
+1012,2,140,173,Unlocked The Path of Many Faces!,You have unlocked The Path of Many faces in your next Manastorm!
+1013,0,141,173,The Path of Many Faces Unlocked,You have unlocked the Path of Many Faces map and creatures in future Manastorms!
+1014,2,141,173,The Path of Many Faces Unlocked,You have unlocked the Path of Many Faces map and creatures in future Manastorms!
+1017,0,150,173,Unlocked The Devourers Den!,You have unlocked The Devourers Den in your next Manastorm!
+1018,2,150,173,Unlocked The Devourers Den!,You have unlocked The Devourers Den in your next Manastorm!
+1021,2,151,173,Devourer's Den Unlocked,You have unlocked the Devourer's Den map and creatures in future Manastorms!
+1022,0,151,173,Devourer's Den Unlocked,You have unlocked the Devourer's Den map and creatures in future Manastorms!
+1023,0,170,173,Unlocked The Pit!,You have unlocked The Pit in your next Manastorm!
+1024,2,170,173,Unlocked The Pit!,You have unlocked The Pit in your next Manastorm!
+1027,2,171,173,The Pit Unlocked,You have unlocked the Pit map and creatures in future Manastorms!
+1028,0,171,173,The Pit Unlocked,You have unlocked the Pit map and creatures in future Manastorms!
+1100,0,62,0,Unlocked Elemental Plateau!,You have unlocked Elemental Plateau in your next Manastorm!
+1101,2,62,0,Unlocked Elemental Plateau!,You have unlocked Elemental Plateau in your next Manastorm!
+1102,0,63,0,Elemental Plateau Unlocked,You have unlocked the Elemental Plateau map and creatures in future Manastorms!
+1103,2,63,0,Elemental Plateau Unlocked,You have unlocked the Elemental Plateau map and creatures in future Manastorms!
+1106,0,58,0,Unlocked the Dead Mire!,You have unlocked The Dead Mire in your next Manastorm!
+1107,2,58,0,Unlocked the Dead Mire!,You have unlocked The Dead Mire randomized creatures in future Manastorms!
+1110,0,59,0,Dead Mire Unlocked,You have unlocked the Dead Mire map and creatures in future Manastorms!
+1111,2,59,0,Dead Mire Unlocked,You have unlocked the Dead Mire map and creatures in future Manastorms!
+1121,0,42,173,Path of Glory Unlocked,You have unlocked the Path of Glory map and creatures in future Manastorms!
+1124,2,42,173,Path of Glory Unlocked,You have unlocked the Path of Glory map and creatures in future Manastorms!
+1126,0,68,0,Unlocked Ata'mal Terrace!,You have unlocked Ata'mal Terrace in your next Manastorm!
+1127,0,69,0,Ata'mal Terrace Unlocked,You have unlocked the Ata'mal Terrace map and creatures in future Manastorms!
+1129,2,68,0,Unlocked Ata'mal Terrace!,You have unlocked Ata'mal Terrace in your next Manastorm!
+1130,2,69,0,Ata'mal Terrace Unlocked,You have unlocked the Ata'mal Terrace map and creatures in future Manastorms!
+1132,0,72,0,Unlocked Ruins of Karabor!,You have unlocked Ruins of Karabor in your next Manastorm!
+1133,0,73,0,Ruins of Karabor Unlocked,You have unlocked the Ruins of Karabor map and creatures in future Manastorms!
+1135,2,72,0,Unlocked Ruins of Karabor!,You have unlocked Ruins of Karabor in your next Manastorm!
+1136,2,73,0,Ruins of Karabor Unlocked,You have unlocked the Ruins of Karabor map and creatures in future Manastorms!
+1138,0,52,0,Unlocked Pools of Aggonar!,You have unlocked Pools of Aggonar in your next Manastorm!
+1139,0,53,0,Pools of Aggonar Unlocked,You have unlocked the Pools of Aggonar map and creatures in future Manastorms!
+1141,2,52,0,Unlocked Pools of Aggonar!,You have unlocked Pools of Aggonar in your next Manastorm!
+1142,2,53,0,Pools of Aggonar Unlocked,You have unlocked the Pools of Aggonar map and creatures in future Manastorms!
+1201,2,109,0,Nyx and Nocturna Defeated!,You have unlocked Baradin Hold Arena in future Manastorms!
+1203,2,123,0,Unlocked Leafborn Sentinel!,You have unlocked Ashamane's Fall in your next Manastorm!
+1204,2,124,0,Unlocked Leafborn Sentinel in Future Manastorms!,You have unlocked Ashamane's Fall in future Manastorms!
+1205,2,119,0,Xyron the Corruptor Unlocked,You have unlocked Xyron the Corruptor and Blackrook Hold in future Manastorms!
+1206,2,129,0,Mechatron Defeated!,Unlocked Tinkertech Showdown in future Manastorms!

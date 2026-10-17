@@ -1,0 +1,440 @@
+{
+  "schema": 1,
+  "name": "Upper Blackrock Spire: a wipe during the Gyth phase lets the stadium event start again",
+  "contract": "When the group wipes while Rend still rides Gyth, the encounter resets: Gyth leaves the arena and Warchief Rend Blackhand (10429) returns to the balcony above Blackrock Stadium within seconds, so walking into the stadium again (area trigger 2026) starts a new round of waves. Rend is not left absent until his two-hour respawn.",
+  "timeout_ms": 600000,
+  "location": {
+    "map": 229,
+    "x": 153.763,
+    "y": -419.833,
+    "z": 110.472,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Upper Blackrock Spire",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 229
+    },
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Rend waits on the balcony above the stadium",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10429,
+      "equals": 1
+    },
+    {
+      "action": "area_trigger",
+      "label": "Enter Blackrock Stadium",
+      "actor": "hero",
+      "id": 2026
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 229,
+      "x": 195.0,
+      "y": -420.0,
+      "z": 110.6
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10447,
+      "kill": true,
+      "label": "Clear the arena's standing guard"
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "assert",
+      "label": "Wave 1 enters the arena",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10442,
+      "min": 1,
+      "within_ms": 40000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10447,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Wave 2 enters the arena",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10447,
+      "min": 1,
+      "within_ms": 40000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10447,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Wave 3 enters the arena",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10742,
+      "min": 1,
+      "within_ms": 40000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10742,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10447,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Wave 4 enters the arena",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10742,
+      "min": 1,
+      "within_ms": 40000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10742,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10447,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Wave 5 enters the arena",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10742,
+      "min": 1,
+      "within_ms": 40000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10742,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10447,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Wave 6 enters the arena",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10742,
+      "min": 1,
+      "within_ms": 40000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10742,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10447,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10447,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 10442,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Gyth enters the arena after the sixth wave",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10339,
+      "min": 1,
+      "within_ms": 150000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Engage Gyth",
+      "actor": "hero",
+      "entry": 10339
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is fighting Gyth",
+      "actor": "hero",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Rend is still mounted, not on the arena floor",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10429,
+      "equals": 0
+    },
+    {
+      "action": "die",
+      "label": "The group wipes",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is dead",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the arena reset after the wipe",
+      "ms": 5000
+    },
+    {
+      "action": "release_spirit",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is back on their feet",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 229,
+      "x": 195.0,
+      "y": -420.0,
+      "z": 110.6,
+      "label": "Look into the arena after the wipe"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Gyth left the arena with the reset",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10339,
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no wave is in the arena yet",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10442,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 229,
+      "x": 153.763,
+      "y": -419.833,
+      "z": 110.472,
+      "label": "Return to the stadium entrance"
+    },
+    {
+      "action": "assert",
+      "label": "Rend is back on the balcony",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10429,
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "area_trigger",
+      "label": "Enter Blackrock Stadium again",
+      "actor": "hero",
+      "id": 2026
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 229,
+      "x": 195.0,
+      "y": -420.0,
+      "z": 110.6
+    },
+    {
+      "action": "assert",
+      "label": "The second attempt's first wave enters the arena",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10442,
+      "min": 1,
+      "within_ms": 40000
+    }
+  ]
+}

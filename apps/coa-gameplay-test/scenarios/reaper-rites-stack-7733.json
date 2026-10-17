@@ -1,0 +1,47 @@
+{
+ "schema": 1,
+ "name": "Reaper: Rites of different stats stack on one target (#7733)",
+ "contract": "Rite of Power (Strength), Rite of Resolve (Stamina) and Rite of Perseverance (resistances) are three different buffs in three exclusive groups, so all three coexist on one target no matter who cast them; single-target and Greater forms of the same stat stay exclusive.",
+ "timeout_ms": 90000,
+ "players": [
+  {
+   "id": "a",
+   "race": 2,
+   "class": 30,
+   "level": 60
+  },
+  {
+   "id": "b",
+   "race": 2,
+   "class": 30,
+   "level": 60,
+   "bot": true
+  }
+ ],
+ "steps": [
+  {"action": "wait", "ms": 3000},
+  {"action": "learn", "actor": "a", "spell": 578126},
+  {"action": "learn", "actor": "a", "spell": 800198},
+  {"action": "learn", "actor": "a", "spell": 575839},
+  {"action": "learn", "actor": "a", "spell": 578130},
+  {"action": "learn", "actor": "b", "spell": 800198},
+  {"action": "cast", "actor": "b", "spell": 800198, "target": "a"},
+  {"action": "assert", "metric": "aura", "spell": 800198, "equals": 1, "within_ms": 3000, "actor": "a"},
+  {"action": "cast", "actor": "a", "spell": 578126},
+  {"action": "assert", "metric": "aura", "spell": 578126, "equals": 1, "within_ms": 3000, "actor": "a"},
+  {"action": "assert", "label": "The bot's Rite of Resolve must survive the Reaper's own Rite of Power",
+   "metric": "aura", "spell": 800198, "equals": 1, "actor": "a"},
+  {"action": "cast", "actor": "a", "spell": 575839},
+  {"action": "assert", "metric": "aura", "spell": 575839, "equals": 1, "within_ms": 3000, "actor": "a"},
+  {"action": "assert", "label": "All three Rites coexist on one target",
+   "metric": "aura", "spell": 578126, "equals": 1, "actor": "a"},
+  {"action": "assert", "metric": "aura", "spell": 800198, "equals": 1, "actor": "a"},
+  {"action": "cast", "actor": "a", "spell": 578130},
+  {"action": "assert", "metric": "aura", "spell": 578130, "equals": 1, "within_ms": 3000, "actor": "a"},
+  {"action": "assert", "label": "Greater Rite of Power replaces the single-target Rite of Power",
+   "metric": "aura", "spell": 578126, "equals": 0, "actor": "a"},
+  {"action": "assert", "label": "Other stats are untouched by the Greater Rite",
+   "metric": "aura", "spell": 800198, "equals": 1, "actor": "a"},
+  {"action": "assert", "metric": "aura", "spell": 575839, "equals": 1, "actor": "a"}
+ ]
+}

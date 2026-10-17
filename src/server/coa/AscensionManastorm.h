@@ -4,10 +4,6 @@
 #ifndef ASCENSION_MANASTORM_H
 #define ASCENSION_MANASTORM_H
 
-class WorldSession;
-class WorldPacket;
-
-bool QueueAscensionManastormPacket(WorldSession* session, WorldPacket const& packet);
-void AddAscensionManastormScripts();
+void AddAscensionManastormItemScripts();
 
 #endif

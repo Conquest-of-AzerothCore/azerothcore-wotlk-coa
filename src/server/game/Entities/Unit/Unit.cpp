@@ -1475,6 +1475,8 @@ thread_local bool TriggerLoopLogged = false;
 
 SpellCastResult Unit::CastSpell(SpellCastTargets const& targets, SpellInfo const* spellInfo, CustomSpellValues const* value, TriggerCastFlags triggerFlags, Item* castItem, AuraEffect const* triggeredByAura, ObjectGuid originalCaster)
 {
+    sScriptMgr->ResolveSpellCast(this, spellInfo);
+
     if (!spellInfo)
     {
         LOG_ERROR("entities.unit", "CastSpell: unknown spell by caster {}", GetGUID().ToString());
@@ -4872,6 +4874,10 @@ bool Unit::CanCastSpellWhileMoving(SpellInfo const* info) const
 {
     if (!info)
         return false;
+    // All movement gates must agree on the active Manastorm mixture.
+    // Its aura 313 family differs from CoA class spells such as Elemental Burst.
+    if (HasManastormMovementGrace())
+        return true;
     if (IsPlayer() && getClass() == CLASS_STARCALLER &&
         (info->Id == 801990 || info->Id == 802682 || (HasAura(704772) && !info->IsPositive())))
         return true;
@@ -6060,12 +6066,12 @@ void Unit::RemoveNotOwnSingleTargetAuras()
 
 bool Unit::HasManastormMovementGrace() const
 {
-    // Aura 313 is a private client extension. Only the eight authored Mobility Mixtures
-    // in an authorized scripted instance enable it; unrelated aura-313 class spells do not.
+    // Only the temporary Mobility Mixture auras grant movement grace.
+    // Learned duration upgrades (1300186-1300192) never grant it by themselves.
     Map const* map = FindMap();
     if (!IsPlayer() || !map || !map->IsScriptedPrivateInstance())
         return false;
-    for (uint32 spell : {1300179u, 1300186u, 1300187u, 1300188u, 1300189u, 1300190u, 1300191u, 1300192u})
+    for (uint32 spell = 1300179; spell <= 1300185; ++spell)
         if (HasAura(spell))
             return true;
     return false;

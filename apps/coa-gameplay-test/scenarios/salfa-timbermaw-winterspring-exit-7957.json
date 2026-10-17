@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Salfa stands at the Winterspring exit of Timbermaw Hold",
+  "contract": "\"Speak to Salfa\" (8465), offered by Nafien (15395) at the Felwood entrance of Timbermaw Hold, is turned in to Salfa (11556). Her only spawn (guid 41642) stands at the Winterspring exit, so a character at the position reported in issue 7957 finds exactly one living Salfa within 60 yards, and Nafien at the Felwood entrance.",
+  "timeout_ms": 180000,
+  "location": { "map": 1, "x": 6898.56, "y": -2299.7, "z": 587.764, "o": 0.0 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "set_phase", "actor": "hero", "value": 1 },
+    { "action": "teleport", "actor": "hero", "map": 1, "x": 6898.56, "y": -2299.7, "z": 587.764, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "Salfa at the Winterspring exit", "actor": "hero", "metric": "nearby_creature_count", "entry": 11556, "equals": 1, "within_ms": 10000 },
+    { "action": "teleport", "actor": "hero", "map": 1, "x": 6821.85, "y": -2082.51, "z": 623.27, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "Nafien at the Felwood entrance", "actor": "hero", "metric": "nearby_creature_count", "entry": 15395, "equals": 1, "within_ms": 10000 }
+  ]
+}

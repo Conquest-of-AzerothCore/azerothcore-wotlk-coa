@@ -1,15 +1,22 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionWarcraftRebornMage.h"
 #include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include <algorithm>
+#include <array>
 
 namespace AscensionWarcraftReborn
 {
 namespace
 {
+constexpr uint32 MAGE_LIVING_BOMB = 0x20000;
+constexpr std::array<uint32, 3> WORLD_IN_FLAMES = { 1111108, 1112349, 1112350 };
+constexpr std::array<uint32, 3> FIRE_POWER = { 1111124, 1112378, 1112398 };
+
 class spell_ascension_reborn_magic_absorption : public AuraScript
 {
     PrepareAuraScript(spell_ascension_reborn_magic_absorption);
@@ -43,6 +50,29 @@ class spell_ascension_reborn_magic_absorption : public AuraScript
     }
 };
 }
+}
+
+void ApplyAscensionWarcraftRebornMageContracts(SpellInfo* spellInfo)
+{
+    using namespace AscensionWarcraftReborn;
+    if (!spellInfo)
+        return;
+
+    if (std::find(WORLD_IN_FLAMES.begin(), WORLD_IN_FLAMES.end(), spellInfo->Id) != WORLD_IN_FLAMES.end())
+    {
+        SpellEffectInfo& critChance = spellInfo->Effects[EFFECT_0];
+        if (critChance.ApplyAuraName == SPELL_AURA_ADD_FLAT_MODIFIER && critChance.MiscValue == SPELLMOD_CRITICAL_CHANCE)
+            critChance.SpellClassMask[1] |= MAGE_LIVING_BOMB;
+    }
+
+    if (std::find(FIRE_POWER.begin(), FIRE_POWER.end(), spellInfo->Id) != FIRE_POWER.end())
+    {
+        SpellEffectInfo const& damage = spellInfo->Effects[EFFECT_0];
+        SpellEffectInfo& periodic = spellInfo->Effects[EFFECT_1];
+        if (damage.ApplyAuraName == SPELL_AURA_ADD_PCT_MODIFIER && damage.MiscValue == SPELLMOD_DAMAGE &&
+            periodic.ApplyAuraName == SPELL_AURA_ADD_PCT_MODIFIER && periodic.MiscValue == SPELLMOD_DOT)
+            periodic.BasePoints = damage.BasePoints;
+    }
 }
 
 void AddAscensionWarcraftRebornMageScripts()

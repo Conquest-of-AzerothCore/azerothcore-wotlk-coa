@@ -46,7 +46,7 @@ def main():
                    [compiler, "-std=c++20", "-Wall", "-Wextra", "-Werror", str(cpp), "-o", str(exe)])
         subprocess.run(command, cwd=out, check=True, timeout=120)
         subprocess.run([str(exe)], cwd=out, check=True, timeout=30)
-    print("PASS: appearance/slot/role matching, level and wearable limits, presets, DBC outfits, weapons, "
+    print("PASS: appearance/slot/role matching, level and wearable limits (including bloodforged exclusion), presets, DBC outfits, weapons, "
           "configuration, corpse-only drops, capacity, duplicates and native group loot setup")
 
 

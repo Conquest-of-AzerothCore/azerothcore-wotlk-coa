@@ -2715,6 +2715,11 @@ private:
             GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
             return object ? uint32(object->GetGoState()) : 99;
         }
+        if (metric == "nearby_gameobject_scale")
+        {
+            GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
+            return object ? object->GetObjectScale() : 0.0f;
+        }
         if (metric == "nearby_gameobject_at_client")
         {
             GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
@@ -2823,13 +2828,15 @@ private:
             uint32 const minLevel = step.get<uint32>("min_level", 1);
             uint32 const maxLevel = step.get<uint32>("max_level", 255);
             float const minHomeDistance = step.get<float>("min_home_distance", 0.0f);
+            uint32 const auraSpell = step.get<uint32>("spell", 0);
             return std::count_if(creatures.begin(), creatures.end(),
-                [minLevel, maxLevel, minHomeDistance](Creature* creature)
+                [minLevel, maxLevel, minHomeDistance, auraSpell](Creature* creature)
                 {
                     return creature->IsInWorld() && creature->IsAlive()
                         && creature->GetLevel() >= minLevel && creature->GetLevel() <= maxLevel
                         && (minHomeDistance == 0.0f
-                            || creature->GetExactDist2d(creature->GetHomePosition()) >= minHomeDistance);
+                            || creature->GetExactDist2d(creature->GetHomePosition()) >= minHomeDistance)
+                        && (!auraSpell || creature->HasAura(auraSpell));
                 });
         }
         if (metric == "carried_money")
@@ -4743,6 +4750,11 @@ private:
                 return !creature->IsInWorld() || (action == "attack_nearby") != creature->IsAlive();
             });
             Require(!creatures.empty(), "No matching nearby creature among " + std::to_string(found));
+            if (action == "loot_nearby")
+                creatures.sort([player](Creature* left, Creature* right)
+                {
+                    return player->isAllowedToLoot(left) && !player->isAllowedToLoot(right);
+                });
             WorldPacket packet(action == "attack_nearby" ? CMSG_ATTACKSWING : CMSG_LOOT, 8);
             packet << creatures.front()->GetGUID();
             if (action == "attack_nearby")

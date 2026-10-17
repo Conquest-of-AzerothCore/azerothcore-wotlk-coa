@@ -2,6 +2,7 @@
 
 #include "CoACreatureScaling.h"
 #include "CoACreatureScalingPolicy.h"
+#include "CoADungeonNormal.h"
 #include "AllCreatureScript.h"
 #include "Config.h"
 #include "Creature.h"
@@ -187,14 +188,16 @@ public:
         ScaleDamage(damage, target, attacker);
     }
 
-    void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const*) override
+    void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo) override
     {
-        ScaleDamage(damage, target, attacker);
+        if (!CoADungeonNormal::TunesSpell(attacker, spellInfo))
+            ScaleDamage(damage, target, attacker);
     }
 
-    void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage, SpellInfo const*) override
+    void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage, SpellInfo const* spellInfo) override
     {
-        ScaleDamage(damage, target, attacker);
+        if (!CoADungeonNormal::TunesSpell(attacker, spellInfo))
+            ScaleDamage(damage, target, attacker);
     }
 };
 

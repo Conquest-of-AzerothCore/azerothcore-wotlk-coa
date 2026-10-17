@@ -857,7 +857,7 @@ std::array<SpellEffectInfo::StaticData, TOTAL_SPELL_EFFECTS> SpellEffectInfo::_d
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 171 unknown Ascension effect
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 172 unknown Ascension effect
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 173 SPELL_EFFECT_ASCENSION_REFRESH_AURA
-    {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 174 unknown Ascension effect
+    {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 174 Ascension health-percentage damage
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 175 SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 176 SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS_2
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 177 SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION
@@ -876,7 +876,7 @@ std::array<SpellEffectInfo::StaticData, TOTAL_SPELL_EFFECTS> SpellEffectInfo::_d
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 191 unknown Ascension effect
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 192 unknown Ascension effect
-    {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 193 unknown Ascension effect
+    {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 193 Ascension delayed trigger; DBC supplies targets
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 194 unknown Ascension effect
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 196 unknown Ascension effect
@@ -1590,12 +1590,16 @@ bool SpellInfo::IsAffectedBySpellMod(SpellModifier const* mod) const
 
     if (!mod->mask)
     {
-        auto const named = SpellAffectTargets().find(mod->spellId);
-        if (named != SpellAffectTargets().end())
+        auto const& targets = SpellAffectTargets();
+        auto const named = targets.find(mod->spellId);
+        if (named != targets.end())
         {
             uint32 const firstRank = sSpellMgr->GetFirstSpellInChain(Id);
             return std::any_of(named->second.begin(), named->second.end(), [&](int32 target)
-                { return target < 0 ? uint32(-target) == firstRank : uint32(target) == Id; });
+            {
+                // Widen before negating so even INT32_MIN cannot overflow.
+                return target < 0 ? uint32(-int64(target)) == firstRank : uint32(target) == Id;
+            });
         }
     }
 
@@ -2298,6 +2302,10 @@ SpellSpecificType SpellInfo::GetSpellSpecific() const
 
 SpellSpecificType SpellInfo::LoadSpellSpecific() const
 {
+    // Frogduck Morph Machine keeps its generic gadget family but uses native Polymorph rules.
+    if (Id == 991576 && HasAura(SPELL_AURA_MOD_CONFUSE) && HasAura(SPELL_AURA_TRANSFORM))
+        return SPELL_SPECIFIC_MAGE_POLYMORPH;
+
     switch (SpellFamilyName)
     {
         case SPELLFAMILY_GENERIC:

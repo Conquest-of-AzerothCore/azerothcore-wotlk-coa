@@ -1806,12 +1806,12 @@ struct SpellCategoryEntry
     uint32 Flags;
 };
 
-// Ascension: the spells each spell modifier applies to, beyond its own family and class mask.
+// Ascension: named targets for spell modifiers with an empty class mask.
 struct SpellAffectEntry
 {
     uint32 ID;                                              // 0
     uint32 ModifierSpellID;                                 // 1
-    uint32 AffectedSpellID;                                 // 2
+    int32 AffectedSpellID;                                  // 2: negative means all ranks of the root
 };
 
 struct SpellDifficultyEntry

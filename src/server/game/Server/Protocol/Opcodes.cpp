@@ -1473,8 +1473,14 @@ void OpcodeTable::Initialize()
     {
         if (_internalTableClient[i])
             continue;
+        // Native Manastorm gameplay runs on the world thread after login.
+        // The compatibility early hook can still route these to the donor when
+        // the SQL-backed module is disabled.
+        bool const manastorm = i == 0x651 || i == 0x665 || i == 0x689;
         ValidateAndSetClientOpcode<decltype(&WorldSession::Handle_NULL), &WorldSession::Handle_NULL>(
-            static_cast<OpcodeClient>(i), "UNKNOWN_EXTENSION_OPCODE", STATUS_NEVER, PROCESS_INPLACE);
+            static_cast<OpcodeClient>(i), manastorm ? "CMSG_MANASTORM" : "UNKNOWN_EXTENSION_OPCODE",
+            manastorm ? STATUS_LOGGEDIN : STATUS_NEVER,
+            manastorm ? PROCESS_THREADUNSAFE : PROCESS_INPLACE);
     }
 
 #undef DEFINE_HANDLER

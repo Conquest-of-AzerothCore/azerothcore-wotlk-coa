@@ -33,6 +33,7 @@ class Player;
 class Unit;
 class ProcEventInfo;
 struct SkillLineAbilityEntry;
+struct SpellEntry;
 
 #define SPELL_RELIC_COOLDOWN      1
 
@@ -774,6 +775,9 @@ public:
         return spellInfo;
     }
     [[nodiscard]] uint32 GetSpellInfoStoreSize() const { return mSpellInfoMap.size(); }
+
+    // Startup-only registration; the store owns the result and refuses to replace existing spells.
+    SpellInfo* RegisterRuntimeSpell(SpellEntry const& entry);
 
     // Talent Additional Set
     [[nodiscard]] bool IsAdditionalTalentSpell(uint32 spellId) const;

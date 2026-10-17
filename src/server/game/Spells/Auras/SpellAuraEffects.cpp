@@ -7022,6 +7022,22 @@ void AuraEffect::HandleObsModPowerAuraTick(Unit* target, Unit* caster) const
         return;
     }
 
+    // EunoiaCore-Underworld Mana Bomb: negative OBS_MOD_POWER (aura 21)
+    // drains max-power percentage. Other negative regen auras stay unchanged.
+    // Handle drains before the full-power regeneration early return.
+    if (GetId() >= 93489 && GetId() <= 93509 && m_amount < 0)
+    {
+        int64 const requested = -int64(m_amount) * int64(target->GetMaxPower(PowerType)) / 100;
+        int32 const drain = int32(std::min<int64>(requested, 2147483647LL));
+        if (!drain)
+            return;
+        int32 const change = target->ModifyPower(PowerType, -drain);
+        uint32 const drained = change < 0 ? uint32(-int64(change)) : 0;
+        SpellPeriodicAuraLogInfo pInfo(this, drained, 0, 0, 0, 0.0f, false);
+        target->SendPeriodicAuraLog(&pInfo);
+        return;
+    }
+
     // don't regen when permanent aura target has full power
     if (GetBase()->IsPermanent() && target->GetPower(PowerType) == target->GetMaxPower(PowerType))
         return;

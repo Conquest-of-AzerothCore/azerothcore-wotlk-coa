@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "name": "Landslide is immune to his own Landslide channel, so it summons no Shardlings and drops the group stun (#7004)",
+  "contract": [
+    "In the supplied Spell.dbc, Landslide 21808 has spell mechanic Stun (12) and is an 8 s self-channel: effect 0",
+    "applies a periodic trigger on the caster that casts Summon Theradrim Shardling 21809 (summons 11783) every",
+    "2 s, and effect 1 stuns enemies within 100 yards. Ascension's combat logs show Landslide's self-hit IMMUNE,",
+    "the players' stun ending after about 0.09 s and no Shardlings. So after the cast and a full 2.5 s periodic",
+    "window, Landslide carries no 21808 aura and is no longer channeling, the nearby player is not stunned and no",
+    "Shardling exists. Without the immunity the channel holds for 8 s, the player stays stunned and the first",
+    "Shardling appears at 2 s. The open-world fixture keeps Maraudon's own Landslide spawn out of the measurement."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 50
+    }
+  ],
+  "creatures": [
+    {
+      "id": "landslide",
+      "owner": "hero",
+      "entry": 12203,
+      "faction": 14,
+      "level": 50,
+      "health": 500000,
+      "reaction": 0,
+      "distance": 5,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Shardling exists before the cast",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 11783,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Landslide channels Landslide on himself",
+      "actor": "landslide",
+      "spell": 21808
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Landslide casts Landslide",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "caster": "landslide",
+      "spell": 21808,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Wait past the first 2 s Shardling summon",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "Landslide carries no Landslide channel aura",
+      "actor": "landslide",
+      "metric": "aura",
+      "spell": 21808,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Landslide is no longer channeling",
+      "actor": "landslide",
+      "metric": "cast_remaining_ms",
+      "spell": 21808,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The player is no longer stunned by Landslide",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 21808,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No Theradrim Shardling was summoned",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 11783,
+      "equals": 0
+    }
+  ]
+}

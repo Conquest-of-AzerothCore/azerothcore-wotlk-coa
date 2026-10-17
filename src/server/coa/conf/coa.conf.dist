@@ -7,6 +7,10 @@
 # Enable the compatibility packet filter.
 CoA.Enable = 1
 
+# One press of /s .rotation attempts one learned attack or heal on the selected target.
+# Uses CoA specialization priorities with a basic fallback for other builds.
+CoA.RotationAssist.Enable = 1
+
 # Maximum crafted-item upgrade steps: 0 disables upgrade kits, 1 allows Refined,
 # 2 allows Superior, and 3 allows Masterwork. Default: 2. Values are clamped to 0-3.
 # Applies on startup and config reload; existing upgraded items remain unchanged.
@@ -340,7 +344,8 @@ PvpPower.Enable = 0
 #    Bloodforged.Enable
 #        Description: Adds one independent Bloodforged roll to eligible open-world creature corpses
 #                     for High-Risk players from level 15, drawn from the reviewed catalogue in
-#                     coa_bloodforged_catalogue. Requires PvpPower.Enable.
+#                     coa_bloodforged_catalogue. The item and rate band follow the player's level;
+#                     creatures grey to the player give no roll. Requires PvpPower.Enable.
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
@@ -476,6 +481,33 @@ Ascension.CallboardCache.GoldMax = 15
 #        Default:     1
 
 CoA.DungeonTuning.Enable = 1
+
+#
+#    CoA.DungeonNormal.Enable
+#        Description: Normal tuning of the Ascension boss kits in 5-man dungeons. The kit spells listed
+#                     in coa_dungeon_normal_spell_damage deal Ascension's Normal rank damage (casters
+#                     below level 50) or the Heroic damage / 1.66 * 0.85, without the dungeon creature
+#                     damage scaling, and their repeat timers run longer.
+#        Default:     1
+
+CoA.DungeonNormal.Enable = 1
+
+#
+#    CoA.DungeonNormal.RepeatFactor
+#        Description: How much longer a boss kit spell takes to come back on Normal (1.1 = 10% longer).
+#        Default:     1.1
+
+CoA.DungeonNormal.RepeatFactor = 1.1
+
+#
+#    CoA.DungeonNormal.AreaHitCapPct
+#    CoA.DungeonNormal.TargetHitCapPct
+#        Description: On Normal no single hit of a boss kit spell deals more than this share of the
+#                     player's maximum health: area spells / single target spells. 0 turns a cap off.
+#        Default:     25, 40
+
+CoA.DungeonNormal.AreaHitCapPct = 25
+CoA.DungeonNormal.TargetHitCapPct = 40
 
 #
 #    CoA.TestZoneBonus.AnnounceIntervalMinutes

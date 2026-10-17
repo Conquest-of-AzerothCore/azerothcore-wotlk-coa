@@ -45,8 +45,10 @@ void AddSC_AscensionTreeOfLife();
 void AddSC_CoALfgStartPoint();
 void AddSC_CoABossProbe();
 void AddSC_CoADungeonSpellDamage();
+void AddSC_CoAGameObjectScale();
 void AddSC_CoACreatureScaling();
 void AddSC_CoADungeonBossKit();
+void AddSC_CoADungeonNormal();
 void AddSC_CoADungeonCompletion();
 void AddSC_CoADungeonSpoils();
 void AddSC_CoADungeonTuning();
@@ -65,6 +67,7 @@ void AddAscensionScalingBaseScripts();
 void AddCoABugReportScripts();
 void AddAscensionArenaQueueScripts();
 void AddCoAPlayerTicketScripts();
+void AddCoARotationAssistScripts();
 void AddAscensionWildcardScripts();
 void AddSC_AscensionWildcardRecuperate();
 void AddSC_AscensionWildcardArcane();
@@ -371,7 +374,7 @@ void AddCoAScripts()
 {
     AddAscensionStockCoefficientScripts();
     AddAscensionScalingBaseScripts();
-    AddAscensionManastormScripts();
+    AddAscensionManastormItemScripts();
     AddSC_AscensionReaperDirge();
     AddAscensionTinkerOverloadScripts();
     AddAscensionCompatScripts();
@@ -654,6 +657,7 @@ void AddCoAScripts()
     AddCoABugReportScripts();
     AddAscensionArenaQueueScripts();
     AddCoAPlayerTicketScripts();
+    AddCoARotationAssistScripts();
     AddAscensionWildcardScripts();
     AddSC_AscensionWildcardRecuperate();
     AddSC_AscensionWildcardArcane();
@@ -712,8 +716,10 @@ void AddCoAScripts()
     AddSC_CoALfgStartPoint();
     AddSC_CoABossProbe();
     AddSC_CoADungeonSpellDamage();
+    AddSC_CoAGameObjectScale();
     AddSC_CoACreatureScaling();
     AddSC_CoADungeonBossKit();
+    AddSC_CoADungeonNormal();
     AddSC_CoADungeonCompletion();
     AddSC_CoADungeonSpoils();
     AddSC_CoADungeonTuning();

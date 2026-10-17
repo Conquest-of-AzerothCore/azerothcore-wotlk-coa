@@ -203,8 +203,7 @@ public:
         if (!eligibleOwner)
             return;
 
-        unsigned targetLevel = std::clamp<unsigned>(
-            std::min<unsigned>(creature->GetLevel(), eligibleOwner->GetLevel()), 15, 60);
+        unsigned targetLevel = std::clamp<unsigned>(eligibleOwner->GetLevel(), 15, 60);
         unsigned quality = RollQuality(urand(0, 9999), current->rates[Band(targetLevel)]);
         if (!quality)
             return;

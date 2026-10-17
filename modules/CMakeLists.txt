@@ -195,6 +195,9 @@ foreach(SOURCE_MODULE ${MODULES_MODULE_LIST})
 
   if(NOT (${MODULE_MODULE_VARIABLE} STREQUAL "disabled"))
     list(APPEND MODULE_LIST__ ${SOURCE_MODULE})
+    if(SOURCE_MODULE STREQUAL "mod-manastorm-endless")
+      target_compile_definitions(database PRIVATE MOD_MANASTORM_ENDLESS)
+    endif()
   endif()
 
   if((${MODULE_MODULE_VARIABLE} STREQUAL "disabled") OR

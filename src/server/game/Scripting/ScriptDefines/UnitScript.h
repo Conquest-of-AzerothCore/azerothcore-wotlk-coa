@@ -53,6 +53,7 @@ enum UnitHook
     UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE,
     UNITHOOK_CAN_UNIT_ATTACK,
     UNITHOOK_SPELL_MAGNET_TARGET,
+    UNITHOOK_RESOLVE_SPELL_CAST,
     UNITHOOK_ON_HEALTH_CHANGED,
     UNITHOOK_END
 };
@@ -69,6 +70,9 @@ protected:
     UnitScript(char const* name, bool addToScripts = true, std::vector<uint16> enabledHooks = std::vector<uint16>());
 
 public:
+    // Resolve metadata before Spell construction, preserving targets, flags and forwarded values.
+    virtual void ResolveSpellCast(Unit* /*caster*/, SpellInfo const*& /*spellInfo*/) { }
+
     // Called when a unit deals healing to another unit
     virtual void OnHeal(Unit* /*healer*/, Unit* /*reciever*/, uint32& /*gain*/) { }
 

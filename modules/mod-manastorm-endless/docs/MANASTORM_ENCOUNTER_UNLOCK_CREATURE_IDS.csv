@@ -1,0 +1,97 @@
+Encounter,Track,UnlockID,Kind,TriggerCompletedDepth,IntroductionDepth,PermanentUnlockDepth,SegmentID,DungeonEncounterID,NativeCreatureID,RuntimeCreatureID,RuntimeIdentitySource,ExportEnabled,ExportTeleportID
+Marisa du'Paige,Normal,1000005,next-run-introduction,5,6,6,526,5018,84270,599,SQL 52 Moonbrook override,0,0
+Marisa du'Paige,Endgame,1000005,next-run-introduction,5,6,6,527,5020,84270,599,SQL 52 Moonbrook override,0,0
+The Witch's Brew,Normal,1000010,next-run-introduction,10,11,11,584,5072,254285,254285,2026-10-07 supplied segment export,0,0
+The Witch's Brew,Endgame,1000010,next-run-introduction,10,11,11,585,5074,254285,254285,2026-10-07 supplied segment export,0,0
+Njernthir,Normal,1000018,next-run-introduction,18,19,19,577,5066,254295,254295,2026-10-07 supplied segment export,0,0
+Njernthir,Endgame,1000018,next-run-introduction,18,19,19,579,5068,254295,254295,2026-10-07 supplied segment export,0,0
+The Twin Soulblades,Normal,1000025,next-run-introduction,25,26,26,576,5084,254294,254294,2026-10-07 supplied segment export,0,0
+The Twin Soulblades,Endgame,1000025,next-run-introduction,25,26,26,578,5086,254294,254294,2026-10-07 supplied segment export,0,0
+Justicar Keltraesa,Normal,1000035,next-run-introduction,35,36,36,540,5021,84271,84271,2026-10-07 supplied segment export,0,0
+Justicar Keltraesa,Endgame,1000035,next-run-introduction,35,36,36,541,5023,84271,84271,2026-10-07 supplied segment export,0,0
+Manaclaw,Normal,1000038,next-run-introduction,38,39,39,411,5012,83859,10663,2026-10-07 supplied segment export,1,2041
+Manaclaw,Endgame,1000038,next-run-introduction,38,39,39,476,5014,83859,83859,2026-10-07 supplied segment export,0,2041
+Geolord Vek,Normal,1000048,next-run-introduction,48,49,49,580,5069,254272,254272,2026-10-07 supplied segment export,0,0
+Geolord Vek,Endgame,1000048,next-run-introduction,48,49,49,581,5071,254272,254272,2026-10-07 supplied segment export,0,0
+Raijuu,Normal,1000062,next-run-introduction,62,63,63,822,1006,550776,550776,2026-10-07 supplied segment export,0,0
+Raijuu,Endgame,1000062,next-run-introduction,62,63,63,933,1254,550776,550776,2026-10-07 supplied segment export,0,0
+Muckrake,Normal,1000065,next-run-introduction,65,66,66,407,4994,83261,83261,2026-10-07 supplied segment export,0,0
+Muckrake,Endgame,1000065,next-run-introduction,65,66,66,480,4996,83261,83261,2026-10-07 supplied segment export,0,0
+Grol the Destroyer,Normal,1000070,next-run-introduction,70,71,71,409,5000,83617,7665,SQL 55 open-world Grol override,0,0
+Grol the Destroyer,Endgame,1000070,next-run-introduction,70,71,71,478,5002,83617,7665,SQL 55 open-world Grol override,0,0
+Archmage Allistarj,Normal,1000075,next-run-introduction,75,76,76,552,5036,83618,7666,SQL 56 open-world Allistarj override,0,0
+Archmage Allistarj,Endgame,1000075,next-run-introduction,75,76,76,553,5038,83618,7666,SQL 56 open-world Allistarj override,0,0
+Razelikh the Defiler,Normal,1000090,next-run-introduction,90,91,91,542,5030,84272,84272,2026-10-07 supplied segment export,0,0
+Razelikh the Defiler,Endgame,1000090,next-run-introduction,90,91,91,543,5032,84272,84272,2026-10-07 supplied segment export,0,0
+Corestone of Dalaran,Normal,1000100,next-run-introduction,100,101,101,556,5051,254189,254189,2026-10-07 supplied segment export,0,0
+Corestone of Dalaran,Endgame,1000100,next-run-introduction,100,101,101,557,5053,254189,254189,2026-10-07 supplied segment export,0,0
+Solakar Flamewreath,Endgame,1000102,next-run-introduction,102,103,103,668,2277,10264,10264,2026-10-07 supplied segment export,0,0
+Solakar Flamewreath,Normal,1000102,next-run-introduction,102,103,103,669,277,10264,10264,2026-10-07 supplied segment export,0,0
+High Priestess Arlokk,Endgame,1000105,next-run-introduction,105,106,106,600,4283,14515,14515,2026-10-07 supplied segment export,0,0
+Nyx and Nocturna,Endgame,1000108,next-run-introduction,108,109,109,949,9009,662953,662953,2026-10-07 supplied segment export,0,0
+High Priestess Mar'li,Endgame,1000115,next-run-introduction,115,116,116,601,4278,14510,14510,2026-10-07 supplied segment export,0,0
+Rezira the Seer,Normal,1000120,next-run-introduction,120,121,121,815,999,84286,84286,2026-10-07 supplied segment export,0,0
+Rezira the Seer,Endgame,1000120,next-run-introduction,120,121,121,926,1250,84286,84286,2026-10-07 supplied segment export,0,0
+Leafborn Sentinel,Endgame,1000123,next-run-introduction,123,124,124,950,9006,662954,662954,2026-10-07 supplied segment export,0,0
+Mechatron,Endgame,1000128,next-run-introduction,128,129,129,951,9013,663012,663012,2026-10-07 supplied segment export,0,0
+High Priest Thekal,Endgame,1000130,next-run-introduction,130,131,131,602,4281,14509,14509,2026-10-07 supplied segment export,0,0
+The Many-Faced Devourer,Normal,1000140,next-run-introduction,140,141,141,816,1000,84281,84281,2026-10-07 supplied segment export,0,0
+The Many-Faced Devourer,Endgame,1000140,next-run-introduction,140,141,141,927,1251,84281,84281,2026-10-07 supplied segment export,0,0
+Pit Lord Vilemus,Normal,1000170,next-run-introduction,170,171,171,818,1002,84300,84300,2026-10-07 supplied segment export,0,0
+Pit Lord Vilemus,Endgame,1000170,next-run-introduction,170,171,171,929,1253,84300,84300,2026-10-07 supplied segment export,0,0
+Jin'do the Hexxer,Endgame,1000175,next-run-introduction,175,176,176,605,4284,11380,11380,2026-10-07 supplied segment export,0,0
+High Priestess Jeklik,Endgame,1000190,next-run-introduction,190,191,191,606,4277,14517,14517,2026-10-07 supplied segment export,0,0
+Hakkar,Endgame,1000205,next-run-introduction,205,206,206,607,4285,14834,14834,2026-10-07 supplied segment export,0,0
+Gehennas,Endgame,1000220,next-run-introduction,220,221,221,610,4223,12259,12259,2026-10-07 supplied segment export,1,2075
+Lucifron,Endgame,1000235,next-run-introduction,235,236,236,608,4221,12118,12118,2026-10-07 supplied segment export,1,2073
+Magmadar,Endgame,1000250,next-run-introduction,250,251,251,609,4222,11982,11982,2026-10-07 supplied segment export,1,2074
+Garr,Endgame,1000265,next-run-introduction,265,266,266,611,4224,12057,12057,2026-10-07 supplied segment export,1,2076
+Shazzrah,Endgame,1000280,next-run-introduction,280,281,281,612,4225,12264,12264,2026-10-07 supplied segment export,1,2077
+Baron Geddon,Endgame,1000295,next-run-introduction,295,296,296,613,4226,12056,12056,2026-10-07 supplied segment export,1,2078
+Sulfuron Harbinger,Endgame,1000310,next-run-introduction,310,311,311,614,4227,12098,12098,2026-10-07 supplied segment export,1,2079
+Golemagg the Incinerator,Endgame,1000335,next-run-introduction,335,336,336,615,4228,11988,11988,2026-10-07 supplied segment export,1,2080
+Ragnaros,Endgame,1000350,next-run-introduction,350,351,351,670,4229,11502,11502,2026-10-07 supplied segment export,1,2081
+Onyxia,Endgame,1000365,next-run-introduction,365,366,366,707,4244,10184,10184,2026-10-07 supplied segment export,1,2072
+Razorgore the Untamed,Endgame,1000410,next-run-introduction,410,411,411,616,4199,12435,12435,2026-10-07 supplied segment export,0,0
+Vaelastrasz the Corrupt,Endgame,1000425,next-run-introduction,425,426,426,617,4200,13020,13020,2026-10-07 supplied segment export,0,0
+Broodlord Lashlayer,Endgame,1000440,next-run-introduction,440,441,441,618,4201,12017,12017,2026-10-07 supplied segment export,0,0
+Firemaw,Endgame,1000455,next-run-introduction,455,456,456,619,4202,11983,11983,2026-10-07 supplied segment export,0,0
+Chromaggus,Endgame,1000470,next-run-introduction,470,471,471,620,4203,14020,14020,2026-10-07 supplied segment export,0,0
+Kurinnaxx,Endgame,1000510,next-run-introduction,510,511,511,621,4254,15348,15348,2026-10-07 supplied segment export,0,0
+General Rajaxx,Endgame,1000525,next-run-introduction,525,526,526,622,4255,15341,15341,2026-10-07 supplied segment export,0,0
+Buru the Gorger,Endgame,1000540,next-run-introduction,540,541,541,623,4257,15370,15370,2026-10-07 supplied segment export,0,0
+Ayamiss the Hunter,Endgame,1000555,next-run-introduction,555,556,556,624,4258,15369,15369,2026-10-07 supplied segment export,0,0
+Moam,Endgame,1000570,next-run-introduction,570,571,571,626,4256,15340,15340,2026-10-07 supplied segment export,0,0
+Ossirian the Unscarred,Endgame,1000595,next-run-introduction,595,596,596,625,4259,15339,15339,2026-10-07 supplied segment export,0,0
+The Prophet Skeram,Endgame,1000610,next-run-introduction,610,611,611,627,4245,15263,15263,2026-10-07 supplied segment export,0,0
+Battleguard Sartura,Endgame,1000625,next-run-introduction,625,626,626,628,4247,15516,15516,2026-10-07 supplied segment export,0,0
+Fankriss the Unyielding,Endgame,1000640,next-run-introduction,640,641,641,629,4248,15510,15510,2026-10-07 supplied segment export,0,0
+Viscidus,Endgame,1000655,next-run-introduction,655,656,656,632,4249,15299,15299,2026-10-07 supplied segment export,0,0
+Princess Huhuran,Endgame,1000670,next-run-introduction,670,671,671,631,4250,15509,15509,2026-10-07 supplied segment export,0,0
+Twin Emperors,Endgame,1000685,next-run-introduction,685,686,686,634,4251,15275,15275,2026-10-07 supplied segment export,0,0
+Ouro,Endgame,1000700,next-run-introduction,700,701,701,633,4252,15517,15517,2026-10-07 supplied segment export,0,0
+C'thun,Endgame,1000725,next-run-introduction,725,726,726,635,4253,15727,15727,2026-10-07 supplied segment export,0,0
+Grand Widow Faerlina,Endgame,1000755,next-run-introduction,755,756,756,641,4231,15953,15953,2026-10-07 supplied segment export,0,0
+Maexxna,Endgame,1000770,next-run-introduction,770,771,771,642,4232,15952,15952,2026-10-07 supplied segment export,0,0
+Noth the Plaguebringer,Endgame,1000785,next-run-introduction,785,786,786,643,4233,15954,15954,2026-10-07 supplied segment export,0,0
+Heigan the Unclean,Endgame,1000800,next-run-introduction,800,801,801,644,4234,15936,15936,2026-10-07 supplied segment export,0,0
+Loatheb,Endgame,1000815,next-run-introduction,815,816,816,645,4235,16011,16011,2026-10-07 supplied segment export,0,0
+Patchwerk,Endgame,1000830,next-run-introduction,830,831,831,636,4238,16028,16028,2026-10-07 supplied segment export,0,0
+Grobbulus,Endgame,1000845,next-run-introduction,845,846,846,637,4239,15931,15931,2026-10-07 supplied segment export,0,0
+Gluth,Endgame,1000860,next-run-introduction,860,861,861,638,4240,15932,15932,2026-10-07 supplied segment export,0,0
+Thaddius,Endgame,1000875,next-run-introduction,875,876,876,639,4241,15928,15928,2026-10-07 supplied segment export,0,0
+Instructor Razuvious,Endgame,1000890,next-run-introduction,890,891,891,646,4236,16061,16061,2026-10-07 supplied segment export,0,0
+Gothik the Harvester,Endgame,1000905,next-run-introduction,905,906,906,647,4237,16060,16060,2026-10-07 supplied segment export,0,0
+Sapphiron,Endgame,1000920,next-run-introduction,920,921,921,648,4242,15989,15989,2026-10-07 supplied segment export,0,0
+Kel'Thuzad,Endgame,1000945,next-run-introduction,945,946,946,649,4243,15990,15990,2026-10-07 supplied segment export,0,0
+Archmage Adeline,Normal,2000265,direct,8600,,8600,563,5054,103151,103151,2026-10-07 supplied segment export,0,0
+Archmage Adeline,Endgame,2000276,direct,8600,,8600,562,5056,103151,103151,2026-10-07 supplied segment export,0,0
+Bloodlord Mandokir,Endgame,2000280,direct,146,,146,604,4279,11382,11382,2026-10-07 supplied segment export,0,0
+Anub'Rekhan,Endgame,2000311,direct,741,,741,640,4230,15956,15956,2026-10-07 supplied segment export,0,0
+General Drakkisath,Normal,2000736,direct,104,,104,658,280,10363,10363,2026-10-07 supplied segment export,1,2100
+General Drakkisath,Endgame,2000737,direct,104,,104,659,2280,10363,10363,2026-10-07 supplied segment export,1,2100
+Warchief Rend Blackhand,Normal,2000740,direct,395,,395,663,278,10429,10429,2026-10-07 supplied segment export,1,2101
+Warchief Rend Blackhand,Endgame,2000741,direct,380,,380,662,2278,10429,10429,2026-10-07 supplied segment export,1,2101
+Xyron the Corruptor,Endgame,2001205,direct,119,,119,948,9003,662963,662963,2026-10-07 supplied segment export,0,0
+Lady Sevine,Normal,1000055,next-run-introduction,55,56,56,554,5045,83619,83619,2026-10-07 supplied segment export,0,0
+Lady Sevine,Endgame,1000055,next-run-introduction,55,56,56,555,5047,83619,83619,2026-10-07 supplied segment export,0,0

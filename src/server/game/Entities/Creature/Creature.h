@@ -26,6 +26,7 @@
 #include "Unit.h"
 #include <algorithm>
 #include <list>
+#include <memory>
 
 class SpellInfo;
 
@@ -256,7 +257,8 @@ public:
     void setDeathState(DeathState s, bool despawn = false) override;    // override virtual Unit::setDeathState
 
     bool LoadFromDB(ObjectGuid::LowType guid, Map* map, bool allowDuplicate = false) { return LoadCreatureFromDB(guid, map, false, allowDuplicate); }
-    bool LoadCreatureFromDB(ObjectGuid::LowType guid, Map* map, bool addToMap = true, bool allowDuplicate = false);
+    bool LoadCreatureFromDB(ObjectGuid::LowType guid, Map* map, bool addToMap = true, bool allowDuplicate = false,
+        CreatureData const* privateData = nullptr);
     [[nodiscard]] bool IsRespawnCompatibilityMode() const { return _respawnCompatibilityMode; }
     void SaveToDB();
 
@@ -560,6 +562,7 @@ protected:
 
     CreatureTemplate const* m_creatureInfo;   // in difficulty mode > 0 can different from sObjectMgr->GetCreatureTemplate(GetEntry())
     CreatureData const* m_creatureData;
+    std::unique_ptr<CreatureData> m_privateCreatureData;
 
     float m_detectionDistance;
     uint16 m_LootMode;  // bitmask, default LOOT_MODE_DEFAULT, determines what loot will be lootable

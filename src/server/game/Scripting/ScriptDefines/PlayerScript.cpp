@@ -1060,6 +1060,12 @@ void ScriptMgr::OnPlayerNormalizeActionButtonSpell(Player* player, uint32& actio
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_NORMALIZE_ACTION_BUTTON_SPELL, script->OnPlayerNormalizeActionButtonSpell(player, action, loading));
 }
 
+void ScriptMgr::OnPlayerSendSpellChargeStates(Player const* player)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_SEND_SPELL_CHARGE_STATES,
+        script->OnPlayerSendSpellChargeStates(player));
+}
+
 void ScriptMgr::OnPlayerTemporarySpellReplacementNotice(Player* player, uint32 previous, uint32 replacement,
     bool sent)
 {
