@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "name": "Ranger waterskin releases its potion-pool cooldown with a cooldown event (#8006)",
+  "contract": "Waterskins declare item spell category 5004, whose SpellCategory flag 0x04 makes the client hold the item and the whole 5004 pool until SMSG_COOLDOWN_EVENT (309). Using a waterskin out of combat must therefore send SMSG_COOLDOWN_EVENT for its spell, exactly as Minor Healing Potion 118 (spell 439) does, and still apply the shared ~60s server cooldown to the waterskin and potion spells. Without the event the client keeps the waterskin locked until relog.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "potion",
+      "race": 1,
+      "class": 21,
+      "level": 20
+    },
+    {
+      "id": "skin",
+      "race": 1,
+      "class": 21,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "settle",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "potion",
+      "item": 118,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "skin",
+      "item": 10521,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "potion",
+      "item": 118,
+      "spell": 439
+    },
+    {
+      "action": "assert",
+      "label": "REF: potion sends SMSG_COOLDOWN_EVENT for 439 out of combat",
+      "actor": "potion",
+      "metric": "server_packets",
+      "opcode": 309,
+      "row": 439,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "skin",
+      "item": 10521,
+      "spell": 800269
+    },
+    {
+      "action": "assert",
+      "label": "FIX: waterskin sends SMSG_COOLDOWN_EVENT for 800269 out of combat",
+      "actor": "skin",
+      "metric": "server_packets",
+      "opcode": 309,
+      "row": 800269,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "POOL: waterskin spell 800269 is on the shared cooldown",
+      "actor": "skin",
+      "metric": "cooldown_ms",
+      "spell": 800269,
+      "min": 55000,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "POOL: potion spell 439 is on the shared cooldown",
+      "actor": "skin",
+      "metric": "cooldown_ms",
+      "spell": 439,
+      "min": 55000,
+      "within_ms": 3000
+    }
+  ]
+}

@@ -11566,10 +11566,6 @@ uint32 Player::GetMaxPersonalArenaRatingRequirement(uint32 minarenaslot) const
     return max_personal_rating;
 }
 
-// Item spell category shared by potions and potion-like consumables (ranger waterskins declare the
-// same category and cooldown as classic potions). The client enforces this pool across spell families.
-static constexpr uint32 SPELL_CATEGORY_SHARED_POTION_COOLDOWN = 5004;
-
 void Player::AddSpellAndCategoryCooldowns(SpellInfo const* spellInfo, uint32 itemId, Spell* spell, bool infinityCooldown)
 {
     if (spell && !itemId && !infinityCooldown && spellInfo->MaxCharges)
