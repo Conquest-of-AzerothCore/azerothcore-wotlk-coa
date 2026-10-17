@@ -229,7 +229,7 @@ namespace
     /// These exclusions are not optional: a creature that belongs to somebody - a pet, a guardian, a
     /// summon, a totem, a charmed unit - must never be re-levelled, and neither must a trigger, a
     /// critter or a non-combat pet, which are scenery with a health bar. A world boss is authored for a
-    /// raid at its level, and a creature that serves (any npcflag) or cannot be fought keeps its level
+    /// raid at its level, and a creature that serves (any npcflag but gossip) or cannot be fought keeps its level
     /// for everyone. Those two are read from the creature's spawn and template rather than from its
     /// live flags, which scripts toggle during events: a client caches the level it was told, so the
     /// view must not appear and vanish with them.
@@ -273,7 +273,7 @@ namespace
         uint32 unitFlags = 0;
         uint32 dynamicFlags = 0;
         ObjectMgr::ChooseCreatureFlags(info, npcFlags, unitFlags, dynamicFlags, creature->GetCreatureData());
-        return !npcFlags &&
+        return !(npcFlags & ~UNIT_NPC_FLAG_GOSSIP) &&
                !(unitFlags & (UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC));
     }
 
