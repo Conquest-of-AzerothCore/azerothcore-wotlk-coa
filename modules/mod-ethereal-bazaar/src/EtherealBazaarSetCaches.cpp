@@ -21,19 +21,20 @@
 #include "Player.h"
 #include "ScriptMgr.h"
 
+#include <algorithm>
 #include <unordered_map>
 #include <vector>
 
 namespace
 {
-    std::unordered_map<uint32, std::vector<uint32>> g_setCaches;
+    std::unordered_map<uint32, std::vector<std::pair<uint32, uint32>>> g_setCaches;
 
     void LoadSetCaches()
     {
         g_setCaches.clear();
 
         QueryResult result = WorldDatabase.Query(
-            "SELECT cache_item, member_item FROM ethereal_bazaar_set_cache ORDER BY cache_item, idx");
+            "SELECT cache_item, member_item, count FROM ethereal_bazaar_set_cache ORDER BY cache_item, idx");
         if (!result)
         {
             LOG_WARN("module.bazaar", "Ethereal Bazaar: no set cache contents defined.");
@@ -46,13 +47,14 @@ namespace
             Field* f = result->Fetch();
             uint32 const cache = f[0].Get<uint32>();
             uint32 const member = f[1].Get<uint32>();
+            uint32 const count = std::max<uint32>(1, f[2].Get<uint8>());
 
             if (!sObjectMgr->GetItemTemplate(member))
             {
                 ++skipped;
                 continue;
             }
-            g_setCaches[cache].push_back(member);
+            g_setCaches[cache].emplace_back(member, count);
         } while (result->NextRow());
 
         std::size_t total = 0;
@@ -82,10 +84,10 @@ public:
         // nine-piece set into two free slots and losing seven of them would be
         // the kind of bug a player never forgives.
         ItemPosCountVec dest;
-        for (uint32 member : it->second)
+        for (auto const& [member, count] : it->second)
         {
             ItemPosCountVec one;
-            InventoryResult const check = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, one, member, 1);
+            InventoryResult const check = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, one, member, count);
             if (check != EQUIP_ERR_OK)
             {
                 player->SendEquipError(check, nullptr, nullptr, member);
@@ -94,13 +96,13 @@ public:
         }
 
         player->DestroyItemCount(item->GetEntry(), 1, true);
-        for (uint32 member : it->second)
+        for (auto const& [member, count] : it->second)
         {
             ItemPosCountVec one;
-            if (player->CanStoreNewItem(NULL_BAG, NULL_SLOT, one, member, 1) != EQUIP_ERR_OK)
+            if (player->CanStoreNewItem(NULL_BAG, NULL_SLOT, one, member, count) != EQUIP_ERR_OK)
                 continue;
             if (Item* given = player->StoreNewItem(one, member, true, Item::GenerateItemRandomPropertyId(member)))
-                player->SendNewItem(given, 1, true, false);
+                player->SendNewItem(given, count, true, false);
         }
 
         LOG_DEBUG("module.bazaar", "Ethereal Bazaar: {} opened set cache {} for {} pieces.",
