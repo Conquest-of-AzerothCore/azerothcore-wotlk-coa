@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "War Falcon presence tooltip shows the per-falcon Wingman reduction instead of 0% (#6220)",
+  "contract": [
+    "War Falcon presence 680278 has two APPLY_AREA_AURA_OWNER effects (dummy and 1 Focus per second) that reach the Ranger and one APPLY_AURA effect, a -2 flat modifier, that stays on the falcon. Its client tooltip ends with '$?s705098[ Reduces damage taken by ${$w3}%.][]'. The Ranger's application never carries effect 2, so SMSG_ASCENSION_AURA_AMOUNT sends 0 for it and the Ranger's buff reads 'Reduces damage taken by 0%' while Wingman 705098 is known. The reduction itself already works: ranger-wingman-war-falcons measures it. Wingman's own authored text uses the static '$680278s3%' for the same per-falcon value, so the presence tooltip is streamed through coa_client_spell_description with '$s3%' and its native description kept verbatim. The captured SMSG_PATCH_SPELL row must carry the corrected text and no longer contain the live effect 3 amount. Rendered client text is outside the harness."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 7000 },
+    { "action": "assert", "label": "The existing description stream is captured", "actor": "ranger", "metric": "server_packet_contains", "opcode": 2346, "row": 500639, "text": "Requires Runeshroud", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "The War Falcon presence row is emitted", "actor": "ranger", "metric": "server_packets", "opcode": 2346, "row": 680278, "min": 1 },
+    { "action": "assert", "label": "The tooltip states the static per-falcon reduction", "actor": "ranger", "metric": "server_packet_contains", "opcode": 2346, "row": 680278, "text": "$?s705098[ Reduces damage taken by $s3%.][]", "equals": 1 },
+    { "action": "assert", "label": "The tooltip no longer reads the Ranger's empty effect 3 amount", "actor": "ranger", "metric": "server_packet_contains", "opcode": 2346, "row": 680278, "text": "${$w3}", "equals": 0 },
+    { "action": "assert", "label": "The Focus line is unchanged", "actor": "ranger", "metric": "server_packet_contains", "opcode": 2346, "row": 680278, "text": "You have a War Falcon active! Generating 1 Focus per second.", "equals": 1 },
+    { "action": "assert", "label": "The native description is kept", "actor": "ranger", "metric": "server_packet_contains", "opcode": 2346, "row": 680278, "text": "Shows how many War Falcons you have active.", "equals": 1 }
+  ]
+}
