@@ -2177,6 +2177,12 @@ public:
     void PrepareScriptedPrivateInstance(uint32 mapId, WorldLocation const& returnLocation,
         ObjectGuid owner = ObjectGuid::Empty, std::set<ObjectGuid> const& members = {}, bool databaseSpawns = false)
     {
+        if (_scriptedPrivateMapId == MAPID_INVALID)
+        {
+            _scriptedPrivateReturnDungeonDifficulty = GetDungeonDifficulty();
+            _scriptedPrivateReturnRaidDifficulty = GetRaidDifficulty();
+        }
+
         _scriptedPrivateDatabaseSpawns = databaseSpawns;
         _scriptedPrivateMapId = mapId;
         _scriptedPrivateInstanceId = 0;
@@ -2920,6 +2926,8 @@ protected:
     uint32 _scriptedPrivateMapId = MAPID_INVALID;
     uint32 _scriptedPrivateInstanceId = 0;
     WorldLocation _scriptedPrivateReturn;
+    Difficulty _scriptedPrivateReturnDungeonDifficulty = DUNGEON_DIFFICULTY_NORMAL;
+    Difficulty _scriptedPrivateReturnRaidDifficulty = RAID_DIFFICULTY_10MAN_NORMAL;
     ObjectGuid _scriptedPrivateOwner;
     std::set<ObjectGuid> _scriptedPrivateMembers;
     void _SaveInstanceTimeRestrictions(CharacterDatabaseTransaction trans);

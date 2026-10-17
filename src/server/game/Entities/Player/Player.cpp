@@ -15885,15 +15885,13 @@ void Player::_SaveCharacter(bool create, CharacterDatabaseTransaction trans)
         stmt->SetData(index++, GetByteValue(PLAYER_BYTES_2, 3));
         stmt->SetData(index++, GetPlayerFlags());
 
-        if (_scriptedPrivateMapId != MAPID_INVALID &&
-            (GetMapId() == _scriptedPrivateMapId
-                || (IsBeingTeleported() &&
-                    GetTeleportDest().GetMapId() == _scriptedPrivateMapId)))
+        if (_scriptedPrivateMapId != MAPID_INVALID)
         {
             // Private-instance IDs are process-local. Crash recovery always starts outside.
             stmt->SetData(index++, uint16(_scriptedPrivateReturn.GetMapId()));
             stmt->SetData(index++, uint32(0));
-            stmt->SetData(index++, uint8(GetDungeonDifficulty()) | uint8(GetRaidDifficulty()) << 4);
+            stmt->SetData(index++, uint8(_scriptedPrivateReturnDungeonDifficulty)
+                | uint8(_scriptedPrivateReturnRaidDifficulty) << 4);
             stmt->SetData(index++, finiteAlways(_scriptedPrivateReturn.GetPositionX()));
             stmt->SetData(index++, finiteAlways(_scriptedPrivateReturn.GetPositionY()));
             stmt->SetData(index++, finiteAlways(_scriptedPrivateReturn.GetPositionZ()));

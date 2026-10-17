@@ -114,6 +114,124 @@ int main() {
         login = function(source, "void ManastormMgr::OnPlayerLogin(")
         self.assertRegex(login, r"if \(!run\)\s*\{\s*RestoreOriginalDifficulties\(player\);")
 
+    def test_private_return_difficulties_survive_stage_changes_and_restart(self):
+        header = (ROOT / "src/server/game/Entities/Player/Player.h").read_text(encoding="utf-8")
+        prepare = header[header.index("    void PrepareScriptedPrivateInstance("):
+                         header.index("    void SetScriptedPrivateInstanceId(")]
+        clear = function(header, "void ClearScriptedPrivateInstance()")
+        fields = header[header.index("    bool _scriptedPrivateDatabaseSpawns"):
+                        header.index("    void _SaveInstanceTimeRestrictions(")]
+        source = (ROOT / "src/server/game/Entities/Player/Player.cpp").read_text(encoding="utf-8")
+        save_start = source.index("        if (_scriptedPrivateMapId != MAPID_INVALID")
+        save = source[save_start:source.index("        else if (!IsBeingTeleported())", save_start)]
+        fixture = r"""
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <set>
+using uint8 = std::uint8_t;
+using uint16 = std::uint16_t;
+using uint32 = std::uint32_t;
+enum Difficulty : uint8 { DUNGEON_DIFFICULTY_NORMAL = 0, RAID_DIFFICULTY_10MAN_NORMAL = 0 };
+constexpr uint32 MAPID_INVALID = 0xFFFFFFFF;
+struct ObjectGuid {
+    unsigned value = 0;
+    static ObjectGuid const Empty;
+    bool IsEmpty() const { return value == 0; }
+    void Clear() { value = 0; }
+    bool operator<(ObjectGuid other) const { return value < other.value; }
+};
+ObjectGuid const ObjectGuid::Empty{};
+struct WorldLocation {
+    uint32 map = 0;
+    uint32 GetMapId() const { return map; }
+    double GetPositionX() const { return 1; }
+    double GetPositionY() const { return 2; }
+    double GetPositionZ() const { return 3; }
+    double GetOrientation() const { return 4; }
+};
+double finiteAlways(double value) { return value; }
+struct Statement {
+    std::array<double, 7> values{};
+    template<class T> void SetData(unsigned index, T value) { values.at(index) = value; }
+};
+struct Player {
+    Difficulty dungeon = Difficulty(0), raid = Difficulty(0);
+    uint32 map = 571;
+    bool teleporting = false;
+    WorldLocation destination;
+    ObjectGuid GetGUID() const { return {7}; }
+    Difficulty GetDungeonDifficulty() const { return dungeon; }
+    Difficulty GetRaidDifficulty() const { return raid; }
+    uint32 GetMapId() const { return map; }
+    bool IsBeingTeleported() const { return teleporting; }
+    WorldLocation const& GetTeleportDest() const { return destination; }
+""" + fields + prepare + clear + r"""
+    std::array<double, 7> SaveReturnState() {
+        Statement statement;
+        Statement* stmt = &statement;
+        uint8 index = 0;
+""" + save + r"""
+        return statement.values;
+    }
+};
+int main() {
+    for (unsigned dungeon = 0; dungeon < 2; ++dungeon) {
+        for (unsigned raid = 0; raid < 4; ++raid) {
+            Player player;
+            player.dungeon = Difficulty(dungeon);
+            player.raid = Difficulty(raid);
+            WorldLocation const returnLocation{571};
+            std::array<double, 7> const expected{571, 0, double(dungeon | (raid << 4)), 1, 2, 3, 4};
+            player.PrepareScriptedPrivateInstance(33, returnLocation);
+            player.dungeon = Difficulty(1 - dungeon);
+            player.destination.map = 33;
+            player.teleporting = true;
+            assert(player.SaveReturnState() == expected);
+            player.map = 33;
+            player.teleporting = false;
+            assert(player.SaveReturnState() == expected);
+            player.PrepareScriptedPrivateInstance(309, returnLocation);
+            player.raid = Difficulty((raid + 1) % 4);
+            assert(player.SaveReturnState() == expected);
+            player.map = 309;
+            auto const saved = player.SaveReturnState();
+            assert(saved == expected);
+
+            Player reconnected;
+            reconnected.dungeon = Difficulty(unsigned(saved[2]) & 0xF);
+            reconnected.raid = Difficulty(unsigned(saved[2]) >> 4);
+            assert(reconnected.dungeon == dungeon && reconnected.raid == raid);
+            reconnected.PrepareScriptedPrivateInstance(309, returnLocation);
+            reconnected.raid = Difficulty((raid + 2) % 4);
+            reconnected.map = 309;
+            assert(reconnected.SaveReturnState() == expected);
+
+            player.ClearScriptedPrivateInstance();
+            player.dungeon = Difficulty(1 - dungeon);
+            player.raid = Difficulty((raid + 1) % 4);
+            std::array<double, 7> const nextRun{571, 0,
+                double((1 - dungeon) | (((raid + 1) % 4) << 4)), 1, 2, 3, 4};
+            player.PrepareScriptedPrivateInstance(0, returnLocation);
+            player.dungeon = Difficulty(dungeon);
+            player.raid = Difficulty(raid);
+            player.map = 0;
+            assert(player.SaveReturnState() == nextRun);
+        }
+    }
+}
+"""
+        self.compile_and_run(fixture)
+        manager = (MODULE / "src/ManastormMgr.cpp").read_text(encoding="utf-8")
+        for signature in ("bool ManastormMgr::PrepareStage(",
+                          "bool ManastormMgr::TransferMemberToCurrentStage(",
+                          "void ManastormMgr::OnPlayerLogin("):
+            with self.subTest(signature=signature):
+                body = function(manager, signature)
+                capture = body.index("->PrepareScriptedPrivateInstance(")
+                self.assertLess(capture, body.index("->SetDungeonDifficulty("))
+                self.assertLess(capture, body.index("->SetRaidDifficulty("))
+
     def test_database_preparation_with_module_enabled_and_disabled(self):
         bodies = []
         ids = set()
