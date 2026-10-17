@@ -22,8 +22,6 @@
 -- INSERT IGNORE is deliberate: if a future source supplies an original full server
 -- creature_template row, this reconstruction must not overwrite it.
 
-USE `acore_world`;
-
 INSERT IGNORE INTO `creature_template`
 (
     `entry`, `name`, `subname`,

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import hashlib
 import importlib.util
 from pathlib import Path
 import re
@@ -18,13 +19,14 @@ spec.loader.exec_module(prepare)
 
 class IntegrationTests(unittest.TestCase):
     def test_original_exports_unchanged(self):
-        for name in ("Gametele.sql", "ManastormWorldDBExport-RUNTHIS.sql",
-                     "CharactersManastormEXPORT-RunThisInCharacterDB.sql"):
-            path = EXPORTS / name
-            original = subprocess.check_output(
-                ["git", "show", "origin/feature/acension-manastorm:" + path.relative_to(ROOT).as_posix()],
-                cwd=ROOT)
-            self.assertEqual(path.read_bytes().replace(b"\r\n", b"\n"), original)
+        expected = {
+            "Gametele.sql": "2f57893b0373ecb49d3ea9793d0310c15133bf55b4935188960355672c21171f",
+            "ManastormWorldDBExport-RUNTHIS.sql": "3b4fbe8f1c25cac82944286238aa3ced47b09997182398717e0bbf4921e2c215",
+            "CharactersManastormEXPORT-RunThisInCharacterDB.sql": "2f9b3affca7485415ebea73ef7fe036700c3eab0a6ec2b73e5fa0ee36fbf229f",
+        }
+        for name, digest in expected.items():
+            content = (EXPORTS / name).read_bytes().replace(b"\r\n", b"\n")
+            self.assertEqual(hashlib.sha256(content).hexdigest(), digest)
 
     def test_teleports_preserve_every_authored_tuple(self):
         source = (EXPORTS / "Gametele.sql").read_text(encoding="utf-8-sig")

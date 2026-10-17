@@ -1,4 +1,4 @@
-INSERT INTO `acore_world`.`creature_template`
+INSERT INTO `creature_template`
 (
     `entry`,
     `name`,
@@ -73,7 +73,7 @@ VALUES
     0
 );
 
-INSERT INTO `acore_world`.`creature_template`
+INSERT INTO `creature_template`
 (
     `entry`,
     `name`,
@@ -148,7 +148,7 @@ VALUES
     NULL
 );
 
-INSERT INTO `acore_world`.`creature_template_model`
+INSERT INTO `creature_template_model`
 (
     `CreatureID`,
     `Idx`,
@@ -167,7 +167,7 @@ VALUES
     0
 );
 
-INSERT INTO `acore_world`.`creature_template_model`
+INSERT INTO `creature_template_model`
 (
     `CreatureID`,
     `Idx`,

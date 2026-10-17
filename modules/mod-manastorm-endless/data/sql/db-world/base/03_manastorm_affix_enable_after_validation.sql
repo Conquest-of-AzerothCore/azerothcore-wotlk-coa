@@ -1,4 +1,3 @@
-USE `acore_world`;
 
 -- Enable only after the direct-unlock C++ path and forced-affix runtime tests pass.
 UPDATE `manastorm_unlock`

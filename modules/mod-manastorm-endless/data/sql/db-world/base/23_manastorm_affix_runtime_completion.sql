@@ -14,7 +14,6 @@
 -- Reflecting percentage semantics are a documented reconstruction:
 -- the DBC amount BP29 => 30 is treated as 30% at Rank 1.
 --
-USE `acore_world`;
 
 UPDATE `manastorm_affix_catalog`
 SET `bounded_runtime` = 1

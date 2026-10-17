@@ -4013,6 +4013,7 @@ void ManastormMgr::FailRun(
             member->GetMap() &&
             member->GetMap()->IsScriptedPrivateInstance();
 
+        RestoreOriginalDifficulties(member);
         member->ClearScriptedPrivateInstance();
 
         std::ostringstream failureMessage;
@@ -5512,6 +5513,13 @@ ManastormRun* ManastormMgr::StartRun(
     for (ObjectGuid::LowType memberGuid : runPtr->GetMembers())
         _memberRunIds[memberGuid] = runId;
 
+    for (ObjectGuid::LowType guid : runPtr->GetMembers())
+    {
+        if (Player* member = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid)))
+            _originalDifficulties.emplace(guid,
+                ManastormDifficultySettings{member->GetDungeonDifficulty(), member->GetRaidDifficulty()});
+    }
+
     if (!PrepareStage(player, *runPtr, error))
     {
         FailRun(*runPtr, error);
@@ -5537,6 +5545,17 @@ ManastormRun* ManastormMgr::StartRun(
     return runPtr;
 }
 
+void ManastormMgr::RestoreOriginalDifficulties(Player* player)
+{
+    auto const itr = _originalDifficulties.find(player->GetGUID().GetCounter());
+    if (itr == _originalDifficulties.end())
+        return;
+
+    player->SetDungeonDifficulty(itr->second.Dungeon);
+    player->SetRaidDifficulty(itr->second.Raid);
+    _originalDifficulties.erase(itr);
+}
+
 void ManastormMgr::OnPlayerLogin(Player* player)
 {
     if (!player || !player->GetSession())
@@ -5545,6 +5564,7 @@ void ManastormMgr::OnPlayerLogin(Player* player)
     ManastormRun* run = GetRunFor(player);
     if (!run)
     {
+        RestoreOriginalDifficulties(player);
         ManastormRewards::Instance().SettlePendingCurrency(player->GetGUID().GetCounter());
         RemoveBaselineRunItems(player, true);
         SendClientState(player, nullptr);
@@ -5579,13 +5599,13 @@ void ManastormMgr::OnPlayerLogin(Player* player)
         FailRun(*run, "Reconnect teleport failed.");
 }
 
-void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
+bool ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
 {
     if (!map || !player)
-        return;
+        return false;
 
     if (player->GetSession() && player->GetSession()->PlayerLoading())
-        return;
+        return true;
 
     ManastormExperience::Instance().OnMapEntry(player);
 
@@ -5602,7 +5622,7 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
             player,
             true);
 
-        return;
+        return false;
     }
 
     if (run->GetState() ==
@@ -5614,7 +5634,7 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
             player,
             true);
 
-        return;
+        return false;
     }
 
     if (map->GetId() !=
@@ -5639,7 +5659,7 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
                 player,
                 false);
 
-            return;
+            return true;
         }
 
         //
@@ -5674,7 +5694,7 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
             reason.str(),
             departingGuid);
 
-        return;
+        return false;
     }
 
     if (run->HasPreviousStage() &&
@@ -5723,13 +5743,13 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
     ManastormSegment const& segment = run->GetSegment();
     if (map->GetId() != segment.MapId ||
         map->GetInstanceId() != run->GetInstanceId())
-        return;
+        return true;
 
     if (run->GetState() == ManastormRunState::Preparing)
     {
         GameTele const* entrance = sObjectMgr->GetGameTele(segment.StartGameTeleId);
         if (!entrance)
-            return;
+            return true;
         if (!run->EntranceInitialized())
         {
             std::string bootstrapError;
@@ -5744,7 +5764,7 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
                     "Special encounter bootstrap failed: " +
                         bootstrapError);
 
-                return;
+                return false;
             }
 
             run->SetEntranceInitialized();
@@ -5779,7 +5799,7 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
                 player,
                 run);
 
-            return;
+            return true;
         }
 
         // Normal movement/combat activation waits for the whole party.
@@ -5808,7 +5828,7 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
                         player,
                         run);
 
-                    return;
+                    return true;
                 }
             }
         }
@@ -5819,7 +5839,7 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
         if (!start)
         {
             SendClientState(player, run);
-            return;
+            return true;
         }
         for (auto guid : run->GetMembers())
             if (Player* member = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid)))
@@ -5957,7 +5977,7 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
                     *run,
                     "Uldaman Archaedas native activation failed: " +
                         archaedasError);
-                return;
+                return false;
             }
         }
 
@@ -6005,6 +6025,7 @@ void ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
     SendClientState(player, run);
     if (run->GetState() == ManastormRunState::StageComplete)
         ManastormClientBridge::Instance().SendStageCompleted(player, run->GetDepth());
+    return true;
 }
 
 void ManastormMgr::OnPlayerLevelChanged(
@@ -7026,9 +7047,10 @@ void ManastormMgr::OnDamage(
         {
             run->RequestStart();
 
-            OnPlayerEnterMap(
-                attackingPlayer->FindMap(),
-                attackingPlayer);
+            if (!OnPlayerEnterMap(
+                    attackingPlayer->FindMap(),
+                    attackingPlayer))
+                return;
         }
 
         LOG_INFO(
@@ -8627,12 +8649,19 @@ bool ManastormMgr::UseStagePortal(
 
         std::string transitionError;
 
+        uint64 const runId = run->GetRunId();
         if (!TransitionToNextStage(
                 *run,
                 transitionError,
                 playerGuid,
                 false))
         {
+            if (_runs.find(runId) == _runs.end())
+            {
+                error = transitionError;
+                return false;
+            }
+
             LOG_ERROR(
                 LOG_FILTER,
                 "Manastorm run {} failed to prepare the next stage "
@@ -8818,9 +8847,13 @@ bool ManastormMgr::TransitionToNextStage(
                 member->GetInstanceId() ==
                     run.GetInstanceId())
             {
-                OnPlayerEnterMap(
-                    member->FindMap(),
-                    member);
+                if (!OnPlayerEnterMap(
+                        member->FindMap(),
+                        member))
+                {
+                    error = "The Manastorm run ended during stage activation.";
+                    return false;
+                }
 
                 break;
             }
@@ -9428,6 +9461,9 @@ void ManastormMgr::Update(uint32 diff)
             continue;
         }
 
+        if (_runs.find(runId) == _runs.end())
+            continue;
+
         LOG_ERROR(
             LOG_FILTER,
             "Manastorm run {} failed the five-second stage fallback "
@@ -9561,6 +9597,7 @@ bool ManastormMgr::StopRun(Player* player, std::string& error)
             member->GetMap() &&
             member->GetMap()->IsScriptedPrivateInstance();
 
+        RestoreOriginalDifficulties(member);
         member->ClearScriptedPrivateInstance();
 
         //

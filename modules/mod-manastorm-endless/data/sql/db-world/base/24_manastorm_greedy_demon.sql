@@ -35,8 +35,6 @@
 --   * gear pool is seeded from existing equippable uncommon/rare/epic items
 --     and can be curated later by editing manastorm_greedy_demon_loot_pool.
 
-USE `acore_world`;
-
 CREATE TABLE IF NOT EXISTS `manastorm_greedy_demon_rule`
 (
     `rule_id`                TINYINT UNSIGNED NOT NULL,

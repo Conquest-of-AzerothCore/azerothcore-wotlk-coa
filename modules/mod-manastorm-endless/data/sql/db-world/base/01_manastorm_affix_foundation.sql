@@ -2,7 +2,6 @@
 -- Full recovered catalogue preserved from the prior v4 forensic foundation.
 -- Runtime affix IDs are shared server IDs, not proven native protocol IDs.
 -- Automatic historical affix density/rank selection remains intentionally disabled.
-USE `acore_world`;
 
 SET @has_unlock_kind := (
   SELECT COUNT(*) FROM information_schema.COLUMNS

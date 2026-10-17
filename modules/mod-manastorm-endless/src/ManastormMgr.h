@@ -2,6 +2,7 @@
 #define MANASTORM_MGR_H
 
 #include "ManastormRun.h"
+#include "SharedDefines.h"
 
 #include <memory>
 #include <string>
@@ -69,7 +70,7 @@ public:
         Player* target);
 
     void Update(uint32 diff);
-    void OnPlayerEnterMap(Map* map, Player* player);
+    bool OnPlayerEnterMap(Map* map, Player* player);
 
     void OnPlayerLevelChanged(Player* player, uint8 oldLevel);
 
@@ -127,6 +128,15 @@ public:
 
 private:
     ManastormMgr() = default;
+
+    struct ManastormDifficultySettings
+    {
+        Difficulty Dungeon;
+        Difficulty Raid;
+    };
+
+    void RestoreOriginalDifficulties(Player* player);
+    std::unordered_map<ObjectGuid::LowType, ManastormDifficultySettings> _originalDifficulties;
 
     void SendClientState(
         Player* player,
