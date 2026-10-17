@@ -7,6 +7,10 @@
 # Enable the compatibility packet filter.
 CoA.Enable = 1
 
+# One press of /s .rotation attempts one learned attack or heal on the selected target.
+# Uses CoA specialization priorities with a basic fallback for other builds.
+CoA.RotationAssist.Enable = 1
+
 # Maximum crafted-item upgrade steps: 0 disables upgrade kits, 1 allows Refined,
 # 2 allows Superior, and 3 allows Masterwork. Default: 2. Values are clamped to 0-3.
 # Applies on startup and config reload; existing upgraded items remain unchanged.
