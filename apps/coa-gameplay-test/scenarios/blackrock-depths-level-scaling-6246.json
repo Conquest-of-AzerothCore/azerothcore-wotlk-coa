@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "name": "Blackrock Depths scales with the character like the other classic dungeons (COA-6246)",
+  "contract": [
+    "Requires DestinyWeaver.Enable=1 and DestinyWeaver.LevelScaling=1 with the default DestinyWeaver.Scaling.DungeonIds.",
+    "Blackrock Depths (map 230) was missing from the default DungeonIds, so Theldren (16059, level 63) and his",
+    "gladiators (level 60) kept their authored levels for a level-53 character during The Challenge. The finder",
+    "entries Upper City (276) and Manufactory (601) now give the map its band; the Prison entry (30) is left out, as",
+    "its TargetLevelMin of 60 would hold every creature at 60. Level-57 and level-53 characters see the creatures at",
+    "their own level."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 230,
+    "x": 593.68,
+    "y": -206.0,
+    "z": -53.44,
+    "o": 0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "mid",
+      "race": 1,
+      "class": 1,
+      "level": 57
+    },
+    {
+      "id": "low",
+      "race": 1,
+      "class": 1,
+      "level": 53
+    }
+  ],
+  "creatures": [
+    {
+      "id": "theldren",
+      "owner": "mid",
+      "entry": 16059,
+      "level": 63,
+      "distance": 6
+    },
+    {
+      "id": "lefty",
+      "owner": "mid",
+      "entry": 16049,
+      "level": 60,
+      "distance": 8
+    },
+    {
+      "id": "low_theldren",
+      "owner": "low",
+      "entry": 16059,
+      "level": 63,
+      "distance": 6
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 2000
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "mid",
+      "value": 1
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "low",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a level-57 character sees Theldren at 57",
+      "actor": "mid",
+      "metric": "view_level",
+      "target": "theldren",
+      "equals": 57,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and his gladiator at 57",
+      "actor": "mid",
+      "metric": "view_level",
+      "target": "lefty",
+      "equals": 57,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The client is sent level 57",
+      "actor": "mid",
+      "metric": "sent_level",
+      "target": "theldren",
+      "equals": 57,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "A level-53 character sees Theldren at 53",
+      "actor": "low",
+      "metric": "view_level",
+      "target": "low_theldren",
+      "equals": 53,
+      "within_ms": 2000
+    }
+  ]
+}

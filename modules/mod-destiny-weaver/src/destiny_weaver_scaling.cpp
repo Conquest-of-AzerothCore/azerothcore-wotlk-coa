@@ -100,7 +100,7 @@ namespace
 
     /// The dungeon finder entries whose dungeons scale: the classic five-player dungeons the client's own
     /// scaling list names.
-    constexpr char DEFAULT_SCALING_DUNGEONS[] = "1 4 6 8 10 12 14 16 18 20 22 24 26 28 163 164 165 272 273";
+    constexpr char DEFAULT_SCALING_DUNGEONS[] = "1 4 6 8 10 12 14 16 18 20 22 24 26 28 163 164 165 272 273 276 601";
 
     /// Where a view can exist at all: the open-world maps, and the classic dungeons with the band their
     /// creatures are held inside. Built on every config load and at startup, and published whole, so a
