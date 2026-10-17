@@ -1,4 +1,5 @@
 #include "AscensionFelCommutation.h"
+#include "AscensionClientLua.h"
 #include "AscensionCompatOpcodes.h"
 #include "AscensionFelCommutationPolicy.h"
 #include "Chat.h"
@@ -20,7 +21,6 @@
 #include "WorldScript.h"
 #include "WorldSession.h"
 #include <algorithm>
-#include <array>
 #include <atomic>
 #include <mutex>
 #include <string>
@@ -145,67 +145,12 @@ void HandleWindowMessage(Player* player, std::string const& body)
     SendSlots(player);
 }
 
-void AppendSizedString(WorldPacket& data, std::string const& text)
-{
-    data << uint32(text.size());
-    if (!text.empty())
-        data.append(reinterpret_cast<uint8 const*>(text.data()), text.size());
-}
-
-void SendRequirementTypeLua(Player* player, uint32 id, std::string const& token, std::string const& lua)
-{
-    std::string const formatter = "end, (function() " + lua + "\nend)(), function(value)";
-    std::array<std::string, 8> const strings = {token, token, "", "", "", formatter, "", ""};
-    WorldPacket data(PatchChallengeRequirementTypeOpcode, 17 * sizeof(uint32) + 2 * token.size() + formatter.size());
-    data << uint32(id);
-    for (std::size_t i = 0; i < strings.size(); ++i)
-        data << uint32(0);
-    for (std::string const& text : strings)
-        AppendSizedString(data, text);
-    player->SendDirectMessage(&data);
-}
-
-void SendRequirementRow(Player* player, uint32 id, std::string const& token)
-{
-    WorldPacket data(PatchChallengeRequirementOpcode, 10 * sizeof(uint32) + token.size());
-    data << uint32(id) << uint32(0) << uint32(0) << uint32(0) << uint32(0);
-    data << float(0.0f) << float(0.0f) << float(0.0f) << uint32(0);
-    AppendSizedString(data, token);
-    player->SendDirectMessage(&data);
-}
-
-void SendActiveChallenges(Player* player, Optional<uint32> challengeId)
-{
-    WorldPacket data(ChallengeActiveListOpcode, sizeof(uint32) + 26);
-    data << uint32(challengeId ? 1 : 0);
-    if (challengeId)
-        data << uint32(0) << uint32(*challengeId) << uint32(1) << uint8(0) << uint64(0) << uint8(0) << uint32(0);
-    player->SendDirectMessage(&data);
-}
-
-void SendCriteriaUpdate(Player* player, uint32 challengeId, uint32 requirementId, uint64 progress)
-{
-    WorldPacket data(ChallengeCriteriaUpdateOpcode, 4 * sizeof(uint32) + 2 * sizeof(uint64) + sizeof(uint8));
-    data << uint32(0) << uint32(challengeId) << uint32(1) << uint32(requirementId);
-    data << uint64(0) << uint64(progress) << uint8(0);
-    player->SendDirectMessage(&data);
-}
-
 constexpr Milliseconds LoginCodeDelay = 5s;
 constexpr uint32 WindowBootstrapRow = 23;
 constexpr uint32 WindowRequirementRow = 16263;
-constexpr uint32 WindowTriggerChallenge = 5;
 constexpr char WindowBootstrapToken[] = "FEL_COMMUTATION_WINDOW";
 
 constexpr char WindowLua[] = R"lua(
-if C_TrackerHeader and not FelCommutationBannerFilter then
-  FelCommutationBannerFilter = true
-  local show = C_TrackerHeader.Show
-  C_TrackerHeader.Show = function(self, template, title, subText, ...)
-    if type(subText) == "string" and subText:find("FEL_COMMUTATION_WINDOW", 1, true) then return end
-    return show(self, template, title, subText, ...)
-  end
-end
 local WINDOW_EVENT = "ASCENSION_FEL_COMMUTATION_WINDOW_VISIBILITY_CHANGED"
 if FelCommutationFrame then
   FelCommutationFrame:UnregisterAllEvents()
@@ -563,12 +508,7 @@ std::string WindowBootstrapLua()
 
 void RunWindowLua(Player* player)
 {
-    SendRequirementTypeLua(player, WindowBootstrapRow, WindowBootstrapToken, WindowBootstrapLua());
-    SendRequirementRow(player, WindowRequirementRow, WindowBootstrapToken);
-    SendActiveChallenges(player, WindowTriggerChallenge);
-    SendCriteriaUpdate(player, WindowTriggerChallenge, WindowRequirementRow, 0);
-    SendCriteriaUpdate(player, WindowTriggerChallenge, WindowRequirementRow, 1);
-    SendActiveChallenges(player, {});
+    RunAscensionClientLua(player, {WindowBootstrapRow, WindowRequirementRow, WindowBootstrapToken, WindowBootstrapLua()});
 }
 
 void EnsureWindowCode(Player* player)
@@ -762,7 +702,7 @@ public:
         if (!player)
             return false;
 
-        SendRequirementTypeLua(player, id, token, std::string(lua));
+        SendAscensionClientLuaFormatter(player, id, token, std::string(lua));
         handler->PSendSysMessage(
             "Sent SMSG 0x05BC row {} token {}. Run it with /run ChallengeUtil.GetRequirementLocalization(\"{}\")", id,
             token, token);
@@ -777,9 +717,9 @@ public:
 
         RunWindowLua(player);
         handler->PSendSysMessage(
-            "Sent the Fel Commutation window (SMSG 0x05BC row {}, 0x05B6 row {}, challenge {} criteria). If "
+            "Sent the Fel Commutation window (SMSG 0x05BC row {}, 0x05B6 row {}). If "
             "/dump FelCommutationFrame is nil, run /run ChallengeUtil.GetRequirementLocalization(\"{}\")",
-            WindowBootstrapRow, WindowRequirementRow, WindowTriggerChallenge, WindowBootstrapToken);
+            WindowBootstrapRow, WindowRequirementRow, WindowBootstrapToken);
         return true;
     }
 

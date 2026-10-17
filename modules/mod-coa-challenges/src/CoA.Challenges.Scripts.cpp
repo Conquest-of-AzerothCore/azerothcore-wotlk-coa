@@ -6,6 +6,7 @@
 #include "Random.h"
 #include "AllCreatureScript.h"
 #include "AccountScript.h"
+#include "AscensionClientLua.h"
 #include "LocalLevelScaling.h"
 
 using namespace Acore::ChatCommands;
@@ -3921,6 +3922,11 @@ namespace CoAChallenges
 void Addmod_coa_challengesScripts()
 {
     RegisterAscensionClientConfig(&CoAChallenges::AppendClientConfig);
+    RegisterAscensionChallengeStateSync([](Player* player)
+    {
+        CoAChallenges::SendActiveList(player);
+        CoAChallenges::SendCriteriaState(player);
+    });
     LocalLevelScaling::ChallengeBlocksOwner.store(&CoAChallenges::LevelScalingBlocks, std::memory_order_relaxed);
     new CoAChallenges::CoAChallengesPlayer();
     new CoAChallenges::CoAChallengesWorld();

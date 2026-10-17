@@ -1,5 +1,6 @@
 #include "ManastormModuleConfig.h"
 #include "ManastormClientBridge.h"
+#include "ManastormClientUIFixes.h"
 #include "ManastormMobilityClient.h"
 #include "ManastormPotionClient.h"
 #include "ManastormMgr.h"
@@ -731,6 +732,7 @@ public:
         ManastormClientBridge::Instance().Login(player);
         ManastormMobilityClient::Sync(player);
         ManastormMgr::Instance().SyncManastormPotionCharges(player);
+        ManastormClientUIFixes::ScheduleLoginPush(player);
     }
 
     void OnPlayerMapChanged(Player* player) override

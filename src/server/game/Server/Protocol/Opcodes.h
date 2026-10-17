@@ -1359,6 +1359,7 @@ enum Opcodes : uint16
     // tracked objective; supplies the type name + values the 0x59A handler
     // resolves by typeIdx. Handler RVA 0x139CD0.
     SMSG_COA_CHALLENGE_REQUIREMENT                  = 0x5B6,
+    SMSG_COA_PATCH_CHALLENGE_REQUIREMENT_TYPE       = 0x5BC,
     SMSG_COA_CHALLENGE_SYNC_REQUEST                 = 0x59B,
     CMSG_COA_SYNC_RESPONSE                          = 0x59C,
     CMSG_COA_SAVE_TRIAL                             = 0x5A7,
