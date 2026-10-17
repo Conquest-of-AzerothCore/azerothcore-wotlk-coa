@@ -22,8 +22,6 @@ constexpr uint32 SPELL_SOULSTONE_LURE_AURA = 561826;
 constexpr uint32 NPC_SOULSTONE_LURE = 557911;
 constexpr uint32 SUMMON_PROPERTIES_STATIONARY = 64;
 constexpr uint32 SPELL_DEATHBRINGER = 573040;
-constexpr uint32 SPELL_UNDERWALK = 800797;
-constexpr uint32 SHAPESHIFT_FORM_ELUDE = 51;
 constexpr uint32 SPELL_APPARITION = 705389;
 constexpr uint32 SPELL_SOULS_FOR_SLAUGHTER_DAMAGE = 575847;
 constexpr uint32 SPELL_HARVESTING_GROUNDS = 705413;
@@ -48,12 +46,6 @@ public:
         if (info->Id == SPELL_HARVESTING_GROUNDS_SLOW &&
             info->Effects[EFFECT_1].ApplyAuraName == SPELL_AURA_MOD_DECREASE_SPEED)
             info->DurationEntry = sSpellDurationStore.LookupEntry(8);
-
-        if (info->Id == SPELL_UNDERWALK &&
-            info->Effects[EFFECT_0].Effect == SPELL_EFFECT_APPLY_AURA &&
-            info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_MOD_SHAPESHIFT &&
-            info->Effects[EFFECT_0].MiscValue == FORM_STEALTH)
-            info->Effects[EFFECT_0].MiscValue = SHAPESHIFT_FORM_ELUDE;
 
         if (info->Id == SPELL_SOULS_FOR_SLAUGHTER_DAMAGE &&
             info->Effects[EFFECT_0].Effect == SPELL_EFFECT_SCHOOL_DAMAGE)
