@@ -378,6 +378,7 @@ namespace
         // spell 16328 to create a separate Rend. Do not turn the controller
         // into the Manastorm boss; doing so leaves its event-owned controlled
         // units attached when the dead creature is removed.
+        std::vector<ObjectGuid> controllerGuids;
         for (auto const& spawn :
             map->GetCreatureBySpawnIdStore())
         {
@@ -392,13 +393,23 @@ namespace
                 continue;
             }
 
+            controllerGuids.push_back(
+                controller->GetGUID());
+        }
+
+        for (ObjectGuid const& controllerGuid : controllerGuids)
+        {
             if (run.GetObjectiveCreatureGuid() ==
-                controller->GetGUID())
+                controllerGuid)
             {
                 run.ClearObjectiveCreatureGuid();
             }
 
-            controller->DespawnOrUnsummon();
+            if (Creature* controller =
+                    map->GetCreature(controllerGuid))
+            {
+                controller->DespawnOrUnsummon();
+            }
         }
 
         // Any remaining claim here is stale/non-Manastorm Rend state. The

@@ -71,6 +71,8 @@ namespace
     constexpr uint32 AutoQuestOffer = 0;
     constexpr uint32 HeroCallBoard = 402000;
     constexpr uint32 WarchiefCommandBoard = 402001;
+    constexpr uint32 PaleReachIntroduction = 175207;
+    constexpr std::array<uint32, 3> PaleReachOpeningQuests = { 175000, 175001, 175002 };
 
     std::atomic<bool> enabled{true};
     std::atomic<bool> autoOffer{true};
@@ -130,6 +132,32 @@ namespace
         return nullptr;
     }
 
+    Quest const* PaleReachIntroductionFor(Player* player)
+    {
+        if (player->GetTeamId() != TEAM_ALLIANCE)
+            return nullptr;
+
+        for (uint32 questId : PaleReachOpeningQuests)
+            if (player->GetQuestStatus(questId) != QUEST_STATUS_NONE || player->GetQuestRewardStatus(questId))
+                return nullptr;
+
+        Quest const* quest = sObjectMgr->GetQuestTemplate(PaleReachIntroduction);
+        return quest && player->CanTakeQuest(quest, false) ? quest : nullptr;
+    }
+
+    void SendAutoQuestOffer(Player* player, Quest const* quest)
+    {
+        WorldPacket offer(SmsgAutoQuestUpdate, 2 * sizeof(uint32));
+        offer << quest->GetQuestId() << AutoQuestOffer;
+        player->SendDirectMessage(&offer);
+    }
+
+    void OfferPaleReachIntroduction(Player* player, uint32 previousLevel)
+    {
+        if (Quest const* quest = PaleReachIntroductionFor(player); quest && quest->GetMinLevel() > previousLevel)
+            SendAutoQuestOffer(player, quest);
+    }
+
     void OfferZoneOrdersUnlockedSince(Player* player, uint32 previousLevel)
     {
         auto const starters = sObjectMgr->GetGOQuestRelationBounds(FactionBoard(player));
@@ -141,9 +169,7 @@ namespace
                 || !player->CanTakeQuest(quest, false))
                 continue;
 
-            WorldPacket offer(SmsgAutoQuestUpdate, 2 * sizeof(uint32));
-            offer << quest->GetQuestId() << AutoQuestOffer;
-            player->SendDirectMessage(&offer);
+            SendAutoQuestOffer(player, quest);
         }
     }
 
@@ -324,7 +350,12 @@ public:
             PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_UPDATE_ZONE, PLAYERHOOK_ON_PLAYER_QUEST_ACCEPT,
             PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST }) { }
 
-    void OnPlayerLogin(Player* player) override { UpdateQuelLithienReaction(player, player->GetZoneId()); }
+    void OnPlayerLogin(Player* player) override
+    {
+        UpdateQuelLithienReaction(player, player->GetZoneId());
+        if (OffersZoneOrders(player))
+            OfferPaleReachIntroduction(player, 0);
+    }
 
     void OnPlayerUpdateZone(Player* player, uint32 newZone, uint32 /*newArea*/) override
     {
@@ -346,7 +377,10 @@ public:
     void OnPlayerLevelChanged(Player* player, uint8 oldLevel) override
     {
         if (OffersZoneOrders(player) && player->GetLevel() > oldLevel)
+        {
             OfferZoneOrdersUnlockedSince(player, oldLevel);
+            OfferPaleReachIntroduction(player, oldLevel);
+        }
     }
 
     void OnPlayerCreatureKill(Player* killer, Creature* killed) override { CreditRaidLeader(killer, killed); }
@@ -484,16 +518,25 @@ public:
 
     bool CanPacketReceive(WorldSession* session, WorldPacket const& packet) override
     {
-        if (packet.GetOpcode() != CMSG_QUESTGIVER_ACCEPT_QUEST || packet.size() != 16 || packet.read<uint64>(0) != 0
+        bool const accepting = packet.GetOpcode() == CMSG_QUESTGIVER_ACCEPT_QUEST;
+        if ((!accepting && packet.GetOpcode() != CMSG_QUESTGIVER_QUERY_QUEST)
+            || packet.size() != (accepting ? 16u : 13u) || packet.read<uint64>(0) != 0
             || !enabled.load() || !autoOffer.load() || !session)
             return true;
 
         Player* player = session->GetPlayer();
-        Quest const* quest = player ? FactionZoneOrder(player, packet.read<uint32>(8)) : nullptr;
+        uint32 const questId = packet.read<uint32>(8);
+        if (!player || (!accepting && questId != PaleReachIntroduction))
+            return true;
+
+        Quest const* quest = questId == PaleReachIntroduction ? PaleReachIntroductionFor(player)
+            : FactionZoneOrder(player, questId);
         if (!quest)
             return true;
 
-        if (player->CanTakeQuest(quest, true) && player->CanAddQuest(quest, true))
+        if (!accepting)
+            player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, ObjectGuid::Empty, true);
+        else if (player->CanTakeQuest(quest, true) && player->CanAddQuest(quest, true))
             player->AddQuestAndCheckCompletion(quest, nullptr);
 
         return false;

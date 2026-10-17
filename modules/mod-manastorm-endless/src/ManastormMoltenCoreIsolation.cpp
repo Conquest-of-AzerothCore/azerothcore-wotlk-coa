@@ -119,11 +119,21 @@ namespace
         if (instance->GetBossState(bossData) != DONE)
             instance->SetBossState(bossData, DONE);
 
-        uint32 despawned = 0;
+        std::vector<ObjectGuid> bossGuids;
         for (auto const& spawn : map->GetCreatureBySpawnIdStore())
         {
             Creature* creature = spawn.second;
             if (!creature || !creature->IsInWorld() || creature->GetEntry() != bossEntry)
+                continue;
+
+            bossGuids.push_back(creature->GetGUID());
+        }
+
+        uint32 despawned = 0;
+        for (ObjectGuid const& guid : bossGuids)
+        {
+            Creature* creature = map->GetCreature(guid);
+            if (!creature || !creature->IsInWorld())
                 continue;
 
             creature->DespawnOrUnsummon();

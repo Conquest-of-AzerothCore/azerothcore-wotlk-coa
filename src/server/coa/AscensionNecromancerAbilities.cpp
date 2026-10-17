@@ -161,6 +161,8 @@ class necromancer_casts : public AllSpellScript
             result = SPELL_FAILED_TARGET_AURASTATE;
         if (id == 802121 && Minions(player).empty())
             result = SPELL_FAILED_NO_PET;
+        if (Family(info, 2, 67108864) && Minions(player).empty())
+            result = SPELL_FAILED_NO_PET;
         if (id == 807098)
         {
             bool ritual = false;

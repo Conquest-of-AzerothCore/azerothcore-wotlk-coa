@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Necromancer audit: Gravedigger cuts Sacrifice Undead's cast time by 0.5 s (#1020)",
-  "contract": "Gravedigger 704715 (CharacterAdvancement 29865, Class tab, class 23) reads 'Reduces the cast time of Sacrifice Undead by $/1000;S1 sec.' Spell.dbc: a passive whose effect 0 is aura 107 (ADD_FLAT_MODIFIER) op 10 (SPELLMOD_CASTING_TIME), BasePoints -501 + DieSides 1 = -500 ms, class mask word 2 0x4000000 in family 29. Sacrifice Undead 805027 and its ranks 807938-807941 are family 29 with SpellFamilyFlags word 2 0x4000000 and SpellCastTimes 16 = 1500 ms. Unit::ModSpellCastTime applies SPELLMOD_CASTING_TIME natively, so the talented cast takes 1000 ms and the untalented one 1500 ms; the talented cast finishes (and starts the 30 s cooldown) while an untalented cast begun just after it is still in progress.",
+  "contract": "Gravedigger 704715 (CharacterAdvancement 29865, Class tab, class 23) reads 'Reduces the cast time of Sacrifice Undead by $/1000;S1 sec.' Spell.dbc: a passive whose effect 0 is aura 107 (ADD_FLAT_MODIFIER) op 10 (SPELLMOD_CASTING_TIME), BasePoints -501 + DieSides 1 = -500 ms, class mask word 2 0x4000000 in family 29. Sacrifice Undead 805027 and its ranks 807938-807941 are family 29 with SpellFamilyFlags word 2 0x4000000 and SpellCastTimes 16 = 1500 ms. Unit::ModSpellCastTime applies SPELLMOD_CASTING_TIME natively, so the talented cast takes 1000 ms and the untalented one 1500 ms; the talented cast finishes (and starts the 30 s cooldown) while an untalented cast begun just after it is still in progress. Each caster raises one Lesser Skeletal Warrior (500970) first: Sacrifice Undead is refused with SPELL_FAILED_NO_PET (84) without undead minions, so the timed casts are performed with a minion present.",
   "timeout_ms": 60000,
   "players": [
     { "id": "plain", "race": 5, "class": 23, "level": 80 },
@@ -32,11 +32,31 @@
       "action": "assert", "label": "The reduction covers the highest Sacrifice Undead rank", "actor": "digger",
       "metric": "spell_cast_time_ms", "spell": 807941, "min": 999, "max": 1001
     },
+    { "action": "learn", "actor": "digger", "spell": 500970 },
+    {
+      "action": "cast", "label": "SETUP: digger raises a minion to sacrifice", "actor": "digger",
+      "spell": 500970
+    },
+    {
+      "action": "assert", "label": "SETUP: the digger has a minion", "actor": "digger",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 500 },
     { "action": "cast", "actor": "digger", "spell": 805027 },
     {
       "action": "assert", "label": "The talented cast bar starts at 1.0 s", "actor": "digger",
       "metric": "cast_remaining_ms", "spell": 805027, "min": 850, "max": 1000
     },
+    { "action": "learn", "actor": "plain", "spell": 500970 },
+    {
+      "action": "cast", "label": "SETUP: plain raises a minion to sacrifice", "actor": "plain",
+      "spell": 500970
+    },
+    {
+      "action": "assert", "label": "SETUP: plain has a minion", "actor": "plain",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 500 },
     { "action": "cast", "actor": "plain", "spell": 805027 },
     {
       "action": "assert", "label": "CONTROL: the untalented cast bar starts at 1.5 s", "actor": "plain",

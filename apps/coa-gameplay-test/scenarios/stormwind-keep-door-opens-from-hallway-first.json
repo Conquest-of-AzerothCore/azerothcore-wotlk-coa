@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "name": "Stormwind Keep: the Petitioner's Chamber door won't budge from the chamber until the character opens it from the hallway",
+  "contract": "Review item #10 and the user's live description (2026-10-15): the Stomwind Keep Door 2300653 (type 0, display 300553 stormwind_castle_noble_door, auto-close 5000 ms) sits in the keep doorway at about (-8279.70, 269.48) between the Petitioner's Chamber rooms and the hallway that runs north-east to the tower. Used from the chamber side before the character has ever opened it, it stays shut and says it won't budge; used from the hallway side it opens. Once a character has opened it from the hallway, it opens from either side for that character. The case joins world phase 1 and uses the world spawn 9999303; a summoned door would despawn when it closes. The exact live wording is unknown; the notice is matched on 'budge'.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8277.31,
+    "y": 271.3,
+    "z": 126.9,
+    "o": 3.79
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where the door is spawned",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the keep's grid activate",
+      "ms": 2000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Try the door from the chamber side first",
+      "actor": "p",
+      "entry": 2300653
+    },
+    {
+      "action": "assert",
+      "label": "the character is told the door won't budge",
+      "actor": "p",
+      "metric": "notification_contains",
+      "text": "budge",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "the door stays closed",
+      "actor": "p",
+      "metric": "nearby_gameobject_state",
+      "entry": 2300653,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and nothing is remembered for the character",
+      "actor": "p",
+      "metric": "player_setting",
+      "source": "core.coa_stormwind_keep_door",
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "label": "Walk round to the hallway side",
+      "actor": "p",
+      "map": 0,
+      "x": -8282.09,
+      "y": 267.67,
+      "z": 126.9,
+      "o": 0.65
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the character stands on the hallway side",
+      "actor": "p",
+      "metric": "position_x",
+      "min": -8283.0,
+      "max": -8281.0
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Open the door from the hallway",
+      "actor": "p",
+      "entry": 2300653
+    },
+    {
+      "action": "assert",
+      "label": "the door opens from the hallway",
+      "actor": "p",
+      "metric": "nearby_gameobject_state",
+      "entry": 2300653,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and the character remembers opening it",
+      "actor": "p",
+      "metric": "player_setting",
+      "source": "core.coa_stormwind_keep_door",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the door closes again by itself",
+      "actor": "p",
+      "metric": "nearby_gameobject_state",
+      "entry": 2300653,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "teleport",
+      "label": "Go back to the chamber side",
+      "actor": "p",
+      "map": 0,
+      "x": -8277.31,
+      "y": 271.3,
+      "z": 126.9,
+      "o": 3.79
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the character stands on the chamber side",
+      "actor": "p",
+      "metric": "position_x",
+      "min": -8278.3,
+      "max": -8276.3
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Try the door from the chamber side again",
+      "actor": "p",
+      "entry": 2300653
+    },
+    {
+      "action": "assert",
+      "label": "now it opens from the chamber side too",
+      "actor": "p",
+      "metric": "nearby_gameobject_state",
+      "entry": 2300653,
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

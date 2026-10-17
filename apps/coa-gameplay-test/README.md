@@ -927,6 +927,8 @@ anywhere on the player's map, in any phase; a spawn whose grid is not loaded is 
 (0 open, 1 closed, 99 none).
 `nearby_gameobject_scale` takes `entry` and returns the object scale of the nearest such gameobject within
 20 yards (0 when none).
+`nearby_gameobject_at_client` takes `entry` and is 1 while the nearest such gameobject within 20 yards is in
+the player's client-visible set. Owners always see their own objects, so per-player visibility needs a world spawn.
 ## Evidence boundaries
 
 ### Optional character names

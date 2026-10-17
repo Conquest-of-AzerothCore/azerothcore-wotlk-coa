@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Cultist: Strength of the Black Empire transforms on Dreadnought ranks (#7632)",
+  "contract": "Strength of the Black Empire 680557 (level 40 passive) promises Dreadnought sheds the caster's mortal form into a void monstrosity. Delivery is the 680556 helper, enabled by the Cultist Refresh only while the caster holds 680557 and an aura of ranked spell 567524 (Unit::GetAuraOfRankedSpell walks the spell_ranks chain). Dreadnought's server ranks 567524/567548/567549/567550/567551/567552 were never chained, so the lookup only matched the exact rank-1 aura while the talent needs level 40 (rank 4+): the helper never applied and nothing transformed. A level 49 Cultist at 90 Insanity (Dreadnought rank 4 needs the 80-Insanity marker 680604 as its caster aura) casting Dreadnought rank 4 (567550) must gain helper 680556 and display 28844 (creature_template 250043, retargeted at load by the class contracts). The display assertion also pins the template/model path, not just aura presence.",
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 25,
+      "level": 49,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "cultist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 680557
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 567550
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Dreadnought rank 4 is known",
+      "actor": "cultist",
+      "metric": "knows_spell",
+      "spell": 567550,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "cultist",
+      "spell": 500706,
+      "stacks": 90
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "cultist",
+      "spell": 567550,
+      "target": "cultist"
+    },
+    {
+      "action": "assert",
+      "label": "Dreadnought rank 4 raises its shield",
+      "actor": "cultist",
+      "metric": "aura",
+      "spell": 567550,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Dreadnought cast itself did not fail",
+      "actor": "cultist",
+      "metric": "cast_failure",
+      "spell": 567550,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Strength of the Black Empire applies its void-monstrosity helper - fails before the fix, when no helper aura appears",
+      "actor": "cultist",
+      "metric": "aura",
+      "spell": 680556,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "The caster shows the void-monstrosity display 28844 - fails before the fix, when the mortal form stays",
+      "actor": "cultist",
+      "metric": "display_id",
+      "equals": 28844
+    },
+    {
+      "action": "assert",
+      "label": "The void monstrosity is scaled down to Herald parity instead of filling the screen",
+      "actor": "cultist",
+      "metric": "unit_scale",
+      "min": 0.24,
+      "max": 0.26
+    }
+  ]
+}

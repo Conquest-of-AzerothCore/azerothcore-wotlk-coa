@@ -19,6 +19,7 @@
 // void MyExampleScript()
 void AddSC_spell_basalthane();
 void AddSC_spell_infernos_items();
+void AddSC_spell_coa_stormwind_quests();
 
 // The name of this function should match:
 // void Add${NameOfDirectory}Scripts()
@@ -27,4 +28,5 @@ void AddCustomScripts()
     // MyExampleScript()
     AddSC_spell_basalthane();
     AddSC_spell_infernos_items();
+    AddSC_spell_coa_stormwind_quests();
 }

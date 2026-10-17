@@ -149,7 +149,8 @@ class spell_warl_shadowflame : public SpellScript
     void HandleSchoolDMG(SpellEffIndex /*effIndex*/)
     {
         if (Unit* target = GetHitUnit())
-            GetCaster()->CastSpell(target, (GetSpellInfo()->Id == 47897 ? 47960 : 61291), true);
+            GetCaster()->CastSpell(target, sSpellMgr->GetSpellTwinFor(
+                sSpellMgr->GetSpellTwinSource(GetSpellInfo()->Id) == 47897 ? 47960 : 61291, GetSpellInfo()->Id), true);
     }
 
     void Register() override

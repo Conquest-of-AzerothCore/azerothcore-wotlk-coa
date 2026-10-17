@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "name": "Where the Veil Wanes: a Blackwood Rift closes only after the 10 second Closing the Blackwood Rift channel",
+  "contract": "Review item #78: on live, closing a Blackwood Rift (gameobject 2300660, quest 175048 objective 2, -2300660 x3) is the client spell 365373 'Closing the Blackwood Rift', a 10 s channel at the rift; only a finished channel counts, being attacked breaks it, and the rift then vanishes until its 60 s respawn. The PR's rift was a plain goober that credited on the click. The case joins world phase 1 beside rift 9920640 and uses the world spawn. The two Horned Ones guarding it are killed first so no attack breaks the channel.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -7528.3,
+    "y": 1186.5,
+    "z": 62.6,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where the rifts are spawned",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the cave's grid activate",
+      "ms": 2500
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 175048,
+      "complete": false
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Clear Horned One 1 of 2 by the rift",
+      "actor": "p",
+      "entry": 164373,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Clear Horned One 2 of 2 by the rift",
+      "actor": "p",
+      "entry": 164373,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Start closing the rift",
+      "actor": "p",
+      "entry": 2300660
+    },
+    {
+      "action": "assert",
+      "label": "the character channels at the rift",
+      "actor": "p",
+      "metric": "casting",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "the click alone does not close the rift",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 175048,
+      "index": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the finished channel closes one rift",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 175048,
+      "index": 1,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "and the rift vanishes",
+      "actor": "p",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 2300660,
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

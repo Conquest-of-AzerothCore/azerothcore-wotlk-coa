@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "No Matter the Cost: Carden's Diary offers its quest, then shows the journal once the quest is taken",
+  "contract": "Carden's Diary 2300689 (type 2 quest giver, lock 43 'Reading') offers No Matter the Cost 175043. The user found (playtest 2026-10-15) that after taking the quest the diary still opened the server's default 'Greetings, $N' gossip. The only recorded writing on the diary is the quest's own text (AscenSS 071126-233952, c3a0y5pCKpE 14:51), so once the quest is in the log or rewarded the diary shows that journal as npc_text 2300689; while the quest is not taken (including after abandoning it) the diary offers the quest. The case joins world phase 1 beside the world spawn 9980002.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -7685.0,
+    "y": 1208.4,
+    "z": 140.5,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where the diary lies",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the crypt's grid activate",
+      "ms": 2500
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Read the diary before taking its quest",
+      "actor": "p",
+      "entry": 2300689
+    },
+    {
+      "action": "assert",
+      "label": "the diary offers No Matter the Cost",
+      "actor": "p",
+      "metric": "quest_menu_has",
+      "equals": 1,
+      "within_ms": 2000,
+      "quest": 175043
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 175043,
+      "complete": false
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Read the diary with the quest in the log",
+      "actor": "p",
+      "entry": 2300689
+    },
+    {
+      "action": "assert",
+      "label": "it shows Carden's journal, not the default greeting",
+      "actor": "p",
+      "metric": "server_packet_u32",
+      "opcode": 381,
+      "index": 3,
+      "equals": 2300689,
+      "within_ms": 2000
+    }
+  ]
+}
