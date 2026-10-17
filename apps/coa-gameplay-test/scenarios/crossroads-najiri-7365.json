@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Crossroads: Naj'iri sits beside Raj'iri and the sisters' quests still reward",
-  "contract": "Raj'iri 41719 gives and takes 'Play It by Ear' 255078 and takes 'Dancing to the Beat' 255080 at The Crossroads; her sister Naj'iri 741719 sits next to her and answers Raj'iri's lines after each of those quests (#7365). The reporter's capture shows Naj'iri as a level 8 Darkspear Trolls NPC beside Raj'iri, but rev_20261010_98 only added her template and her lines, so no Naj'iri existed in the world. This case walks onto Raj'iri's world spawn 9010700 and counts the living Naj'iri within 60 yd at her native level 8, which is zero before rev_20261012_03 and one after it. It then rewards 255078 and 255080 through the native reward path while Raj'iri runs her new SmartAI, so the quest rewards and the two action lists that make the sisters talk complete without breaking either quest. The spoken lines, Raj'iri's dance and Naj'iri's sitting are client-visible and are not observed here.",
+  "name": "Crossroads: Naj'iri sits beside Raj'iri, declines her unprompted and agrees after Dancing to the Beat",
+  "contract": "Raj'iri 41719 gives and takes 'Play It by Ear' 255078 and takes 'Dancing to the Beat' 255080 at The Crossroads; her sister Naj'iri 741719 sits next to her (#7365). A live capture (#7385) shows Raj'iri at level 15 and Naj'iri at level 8 beside her, and Raj'iri saying 'Feel like dancin' now?' answered by Naj'iri's 'Not really mon...' while the player only took other Crossroads quests; live footage puts Raj'iri's 'How about now mon?' about a minute later. rev_20261010_98 only added the templates and lines, so no Naj'iri existed and nobody spoke. This case walks onto Raj'iri's world spawn 9010700, counts the living Raj'iri at level 15 and Naj'iri at level 8 within 60 yd, and waits without any quest action for Naj'iri's decline, which reaches the player as SMSG_MESSAGECHAT 150 of type CHAT_MSG_MONSTER_SAY 12 in universal language 0, so its first uint32 is 12. It then rewards 255078, 255079 and 255080 through the native reward path and expects Naj'iri's 'Alright, just for a bit...'. Before rev_20261012_03 Naj'iri is missing and neither line is sent. Raj'iri's dance and Naj'iri's sitting and dancing are client-visible and are not observed here.",
   "timeout_ms": 120000,
   "location": {
     "map": 1,
@@ -38,10 +38,12 @@
     },
     {
       "action": "assert",
-      "label": "SETUP: Raj'iri herself is there",
+      "label": "DISCRIMINATING: Raj'iri is there at her live level 15",
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 41719,
+      "min_level": 15,
+      "max_level": 15,
       "equals": 1,
       "within_ms": 10000
     },
@@ -57,6 +59,17 @@
       "within_ms": 10000
     },
     {
+      "action": "assert",
+      "label": "DISCRIMINATING: without any quest action Raj'iri asks and Naj'iri declines",
+      "actor": "p",
+      "metric": "server_packet_contains",
+      "opcode": 150,
+      "row": 12,
+      "text": "Not really mon...",
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
       "action": "prepare_quest",
       "label": "SETUP: 'Play It by Ear' is ready to turn in",
       "actor": "p",
@@ -64,7 +77,7 @@
     },
     {
       "action": "reward_quest",
-      "label": "Turn in 'Play It by Ear', which starts Raj'iri's first action list",
+      "label": "Turn in 'Play It by Ear'",
       "actor": "p",
       "quest": 255078
     },
@@ -97,7 +110,7 @@
     },
     {
       "action": "reward_quest",
-      "label": "Turn in 'Dancing to the Beat', which starts the second action list and Naj'iri's dance",
+      "label": "Turn in 'Dancing to the Beat', which starts the sisters' last exchange and Naj'iri's dance",
       "actor": "p",
       "quest": 255080
     },
@@ -111,9 +124,15 @@
       "within_ms": 4000
     },
     {
-      "action": "wait",
-      "label": "Let both lines and the start of Naj'iri's dance play out",
-      "ms": 8000
+      "action": "assert",
+      "label": "DISCRIMINATING: Naj'iri agrees to dance after 'Dancing to the Beat'",
+      "actor": "p",
+      "metric": "server_packet_contains",
+      "opcode": 150,
+      "row": 12,
+      "text": "Alright, just for a bit...",
+      "equals": 1,
+      "within_ms": 10000
     },
     {
       "action": "assert",
