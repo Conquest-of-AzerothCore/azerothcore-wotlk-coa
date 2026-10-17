@@ -130,7 +130,11 @@ namespace CoaMythicPlus
                 if (!k.item || !k.level || dungeon == _dungeons.end())
                     continue;
                 _keystones[k.item] = k;
-                _keystoneByDungeonLevel.emplace(Key(k.lfgId, k.level), k.item);
+                // Pit of the Fangs and Halls of the Damned have two key series: an older one named after the
+                // whole dungeon ("Keystone: Wailing Caverns") and a newer one with the wing in its name. New
+                // keys come from the newer series; old ones still work.
+                uint32& handedOut = _keystoneByDungeonLevel[Key(k.lfgId, k.level)];
+                handedOut = std::max(handedOut, k.item);
                 _keystonesByMap[dungeon->second.mapId].push_back(k.item);
             }
         }

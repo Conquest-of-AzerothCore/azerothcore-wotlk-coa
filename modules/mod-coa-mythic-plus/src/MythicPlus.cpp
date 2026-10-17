@@ -1858,12 +1858,18 @@ namespace
         return true;
     }
 
-    // Recycling gives 45 + level coins and counts towards the weekly coin cap.
+    // Recycling gives 45 + level coins and counts towards the weekly coin cap. Only Mythic 1 and up: a Mythic
+    // Dungeon item (level 0) drops from every Mythic run and would turn into coins for free.
     bool Recycle(Player* player, Item* item)
     {
         auto itr = g_chainOf.find(item->GetEntry());
         if (itr == g_chainOf.end())
             return false;
+        if (!itr->second.second)
+        {
+            ChatHandler(player->GetSession()).SendSysMessage("Only Mythic 1 and higher items can be recycled.");
+            return false;
+        }
         uint32 const value = RecycleValue(itr->second.second);
         Weekly const weekly = GetWeekly(player->GetGUID());
         if (weekly.coins + value > WeeklyCoinCap())
@@ -2021,7 +2027,7 @@ private:
         ForEachOwnedItem(player, false, [&](Item* item)
         {
             auto itr = g_chainOf.find(item->GetEntry());
-            if (itr == g_chainOf.end())
+            if (itr == g_chainOf.end() || !itr->second.second)
                 return;
             std::string const name = item->GetTemplate()->Name1;
             std::string const level = LevelName(itr->second.second);
