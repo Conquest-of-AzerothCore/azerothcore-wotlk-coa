@@ -66,6 +66,17 @@ class ReviewRegressions(unittest.TestCase):
         update = function(source, "void ManastormMgr::Update(")
         self.assertRegex(update, r"if \(_runs.find\(runId\) == _runs.end\(\)\)\s*continue;")
 
+    def test_spawn_store_loops_never_remove_creatures(self):
+        loop = re.compile(r"for \(auto const& \w+ :\s*map->GetCreatureBySpawnIdStore\(\)\)\s*")
+        removals = re.compile(r"DespawnOrUnsummon|OnCreatureAddWorld|RemoveFromWorld|AddObjectToRemoveList")
+        for path in sorted((MODULE / "src").glob("*.cpp")):
+            source = path.read_text(encoding="utf-8")
+            for match in loop.finditer(source):
+                rest = source[match.end():]
+                body = function(rest, "{") if rest.startswith("{") else rest[:rest.index(";")]
+                with self.subTest(path=path.name, line=source.count("\n", 0, match.start()) + 1):
+                    self.assertIsNone(removals.search(body))
+
     def test_original_difficulties_restore_once_and_survive_offline_exit(self):
         source = (MODULE / "src/ManastormMgr.cpp").read_text(encoding="utf-8")
         restore = function(source, "void ManastormMgr::RestoreOriginalDifficulties(")

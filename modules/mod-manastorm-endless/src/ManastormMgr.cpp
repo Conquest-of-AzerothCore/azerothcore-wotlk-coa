@@ -1418,15 +1418,20 @@ namespace
             HELNURATH_RITUAL_POSITION.GetPositionX(),
             HELNURATH_RITUAL_POSITION.GetPositionY());
 
+        std::vector<ObjectGuid> immoltharGuids;
         for (auto const& spawn : map->GetCreatureBySpawnIdStore())
         {
             Creature* creature = spawn.second;
             if (creature && creature->IsInWorld() &&
                 creature->GetEntry() == NPC_IMMOLTHAR)
             {
-                creature->DespawnOrUnsummon(0ms, 24h);
+                immoltharGuids.push_back(creature->GetGUID());
             }
         }
+
+        for (ObjectGuid const& guid : immoltharGuids)
+            if (Creature* creature = map->GetCreature(guid))
+                creature->DespawnOrUnsummon(0ms, 24h);
 
         TempSummon* helnurath = map->SummonCreature(
             NPC_LORD_HELNURATH,
@@ -5775,9 +5780,16 @@ bool ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
                 SPELL_SAFETY_BUBBLE, true);
             // Instance scripts may have loaded creatures during CreateMap, before
             // the stage index existed. Register those DB spawns once as well.
+            std::vector<ObjectGuid> loadedSpawnGuids;
+            loadedSpawnGuids.reserve(map->GetCreatureBySpawnIdStore().size());
             for (auto const& spawn : map->GetCreatureBySpawnIdStore())
                 if (spawn.second && spawn.second->IsInWorld())
-                    OnCreatureAddWorld(spawn.second);
+                    loadedSpawnGuids.push_back(spawn.second->GetGUID());
+
+            for (ObjectGuid const& guid : loadedSpawnGuids)
+                if (Creature* creature = map->GetCreature(guid))
+                    if (creature->IsInWorld())
+                        OnCreatureAddWorld(creature);
         }
 
         //
