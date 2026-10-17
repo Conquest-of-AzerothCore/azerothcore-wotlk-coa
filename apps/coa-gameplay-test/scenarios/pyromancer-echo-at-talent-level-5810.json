@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Echo of Nozdormu replaces Explode as soon as the talent is taken at level 10 (COA-5810)",
+  "contract": [
+    "Echo of Nozdormu 520937 is the first Draconic talent and can be taken at level 10. Its passive transforms",
+    "Explode (chain of 800792) into Echo of Nozdormu. AscensionPyromancer::Refresh learned only the Echo ranks whose",
+    "SpellLevel is at or below the player's level, and rank 1 802174 has SpellLevel 11, so a level 10 Pyromancer",
+    "learned no Echo rank and Explode stayed Explode until level 11. Rank 1 is now always taught while the talent is",
+    "active; higher ranks still follow the player's level, and losing the talent still removes every rank."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "pyro", "race": 1, "class": 24, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "learn", "actor": "pyro", "spell": 800792 },
+    { "action": "learn", "actor": "pyro", "spell": 520937 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a level 10 Pyromancer knows Echo of Nozdormu rank 1",
+      "actor": "pyro", "metric": "knows_spell", "spell": 802174, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Echo of Nozdormu replaces Explode at level 10",
+      "actor": "pyro", "metric": "temporary_spell_replacement", "spell": 800792, "equals": 802174,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 (SpellLevel 18) is still gated by level",
+      "actor": "pyro", "metric": "knows_spell", "spell": 803407, "equals": 0
+    }
+  ]
+}

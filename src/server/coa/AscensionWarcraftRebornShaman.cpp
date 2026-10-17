@@ -1,7 +1,9 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "Creature.h"
+#include "Item.h"
 #include "Map.h"
+#include "Player.h"
 #include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
 #include "SpellInfo.h"
@@ -12,6 +14,52 @@ namespace AscensionWarcraftReborn
 namespace
 {
 constexpr uint32 TIDAL_FORCE_CRIT = 1155166;
+constexpr uint32 SHAMAN_FLAMETONGUE_WEAPON = 0x200000;
+constexpr int32 LAVA_SWEEP_FLAMETONGUE_PCT = 50;
+
+bool HasFlametongue(Player const* player, Item const* weapon)
+{
+    for (AuraEffect const* effect : player->GetAuraEffectsByType(SPELL_AURA_DUMMY))
+    {
+        SpellInfo const* spellInfo = effect->GetSpellInfo();
+        if (spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN && (spellInfo->SpellFamilyFlags[0] & SHAMAN_FLAMETONGUE_WEAPON) &&
+            effect->GetBase()->GetCastItemGUID() == weapon->GetGUID())
+            return true;
+    }
+    return false;
+}
+
+class spell_ascension_reborn_lava_sweep : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_reborn_lava_sweep);
+
+    bool Load() override
+    {
+        return GetCaster()->IsPlayer();
+    }
+
+    void HandleHit()
+    {
+        Player* caster = GetCaster()->ToPlayer();
+        Item* weapon = caster->GetWeaponForAttack(BASE_ATTACK, true);
+        int32 damage = GetHitDamage();
+        if (!weapon || damage <= 0)
+            return;
+        if (GetHitUnit() == GetExplTargetUnit())
+            if (int32 const otherTargets = GetSpellInfo()->Effects[EFFECT_0].CalcValue(caster))
+                damage = damage * 100 / otherTargets;
+        if (HasFlametongue(caster, weapon))
+            AddPct(damage, LAVA_SWEEP_FLAMETONGUE_PCT);
+        if (weapon->GetTemplate()->InventoryType != INVTYPE_2HWEAPON)
+            AddPct(damage, GetSpellInfo()->Effects[EFFECT_1].CalcValue(caster));
+        SetHitDamage(damage);
+    }
+
+    void Register() override
+    {
+        OnHit += SpellHitFn(spell_ascension_reborn_lava_sweep::HandleHit);
+    }
+};
 
 class spell_ascension_reborn_tidal_force : public AuraScript
 {
@@ -80,6 +128,7 @@ class spell_ascension_reborn_totemic_projection : public SpellScript
 void AddAscensionWarcraftRebornShamanScripts()
 {
     using namespace AscensionWarcraftReborn;
+    RegisterSpellScript(spell_ascension_reborn_lava_sweep);
     RegisterSpellScript(spell_ascension_reborn_tidal_force);
     RegisterSpellScript(spell_ascension_reborn_totemic_projection);
 }

@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "AscensionClientSpellPatches.h"
 #include "AscensionXoroth.h"
 #include "AscensionXorothData.h"
 #include "DBCStores.h"
@@ -170,8 +171,11 @@ void ApplyContracts(SpellInfo* info)
         dummy(1);
         dummy(2);
     }
-    if (id == 805677)
+    if (id == SPELL_SACRIFICIAL_CIRCLE)
+    {
         info->CasterAuraSpell = 0;
+        Ascension::ClientSpellPatches::Instance().Register(id);
+    }
     if (id == 805965)
     {
         auto& e = info->Effects[0];

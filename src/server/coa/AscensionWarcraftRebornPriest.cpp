@@ -1,11 +1,14 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionWarcraftRebornPriest.h"
 #include "AscensionWarcraftRebornRules.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include <algorithm>
+#include <array>
 
 namespace AscensionWarcraftReborn
 {
@@ -13,6 +16,8 @@ namespace
 {
 constexpr uint32 PENANCE_DAMAGE_R1 = 47758;
 constexpr uint32 PENANCE_HEAL_R1 = 47757;
+constexpr uint32 PRIEST_PRAYER_OF_MENDING = 0x20;
+constexpr std::array<uint32, 3> DIVINE_PROVIDENCE = { 1147562, 1147564, 1147565 };
 
 uint32 RebornRank(uint32 stockFirstRank, uint8 rank)
 {
@@ -64,6 +69,17 @@ class spell_ascension_reborn_penance : public SpellScript
     }
 };
 }
+}
+
+void ApplyAscensionWarcraftRebornPriestContracts(SpellInfo* spellInfo)
+{
+    using namespace AscensionWarcraftReborn;
+    if (!spellInfo || std::find(DIVINE_PROVIDENCE.begin(), DIVINE_PROVIDENCE.end(), spellInfo->Id) == DIVINE_PROVIDENCE.end())
+        return;
+
+    SpellEffectInfo& healing = spellInfo->Effects[EFFECT_0];
+    if (healing.ApplyAuraName == SPELL_AURA_ADD_PCT_MODIFIER && healing.MiscValue == SPELLMOD_DAMAGE)
+        healing.SpellClassMask[1] |= PRIEST_PRAYER_OF_MENDING;
 }
 
 void AddAscensionWarcraftRebornPriestScripts()

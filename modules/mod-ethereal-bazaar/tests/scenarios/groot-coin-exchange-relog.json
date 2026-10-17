@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "name": "Groot Coin exchange at Tiraxis persists across relog (needs GrootCoin.ExchangeEnable = 1)",
+  "contract": "With the exchange enabled (and CharacterDatabase.WorkerThreads = 1) Tiraxis adds a sixth option. The submenu shows the balance in its text and offers only affordable bundles, 'Exchange all N' and Back. Choosing 5 of 12 coins at 100 per coin removes exactly 5 coins and adds exactly 500 Bazaar Tokens (975001) at once; a relog through the native save path keeps exactly that. 'Exchange all' then converts the remaining 7 into 700 more tokens in the same stack, again kept across a relog.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8816.5,
+    "y": 627.0,
+    "z": 94.1,
+    "o": 3.8
+  },
+  "players": [
+    {
+      "id": "player",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "tiraxis",
+      "owner": "player",
+      "entry": 900007,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "player",
+      "item": 910001,
+      "count": 12
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "player",
+      "target": "tiraxis"
+    },
+    {
+      "action": "assert",
+      "label": "Exchange option added",
+      "actor": "player",
+      "metric": "gossip_options",
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "Sixth option is the exchange",
+      "actor": "player",
+      "metric": "gossip_option_text",
+      "equals": 1,
+      "index": 5,
+      "text": "I want to exchange Groot Coins."
+    },
+    {
+      "action": "gossip_select",
+      "actor": "player",
+      "option": 5
+    },
+    {
+      "action": "assert",
+      "label": "1, 5, 10, all, Back",
+      "actor": "player",
+      "metric": "gossip_options",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "Exchange all names the balance",
+      "actor": "player",
+      "metric": "gossip_option_text",
+      "equals": 1,
+      "index": 3,
+      "text": "Exchange all 12 Groot Coins for 1200 Bazaar Tokens."
+    },
+    {
+      "action": "gossip_select",
+      "actor": "player",
+      "option": 1,
+      "label": "Five coins (pop-up accepted)"
+    },
+    {
+      "action": "assert",
+      "label": "Exactly five coins spent",
+      "actor": "player",
+      "metric": "item_count",
+      "equals": 7,
+      "item": 910001
+    },
+    {
+      "action": "assert",
+      "label": "Exactly 500 Bazaar Tokens",
+      "actor": "player",
+      "metric": "item_count",
+      "equals": 500,
+      "item": 975001
+    },
+    {
+      "action": "relog",
+      "actor": "player"
+    },
+    {
+      "action": "assert",
+      "label": "Coins kept after relog",
+      "actor": "player",
+      "metric": "item_count",
+      "equals": 7,
+      "item": 910001
+    },
+    {
+      "action": "assert",
+      "label": "Tokens kept after relog",
+      "actor": "player",
+      "metric": "item_count",
+      "equals": 500,
+      "item": 975001
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "player",
+      "target": "tiraxis"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "player",
+      "option": 5
+    },
+    {
+      "action": "assert",
+      "label": "1, 5, all, Back",
+      "actor": "player",
+      "metric": "gossip_options",
+      "equals": 4
+    },
+    {
+      "action": "gossip_select",
+      "actor": "player",
+      "option": 2,
+      "label": "Exchange all 7"
+    },
+    {
+      "action": "assert",
+      "label": "No coins left",
+      "actor": "player",
+      "metric": "item_count",
+      "equals": 0,
+      "item": 910001
+    },
+    {
+      "action": "assert",
+      "label": "700 more tokens",
+      "actor": "player",
+      "metric": "item_count",
+      "equals": 1200,
+      "item": 975001
+    },
+    {
+      "action": "relog",
+      "actor": "player"
+    },
+    {
+      "action": "assert",
+      "label": "Still no coins after relog",
+      "actor": "player",
+      "metric": "item_count",
+      "equals": 0,
+      "item": 910001
+    },
+    {
+      "action": "assert",
+      "label": "1200 tokens after relog",
+      "actor": "player",
+      "metric": "item_count",
+      "equals": 1200,
+      "item": 975001
+    }
+  ]
+}

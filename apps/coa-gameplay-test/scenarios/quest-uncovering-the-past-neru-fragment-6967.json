@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "name": "Uncovering the Past: all four tablet fragments spawn at Whelgar's Excavation Site (#6967)",
+  "contract": [
+    "Report #6967: of the four fragments for Uncovering the Past (299) only three spawn; the Neru Fragment is missing. The reporter later found it.",
+    "Quest 299 needs Ados, Modr, Golm and Neru Fragment (2658-2661). Each drops only for the quest from one chest: Ancient Relic 35252, 334 and 333 and Loose Soil 331 (gameobject_questitem, loot 1678-1681).",
+    "data/sql/base/db_world/gameobject.sql spawns each chest once in area 118: Loose Soil 15208 at (-3308.06, -1899.06, 31.74), Ancient Relics 15209, 15210 and 15211; no later update removes them.",
+    "A dwarf on Uncovering the Past finds each chest active for the quest at its spawn, and the Loose Soil yields the Neru Fragment."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -3308.06, "y": -1899.06, "z": 32.3, "o": 0.0 },
+  "players": [
+    { "id": "digger", "race": 3, "class": 1, "level": 30 }
+  ],
+  "steps": [
+    { "action": "set_phase", "label": "See the world-spawned fragment chests", "actor": "digger", "value": 1 },
+    { "action": "prepare_quest", "label": "Take Uncovering the Past", "actor": "digger", "quest": 299, "complete": false },
+    { "action": "destroy_item", "actor": "digger", "item": 2658 },
+    { "action": "destroy_item", "actor": "digger", "item": 2659 },
+    { "action": "destroy_item", "actor": "digger", "item": 2660 },
+    { "action": "destroy_item", "actor": "digger", "item": 2661 },
+    { "action": "assert", "label": "Uncovering the Past is in progress", "actor": "digger", "metric": "quest_status",
+      "quest": 299, "equals": 3, "within_ms": 3000 },
+    { "action": "assert", "label": "The digger carries no Neru Fragment yet", "actor": "digger", "metric": "item_count",
+      "item": 2661, "equals": 0 },
+
+    { "action": "teleport", "actor": "digger", "map": 0, "x": -3308.06, "y": -1899.06, "z": 32.3, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "The Loose Soil holding the Neru Fragment stands at spawn 15208", "actor": "digger",
+      "metric": "nearby_gameobject_count", "entry": 331, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "The Loose Soil is active for Uncovering the Past", "actor": "digger",
+      "metric": "nearby_gameobject_quest_active", "entry": 331, "equals": 1 },
+
+    { "action": "teleport", "actor": "digger", "map": 0, "x": -3373.47, "y": -1810.15, "z": 16.8, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "The Ancient Relic holding the Modr Fragment stands at spawn 15209", "actor": "digger",
+      "metric": "nearby_gameobject_count", "entry": 334, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "It is active for Uncovering the Past", "actor": "digger",
+      "metric": "nearby_gameobject_quest_active", "entry": 334, "equals": 1 },
+
+    { "action": "teleport", "actor": "digger", "map": 0, "x": -3371.96, "y": -1846.54, "z": 17.1, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "The Ancient Relic holding the Golm Fragment stands at spawn 15210", "actor": "digger",
+      "metric": "nearby_gameobject_count", "entry": 333, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "It is active for Uncovering the Past", "actor": "digger",
+      "metric": "nearby_gameobject_quest_active", "entry": 333, "equals": 1 },
+
+    { "action": "teleport", "actor": "digger", "map": 0, "x": -3444.59, "y": -1833.84, "z": 25.5, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "The Ancient Relic holding the Ados Fragment stands at spawn 15211", "actor": "digger",
+      "metric": "nearby_gameobject_count", "entry": 35252, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "It is active for Uncovering the Past", "actor": "digger",
+      "metric": "nearby_gameobject_quest_active", "entry": 35252, "equals": 1 },
+
+    { "action": "summon_gameobject", "actor": "digger", "entry": 331 },
+    { "action": "wait", "label": "Let the chest become ready", "ms": 1000 },
+    { "action": "loot_gameobject", "actor": "digger", "entry": 331 },
+    { "action": "loot_slot", "label": "The Loose Soil's quest loot holds the Neru Fragment", "actor": "digger", "item": 2661 },
+    { "action": "assert", "label": "The digger picks up the Neru Fragment", "actor": "digger", "metric": "item_count",
+      "item": 2661, "equals": 1, "within_ms": 2000 },
+    { "action": "close_loot", "actor": "digger" }
+  ]
+}

@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionHighRiskPolicy.h"
+#include "AscensionBloodforging.h"
 #include "Bag.h"
 #include "Chat.h"
 #include "Config.h"
@@ -420,10 +421,11 @@ void Drop(Player* player)
     uint8 slot = 0;
     for (Item* item : losses)
     {
-        StoredItem stored{item->GetGUID().GetCounter(), item->GetEntry(), item->GetCount(),
-            item->GetItemRandomPropertyId(), item->GetItemSuffixFactor(), false};
         player->MoveItemFromInventory(item->GetBagSlot(), item->GetSlot(), true);
         item->DeleteFromInventoryDB(transaction);
+        Bloodforging::Convert(*item, Bloodforging::Method::HighRiskDrop);
+        StoredItem stored{item->GetGUID().GetCounter(), item->GetEntry(), item->GetCount(),
+            item->GetItemRandomPropertyId(), item->GetItemSuffixFactor(), false};
         if (item->GetState() == ITEM_UNCHANGED)
             item->FSetState(ITEM_CHANGED);
         item->SetOwnerGUID(ObjectGuid::Empty);

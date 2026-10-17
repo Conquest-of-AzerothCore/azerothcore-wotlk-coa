@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "name": "The Sacred Flame's world map area sits on the Ashenvale Moonwell (#7722)",
+  "contract": [
+    "quest_poi 1195/1 is the stock area row for quest 1195 (Flags 1, eight points) but carries ObjectiveIndex 10, which addresses item objective slot 6, empty for this quest (RequiredItemId1-6 are 0), so the world map draws no area for it.",
+    "quest_poi 1195/2 carries ObjectiveIndex 5 and one point, the pin at 1888 -1776 that the issue reports as the map's correct location.",
+    "A real client asks CMSG_QUEST_POI_QUERY for the quests in its log and reads SMSG_QUEST_POI_QUERY_RESPONSE (opcode 484, QueryHandler.cpp:431-469): quest count, then per quest the quest id, a POI count, and per POI its id, objective index, map, area, floor, priority, flags, point count and integer world points, in quest_poi id order.",
+    "Expectation: quest 1195 answers with three POIs; the area row carries ObjectiveIndex 5, Flags 1 and eight points ringed 14 yd around the Ashenvale Moonwell (gameobject 20806); the pin row keeps Flags 3 and its point."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "c",
+      "race": 6,
+      "class": 1,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries The Sacred Flame unfinished",
+      "actor": "c",
+      "quest": 1195,
+      "complete": false
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark The Sacred Flame, as the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 1195
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the answer names quest 1195",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "equals": 1195
+    },
+    {
+      "action": "assert",
+      "label": "The quest answers with three POIs",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the area POI keeps its own id",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 52,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The area POI targets the objective the pin uses",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 56,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the area POI is on Ashenvale",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "equals": 43
+    },
+    {
+      "action": "assert",
+      "label": "The area POI keeps the area flag",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 76,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The area POI stays a polygon",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "The area ring's first x is the moonwell's",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 84,
+      "equals": 1884
+    },
+    {
+      "action": "assert",
+      "label": "The area ring's first y is the moonwell's",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "equals": 4294965524
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pin POI is still third",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 148,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "The pin keeps its pin flag",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 172,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "The pin keeps its single point on the moonwell",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 180,
+      "equals": 1888
+    }
+  ]
+}

@@ -125,7 +125,7 @@ int main()
     assert(AddLoot(&caster, staff, 1) && staff.items.front().itemid == 400);
     assert(!AddLoot(&caster, staff, 1) && staff.items.size() == 1);
 
-    for (uint32 rejected = 0; rejected < 13; ++rejected)
+    for (uint32 rejected = 0; rejected < 14; ++rejected)
     {
         Reset();
         Outfit(1, 5000);
@@ -143,6 +143,12 @@ int main()
         if (rejected == 10) item.RandomProperty = 1;
         if (rejected == 11) item.RandomSuffix = 1;
         if (rejected == 12) item.Name1 = "Monster - Shield, Stormwind Guard";
+        if (rejected == 13)
+        {
+            item = Gear(5000, ITEM_MOD_STRENGTH);
+            item.Name1 = "Bloodforged Stone Sledgehammer";
+            item.Description = "@Bloodforged@";
+        }
         objectMgr.items[500] = item;
         Index();
         Loot rejectedLoot;

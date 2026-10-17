@@ -99,6 +99,7 @@ constexpr uint32 PyromancerCopies[] = {503864, 704817, 804103, 680962, 704274, 7
 constexpr uint32 PyromancerResourceHelpers[] = {572806, 807390, 807391, 807392, 807393, 807394, 807401,
                                                 807402, 807412, 807535, 807536, 807613, 807533, 808064,
                                                 807768, 804301, 521642, 572381, 680365};
+constexpr uint32 PyromancerDraconicDisplay = 142067;
 constexpr uint32 PyromancerEchoRanks[] = {567589, 567590, 578307, 578308, 578309,
                                           802174, 803407, 803408, 803409, 803410};
 #endif

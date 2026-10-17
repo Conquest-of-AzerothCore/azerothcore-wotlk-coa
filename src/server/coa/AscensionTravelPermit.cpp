@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "DBCStores.h"
 #include "GameObject.h"
 #include "GameObjectScript.h"
 #include "GlobalScript.h"
@@ -11,6 +12,7 @@
 #include "ScriptedGossip.h"
 #include "SpellInfo.h"
 #include "SpellScript.h"
+#include "WorldSession.h"
 #include <array>
 
 namespace
@@ -63,6 +65,13 @@ SpellCastResult CheckTravel(Player const* player)
     return SPELL_CAST_OK;
 }
 
+bool IsOffered(Player const* player, Destination const& destination)
+{
+    MapEntry const* map = sMapStore.LookupEntry(destination.mapId);
+    return destination.team == player->GetTeamId() && map && map->Expansion() <= player->GetSession()->Expansion() &&
+        sObjectMgr->GetPlayerInfo(destination.race, player->getClass());
+}
+
 class spell_ascension_travel_permit : public SpellScript
 {
     PrepareSpellScript(spell_ascension_travel_permit);
@@ -85,8 +94,7 @@ class spell_ascension_travel_permit : public SpellScript
             return;
         ClearGossipMenuFor(player);
         for (uint32 i = 0; i < Destinations.size(); ++i)
-            if (Destinations[i].team == player->GetTeamId() &&
-                sObjectMgr->GetPlayerInfo(Destinations[i].race, player->getClass()))
+            if (IsOffered(player, Destinations[i]))
                 AddGossipItemFor(player, GOSSIP_ICON_TAXI, Destinations[i].name, SenderTravelPermit, i);
         SendGossipMenuFor(player, DEFAULT_GOSSIP_MESSAGE, item->GetGUID());
     }
@@ -161,9 +169,7 @@ public:
         if (action >= Destinations.size() || CheckTravel(player) != SPELL_CAST_OK)
             return;
         Destination const& destination = Destinations[action];
-        if (destination.team != player->GetTeamId())
-            return;
-        if (sObjectMgr->GetPlayerInfo(destination.race, player->getClass()))
+        if (IsOffered(player, destination))
             player->TeleportTo(destination.mapId, destination.x, destination.y, destination.z, destination.orientation);
     }
 };

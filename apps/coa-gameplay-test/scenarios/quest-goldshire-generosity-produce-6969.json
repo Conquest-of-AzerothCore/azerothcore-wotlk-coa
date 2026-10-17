@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Goldshire's Generosity Apples stop sparkling once the player has ten",
+  "contract": "#6969: Goldshire's Generosity 1660059 wants 3 Pumpkins 558961, 3 Melons 558962 and 10 Apples 558963 from the Pumpkin 2300547, Melon 2300548 and Apple 2300549 chests. Expected: a chest is quest-active (sparkles and can be looted) only while the player still needs its produce, so with 10 Apples and no Pumpkins the Apple is no longer active while the Pumpkin still is.",
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "gatherer",
+      "race": 1,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "actor": "gatherer",
+      "quest": 1660059,
+      "complete": false
+    },
+    {
+      "action": "destroy_item",
+      "actor": "gatherer",
+      "item": 558961
+    },
+    {
+      "action": "destroy_item",
+      "actor": "gatherer",
+      "item": 558962
+    },
+    {
+      "action": "destroy_item",
+      "actor": "gatherer",
+      "item": 558963
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "gatherer",
+      "entry": 2300549,
+      "distance": 3
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "gatherer",
+      "entry": 2300547,
+      "distance": 6
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "metric": "nearby_gameobject_quest_active",
+      "entry": 2300549,
+      "equals": 1,
+      "label": "The Apple sparkles while the quest still needs Apples"
+    },
+    {
+      "action": "add_item",
+      "actor": "gatherer",
+      "item": 558963,
+      "count": 10
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "metric": "quest_status",
+      "quest": 1660059,
+      "equals": 3,
+      "label": "The quest still needs its Pumpkins and Melons"
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "metric": "nearby_gameobject_count",
+      "entry": 2300549,
+      "equals": 1,
+      "label": "The Apple is still there"
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "metric": "nearby_gameobject_quest_active",
+      "entry": 2300549,
+      "equals": 0,
+      "within_ms": 1000,
+      "label": "The Apple stops sparkling once the player has ten Apples"
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "metric": "nearby_gameobject_quest_active",
+      "entry": 2300547,
+      "equals": 1,
+      "label": "The Pumpkin still sparkles while the quest needs Pumpkins"
+    }
+  ]
+}

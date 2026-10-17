@@ -24,7 +24,7 @@ class RunnerTests(unittest.TestCase):
                 run.validate(self.scenario)
 
     def test_nearby_creature_count_filters_require_valid_scope_and_ranges(self):
-        for filters in ({}, {'min_level': 16, 'max_level': 17}, {'min_home_distance': 1}):
+        for filters in ({}, {'min_level': 16, 'max_level': 17}, {'min_home_distance': 1}, {'spell': 210866}):
             scenario = copy.deepcopy(self.scenario)
             scenario['steps'].append({'action': 'assert', 'actor': 'caster',
                                      'metric': 'nearby_creature_count', 'entry': 2070, 'equals': 2, **filters})
@@ -33,7 +33,8 @@ class RunnerTests(unittest.TestCase):
         for filters in ({'min_level': 0}, {'max_level': 256}, {'min_level': 17, 'max_level': 16},
                         {'min_level': '16'}, {'min_level': True}, {'max_level': 16.5},
                         {'min_home_distance': -1}, {'min_home_distance': float('nan')},
-                        {'min_home_distance': float('inf')}, {'min_home_distance': True}):
+                        {'min_home_distance': float('inf')}, {'min_home_distance': True},
+                        {'spell': 0}, {'spell': '210866'}, {'spell': True}):
             scenario = copy.deepcopy(self.scenario)
             scenario['steps'].append({'action': 'assert', 'actor': 'caster',
                                      'metric': 'nearby_creature_count', 'entry': 2070, 'equals': 2, **filters})
@@ -46,15 +47,16 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(field=field), self.assertRaises(ValueError):
                 run.validate(scenario)
 
-    def test_duel_arbiter_packet_field_requires_a_player(self):
-        step = {'action': 'client_packet', 'actor': 'caster', 'opcode': 364,
-                'fields': [{'duel_arbiter': 'caster'}], 'consumed': False}
+    def test_player_packet_fields_require_a_player(self):
+        step = {'action': 'client_packet', 'actor': 'caster', 'opcode': 364, 'consumed': False}
         self.scenario['steps'].append(step)
-        self.assertIs(run.validate(self.scenario), self.scenario)
-        for actor in ('target', 'missing', 1):
-            step['fields'] = [{'duel_arbiter': actor}]
-            with self.subTest(actor=actor), self.assertRaisesRegex(ValueError, 'expected a player id'):
-                run.validate(self.scenario)
+        for kind in ('duel_arbiter', 'invited_battleground_type'):
+            step['fields'] = [{kind: 'caster'}]
+            self.assertIs(run.validate(self.scenario), self.scenario)
+            for actor in ('target', 'missing', 1):
+                step['fields'] = [{kind: actor}]
+                with self.subTest(kind=kind, actor=actor), self.assertRaisesRegex(ValueError, 'expected a player id'):
+                    run.validate(self.scenario)
 
     def test_nearby_gameobject_use_owner_requires_a_player(self):
         step = {'action': 'use_nearby_gameobject', 'actor': 'caster', 'entry': 80775, 'owner': 'caster'}

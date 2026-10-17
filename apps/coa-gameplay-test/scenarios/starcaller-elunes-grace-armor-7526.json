@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Elune's Grace: a critical Hand of Elune raises the target's armor (#7526)",
+  "contract": "Elune's Grace 504001 reads 'Critical heals with Hand of Elune now increase the target's armor by $504027s1% for $504027d'. 504027 is MOD_RESISTANCE_PCT (101) on physical resistance with 9 base points (+10%) and a 15 s duration. aura_ascension_starcaller_event::Check accepts the proc only when the hit is critical and Hand of Elune 801990 healed for a non-zero effective amount, then Proc casts 504027 on the healed ally. spell_crit_rating 100000 makes every Hand of Elune critical. The first cast heals an injured ally, the second one a full-health ally so the whole heal is overheal.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "s", "race": 1, "class": 26, "level": 60, "spell_crit_rating": 100000 },
+    { "id": "ally", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "s", "spell": 801990 },
+    { "action": "learn", "actor": "s", "spell": 504001 },
+    { "action": "assert", "label": "SETUP: the Elune's Grace passive is active", "actor": "s", "metric": "aura", "spell": 504001, "equals": 1 },
+    { "action": "assert", "label": "SETUP: no armor buff before any heal", "actor": "ally", "metric": "aura", "spell": 504027, "caster": "s", "equals": 0 },
+    { "action": "set_health", "actor": "ally", "maximum": 100000, "value": 50000 },
+    { "action": "cast", "actor": "s", "spell": 801990, "target": "ally" },
+    { "action": "assert", "label": "SETUP: Hand of Elune crit-healed the injured ally", "actor": "s", "metric": "spell_heal_count", "spell": 801990, "target": "ally", "critical": true, "equals": 1, "within_ms": 6000 },
+    { "action": "assert", "label": "CASE A (injured ally): the critical heal applies the armor buff 504027", "actor": "ally", "metric": "aura", "spell": 504027, "caster": "s", "equals": 1, "within_ms": 3000 },
+    { "action": "cancel_aura", "actor": "ally", "spell": 504027 },
+    { "action": "set_health", "actor": "ally", "maximum": 100000, "value": 100000 },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 3000 },
+    { "action": "cast", "actor": "s", "spell": 801990, "target": "ally" },
+    { "action": "assert", "label": "SETUP: Hand of Elune crit-healed the full-health ally", "actor": "s", "metric": "spell_heal_count", "spell": 801990, "target": "ally", "critical": true, "equals": 2, "within_ms": 6000 },
+    { "action": "assert", "label": "CASE B (full-health ally): the critical heal applies the armor buff 504027", "actor": "ally", "metric": "aura", "spell": 504027, "caster": "s", "equals": 1, "within_ms": 3000 }
+  ]
+}

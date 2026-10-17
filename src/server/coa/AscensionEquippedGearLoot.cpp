@@ -1,4 +1,5 @@
 #include "AscensionEquippedGearLoot.h"
+#include "AscensionBloodforging.h"
 #include "AscensionCreaturePreset.h"
 #include "Config.h"
 #include "Creature.h"
@@ -12,7 +13,10 @@
 #include <algorithm>
 #include <array>
 #include <atomic>
+#include <cctype>
 #include <cmath>
+#include <string>
+#include <string_view>
 #include <tuple>
 #include <unordered_map>
 #include <vector>
@@ -53,6 +57,31 @@ uint64 AppearanceKey(uint32 display, uint32 inventoryType)
     return (uint64(display) << 32) | SlotType(inventoryType);
 }
 
+bool PlaceholderName(std::string_view name)
+{
+    constexpr std::array<std::string_view, 4> prefixes = {"Monster -", "***", "zzOLD", "zzDEPRECATED"};
+    if (std::any_of(prefixes.begin(), prefixes.end(),
+            [name](std::string_view prefix) { return name.starts_with(prefix); }) ||
+        name.find("[MISSING ITEM NAME]") != std::string_view::npos)
+        return true;
+
+    std::string lowered(name);
+    std::transform(lowered.begin(), lowered.end(), lowered.begin(),
+        [](char character) { return char(std::tolower(static_cast<unsigned char>(character))); });
+
+    auto const isWordChar = [](char character)
+    {
+        return character == '_' || std::isalnum(static_cast<unsigned char>(character)) != 0;
+    };
+    constexpr std::array<std::string_view, 4> words = {"unused", "test", "ph", "deprecated"};
+    for (std::string_view word : words)
+        for (std::size_t at = lowered.find(word); at != std::string::npos; at = lowered.find(word, at + 1))
+            if ((at == 0 || !isWordChar(lowered[at - 1])) &&
+                (at + word.size() == lowered.size() || !isWordChar(lowered[at + word.size()])))
+                return true;
+    return false;
+}
+
 bool Wearable(ItemTemplate const& item)
 {
     return item.DisplayInfoID && item.ItemLevel && item.InventoryType != INVTYPE_NON_EQUIP
@@ -62,7 +91,7 @@ bool Wearable(ItemTemplate const& item)
         && !item.HasFlag(ITEM_FLAG_DEPRECATED) && !item.HasFlag(ITEM_FLAG_CONJURED)
         && !item.StartQuest && !item.RequiredSkill && !item.RequiredSpell && !item.RandomProperty && !item.RandomSuffix
         && !item.RequiredHonorRank && !item.RequiredReputationFaction
-        && !item.Name1.starts_with("Monster -");
+        && !PlaceholderName(item.Name1) && !Bloodforging::IsBloodforged(item);
 }
 
 uint32 GearLevel(ItemTemplate const& item)

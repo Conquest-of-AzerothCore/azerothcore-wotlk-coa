@@ -36,6 +36,9 @@ struct WaterRune
 
 constexpr WaterRune WaterRunes[] = {{EFFECT_1, SPELL_WATER_ENGRAVING}, {EFFECT_2, SPELL_ICE_ENGRAVING}};
 
+constexpr float HURRICANE_STRIKE_DISTANCE = 1.5f;
+constexpr uint32 HURRICANE_STRIKE_DIRECTIONS = 5;
+
 bool CanUseHurricane(Unit* caster, uint32 spell)
 {
     Player* player = caster ? caster->ToPlayer() : nullptr;
@@ -67,16 +70,25 @@ bool StrikeHurricane(Unit* player, Aura* aura)
         player->GetMap() != target->GetMap() || !player->InSamePhase(target) ||
         !player->IsValidAttackTarget(target))
         return false;
-    if (aura->GetId() == SPELL_RUNIC_HURRICANE)
+    uint64 const strikes = aura->GetScriptValue(SPELL_HURRICANE_HIT);
+    if (aura->GetId() == SPELL_RUNIC_HURRICANE && strikes >= HURRICANE_STRIKE_DIRECTIONS)
+        return false;
+    aura->SetScriptValue(SPELL_HURRICANE_HIT, strikes + 1);
+    float const angle = player->GetOrientation() +
+        float(strikes % HURRICANE_STRIKE_DIRECTIONS) * 2.0f * float(M_PI) / float(HURRICANE_STRIKE_DIRECTIONS);
+    float const x = target->GetPositionX() + std::cos(angle) * HURRICANE_STRIKE_DISTANCE;
+    float const y = target->GetPositionY() + std::sin(angle) * HURRICANE_STRIKE_DISTANCE;
+    float z = target->GetPositionZ();
+    if (!player->IsUnderWater())
     {
-        uint64 const strikes = aura->GetScriptValue(SPELL_RUNIC_HURRICANE_HIT);
-        if (strikes >= 5)
-            return false;
-        aura->SetScriptValue(SPELL_RUNIC_HURRICANE_HIT, strikes + 1);
-        player->CastSpell(target, SPELL_RUNIC_HURRICANE_HIT, true);
+        float const ground = player->GetMap()->GetHeight(x, y, MAX_HEIGHT);
+        if (ground > INVALID_HEIGHT)
+            z = ground;
     }
-    else
-        player->CastSpell(target, SPELL_HURRICANE_HIT, true);
+    player->NearTeleportTo(x, y, z, player->GetOrientation());
+    player->SetFacingToObject(target);
+    player->CastSpell(target,
+        aura->GetId() == SPELL_RUNIC_HURRICANE ? SPELL_RUNIC_HURRICANE_HIT : SPELL_HURRICANE_HIT, true);
     return true;
 }
 
@@ -112,6 +124,18 @@ class aura_ascension_runemaster_hurricane : public AuraScript
         return GetCaster() && GetCaster() == GetUnitOwner() && CanUseHurricane(GetCaster(), GetId());
     }
 
+    void SetFearImmunity(bool apply)
+    {
+        Unit* player = GetTarget();
+        player->ApplySpellImmune(GetId(), IMMUNITY_MECHANIC, MECHANIC_FEAR, apply);
+        player->ApplySpellImmune(GetId(), IMMUNITY_STATE, SPELL_AURA_MOD_FEAR, apply);
+    }
+
+    void Apply(AuraEffect const*, AuraEffectHandleModes)
+    {
+        SetFearImmunity(true);
+    }
+
     void Tick(AuraEffect const*)
     {
         if (!StrikeHurricane(GetTarget(), GetAura()))
@@ -121,6 +145,7 @@ class aura_ascension_runemaster_hurricane : public AuraScript
     void End(AuraEffect const*, AuraEffectHandleModes)
     {
         Unit* player = GetTarget();
+        SetFearImmunity(false);
         player->RemoveAurasDueToSpell(HurricaneDodge(GetId()), player->GetGUID());
         if (GetId() == SPELL_RUNIC_HURRICANE || !player->IsAlive() || !player->IsInWorld() ||
             GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
@@ -133,6 +158,8 @@ class aura_ascension_runemaster_hurricane : public AuraScript
 
     void Register() override
     {
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_runemaster_hurricane::Apply,
+            EFFECT_0, SPELL_AURA_PERIODIC_DUMMY, AURA_EFFECT_HANDLE_REAL);
         OnEffectPeriodic += AuraEffectPeriodicFn(aura_ascension_runemaster_hurricane::Tick,
             EFFECT_0, SPELL_AURA_PERIODIC_DUMMY);
         AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_runemaster_hurricane::End,

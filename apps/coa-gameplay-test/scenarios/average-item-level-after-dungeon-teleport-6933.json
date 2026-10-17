@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Teleporting into and out of a Dungeon Finder dungeon resends the average item level (#6933)",
+  "contract": "The client shows the character's average item level from the SMSG_UPDATE_OBJECT_ADDON (0x0578) average item level field, and it rebuilds the player after a far teleport. After the Dungeon Finder teleport into the dungeon and the minimap's Teleport out of Dungeon, the server sends the same non-zero average item level again instead of leaving it at 0 until the next login.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    { "id": "p1", "race": 1, "class": 1, "level": 60, "ascension_client": true },
+    { "id": "p2", "race": 1, "class": 1, "level": 60, "ascension_client": true }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "group", "actor": "p1", "target": "p2" },
+    { "action": "lfg_dungeon", "label": "The group is assigned Scarlet Monastery - Graveyard", "actor": "p1", "dungeon": 18 },
+    { "action": "add_item", "actor": "p1", "item": 12584 },
+    { "action": "equip", "label": "p1 wields Grand Marshal's Longsword", "actor": "p1", "item": 12584, "slot": 15 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert",
+      "label": "The equipped weapon gives p1 a non-zero average item level",
+      "actor": "p1",
+      "metric": "sent_average_item_level",
+      "min": 1
+    },
+    { "action": "snapshot", "actor": "p1", "metric": "sent_average_item_level", "save_as": "item_level_outside" },
+    { "action": "snapshot", "actor": "p1", "metric": "sent_average_item_level_count", "save_as": "sent_before_entering" },
+    { "action": "lfg_teleport", "label": "p1 teleports into the dungeon", "actor": "p1" },
+    { "action": "assert", "label": "p1 enters Scarlet Monastery", "actor": "p1", "metric": "map_id", "equals": 189, "within_ms": 15000 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert",
+      "label": "The server resends p1's average item level after entering the dungeon",
+      "actor": "p1",
+      "metric": "sent_average_item_level_count",
+      "relative_to": "sent_before_entering",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The average item level sent inside the dungeon is unchanged",
+      "actor": "p1",
+      "metric": "sent_average_item_level",
+      "relative_to": "item_level_outside",
+      "min": -0.01,
+      "max": 0.01
+    },
+    { "action": "snapshot", "actor": "p1", "metric": "sent_average_item_level_count", "save_as": "sent_before_leaving" },
+    { "action": "lfg_teleport", "label": "p1 uses Teleport out of Dungeon", "actor": "p1", "out": true },
+    { "action": "assert", "label": "p1 is back in Eastern Kingdoms", "actor": "p1", "metric": "map_id", "equals": 0, "within_ms": 15000 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert",
+      "label": "The server resends p1's average item level after leaving the dungeon",
+      "actor": "p1",
+      "metric": "sent_average_item_level_count",
+      "relative_to": "sent_before_leaving",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The average item level sent after leaving is unchanged",
+      "actor": "p1",
+      "metric": "sent_average_item_level",
+      "relative_to": "item_level_outside",
+      "min": -0.01,
+      "max": 0.01
+    }
+  ]
+}

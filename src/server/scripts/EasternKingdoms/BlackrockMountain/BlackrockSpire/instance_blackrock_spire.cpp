@@ -21,6 +21,7 @@
 #include "CreatureScript.h"
 #include "GameObjectAI.h"
 #include "GameObjectScript.h"
+#include "GameTime.h"
 #include "GridNotifiers.h"
 #include "InstanceMapScript.h"
 #include "InstanceScript.h"
@@ -91,6 +92,37 @@ struct instance_blackrock_spire : public InstanceScript
         VaelastraszState   = NOT_STARTED;
     }
 
+    void OnPlayerEnter(Player* player) override
+    {
+        InstanceScript::OnPlayerEnter(player);
+
+        if (GetBossState(DATA_WARCHIEF_REND_BLACKHAND) == DONE ||
+            GetBossState(DATA_WARCHIEF_REND_BLACKHAND) == IN_PROGRESS ||
+            GetBossState(DATA_GYTH) == IN_PROGRESS)
+            return;
+
+        if (!RendSpawnId)
+            for (auto const& [spawnId, data] : sObjectMgr->GetAllCreatureData())
+                if (data.id == NPC_WARCHIEF_REND_BLACKHAND && data.mapid == instance->GetId())
+                {
+                    RendSpawnId = spawnId;
+                    break;
+                }
+
+        time_t now = GameTime::GetGameTime().count();
+        if (!RendSpawnId || instance->GetCreatureRespawnTime(RendSpawnId) <= now)
+            return;
+
+        auto bounds = instance->GetCreatureBySpawnIdStore().equal_range(RendSpawnId);
+        for (auto itr = bounds.first; itr != bounds.second; ++itr)
+            if (!itr->second->IsAlive())
+            {
+                itr->second->Respawn();
+                return;
+            }
+        instance->SaveCreatureRespawnTime(RendSpawnId, now);
+    }
+
     void CreatureLooted(Creature* creature, LootType loot) override
     {
         switch (creature->GetEntry())
@@ -146,8 +178,10 @@ struct instance_blackrock_spire : public InstanceScript
             case NPC_WARCHIEF_REND_BLACKHAND:
                 if (GetBossState(DATA_GYTH) != IN_PROGRESS)
                     WarchiefRendBlackhand = creature->GetGUID();
+                if (creature->GetSpawnId())
+                    RendSpawnId = creature->GetSpawnId();
 
-                if (GetBossState(DATA_GYTH) == DONE)
+                if (creature->GetSpawnId() && GetBossState(DATA_WARCHIEF_REND_BLACKHAND) == DONE)
                     creature->DisappearAndDie();
                 break;
             case NPC_GYTH:
@@ -161,7 +195,7 @@ struct instance_blackrock_spire : public InstanceScript
                 break;
             case NPC_LORD_VICTOR_NEFARIUS:
                 LordVictorNefarius = creature->GetGUID();
-                if (GetBossState(DATA_GYTH) == DONE)
+                if (GetBossState(DATA_WARCHIEF_REND_BLACKHAND) == DONE)
                     creature->DisappearAndDie();
                 break;
             case NPC_FINKLE_EINHORN:
@@ -294,6 +328,12 @@ struct instance_blackrock_spire : public InstanceScript
                 {
                     if (Creature* rend = instance->GetCreature(WarchiefRendBlackhand))
                         rend->Respawn(true);
+                    else if (RendSpawnId)
+                    {
+                        // Delayed until the evade has moved DATA_GYTH out of IN_PROGRESS.
+                        time_t respawnTime = GameTime::GetGameTime().count() + 5;
+                        instance->SaveCreatureRespawnTime(RendSpawnId, respawnTime);
+                    }
 
                     if (Creature* nefarius = instance->GetCreature(LordVictorNefarius))
                         nefarius->AI()->Talk(SAY_NEFARIUS_REND_WIPE);
@@ -634,6 +674,7 @@ protected:
     ObjectGuid OverlordWyrmthalak;
     ObjectGuid PyroguardEmberseer;
     ObjectGuid WarchiefRendBlackhand;
+    ObjectGuid::LowType RendSpawnId = 0;
     ObjectGuid Gyth;
     ObjectGuid LordVictorNefarius;
     ObjectGuid TheBeast;

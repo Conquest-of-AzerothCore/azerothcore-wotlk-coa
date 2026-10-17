@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "name": "Ranger Falconstrike appears only with the ready swap",
+  "contract": [
+    "SyncFalconstrike keeps the highest allowed Falconstrike rank active so SetTemporarySpellReplacement can swap every known Quick Shot rank for it; the swap only applies while both spells are active (Player.cpp:13994).",
+    "The rank is a vehicle for that swap, not a player ability. Learning it unconditionally at login announced a second, inert Falconstrike entry to the client's spellbook, which the ready gate then refuses (spell_ascension_ranger_falconstrike::CheckReady -> SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW): the reported defect.",
+    "The client needs the announced learn for the swapped action bar slot to render the replacement, so the learn belongs to the ready window that performs the swap, not to the idle state.",
+    "Expectation: with no ready aura the server and the client hold no Falconstrike rank; once 573338 is up the rank is learned, Quick Shot is swapped for it in the client's spellbook, and the swap reverts when the aura ends."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login state settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 500074
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 573060
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "No Falconstrike rank is learned before a ready window",
+      "actor": "ranger",
+      "metric": "knows_spell",
+      "spell": 806443,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No standalone Falconstrike entry reaches the spellbook",
+      "actor": "ranger",
+      "metric": "client_knows_spell",
+      "spell": 806443,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Falconstrike is ready",
+      "actor": "ranger",
+      "spell": 573338,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the rank is active with the ready window",
+      "actor": "ranger",
+      "metric": "knows_spell",
+      "spell": 806443,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Quick Shot is swapped for Falconstrike",
+      "actor": "ranger",
+      "metric": "temporary_spell_replacement",
+      "spell": 500074,
+      "equals": 806443,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The swapped slot reaches the client",
+      "actor": "ranger",
+      "metric": "spellbook_superseded_for",
+      "spell": 806443,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The client knows the rank the swapped slot renders",
+      "actor": "ranger",
+      "metric": "client_knows_spell",
+      "spell": 806443,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cancel_aura",
+      "label": "The ready buff ends",
+      "actor": "ranger",
+      "spell": 573338
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Quick Shot is back",
+      "actor": "ranger",
+      "metric": "temporary_spell_replacement",
+      "spell": 500074,
+      "equals": 500074,
+      "within_ms": 2000
+    }
+  ]
+}

@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Gleaming Vigil stays applied above 80% health (#7829)",
+  "contract": [
+    "Gleaming Vigil (704585) reduces Physical damage taken by 6%, plus 6% more while above 80% health, through helper 707769.",
+    "The helper lasts 1500 ms in the DBC (SpellDuration 65). AscensionSunClericContracts.cpp dummies 704585's native 500 ms periodic trigger, so AscensionSunCleric.cpp's Refresh owns applying and removing it from the 80%/75% health gate every 500 ms.",
+    "At stable 95% health the helper must stay applied without being cast again. An expiring helper recreated by the next refresh is the reported buff that fades and comes back every 2 seconds.",
+    "A drop to 70% removes it; climbing back to 85% grants it once and it then stays without further casts.",
+    "Unlearning the talent removes the helper again. Regeneration is disabled so the health condition stays independent of time."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "cleric",
+      "maximum": 1000,
+      "value": 950
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 704585
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Gleaming Vigil's helper is granted above 80% health",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 707769,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "spell_cast_count",
+      "spell": 707769,
+      "save_as": "helper_casts"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "aura_duration_ms",
+      "spell": 707769,
+      "save_as": "helper_duration"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the helper was applied at least once",
+      "actor": "cleric",
+      "metric": "spell_cast_count",
+      "spell": 707769,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "Health stays above 80% for the whole window",
+      "actor": "cleric",
+      "metric": "health",
+      "equals": 950
+    },
+    {
+      "action": "assert",
+      "label": "Gleaming Vigil's helper is still applied after 20 seconds",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 707769,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "A stable healthy helper is never recreated",
+      "actor": "cleric",
+      "metric": "spell_cast_count",
+      "spell": 707769,
+      "relative_to": "helper_casts",
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "cleric",
+      "value": 700
+    },
+    {
+      "action": "assert",
+      "label": "Dropping below the band removes Gleaming Vigil",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 707769,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "cleric",
+      "value": 850
+    },
+    {
+      "action": "assert",
+      "label": "Climbing back above 80% grants it again",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 707769,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "spell_cast_count",
+      "spell": 707769,
+      "save_as": "regrant_casts"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The re-granted helper stays without further casts",
+      "actor": "cleric",
+      "metric": "spell_cast_count",
+      "spell": 707769,
+      "relative_to": "regrant_casts",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "It is still applied at the end of the window",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 707769,
+      "equals": 1
+    },
+    {
+      "action": "unlearn",
+      "actor": "cleric",
+      "spell": 704585
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning Gleaming Vigil removes its helper",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 707769,
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}

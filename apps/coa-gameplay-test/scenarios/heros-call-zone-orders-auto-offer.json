@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Reaching a level offers the Hero's Call or Warchief's Command zone orders it unlocks as a pop-up",
-  "contract": "The Ascension client shows a \"Quest Discovered!\" pop-up for SMSG 0x927 {quest, 0} (OFFER) and accepts it with CMSG_QUESTGIVER_ACCEPT_QUEST carrying no quest giver. Reaching a level offers every zone order of the faction whose minimum level was just reached: the fixture's level-up from 1 to 19 offers the three level 10 orders 14204, 14212 and 14220, and reaching 20 offers Hero's Call: Redridge Mountains! 14209 and Hero's Call: Duskwood! 14208, not the level 10 orders again nor the Horde order 14243; a Horde character reaching 10 is offered Warchief's Command: The Barrens! 14232, not the level 15 order 14233. Accepting the pop-up adds the order to the quest log; an order above the character's level is refused. The client forgets its pop-ups on logout, so logging in offers the two open orders with the highest minimum level: logging in again at 20 offers 14208 and 14222, not the level 10 orders and not the accepted 14209.",
+  "contract": "The Ascension client shows a \"Quest Discovered!\" pop-up for SMSG 0x927 {quest, 0} (OFFER) and accepts it with CMSG_QUESTGIVER_ACCEPT_QUEST carrying no quest giver. Reaching a level offers every zone order of the faction whose minimum level was just reached: the fixture's level-up from 1 to 19 offers the three level 10 orders 14204, 14212 and 14220, and reaching 20 offers Hero's Call: Redridge Mountains! 14209 and Hero's Call: Duskwood! 14208, not the level 10 orders again nor the Horde order 14243; a Horde character reaching 10 is offered Warchief's Command: The Barrens! 14232, not the level 15 order 14233. Accepting the pop-up adds the order to the quest log; an order above the character's level is refused. The client does not report a dismissed pop-up, so each order is offered only on the level-up that unlocks it: logging in again at 20 offers neither the dismissed 14208 and 14222, nor the level 10 orders, nor the accepted 14209 (#7536).",
   "timeout_ms": 60000,
   "players": [
     {
@@ -67,7 +67,7 @@
       "equals": 1
     },
     {
-      "label": "a level-up offers every order it unlocks, without the login limit",
+      "label": "a level-up offers every order it unlocks",
       "action": "assert",
       "actor": "alliance",
       "metric": "server_packets",
@@ -147,23 +147,26 @@
       "actor": "alliance"
     },
     {
-      "label": "logging in offers Duskwood again",
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "label": "logging in does not offer the dismissed Duskwood order again",
       "action": "assert",
       "actor": "alliance",
       "metric": "server_packets",
       "opcode": 2343,
       "row": 14208,
-      "equals": 2,
-      "within_ms": 5000
+      "equals": 1
     },
     {
-      "label": "logging in offers the other level 20 order again",
+      "label": "logging in does not offer the other level 20 order again",
       "action": "assert",
       "actor": "alliance",
       "metric": "server_packets",
       "opcode": 2343,
       "row": 14222,
-      "equals": 2
+      "equals": 1
     },
     {
       "label": "the accepted Redridge order is not offered again",
@@ -175,7 +178,7 @@
       "equals": 1
     },
     {
-      "label": "the login offer stops at two orders, the level 10 ones wait",
+      "label": "logging in does not offer the level 10 orders again",
       "action": "assert",
       "actor": "alliance",
       "metric": "server_packets",

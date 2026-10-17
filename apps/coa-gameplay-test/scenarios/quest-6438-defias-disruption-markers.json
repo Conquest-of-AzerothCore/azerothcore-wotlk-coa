@@ -1,0 +1,718 @@
+{
+  "schema": 1,
+  "name": "Defias Disruption and Agria's Medicine: the map marks the Bandit's Bastion and the Goldshire market",
+  "contract": "#6438: Defias Disruption (100071) and Agria's Medicine (1660056) showed only the turn-in on the map. rev_20261009_00_coa_quest_6977_goldshire_objective_markers.sql drew both, but rev_20261009_30_coa_quest_poi_restore.sql then replaced 100071's two Bastion areas with twelve areas around every Defias spawn in Elwynn. This case sends the CMSG_QUEST_POI_QUERY a real client sends for each quest in the log and reads SMSG_QUEST_POI_QUERY_RESPONSE: 100071 must answer with the turn-in pin at Melika Isenstrider and one Bastion rectangle (-9855,-400)-(-9725,-525) per objective (ObjectiveIndex 0 Defias Bandits, 1 Defias Rogue Wizards), and 1660056 with its turn-in pin and one area per market ingredient (ObjectiveIndex 4-7). A control query for 17003, which the character does not carry, must come back empty.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9460.0,
+    "y": 50.0,
+    "z": 57.0,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 1,
+      "level": 8
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 100071 'Defias Disruption' unfinished",
+      "actor": "c",
+      "quest": 100071,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 1660056 'Agria's Medicine' unfinished",
+      "actor": "c",
+      "quest": 1660056,
+      "complete": false
+    },
+    {
+      "action": "client_packet",
+      "label": "CONTROL: ask the map to mark 17003, a quest this character does not carry",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 17003
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the answer names 17003, so the packet being read is this query's own answer",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 17003,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a quest outside the log gets no POIs",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 100071 'Defias Disruption', as the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 100071
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 100071's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 100071,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 100071 answers with 3 POIs, the turn-in pin and one Bastion area per objective",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "100071: POI id 0 is the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "100071: POI id 0 carries ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "100071: POI id 0 has 1 point",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "100071: POI id 0 point x -9491 (Melika Isenstrider)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294957805,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "100071: POI id 0 point y -8 (Melika Isenstrider)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 4294967288,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "100071: POI id 1 follows",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 52,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "100071: POI id 1 marks the Defias Bandits (ObjectiveIndex 0)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 56,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "100071: POI id 1 is drawn on WorldMapAreaId 30",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 30,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 100071 POI id 1 is the 4-corner Bastion area",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 100071 POI id 1 first point x -9855 (Bandit's Bastion)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 84,
+      "index": 0,
+      "equals": 4294957441,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 100071 POI id 1 first point y -400 (Bandit's Bastion)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 4294966896,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "100071: POI id 2 follows",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 116,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "100071: POI id 2 marks the Defias Rogue Wizards (ObjectiveIndex 1)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 120,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "100071: POI id 2 is drawn on WorldMapAreaId 30",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 128,
+      "index": 0,
+      "equals": 30,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 100071 POI id 2 is the 4-corner Bastion area",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 144,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 100071 POI id 2 first point x -9855 (Bandit's Bastion)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 148,
+      "index": 0,
+      "equals": 4294957441,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 100071 POI id 2 first point y -400 (Bandit's Bastion)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 152,
+      "index": 0,
+      "equals": 4294966896,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 1660056 'Agria's Medicine', as the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 1660056
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 1660056's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 1660056,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056 answers with 5 POIs, the turn-in pin and one area per market ingredient",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 5,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 0 follows",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 0 carries ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 0 is drawn on WorldMapAreaId 30",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 30,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 0 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 0 first point x -9275",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294958021,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 0 first point y 469",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 469,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 1 follows",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 52,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 1 carries ObjectiveIndex 4",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 56,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 1 is drawn on WorldMapAreaId 30",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 30,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 1 has 4 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 1 first point x -9420",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 84,
+      "index": 0,
+      "equals": 4294957876,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 1 first point y 55",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 55,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 2 follows",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 116,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 2 carries ObjectiveIndex 5",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 120,
+      "index": 0,
+      "equals": 5,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 2 is drawn on WorldMapAreaId 30",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 128,
+      "index": 0,
+      "equals": 30,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 2 has 4 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 144,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 2 first point x -9500",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 148,
+      "index": 0,
+      "equals": 4294957796,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 2 first point y 95",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 152,
+      "index": 0,
+      "equals": 95,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 3 follows",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 180,
+      "index": 0,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 3 carries ObjectiveIndex 6",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 184,
+      "index": 0,
+      "equals": 6,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 3 is drawn on WorldMapAreaId 30",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 192,
+      "index": 0,
+      "equals": 30,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 3 has 4 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 208,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 3 first point x -9520",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 212,
+      "index": 0,
+      "equals": 4294957776,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 3 first point y 70",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 216,
+      "index": 0,
+      "equals": 70,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 4 follows",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 244,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 4 carries ObjectiveIndex 7",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 248,
+      "index": 0,
+      "equals": 7,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 4 is drawn on WorldMapAreaId 30",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 256,
+      "index": 0,
+      "equals": 30,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 4 has 4 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 272,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 4 first point x -9485",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 276,
+      "index": 0,
+      "equals": 4294957811,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1660056: POI id 4 first point y -50",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 280,
+      "index": 0,
+      "equals": 4294967246,
+      "within_ms": 4000
+    }
+  ]
+}

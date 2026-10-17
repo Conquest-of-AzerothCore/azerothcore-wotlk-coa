@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Whirling Advance follows the direction the Barbarian is moving (#7668)",
+  "contract": "Issue #7668: pressing Q, E or S and then using Whirling Advance always launched the Barbarian forward, so the mobility move could not be used while kiting or backpedalling. Whirling Advance's effect 1 is SPELL_EFFECT_CHARGE_DEST with EffectImplicitTargetA TARGET_DEST_CASTER_FRONT, and Spell::SelectImplicitCasterDestTargets resolves that destination with WorldObject::MovePositionToFirstCollision(pos, dist, 0) around the caster's current orientation, so the charge spline always ran along the facing direction whatever movement key was held. CoA spells that already follow the movement keys read MOVEMENTFLAG_FORWARD/BACKWARD/STRAFE_LEFT/STRAFE_RIGHT and take the movement angle (AscensionPyromancer.cpp and AscensionWitchHunterAbilities.cpp both do this), so the same reading is applied to the Whirling Advance ranks (root 500919, ranks 504912-504916) through the OnDestinationTargetSelect hook. SpellRadius 32 gives the charge 12 yd. The fixture faces +X (orientation 0) with a dummy 30 yd ahead, so each successful cast moves the Barbarian about 12 yd: with no key held the gap closes, with S held (MOVEMENTFLAG_BACKWARD) the gap must open, and with Q held (MOVEMENTFLAG_STRAFE_LEFT) the gap must stay roughly the same. Expected before the fix: every cast closes the gap by about 12 yd, whichever key is held. The movement flag is set through the harness rather than a real client, so this establishes the server-side destination only; client rendering and the feel of the leap are not covered.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "b", "race": 1, "class": 12, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "e", "owner": "b", "entry": 36, "level": 60, "health": 500000, "distance": 30 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "b", "spell": 504913 },
+    { "action": "assert", "label": "SETUP: the Barbarian knows Whirling Advance", "actor": "b", "metric": "knows_spell", "spell": 504913, "equals": 1 },
+
+    { "action": "snapshot", "label": "Gap to the dummy before any cast", "actor": "b", "metric": "distance_2d", "target": "e", "save_as": "still0" },
+    { "action": "reset_cooldown", "actor": "b", "spell": 504913 },
+    { "action": "cast", "label": "CONTROL: stand still and use Whirling Advance", "actor": "b", "spell": 504913, "target": "e" },
+    { "action": "assert", "label": "SETUP: the standing cast was accepted", "actor": "b", "metric": "cast_failure", "spell": 504913, "equals": 0 },
+    { "action": "wait", "label": "Let the standing charge finish", "ms": 2000 },
+    {
+      "action": "assert", "label": "CONTROL: a standing Barbarian still charges forward, closing the 30 yd gap by the 12 yd radius",
+      "actor": "b", "metric": "distance_2d", "target": "e", "relative_to": "still0", "min": -16, "max": -6
+    },
+
+    { "action": "set_moving", "label": "Hold S: backpedal without turning", "actor": "b", "enabled": true, "flag": "backward" },
+    { "action": "assert", "label": "SETUP: the Barbarian is moving", "actor": "b", "metric": "moving", "equals": 1 },
+    { "action": "snapshot", "label": "Gap before the backpedalling cast", "actor": "b", "metric": "distance_2d", "target": "e", "save_as": "back0" },
+    { "action": "reset_cooldown", "actor": "b", "spell": 504913 },
+    { "action": "cast", "label": "Whirling Advance while holding S", "actor": "b", "spell": 504913, "target": "e" },
+    { "action": "assert", "label": "SETUP: the backpedalling cast was accepted", "actor": "b", "metric": "cast_failure", "spell": 504913, "equals": 0 },
+    { "action": "wait", "label": "Let the backpedalling charge finish", "ms": 2000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: holding S carries the Barbarian away from the target it faces, opening the gap by the 12 yd radius",
+      "actor": "b", "metric": "distance_2d", "target": "e", "relative_to": "back0", "min": 6, "max": 18
+    },
+    { "action": "set_moving", "label": "Release S", "actor": "b", "enabled": false, "flag": "backward" },
+    { "action": "assert", "label": "SETUP: the Barbarian has stopped", "actor": "b", "metric": "moving", "equals": 0 },
+
+    { "action": "set_moving", "label": "Hold Q: strafe left without turning", "actor": "b", "enabled": true, "flag": "strafe_left" },
+    { "action": "assert", "label": "SETUP: the Barbarian is moving sideways", "actor": "b", "metric": "moving", "equals": 1 },
+    { "action": "snapshot", "label": "Gap before the strafing cast", "actor": "b", "metric": "distance_2d", "target": "e", "save_as": "strafe0" },
+    { "action": "wait", "label": "Let the two spent charges recharge, as the ability carries them serially", "ms": 7000 },
+    { "action": "set_power", "actor": "b", "power": 3, "value": 100 },
+    { "action": "reset_cooldown", "actor": "b", "spell": 504913 },
+    { "action": "cast", "label": "Whirling Advance while holding Q", "actor": "b", "spell": 504913, "target": "e" },
+    { "action": "assert", "label": "SETUP: the strafing cast was accepted", "actor": "b", "metric": "cast_failure", "spell": 504913, "equals": 0 },
+    { "action": "wait", "label": "Let the strafing charge finish", "ms": 2000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: holding Q carries the Barbarian sideways instead of closing on the target ahead",
+      "actor": "b", "metric": "distance_2d", "target": "e", "relative_to": "strafe0", "min": -4, "max": 8
+    },
+    { "action": "set_moving", "label": "Release Q", "actor": "b", "enabled": false, "flag": "strafe_left" },
+    { "action": "assert", "label": "SETUP: the Barbarian has stopped again", "actor": "b", "metric": "moving", "equals": 0 }
+  ]
+}

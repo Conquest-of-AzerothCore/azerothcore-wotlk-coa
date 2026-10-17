@@ -50,6 +50,8 @@ bool Useful(SpellInfo const* info)
 constexpr uint32 ScorchMarks = 807059;
 constexpr uint32 BurnTheHeretics = 560857;
 constexpr uint32 BurnTheHereticsMagicDamage = 560856;
+constexpr uint32 SunStride = 680700;
+constexpr uint32 SunStrideVisual = 681434;
 void Finish(Player* player, Spell* spell)
 {
     for (uint32 id : SunClericFinite)
@@ -174,6 +176,13 @@ public:
         if (!player || caster != player || info->SpellFamilyName != 33 || spell->IsTriggered())
             return;
         uint32 id = info->Id;
+        if (id == SunStride)
+            if (Aura* stride = player->GetAura(SunStride, player->GetGUID()))
+                if (Aura* visual = player->AddAura(SunStrideVisual, player))
+                {
+                    visual->SetMaxDuration(stride->GetMaxDuration());
+                    visual->SetDuration(stride->GetDuration());
+                }
         if (id == HammerOfKings && player->HasAura(ChosenKing, player->GetGUID()))
             Cast(player, player, Anointed);
         if (Invocation(info))

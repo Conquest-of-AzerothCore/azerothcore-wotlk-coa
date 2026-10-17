@@ -75,6 +75,7 @@ def main():
         ('QUEUE_LIMIT', constant(compat, 'MAX_QUEUED_EXTENSION_PACKETS')),
         ('CONFIG_KEYS', method(compat, 'enum class AscensionCompatConfig') + ';'),
         ('SEND_REALM_INFO', method(compat, 'void SendRealmInfo(WorldSession *session')),
+        ('REALM_TYPE_MASK', method_or(compat, 'uint8 GetRealmTypeMask()', '')),
         ('SEND_GAME_MODE_STATE', method_or(compat, 'void SendGameModeState(Player *player)',
                                            'void SendGameModeState(Player*) { }')),
         ('SEND_SECURE_ADDON_LIST', method_or(compat, 'void SendSecureAddonList(WorldSession* session)', '')),
@@ -89,6 +90,8 @@ def main():
         ('CAN_PACKET_RECEIVE_EARLY', method(compat, 'bool CanPacketReceiveEarly(WorldSession *session')),
         ('CAN_PACKET_SEND', method(compat, 'bool CanPacketSend(WorldSession* session')),
         ('POINT_SPEND', method_or(compat, 'void HandlePointSpendRequest(Player* player', '')),
+        ('TOKEN_PURCHASE', 'void PurchaseVanityItemWithBazaarTokens(Player*, uint32) { }'
+                           if 'void PurchaseVanityItemWithBazaarTokens(' in compat else ''),
         ('DELIVER_VANITY', method(compat, 'void DeliverVanityItem(Player *player, uint32 itemId)')),
         ('WITHHELD_VANITY', '\n'.join([
             (re.search(r'static constexpr std::array<uint32, \d+> MysticAltarVanityItems = [^;]+;', compat) or [''])[0],

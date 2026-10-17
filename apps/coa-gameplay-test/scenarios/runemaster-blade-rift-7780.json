@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Blade Rift grants its Magic Damage buff when Warpdagger is thrown from stealth (#7780)",
+  "contract": "Blade Rift 520237 is a hidden passive (Attributes 192 = SPELL_ATTR0_PASSIVE | SPELL_ATTR0_DO_NOT_DISPLAY, Rank 'Passive', DurationIndex 21) whose only effect is APPLY_AURA 42 SPELL_AURA_PROC_TRIGGER_SPELL on the caster with TriggerSpell 520238. Its Spell.dbc ProcFlags is 0, and no spell_proc_event, spell_scripts or CoA source row mentions 520237 or 520238 anywhere in the repository, so the native proc path can never fire it: the reported 'aura not applied' follows from the data alone. Its description reads 'While stealthed, using |cFFFFFFFFWarpdagger|r now increases your Magic Damage dealt by $520238s1% for $520238d.', a condition no Spell.dbc column expresses. Warpdagger 500287 is the Runemaster throw whose cast path is spell_ascension_runemaster_travel (spell_script_names 500287, rev_20260914_06_runemaster_travel.sql:23), the same script that already implements the sibling 'while your Runeshroud is active' talent Shroudwalker, and it carries SPELL_ATTR1_ALLOW_WHILE_STEALTHED, so the throw can be made from stealth and keeps it. The buff 520238 is a single native aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, EffectMiscValue 126 (all magic schools), EffectBasePoints 9 with DieSides 1 = +10%, DurationIndex 31 (SpellDuration row 31 = 8000 ms). Runeshroud 500288 carries SPELL_AURA_MOD_STEALTH as its effect 1, and forcing that aura is the stealth fixture this class's own scenarios use. Expected: a Runemaster holding Blade Rift who throws Warpdagger while stealthed receives 520238 at amount 10 for 8 s, taking a client-visible buff slot, while a Runemaster without the talent and one holding the talent who throws while not stealthed receive nothing, although all three throws succeed and grant the throw's own Warp Ready 500289. Client rendering itself is not observed.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "talented", "race": 1, "class": 32, "level": 60 },
+    { "id": "plain", "race": 1, "class": 32, "level": 60 },
+    { "id": "bare", "race": 1, "class": 32, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the characters settle", "ms": 3000 },
+    { "action": "learn", "actor": "talented", "spell": 500287 },
+    { "action": "learn", "actor": "talented", "spell": 500288 },
+    { "action": "learn", "actor": "talented", "spell": 520237 },
+    { "action": "learn", "actor": "plain", "spell": 500287 },
+    { "action": "learn", "actor": "plain", "spell": 500288 },
+    { "action": "learn", "actor": "bare", "spell": 500287 },
+    { "action": "learn", "actor": "bare", "spell": 520237 },
+
+    { "action": "assert", "label": "SETUP: every Runemaster knows Warpdagger", "actor": "talented", "metric": "knows_spell", "spell": 500287, "equals": 1 },
+    { "action": "assert", "label": "SETUP: the control Runemaster does not know Blade Rift", "actor": "plain", "metric": "knows_spell", "spell": 520237, "equals": 0 },
+    { "action": "assert", "label": "SETUP: the unstealthed Runemaster knows Blade Rift", "actor": "bare", "metric": "knows_spell", "spell": 520237, "equals": 1 },
+
+    { "action": "set_aura", "actor": "talented", "spell": 500288, "stacks": 1, "label": "Force Runeshroud, the class's stealth" },
+    { "action": "set_aura", "actor": "plain", "spell": 500288, "stacks": 1, "label": "Force Runeshroud, the class's stealth" },
+    { "action": "set_aura", "actor": "talented", "spell": 520237, "stacks": 1, "label": "Force the Blade Rift passive's aura" },
+    { "action": "set_aura", "actor": "bare", "spell": 520237, "stacks": 1, "label": "Force the Blade Rift passive's aura" },
+
+    { "action": "assert", "label": "SETUP: the talented Runemaster is stealthed", "actor": "talented", "metric": "aura", "spell": 500288, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "SETUP: the control Runemaster is stealthed", "actor": "plain", "metric": "aura", "spell": 500288, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "SETUP: the third Runemaster is not stealthed", "actor": "bare", "metric": "aura", "spell": 500288, "equals": 0 },
+    { "action": "assert", "label": "SETUP: the talented Runemaster holds the Blade Rift passive", "actor": "talented", "metric": "aura", "spell": 520237, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "SETUP: the unstealthed Runemaster holds the Blade Rift passive", "actor": "bare", "metric": "aura", "spell": 520237, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "SETUP: the control Runemaster holds no Blade Rift passive", "actor": "plain", "metric": "aura", "spell": 520237, "equals": 0 },
+    { "action": "assert", "label": "SETUP: no Magic Damage buff before the throw", "actor": "talented", "metric": "aura", "spell": 520238, "equals": 0 },
+    { "action": "assert", "label": "SETUP: no Magic Damage buff before the throw", "actor": "plain", "metric": "aura", "spell": 520238, "equals": 0 },
+    { "action": "assert", "label": "SETUP: no Magic Damage buff before the throw", "actor": "bare", "metric": "aura", "spell": 520238, "equals": 0 },
+
+    { "action": "cast", "label": "Throw Warpdagger from stealth with Blade Rift", "actor": "talented", "spell": 500287 },
+    { "action": "cast", "label": "Throw Warpdagger from stealth without Blade Rift", "actor": "plain", "spell": 500287 },
+    { "action": "cast", "label": "Throw Warpdagger with Blade Rift but out of stealth", "actor": "bare", "spell": 500287 },
+
+    { "action": "assert", "label": "SETUP: the talented Runemaster's dagger was thrown", "actor": "talented", "metric": "aura", "spell": 500289, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: the control Runemaster's dagger was thrown", "actor": "plain", "metric": "aura", "spell": 500289, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: the unstealthed Runemaster's dagger was thrown", "actor": "bare", "metric": "aura", "spell": 500289, "equals": 1, "within_ms": 2000 },
+
+    { "action": "assert", "label": "CONTRACT: Blade Rift answers the stealthed throw", "actor": "talented", "metric": "aura", "spell": 520238, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: the buff grants the tooltip's 10% Magic Damage", "actor": "talented", "metric": "aura_amount", "spell": 520238, "effect": 0, "equals": 10 },
+    { "action": "assert", "label": "CONTRACT: the buff occupies a client-visible buff slot", "actor": "talented", "metric": "aura_visible", "spell": 520238, "equals": 1 },
+    { "action": "assert", "label": "CONTRACT: the buff lasts the authored 8 seconds", "actor": "talented", "metric": "aura_duration_ms", "spell": 520238, "min": 7000, "max": 8000 },
+
+    { "action": "wait", "label": "Let any late trigger land before the absence checks", "ms": 500 },
+    { "action": "assert", "label": "REGRESSION: without the talent the stealthed throw grants nothing", "actor": "plain", "metric": "aura", "spell": 520238, "equals": 0 },
+    { "action": "assert", "label": "REGRESSION: the talent grants nothing out of stealth", "actor": "bare", "metric": "aura", "spell": 520238, "equals": 0 }
+  ]
+}

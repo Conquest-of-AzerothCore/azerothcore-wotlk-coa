@@ -1,0 +1,180 @@
+{
+  "schema": 1,
+  "name": "Bombastic: the Bomb Toss after Build: Spider Bomb has no cooldown, global cooldown or cost",
+  "contract": [
+    "Bombastic (707271) reads 'Casting Build: Spider Bomb now resets the cooldown of Bomb Toss and causes your next",
+    "Bomb Toss within 15 sec to trigger no cooldown, global cooldown, or cost.' Build: Spider Bomb (500535) grants",
+    "Bombastic (707272, 15 s): 'Your next Bomb Toss incurs no cooldown, global cooldown, or cost.' Its effects are",
+    "-101% SPELLMOD_COOLDOWN and SPELLMOD_GLOBAL_COOLDOWN on the Bomb Toss family mask. Bomb Toss (801005) has an",
+    "8 s cooldown, a 1000 ms category-133 global cooldown and costs 6% of base mana. A plain Bomb Toss keeps its",
+    "1000 ms global cooldown; the Bomb Toss spending 707272 starts neither its cooldown nor a global cooldown and",
+    "costs nothing, and 707272 is consumed. Readings are taken right after the instant casts; the plain global",
+    "cooldown window allows 150 ms of world ticks."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 707271
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 500535
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 801005
+    },
+    {
+      "action": "client_packet",
+      "actor": "tinker",
+      "opcode": 317,
+      "fields": [
+        {
+          "actor_guid": "dummy"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no category-133 global cooldown is running",
+      "actor": "tinker",
+      "metric": "global_cooldown_ms",
+      "spell": 801005,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801005,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "plain Bomb Toss starts its 1000 ms global cooldown",
+      "actor": "tinker",
+      "metric": "global_cooldown_ms",
+      "spell": 801005,
+      "min": 850,
+      "max": 1000
+    },
+    {
+      "action": "assert",
+      "label": "plain Bomb Toss starts its cooldown",
+      "actor": "tinker",
+      "metric": "cooldown_ms",
+      "spell": 801005,
+      "min": 7000
+    },
+    {
+      "action": "assert",
+      "label": "the global cooldown of the plain Bomb Toss ends",
+      "actor": "tinker",
+      "metric": "global_cooldown_ms",
+      "spell": 801005,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500535,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Build: Spider Bomb grants Bombastic",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 707272,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Build: Spider Bomb resets the Bomb Toss cooldown",
+      "actor": "tinker",
+      "metric": "cooldown_ms",
+      "spell": 801005,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Bombastic makes Bomb Toss free",
+      "actor": "tinker",
+      "metric": "spell_power_cost",
+      "spell": 801005,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the global cooldown of Build: Spider Bomb ends",
+      "actor": "tinker",
+      "metric": "global_cooldown_ms",
+      "spell": 801005,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 801005,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "the Bomb Toss spending Bombastic triggers no global cooldown",
+      "actor": "tinker",
+      "metric": "global_cooldown_ms",
+      "spell": 801005,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Bomb Toss spending Bombastic triggers no cooldown",
+      "actor": "tinker",
+      "metric": "cooldown_ms",
+      "spell": 801005,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Bomb Toss consumes Bombastic",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 707272,
+      "equals": 0
+    }
+  ]
+}

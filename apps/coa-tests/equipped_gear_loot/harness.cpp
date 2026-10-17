@@ -2,10 +2,12 @@
 #include <array>
 #include <atomic>
 #include <cassert>
+#include <cctype>
 #include <cmath>
 #include <initializer_list>
 #include <map>
 #include <string>
+#include <string_view>
 #include <tuple>
 #include <type_traits>
 #include <unordered_map>
@@ -30,7 +32,7 @@ constexpr uint16 WORLDHOOK_ON_STARTUP = 2;
 
 struct ItemTemplate
 {
-    std::string Name1 = "Captured wearable gear";
+    std::string Name1 = "Captured wearable gear", Description;
     uint32 Class = ITEM_CLASS_ARMOR, SubClass = 1, DisplayInfoID = 0, Quality = ITEM_QUALITY_UNCOMMON;
     uint32 InventoryType = INVTYPE_CHEST, ItemLevel = 20, RequiredLevel = 15, Bonding = BIND_WHEN_EQUIPPED;
     uint32 StartQuest = 0, RequiredSkill = 0, RequiredSpell = 0, RequiredHonorRank = 0;
@@ -249,3 +251,10 @@ struct ScriptMgr
     }
 } scriptMgr;
 auto* sScriptMgr = &scriptMgr;
+namespace Bloodforging
+{
+bool IsBloodforged(ItemTemplate const& item)
+{
+    return item.Name1.starts_with("Bloodforged ") && item.Description.find("Bloodforged") != std::string::npos;
+}
+}

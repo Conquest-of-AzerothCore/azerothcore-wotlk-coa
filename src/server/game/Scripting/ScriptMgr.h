@@ -462,6 +462,7 @@ public: /* PlayerScript */
     bool OnPlayerCanCastItemUseSpell(Player* player, Item* item, SpellCastTargets const& targets, uint8 cast_count, uint32 glyphIndex);
     void OnPlayerApplyAmmoBonuses(Player* player, ItemTemplate const* proto, float& currentAmmoDPS);
     void OnPlayerGetAmmoDisplay(Player* player, SpellInfo const* spellInfo, uint32& displayId, uint32& inventoryType);
+    void OnPlayerGetShapeshiftModel(Player* player, uint8 form, uint32 spellId, uint32& modelId);
     bool OnPlayerCanEquipItem(Player* player, uint8 slot, uint16& dest, Item* pItem, bool swap, bool not_loading);
     bool OnPlayerCanUnequipItem(Player* player, uint16 pos, bool swap);
     bool OnPlayerCanUseItem(Player* player, ItemTemplate const* proto, InventoryResult& result);
@@ -528,6 +529,7 @@ public: /* PlayerScript */
     void OnPlayerCoAProgress(Player* player, CoAProgressEvent event, uint32 value);
     void OnPlayerCoAPrestige(Player* player, CharacterDatabaseTransaction trans);
     void OnPlayerCoAPrestigeSaved(Player* player);
+    void OnPlayerMasterLootItem(Player* player, Item* item, uint32 count, ObjectGuid lootguid);
     std::optional<uint32> OnPlayerGetGameModeMask(Player const* player);
 
     // Anti cheat

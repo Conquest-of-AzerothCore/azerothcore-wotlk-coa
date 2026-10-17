@@ -257,6 +257,8 @@ enum PlayerHook
     PLAYERHOOK_ON_AFTER_APPLY_ITEM_MODS,
     PLAYERHOOK_ON_COA_PRESTIGE,
     PLAYERHOOK_ON_COA_PRESTIGE_SAVED,
+    PLAYERHOOK_ON_MASTER_LOOT_ITEM,
+    PLAYERHOOK_ON_GET_SHAPESHIFT_MODEL,
     PLAYERHOOK_END
 };
 
@@ -692,6 +694,9 @@ public:
     virtual void OnPlayerGetAmmoDisplay(Player* /*player*/, SpellInfo const* /*spellInfo*/,
         uint32& /*displayId*/, uint32& /*inventoryType*/) { }
 
+    // Model the player takes in a shapeshift form; leaving modelId at 0 keeps the form's own model.
+    virtual void OnPlayerGetShapeshiftModel(Player* /*player*/, uint8 /*form*/, uint32 /*spellId*/, uint32& /*modelId*/) { }
+
     [[nodiscard]] virtual bool OnPlayerCanEquipItem(Player* /*player*/, uint8 /*slot*/, uint16& /*dest*/, Item* /*pItem*/, bool /*swap*/, bool /*not_loading*/) { return true; }
 
     [[nodiscard]] virtual bool OnPlayerCanUnequipItem(Player* /*player*/, uint16 /*pos*/, bool /*swap*/) { return true; }
@@ -1110,6 +1115,16 @@ public:
      * @param player Contains information about the Player
      */
     virtual void OnPlayerCoAPrestigeSaved(Player* /*player*/) { }
+
+    /**
+     * @brief This hook is called after the master looter gave a loot item to a group member.
+     *
+     * @param player The group member who received the item
+     * @param item The stored item
+     * @param count The stored count
+     * @param lootguid The creature or gameobject the item was looted from
+     */
+    virtual void OnPlayerMasterLootItem(Player* /*player*/, Item* /*item*/, uint32 /*count*/, ObjectGuid /*lootguid*/) { }
 
     /**
      * @brief This hook is called to resolve a character's Conquest of Azeroth game mode mask.

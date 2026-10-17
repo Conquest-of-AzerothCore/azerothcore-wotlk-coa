@@ -1,0 +1,218 @@
+{
+  "schema": 1,
+  "name": "Remaining classes reported at 0% parry can parry once they learn Parry (#6775)",
+  "contract": "Tome of Parry 1001186 (any class, level 10) teaches Parry 3124 (SPELL_EFFECT_PARRY), and live CoA combat logs show Bloodmage, Barbarian, Tinker and Runemaster players parrying without a class parry talent. With maxed defense skill and no parry rating or aura, Player::UpdateParryPercentage gives the flat 5 percent base chance once CanParry() is set. Bloodmage, Chronomancer, Necromancer and Pyromancer fell back to Druid, Priest, Warlock and Mage, whose parry cap is 0, so they stayed at 0 percent even with Parry learned.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "felsworn",
+      "race": 1,
+      "class": 14,
+      "level": 60
+    },
+    {
+      "id": "stormbringer",
+      "race": 1,
+      "class": 16,
+      "level": 60
+    },
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 60
+    },
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 60
+    },
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 25,
+      "level": 60
+    },
+    {
+      "id": "sun_cleric",
+      "race": 1,
+      "class": 27,
+      "level": 60
+    },
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_skill",
+      "label": "Max felsworn defense",
+      "actor": "felsworn",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "label": "felsworn learns Parry as Tome of Parry 1001186 teaches it",
+      "actor": "felsworn",
+      "spell": 3124
+    },
+    {
+      "action": "assert",
+      "label": "felsworn parries at the base 5 percent",
+      "actor": "felsworn",
+      "metric": "parry_chance",
+      "min": 4.9,
+      "max": 5.1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "label": "Max stormbringer defense",
+      "actor": "stormbringer",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "label": "stormbringer learns Parry as Tome of Parry 1001186 teaches it",
+      "actor": "stormbringer",
+      "spell": 3124
+    },
+    {
+      "action": "assert",
+      "label": "stormbringer parries at the base 5 percent",
+      "actor": "stormbringer",
+      "metric": "parry_chance",
+      "min": 4.9,
+      "max": 5.1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "label": "Max templar defense",
+      "actor": "templar",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "label": "templar learns Parry as Tome of Parry 1001186 teaches it",
+      "actor": "templar",
+      "spell": 3124
+    },
+    {
+      "action": "assert",
+      "label": "templar parries at the base 5 percent",
+      "actor": "templar",
+      "metric": "parry_chance",
+      "min": 4.9,
+      "max": 5.1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "label": "Max ranger defense",
+      "actor": "ranger",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "label": "ranger learns Parry as Tome of Parry 1001186 teaches it",
+      "actor": "ranger",
+      "spell": 3124
+    },
+    {
+      "action": "assert",
+      "label": "ranger parries at the base 5 percent",
+      "actor": "ranger",
+      "metric": "parry_chance",
+      "min": 4.9,
+      "max": 5.1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "label": "Max cultist defense",
+      "actor": "cultist",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "label": "cultist learns Parry as Tome of Parry 1001186 teaches it",
+      "actor": "cultist",
+      "spell": 3124
+    },
+    {
+      "action": "assert",
+      "label": "cultist parries at the base 5 percent",
+      "actor": "cultist",
+      "metric": "parry_chance",
+      "min": 4.9,
+      "max": 5.1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "label": "Max sun_cleric defense",
+      "actor": "sun_cleric",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "label": "sun_cleric learns Parry as Tome of Parry 1001186 teaches it",
+      "actor": "sun_cleric",
+      "spell": 3124
+    },
+    {
+      "action": "assert",
+      "label": "sun_cleric parries at the base 5 percent",
+      "actor": "sun_cleric",
+      "metric": "parry_chance",
+      "min": 4.9,
+      "max": 5.1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_skill",
+      "label": "Max primalist defense",
+      "actor": "primalist",
+      "skill": 95,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "label": "primalist learns Parry as Tome of Parry 1001186 teaches it",
+      "actor": "primalist",
+      "spell": 3124
+    },
+    {
+      "action": "assert",
+      "label": "primalist parries at the base 5 percent",
+      "actor": "primalist",
+      "metric": "parry_chance",
+      "min": 4.9,
+      "max": 5.1,
+      "within_ms": 1000
+    }
+  ]
+}

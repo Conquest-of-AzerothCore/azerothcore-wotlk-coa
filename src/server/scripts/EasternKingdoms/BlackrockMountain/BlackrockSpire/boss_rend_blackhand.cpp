@@ -111,6 +111,13 @@ struct boss_rend_blackhand : public BossAI
 
     void Reset() override
     {
+        if (instance->GetBossState(DATA_WARCHIEF_REND_BLACKHAND) == DONE)
+        {
+            me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_PREPARATION);
+            me->SetImmuneToAll(true);
+            return;
+        }
+
         _Reset();
 
         if (instance->GetBossState(DATA_GYTH) == IN_PROGRESS)
@@ -171,6 +178,9 @@ struct boss_rend_blackhand : public BossAI
     {
         instance->SetBossState(DATA_WARCHIEF_REND_BLACKHAND, FAIL);
         instance->SetBossState(DATA_GYTH, FAIL);
+        if (Creature* gyth = ObjectAccessor::GetCreature(*me, instance->GetGuidData(DATA_GYTH)))
+            if (gyth->IsAlive())
+                gyth->DespawnOrUnsummon();
         BossAI::EnterEvadeMode(why);
         me->DespawnOrUnsummon();
     }
@@ -204,6 +214,9 @@ struct boss_rend_blackhand : public BossAI
     {
         if (type == AREATRIGGER && data == AREATRIGGER_BLACKROCK_STADIUM)
         {
+            if (me->IsSummon() || instance->GetBossState(DATA_WARCHIEF_REND_BLACKHAND) == DONE)
+                return;
+
             if (!_gythEvent)
             {
                 _gythEvent = true;

@@ -1,7 +1,9 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AchievementCriteriaScript.h"
 #include "Player.h"
+#include "RBAC.h"
 #include "ScriptMgr.h"
+#include "WorldSession.h"
 
 namespace
 {
@@ -53,10 +55,28 @@ public:
 private:
     uint32 _modes;
 };
+
+class RealmFirstAchievementPermission final : public PlayerScript
+{
+public:
+    RealmFirstAchievementPermission()
+        : PlayerScript("RealmFirstAchievementPermission", { PLAYERHOOK_ON_BEFORE_ACHI_COMPLETE }) { }
+
+    bool OnPlayerBeforeAchievementComplete(Player* player, AchievementEntry const* achievement) override
+    {
+        if (!(achievement->flags & (ACHIEVEMENT_FLAG_REALM_FIRST_REACH | ACHIEVEMENT_FLAG_REALM_FIRST_KILL)))
+            return true;
+
+        WorldSession* session = player->GetSession();
+        return !session || !session->HasPermission(rbac::RBAC_PERM_CANNOT_EARN_REALM_FIRST_ACHIEVEMENTS);
+    }
+};
 }
 
 void AddAscensionAchievementConditionScripts()
 {
     for (GameModeCriteria const& criteria : GAME_MODE_CRITERIA)
         new AchievementGameModeCriteria(criteria);
+
+    new RealmFirstAchievementPermission();
 }

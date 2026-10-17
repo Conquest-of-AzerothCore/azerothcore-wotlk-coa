@@ -1049,6 +1049,12 @@ void ScriptMgr::OnPlayerGetAmmoDisplay(Player* player, SpellInfo const* spellInf
         script->OnPlayerGetAmmoDisplay(player, spellInfo, displayId, inventoryType));
 }
 
+void ScriptMgr::OnPlayerGetShapeshiftModel(Player* player, uint8 form, uint32 spellId, uint32& modelId)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_GET_SHAPESHIFT_MODEL,
+        script->OnPlayerGetShapeshiftModel(player, form, spellId, modelId));
+}
+
 void ScriptMgr::OnPlayerNormalizeActionButtonSpell(Player* player, uint32& action, bool loading)
 {
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_NORMALIZE_ACTION_BUTTON_SPELL, script->OnPlayerNormalizeActionButtonSpell(player, action, loading));
@@ -1131,6 +1137,11 @@ void ScriptMgr::OnPlayerCoAPrestige(Player* player, CharacterDatabaseTransaction
 void ScriptMgr::OnPlayerCoAPrestigeSaved(Player* player)
 {
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_COA_PRESTIGE_SAVED, script->OnPlayerCoAPrestigeSaved(player));
+}
+
+void ScriptMgr::OnPlayerMasterLootItem(Player* player, Item* item, uint32 count, ObjectGuid lootguid)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_MASTER_LOOT_ITEM, script->OnPlayerMasterLootItem(player, item, count, lootguid));
 }
 
 std::optional<uint32> ScriptMgr::OnPlayerGetGameModeMask(Player const* player)

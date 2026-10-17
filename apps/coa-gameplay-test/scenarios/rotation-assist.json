@@ -1,0 +1,349 @@
+{
+  "schema": 1,
+  "name": "Rotation assistance: one press, ordinary spell checks and no background casts",
+  "contract": [
+    "With CoA.RotationAssist.Enable=1, an ordinary player without a CoA specialization can use .rotation on a",
+    "selected enemy. With only Frostbolt learned, one press causes one normal Frostbolt, spends mana and",
+    "applies its slow. A second press during that cast does not queue another. Waiting does not cast again; an",
+    "empty mana bar prevents an attack. A friendly selection produces no harmful spell. A priest selecting",
+    "themself at low health casts one normal Lesser Heal, with no repeated healing after waiting. This",
+    "verifies the generic fallback and native command boundary, not every specialization priority or client",
+    "macro rendering. A subsequent learned Fire Blast tests the global cooldown and falling through its spell",
+    "cooldown to Frostbolt."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 8,
+      "level": 1,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "healer",
+      "race": 1,
+      "class": 5,
+      "level": 1
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "caster",
+      "entry": 36,
+      "level": 1,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "command",
+      "actor": "caster",
+      "command": ".rotation",
+      "rejected": true
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 133
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 116
+    },
+    {
+      "action": "client_packet",
+      "actor": "caster",
+      "opcode": 317,
+      "fields": [
+        {
+          "actor_guid": "target"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_go_count",
+      "spell": 116,
+      "save_as": "before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "health_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "power",
+      "power": 0,
+      "save_as": "mana_before"
+    },
+    {
+      "action": "command",
+      "actor": "caster",
+      "command": ".rotation"
+    },
+    {
+      "action": "command",
+      "actor": "caster",
+      "command": ".rotation"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_go_count",
+      "spell": 116,
+      "relative_to": "before",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 116,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "health_before",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "power",
+      "power": 0,
+      "relative_to": "mana_before",
+      "max": -1
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "No further casts without another press",
+      "actor": "caster",
+      "metric": "spell_go_count",
+      "spell": 116,
+      "relative_to": "before",
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 0
+    },
+    {
+      "action": "command",
+      "actor": "caster",
+      "command": ".rotation"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "label": "Unaffordable attack is not submitted",
+      "actor": "caster",
+      "metric": "spell_go_count",
+      "spell": 116,
+      "relative_to": "before",
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "actor": "caster",
+      "opcode": 317,
+      "fields": [
+        {
+          "actor_guid": "caster"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "command",
+      "actor": "caster",
+      "command": ".rotation"
+    },
+    {
+      "action": "learn",
+      "actor": "healer",
+      "spell": 2050
+    },
+    {
+      "action": "set_health",
+      "actor": "healer",
+      "value": 10
+    },
+    {
+      "action": "client_packet",
+      "actor": "healer",
+      "opcode": 317,
+      "fields": [
+        {
+          "actor_guid": "healer"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "snapshot",
+      "actor": "healer",
+      "metric": "health",
+      "save_as": "healer_before"
+    },
+    {
+      "action": "command",
+      "actor": "healer",
+      "command": ".rotation"
+    },
+    {
+      "action": "assert",
+      "actor": "healer",
+      "metric": "spell_go_count",
+      "spell": 2050,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "healer",
+      "metric": "health",
+      "relative_to": "healer_before",
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Healing also stops without another press",
+      "actor": "healer",
+      "metric": "spell_go_count",
+      "spell": 2050,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Friendly selection did not cast a damaging spell",
+      "actor": "caster",
+      "metric": "spell_go_count",
+      "spell": 116,
+      "relative_to": "before",
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 2136
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 50
+    },
+    {
+      "action": "client_packet",
+      "actor": "caster",
+      "opcode": 317,
+      "fields": [
+        {
+          "actor_guid": "target"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "command",
+      "actor": "caster",
+      "command": ".rotation"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_go_count",
+      "spell": 2136,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "command",
+      "actor": "caster",
+      "command": ".rotation"
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "label": "Global cooldown blocks the second attack",
+      "actor": "caster",
+      "metric": "spell_go_count",
+      "spell": 116,
+      "relative_to": "before",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_go_count",
+      "spell": 2136,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 50
+    },
+    {
+      "action": "command",
+      "actor": "caster",
+      "command": ".rotation"
+    },
+    {
+      "action": "assert",
+      "label": "After GCD, unavailable Fire Blast falls through to Frostbolt",
+      "actor": "caster",
+      "metric": "spell_go_count",
+      "spell": 116,
+      "relative_to": "before",
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_go_count",
+      "spell": 2136,
+      "equals": 1
+    }
+  ]
+}

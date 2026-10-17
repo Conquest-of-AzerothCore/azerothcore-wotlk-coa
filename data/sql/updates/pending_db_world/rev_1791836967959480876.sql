@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS `coa_client_vanity_collection` (
+  `ItemID` INT UNSIGNED NOT NULL,
+  `DonationPointCost` INT UNSIGNED NOT NULL DEFAULT 0,
+  `SeasonalPointCost` INT UNSIGNED NOT NULL DEFAULT 0,
+  `BazaarTokenCost` INT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (`ItemID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

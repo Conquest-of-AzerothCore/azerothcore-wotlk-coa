@@ -12,6 +12,7 @@
 #include "AscensionVenomancer.h"
 #include "AscensionTinker.h"
 #include "AscensionSunCleric.h"
+#include "AscensionXoroth.h"
 #include "AllCreatureScript.h"
 #include "AllItemScript.h"
 #include "AllSpellScript.h"
@@ -33,6 +34,7 @@
 #include "AscensionCollectionModelData.h"
 #include "AscensionWitchHunterCompletion.h"
 #include "AscensionAmmunitionData.h"
+#include "AscensionAverageItemLevel.h"
 #include "AscensionPersonalBank.h"
 #include "AscensionCollectibleSpellData.h"
 #include "AscensionCustomClassData.h"
@@ -214,6 +216,11 @@ static_assert(MAX_CREATURE_QUERY_BULK_ENTRIES <= MAX_EXTENSION_REPLIES_PER_UPDAT
 static_assert(MAX_ITEM_QUERY_BULK_ENTRIES <= MAX_EXTENSION_REPLIES_PER_UPDATE);
 constexpr std::size_t POINT_SPEND_REQUEST_SIZE = sizeof(uint8) + sizeof(uint32);
 constexpr uint8 VANITY_CURRENCY_DONATION_POINTS = 2;
+constexpr uint8 VANITY_CURRENCY_BAZAAR_TOKENS = 3;
+constexpr uint32 VANITY_BAZAAR_TOKEN_ITEM = 975001;
+constexpr uint32 VANITY_FLAG_NOT_OFFERED = 0x8;
+constexpr uint8 REALM_TYPE_COUNT = 5;
+constexpr std::string_view VANITY_ITEM_LEARNED_EVENT = "ASCENSION_STORE_COLLECTION_ITEM_LEARNED";
 
 constexpr std::array<uint16, 8> QUEUED_EXTENSION_OPCODES = {
     CMSG_APPLY_APPEARANCES, CMSG_SET_CAN_SEE_APPEARANCES,
@@ -394,6 +401,7 @@ constexpr std::size_t MAX_QUEUED_EXTENSION_PACKETS = 64;
 constexpr uint32 VANITY_CATEGORY_MOUNTS = 0x04000000;
 constexpr uint32 SPELL_TALENT_LEARNING_CUE = 47292;
 constexpr uint32 VANITY_CATEGORY_COMPANIONS = 0x08000000;
+constexpr uint32 VANITY_CATEGORY_CONSUMABLE = 0x40000000;
 constexpr uint32 ITEM_WONDROUS_WISDOMBALL = 101169;
 constexpr uint32 ITEM_FIX_O_TRON_5000 = 97330;
 constexpr std::size_t COMPANION_SPELLS_PER_BATCH = 4;
@@ -401,7 +409,9 @@ constexpr uint32 COMPANION_SPELL_BATCH_INTERVAL_MS = 200;
 
 enum AscensionItems : uint32
 {
-    ITEM_HEARTWOOD_KEY = 1041710
+    ITEM_HEARTWOOD_KEY = 1041710,
+    ITEM_CUIRBOULLI_BOOTS = 2143,
+    ITEM_RED_RIBBONED_WRAPPING_PAPER = 5042
 };
 
 constexpr std::array<uint32, 9> BUSHCRAFT_CRAFTED_ITEMS =
@@ -500,6 +510,45 @@ public:
 
 AscensionCompatConfigData ascensionCompatConfig;
 
+uint8 GetRealmTypeMask()
+{
+  std::string const types = ascensionCompatConfig.GetConfigValue<std::string>(
+      AscensionCompatConfig::REALM_TYPE);
+
+  uint8 mask = 0;
+  for (std::string_view type : Acore::Tokenize(types, ' ', false)) {
+    if (type == "live")             mask |= 1 << 0;
+    else if (type == "seasonal")    mask |= 1 << 1;
+    else if (type == "league")      mask |= 1 << 2;
+    else if (type == "ptr")         mask |= 1 << 3;
+    else if (type == "development") mask |= 1 << 4;
+  }
+  return mask ? mask : 1;
+}
+
+struct VanityPrice
+{
+  uint32 DonationPoints = 0;
+  uint32 SeasonalPoints = 0;
+  uint32 BazaarTokens = 0;
+};
+
+std::map<uint32, VanityPrice> LoadVanityPrices()
+{
+  std::map<uint32, VanityPrice> prices;
+  QueryResult result = WorldDatabase.Query(
+      "SELECT `ItemID`, `DonationPointCost`, `SeasonalPointCost`, `BazaarTokenCost` "
+      "FROM `coa_client_vanity_collection`");
+  if (!result)
+    return prices;
+
+  do {
+    Field const *fields = result->Fetch();
+    prices[fields[0].Get<uint32>()] = {fields[1].Get<uint32>(), fields[2].Get<uint32>(), fields[3].Get<uint32>()};
+  } while (result->NextRow());
+  return prices;
+}
+
 struct AppearanceInfo {
   uint32 SourceItem = 0;
   uint32 PrimaryCategory = 0;
@@ -509,12 +558,32 @@ struct AppearanceInfo {
   uint32 CosmeticSpell = 0;
   uint32 CreatureDisplay = 0;
   uint32 CreatureEntry = 0;
+  uint32 CreatureWeapon = 0;
+};
+
+constexpr uint32 INCARNATION_KIND_FORM = 1;
+constexpr uint32 INCARNATION_KIND_CREATURE = 2;
+
+struct IncarnationCategory {
+  uint32 Kind = 0;
+  uint32 FirstId = 0;
+  uint32 SecondId = 0;
+  uint64 ClassMask = 0;
+
+  [[nodiscard]] bool AllowsClass(uint8 classId) const
+  {
+    return classId && classId <= 64 && (ClassMask & (uint64(1) << (classId - 1)));
+  }
 };
 
 struct VanityInfo {
   uint32 LearnedSpell = 0;
   uint32 Flags = 0;
   uint32 CategoryMask = 0;
+  uint32 BazaarTokenCost = 0;
+  uint8 RealmTypeMask = 0;
+  uint64 ClassMask = 0;
+  uint32 RaceMask = 0;
 };
 
 struct PlayerCollectionState {
@@ -1019,8 +1088,24 @@ public:
                     ++learned;
             }
         }
+        bool barChanged = false;
         for (auto const& [id, replacement] : replacements)
+        {
             player->SetTemporarySpellReplacement(id, replacement);
+            if (!replacement)
+                continue;
+            for (uint8 button = 0; button < MAX_ACTION_BUTTONS; ++button)
+            {
+                ActionButton const* action = player->GetActionButton(button);
+                if (action && action->GetType() == ACTION_BUTTON_SPELL && action->GetAction() == id)
+                {
+                    player->addActionButton(button, replacement, ACTION_BUTTON_SPELL);
+                    barChanged = true;
+                }
+            }
+        }
+        if (barChanged)
+            player->SendInitialActionButtons();
         return learned;
     }
 
@@ -1412,10 +1497,14 @@ public:
     WorldSession* session = player->GetSession();
     uint32 const slot = ActiveSlot(player);
     session->GetQueryProcessor().AddCallback(CharacterDatabase.AsyncQuery(actionsStmt)
-        .WithPreparedCallback([session, slot](PreparedQueryResult result)
+        .WithPreparedCallback([this, session, slot](PreparedQueryResult result)
         {
             if (Player* owner = session->GetPlayer(); owner && ActiveSlot(owner) == slot)
+            {
                 owner->LoadActions(result);
+                SynchronizeTalentReplacements(owner);
+                owner->SendInitialActionButtons();
+            }
         }));
   }
 
@@ -2429,6 +2518,8 @@ public:
     uint32 granted = SynchronizeProgression(player);
     if (restoreStoredBuild)
       RestoreBarButtons(player, specializationId, previousSpecialization);
+    else
+      player->SendInitialActionButtons();
     ChatHandler(player->GetSession())
         .PSendSysMessage(
             "Activated specialization {}. Stored the build of specialization {}, removed {} old talent "
@@ -3906,13 +3997,17 @@ public:
     for (ShapeshiftFormPatchRow const &row : rows.ShapeshiftForms)
       bytes += SendShapeshiftFormRow(player, row);
 
+    for (VanityCollectionPatchRow const& row : rows.VanityCollections)
+      bytes += SendVanityCollectionRow(player, row);
+
     LOG_INFO("coa",
              "Streamed {} CreatureModelData, {} CreatureDisplayInfo, {} ItemDisplayInfo, {} of {} Item, "
-             "{} Spell, {} SuperTrack, {} SkillLineAbility and {} SpellShapeshiftForm patch rows "
-             "({} bytes) to {} in {} ms",
+             "{} Spell, {} SuperTrack, {} SkillLineAbility, {} SpellShapeshiftForm and {} VanityCollection "
+             "patch rows ({} bytes) to {} in {} ms",
              rows.CreatureModels.size(), sent, rows.ItemDisplayInfos.size(), sentItems.Rows,
              rows.Items.size(), sentSpells, rows.SuperTracks.size(), rows.SkillLineAbilities.size(),
-             rows.ShapeshiftForms.size(), bytes, player->GetName(), GetMSTimeDiffToNow(startTime));
+             rows.ShapeshiftForms.size(), rows.VanityCollections.size(), bytes, player->GetName(),
+             GetMSTimeDiffToNow(startTime));
   }
 
 private:
@@ -3943,6 +4038,18 @@ private:
   struct ShapeshiftFormPatchRow {
     std::array<uint32, 18> Values{};
     std::string Name;
+  };
+
+  static constexpr uint32 VANITY_COLLECTION_DBC_FIELD_COUNT = 77;
+  static constexpr uint32 VANITY_COLLECTION_DESCRIPTION_FIELD = 42;
+  static constexpr uint32 VANITY_COLLECTION_ADDITIONAL_TEXT_FIELD = 59;
+  static constexpr uint32 VANITY_COLLECTION_LEARNED_SPELL_FIELD = 76;
+
+  struct VanityCollectionPatchRow {
+    std::array<uint32, VANITY_COLLECTION_DBC_FIELD_COUNT> Values{};
+    std::string Artwork;
+    std::string Description;
+    std::string AdditionalText;
   };
 
   static constexpr uint32 CREATURE_MODEL_DATA_FIELD_COUNT = 28;
@@ -3981,8 +4088,9 @@ private:
   static constexpr uint32 SPELL_EXCLUDE_CASTER_AURA_SPELL_FIELD = 26;
   static constexpr uint32 SPELL_CAST_TIME_INDEX_FIELD = 28;
   static constexpr uint32 SPELL_FAMILY_NAME_FIELD = 208;
-  static constexpr std::array<uint32, 10> RANGED_PREPARATION_CLIENT_SPELLS = {
-      504582, 572343, 572344, 572345, 572383, 680902, 680903, 680904, 680905, 806288};
+  static constexpr std::array<uint32, 18> RANGED_PREPARATION_CLIENT_SPELLS = {
+      504582, 572343, 572344, 572345, 572383, 680902, 680903, 680904, 680905, 806288,
+      572614, 804136, 806876, 806877, 806878, 806879, 806880, 806881};
   static constexpr uint32 SPELL_LEVEL_FIELD = 39;
   struct ClientSpellText {
     std::string Description;
@@ -4015,6 +4123,7 @@ private:
     std::vector<SkillLineAbilityPatchRow> SkillLineAbilities;
     std::vector<ShapeshiftFormPatchRow> ShapeshiftForms;
     std::vector<CreatureModelPatchRow> CreatureModels;
+    std::vector<VanityCollectionPatchRow> VanityCollections;
   };
 
   static constexpr uint32 SPELL_ATTRIBUTES_FIELD = 4;
@@ -4479,6 +4588,57 @@ private:
     return SendRowPacket(player, packet);
   }
 
+  static std::size_t SendVanityCollectionRow(Player* player, VanityCollectionPatchRow const& row)
+  {
+    WorldPacket packet(SMSG_PATCH_VANITY_COLLECTION, VANITY_COLLECTION_DBC_FIELD_COUNT * sizeof(uint32) + 256);
+    for (uint32 field = 0; field < 3; ++field)
+      packet << row.Values[field];
+    packet << row.Artwork;
+    for (uint32 field = 4; field < VANITY_COLLECTION_DESCRIPTION_FIELD; ++field)
+      packet << row.Values[field];
+    packet << row.Description << row.AdditionalText;
+    packet << row.Values[VANITY_COLLECTION_LEARNED_SPELL_FIELD];
+    packet << "" << "" << "";
+    return SendRowPacket(player, packet);
+  }
+
+  static std::vector<VanityCollectionPatchRow> LoadVanityCollectionPatchRows() {
+    std::vector<VanityCollectionPatchRow> rows;
+    std::map<uint32, VanityPrice> prices = LoadVanityPrices();
+    if (prices.empty())
+      return rows;
+
+    ClientDBC vanity;
+    if (!vanity.Load(GetClientDBCPath("VanityCollection.dbc"), VANITY_COLLECTION_DBC_FIELD_COUNT))
+    {
+      LOG_ERROR("coa", "Cannot read the client VanityCollection.dbc; coa_client_vanity_collection rows are not streamed");
+      return rows;
+    }
+
+    for (uint32 index = 0; index < vanity.GetRecordCount(); ++index)
+    {
+      ClientDBC::Record const record = vanity.GetRecord(index);
+      auto const price = prices.find(record.GetUInt32(1));
+      if (price == prices.end())
+        continue;
+
+      VanityCollectionPatchRow &row = rows.emplace_back();
+      for (uint32 field = 0; field < VANITY_COLLECTION_DBC_FIELD_COUNT; ++field)
+        row.Values[field] = record.GetUInt32(field);
+      row.Values[4] = price->second.DonationPoints;
+      row.Values[5] = price->second.SeasonalPoints;
+      row.Values[6] = price->second.BazaarTokens;
+      row.Artwork = std::string(record.GetString(3));
+      row.Description = std::string(record.GetString(VANITY_COLLECTION_DESCRIPTION_FIELD));
+      row.AdditionalText = std::string(record.GetString(VANITY_COLLECTION_ADDITIONAL_TEXT_FIELD));
+      prices.erase(price);
+    }
+
+    for (auto const &[itemId, price] : prices)
+      LOG_ERROR("coa", "coa_client_vanity_collection {} has no VanityCollection.dbc row", itemId);
+    return rows;
+  }
+
   static std::vector<ShapeshiftFormPatchRow> LoadShapeshiftFormPatchRows() {
     std::vector<ShapeshiftFormPatchRow> rows;
     QueryResult result = WorldDatabase.Query(
@@ -4567,6 +4727,7 @@ private:
       _rows.SuperTracks = LoadSuperTrackPatchRows();
       _rows.SkillLineAbilities = LoadSkillLineAbilityPatchRows();
       _rows.ShapeshiftForms = LoadShapeshiftFormPatchRows();
+      _rows.VanityCollections = LoadVanityCollectionPatchRows();
       _rows.CreatureModels = BuildCreatureModelPatchRows();
       _rowsPrepared = true;
     }
@@ -4745,7 +4906,7 @@ private:
     if (!info)
       return;
 
-    if (info->Id == AscensionSunCleric::DawnCast)
+    if (info->Id == AscensionSunCleric::DawnCast || info->Id == AscensionXoroth::SPELL_SACRIFICIAL_CIRCLE)
     {
       row.Values[SPELL_WIRE_SLOT(SPELL_CASTER_AURA_SPELL_FIELD)] = info->CasterAuraSpell;
       row.Values[SPELL_WIRE_SLOT(SPELL_EXCLUDE_CASTER_AURA_SPELL_FIELD)] = info->ExcludeCasterAuraSpell;
@@ -5153,10 +5314,25 @@ public:
     _allVanityItemIds.clear();
     _woodworkingAppearancePatches.clear();
     _woodworkingItemAppearancePatches.clear();
+    _incarnationCategories.clear();
+
+    ClientDBC categories;
+    if (categories.Load(GetClientDBCPath("AppearanceCategories.dbc"), 25))
+      for (uint32 row = 0; row < categories.GetRecordCount(); ++row) {
+        ClientDBC::Record record = categories.GetRecord(row);
+        uint32 const categoryId = record.GetUInt32(0);
+        uint32 const kind = record.GetUInt32(19);
+        uint64 const classMask = record.GetUInt32(23) | (uint64(record.GetUInt32(24)) << 32);
+        if (categoryId < APPEARANCE_CATEGORY_COUNT && categoryId != APPEARANCE_CATEGORY_SHADOWHOUND && classMask &&
+            record.GetString(1) == "APPEARANCE_TYPE_INCARNATION" &&
+            (kind == INCARNATION_KIND_FORM || kind == INCARNATION_KIND_CREATURE))
+          _incarnationCategories[categoryId] = IncarnationCategory{kind, record.GetUInt32(20), record.GetUInt32(21),
+              classMask};
+      }
 
     ClientDBC appearances;
     bool appearancesLoaded =
-        appearances.Load(GetClientDBCPath("Appearances.dbc"), 9);
+        appearances.Load(GetClientDBCPath("Appearances.dbc"), 10);
     for (uint32 row = 0; row < appearances.GetRecordCount(); ++row) {
       ClientDBC::Record record = appearances.GetRecord(row);
       uint32 appearanceId = record.GetUInt32(0);
@@ -5175,6 +5351,15 @@ public:
         appearance.CreatureDisplay = ResolveShadowhoundDisplay(displayId);
       if (appearance.PrimaryCategory == APPEARANCE_CATEGORY_TAMED_BEAST)
         appearance.CreatureEntry = record.GetUInt32(8);
+      if (_incarnationCategories.contains(appearance.PrimaryCategory) ||
+          _incarnationCategories.contains(appearance.SecondaryCategory) ||
+          _incarnationCategories.contains(appearance.TertiaryCategory))
+      {
+        uint32 const incarnationDisplay = record.GetUInt32(8);
+        if (sCreatureDisplayInfoStore.LookupEntry(incarnationDisplay))
+          appearance.CreatureDisplay = incarnationDisplay;
+        appearance.CreatureWeapon = record.GetUInt32(9);
+      }
       _allAppearanceIds.push_back(appearanceId);
     }
 
@@ -5218,6 +5403,7 @@ public:
     ClientDBC vanity;
     bool vanityLoaded =
         vanity.Load(GetClientDBCPath("VanityCollection.dbc"), 77);
+    std::map<uint32, VanityPrice> const prices = LoadVanityPrices();
     for (uint32 row = 0; row < vanity.GetRecordCount(); ++row) {
       ClientDBC::Record record = vanity.GetRecord(row);
       uint32 itemId = record.GetUInt32(1);
@@ -5226,6 +5412,14 @@ public:
 
       VanityInfo info{
           record.GetUInt32(76), record.GetUInt32(12), record.GetUInt32(2)};
+      info.BazaarTokenCost = record.GetUInt32(6);
+      for (uint8 type = 0; type < REALM_TYPE_COUNT; ++type)
+        if (record.GetUInt32(7 + type))
+          info.RealmTypeMask |= 1 << type;
+      info.ClassMask = record.GetUInt32(13) | (uint64(record.GetUInt32(14)) << 32);
+      info.RaceMask = record.GetUInt32(15);
+      if (auto const price = prices.find(itemId); price != prices.end())
+        info.BazaarTokenCost = price->second.BazaarTokens;
 
       _vanityItems[itemId] = info;
       _allVanityItemIds.push_back(itemId);
@@ -5360,6 +5554,7 @@ public:
         if (appearance.CosmeticSpell)
             player->RemoveAurasDueToSpell(appearance.CosmeticSpell, player->GetGUID());
     RefreshCosmetics(player, *state);
+    RefreshIncarnations(player);
     InitializeRiding(player);
     QueueOwnedCompanionSpells(player, *state);
 
@@ -5845,6 +6040,80 @@ public:
         return appearance != _appearances.end() ? appearance->second.CreatureDisplay : 0;
     }
 
+    uint32 FindIncarnationCategory(uint32 kind, uint32 id) const
+    {
+        for (auto const& [category, incarnation] : _incarnationCategories)
+            if (incarnation.Kind == kind && (incarnation.FirstId == id || (incarnation.SecondId && incarnation.SecondId == id)))
+                return category;
+        return 0;
+    }
+
+    AppearanceInfo const* GetActiveIncarnation(Player* player, uint32 category)
+    {
+        auto const incarnation = _incarnationCategories.find(category);
+        if (!player || incarnation == _incarnationCategories.end() ||
+            !incarnation->second.AllowsClass(player->getClass()) ||
+            !ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED))
+            return nullptr;
+
+        auto state = GetState(player);
+        if (!state || !state->CanSeeSpellAppearances)
+            return nullptr;
+
+        uint32 const appearanceId = state->ActiveAppearances[category];
+        if (!state->CollectedAppearances.contains(appearanceId))
+            return nullptr;
+
+        auto const appearance = _appearances.find(appearanceId);
+        return appearance != _appearances.end() && appearance->second.CreatureDisplay ? &appearance->second : nullptr;
+    }
+
+    uint32 GetIncarnationFormDisplay(Player* player, ShapeshiftForm form)
+    {
+        if (form == FORM_DIREBEAR)
+            form = FORM_BEAR;
+        else if (form == FORM_FLIGHT_EPIC)
+            form = FORM_FLIGHT;
+
+        uint32 const category = FindIncarnationCategory(INCARNATION_KIND_FORM, form);
+        AppearanceInfo const* appearance = category ? GetActiveIncarnation(player, category) : nullptr;
+        return appearance ? appearance->CreatureDisplay : 0;
+    }
+
+    void RefreshIncarnationGuardian(Player* player, Guardian* guardian)
+    {
+        if (!player || !guardian || guardian->GetOwnerGUID() != player->GetGUID() || guardian->getTransForm())
+            return;
+
+        uint32 const category = FindIncarnationCategory(INCARNATION_KIND_CREATURE, guardian->GetEntry());
+        if (!category)
+            return;
+
+        AppearanceInfo const* appearance = GetActiveIncarnation(player, category);
+        uint32 const display = appearance ? appearance->CreatureDisplay : guardian->GetNativeDisplayId();
+        if (guardian->GetDisplayId() != display)
+            guardian->SetDisplayId(display, guardian->GetObjectScale());
+
+        uint32 weapon = appearance && sObjectMgr->GetItemTemplate(appearance->CreatureWeapon) ? appearance->CreatureWeapon : 0;
+        int8 equipmentId = 1;
+        if (!weapon)
+            if (EquipmentInfo const* equipment = sObjectMgr->GetEquipmentInfo(guardian->GetEntry(), equipmentId))
+                weapon = equipment->ItemEntry[0];
+        if (guardian->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID) != weapon)
+            guardian->SetVirtualItem(0, weapon);
+    }
+
+    void RefreshIncarnations(Player* player)
+    {
+        if (!player || !player->IsInWorld())
+            return;
+
+        if (player->GetShapeshiftForm() != FORM_NONE)
+            player->RestoreDisplayId();
+        if (Pet* pet = player->GetPet())
+            RefreshIncarnationGuardian(player, pet);
+    }
+
   void DeliverVanityItem(Player *player, uint32 itemId) {
     std::shared_ptr<PlayerCollectionState> state = GetState(player);
     if (!state)
@@ -5932,6 +6201,95 @@ public:
         .PSendSysMessage("Vanity item {} exists in the Ascension client but "
                          "has no AzerothCore item template yet.",
                          itemId);
+  }
+
+  bool GrantFullVanityCollection(Player *player) {
+    std::shared_ptr<PlayerCollectionState> state = GetState(player);
+    if (!state)
+      return false;
+
+    std::size_t vanityBefore = state->OwnedVanityItems.size();
+    for (uint32 itemId : _allVanityItemIds) {
+      if (IsWithheldVanityItem(itemId))
+        continue;
+
+      if (state->OwnedVanityItems.insert(itemId).second) {
+        CharacterDatabasePreparedStatement *stmt =
+            CharacterDatabase.GetPreparedStatement(CHAR_INS_ACCOUNT_VANITY_COLLECTION);
+        stmt->SetData(0, state->AccountId);
+        stmt->SetData(1, itemId);
+        CharacterDatabase.Execute(stmt);
+      }
+    }
+
+    SendVanityCollection(player, *state);
+    LearnOwnedBankSpells(player, *state, !player->IsInWorld());
+    QueueOwnedCompanionSpells(player, *state);
+
+    LOG_INFO("coa",
+             "Granted full Ascension vanity collection to {} (account {}): "
+             "+{} vanity items",
+             player->GetName(), state->AccountId,
+             state->OwnedVanityItems.size() - vanityBefore);
+    return true;
+  }
+
+  bool GrantMysticAltarVanityItems(Player *player) {
+    std::shared_ptr<PlayerCollectionState> state = GetState(player);
+    if (!state)
+      return false;
+
+    std::size_t vanityBefore = state->OwnedVanityItems.size();
+    for (uint32 itemId : MysticAltarVanityItems) {
+      if (!_vanityItems.contains(itemId))
+        continue;
+
+      if (state->OwnedVanityItems.insert(itemId).second) {
+        CharacterDatabasePreparedStatement *stmt =
+            CharacterDatabase.GetPreparedStatement(CHAR_INS_ACCOUNT_VANITY_COLLECTION);
+        stmt->SetData(0, state->AccountId);
+        stmt->SetData(1, itemId);
+        CharacterDatabase.Execute(stmt);
+      }
+    }
+
+    SendVanityCollection(player, *state);
+
+    LOG_INFO("coa",
+             "Granted Mystic Altar vanity items to {} (account {}) "
+             "regardless of this realm's CoA.RealmOffersMysticAltars "
+             "setting: +{} vanity items",
+             player->GetName(), state->AccountId,
+             state->OwnedVanityItems.size() - vanityBefore);
+    return true;
+  }
+
+  bool GrantFullAppearanceCollection(Player *player) {
+    std::shared_ptr<PlayerCollectionState> state = GetState(player);
+    if (!state)
+      return false;
+
+    std::size_t appearancesBefore = state->CollectedAppearances.size();
+    for (uint32 appearanceId : _allAppearanceIds) {
+      auto appearanceItr = _appearances.find(appearanceId);
+      if (appearanceItr == _appearances.end() ||
+          !state->CollectedAppearances.insert(appearanceId).second)
+        continue;
+
+      CharacterDatabase.Execute(
+          "INSERT IGNORE INTO `account_appearance_collection` "
+          "(`account_id`, `appearance_id`, `source_item`) VALUES ({}, {}, {})",
+          state->AccountId, appearanceId, appearanceItr->second.SourceItem);
+    }
+
+    BeginAppearanceCollectionSync(player, *state);
+
+    LOG_INFO("coa",
+             "Granted full Ascension transmog collection to {} (account {}): "
+             "+{} appearances",
+             player->GetName(), state->AccountId,
+             state->CollectedAppearances.size() - appearancesBefore);
+    return true;
   }
 
 private:
@@ -6337,6 +6695,18 @@ private:
             SendAppearanceAdded(player, appearanceId, itemId);
     }
 
+  void SendVanityCollectionAdded(Player* player, uint32 itemId)
+  {
+    WorldPacket packet(SMSG_VANITY_COLLECTION_ADDED, sizeof(uint32));
+    packet << itemId;
+    player->GetSession()->SendPacket(&packet);
+
+    WorldPacket learned;
+    ChatHandler::BuildChatPacket(learned, CHAT_MSG_WHISPER, LANG_ADDON, player, player,
+        Acore::StringFormat("{}	{}", VANITY_ITEM_LEARNED_EVENT, itemId));
+    player->SendDirectMessage(&learned);
+  }
+
   void CollectItem(Player *player, PlayerCollectionState &state, uint32 itemId,
                    bool notifyClient, bool bound) {
     CollectItemAppearance(player, state, itemId, notifyClient);
@@ -6349,6 +6719,7 @@ private:
         std::binary_search(AscensionCollectibles::SigilVanityItems.begin(),
             AscensionCollectibles::SigilVanityItems.end(), itemId)) &&
         _vanityItems.contains(itemId) &&
+        !IsConsumableVanityItem(_vanityItems.at(itemId)) &&
         state.OwnedVanityItems.insert(itemId).second) {
       CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_ACCOUNT_VANITY_COLLECTION);
       stmt->SetData(0, state.AccountId);
@@ -6356,11 +6727,7 @@ private:
       CharacterDatabase.Execute(stmt);
 
       if (notifyClient)
-      {
-        WorldPacket packet(SMSG_VANITY_COLLECTION_ADDED, sizeof(uint32));
-        packet << itemId;
-        player->GetSession()->SendPacket(&packet);
-      }
+        SendVanityCollectionAdded(player, itemId);
     }
 
     if (IsBankVanityItem(itemId) && state.OwnedVanityItems.insert(itemId).second)
@@ -6371,11 +6738,7 @@ private:
       CharacterDatabase.Execute(stmt);
 
       if (notifyClient)
-      {
-        WorldPacket packet(SMSG_VANITY_COLLECTION_ADDED, sizeof(uint32));
-        packet << itemId;
-        player->GetSession()->SendPacket(&packet);
-      }
+        SendVanityCollectionAdded(player, itemId);
 
       LearnOwnedBankSpells(player, state, !player->IsInWorld());
       LOG_INFO("coa", "Account {} acquired the bank item {} through {}",
@@ -6485,7 +6848,7 @@ private:
       AppearanceInfo const &appearance = appearanceItr->second;
       if ((categoryId <= 14 || categoryId == APPEARANCE_CATEGORY_AMMUNITION ||
           categoryId == APPEARANCE_CATEGORY_SHADOWHOUND ||
-          IsCosmeticCategory(categoryId)) &&
+          IsCosmeticCategory(categoryId) || _incarnationCategories.contains(categoryId)) &&
           appearance.PrimaryCategory != categoryId &&
           appearance.SecondaryCategory != categoryId &&
           appearance.TertiaryCategory != categoryId) {
@@ -6493,9 +6856,16 @@ private:
         return;
       }
       if ((IsCosmeticCategory(categoryId) && !appearance.CosmeticSpell) ||
-          (categoryId == APPEARANCE_CATEGORY_SHADOWHOUND && !appearance.CreatureDisplay))
+          ((categoryId == APPEARANCE_CATEGORY_SHADOWHOUND || _incarnationCategories.contains(categoryId)) &&
+           !appearance.CreatureDisplay))
       {
         SendApplyResult(player, "APPLY_APPEARANCES_INVALID_SELECTION");
+        return;
+      }
+      if (auto const incarnation = _incarnationCategories.find(categoryId);
+          incarnation != _incarnationCategories.end() && !incarnation->second.AllowsClass(player->getClass()))
+      {
+        SendApplyResult(player, "APPLY_APPEARANCES_NOT_AVAILABLE_FOR_CLASS");
         return;
       }
     }
@@ -6520,6 +6890,7 @@ private:
     SaveActiveAppearances(player, *state);
     RefreshCosmetics(player, *state);
     RefreshVisibleItems(player);
+    RefreshIncarnations(player);
     SendApplyResult(player, "APPLY_APPEARANCES_OK");
   }
 
@@ -6587,6 +6958,7 @@ private:
                               canSeeItem ? 1 : 0, canSeeSpell ? 1 : 0);
 
     RefreshVisibleItems(player);
+    RefreshIncarnations(player);
     SendAppearanceVisibility(player, *state);
   }
 
@@ -6601,6 +6973,12 @@ private:
         uint8 currency = 0;
         uint32 itemId = 0;
         packet >> currency >> itemId;
+        if (currency == VANITY_CURRENCY_BAZAAR_TOKENS)
+        {
+            PurchaseVanityItemWithBazaarTokens(player, itemId);
+            return;
+        }
+
         if (currency != VANITY_CURRENCY_DONATION_POINTS)
         {
             LOG_DEBUG("coa", "Ignored Ascension point spend request in vanity currency {} for {} from {}",
@@ -6609,6 +6987,102 @@ private:
         }
 
         DeliverVanityItem(player, itemId);
+    }
+
+    [[nodiscard]] static bool IsVanityItemOffered(Player* player, VanityInfo const& vanity)
+    {
+        if ((vanity.Flags & VANITY_FLAG_NOT_OFFERED) || !(vanity.RealmTypeMask & GetRealmTypeMask()))
+            return false;
+
+        uint32 const classIndex = player->getClass() - 1;
+        if (vanity.ClassMask && (classIndex >= 64 || !(vanity.ClassMask & (uint64(1) << classIndex))))
+            return false;
+
+        uint32 const raceIndex = player->getRace() - 1;
+        return !vanity.RaceMask || (raceIndex < 32 && (vanity.RaceMask & (1u << raceIndex)));
+    }
+
+    void PurchaseVanityItemWithBazaarTokens(Player* player, uint32 itemId)
+    {
+        std::shared_ptr<PlayerCollectionState> state = GetState(player);
+        if (!state)
+            return;
+
+        ChatHandler handler(player->GetSession());
+        auto vanityItr = _vanityItems.find(itemId);
+        if (vanityItr == _vanityItems.end() || IsWithheldVanityItem(itemId) ||
+            !IsVanityItemOffered(player, vanityItr->second))
+        {
+            handler.SendSysMessage("That item is not sold on this realm.");
+            return;
+        }
+
+        uint32 const cost = vanityItr->second.BazaarTokenCost;
+        if (!cost)
+        {
+            handler.SendSysMessage("That item cannot be bought with Bazaar Tokens.");
+            return;
+        }
+
+        if (IsConsumableVanityItem(vanityItr->second))
+        {
+            BuyConsumableVanityItem(player, itemId, cost);
+            return;
+        }
+
+        bool const sigil = std::binary_search(AscensionCollectibles::SigilVanityItems.begin(),
+            AscensionCollectibles::SigilVanityItems.end(), itemId);
+        bool const unlockAll = ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::UNLOCK_ALL_VANITY);
+        if (state->OwnedVanityItems.contains(itemId) || (unlockAll && !sigil && !IsBankVanityItem(itemId)))
+        {
+            handler.SendSysMessage("You already own this item.");
+            return;
+        }
+
+        if (!player->HasItemCount(VANITY_BAZAAR_TOKEN_ITEM, cost))
+        {
+            handler.SendSysMessage("You do not have enough Bazaar Tokens.");
+            return;
+        }
+
+        player->DestroyItemCount(VANITY_BAZAAR_TOKEN_ITEM, cost, true);
+        CollectItem(player, *state, itemId, true, true);
+        LOG_INFO("coa", "{} bought vanity item {} for {} Bazaar Tokens", player->GetName(), itemId, cost);
+    }
+
+    [[nodiscard]] static bool IsConsumableVanityItem(VanityInfo const& vanity)
+    {
+        return vanity.CategoryMask & VANITY_CATEGORY_CONSUMABLE;
+    }
+
+    void BuyConsumableVanityItem(Player* player, uint32 itemId, uint32 cost)
+    {
+        ChatHandler handler(player->GetSession());
+        if (!sObjectMgr->GetItemTemplate(itemId))
+        {
+            handler.PSendSysMessage("Vanity item {} has no AzerothCore item template yet.", itemId);
+            return;
+        }
+
+        if (!player->HasItemCount(VANITY_BAZAAR_TOKEN_ITEM, cost))
+        {
+            handler.SendSysMessage("You do not have enough Bazaar Tokens.");
+            return;
+        }
+
+        ItemPosCountVec destinations;
+        InventoryResult result = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, destinations, itemId, 1);
+        if (result != EQUIP_ERR_OK)
+        {
+            player->SendEquipError(result, nullptr, nullptr, itemId);
+            return;
+        }
+
+        player->DestroyItemCount(VANITY_BAZAAR_TOKEN_ITEM, cost, true);
+        if (Item* bought = player->StoreNewItem(destinations, itemId, true))
+            player->SendNewItem(bought, 1, true, false);
+
+        LOG_INFO("coa", "{} bought consumable vanity item {} for {} Bazaar Tokens", player->GetName(), itemId, cost);
     }
 
   void SaveActiveAppearances(Player *player,
@@ -6681,15 +7155,9 @@ public:
         AscensionCompatConfig::REALM_TYPE);
 
     uint8 flags[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-    for (std::string_view type : Acore::Tokenize(art, ' ', false)) {
-      if (type == "live")             flags[0] = 1;
-      else if (type == "seasonal")    flags[1] = 1;
-      else if (type == "league")      flags[2] = 1;
-      else if (type == "ptr")         flags[3] = 1;
-      else if (type == "development") flags[4] = 1;
-    }
-    if (std::none_of(flags, flags + 5, [](uint8 flag) { return flag != 0; }))
-      flags[0] = 1;
+    uint8 const realmTypes = GetRealmTypeMask();
+    for (uint8 type = 0; type < REALM_TYPE_COUNT; ++type)
+      flags[type] = (realmTypes >> type) & 1;
 
     std::string const model = ascensionCompatConfig.GetConfigValue<std::string>(
         AscensionCompatConfig::CLASS_MODEL);
@@ -6752,9 +7220,9 @@ public:
         };
 
         static std::unordered_set<std::string_view> const secureAscensionAddons = {
-            "AscensionUI", "Ascension_CompactRaidFrames", "Ascension_EnchantCollection", "Ascension_HelpUI",
-            "Ascension_InspectUI", "Ascension_MythicPlus", "Ascension_SeasonCollection", "Ascension_TicketUI",
-            "Ascension_UIDevelopmentTools", "Ascension_WildCard",
+            "AscensionUI", "Ascension_Collections", "Ascension_CompactRaidFrames", "Ascension_EnchantCollection",
+            "Ascension_HelpUI", "Ascension_InspectUI", "Ascension_MythicPlus", "Ascension_SeasonCollection",
+            "Ascension_TicketUI", "Ascension_UIDevelopmentTools", "Ascension_WildCard",
         };
 
         std::vector<std::string> names = session->GetClientAddonNames();
@@ -6929,7 +7397,11 @@ private:
       vanityItems.assign(state.OwnedVanityItems.begin(),
                          state.OwnedVanityItems.end());
 
-    vanityItems.erase(std::remove_if(vanityItems.begin(), vanityItems.end(), IsWithheldVanityItem), vanityItems.end());
+    vanityItems.erase(std::remove_if(vanityItems.begin(), vanityItems.end(), [this](uint32 itemId)
+        {
+            auto itr = _vanityItems.find(itemId);
+            return IsWithheldVanityItem(itemId) || (itr != _vanityItems.end() && IsConsumableVanityItem(itr->second));
+        }), vanityItems.end());
     std::sort(vanityItems.begin(), vanityItems.end());
     vanityItems.erase(std::unique(vanityItems.begin(), vanityItems.end()), vanityItems.end());
     WorldPacket packet(SMSG_VANITY_COLLECTION_INFO,
@@ -7022,6 +7494,7 @@ private:
   }
 
   bool _clientDataLoaded = false;
+  std::unordered_map<uint32, IncarnationCategory> _incarnationCategories;
   std::unordered_map<uint32, AppearanceInfo> _appearances;
   std::unordered_map<uint32, uint32> _itemAppearances;
   std::unordered_map<uint32, std::vector<uint32>> _itemSetItems;
@@ -7126,29 +7599,11 @@ void SendBankPermissions(Player* player, uint8 kind)
     AscensionPersonalBank::SendKindHint(player, uint8(kind));
 }
 
-[[nodiscard]] float AverageEquippedItemLevel(Player* player, uint8 emptiedSlot)
-{
-    float sum = 0.0f;
-    uint32 count = 0;
-    for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
-    {
-        if (slot == EQUIPMENT_SLOT_TABARD || slot == EQUIPMENT_SLOT_RANGED || slot == EQUIPMENT_SLOT_OFFHAND ||
-            slot == EQUIPMENT_SLOT_BODY)
-            continue;
-
-        ++count;
-        if (Item* item = slot == emptiedSlot ? nullptr : player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
-            sum += item->GetTemplate()->Quality == ITEM_QUALITY_HEIRLOOM ? player->GetLevel()
-                                                                        : item->GetTemplate()->ItemLevel;
-    }
-    return sum / count;
-}
-
 [[nodiscard]] WorldPacket BuildAverageItemLevel(Player* player, uint8 emptiedSlot = EQUIPMENT_SLOT_END)
 {
     WorldPacket data(SMSG_UPDATE_OBJECT_ADDON, 16);
     data << player->GetGUID() << PLAYER_ADDON_FIELD_AVERAGE_ITEM_LEVEL
-         << AverageEquippedItemLevel(player, emptiedSlot);
+         << AscensionAverageItemLevel::Equipped(player, emptiedSlot);
     return data;
 }
 
@@ -7581,8 +8036,112 @@ public:
         {"spellcharges", spellChargesCommandTable},
         {"localclassrepair", HandleLocalClassRepairCommand, SEC_PLAYER,
          Console::No},
+        {"localvanityall", HandleLocalVanityAllCommand, SEC_ADMINISTRATOR,
+         Console::No},
+        {"localtransmogall", HandleLocalTransmogAllCommand, SEC_ADMINISTRATOR,
+         Console::No},
+        {"localmysticaltarall", HandleLocalMysticAltarAllCommand,
+         SEC_ADMINISTRATOR, Console::No},
         {"bankground", HandleBankGroundCommand, SEC_ADMINISTRATOR, Console::No}};
     return commandTable;
+  }
+
+  static bool HandleLocalVanityAllCommand(ChatHandler *handler,
+                                          Optional<PlayerIdentifier> player) {
+    if (!player)
+      player = PlayerIdentifier::FromTargetOrSelf(handler);
+
+    if (!player || !player->IsConnected())
+    {
+      handler->SendSysMessage("That player must be online for this command.");
+      return true;
+    }
+
+    Player *target = player->GetConnectedPlayer();
+    if (!AscensionCollectionService::Instance().GrantFullVanityCollection(target))
+    {
+      handler->PSendSysMessage(
+          "Could not grant the vanity collection to {}: their Ascension "
+          "collection state isn't loaded (bot, or collection data failed to "
+          "load).",
+          player->GetName());
+      return true;
+    }
+
+    handler->PSendSysMessage(
+        "Granted the full Ascension vanity collection to {}.",
+        player->GetName());
+    if (handler->GetPlayer() != target)
+      ChatHandler(target->GetSession())
+          .SendSysMessage(
+              "You have been granted the full Ascension vanity collection.");
+    return true;
+  }
+
+  static bool HandleLocalTransmogAllCommand(ChatHandler *handler,
+                                            Optional<PlayerIdentifier> player) {
+    if (!player)
+      player = PlayerIdentifier::FromTargetOrSelf(handler);
+
+    if (!player || !player->IsConnected())
+    {
+      handler->SendSysMessage("That player must be online for this command.");
+      return true;
+    }
+
+    Player *target = player->GetConnectedPlayer();
+    if (!AscensionCollectionService::Instance().GrantFullAppearanceCollection(target))
+    {
+      handler->PSendSysMessage(
+          "Could not grant the transmog collection to {}: their Ascension "
+          "collection state isn't loaded (bot, or collection data failed to "
+          "load).",
+          player->GetName());
+      return true;
+    }
+
+    handler->PSendSysMessage(
+        "Granted the full Ascension transmog collection to {}.",
+        player->GetName());
+    if (handler->GetPlayer() != target)
+      ChatHandler(target->GetSession())
+          .SendSysMessage(
+              "You have been granted the full Ascension transmog "
+              "collection.");
+    return true;
+  }
+
+  static bool HandleLocalMysticAltarAllCommand(ChatHandler *handler,
+                                               Optional<PlayerIdentifier> player) {
+    if (!player)
+      player = PlayerIdentifier::FromTargetOrSelf(handler);
+
+    if (!player || !player->IsConnected())
+    {
+      handler->SendSysMessage("That player must be online for this command.");
+      return true;
+    }
+
+    Player *target = player->GetConnectedPlayer();
+    if (!AscensionCollectionService::Instance().GrantMysticAltarVanityItems(target))
+    {
+      handler->PSendSysMessage(
+          "Could not grant the Mystic Altar vanity items to {}: their "
+          "Ascension collection state isn't loaded (bot, or collection data "
+          "failed to load).",
+          player->GetName());
+      return true;
+    }
+
+    handler->PSendSysMessage(
+        "Granted the Mystic Altar vanity items to {} (account-wide "
+        "ownership; this realm may not offer altars to use them on).",
+        player->GetName());
+    if (handler->GetPlayer() != target)
+      ChatHandler(target->GetSession())
+          .SendSysMessage(
+              "You have been granted the Mystic Altar vanity items.");
+    return true;
   }
 
   static bool HandleBankGroundCommand(ChatHandler *handler) {
@@ -7850,7 +8409,7 @@ public:
              PLAYERHOOK_ON_TAKE_MAIL_ITEM, PLAYERHOOK_CAN_CAST_ITEM_USE_SPELL,
              PLAYERHOOK_ON_STORE_NEW_ITEM, PLAYERHOOK_ON_CREATE_ITEM,
              PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST,
-             PLAYERHOOK_ON_PLAYER_IS_CLASS, PLAYERHOOK_ON_LEVEL_CHANGED,
+             PLAYERHOOK_ON_PLAYER_IS_CLASS, PLAYERHOOK_ON_LEVEL_CHANGED, PLAYERHOOK_ON_MAP_CHANGED,
              PLAYERHOOK_ON_LEARN_SPELL, PLAYERHOOK_ON_LEARN_TRAINER_SPELL, PLAYERHOOK_ON_FORGOT_SPELL,
              PLAYERHOOK_ON_AFTER_SPEC_SLOT_CHANGED,
              PLAYERHOOK_ON_CREATE_INITIAL_ITEMS,
@@ -7860,7 +8419,21 @@ public:
              PLAYERHOOK_CAN_USE_ITEM,
              PLAYERHOOK_CHECK_ITEM_IN_SLOT_AT_LOAD_INVENTORY,
              PLAYERHOOK_ON_TEMPORARY_SPELL_REMOVE_NOTICE,
-             PLAYERHOOK_ON_TEMPORARY_SPELL_REPLACEMENT_NOTICE}) {}
+             PLAYERHOOK_ON_TEMPORARY_SPELL_REPLACEMENT_NOTICE,
+             PLAYERHOOK_ON_GET_SHAPESHIFT_MODEL,
+             PLAYERHOOK_ON_AFTER_GUARDIAN_INIT_STATS_FOR_LEVEL}) {}
+
+    void OnPlayerGetShapeshiftModel(Player* player, uint8 form, uint32, uint32& modelId) override
+    {
+        if (uint32 const display = AscensionCollectionService::Instance().GetIncarnationFormDisplay(player,
+                ShapeshiftForm(form)))
+            modelId = display;
+    }
+
+    void OnPlayerAfterGuardianInitStatsForLevel(Player* player, Guardian* guardian) override
+    {
+        AscensionCollectionService::Instance().RefreshIncarnationGuardian(player, guardian);
+    }
 
     void OnPlayerTemporarySpellRemoveNotice(Player* player, uint32 spellId, bool sent) override
     {
@@ -8040,6 +8613,12 @@ public:
       RefreshScaledQuestQueries(player);
     }
   }
+
+    void OnPlayerMapChanged(Player* player) override
+    {
+        if (ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED) && player->IsInWorld())
+            SendAverageItemLevel(player);
+    }
 
   void OnPlayerLearnSpell(Player *player, uint32 spellId) override {
     if (ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED) &&
@@ -9512,6 +10091,8 @@ void AppendConfiguredClientConfigs(AscensionClientConfig& config) {
 
 void AddAscensionCompatScripts() {
   Ascension::ClientItemPatches::Instance().Register(ITEM_HEARTWOOD_KEY);
+  Ascension::ClientItemPatches::Instance().Register(ITEM_CUIRBOULLI_BOOTS);
+  Ascension::ClientItemPatches::Instance().Register(ITEM_RED_RIBBONED_WRAPPING_PAPER);
   for (uint32 itemId : BUSHCRAFT_CRAFTED_ITEMS)
     Ascension::ClientItemPatches::Instance().Register(itemId);
   RegisterAscensionClientConfig([](AscensionClientConfig& config) {

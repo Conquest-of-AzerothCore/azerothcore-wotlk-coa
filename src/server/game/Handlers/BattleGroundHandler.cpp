@@ -724,6 +724,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
     uint32 arenaRating = 0;
     uint32 matchmakerRating = 0;
     uint32 previousOpponents = 0;
+    bool ratedFiveVersusFiveUnavailable = false;
 
     switch (arenaslot)
     {
@@ -739,11 +740,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
                 arenatype = ARENA_TYPE_1v1;
                 break;
             }
-            if (!IsBot())
-            {
-                ChatHandler(this).SendSysMessage("This arena bracket is not available yet.");
-                return;
-            }
+            ratedFiveVersusFiveUnavailable = !IsBot();
             arenatype = ARENA_TYPE_5v5;
             break;
         default:
@@ -791,6 +788,12 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
         WorldPacket data;
         sBattlegroundMgr->BuildGroupJoinedBattlegroundPacket(&data, err);
         SendPacket(&data);
+        return;
+    }
+
+    if (ratedFiveVersusFiveUnavailable)
+    {
+        ChatHandler(this).SendSysMessage("This arena bracket is not available yet.");
         return;
     }
 

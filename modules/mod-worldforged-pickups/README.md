@@ -1493,10 +1493,13 @@ page plots them.
   spent in memory and in the database. Pickup awards and the prestige save commit synchronously
   so earlier claims finish before the reset, and the reset finishes before a new claim.
   Relogging preserves the new cycle; ordinary level changes leave spent pickups locked.
-* **Recording**: `OnPlayerLootItem` fires the moment a base item leaves the pickup, so
-  clicked, auto-stored and group-window loot are all covered. The item and the ledger row are
-  written in one character-database transaction, so a crash cannot mark a pickup spent
-  without the item it was spent for.
+* **Recording**: the pickup is recorded the moment its base item reaches a character, by any
+  of the three paths that hand one out: `OnPlayerLootItem` (clicked, auto-stored or picked from
+  the group window), `OnPlayerGroupRollRewardItem` (won by a Need or Greed roll) and
+  `OnPlayerMasterLootItem` (given by the master looter). A pickup whose template sets group loot
+  rules (`Data15 = 1`, Redfang's Cache) hands its item out through the last two in a group.
+  The item and the ledger row are written in one character-database transaction, so a crash
+  cannot mark a pickup spent without the item it was spent for.
 * **`OnAllowedForPlayerLootCheck` refuses the item itself** for a character who has already
   looted this pickup. This is the one that closes the remaining hole: a loot session that
   outlives its claim. The chest holds a single shared loot, so the next character's open

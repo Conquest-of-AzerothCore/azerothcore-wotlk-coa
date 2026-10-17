@@ -1,0 +1,224 @@
+{
+  "schema": 1,
+  "name": "Soulrend's tooltip states the Soul Infusion requirement its client data omits (#7667)",
+  "contract": [
+    "Soulrend 573316 and every later rank carry Spell.dbc CasterAuraSpell 803031",
+    "(Soul Infusion), which Reaped Soul 500363 grants at three stacks, so the cast is",
+    "rejected with SPELL_FAILED_CASTER_AURAS (22) until the infusion exists and it",
+    "spends the infusion and the three souls. The client's own description names",
+    "neither, while its 'Requires Melee Weapon' line comes from the spell's own",
+    "attributes, so #7667 asks the tooltip to state the requirement as the Reaper's",
+    "other formation-gated abilities do. The client's Spell.dbc cannot be edited from",
+    "this repository, so the fix publishes each rank's unchanged DBC text with the",
+    "conditional 'Requires Soul Infusion' prefix in coa_client_spell_description,",
+    "which AscensionCompat streams to the client as SMSG_PATCH_SPELL (opcode 2346) at",
+    "login. This scenario reads the streamed rows and then proves the text is true:",
+    "row 500639 (Runeshroud, published by the same table) is the control for the",
+    "stream and must not gain the line, 573316 must arrive with it, and the same",
+    "Soul Infusion the line names must gate the cast and be spent by it."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "reaper",
+      "race": 1,
+      "class": 30,
+      "level": 12,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "reaper",
+      "entry": 36,
+      "level": 12,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI, level scaling and the login patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the shared description table still streams Runeshroud's own text as row 500639",
+      "actor": "reaper",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500639,
+      "text": "Requires Runeshroud",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: that streamed row carries no Soul Infusion requirement line",
+      "actor": "reaper",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500639,
+      "text": "Requires Soul Infusion",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: Soulrend rank 1 (573316) reaches the client with the requirement line",
+      "actor": "reaper",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 573316,
+      "text": "Requires Soul Infusion",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: that row also names the Reaped Souls the cast spends",
+      "actor": "reaper",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 573316,
+      "text": "Consumes 3 Reaped Souls",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: the rank-2 description still reaches the client with the same line",
+      "actor": "reaper",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 573317,
+      "text": "Requires Soul Infusion",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: the level-12 chain member 802731 carries it too",
+      "actor": "reaper",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 802731,
+      "text": "Requires Soul Infusion",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: every other streamed description is untouched - 501546 keeps its own prerequisite",
+      "actor": "reaper",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 501546,
+      "text": "Requires Assault Formation",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Learn the rank the report used",
+      "actor": "reaper",
+      "spell": 573316
+    },
+    {
+      "action": "set_power",
+      "label": "Empty the Runic Power bar so the cast's generation is visible",
+      "actor": "reaper",
+      "power": 6,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "label": "Soulrend without the infusion the tooltip now names",
+      "actor": "reaper",
+      "spell": 573316,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "The line is true: the infusion gates the cast (SPELL_FAILED_CASTER_AURAS)",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 573316,
+      "equals": 22
+    },
+    {
+      "action": "assert",
+      "label": "and no Soulrend damage lands",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 573316,
+      "equals": 0
+    },
+    {
+      "action": "grant_resource",
+      "label": "Three Reaped Souls, the stacks the line names",
+      "actor": "reaper",
+      "spell": 500363,
+      "amount": 3
+    },
+    {
+      "action": "assert",
+      "label": "The three souls grant Soul Infusion 803031",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Soulrend with the infusion",
+      "actor": "reaper",
+      "spell": 573316,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "The infused Soulrend lands",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 573316,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The cast spends the infusion the tooltip names",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 803031,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "and spends the three Reaped Souls",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "and generates Runic Power, as the unchanged description still promises",
+      "actor": "reaper",
+      "metric": "power",
+      "power": 6,
+      "min": 1
+    }
+  ]
+}

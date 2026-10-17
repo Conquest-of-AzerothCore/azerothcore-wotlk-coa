@@ -1,0 +1,1163 @@
+{
+  "schema": 1,
+  "name": "Profession upgrades preserve random properties and fixed suffix bonuses",
+  "contract": "Runecloth upgrade kits preserve existing affix identity, seed and enchantments through Refined and Superior. The default two-step cap refuses Masterwork without consuming the kit or changing the Superior item.",
+  "players": [
+    {
+      "id": "property",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "suffix",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "plain",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_skill",
+      "actor": "property",
+      "skill": 197,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "suffix",
+      "skill": 197,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "plain",
+      "skill": 197,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "property",
+      "item": 13858
+    },
+    {
+      "action": "add_item",
+      "actor": "property",
+      "item": 135289,
+      "count": 3
+    },
+    {
+      "action": "set_item_random_property",
+      "actor": "property",
+      "item": 13858,
+      "property": 13202
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_random_property",
+      "item": 13858,
+      "equals": 13202,
+      "label": "Fixture has requested affix identity"
+    },
+    {
+      "action": "snapshot",
+      "actor": "property",
+      "metric": "item_random_property",
+      "item": 13858,
+      "save_as": "affix_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "property",
+      "metric": "item_suffix_factor",
+      "item": 13858,
+      "save_as": "affix_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "affix_9",
+      "slot": 7
+    },
+    {
+      "action": "snapshot",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "affix_10",
+      "slot": 8
+    },
+    {
+      "action": "snapshot",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "affix_11",
+      "slot": 9
+    },
+    {
+      "action": "snapshot",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "affix_12",
+      "slot": 10
+    },
+    {
+      "action": "snapshot",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "affix_13",
+      "slot": 11
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "use_item",
+      "actor": "property",
+      "item": 135289,
+      "spell": 94722,
+      "target_item": 13858
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_count",
+      "item": 1156155,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_random_property",
+      "item": 1156155,
+      "relative_to": "affix_7",
+      "equals": 0,
+      "label": "property keeps item_random_property None"
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_suffix_factor",
+      "item": 1156155,
+      "relative_to": "affix_8",
+      "equals": 0,
+      "label": "property keeps item_suffix_factor None"
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 1156155,
+      "relative_to": "affix_9",
+      "equals": 0,
+      "label": "property keeps item_enchantment 7",
+      "slot": 7
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 1156155,
+      "relative_to": "affix_10",
+      "equals": 0,
+      "label": "property keeps item_enchantment 8",
+      "slot": 8
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 1156155,
+      "relative_to": "affix_11",
+      "equals": 0,
+      "label": "property keeps item_enchantment 9",
+      "slot": 9
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 1156155,
+      "relative_to": "affix_12",
+      "equals": 0,
+      "label": "property keeps item_enchantment 10",
+      "slot": 10
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 1156155,
+      "relative_to": "affix_13",
+      "equals": 0,
+      "label": "property keeps item_enchantment 11",
+      "slot": 11
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "equip",
+      "actor": "property",
+      "item": 1156155,
+      "slot": 4
+    },
+    {
+      "action": "use_item",
+      "actor": "property",
+      "item": 135289,
+      "spell": 94722,
+      "target_item": 1156155
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_count",
+      "item": 1156156,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_random_property",
+      "item": 1156156,
+      "relative_to": "affix_7",
+      "equals": 0,
+      "label": "property keeps item_random_property None"
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_suffix_factor",
+      "item": 1156156,
+      "relative_to": "affix_8",
+      "equals": 0,
+      "label": "property keeps item_suffix_factor None"
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_9",
+      "equals": 0,
+      "label": "property keeps item_enchantment 7",
+      "slot": 7
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_10",
+      "equals": 0,
+      "label": "property keeps item_enchantment 8",
+      "slot": 8
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_11",
+      "equals": 0,
+      "label": "property keeps item_enchantment 9",
+      "slot": 9
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_12",
+      "equals": 0,
+      "label": "property keeps item_enchantment 10",
+      "slot": 10
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_13",
+      "equals": 0,
+      "label": "property keeps item_enchantment 11",
+      "slot": 11
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "use_item",
+      "actor": "property",
+      "item": 135289,
+      "spell": 94722,
+      "target_item": 1156156
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "cast_failure",
+      "spell": 94722,
+      "equals": 12,
+      "within_ms": 2000,
+      "label": "Third upgrade refused at cap"
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_count",
+      "item": 135289,
+      "equals": 1,
+      "label": "Refused upgrade preserves kit"
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_count",
+      "item": 1156157,
+      "equals": 0,
+      "label": "No Masterwork item created",
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_count",
+      "item": 1156156,
+      "equals": 1,
+      "label": "Superior item retained"
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_random_property",
+      "item": 1156156,
+      "relative_to": "affix_7",
+      "equals": 0,
+      "label": "property keeps item_random_property None"
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_suffix_factor",
+      "item": 1156156,
+      "relative_to": "affix_8",
+      "equals": 0,
+      "label": "property keeps item_suffix_factor None"
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_9",
+      "equals": 0,
+      "label": "property keeps item_enchantment 7",
+      "slot": 7
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_10",
+      "equals": 0,
+      "label": "property keeps item_enchantment 8",
+      "slot": 8
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_11",
+      "equals": 0,
+      "label": "property keeps item_enchantment 9",
+      "slot": 9
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_12",
+      "equals": 0,
+      "label": "property keeps item_enchantment 10",
+      "slot": 10
+    },
+    {
+      "action": "assert",
+      "actor": "property",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_13",
+      "equals": 0,
+      "label": "property keeps item_enchantment 11",
+      "slot": 11
+    },
+    {
+      "action": "add_item",
+      "actor": "suffix",
+      "item": 13858
+    },
+    {
+      "action": "add_item",
+      "actor": "suffix",
+      "item": 135289,
+      "count": 3
+    },
+    {
+      "action": "set_item_random_property",
+      "actor": "suffix",
+      "item": 13858,
+      "property": -63
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_random_property",
+      "item": 13858,
+      "equals": -63,
+      "label": "Fixture has requested affix identity"
+    },
+    {
+      "action": "snapshot",
+      "actor": "suffix",
+      "metric": "item_random_property",
+      "item": 13858,
+      "save_as": "affix_48"
+    },
+    {
+      "action": "snapshot",
+      "actor": "suffix",
+      "metric": "item_suffix_factor",
+      "item": 13858,
+      "save_as": "affix_49"
+    },
+    {
+      "action": "snapshot",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "affix_50",
+      "slot": 7
+    },
+    {
+      "action": "snapshot",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "affix_51",
+      "slot": 8
+    },
+    {
+      "action": "snapshot",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "affix_52",
+      "slot": 9
+    },
+    {
+      "action": "snapshot",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "affix_53",
+      "slot": 10
+    },
+    {
+      "action": "snapshot",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "affix_54",
+      "slot": 11
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "use_item",
+      "actor": "suffix",
+      "item": 135289,
+      "spell": 94722,
+      "target_item": 13858
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_count",
+      "item": 1156155,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_random_property",
+      "item": 1156155,
+      "relative_to": "affix_48",
+      "equals": 0,
+      "label": "suffix keeps item_random_property None"
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_suffix_factor",
+      "item": 1156155,
+      "relative_to": "affix_49",
+      "equals": 0,
+      "label": "suffix keeps item_suffix_factor None"
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 1156155,
+      "relative_to": "affix_50",
+      "equals": 0,
+      "label": "suffix keeps item_enchantment 7",
+      "slot": 7
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 1156155,
+      "relative_to": "affix_51",
+      "equals": 0,
+      "label": "suffix keeps item_enchantment 8",
+      "slot": 8
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 1156155,
+      "relative_to": "affix_52",
+      "equals": 0,
+      "label": "suffix keeps item_enchantment 9",
+      "slot": 9
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 1156155,
+      "relative_to": "affix_53",
+      "equals": 0,
+      "label": "suffix keeps item_enchantment 10",
+      "slot": 10
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 1156155,
+      "relative_to": "affix_54",
+      "equals": 0,
+      "label": "suffix keeps item_enchantment 11",
+      "slot": 11
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "use_item",
+      "actor": "suffix",
+      "item": 135289,
+      "spell": 94722,
+      "target_item": 1156155
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_count",
+      "item": 1156156,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_random_property",
+      "item": 1156156,
+      "relative_to": "affix_48",
+      "equals": 0,
+      "label": "suffix keeps item_random_property None"
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_suffix_factor",
+      "item": 1156156,
+      "relative_to": "affix_49",
+      "equals": 0,
+      "label": "suffix keeps item_suffix_factor None"
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_50",
+      "equals": 0,
+      "label": "suffix keeps item_enchantment 7",
+      "slot": 7
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_51",
+      "equals": 0,
+      "label": "suffix keeps item_enchantment 8",
+      "slot": 8
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_52",
+      "equals": 0,
+      "label": "suffix keeps item_enchantment 9",
+      "slot": 9
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_53",
+      "equals": 0,
+      "label": "suffix keeps item_enchantment 10",
+      "slot": 10
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_54",
+      "equals": 0,
+      "label": "suffix keeps item_enchantment 11",
+      "slot": 11
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "use_item",
+      "actor": "suffix",
+      "item": 135289,
+      "spell": 94722,
+      "target_item": 1156156
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "cast_failure",
+      "spell": 94722,
+      "equals": 12,
+      "within_ms": 2000,
+      "label": "Third upgrade refused at cap"
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_count",
+      "item": 135289,
+      "equals": 1,
+      "label": "Refused upgrade preserves kit"
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_count",
+      "item": 1156157,
+      "equals": 0,
+      "label": "No Masterwork item created",
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_count",
+      "item": 1156156,
+      "equals": 1,
+      "label": "Superior item retained"
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_random_property",
+      "item": 1156156,
+      "relative_to": "affix_48",
+      "equals": 0,
+      "label": "suffix keeps item_random_property None"
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_suffix_factor",
+      "item": 1156156,
+      "relative_to": "affix_49",
+      "equals": 0,
+      "label": "suffix keeps item_suffix_factor None"
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_50",
+      "equals": 0,
+      "label": "suffix keeps item_enchantment 7",
+      "slot": 7
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_51",
+      "equals": 0,
+      "label": "suffix keeps item_enchantment 8",
+      "slot": 8
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_52",
+      "equals": 0,
+      "label": "suffix keeps item_enchantment 9",
+      "slot": 9
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_53",
+      "equals": 0,
+      "label": "suffix keeps item_enchantment 10",
+      "slot": 10
+    },
+    {
+      "action": "assert",
+      "actor": "suffix",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_54",
+      "equals": 0,
+      "label": "suffix keeps item_enchantment 11",
+      "slot": 11
+    },
+    {
+      "action": "add_item",
+      "actor": "plain",
+      "item": 13858
+    },
+    {
+      "action": "add_item",
+      "actor": "plain",
+      "item": 135289,
+      "count": 3
+    },
+    {
+      "action": "set_item_random_property",
+      "actor": "plain",
+      "item": 13858,
+      "property": 0
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_random_property",
+      "item": 13858,
+      "equals": 0,
+      "label": "Fixture has requested affix identity"
+    },
+    {
+      "action": "snapshot",
+      "actor": "plain",
+      "metric": "item_random_property",
+      "item": 13858,
+      "save_as": "affix_88"
+    },
+    {
+      "action": "snapshot",
+      "actor": "plain",
+      "metric": "item_suffix_factor",
+      "item": 13858,
+      "save_as": "affix_89"
+    },
+    {
+      "action": "snapshot",
+      "actor": "plain",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "affix_90",
+      "slot": 7
+    },
+    {
+      "action": "snapshot",
+      "actor": "plain",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "affix_91",
+      "slot": 8
+    },
+    {
+      "action": "snapshot",
+      "actor": "plain",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "affix_92",
+      "slot": 9
+    },
+    {
+      "action": "snapshot",
+      "actor": "plain",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "affix_93",
+      "slot": 10
+    },
+    {
+      "action": "snapshot",
+      "actor": "plain",
+      "metric": "item_enchantment",
+      "item": 13858,
+      "save_as": "affix_94",
+      "slot": 11
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "use_item",
+      "actor": "plain",
+      "item": 135289,
+      "spell": 94722,
+      "target_item": 13858
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_count",
+      "item": 1156155,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_random_property",
+      "item": 1156155,
+      "relative_to": "affix_88",
+      "equals": 0,
+      "label": "plain keeps item_random_property None"
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_suffix_factor",
+      "item": 1156155,
+      "relative_to": "affix_89",
+      "equals": 0,
+      "label": "plain keeps item_suffix_factor None"
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_enchantment",
+      "item": 1156155,
+      "relative_to": "affix_90",
+      "equals": 0,
+      "label": "plain keeps item_enchantment 7",
+      "slot": 7
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_enchantment",
+      "item": 1156155,
+      "relative_to": "affix_91",
+      "equals": 0,
+      "label": "plain keeps item_enchantment 8",
+      "slot": 8
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_enchantment",
+      "item": 1156155,
+      "relative_to": "affix_92",
+      "equals": 0,
+      "label": "plain keeps item_enchantment 9",
+      "slot": 9
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_enchantment",
+      "item": 1156155,
+      "relative_to": "affix_93",
+      "equals": 0,
+      "label": "plain keeps item_enchantment 10",
+      "slot": 10
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_enchantment",
+      "item": 1156155,
+      "relative_to": "affix_94",
+      "equals": 0,
+      "label": "plain keeps item_enchantment 11",
+      "slot": 11
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "use_item",
+      "actor": "plain",
+      "item": 135289,
+      "spell": 94722,
+      "target_item": 1156155
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_count",
+      "item": 1156156,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_random_property",
+      "item": 1156156,
+      "relative_to": "affix_88",
+      "equals": 0,
+      "label": "plain keeps item_random_property None"
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_suffix_factor",
+      "item": 1156156,
+      "relative_to": "affix_89",
+      "equals": 0,
+      "label": "plain keeps item_suffix_factor None"
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_90",
+      "equals": 0,
+      "label": "plain keeps item_enchantment 7",
+      "slot": 7
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_91",
+      "equals": 0,
+      "label": "plain keeps item_enchantment 8",
+      "slot": 8
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_92",
+      "equals": 0,
+      "label": "plain keeps item_enchantment 9",
+      "slot": 9
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_93",
+      "equals": 0,
+      "label": "plain keeps item_enchantment 10",
+      "slot": 10
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_94",
+      "equals": 0,
+      "label": "plain keeps item_enchantment 11",
+      "slot": 11
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "use_item",
+      "actor": "plain",
+      "item": 135289,
+      "spell": 94722,
+      "target_item": 1156156
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "cast_failure",
+      "spell": 94722,
+      "equals": 12,
+      "within_ms": 2000,
+      "label": "Third upgrade refused at cap"
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_count",
+      "item": 135289,
+      "equals": 1,
+      "label": "Refused upgrade preserves kit"
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_count",
+      "item": 1156157,
+      "equals": 0,
+      "label": "No Masterwork item created",
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_count",
+      "item": 1156156,
+      "equals": 1,
+      "label": "Superior item retained"
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_random_property",
+      "item": 1156156,
+      "relative_to": "affix_88",
+      "equals": 0,
+      "label": "plain keeps item_random_property None"
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_suffix_factor",
+      "item": 1156156,
+      "relative_to": "affix_89",
+      "equals": 0,
+      "label": "plain keeps item_suffix_factor None"
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_90",
+      "equals": 0,
+      "label": "plain keeps item_enchantment 7",
+      "slot": 7
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_91",
+      "equals": 0,
+      "label": "plain keeps item_enchantment 8",
+      "slot": 8
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_92",
+      "equals": 0,
+      "label": "plain keeps item_enchantment 9",
+      "slot": 9
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_93",
+      "equals": 0,
+      "label": "plain keeps item_enchantment 10",
+      "slot": 10
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "item_enchantment",
+      "item": 1156156,
+      "relative_to": "affix_94",
+      "equals": 0,
+      "label": "plain keeps item_enchantment 11",
+      "slot": 11
+    }
+  ]
+}

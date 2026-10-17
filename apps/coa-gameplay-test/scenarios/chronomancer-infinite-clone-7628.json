@@ -1,0 +1,33 @@
+{
+ "schema": 1,
+ "name": "Chronomancer: Infinite Clone enables Rewind and Rewind restores (#7628)",
+ "contract": "Casting Infinite Clone (804492) records the caster on a living clone (50071) and marks the caster with the Infinite Clone aura (704154) that Rewind (801294) requires. Casting Rewind restores the recorded health, removes the clone and the mark. Before the fix the mark was never applied, so Rewind stayed unusable.",
+ "timeout_ms": 90000,
+ "players": [
+  {
+   "id": "c",
+   "race": 1,
+   "class": 22,
+   "level": 46
+  }
+ ],
+ "steps": [
+  {"action": "wait", "ms": 3000},
+  {"action": "learn", "actor": "c", "spell": 804492},
+  {"action": "learn", "actor": "c", "spell": 801294},
+  {"action": "cast", "actor": "c", "spell": 804492},
+  {"action": "assert", "label": "Infinite Clone must leave a living clone owned by the caster",
+   "metric": "owned_creature_count", "entry": 50071, "equals": 1, "within_ms": 5000, "actor": "c"},
+  {"action": "assert", "label": "The caster must carry the Infinite Clone mark that Rewind requires",
+   "metric": "aura", "spell": 704154, "equals": 1, "actor": "c"},
+  {"action": "snapshot", "actor": "c", "metric": "health", "save_as": "recorded"},
+  {"action": "set_health", "actor": "c", "value": 1000},
+  {"action": "cast", "actor": "c", "spell": 801294},
+  {"action": "assert", "label": "Rewind must restore the recorded health",
+   "metric": "health", "relative_to": "recorded", "equals": 0, "within_ms": 5000, "actor": "c"},
+  {"action": "assert", "label": "Rewind must consume the clone",
+   "metric": "owned_creature_count", "entry": 50071, "equals": 0, "within_ms": 5000, "actor": "c"},
+  {"action": "assert", "label": "Rewind must remove the mark so it cannot be reused",
+   "metric": "aura", "spell": 704154, "equals": 0, "actor": "c"}
+ ]
+}

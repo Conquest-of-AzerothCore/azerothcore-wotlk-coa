@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "name": "Lower Blackrock Spire: Overlord Wyrmthalak's half-health adds carry Ascension's Nerf Summons",
+  "contract": "Below 51% health Overlord Wyrmthalak calls one Spirestone Warlord (9216) and one Smolderthorn Berserker (9268). The client data has a hidden permanent self aura for them, Wyrmthalak - Nerf Summons (210866): -50% damage done to all schools and +0% health. Both summoned adds carry that aura.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 229,
+    "x": -59.77,
+    "y": -498.06,
+    "z": 88.77,
+    "o": 1.5,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 9568,
+      "level": 60,
+      "health": 400000,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 2156414,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Lower Blackrock Spire",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 229
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Spirestone Warlord is near before the call for help",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 9216,
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "label": "Engage Overlord Wyrmthalak",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Overlord Wyrmthalak fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "set_health",
+      "label": "Drop Overlord Wyrmthalak below half health",
+      "actor": "boss",
+      "value": 150000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: he calls one Spirestone Warlord",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 9216,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: he calls one Smolderthorn Berserker",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 9268,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The Spirestone Warlord carries Wyrmthalak - Nerf Summons",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 9216,
+      "spell": 210866,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The Smolderthorn Berserker carries Wyrmthalak - Nerf Summons",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 9268,
+      "spell": 210866,
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

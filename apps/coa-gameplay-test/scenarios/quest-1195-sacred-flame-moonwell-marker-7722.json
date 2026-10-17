@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "CoA super-track patch: The Sacred Flame's arrow moves to the Ashenvale Moonwell (#7722)",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1.",
+    "The in-world arrow and minimap pin come from the client's SuperTrack.dbc, which the login patch stream overrides from coa_client_super_track (AscensionCompat.cpp:4646); the world-map markers stay the server's quest_poi rows.",
+    "Quest 1195 'The Sacred Flame' binds its only objective to SuperTrack point 4599 (QuestSuperTrack row 2865, field 2), and the client places 4599 at Raynewood Retreat (2377.6299, -1665.83, 142.128). The issue reports that arrow while the world map marks the Ashenvale Moonwell, and quest_poi id 2 (ObjectiveIndex 5, point 1888 -1776) agrees with the map.",
+    "Gameobject 20806 'Ashenvale Moonwell' stands at (1870.43, -1771.57, 61.328), where the issue's coordinates point, so the override moves 4599 there.",
+    "Row 4599 is referenced by exactly one objective in the whole client table, so nothing else moves. The login patch stream sends coa_client_super_track rows as SMSG_PATCH_SUPER_TRACK (0x06BE) records; socketless packet construction does not establish how the client renders the waypoint."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": 1870.43,
+    "y": -1771.57,
+    "z": 61.328,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "client",
+      "race": 6,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The login stream sends SuperTrack row 4599 once",
+      "actor": "client",
+      "metric": "server_packets",
+      "opcode": 1726,
+      "row": 4599,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Row 4599 is on Kalimdor",
+      "actor": "client",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 4599,
+      "index": 1,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Row 4599 x is the Ashenvale Moonwell's 1870.43",
+      "actor": "client",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 4599,
+      "index": 2,
+      "equals": 1156173251
+    },
+    {
+      "action": "assert",
+      "label": "Row 4599 y is the Ashenvale Moonwell's -1771.57",
+      "actor": "client",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 4599,
+      "index": 3,
+      "equals": 3302847037
+    }
+  ]
+}

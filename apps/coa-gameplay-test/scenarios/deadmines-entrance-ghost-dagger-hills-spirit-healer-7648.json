@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Westfall: a ghost released inside the Deadmines entrance reaches the Dagger Hills Spirit Healer (#7648)",
+  "contract": "A player who dies inside the Deadmines entrance cave (zone 10135, at the Defias Digger spawn (-11089.5,1531.5,31)) releases at the nearest graveyard of Westfall (40), Dagger Hills 1462 (-11218.7,1711.25,39.0291), instead of the default Westfall graveyard 4 at Sentinel Hill. Its Spirit Healer 6491 stands near it. Death and spirit release use the native handlers.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -11089.5,
+    "y": 1531.5,
+    "z": 31,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 11
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "die",
+      "actor": "cleric"
+    },
+    {
+      "action": "release_spirit",
+      "actor": "cleric"
+    },
+    {
+      "action": "assert",
+      "label": "The released player is a ghost",
+      "actor": "cleric",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ghost lands at the Dagger Hills graveyard",
+      "actor": "cleric",
+      "metric": "position_x",
+      "min": -11233.7,
+      "max": -11203.7,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "position_y",
+      "min": 1696.2,
+      "max": 1726.2
+    },
+    {
+      "action": "assert",
+      "label": "A Spirit Healer stands at the ghost's graveyard",
+      "actor": "cleric",
+      "metric": "nearby_creature_template",
+      "entry": 6491,
+      "equals": 6491
+    }
+  ]
+}

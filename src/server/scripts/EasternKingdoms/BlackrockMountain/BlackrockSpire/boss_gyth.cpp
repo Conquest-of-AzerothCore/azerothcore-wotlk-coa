@@ -56,6 +56,12 @@ struct boss_gyth : public BossAI
 
     void Reset() override
     {
+        if (instance->GetBossState(DATA_WARCHIEF_REND_BLACKHAND) == DONE)
+        {
+            events.Reset();
+            return;
+        }
+
         if (instance->GetBossState(DATA_GYTH) == IN_PROGRESS)
         {
             instance->SetBossState(DATA_GYTH, NOT_STARTED);
@@ -85,7 +91,8 @@ struct boss_gyth : public BossAI
 
     void EnterEvadeMode(EvadeReason why) override
     {
-        instance->SetBossState(DATA_WARCHIEF_REND_BLACKHAND, FAIL);
+        if (instance->GetBossState(DATA_WARCHIEF_REND_BLACKHAND) != DONE)
+            instance->SetBossState(DATA_WARCHIEF_REND_BLACKHAND, FAIL);
         BossAI::EnterEvadeMode(why);
     }
 

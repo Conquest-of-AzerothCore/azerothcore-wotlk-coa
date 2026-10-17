@@ -2,10 +2,11 @@
   "schema": 1,
   "name": "Wildcard Ancient of War selects the Ancient model and restores the original display",
   "contract": [
-    "Ascension Spell281261 transform references missing creature346922; available Ancient of War3469 uses",
-    "display1461. A normal cast must select the Ancient display rather than native missing-template pig",
-    "fallback, retain its authored twenty-point crit bonus, and restore display/crit on expiry. This",
-    "checks server display selection; rendered models are outside this harness."
+    "Ascension Spell281261 transforms into creature346922, whose Ancient of War form display111212 has",
+    "client scale 0.7; NPC display1461 has client scale 3.0 and blocks the screen (#7519). A normal cast",
+    "must select display111212 rather than native missing-template pig fallback, retain its authored",
+    "twenty-point crit bonus, and restore display/crit on expiry. This checks server display selection;",
+    "rendered models are outside this harness."
   ],
   "timeout_ms": 180000,
   "players": [
@@ -65,7 +66,7 @@
       "action": "assert",
       "actor": "hero",
       "metric": "display_id",
-      "equals": 1461
+      "equals": 111212
     },
     {
       "action": "assert",

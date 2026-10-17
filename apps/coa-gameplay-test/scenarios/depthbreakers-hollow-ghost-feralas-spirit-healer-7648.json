@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Feralas: a ghost released in Depthbreaker's Hollow reaches a Spirit Healer (#7648)",
+  "contract": "A player who dies in Depthbreaker's Hollow (zone 10239, at the middle of its main cave (-4680.1,2433.1,-56.5)) releases at the nearest friendly graveyard of Feralas (357), graveyard 309 (-4596.4,3229.43,8.99376) for the Alliance, instead of the default Westfall graveyard. Its Spirit Healer 6491 stands near it. Death and spirit release use the native handlers.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -4680.1,
+    "y": 2433.1,
+    "z": -56.5,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 11
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "die",
+      "actor": "cleric"
+    },
+    {
+      "action": "release_spirit",
+      "actor": "cleric"
+    },
+    {
+      "action": "assert",
+      "label": "The released player is a ghost",
+      "actor": "cleric",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "map_id",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ghost lands at the Feralas graveyard",
+      "actor": "cleric",
+      "metric": "position_x",
+      "min": -4611.4,
+      "max": -4581.4,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "position_y",
+      "min": 3214.4,
+      "max": 3244.4
+    },
+    {
+      "action": "assert",
+      "label": "A Spirit Healer stands at the ghost's graveyard",
+      "actor": "cleric",
+      "metric": "nearby_creature_template",
+      "entry": 6491,
+      "equals": 6491
+    }
+  ]
+}

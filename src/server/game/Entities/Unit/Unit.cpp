@@ -69,6 +69,7 @@
 #include "Totem.h"
 #include "TotemAI.h"
 #include "Transport.h"
+#include "TypeContainerVisitor.h"
 #include "UpdateFieldFlags.h"
 #include "UpdateFields.h"
 #include "Util.h"
@@ -15101,6 +15102,61 @@ bool Unit::HandleAuraRaidProcFromCharge(AuraEffect* triggeredByAura)
     return true;
 }
 
+namespace
+{
+    struct BossSummonCollector
+    {
+        std::vector<Creature*> summons;
+
+        void Visit(std::unordered_map<ObjectGuid, Creature*>& creatures)
+        {
+            for (auto const& [guid, creature] : creatures)
+                if (creature->IsSummon())
+                    summons.push_back(creature);
+        }
+
+        template<class T>
+        void Visit(std::unordered_map<ObjectGuid, T*>&) { }
+    };
+
+    // CoA: when a boss dies in an instance, the adds and totems it summoned (and
+    // what those summoned in turn) despawn with it. Runs before the boss's
+    // JustDied, so anything its script summons on death stays.
+    void DespawnBossSummons(Creature* boss)
+    {
+        Map* map = boss->GetMap();
+        if (!map || !map->Instanceable() || boss->IsCharmedOwnedByPlayerOrPlayer())
+            return;
+        if (!boss->IsDungeonBoss() && !boss->isWorldBoss() && boss->GetCreatureTemplate()->rank != CREATURE_ELITE_WORLDBOSS)
+            return;
+
+        BossSummonCollector collector;
+        TypeContainerVisitor<BossSummonCollector, MapStoredObjectTypesContainer> visitor(collector);
+        visitor.Visit(map->GetObjectsStore());
+
+        std::set<ObjectGuid> parents{ boss->GetGUID() };
+        std::vector<Creature*> despawn;
+        bool added;
+        do
+        {
+            added = false;
+            for (Creature* summon : collector.summons)
+            {
+                if (summon->IsCharmedOwnedByPlayerOrPlayer() || summon->IsDungeonBoss() || !summon->IsHostileToPlayers())
+                    continue;
+                if (parents.count(summon->ToTempSummon()->GetSummonerGUID()) && parents.insert(summon->GetGUID()).second)
+                {
+                    despawn.push_back(summon);
+                    added = true;
+                }
+            }
+        } while (added);
+
+        for (Creature* summon : despawn)
+            summon->DespawnOrUnsummon();
+    }
+}
+
 void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackType attackType, SpellInfo const* /*spellProto*/, Spell const* /*spell*/ /*= nullptr*/)
 {
     // Prevent killing unit twice (and giving reward from kill twice)
@@ -15355,6 +15411,8 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
         // Call KilledUnit for creatures, this needs to be called after the lootable flag is set
         if (killer && killer->IsCreature() && killer->IsAIEnabled)
             killer->ToCreature()->AI()->KilledUnit(victim);
+
+        DespawnBossSummons(creature);
 
         // Call creature just died function
         if (CreatureAI* ai = creature->AI())
@@ -16636,6 +16694,11 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId)
 
     if (IsPlayer())
     {
+        uint32 incarnationModel = 0;
+        sScriptMgr->OnPlayerGetShapeshiftModel(ToPlayer(), form, spellId, incarnationModel);
+        if (incarnationModel)
+            return incarnationModel;
+
         if (uint32 ModelId = sObjectMgr->GetModelForShapeshift(form, ToPlayer()))
             return ModelId;
     }
@@ -17265,7 +17328,7 @@ void Unit::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacker)
         addRage = damage / rageconversion * 2.5f;
 
         // Berserker Rage effect
-        if (HasAura(18499))
+        if (HasAuraOrTwin(18499))
             addRage *= 3.0f;
     }
 
@@ -18541,6 +18604,25 @@ bool Unit::IsInDisallowedMountForm() const
     if (GetDisplayId() == GetNativeDisplayId())
     {
         return false;
+    }
+
+    // A display form whose spell asks to be allowed while mounted may coexist with the mount, so
+    // it does not block one. The form is kept, and entering it is what dismounts the caster.
+    for (auto const& pair : GetOwnedAuras())
+    {
+        SpellInfo const* auraInfo = pair.second->GetSpellInfo();
+        if (!auraInfo || !auraInfo->HasAttribute(SPELL_ATTR0_ALLOW_WHILE_MOUNTED))
+        {
+            continue;
+        }
+
+        for (SpellEffectInfo const& effect : auraInfo->Effects)
+        {
+            if (effect.IsAura() && effect.ApplyAuraName != SPELL_AURA_MOD_SHAPESHIFT)
+            {
+                return false;
+            }
+        }
     }
 
     CreatureDisplayInfoEntry const* display = sCreatureDisplayInfoStore.LookupEntry(GetDisplayId());

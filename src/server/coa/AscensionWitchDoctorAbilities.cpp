@@ -85,8 +85,7 @@ class witch_doctor_casts : public AllSpellScript
             result = SPELL_FAILED_CASTER_AURASTATE;
         if (id == BigVoodoo && player->HasAura(BigVoodooLock))
             result = SPELL_FAILED_CASTER_AURASTATE;
-        if ((IsHex(info) && player->HasAura(UmbralReady)) ||
-            (Family(info, 1, 32768) && !IsArrow(info) && id != HexfireWrath &&
+        if ((Family(info, 1, 32768) && !IsArrow(info) && id != HexfireWrath &&
              (player->HasAura(HexfireReady) || player->HasAura(Shadowhunter) || player->HasAura(ArrowTalent))) ||
             (IsBottle(info) && player->HasAura(TikiTalent) && (player->HasAura(Crystal) || player->HasAura(Beast))) ||
             (id == CallSseratus && player->HasAura(ViperTalent)) ||

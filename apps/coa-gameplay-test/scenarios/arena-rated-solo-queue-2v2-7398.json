@@ -1,0 +1,352 @@
+{
+  "schema": 1,
+  "name": "Rated 2v2 solo queue: four solo players with roles are matched into a rated arena and rated by their result",
+  "contract": "The Ascension PvP window's Rated SoloQ 2v2 button sends 0x05C1 with bracket 2 and the chosen role (healer 0x04, damage 0x08). Each solo player joins the rated 2v2 queue with a personal one-member 2v2 arena team, not the skirmish queue. Two healers and two damage dealers are matched into one rated arena with a healer on each side; with equal matchmaking ratings the earlier damage dealer joins the first healer's side. When one side dies after the gates open, every participant's personal 2v2 team records one season game, and only the winners record a season win.",
+  "timeout_ms": 480000,
+  "players": [
+    {
+      "id": "healer_one",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "healer_two",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "damage_one",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "damage_two",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8809.6,
+    "y": 625.0,
+    "z": 94.979,
+    "o": 2.1
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the characters settle",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "label": "The first healer joins the rated 2v2 solo queue",
+      "actor": "healer_one",
+      "opcode": 1473,
+      "fields": [
+        {
+          "u32": 2
+        },
+        {
+          "u32": 4
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "label": "Let the join reach the world update",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "The healer queues with a personal one-member 2v2 team",
+      "actor": "healer_one",
+      "metric": "arena_team_members",
+      "slot": 0,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "label": "The second healer joins",
+      "actor": "healer_two",
+      "opcode": 1473,
+      "fields": [
+        {
+          "u32": 2
+        },
+        {
+          "u32": 4
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "label": "Let the join reach the world update",
+      "ms": 500
+    },
+    {
+      "action": "client_packet",
+      "label": "The first damage dealer joins",
+      "actor": "damage_one",
+      "opcode": 1473,
+      "fields": [
+        {
+          "u32": 2
+        },
+        {
+          "u32": 8
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "label": "Let the join reach the world update",
+      "ms": 500
+    },
+    {
+      "action": "client_packet",
+      "label": "The second damage dealer completes the lineup",
+      "actor": "damage_two",
+      "opcode": 1473,
+      "fields": [
+        {
+          "u32": 2
+        },
+        {
+          "u32": 8
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "label": "Let the queue match the four players",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "The first healer enters the arena",
+      "actor": "healer_one",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 2
+        },
+        {
+          "u8": 14
+        },
+        {
+          "invited_battleground_type": "healer_one"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The second healer enters the arena",
+      "actor": "healer_two",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 2
+        },
+        {
+          "u8": 14
+        },
+        {
+          "invited_battleground_type": "healer_two"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The first damage dealer enters the arena",
+      "actor": "damage_one",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 2
+        },
+        {
+          "u8": 14
+        },
+        {
+          "invited_battleground_type": "damage_one"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The second damage dealer enters the arena",
+      "actor": "damage_two",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 2
+        },
+        {
+          "u8": 14
+        },
+        {
+          "invited_battleground_type": "damage_two"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The first healer is in the arena",
+      "actor": "healer_one",
+      "metric": "in_arena",
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The second healer is in the arena",
+      "actor": "healer_two",
+      "metric": "in_arena",
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The first damage dealer is in the arena",
+      "actor": "damage_one",
+      "metric": "in_arena",
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The second damage dealer is in the arena",
+      "actor": "damage_two",
+      "metric": "in_arena",
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "label": "Wait for the arena gates to open",
+      "ms": 80000
+    },
+    {
+      "action": "die",
+      "label": "The second healer falls; the damage dealer on that side still stands",
+      "actor": "healer_two"
+    },
+    {
+      "action": "die",
+      "label": "The second damage dealer falls; the match ends and the arena revives its dead",
+      "actor": "damage_two",
+      "revived": true
+    },
+    {
+      "action": "assert",
+      "label": "The first healer's personal team records the game",
+      "actor": "healer_one",
+      "metric": "arena_team_season_games",
+      "slot": 0,
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "and the win",
+      "actor": "healer_one",
+      "metric": "arena_team_season_wins",
+      "slot": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Their teammate's personal team records the game",
+      "actor": "damage_one",
+      "metric": "arena_team_season_games",
+      "slot": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and the win",
+      "actor": "damage_one",
+      "metric": "arena_team_season_wins",
+      "slot": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The losing healer's personal team records the game",
+      "actor": "healer_two",
+      "metric": "arena_team_season_games",
+      "slot": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "without a win",
+      "actor": "healer_two",
+      "metric": "arena_team_season_wins",
+      "slot": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Their teammate's personal team records the game",
+      "actor": "damage_two",
+      "metric": "arena_team_season_games",
+      "slot": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "without a win",
+      "actor": "damage_two",
+      "metric": "arena_team_season_wins",
+      "slot": 0,
+      "equals": 0
+    }
+  ]
+}

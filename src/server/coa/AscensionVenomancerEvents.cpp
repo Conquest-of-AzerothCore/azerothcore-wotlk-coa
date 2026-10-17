@@ -51,7 +51,7 @@ class aura_ascension_venomancer_event : public AuraScript
                 case 803210: return !player->HasAura(803211) && Chance(player,id);
                 case 503960: return !periodic && Chance(player,id,1000);
                 case 705998: return !periodic && Chance(player,id,3000);
-                case 805098: return !periodic && player->HasAura(Beetle) && Chance(player,id);
+                case 805098: return !periodic && player->HasAura(Beetle) && Chance(player,id,1000);
                 case 504406: return !periodic && Chance(player,id);
                 case 800892: return event.GetDamageInfo() &&
                     (event.GetDamageInfo()->GetSchoolMask() & SPELL_SCHOOL_MASK_NORMAL);

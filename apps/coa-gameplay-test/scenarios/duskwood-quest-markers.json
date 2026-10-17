@@ -1,0 +1,2676 @@
+{
+  "schema": 1,
+  "name": "Duskwood restored quests: the map marks each objective area and the turn-in",
+  "contract": "The thirteen Duskwood quests of rev_20261011_95_coa_duskwood_restore.sql (254086-254089, 254091, 255067-255074) had no quest_poi rows, so the world map drew nothing for them. This case sends the CMSG_QUEST_POI_QUERY a real client sends for each quest in the log and reads SMSG_QUEST_POI_QUERY_RESPONSE: every quest must answer with one marker per objective area, on the Duskwood map (WorldMapAreaId 34), followed by the turn-in pin (ObjectiveIndex -1) on its ender. A control query for 17003, which the character does not carry, must come back empty.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -10560.0,
+    "y": -1150.0,
+    "z": 28.0,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 254086 'The Interrogation' unfinished",
+      "actor": "c",
+      "quest": 254086,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 254087 'Taken By the Dark' unfinished",
+      "actor": "c",
+      "quest": 254087,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 254088 'Addle's Stead' unfinished",
+      "actor": "c",
+      "quest": 254088,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 254089 'Addle's Stead' unfinished",
+      "actor": "c",
+      "quest": 254089,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 254091 'May We Be Reunited' unfinished",
+      "actor": "c",
+      "quest": 254091,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 255067 'Til Undeath Do We Part' unfinished",
+      "actor": "c",
+      "quest": 255067,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 255068 'An Incomplete Order' unfinished",
+      "actor": "c",
+      "quest": 255068,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 255069 'From Death Comes Love' unfinished",
+      "actor": "c",
+      "quest": 255069,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 255070 'Tilling Against the Taint' unfinished",
+      "actor": "c",
+      "quest": 255070,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 255071 'Strangers in Our Midst' unfinished",
+      "actor": "c",
+      "quest": 255071,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 255072 'The Fool and the Foul' unfinished",
+      "actor": "c",
+      "quest": 255072,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 255073 'Skittering Bedfellows' unfinished",
+      "actor": "c",
+      "quest": 255073,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 255074 'Supplies and Safety' unfinished",
+      "actor": "c",
+      "quest": 255074,
+      "complete": false
+    },
+    {
+      "action": "client_packet",
+      "label": "CONTROL: ask the map to mark 17003, a quest this character does not carry",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 17003
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the answer names 17003, so the packet being read is this query's own answer",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 17003,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a quest outside the log gets no POIs",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 254086 'The Interrogation', as the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 254086
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 254086's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 254086,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 254086 answers with 2 POIs, every objective area and the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254086: POI id 0 is an objective marker (ObjectiveIndex 0)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254086: POI id 0 carries ObjectiveIndex 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254086: POI id 0 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254086: POI id 0 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254086: POI id 0 first point x -9999",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294957297,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254086: POI id 0 first point y -838",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 4294966458,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254086: POI id 1 is the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 52,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254086: POI id 1 carries ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 56,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254086: POI id 1 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254086: POI id 1 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254086: POI id 1 first point x -9991",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 84,
+      "index": 0,
+      "equals": 4294957305,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254086: POI id 1 first point y -840",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 4294966456,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 254087 'Taken By the Dark', as the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 254087
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 254087's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 254087,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 254087 answers with 1 POIs, every objective area and the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254087: POI id 0 is the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254087: POI id 0 carries ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254087: POI id 0 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254087: POI id 0 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254087: POI id 0 first point x -10532",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294956764,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254087: POI id 0 first point y -1168",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 4294966128,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 254088 'Addle's Stead', as the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 254088
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 254088's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 254088,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 254088 answers with 2 POIs, every objective area and the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254088: POI id 0 is an objective marker (ObjectiveIndex 4)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254088: POI id 0 carries ObjectiveIndex 4",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254088: POI id 0 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254088: POI id 0 has 4 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254088: POI id 0 first point x -11061",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294956235,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254088: POI id 0 first point y 296",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 296,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254088: POI id 1 is the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 76,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254088: POI id 1 carries ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254088: POI id 1 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254088: POI id 1 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 104,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254088: POI id 1 first point x -10532",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 108,
+      "index": 0,
+      "equals": 4294956764,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254088: POI id 1 first point y -1168",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 112,
+      "index": 0,
+      "equals": 4294966128,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 254089 'Addle's Stead', as the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 254089
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 254089's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 254089,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 254089 answers with 2 POIs, every objective area and the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254089: POI id 0 is an objective marker (ObjectiveIndex 4)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254089: POI id 0 carries ObjectiveIndex 4",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254089: POI id 0 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254089: POI id 0 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254089: POI id 0 first point x -10510",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294956786,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254089: POI id 0 first point y -1156",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 4294966140,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254089: POI id 1 is the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 52,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254089: POI id 1 carries ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 56,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254089: POI id 1 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254089: POI id 1 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254089: POI id 1 first point x -9997",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 84,
+      "index": 0,
+      "equals": 4294957299,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254089: POI id 1 first point y -839",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 4294966457,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 254091 'May We Be Reunited', as the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 254091
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 254091's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 254091,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 254091 answers with 2 POIs, every objective area and the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254091: POI id 0 is an objective marker (ObjectiveIndex 0)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254091: POI id 0 carries ObjectiveIndex 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254091: POI id 0 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254091: POI id 0 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254091: POI id 0 first point x -9999",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294957297,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254091: POI id 0 first point y -838",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 4294966458,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254091: POI id 1 is the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 52,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254091: POI id 1 carries ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 56,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254091: POI id 1 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254091: POI id 1 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254091: POI id 1 first point x -9996",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 84,
+      "index": 0,
+      "equals": 4294957300,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "254091: POI id 1 first point y -837",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 4294966459,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 255067 'Til Undeath Do We Part', as the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 255067
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 255067's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 255067,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 255067 answers with 2 POIs, every objective area and the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255067: POI id 0 is an objective marker (ObjectiveIndex 4)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255067: POI id 0 carries ObjectiveIndex 4",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255067: POI id 0 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255067: POI id 0 has 4 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255067: POI id 0 first point x -10464",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294956832,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255067: POI id 0 first point y 490",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 490,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255067: POI id 1 is the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 76,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255067: POI id 1 carries ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255067: POI id 1 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255067: POI id 1 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 104,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255067: POI id 1 first point x -10590",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 108,
+      "index": 0,
+      "equals": 4294956706,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255067: POI id 1 first point y -1165",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 112,
+      "index": 0,
+      "equals": 4294966131,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 255068 'An Incomplete Order', as the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 255068
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 255068's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 255068,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 255068 answers with 2 POIs, every objective area and the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255068: POI id 0 is an objective marker (ObjectiveIndex 4)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255068: POI id 0 carries ObjectiveIndex 4",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255068: POI id 0 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255068: POI id 0 has 4 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255068: POI id 0 first point x -11254",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294956042,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255068: POI id 0 first point y -17",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 4294967279,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255068: POI id 1 is the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 76,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255068: POI id 1 carries ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255068: POI id 1 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255068: POI id 1 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 104,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255068: POI id 1 first point x -10590",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 108,
+      "index": 0,
+      "equals": 4294956706,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255068: POI id 1 first point y -1165",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 112,
+      "index": 0,
+      "equals": 4294966131,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 255069 'From Death Comes Love', as the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 255069
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 255069's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 255069,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 255069 answers with 1 POIs, every objective area and the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255069: POI id 0 is the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255069: POI id 0 carries ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255069: POI id 0 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255069: POI id 0 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255069: POI id 0 first point x -10579",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294956717,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255069: POI id 0 first point y -1289",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 4294966007,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 255070 'Tilling Against the Taint', as the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 255070
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 255070's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 255070,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 255070 answers with 2 POIs, every objective area and the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255070: POI id 0 is an objective marker (ObjectiveIndex 4)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255070: POI id 0 carries ObjectiveIndex 4",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255070: POI id 0 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255070: POI id 0 has 4 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255070: POI id 0 first point x -11132",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294956164,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255070: POI id 0 first point y -464",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 4294966832,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255070: POI id 1 is the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 76,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255070: POI id 1 carries ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255070: POI id 1 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255070: POI id 1 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 104,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255070: POI id 1 first point x -10466",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 108,
+      "index": 0,
+      "equals": 4294956830,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255070: POI id 1 first point y -1200",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 112,
+      "index": 0,
+      "equals": 4294966096,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 255071 'Strangers in Our Midst', as the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 255071
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 255071's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 255071,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 255071 answers with 1 POIs, every objective area and the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255071: POI id 0 is the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255071: POI id 0 carries ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255071: POI id 0 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255071: POI id 0 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255071: POI id 0 first point x -10446",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294956850,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255071: POI id 0 first point y -1448",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 4294965848,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 255072 'The Fool and the Foul', as the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 255072
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 255072's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 255072,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 255072 answers with 5 POIs, every objective area and the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 5,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 0 is an objective marker (ObjectiveIndex 0)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 0 carries ObjectiveIndex 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 0 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 0 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 0 first point x -10970",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294956326,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 0 first point y -1276",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 4294966020,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 1 is an objective marker (ObjectiveIndex 1)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 52,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 1 carries ObjectiveIndex 1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 56,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 1 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 1 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 1 first point x -10755",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 84,
+      "index": 0,
+      "equals": 4294956541,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 1 first point y 311",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 311,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 2 is an objective marker (ObjectiveIndex 2)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 92,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 2 carries ObjectiveIndex 2",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 96,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 2 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 104,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 2 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 120,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 2 first point x -11119",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 124,
+      "index": 0,
+      "equals": 4294956177,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 2 first point y -99",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 128,
+      "index": 0,
+      "equals": 4294967197,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 3 is an objective marker (ObjectiveIndex 3)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 132,
+      "index": 0,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 3 carries ObjectiveIndex 3",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 136,
+      "index": 0,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 3 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 144,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 3 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 160,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 3 first point x -10450",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 164,
+      "index": 0,
+      "equals": 4294956846,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 3 first point y -802",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 168,
+      "index": 0,
+      "equals": 4294966494,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 4 is the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 172,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 4 carries ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 176,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 4 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 184,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 4 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 200,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 4 first point x -10446",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 204,
+      "index": 0,
+      "equals": 4294956850,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255072: POI id 4 first point y -1448",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 208,
+      "index": 0,
+      "equals": 4294965848,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 255073 'Skittering Bedfellows', as the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 255073
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 255073's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 255073,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 255073 answers with 3 POIs, every objective area and the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255073: POI id 0 is an objective marker (ObjectiveIndex 0)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255073: POI id 0 carries ObjectiveIndex 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255073: POI id 0 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255073: POI id 0 has 4 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255073: POI id 0 first point x -10866",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294956430,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255073: POI id 0 first point y -1317",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 4294965979,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255073: POI id 1 is an objective marker (ObjectiveIndex 0)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 76,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255073: POI id 1 carries ObjectiveIndex 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255073: POI id 1 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255073: POI id 1 has 4 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 104,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255073: POI id 1 first point x -10730",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 108,
+      "index": 0,
+      "equals": 4294956566,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255073: POI id 1 first point y 145",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 112,
+      "index": 0,
+      "equals": 145,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255073: POI id 2 is the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 140,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255073: POI id 2 carries ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 144,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255073: POI id 2 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 152,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255073: POI id 2 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 168,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255073: POI id 2 first point x -10579",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 172,
+      "index": 0,
+      "equals": 4294956717,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255073: POI id 2 first point y -1289",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 176,
+      "index": 0,
+      "equals": 4294966007,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 255074 'Supplies and Safety', as the quest log does",
+      "actor": "c",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 255074
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 255074's own POI list",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 255074,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 255074 answers with 3 POIs, every objective area and the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255074: POI id 0 is an objective marker (ObjectiveIndex 4)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 12,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255074: POI id 0 carries ObjectiveIndex 4",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255074: POI id 0 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255074: POI id 0 has 4 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255074: POI id 0 first point x -10920",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 4294956376,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255074: POI id 0 first point y -518",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 4294966778,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255074: POI id 1 is an objective marker (ObjectiveIndex 4)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 76,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255074: POI id 1 carries ObjectiveIndex 4",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255074: POI id 1 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255074: POI id 1 has 4 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 104,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255074: POI id 1 first point x -11141",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 108,
+      "index": 0,
+      "equals": 4294956155,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255074: POI id 1 first point y 257",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 112,
+      "index": 0,
+      "equals": 257,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255074: POI id 2 is the turn-in pin",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 140,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255074: POI id 2 carries ObjectiveIndex -1",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 144,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255074: POI id 2 is drawn on WorldMapAreaId 34",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 152,
+      "index": 0,
+      "equals": 34,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255074: POI id 2 has 1 point(s)",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 168,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255074: POI id 2 first point x -10923",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 172,
+      "index": 0,
+      "equals": 4294956373,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "255074: POI id 2 first point y -385",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 176,
+      "index": 0,
+      "equals": 4294966911,
+      "within_ms": 4000
+    }
+  ]
+}

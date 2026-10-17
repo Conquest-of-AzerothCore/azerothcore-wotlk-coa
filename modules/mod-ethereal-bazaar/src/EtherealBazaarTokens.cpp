@@ -21,6 +21,7 @@
 #include "EtherealBazaar.h"
 
 #include "Chat.h"
+#include "CoATestZoneBonus.h"
 #include "Configuration/Config.h"
 #include "Creature.h"
 #include "GameTime.h"
@@ -69,7 +70,7 @@ namespace
         if (!player || !amount)
             return;
 
-        amount = ApplyLevelBonus(player, amount);
+        amount = TestZoneBonus::Apply(player, TestZoneBonus::Reward::BazaarTokens, ApplyLevelBonus(player, amount));
         if (!amount)
             return;
 

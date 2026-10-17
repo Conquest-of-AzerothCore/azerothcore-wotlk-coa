@@ -341,7 +341,9 @@
       "actor": "caster",
       "metric": "aura",
       "spell": 803495,
-      "equals": 1
+      "equals": 0,
+      "within_ms": 1000,
+      "label": "Spirit of Bwonsamdi's field purges the caster's own Waning Wuju, as the live combat log records"
     },
     {
       "action": "assert",
@@ -373,7 +375,8 @@
       "actor": "caster",
       "metric": "aura",
       "spell": 803495,
-      "equals": 1
+      "equals": 0,
+      "label": "The caster's Waning Wuju is not reapplied after Spirit of Bwonsamdi leaves"
     },
     {
       "action": "assert",

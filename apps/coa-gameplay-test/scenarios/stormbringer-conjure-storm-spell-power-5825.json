@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Conjure Storm scales with spell power (COA-5825)",
+  "contract": [
+    "Conjure Storm (800227, 501415-501420) reads '${$m1+0+$spn*.2} initial Nature damage' and",
+    "'${($d*1000/$T2)*($m2+0+$spn*.15)} Nature damage over $d'. None of its ranks had a spell_bonus_data row and",
+    "its EffectBonusMultiplier is 0, so with 2000 spell power it dealt the same damage as with none (measured",
+    "2333 vs 2384 on main). The ranks now carry direct_bonus 0.2 and dot_bonus 0.15 (per tick). The rank 7 storm",
+    "lands its initial hit and six ticks; at least five ticks are counted to leave room for timing."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "plain",
+      "race": 1,
+      "class": 16,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "sp",
+      "race": 1,
+      "class": 16,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "plain_dummy",
+      "owner": "plain",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10
+    },
+    {
+      "id": "sp_dummy",
+      "owner": "sp",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 501420
+    },
+    {
+      "action": "set_aura",
+      "label": "Seed Static for the 50-Static cost",
+      "actor": "plain",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "learn",
+      "actor": "sp",
+      "spell": 501420
+    },
+    {
+      "action": "set_aura",
+      "label": "Seed Static for the 50-Static cost",
+      "actor": "sp",
+      "spell": 803102,
+      "stacks": 100
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture +2000 spell damage",
+      "actor": "sp",
+      "spell": 44505,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the fixture adds 2000 Nature spell power",
+      "actor": "sp",
+      "metric": "spell_power",
+      "school": 3,
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no spell power on the control",
+      "actor": "plain",
+      "metric": "spell_power",
+      "school": 3,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "plain",
+      "spell": 501420,
+      "target": "plain_dummy"
+    },
+    {
+      "action": "cast",
+      "actor": "sp",
+      "spell": 501420,
+      "target": "sp_dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both casts are accepted",
+      "actor": "plain",
+      "metric": "cast_failure",
+      "spell": 501420,
+      "equals": 0,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both casts are accepted",
+      "actor": "sp",
+      "metric": "cast_failure",
+      "spell": 501420,
+      "equals": 0,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Let the storm run its full duration",
+      "ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the initial hit and the ticks landed",
+      "actor": "plain",
+      "metric": "spell_damage_count",
+      "spell": 501420,
+      "target": "plain_dummy",
+      "min": 5
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the same number of hits with spell power",
+      "actor": "sp",
+      "metric": "spell_damage_count",
+      "spell": 501420,
+      "target": "sp_dummy",
+      "min": 5
+    },
+    {
+      "action": "snapshot",
+      "actor": "plain",
+      "metric": "spell_damage_total",
+      "spell": 501420,
+      "target": "plain_dummy",
+      "save_as": "plain_total"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 2000 spell power adds at least 0.2*2000 + 5 ticks * 0.15*2000 = 1900 damage",
+      "actor": "sp",
+      "metric": "spell_damage_total",
+      "spell": 501420,
+      "target": "sp_dummy",
+      "relative_to": "plain_total",
+      "min": 1900
+    }
+  ]
+}

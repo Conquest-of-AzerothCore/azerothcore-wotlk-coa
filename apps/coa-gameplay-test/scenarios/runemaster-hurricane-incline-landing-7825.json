@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Runemaster Hurricane lands on the terrain on inclines (#7825)",
+  "contract": [
+    "#7825: Runemaster Hurricane (645435) teleports the Runemaster around the target once per strike (1.5 yd ring, 5 directions) and used the target's Z for every landing, so a strike landing uphill on an incline put the player inside the terrain and under the map, which can kill a Hardcore character.",
+    "StrikeHurricane in AscensionRunemasterHurricane.cpp now clamps each landing to the map height at the destination (Map::GetHeight with MAX_HEIGHT, falling back to the target's Z when no height exists), the same ground-clamp the .go teleport path uses. The clamp sits in the single shared strike function, so both Hurricane (645435) and Runic Hurricane (280930) land on the surface.",
+    "This scenario runs the real cast path at the reporter's incline (map 0, -9190.03 -2319.81): after the ability ends on its own it snapshots the map height under the player (ground_height) and asserts position_z equals it (ratio 1.0 within float tolerance). Pre-fix landings keep the target's Z, which on this incline sits below the terrain surface; post-fix landings are set from the height query itself, so the ratio is exact.",
+    "Socketless sessions have no client fall physics: a bad landing keeps its teleported Z server-side instead of falling, which is exactly what the position_z/ground_height comparison observes. Strike destinations are Z-independent in X/Y (angles from facing, 1.5 yd ring), so the final landing X/Y is identical pre/post fix and only Z differs; the dummy-Z snapshot below lets the report state the pre-fix ratio arithmetically. map_id pins the comparison to map 0, and a strike-damage assert keeps the ability itself working.",
+    "Executed post-fix: 5 strikes land, final ground 89.824, position_z ratio exactly 1.0 — PASSED."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -9190.03, "y": -2319.81, "z": 88.5203, "o": 0},
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "rm", "entry": 36, "level": 60, "health": 1000000, "distance": 5}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI, level scaling and the login patch stream settle", "ms": 7000},
+    {"action": "snapshot", "label": "target Z the pre-fix code would land every strike at", "actor": "dummy", "metric": "position_z", "save_as": "dummyz"},
+    {"action": "learn", "actor": "rm", "spell": 197},
+    {"action": "add_item", "actor": "rm", "item": 12784},
+    {"action": "equip", "label": "Hurricane requires a main-hand weapon", "actor": "rm", "item": 12784, "slot": 15},
+    {"action": "learn", "actor": "rm", "spell": 645435},
+    {"action": "cast", "label": "Start the ability", "actor": "rm", "spell": 645435, "target": "dummy"},
+    {"action": "assert", "label": "the ability is running", "actor": "rm", "metric": "aura", "spell": 645435, "equals": 1, "within_ms": 500},
+    {"action": "assert", "label": "the ability ends on its own", "actor": "rm", "metric": "aura", "spell": 645435, "equals": 0, "within_ms": 12000},
+    {"action": "assert", "label": "the ability still lands strikes", "actor": "rm", "metric": "spell_damage_count", "spell": 645437, "target": "dummy", "min": 1},
+    {"action": "assert", "label": "still on map 0", "actor": "rm", "metric": "map_id", "equals": 0},
+    {"action": "snapshot", "label": "terrain height under the landing", "actor": "rm", "metric": "ground_height", "save_as": "ground"},
+    {"action": "assert", "label": "landing Z equals the terrain height, not the target's Z", "actor": "rm", "metric": "position_z", "ratio_to": "ground", "min": 0.999, "max": 1.001}
+  ]
+}

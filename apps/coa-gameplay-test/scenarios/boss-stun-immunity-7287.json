@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "name": "Ascension bosses are immune to player stuns (#7287)",
+  "contract": [
+    "A Stormbringer's Arm of Thorim stunned Taragaman the Hungerer (11520) and broke his Massive Fire Nova. Bosses",
+    "are stun-immune on every difficulty now: Hammer of Justice (853) stuns an ordinary hostile creature but does not",
+    "land on Taragaman."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "mob",
+      "owner": "guardian",
+      "entry": 36,
+      "faction": 14,
+      "distance": 3
+    },
+    {
+      "id": "boss",
+      "owner": "guardian",
+      "entry": 11520,
+      "faction": 14,
+      "health": 400000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "guardian",
+      "spell": 853
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: Hammer of Justice on an ordinary creature",
+      "actor": "guardian",
+      "spell": 853,
+      "target": "mob"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the ordinary creature is stunned",
+      "actor": "mob",
+      "metric": "aura",
+      "spell": 853,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "guardian",
+      "spell": 853
+    },
+    {
+      "action": "cast",
+      "label": "Hammer of Justice on Taragaman the Hungerer",
+      "actor": "guardian",
+      "spell": 853,
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Taragaman is not stunned",
+      "actor": "boss",
+      "metric": "aura",
+      "spell": 853,
+      "equals": 0
+    }
+  ]
+}
