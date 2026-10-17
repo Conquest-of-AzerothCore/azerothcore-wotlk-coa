@@ -1,0 +1,52 @@
+###################################################################################################
+#  mod-coa-qol
+#
+#  Raises the stack size of profession materials.
+#
+#  This code is part of the AzerothCore project. See AUTHORS file for Copyright information.
+###################################################################################################
+
+[worldserver]
+
+###################################################################################################
+#  PROFESSION MATERIAL STACK SIZES
+#
+#  Stack sizes are applied to the loaded item templates once, at worldserver startup. Changing
+#  these options needs a restart; a config reload does not apply them. Stacks that are already
+#  larger than a new, smaller limit are kept as they are.
+#
+#  Only stackable items are raised. Non-stackable items and items that already stack higher are
+#  never changed. The change is in memory only; item_template is not modified.
+#
+#  Clients cache item data. After the first start with this module, or after changing these
+#  options, clear the client's Cache folder (WDB) so the new limit is shown and enforced.
+###################################################################################################
+
+#    CoAQol.StackSize.Enable
+#        Description: Whether item stack sizes are raised at startup.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+CoAQol.StackSize.Enable = 1
+
+#    CoAQol.StackSize.Materials
+#        Description: Stack size given to the selected items. 0 or 1 changes nothing.
+#                     Values above 100000 are limited to 100000.
+#        Default:     2000
+CoAQol.StackSize.Materials = 2000
+
+#    CoAQol.StackSize.ItemClasses
+#        Description: Comma-separated item classes raised to the stack size above.
+#                     7 is Trade Goods: ore, herbs, leather, cloth, meat, enchanting and
+#                     inscription materials, and similar. 3 is Gems. Empty selects no class.
+#        Default:     "7"
+CoAQol.StackSize.ItemClasses = "7"
+
+#    CoAQol.StackSize.IncludedItems
+#        Description: Comma-separated item IDs raised regardless of class.
+#        Default:     ""
+CoAQol.StackSize.IncludedItems = ""
+
+#    CoAQol.StackSize.ExcludedItems
+#        Description: Comma-separated item IDs that always keep their original stack size.
+#        Default:     ""
+CoAQol.StackSize.ExcludedItems = ""
