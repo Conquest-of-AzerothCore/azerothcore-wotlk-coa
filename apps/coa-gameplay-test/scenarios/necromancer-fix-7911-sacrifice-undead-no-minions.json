@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Sacrifice Undead is refused without undead minions instead of consuming its cooldown (#7911)",
+  "contract": "Sacrifice Undead 805027 and its ranks 807938-807941 (family 29, SpellFamilyFlags word 2 0x4000000) kill every owned undead minion and heal the caster once per minion destroyed. With no minions present the cast has no effect, so necromancer_casts::OnSpellCheckCast refuses it with SPELL_FAILED_NO_PET (84) and no cooldown starts: the 30 s RecoveryTime/CategoryRecoveryTime (category 164) only applies when the spell is actually used.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 807941 },
+    {
+      "action": "assert", "label": "SETUP: no minions are raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 0
+    },
+    { "action": "cast", "label": "Sacrifice Undead with no minions", "actor": "n", "spell": 807941 },
+    {
+      "action": "assert", "label": "The minionless cast is refused without a pet", "actor": "n",
+      "metric": "cast_failure", "spell": 807941, "equals": 84, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "No cooldown starts when the spell is not used", "actor": "n",
+      "metric": "cooldown_ms", "spell": 807941, "max": 0
+    },
+    { "action": "learn", "actor": "n", "spell": 500970 },
+    { "action": "cast", "label": "Raise a Lesser Skeletal Warrior", "actor": "n", "spell": 500970 },
+    {
+      "action": "assert", "label": "SETUP: one Lesser Skeletal Warrior is raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 500 },
+    { "action": "cast", "label": "CONTROL: Sacrifice Undead with a minion", "actor": "n", "spell": 807941 },
+    {
+      "action": "assert", "label": "CONTROL: the minion is destroyed", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 0, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the used cast starts its cooldown", "actor": "n",
+      "metric": "cooldown_ms", "spell": 807941, "min": 25000
+    }
+  ]
+}
