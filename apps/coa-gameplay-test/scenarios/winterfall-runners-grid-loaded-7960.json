@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Winterfall Runners exist on Kalimdor before anyone visits their spawn",
+  "contract": "Winterfall Runner (10916) waypoint spawns 42250-42252 start at 6886,-4085 and walk an 8241-yard loop through Winterspring. They are in the world as soon as Kalimdor exists, so a player who waits on the path without ever coming near the spawn point still has all three runners on the map.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 1,
+    "x": 7347.9,
+    "y": -4588.8,
+    "z": 591.82,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 1,
+      "x": 7347.9,
+      "y": -4588.8,
+      "z": 591.82,
+      "o": 0.0
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "three Winterfall Runners loaded on Kalimdor",
+      "actor": "hero",
+      "metric": "map_creature_count",
+      "entry": 10916,
+      "min": 3,
+      "within_ms": 15000
+    }
+  ]
+}

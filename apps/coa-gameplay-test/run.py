@@ -87,7 +87,7 @@ METRICS = {
     'loot_gold', 'loot_bloodforged', 'loot_required_level', 'loot_item_level', 'loot_base_entry', 'loot_item_armor',
     'carried_item_level', 'carried_item_required_level', 'carried_item_armor', 'carried_item_scaling_level',
     'nearby_gameobject_count', 'nearby_gameobject_quest_active', 'nearby_gameobject_state', 'nearby_gameobject_scale',
-    'nearby_creature_count',
+    'nearby_creature_count', 'map_creature_count',
     'carried_money',
     'channel_object_entry',
     'quest_rewarded', 'has_achievement', 'has_title', 'spell_damage_taken', 'melee_damage_taken', 'spell_healing_taken',
@@ -647,6 +647,9 @@ def validate(scenario):
                           'nearby_creature_max_health', 'loot_gear_item_level'}:
                 require(step['actor'] in player_ids, f'{where}: dungeon/loot metric needs a player')
             if metric in {'nearby_creature_template', 'nearby_creature_max_health'}:
+                number(step.get('entry'), f'{where}.entry', 1, 2**32 - 1, True)
+            if metric == 'map_creature_count':
+                require(step['actor'] in player_ids, f'{where}: creature count needs a player')
                 number(step.get('entry'), f'{where}.entry', 1, 2**32 - 1, True)
             if metric == 'nearby_creature_count':
                 require(step['actor'] in player_ids, f'{where}: creature count needs a player')

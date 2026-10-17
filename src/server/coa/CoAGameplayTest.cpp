@@ -2834,6 +2834,15 @@ private:
                         && (!auraSpell || creature->HasAura(auraSpell));
                 });
         }
+        if (metric == "map_creature_count")
+        {
+            uint32 const entry = step.get<uint32>("entry");
+            auto const& spawns = player->GetMap()->GetCreatureBySpawnIdStore();
+            return std::count_if(spawns.begin(), spawns.end(), [entry](auto const& spawn)
+            {
+                return spawn.second->GetEntry() == entry && spawn.second->IsInWorld() && spawn.second->IsAlive();
+            });
+        }
         if (metric == "carried_money")
             return player->GetMoney();
         if (metric == "loot_count" || metric == "loot_entry" || metric == "loot_gold" ||
