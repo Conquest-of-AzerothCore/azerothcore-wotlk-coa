@@ -100,6 +100,13 @@
       "args": []
     },
     {
+      "script": "check_primalist_primal_shred.py",
+      "scenarios": [
+        "primalist-primal-shred"
+      ],
+      "args": []
+    },
+    {
       "script": "check_primalist_protector_grove.py",
       "scenarios": [
         "primalist-protector-grove"
