@@ -5724,7 +5724,7 @@ public:
             if (sSpellMgr->GetSpellInfo(spellId) && !player->HasSpell(spellId))
                 player->learnSpell(spellId, false);
 
-        player->SetSkill(SKILL_RIDING, 4, 300, 300);
+        player->SetSkill(SKILL_RIDING, 5, RIDING_SKILL_ARTISAN, RIDING_SKILL_ARTISAN);
     }
 
     void PrepareOwnedCompanionsBeforeMap(Player* player)
@@ -9648,12 +9648,12 @@ class spell_ascension_local_mount : public SpellScript
             return;
 
         uint16 riding = player->GetBaseSkillValue(SKILL_RIDING);
-        if (riding < 75)
+        if (riding < RIDING_SKILL_NOVICE)
         {
             PreventHitAura();
             return;
         }
-        uint32 selected = riding >= 150 ? _mount->Ground100 : _mount->Ground60;
+        uint32 selected = riding >= RIDING_SKILL_JOURNEYMAN ? _mount->Ground100 : _mount->Ground60;
         uint32 map = GetVirtualMapForMapAndZone(player->GetMapId(), player->GetZoneId());
         bool canFly = map == MAP_OUTLAND || (map == MAP_NORTHREND && player->HasSpell(SPELL_COLD_WEATHER_FLYING));
         AreaTableEntry const* area = sAreaTableStore.LookupEntry(player->GetAreaId());
@@ -9662,9 +9662,9 @@ class spell_ascension_local_mount : public SpellScript
             player->InBattleground())
             canFly = false;
 
-        if (canFly && riding >= 225)
+        if (canFly && riding >= RIDING_SKILL_EXPERT)
         {
-            uint32 flying = riding >= 300 ? (_mount->Flying310 ? _mount->Flying310 : _mount->Flying280) :
+            uint32 flying = riding >= RIDING_SKILL_ARTISAN ? (_mount->Flying310 ? _mount->Flying310 : _mount->Flying280) :
                 _mount->Flying150;
             if (!flying)
                 flying = _mount->Flying150;
@@ -9682,7 +9682,7 @@ class spell_ascension_local_mount : public SpellScript
         player->SetTemporaryUnsummonedPetNumber(0);
         player->RemoveAurasByType(SPELL_AURA_MOUNTED, ObjectGuid::Empty, GetHitAura());
         PreventHitAura();
-        player->CastSpell(player, selected, true);
+        player->CastRidingMount(selected);
         if (petNumber)
             player->SetTemporaryUnsummonedPetNumber(petNumber);
     }

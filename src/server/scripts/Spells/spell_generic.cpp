@@ -4165,42 +4165,24 @@ public:
                 canFly = false;
 
             uint32 mount = 0;
-            switch (target->GetBaseSkillValue(SKILL_RIDING))
-            {
-                case 0:
-                    mount = _mount0;
-                    break;
-                case 75:
-                    mount = _mount60;
-                    break;
-                case 150:
-                    mount = _mount100;
-                    break;
-                case 225:
-                    if (canFly)
-                        mount = _mount150;
-                    else
-                        mount = _mount100;
-                    break;
-                case 300:
-                    if (canFly)
-                    {
-                        if (_mount310 && target->Has310Flyer(false))
-                            mount = _mount310;
-                        else
-                            mount = _mount280;
-                    }
-                    else
-                        mount = _mount100;
-                    break;
-                default:
-                    break;
-            }
+            uint16 riding = target->GetBaseSkillValue(SKILL_RIDING);
+            if (riding < RIDING_SKILL_NOVICE)
+                mount = _mount0;
+            else if (riding < RIDING_SKILL_JOURNEYMAN)
+                mount = _mount60;
+            else if (!canFly || riding < RIDING_SKILL_EXPERT)
+                mount = _mount100;
+            else if (riding < RIDING_SKILL_ARTISAN)
+                mount = _mount150;
+            else if (_mount310 && target->Has310Flyer(false))
+                mount = _mount310;
+            else
+                mount = _mount280;
 
             if (mount)
             {
                 PreventHitAura();
-                target->CastSpell(target, mount, true);
+                target->CastRidingMount(mount);
             }
 
             if (petNumber)
