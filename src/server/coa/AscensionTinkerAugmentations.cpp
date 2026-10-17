@@ -284,20 +284,13 @@ class spell_ascension_tinker_tracer : public SpellScript
         if (_remaining <= 0)
             return;
 
-        Aura* aura = GetHitAura();
-        if (!aura || !IsTracerMark(aura->GetSpellInfo()))
-            return;
-
-        if (aura->GetStackAmount() < aura->GetSpellInfo()->CalcMaxAuraStacks(GetCaster()))
-        {
-            if (AuraEffect* effect = aura->GetEffect(EFFECT_2))
-                effect->SetPeriodicTimer(aura->GetDuration());
-            return;
-        }
-
-        aura->SetDuration(_remaining);
-        if (AuraEffect* effect = aura->GetEffect(EFFECT_2))
-            effect->SetPeriodicTimer(_periodicTimer);
+        if (Aura* aura = GetHitAura())
+            if (IsTracerMark(aura->GetSpellInfo()))
+            {
+                aura->SetDuration(_remaining);
+                if (AuraEffect* effect = aura->GetEffect(EFFECT_2))
+                    effect->SetPeriodicTimer(_periodicTimer);
+            }
     }
 
     void Register() override
