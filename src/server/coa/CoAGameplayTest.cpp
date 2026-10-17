@@ -2715,6 +2715,11 @@ private:
             GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
             return object ? uint32(object->GetGoState()) : 99;
         }
+        if (metric == "nearby_gameobject_scale")
+        {
+            GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
+            return object ? object->GetObjectScale() : 0.0f;
+        }
         if (metric == "loot_bloodforged")
         {
             Loot* window = nullptr;

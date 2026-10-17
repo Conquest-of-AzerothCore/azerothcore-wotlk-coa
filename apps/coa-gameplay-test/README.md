@@ -923,6 +923,8 @@ at least that many yards from their own home positions (2D), and `spell` those c
 observe movement and auras of native summons without creating or controlling them.
 `nearby_gameobject_state` takes `entry` and returns the state of the nearest such gameobject within 20 yards
 (0 open, 1 closed, 99 none).
+`nearby_gameobject_scale` takes `entry` and returns the object scale of the nearest such gameobject within
+20 yards (0 when none).
 ## Evidence boundaries
 
 ### Optional character names
