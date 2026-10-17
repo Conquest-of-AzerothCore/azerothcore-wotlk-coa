@@ -6734,19 +6734,10 @@ void Spell::EffectBind(SpellEffIndex effIndex)
 
     player->SetHomebind(homeLoc, areaId);
 
-    // binding
-    WorldPacket data(SMSG_BINDPOINTUPDATE, 4 + 4 + 4 + 4 + 4);
-    data << float(homeLoc.GetPositionX());
-    data << float(homeLoc.GetPositionY());
-    data << float(homeLoc.GetPositionZ());
-    data << uint32(homeLoc.GetMapId());
-    data << uint32(areaId);
-    player->SendDirectMessage(&data);
-
     LOG_DEBUG("spells.aura", "EffectBind: New homebind X: {}, Y: {}, Z: {}, MapId: {}, AreaId: {}",
                    homeLoc.GetPositionX(), homeLoc.GetPositionY(), homeLoc.GetPositionZ(), homeLoc.GetMapId(), areaId);
     // zone update
-    data.Initialize(SMSG_PLAYERBOUND, 8 + 4);
+    WorldPacket data(SMSG_PLAYERBOUND, 8 + 4);
     data << m_caster->GetGUID();
     data << uint32(areaId);
     player->SendDirectMessage(&data);

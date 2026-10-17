@@ -5017,6 +5017,12 @@ void Player::SetHomebind(WorldLocation const& loc, uint32 areaId)
     stmt->SetData (4, m_homebindZ);
     stmt->SetData(5, GetGUID().GetRawValue());
     CharacterDatabase.Execute(stmt);
+
+    WorldPacket data(SMSG_BINDPOINTUPDATE, 4 + 4 + 4 + 4 + 4);
+    data << m_homebindX << m_homebindY << m_homebindZ;
+    data << uint32(m_homebindMapId);
+    data << uint32(m_homebindAreaId);
+    SendDirectMessage(&data);
 }
 
 bool Player::isBeingLoaded() const
