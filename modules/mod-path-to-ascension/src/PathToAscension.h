@@ -104,7 +104,6 @@ namespace PathToAscension
         bool rewards = false;
         bool tracking = false;
         bool legacyContent = false;
-        bool starterMountBridge = false;
         uint32 expansion = 0;
         uint32 clientExpansion = 2;
         RealmProfile realm = RealmProfile::Live;
@@ -131,7 +130,7 @@ namespace PathToAscension
     bool IsLegacyAvailable(uint32 tutorialId);
     bool IsExpansionOffered(Tutorial const& tutorial);
     bool IsCallbackImplemented(uint32 tutorialId);
-    bool IsStarterMountTutorial(uint32 tutorialId);
+    bool IsStarterMountQuest(uint32 questId);
     bool IsCallBoard(uint32 entry);
 
     void ConfigureRewards();

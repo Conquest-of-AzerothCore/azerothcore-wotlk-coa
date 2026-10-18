@@ -62,10 +62,3 @@ PathToAscension.Tracking.Enable = 1
 #                     PathToAscension.Expansion. Their objectives and rewards are unchanged.
 #        Default:     0 - (Disabled)
 PathToAscension.LegacyContent.Enable = 0
-
-#    PathToAscension.StarterMountBridge.Enable
-#        Description: Riding trainers hand a character its race's starter mount once, after it learned
-#                     Apprentice Riding, so the starter mount tutorials can be completed. While
-#                     disabled, their Novice Rider quests (4420430-4420439) are not offered.
-#        Default:     0 - (Disabled)
-PathToAscension.StarterMountBridge.Enable = 0

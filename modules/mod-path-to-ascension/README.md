@@ -20,6 +20,9 @@
 - **Tracking views.** A tutorial with an event-completed quest in `data/sql` can be started from the book or from a
   quest giver (Gorn Axefist offers the riding one). The quest completes with the tutorial, cannot be rewarded by the
   ordinary quest path and leaves the log when the reward is claimed.
+- **Novice Rider.** Its race quests (4420430-4420439) are ordinary quests: the racial riding trainers offer them,
+  learning Novice Riding completes them and the turn-in gives the race's starter mount. The tutorial completes once
+  that quest is rewarded and the mount is learned; its Path to Ascension reward is claimed separately.
 
 Progress lives in the character's `core.ascension.tutorial_*` settings, which the core saves with the character.
 
@@ -43,5 +46,4 @@ vendors, Warchests and the Callboard Cache contents are outside this module.
 installed catalog fills), `.Expansion` (default Vanilla: the expansion whose tutorial variants are offered and
 shown to the client; Onyxia's Lair and Naxxramas stay hidden while they are Wrath raids, Mythic+ Dungeons while
 the server has no Mythic+),
-`.VerifiedProgress.Enable`, `.Rewards.Enable`, `.Tracking.Enable`, `.LegacyContent.Enable`,
-`.StarterMountBridge.Enable`.
+`.VerifiedProgress.Enable`, `.Rewards.Enable`, `.Tracking.Enable`, `.LegacyContent.Enable`.
