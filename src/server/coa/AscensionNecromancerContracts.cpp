@@ -356,7 +356,10 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[2].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_MASTER);
         info->Effects[2].TargetB = SpellImplicitTargetInfo();
     }
-    for (uint32 child : {573242, 801241, 707575, 561318, 561095, 570050, 505225, 681463})
+    if (id == 707575)
+        for (auto& effect : info->Effects)
+            effect.BonusMultiplier = 0.0f;
+    for (uint32 child : {573242, 801241, 561318, 561095, 570050, 505225, 681463})
         if (id == child)
         {
             info->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;

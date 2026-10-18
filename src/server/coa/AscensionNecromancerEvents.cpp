@@ -153,9 +153,9 @@ class aura_ascension_necromancer_event : public AuraScript
             if (info && (info->SchoolMask & SPELL_SCHOOL_MASK_MAGIC) && Chance(player, 705750))
                 Cast(player, player, 705751);
             if (info && info->Id == 707592 && player->HasAura(705745))
-                for (Unit* nearby : Nearby(target, 10.0f))
-                    if (nearby != target && player->IsValidAttackTarget(nearby))
-                        Copy(player, nearby, 707575, uint64(damage) * std::max(0, Amount(705745)) / 100);
+                if (uint64 splash = uint64(damage) * std::max(0, Amount(705745)) / 100)
+                    player->CastCustomSpell(707575, SPELLVALUE_BASE_POINT0,
+                                            int32(std::min<uint64>(splash, INT32_MAX)), target, true);
         }
         if (minion)
         {
