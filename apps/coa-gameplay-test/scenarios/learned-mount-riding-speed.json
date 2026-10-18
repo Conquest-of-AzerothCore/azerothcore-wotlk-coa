@@ -1,0 +1,358 @@
+{
+  "schema": 1,
+  "name": "Learned mounts take their speed from riding skill and fly only where flying is allowed",
+  "contract": [
+    "Risen Nightmarish Steed 900055 is a learned mount whose client spell carries a 100% ground aura and a 280%",
+    "flying aura with no area limit, so it used to fly anywhere at any riding skill.",
+    "Every mount follows the rider's riding skill: Novice 50 gives 40% ground speed, Apprentice 75 gives 60%, and",
+    "Journeyman 150 and above give 100%. Flying needs Expert 225 (150%) or Artisan 300 (280%) and an area where",
+    "flying is allowed, such as Outland; Orgrimmar allows none at any skill.",
+    "The test observes native speed rates and flight permission, not rendered tooltips."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 1,
+    "x": 1662.44,
+    "y": -4405.14,
+    "z": 18.0879,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rider",
+      "race": 2,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 900055
+    },
+    {
+      "action": "assert",
+      "label": "The rider knows Risen Nightmarish Steed",
+      "actor": "rider",
+      "metric": "knows_spell",
+      "spell": 900055,
+      "equals": 1
+    },
+    {
+      "action": "set_skill",
+      "actor": "rider",
+      "skill": 762,
+      "value": 50,
+      "maximum": 300
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 900055
+    },
+    {
+      "action": "assert",
+      "label": "Novice riding mounts the rider",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Novice riding gives 40% ground speed",
+      "actor": "rider",
+      "metric": "run_speed_rate",
+      "min": 1.399,
+      "max": 1.4009999999999998
+    },
+    {
+      "action": "assert",
+      "label": "Novice riding does not allow flying here",
+      "actor": "rider",
+      "metric": "can_fly",
+      "equals": 0
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "label": "Dismounting removes the mount",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_skill",
+      "actor": "rider",
+      "skill": 762,
+      "value": 75,
+      "maximum": 300
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 900055
+    },
+    {
+      "action": "assert",
+      "label": "Apprentice riding mounts the rider",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Apprentice riding gives 60% ground speed",
+      "actor": "rider",
+      "metric": "run_speed_rate",
+      "min": 1.5990000000000002,
+      "max": 1.601
+    },
+    {
+      "action": "assert",
+      "label": "Apprentice riding does not allow flying here",
+      "actor": "rider",
+      "metric": "can_fly",
+      "equals": 0
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "label": "Dismounting removes the mount",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_skill",
+      "actor": "rider",
+      "skill": 762,
+      "value": 150,
+      "maximum": 300
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 900055
+    },
+    {
+      "action": "assert",
+      "label": "Journeyman riding mounts the rider",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Journeyman riding gives 100% ground speed",
+      "actor": "rider",
+      "metric": "run_speed_rate",
+      "min": 1.999,
+      "max": 2.001
+    },
+    {
+      "action": "assert",
+      "label": "Journeyman riding does not allow flying here",
+      "actor": "rider",
+      "metric": "can_fly",
+      "equals": 0
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "label": "Dismounting removes the mount",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_skill",
+      "actor": "rider",
+      "skill": 762,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 900055
+    },
+    {
+      "action": "assert",
+      "label": "Artisan in Orgrimmar riding mounts the rider",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Artisan in Orgrimmar riding gives 100% ground speed",
+      "actor": "rider",
+      "metric": "run_speed_rate",
+      "min": 1.999,
+      "max": 2.001
+    },
+    {
+      "action": "assert",
+      "label": "Artisan in Orgrimmar riding does not allow flying here",
+      "actor": "rider",
+      "metric": "can_fly",
+      "equals": 0
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "label": "Dismounting removes the mount",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "rider",
+      "map": 530,
+      "x": -248.11,
+      "y": 922.9,
+      "z": 84.38,
+      "o": 1.57
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_skill",
+      "actor": "rider",
+      "skill": 762,
+      "value": 225,
+      "maximum": 300
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 900055
+    },
+    {
+      "action": "assert",
+      "label": "Expert in Hellfire Peninsula riding mounts the rider",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Expert in Hellfire Peninsula riding gives 100% ground speed",
+      "actor": "rider",
+      "metric": "run_speed_rate",
+      "min": 1.999,
+      "max": 2.001
+    },
+    {
+      "action": "assert",
+      "label": "Expert in Hellfire Peninsula riding allows flying here",
+      "actor": "rider",
+      "metric": "can_fly",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Expert in Hellfire Peninsula riding gives 150% flying speed",
+      "actor": "rider",
+      "metric": "flight_speed_rate",
+      "min": 2.499,
+      "max": 2.501
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "label": "Dismounting removes the mount",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_skill",
+      "actor": "rider",
+      "skill": 762,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 900055
+    },
+    {
+      "action": "assert",
+      "label": "Artisan in Hellfire Peninsula riding mounts the rider",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Artisan in Hellfire Peninsula riding gives 100% ground speed",
+      "actor": "rider",
+      "metric": "run_speed_rate",
+      "min": 1.999,
+      "max": 2.001
+    },
+    {
+      "action": "assert",
+      "label": "Artisan in Hellfire Peninsula riding allows flying here",
+      "actor": "rider",
+      "metric": "can_fly",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Artisan in Hellfire Peninsula riding gives 280% flying speed",
+      "actor": "rider",
+      "metric": "flight_speed_rate",
+      "min": 3.799,
+      "max": 3.8009999999999997
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "label": "Dismounting removes the mount",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 5000
+    }
+  ]
+}

@@ -650,6 +650,23 @@ enum RidingSkillValue : uint16
 
 constexpr int32 NOVICE_RIDING_MOUNT_SPEED = 40;
 
+// Conquest of Azeroth mounts take their speed from the rider's riding skill instead of the mount spell.
+inline int32 GetRidingGroundMountSpeed(uint16 riding)
+{
+    if (riding >= RIDING_SKILL_JOURNEYMAN)
+        return 100;
+    return riding >= RIDING_SKILL_APPRENTICE ? 60 : NOVICE_RIDING_MOUNT_SPEED;
+}
+
+inline int32 GetRidingFlightMountSpeed(uint16 riding)
+{
+    if (riding >= RIDING_SKILL_EXTRAORDINARY)
+        return 310;
+    if (riding >= RIDING_SKILL_ARTISAN)
+        return 280;
+    return riding >= RIDING_SKILL_EXPERT ? 150 : 0;
+}
+
 inline uint16 GetSkillValueForStep(uint32 skill, uint16 step)
 {
     if (skill == SKILL_RIDING && step)

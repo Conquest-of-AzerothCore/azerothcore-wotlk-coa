@@ -3848,11 +3848,17 @@ void Player::CastRidingMount(uint32 spellId)
         return;
 
     CustomSpellValues values;
-    if (GetBaseSkillValue(SKILL_RIDING) < RIDING_SKILL_APPRENTICE)
-        for (SpellEffectInfo const& effect : spellInfo->GetEffects())
-            if (effect.ApplyAuraName == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
-                values.AddSpellMod(SpellValueMod(SPELLVALUE_BASE_POINT0 + effect.EffectIndex),
-                    NOVICE_RIDING_MOUNT_SPEED);
+    uint16 const riding = GetBaseSkillValue(SKILL_RIDING);
+    for (SpellEffectInfo const& effect : spellInfo->GetEffects())
+    {
+        int32 speed = 0;
+        if (effect.ApplyAuraName == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED)
+            speed = GetRidingGroundMountSpeed(riding);
+        else if (effect.ApplyAuraName == SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED)
+            speed = GetRidingFlightMountSpeed(riding);
+        if (speed)
+            values.AddSpellMod(SpellValueMod(SPELLVALUE_BASE_POINT0 + effect.EffectIndex), speed);
+    }
 
     CastCustomSpell(spellId, values, this, TRIGGERED_FULL_MASK);
 }

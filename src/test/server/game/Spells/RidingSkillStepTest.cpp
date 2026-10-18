@@ -42,3 +42,20 @@ TEST(RidingSkillStepTest, OtherSkillsKeepSeventyFivePerStep)
     EXPECT_EQ(GetSkillValueForStep(SKILL_TAILORING, 4), 300);
     EXPECT_EQ(GetSkillValueForStep(SKILL_RIDING, 0), 0);
 }
+
+TEST(RidingSkillStepTest, GroundMountSpeedFollowsRidingRank)
+{
+    EXPECT_EQ(GetRidingGroundMountSpeed(RIDING_SKILL_NOVICE), 40);
+    EXPECT_EQ(GetRidingGroundMountSpeed(RIDING_SKILL_APPRENTICE - 1), 40);
+    EXPECT_EQ(GetRidingGroundMountSpeed(RIDING_SKILL_APPRENTICE), 60);
+    EXPECT_EQ(GetRidingGroundMountSpeed(RIDING_SKILL_JOURNEYMAN), 100);
+    EXPECT_EQ(GetRidingGroundMountSpeed(RIDING_SKILL_ARTISAN), 100);
+}
+
+TEST(RidingSkillStepTest, FlightMountSpeedNeedsExpertRiding)
+{
+    EXPECT_EQ(GetRidingFlightMountSpeed(RIDING_SKILL_JOURNEYMAN), 0);
+    EXPECT_EQ(GetRidingFlightMountSpeed(RIDING_SKILL_EXPERT), 150);
+    EXPECT_EQ(GetRidingFlightMountSpeed(RIDING_SKILL_ARTISAN), 280);
+    EXPECT_EQ(GetRidingFlightMountSpeed(RIDING_SKILL_EXTRAORDINARY), 310);
+}
