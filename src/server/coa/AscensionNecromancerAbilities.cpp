@@ -257,7 +257,7 @@ class necromancer_casts : public AllSpellScript
         if (Chance(player, 92122))
             Cast(player, player, 707421);
         if (player->HasAura(704723))
-            Cast(player, player, 706504);
+            Cast(player, player, 707133);
         if (Command(info))
         {
             if (Chance(player, 300940))
@@ -327,9 +327,6 @@ class necromancer_casts : public AllSpellScript
                                 break;
                         }
                 }
-                if (player->HasAura(707133))
-                    for (uint8 stack = 0; stack < 3; ++stack)
-                        Cast(player, target, 707133);
                 if (player->HasAura(705754))
                     Cast(player, target, 500443);
             }

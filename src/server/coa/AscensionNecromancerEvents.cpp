@@ -104,7 +104,7 @@ class aura_ascension_necromancer_event : public AuraScript
                 if (player->HasAura(500165))
                     Cast(player, player, 806588);
                 if (player->HasAura(704723))
-                    if (Aura* stacks = player->GetAura(706504))
+                    if (Aura* stacks = player->GetAura(707133))
                         stacks->ModStackAmount(-1);
             }
             if (periodic)
