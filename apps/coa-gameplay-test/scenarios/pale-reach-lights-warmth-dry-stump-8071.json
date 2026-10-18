@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Light's Warmth: Dry Stumps can be looted and tossed into the watchtower bonfire (#8071)",
+  "contract": [
+    "Report #8071: on Light's Warmth (175056) the wooden logs in the destroyed Snowsong Valley watchtower cannot be picked up.",
+    "The Dry Stump chest 2300667 drops the quest-only Dry Stump 559882, so the quest must list it as a quest item drop for its holder to see it in the loot.",
+    "Throw Dry Stump (365037, the item's spell) at a Watchtower Bonfire 2300668 credits the second objective, Logs tossed into the fire."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -7001.0, "y": 503.0, "z": 350.4, "o": 1.6 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 25 }
+  ],
+  "steps": [
+    { "action": "set_phase", "label": "Join world phase 1, where the watchtower bonfires live", "actor": "hero",
+      "value": 1 },
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
+    { "action": "prepare_quest", "label": "Fixture: Light's Warmth is in progress", "actor": "hero", "quest": 175056,
+      "complete": false },
+    { "action": "assert", "label": "Light's Warmth is in progress", "actor": "hero", "metric": "quest_status",
+      "quest": 175056, "equals": 3, "within_ms": 3000 },
+    { "action": "assert", "label": "No log has been tossed yet", "actor": "hero", "metric": "quest_objective_count",
+      "quest": 175056, "index": 1, "equals": 0 },
+
+    { "action": "summon_gameobject", "actor": "hero", "entry": 2300667 },
+    { "action": "wait", "label": "Let the chest become ready", "ms": 1000 },
+    { "action": "loot_gameobject", "actor": "hero", "entry": 2300667 },
+    { "action": "loot_slot", "label": "DISCRIMINATING: the Dry Stump pile shows its Dry Stump to the quest holder",
+      "actor": "hero", "item": 559882 },
+    { "action": "assert", "label": "The hero carries a Dry Stump", "actor": "hero", "metric": "item_count",
+      "item": 559882, "equals": 1, "within_ms": 2000 },
+    { "action": "close_loot", "actor": "hero" },
+
+    { "action": "use_item", "label": "Toss the Dry Stump into the centre bonfire", "actor": "hero", "item": 559882,
+      "spell": 365037, "destination": { "x": -7000.2, "y": 507.4, "z": 350.4 } },
+    { "action": "assert", "label": "One log was tossed into the fire", "actor": "hero",
+      "metric": "quest_objective_count", "quest": 175056, "index": 1, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "The Dry Stump was consumed", "actor": "hero", "metric": "item_count",
+      "item": 559882, "equals": 0 }
+  ]
+}
