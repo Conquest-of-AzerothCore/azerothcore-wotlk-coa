@@ -24,6 +24,7 @@ void AddSC_AscensionRulesets();
 void AddSC_AscensionMercenary();
 void AddSC_AscensionHighRisk();
 void AddSC_AscensionFelCommutation();
+void AddSC_AscensionClientHotPatch();
 void AddSC_AscensionCrowsCache();
 void AddSC_AscensionItemScaling();
 void AddSC_AscensionNativeItemScaling();
@@ -705,6 +706,7 @@ void AddCoAScripts()
     AddSC_AscensionMercenary();
     AddSC_AscensionHighRisk();
     AddSC_AscensionFelCommutation();
+    AddSC_AscensionClientHotPatch();
     AddSC_AscensionCrowsCache();
     AddSC_AscensionItemScaling();
     AddSC_AscensionNativeItemScaling();

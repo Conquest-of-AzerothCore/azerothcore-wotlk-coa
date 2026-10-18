@@ -11,7 +11,8 @@ Sources live in `src/server/coa/`, focused regressions in `apps/coa-tests/`, and
 configuration templates in `src/server/coa/conf/`. They install to
 `etc/modules/coa.conf` and `etc/modules/coa_bugreport.conf`; runtime configuration is
 supplied there, not by committing live local credentials. CoA logs under `coa`,
-`coa.gameplay_test` and `coa.highrisk`.
+`coa.gameplay_test`, `coa.highrisk` and `coa.hotpatch`. Server-sent interface Lua is described in
+`client-hot-patch.md`.
 
 This fork, CoA included, is licensed under the root `LICENSE` (GNU GPL v2), like
 AzerothCore. Most CoA source files still carry the short "GNU AGPL v3" notice from

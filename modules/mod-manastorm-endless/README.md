@@ -20,7 +20,8 @@ login instead: set `Manastorm.ClientUIFixes` (bitmask, default 0) in
 `manastorm-endless.conf`. 1 is the group finder keybind inside a run, 2 the reward divider
 anchor, 4 the queue level guards and fallback reward border, 8 hiding an empty loadout flyout;
 15 sends all four. It needs `Manastorm.ClientMode = 2`. Clients that already carry the
-corrected files can leave it at 0. The sender is `src/server/coa/AscensionClientLua.cpp`.
+corrected files can leave it at 0. The sender is `src/server/coa/AscensionClientLua.cpp`; both
+delivery routes are described in `docs/coa/client-hot-patch.md`.
 
 ## Realm configuration
 

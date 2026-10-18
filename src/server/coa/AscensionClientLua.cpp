@@ -3,6 +3,8 @@
 #include "Player.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include <mutex>
+#include <unordered_map>
 
 namespace
 {
@@ -28,10 +30,30 @@ end
 if AscensionClientLuaTokens then
     AscensionClientLuaTokens[")lua";
 
+    constexpr uint32 HotPatchProtocolVersion = 1;
+    constexpr std::chrono::seconds CapabilityWait = std::chrono::seconds(30);
+
+    struct Capability
+    {
+        bool Known = false;
+        uint32 ProtocolVersion = 0;
+        uint8 Mode = 0;
+        AscensionClientLuaClock::time_point Since;
+    };
+
+    std::mutex CapabilityMutex;
+    std::unordered_map<uint32, Capability> Capabilities;
+
     AscensionChallengeStateSync& StateSync()
     {
         static AscensionChallengeStateSync sync = nullptr;
         return sync;
+    }
+
+    AscensionClientLuaDeferral& Deferral()
+    {
+        static AscensionClientLuaDeferral deferral = nullptr;
+        return deferral;
     }
 
     void AppendSized(WorldPacket& data, std::string_view text)
@@ -78,6 +100,15 @@ if AscensionClientLuaTokens then
         session->SendPacket(&data);
     }
 
+    void SendHotPatch(WorldSession* session, AscensionClientLuaChunk const& chunk)
+    {
+        WorldPacket data(AscensionClientLuaHotPatchOpcode, 12 + chunk.Token.size() + chunk.TargetAddon.size() + chunk.Lua.size());
+        AppendSized(data, chunk.Token);
+        AppendSized(data, chunk.TargetAddon);
+        AppendSized(data, chunk.Lua);
+        session->SendPacket(&data);
+    }
+
     void SendEmptyChallengeList(WorldSession* session)
     {
         WorldPacket data(SMSG_COA_CHALLENGE_ACTIVE_LIST, 4);
@@ -99,6 +130,46 @@ if AscensionClientLuaTokens then
 void RegisterAscensionChallengeStateSync(AscensionChallengeStateSync sync)
 {
     StateSync() = sync;
+}
+
+void RegisterAscensionClientLuaDeferral(AscensionClientLuaDeferral deferral)
+{
+    Deferral() = deferral;
+}
+
+void ResetAscensionClientLuaCapability(uint32 accountId, AscensionClientLuaClock::time_point now)
+{
+    std::lock_guard<std::mutex> lock(CapabilityMutex);
+    Capability& capability = Capabilities[accountId];
+    capability = Capability();
+    capability.Since = now;
+}
+
+void SetAscensionClientLuaCapability(uint32 accountId, uint32 protocolVersion, uint8 mode)
+{
+    std::lock_guard<std::mutex> lock(CapabilityMutex);
+    Capability& capability = Capabilities[accountId];
+    capability.Known = true;
+    capability.ProtocolVersion = protocolVersion;
+    capability.Mode = mode;
+}
+
+void ForgetAscensionClientLuaCapability(uint32 accountId)
+{
+    std::lock_guard<std::mutex> lock(CapabilityMutex);
+    Capabilities.erase(accountId);
+}
+
+AscensionClientLuaRoute GetAscensionClientLuaRoute(uint32 accountId, AscensionClientLuaClock::time_point now)
+{
+    std::lock_guard<std::mutex> lock(CapabilityMutex);
+    auto it = Capabilities.find(accountId);
+    if (it == Capabilities.end())
+        return AscensionClientLuaRoute::Formatter;
+    if (it->second.Known)
+        return it->second.ProtocolVersion >= HotPatchProtocolVersion ? AscensionClientLuaRoute::HotPatch
+            : AscensionClientLuaRoute::Formatter;
+    return now - it->second.Since < CapabilityWait ? AscensionClientLuaRoute::Wait : AscensionClientLuaRoute::Formatter;
 }
 
 std::string BuildAscensionClientLuaFormatter(std::string_view token, std::string_view lua)
@@ -123,6 +194,22 @@ void RunAscensionClientLua(Player* player, AscensionClientLuaChunk const& chunk)
     WorldSession* session = player ? player->GetSession() : nullptr;
     if (!session)
         return;
+
+    switch (GetAscensionClientLuaRoute(session->GetAccountId(), AscensionClientLuaClock::now()))
+    {
+        case AscensionClientLuaRoute::HotPatch:
+            SendHotPatch(session, chunk);
+            return;
+        case AscensionClientLuaRoute::Wait:
+            if (AscensionClientLuaDeferral deferral = Deferral())
+            {
+                deferral(player, chunk);
+                return;
+            }
+            break;
+        case AscensionClientLuaRoute::Formatter:
+            break;
+    }
 
     SendRequirementType(session, chunk.RequirementTypeId, chunk.Token,
         BuildAscensionClientLuaFormatter(chunk.Token, chunk.Lua));

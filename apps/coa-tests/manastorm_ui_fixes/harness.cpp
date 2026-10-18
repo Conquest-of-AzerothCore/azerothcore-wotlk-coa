@@ -49,6 +49,7 @@ struct WorldPacket
 
 struct WorldSession
 {
+    uint32 GetAccountId() const { return 1; }
     void SendPacket(WorldPacket const* packet) { sent.push_back(*packet); }
     std::vector<WorldPacket> sent;
 };
