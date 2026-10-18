@@ -4894,6 +4894,10 @@ bool Unit::CanCastSpellWhileMoving(SpellInfo const* info) const
          sSpellMgr->GetFirstSpellInChain(info->Id) == 504527 ||
          sSpellMgr->GetFirstSpellInChain(info->Id) == 801387))
         return true;
+    if (IsPlayer() && getClass() == CLASS_CHRONOMANCER && info->SpellFamilyName == 28 &&
+        (info->SpellFamilyFlags[1] & 0x00001000) && (info->SpellFamilyFlags[2] & 0x02000000) &&
+        HasAura(570067))
+        return true;
     // Copied aura 313 grants movement only to spells selected by its family mask.
     return HasAuraTypeWithAffectMask(SPELL_AURA_313, info);
 }
