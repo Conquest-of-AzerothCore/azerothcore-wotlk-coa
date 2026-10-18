@@ -147,7 +147,7 @@ class necromancer_casts : public AllSpellScript
         Unit* target = spell->m_targets.GetUnitTarget();
         if (player->HasAura(500730))
             result = SPELL_FAILED_CASTER_AURASTATE;
-        if (Cost(player, id) && int32(Capacity(player)) - Used(player) < Cost(player, id))
+        if (Cost(player, id) > Capacity(player))
             result = SPELL_FAILED_ALREADY_HAVE_SUMMON;
         if (Command(info) && (player->HasAura(500983) ||
             (!Named(info, 504868) && Minions(player).empty())))

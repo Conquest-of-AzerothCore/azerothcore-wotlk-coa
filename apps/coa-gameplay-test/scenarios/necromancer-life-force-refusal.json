@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Necromancer: a raise without free Life Force is refused without 'Not enough mana' (#387)",
-  "contract": "Raise spells occupy Life Force (805011, a stacked aura whose stack count is the capacity: Spell.dbc StackAmount 2, raised only by SPELLMOD_MAX_AURA_STACKS passives such as Scourge Apprentice Training 680283 that this fixture does not learn) instead of the Necromancer's power bar: Raise: Abomination 500335 occupies 3 and Raise: Lesser Skeletal Warrior 500970 occupies 1 (their tooltips: 'occupying 3 Life Force', 'occupying 1 Life Force'). Both have PowerType 0 (mana) with a ManaCostPercentage, so the client renders SPELL_FAILED_NO_POWER (85) for them as ERR_OUT_OF_MANA 'Not enough mana', the reported message. The live client string table (GlobalStrings.dbc from patch-M.MPQ, 14357 strings) has no Life Force error: none of SPELL_FAILED_CUSTOM_ERROR_1..104 names it, PowerDisplay.dbc holds only vehicle powers (Pyrite, Steam, Heat, Ooze, Blood Power) and SpellAlternativePowerType.dbc only Shadow Orbs and Holy Power. The nearest native reason the client can show is SPELL_FAILED_ALREADY_HAVE_SUMMON (7), 'You already control a summoned creature', which a9f716557 (#1489) sends from necromancer_casts::OnSpellCheckCast before the native power check. A level-8 Necromancer (the reporter's level) with full mana is refused Raise: Abomination with reason 7 and raises nothing, raises two Lesser Skeletal Warriors (50065) to fill its Life Force, and is then refused a third with reason 7 while the two stay up.",
+  "name": "Necromancer: a raise exceeding the Life Force capacity is refused without 'Not enough mana' (#387)",
+  "contract": "Raise spells occupy Life Force (805011, a stacked aura whose stack count is the capacity: Spell.dbc StackAmount 2, raised only by SPELLMOD_MAX_AURA_STACKS passives such as Scourge Apprentice Training 680283 that this fixture does not learn) instead of the Necromancer's power bar: Raise: Abomination 500335 occupies 3 and Raise: Lesser Skeletal Warrior 500970 occupies 1 (their tooltips: 'occupying 3 Life Force', 'occupying 1 Life Force'). Both have PowerType 0 (mana) with a ManaCostPercentage, so the client renders SPELL_FAILED_NO_POWER (85) for them as ERR_OUT_OF_MANA 'Not enough mana', the reported message. The live client string table (GlobalStrings.dbc from patch-M.MPQ, 14357 strings) has no Life Force error: none of SPELL_FAILED_CUSTOM_ERROR_1..104 names it, PowerDisplay.dbc holds only vehicle powers (Pyrite, Steam, Heat, Ooze, Blood Power) and SpellAlternativePowerType.dbc only Shadow Orbs and Holy Power. The nearest native reason the client can show is SPELL_FAILED_ALREADY_HAVE_SUMMON (7), 'You already control a summoned creature', which a9f716557 (#1489) sends from necromancer_casts::OnSpellCheckCast before the native power check. A level-8 Necromancer (the reporter's level) with full mana is refused Raise: Abomination with reason 7 and raises nothing, raises two Lesser Skeletal Warriors (50065) to fill its Life Force; a third, which fits once the oldest is unsummoned (#5889), is raised in its place and two stay up.",
   "timeout_ms": 90000,
   "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
   "players": [
@@ -44,15 +44,14 @@
     },
     { "action": "wait", "label": "Clear the global cooldown", "ms": 500 },
     { "action": "cast", "label": "Raise a third with no free Life Force", "actor": "n", "spell": 500970 },
-    {
-      "action": "assert",
-      "label": "Refused as SPELL_FAILED_ALREADY_HAVE_SUMMON (7), not SPELL_FAILED_NO_POWER (85, 'Not enough mana')",
-      "actor": "n", "metric": "cast_failure", "spell": 500970, "equals": 7, "within_ms": 2000
-    },
     { "action": "wait", "label": "Outlast the 2 s cast time", "ms": 2500 },
     {
-      "action": "assert", "label": "The two raised warriors stay and no third appears", "actor": "n",
-      "metric": "owned_creature_count", "entry": 50065, "equals": 2
+      "action": "assert", "label": "A raise that fits after replacing the oldest is not refused", "actor": "n",
+      "metric": "cast_failure", "spell": 500970, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The third warrior replaces the oldest, so two stay up", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 2, "within_ms": 2000
     }
   ]
 }

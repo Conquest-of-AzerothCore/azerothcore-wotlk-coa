@@ -110,6 +110,21 @@ uint32 AttackSpell(uint32 entry)
         return 0;
     }
 }
+void Evict(Player* player, int32 needed)
+{
+    auto& minions = State(player).minions;
+    while (int32(Capacity(player)) - Used(player) < needed)
+    {
+        auto oldest = std::find_if(minions.begin(), minions.end(),
+                                   [](MinionRecord const& row) { return row.cost != 0; });
+        if (oldest == minions.end())
+            return;
+        ObjectGuid guid = oldest->guid;
+        minions.erase(oldest);
+        if (Creature* unit = ObjectAccessor::GetCreature(*player, guid))
+            unit->DespawnOrUnsummon();
+    }
+}
 }
 bool Responds(uint32 entry, uint32 command)
 {
@@ -211,8 +226,16 @@ bool Summon(Player* player, uint32 spell, Unit* target, Position const& position
     if (!info)
         return false;
     uint8 cost = Cost(player, spell);
-    if (cost && int32(Capacity(player)) - Used(player) < cost)
+    if (cost > Capacity(player))
         return false;
+    if (cost)
+    {
+        int32 count = 0;
+        for (auto const& row : NecromancerSummons)
+            if (row.spell == spell)
+                count += SummonCount(player, info, row);
+        Evict(player, std::min<int32>(count, Capacity(player) / cost) * cost);
+    }
     int32 lifetime = duration;
     if (!lifetime)
     {
