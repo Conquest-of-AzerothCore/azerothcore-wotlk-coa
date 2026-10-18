@@ -484,9 +484,9 @@ Ascension.PrestigiousCache.TbcStages = 0
 #                     Callboard Caches follow the same stages: only released caches are
 #                     earned, and a generic Callboard Cache resolves to a released tier.
 #                     Applied on .reload config; the client's difficulty list on next login.
-#        Default:     8
+#        Default:     3
 
-Ascension.CallboardCache.ReleaseStage = 8
+Ascension.CallboardCache.ReleaseStage = 3
 
 #
 #    Ascension.CallboardCache.PreviousStageOnly

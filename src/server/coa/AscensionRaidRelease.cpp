@@ -12,12 +12,12 @@
 
 namespace
 {
-uint32 g_raidReleaseStage = RaidRelease::AllReleased;
+uint32 g_raidReleaseStage = RaidRelease::StageMoltenCore;
 
 void LoadRaidReleaseStage()
 {
     g_raidReleaseStage = sConfigMgr->GetOption<uint32>("Ascension.CallboardCache.ReleaseStage",
-        RaidRelease::AllReleased);
+        RaidRelease::StageMoltenCore);
 }
 
 class ascension_raid_release_config : public WorldScript

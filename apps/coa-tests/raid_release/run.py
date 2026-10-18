@@ -155,7 +155,7 @@ def main():
     assert '"Ascension.CallboardCache.ReleaseStage"' in source
     assert 'WORLDHOOK_ON_STARTUP, WORLDHOOK_ON_AFTER_CONFIG_LOAD' in source
     assert loader.count('AddSC_AscensionRaidRelease()') == 2
-    assert '\nAscension.CallboardCache.ReleaseStage = 8\n' in config
+    assert '\nAscension.CallboardCache.ReleaseStage = 3\n' in config
     assert 'Ascension.RaidLock' not in config
     with tempfile.TemporaryDirectory(prefix='coa-raid-release-') as directory:
         out = Path(directory)
@@ -165,7 +165,7 @@ def main():
         subprocess.run([str(exe)], cwd=out, check=True, timeout=15)
     print('PASS: Heroic and Mythic dungeon difficulties and the Classic raids open in release-stage order, each '
           'stage keeps the earlier ones open, closed content refuses entry and login with "Instance is closed", '
-          'normal dungeons and other maps stay open, and the default releases everything')
+          'normal dungeons and other maps stay open, and the default opens up to Molten Core')
 
 
 if __name__ == '__main__':
