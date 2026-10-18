@@ -34,6 +34,7 @@ enum ChronomancerSecondarySpells : uint32
     SPELL_ANOMALY_SPIKE = 503826,
     SPELL_CHROMATIC_SHARD = 801292,
     SPELL_CHROMATIC_SHARD_CAST_TIME = 503829,
+    SPELL_DECOMPOSITION = 800856,
     SPELL_INCARNATION_OF_CHAOS = 570067,
     SPELL_INFINITE_KEEPER = 806312,
     SPELL_INFINITE_KEEPER_TRIGGER = 806314,
@@ -76,6 +77,11 @@ bool IsChromaticShardOrAnomalySpike(SpellInfo const* info)
     flag96 const& flags = info->SpellFamilyFlags;
     return ((flags[1] & ChromaticShardFamilyFlag1) && (flags[2] & ChromaticShardFamilyFlag2)) ||
         (flags[0] & AnomalySpikeFamilyFlag0);
+}
+
+bool IsDecomposition(uint32 id)
+{
+    return id == SPELL_DECOMPOSITION || (id >= 801028 && id <= 801033) || id == 802597;
 }
 
 bool IsChromaticShardRank(uint32 id)
@@ -391,15 +397,28 @@ public:
             caster->RemoveAurasDueToSpell(SPELL_ECHO_FRAGMENT, caster->GetGUID());
         if (Player* player = SecondaryChronomancer(caster); player && !spell->IsTriggered())
         {
+            if (IsDecomposition(info->Id))
+            {
+                uint32 fragments = 0;
+                if (Aura* echo = player->GetAura(SPELL_ECHO_FRAGMENT, player->GetGUID()))
+                    fragments = echo->GetStackAmount();
+                if (fragments)
+                {
+                    player->RemoveAurasDueToSpell(SPELL_ECHO_FRAGMENT, player->GetGUID());
+                    spell->SetScriptValue(SPELL_ECHO_FRAGMENT, fragments);
+                }
+            }
             if (info->Id == SPELL_INCARNATION_OF_CHAOS)
                 ResetChromaticShard(player);
             if (IsChromaticShardRank(info->Id))
+            {
                 if (Aura* incarnation = player->GetAura(SPELL_INCARNATION_OF_CHAOS, player->GetGUID());
                     incarnation && incarnation->GetScriptValue(SPELL_CHROMATIC_SHARD))
                 {
                     incarnation->SetScriptValue(SPELL_CHROMATIC_SHARD, 0);
                     ResetChromaticShard(player);
                 }
+            }
         }
     }
 };
@@ -430,6 +449,19 @@ public:
             EruptInfiniteKeeper(player, target);
         else if (damage && IsChromaticShardOrAnomalySpike(info))
             ReplicateShiftingChaos(player, target, damage);
+        if (IsDecomposition(info->Id))
+        {
+            uint64 fragments = spell->GetScriptValue(SPELL_ECHO_FRAGMENT);
+            SpellInfo const* echo = sSpellMgr->GetSpellInfo(SPELL_ECHO_FRAGMENT);
+            if (fragments && echo)
+                if (Aura* dot = target->GetAura(info->Id, player->GetGUID()))
+                    if (AuraEffect* effect = dot->GetEffect(EFFECT_0))
+                    {
+                        int64 amount = int64(effect->GetAmount()) *
+                            (100 + int64(echo->Effects[EFFECT_0].CalcValue(player)) * int64(fragments)) / 100;
+                        effect->ChangeAmount(int32(std::clamp(amount, int64(INT32_MIN / 2), int64(INT32_MAX / 2))));
+                    }
+        }
     }
 };
 
