@@ -15,6 +15,13 @@ Manastorm addon support, and all four corrected client files under `client/overl
 See [client packaging instructions](client/Readme.txt). The old two-file MPQ is not
 the complete updated package.
 
+Without a client archive, the server can send the same four corrections as interface Lua at
+login instead: set `Manastorm.ClientUIFixes` (bitmask, default 0) in
+`manastorm-endless.conf`. 1 is the group finder keybind inside a run, 2 the reward divider
+anchor, 4 the queue level guards and fallback reward border, 8 hiding an empty loadout flyout;
+15 sends all four. It needs `Manastorm.ClientMode = 2`. Clients that already carry the
+corrected files can leave it at 0. The sender is `src/server/coa/AscensionClientLua.cpp`.
+
 ## Realm configuration
 
 For CoA: `CoA.ClassModel = "coa"`, `CoA.GameModeMask = 0`.
