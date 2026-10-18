@@ -55,7 +55,9 @@ enum TimeSpells : uint32
     BorrowedTime = 680373,
     BorrowedTimeHeal = 680374,
     RapidAcceleration = 570149,
-    RapidAccelerationHeal = 804500
+    RapidAccelerationHeal = 804500,
+    SingularityCoreTrigger = 804437,
+    SpellRangeThirtyYards = 4
 };
 
 constexpr int32 PrivatePeriodicSpellPowerCoefficientPct = 40;
@@ -388,6 +390,8 @@ void ApplyTimeContracts(SpellInfo* info)
     }
     if (info->SpellFamilyName != 28)
         return;
+    if (info->Id == SingularityCoreTrigger && info->Effects[EFFECT_0].Effect == SPELL_EFFECT_NORMALIZED_WEAPON_DMG)
+        info->RangeEntry = sSpellRangeStore.LookupEntry(SpellRangeThirtyYards);
     if (IsRank(info->Id, Fortify))
         info->Effects[EFFECT_1].Effect = 0;
     if (info->Id == Sands)
