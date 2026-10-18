@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "CoA classes take the Zandalar Paragons of Power quests of their gear family (#8082)",
+  "contract": [
+    "Report #8082: CoA characters are offered none of the Zandalar Tribe class quests on Yojamba Isle.",
+    "Quests 8062 (Zandalar Predator's Bracers, Hunter) and 8063 (Zandalar Madcap's Bracers, Rogue) from Falthir the Sightless (14905) allow one stock class each, and a single stock-class mask stays closed to CoA classes.",
+    "Neither quest has a minimum reputation, previous quest or condition, and both need level 58, so at level 60 only the class check decides.",
+    "Decision on #8082: a CoA class takes the quests of the stock class GetLegacyClassForCustomClass maps it to. A Ranger (Hunter family) takes 8062, a Barbarian (Rogue family) takes 8063 but not 8062, and a stock Hunter keeps 8062."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "hunter", "race": 2, "class": 3, "level": 60 },
+    { "id": "ranger", "race": 1, "class": 21, "level": 60 },
+    { "id": "barbarian", "race": 2, "class": 12, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "assert", "label": "A stock Hunter can take Predator's Bracers", "actor": "hunter", "metric": "quest_takeable", "quest": 8062, "equals": 1 },
+    { "action": "assert", "label": "A Ranger can take Predator's Bracers", "actor": "ranger", "metric": "quest_takeable", "quest": 8062, "equals": 1 },
+    { "action": "assert", "label": "A Barbarian can take Madcap's Bracers", "actor": "barbarian", "metric": "quest_takeable", "quest": 8063, "equals": 1 },
+    { "action": "assert", "label": "A Barbarian cannot take the Hunter family's Predator's Bracers", "actor": "barbarian", "metric": "quest_takeable", "quest": 8062, "equals": 0 }
+  ]
+}
