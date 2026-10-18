@@ -1764,11 +1764,12 @@ QuestGiverStatus Player::GetQuestDialogStatus(Object* questgiver)
         if (!quest)
             continue;
 
+        QuestStatus status = GetQuestStatus(questId);
+        bool const holdsQuest = status == QUEST_STATUS_COMPLETE || status == QUEST_STATUS_INCOMPLETE;
         ConditionList conditions = sConditionMgr->GetConditionsForNotGroupedEntry(CONDITION_SOURCE_TYPE_QUEST_AVAILABLE, quest->GetQuestId());
-        if (!sConditionMgr->IsObjectMeetToConditions(this, conditions))
+        if (!holdsQuest && !sConditionMgr->IsObjectMeetToConditions(this, conditions))
             continue;
 
-        QuestStatus status = GetQuestStatus(questId);
         if (status == QUEST_STATUS_COMPLETE && !GetQuestRewardStatus(questId))
         {
             result2 = DIALOG_STATUS_REWARD;
