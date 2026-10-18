@@ -252,6 +252,20 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'creature_scaling must be boolean'):
                 run.validate(scenario)
 
+    def test_game_event_needs_an_event_id_and_a_boolean_state(self):
+        for step in ({'action': 'game_event', 'event': 12, 'active': True},
+                     {'action': 'game_event', 'event': 12, 'active': False}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, step)
+            self.assertIs(run.validate(scenario), scenario)
+        for step, error in (({'action': 'game_event', 'event': 12, 'active': 1}, 'active must be boolean'),
+                            ({'action': 'game_event', 'event': 0, 'active': True}, r'\.event'),
+                            ({'action': 'game_event', 'event': 12}, 'step 0')):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, step)
+            with self.subTest(step=step), self.assertRaisesRegex(ValueError, error):
+                run.validate(scenario)
+
     def test_hour_timezone_is_a_posix_offset_placing_local_time_at_the_start_of_that_hour(self):
         for utc_hour, hour, expected in ((10, 12, 'UTC-01:01'), (23, 0, 'UTC-00:01'), (1, 23, 'UTC+02:59'),
                                          (12, 0, 'UTC-11:01'), (12, 23, 'UTC-10:01'), (5, 5, 'UTC+00:59'),
