@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "name": "Normal dungeon bosses drop their Ascension signature gear (The Stockade)",
+  "contract": "A level 23 run through The Stockade on Normal dropped nothing from any boss. On Ascension Targorr the Dread drops Dreadful Blade (5305), Dextren Ward Unnecessary Big Shanker (3432), Bazil Thredd Behander (1897) and Hamhock Hamhock's Ham Hacker (2827) every kill (db.exil.es archive). A Normal kill of Targorr and of Bazil by a level 23 character now leaves that item on the corpse.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 23,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "hero",
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 34,
+      "x": 54.23,
+      "y": 0.28,
+      "z": -18.34
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: The Stockade on Normal",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 1696,
+      "as": "targorr",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 1696,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "targorr",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "hero",
+      "target": "targorr"
+    },
+    {
+      "action": "assert",
+      "label": "Targorr drops Dreadful Blade",
+      "actor": "hero",
+      "metric": "loot_count",
+      "item": 5305,
+      "equals": 1
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 1716,
+      "as": "bazil",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 1716,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "bazil",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "hero",
+      "target": "bazil"
+    },
+    {
+      "action": "assert",
+      "label": "Bazil Thredd drops Behander",
+      "actor": "hero",
+      "metric": "loot_count",
+      "item": 1897,
+      "equals": 1
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    }
+  ]
+}
