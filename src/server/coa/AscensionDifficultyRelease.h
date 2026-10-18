@@ -5,6 +5,7 @@
 
 #include "WorldPacket.h"
 #include <array>
+#include <vector>
 
 class Player;
 
@@ -17,6 +18,7 @@ constexpr std::array<uint16, 6> HeroicDungeonEvents = { 394, 395, 396, 436, 437,
 constexpr std::array<uint16, 6> MythicDungeonEvents = { 728, 729, 730, 731, 732, 734 };
 
 [[nodiscard]] WorldPacket BuildActiveEvent(uint16 eventId);
+[[nodiscard]] std::vector<uint16> ReleasedEvents(uint32 releasedStage);
 void SendReleasedDifficulties(Player* player);
 }
 
