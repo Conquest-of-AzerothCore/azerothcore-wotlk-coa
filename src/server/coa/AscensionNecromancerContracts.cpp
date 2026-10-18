@@ -145,6 +145,8 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[1].Effect = 0;
     if (id == 503738 || id == 570136)
         dummy(1);
+    if (id == 531130)
+        info->SpellFamilyFlags[0] |= 8;
     if (id == 300236)
         info->Effects[0].SpellClassMask[1] = 268435456;
     if (id == 302923 || id == 300234 || id == 301325 || id == 704163)
