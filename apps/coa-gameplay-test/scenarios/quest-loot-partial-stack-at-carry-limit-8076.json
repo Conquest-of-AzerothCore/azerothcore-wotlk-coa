@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "A quest drop stack beyond the carry limit still fills the quest (#8076)",
+  "contract": [
+    "Report #8076: on Meat for the Plucked Rook (175334) a Beast Meat drop of 2 cannot be looted when one more is needed.",
+    "Quest drops are capped by the item's MaxCount, which for these Pale Reach items equals the quest's required count.",
+    "A Scadeald Bear 164039 always drops 2-10 Bear Teeth 560338 for A Tooth for a Song 175324 (50 required, MaxCount 50).",
+    "Expected: holding 49 Bear Teeth, looting any such stack takes the one that fits and completes the collection."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -7001.0, "y": 503.0, "z": 350.4, "o": 1.6 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 25 }
+  ],
+  "creatures": [
+    { "id": "bear", "owner": "hero", "entry": 164039, "distance": 3, "level": 18, "health": 100 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
+    { "action": "prepare_quest", "label": "Fixture: A Tooth for a Song is in progress", "actor": "hero",
+      "quest": 175324, "complete": false },
+    { "action": "destroy_item", "label": "Drop the first prepared stack of 25", "actor": "hero", "item": 560338 },
+    { "action": "destroy_item", "label": "Drop the second prepared stack of 25", "actor": "hero", "item": 560338 },
+    { "action": "assert", "label": "No Bear Teeth are left", "actor": "hero", "metric": "item_count",
+      "item": 560338, "equals": 0 },
+    { "action": "add_item", "label": "Fixture: one Bear Tooth short of the carry limit", "actor": "hero",
+      "item": 560338, "count": 49 },
+    { "action": "assert", "label": "The hero carries 49 Bear Teeth", "actor": "hero", "metric": "item_count",
+      "item": 560338, "equals": 49 },
+    { "action": "assert", "label": "A Tooth for a Song is in progress", "actor": "hero", "metric": "quest_status",
+      "quest": 175324, "equals": 3 },
+
+    { "action": "attack_nearby", "label": "Kill the Scadeald Bear", "actor": "hero", "entry": 164039, "kill": true },
+    { "action": "assert", "actor": "bear", "metric": "alive", "equals": 0 },
+    { "action": "loot_creature", "actor": "hero", "target": "bear" },
+    { "action": "loot_slot", "label": "Pick up the Bear Teeth stack of at least two", "actor": "hero",
+      "item": 560338 },
+    { "action": "assert", "label": "DISCRIMINATING: the tooth that fits was taken", "actor": "hero",
+      "metric": "item_count", "item": 560338, "equals": 50, "within_ms": 2000 },
+    { "action": "assert", "label": "The collection objective is complete", "actor": "hero",
+      "metric": "quest_status", "quest": 175324, "equals": 1, "within_ms": 2000 }
+  ]
+}
