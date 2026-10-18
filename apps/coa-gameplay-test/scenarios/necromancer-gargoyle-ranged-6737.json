@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Raised Gargoyle stays at range for Putrid Claw and Command: Gargoyle (#6737)",
+  "contract": "Raise: Gargoyle 500329 summons creature 50067. Its periodic attack Putrid Claw 805976 has SpellRange 4 (30 yd) and its Command shot 707598 has SpellRange 6 (100 yd) and applies Bone Toss 704706 to the target; the maintainer classified the Gargoyle as a ranged minion. AscensionNecromancerSummons.cpp Ranged(entry) omits 50067, so SetCombatMovement stays enabled, DoAction's AttackStart chases the commanded target and UpdateAI swings DoMeleeAttackIfReady. A ranged Gargoyle keeps its follow formation beside the Necromancer while it shoots the golem 15 yards away.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "n", "entry": 36, "level": 60, "health": 1000000, "distance": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the Life Force aura settle", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: Command accuracy is independent of the minion movement",
+      "actor": "n", "metric": "spell_hit_chance", "min": 100 },
+    { "action": "learn", "actor": "n", "spell": 680283 },
+    { "action": "learn", "actor": "n", "spell": 500329 },
+    { "action": "learn", "actor": "n", "spell": 504052 },
+    { "action": "cast", "label": "Raise: Gargoyle", "actor": "n", "spell": 500329 },
+    {
+      "action": "assert", "label": "SETUP: Gargoyle raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50067, "min": 1, "within_ms": 8000
+    },
+    { "action": "wait", "label": "Let it take formation", "ms": 2000 },
+    {
+      "action": "assert", "label": "CONTROL: the Gargoyle starts in formation beside the Necromancer", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50067, "min_distance": 10, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: no Bone Toss before the Command", "actor": "golem",
+      "metric": "aura", "spell": 704706, "equals": 0
+    },
+    { "action": "set_power", "label": "Runic Power for Command: Gargoyle", "actor": "n", "power": 6, "value": 500 },
+    { "action": "attack", "label": "Target the golem for the self-cast Command", "actor": "n", "target": "golem" },
+    { "action": "cast", "label": "Command: Gargoyle on the Necromancer's target", "actor": "n", "spell": 504052 },
+    {
+      "action": "assert", "label": "The Command shot applies Bone Toss to the golem", "actor": "golem",
+      "metric": "aura", "spell": 704706, "equals": 1, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Give an unfixed Gargoyle time to chase into melee", "ms": 6000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Gargoyle did not walk to the golem 15 yards away", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50067, "min_distance": 10, "equals": 0
+    },
+    { "action": "snapshot", "actor": "golem", "metric": "health", "save_as": "ranged" },
+    {
+      "action": "assert", "label": "The Gargoyle keeps damaging the golem from range with Putrid Claw", "actor": "golem",
+      "metric": "health", "relative_to": "ranged", "max": -1, "within_ms": 9000
+    },
+    {
+      "action": "assert", "label": "The Gargoyle is still alive and owned", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50067, "equals": 1
+    }
+  ]
+}

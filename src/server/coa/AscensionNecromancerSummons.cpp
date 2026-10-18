@@ -31,7 +31,7 @@ bool Stationary(uint32 entry)
 }
 bool Ranged(uint32 entry)
 {
-    return entry == 50076 || entry == 50075 || entry == 50323 || entry == 50177;
+    return entry == 50076 || entry == 50075 || entry == 50323 || entry == 50177 || entry == 50067;
 }
 bool Follows(uint32 entry)
 {
