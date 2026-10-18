@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "name": "Hallow's End: Fire Brigade Practice is handed in at the Goldshire matron, also under Snob of Azeroth",
+  "contract": "With Hallow's End running, a completed 'Fire Brigade Practice' 11360 shows the reward marker (dialog status 10) at Costumed Orphan Matron 24519 in Goldshire and is handed in through the questgiver packets, at level 7 and at level 42 (#8066, #8050). 11360 has QuestLevel -1, which follows the player's level and has no quest colour. The accept side of the challenge NO_*_QUESTS rules already ignores such quests, so the 'Snob of Azeroth' challenge 82 (no grey quests) lets a level 42 hero accept 11360. Before the fix the turn-in side read -1 as a grey quest and refused to complete it, leaving the challenger stuck at status 3; the challenger must reach status 1 and be rewarded like anyone else.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9431.25,
+    "y": 52.69,
+    "z": 56.59,
+    "o": 1.5
+  },
+  "players": [
+    { "id": "low", "race": 1, "class": 1, "level": 7 },
+    { "id": "mid", "race": 1, "class": 1, "level": 42 },
+    { "id": "snob", "race": 1, "class": 1, "level": 42 }
+  ],
+  "steps": [
+    { "action": "set_phase", "label": "Join world phase 1, where the event spawns live", "actor": "low", "value": 1 },
+    { "action": "set_phase", "label": "Join world phase 1, where the event spawns live", "actor": "mid", "value": 1 },
+    { "action": "set_phase", "label": "Join world phase 1, where the event spawns live", "actor": "snob", "value": 1 },
+    { "action": "game_event", "label": "Hallow's End is running", "event": 12, "active": true },
+    { "action": "assert", "label": "The Goldshire matron is spawned", "actor": "low", "metric": "nearby_creature_count",
+      "entry": 24519, "equals": 1, "within_ms": 15000 },
+
+    { "action": "quest_accept", "label": "Accept 11360 at level 7", "actor": "low", "quest": 11360, "entry": 24519 },
+    { "action": "assert", "label": "11360 is in the level 7 log", "actor": "low", "metric": "quest_status",
+      "quest": 11360, "equals": 3, "within_ms": 3000 },
+    { "action": "quest_complete", "label": "SETUP: five fires put out", "actor": "low", "quest": 11360 },
+    { "action": "assert", "label": "The matron shows the reward marker at level 7", "actor": "low",
+      "metric": "dialog_status", "entry": 24519, "equals": 10 },
+    { "action": "quest_turn_in", "label": "Hand 11360 in at level 7", "actor": "low", "quest": 11360,
+      "entry": 24519, "reward": 0 },
+    { "action": "assert", "label": "The level 7 player is rewarded", "actor": "low", "metric": "quest_rewarded",
+      "quest": 11360, "equals": 1, "within_ms": 4000 },
+
+    { "action": "quest_accept", "label": "Accept 11360 at level 42", "actor": "mid", "quest": 11360, "entry": 24519 },
+    { "action": "quest_complete", "label": "SETUP: five fires put out", "actor": "mid", "quest": 11360 },
+    { "action": "assert", "label": "The matron shows the reward marker at level 42", "actor": "mid",
+      "metric": "dialog_status", "entry": 24519, "equals": 10 },
+    { "action": "quest_turn_in", "label": "Hand 11360 in at level 42", "actor": "mid", "quest": 11360,
+      "entry": 24519, "reward": 0 },
+    { "action": "assert", "label": "The level 42 player is rewarded", "actor": "mid", "metric": "quest_rewarded",
+      "quest": 11360, "equals": 1, "within_ms": 4000 },
+
+    { "action": "start_challenge", "label": "Start Snob of Azeroth", "actor": "snob", "challenge": 82, "level": 1 },
+    { "action": "assert", "label": "Snob of Azeroth starts", "actor": "snob", "metric": "challenge_start_code",
+      "equals": 0 },
+    { "action": "quest_accept", "label": "The challenge lets 11360 be accepted", "actor": "snob", "quest": 11360,
+      "entry": 24519 },
+    { "action": "assert", "label": "11360 is in the challenger's log", "actor": "snob", "metric": "quest_status",
+      "quest": 11360, "equals": 3, "within_ms": 3000 },
+    { "action": "quest_complete", "label": "Five fires put out under the challenge", "actor": "snob", "quest": 11360 },
+    { "action": "assert", "label": "DISCRIMINATING: the challenge lets 11360 complete", "actor": "snob",
+      "metric": "quest_status", "quest": 11360, "equals": 1 },
+    { "action": "assert", "label": "The matron shows the reward marker to the challenger", "actor": "snob",
+      "metric": "dialog_status", "entry": 24519, "equals": 10 },
+    { "action": "quest_turn_in", "label": "Hand 11360 in under the challenge", "actor": "snob", "quest": 11360,
+      "entry": 24519, "reward": 0 },
+    { "action": "assert", "label": "The challenger is rewarded", "actor": "snob", "metric": "quest_rewarded",
+      "quest": 11360, "equals": 1, "within_ms": 4000 }
+  ]
+}

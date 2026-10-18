@@ -1700,7 +1700,10 @@ namespace CoAChallenges
             if (Quest const* quest = sObjectMgr->GetQuestTemplate(quest_id))
             {
                 static char const* colors[5] = {"GRAY", "GREEN", "YELLOW", "ORANGE", "RED"};
-                int c = QuestColor(quest->GetQuestLevel(), player->GetLevel());
+                int qLevel = quest->GetQuestLevel();
+                if (qLevel < 0)
+                    return true;
+                int c = QuestColor(uint32(qLevel), player->GetLevel());
                 std::string rule = std::string("CHALLENGE_RULES_TYPE_NO_") + colors[c] + "_QUESTS";
                 if (PlayerHasRule(player, rule.c_str()))
                 {
