@@ -144,6 +144,7 @@ constexpr uint32 MortalAbilityForms[] = {680692, 801076};
 constexpr float BloodVeilSpiritScale = 1.5f;
 constexpr float BloodVeilAttackPowerScale = 0.75f;
 constexpr uint32 BloodVeilRanks[] = {504263, 572277, 572278, 572279};
+constexpr uint32 SlaughterhouseOfferingRanks[] = {1108459, 1108463, 1108493};
 
 bool IsCursedForm(uint32 id)
 {
@@ -153,6 +154,11 @@ bool IsCursedForm(uint32 id)
 bool IsBloodVeilRank(uint32 id)
 {
     return std::find(std::begin(BloodVeilRanks), std::end(BloodVeilRanks), id) != std::end(BloodVeilRanks);
+}
+
+bool IsSlaughterhouseOfferingRank(uint32 id)
+{
+    return std::find(std::begin(SlaughterhouseOfferingRanks), std::end(SlaughterhouseOfferingRanks), id) != std::end(SlaughterhouseOfferingRanks);
 }
 
 bool BloodScentTarget(Unit const* player, Unit const* target)
@@ -1468,6 +1474,9 @@ public:
 
         if (info->Id == SPELL_SANGUINE_ESSENCE_HEAL || info->Id == SPELL_SANGUINE_ESSENCE_DAMAGE)
             info->AscensionInheritsResolvedAmount = true;
+
+        if (IsSlaughterhouseOfferingRank(info->Id) && info->Effects[EFFECT_0].IsAura(SPELL_AURA_MOD_DAMAGE_TAKEN))
+            info->AttributesCu &= ~SPELL_ATTR0_CU_NEGATIVE;
 
         ApplyBloodmageConditionalContracts(info);
 
