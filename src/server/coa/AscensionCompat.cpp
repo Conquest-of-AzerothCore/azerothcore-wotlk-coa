@@ -190,6 +190,7 @@ constexpr uint16 SMSG_PATCH_ITEM_DISPLAY_INFO = 0x096B;
 constexpr uint16 SMSG_PATCH_CHARACTER_ADVANCEMENT = 0x064A;
 constexpr uint16 SMSG_PATCH_SPELL = 0x092A;
 constexpr uint16 SMSG_PATCH_SUPER_TRACK = 0x06BE;
+constexpr uint16 SMSG_PATCH_QUEST_SUPER_TRACK = 0x06BF;
 constexpr uint16 SMSG_PATCH_SKILL_LINE_ABILITY = 0x0934;
 constexpr uint16 SMSG_PATCH_SPELL_SHAPESHIFT_FORM = 0x0949;
 constexpr uint16 SMSG_PATCH_CREATURE_MODEL_DATA = 0x0974;
@@ -3747,11 +3748,11 @@ public:
     PreparedPatchRows const &rows = GetPreparedPatchRows();
     LOG_INFO("coa",
              "Prepared {} CreatureModelData, {} CreatureDisplayInfo, {} ItemDisplayInfo, {} Item, "
-             "{} Spell, {} SuperTrack, {} SkillLineAbility and {} SpellShapeshiftForm patch rows "
-             "for the client stream",
+             "{} Spell, {} SuperTrack, {} QuestSuperTrack, {} SkillLineAbility and {} SpellShapeshiftForm "
+             "patch rows for the client stream",
              rows.CreatureModels.size(), rows.CreatureDisplayIds.size(), rows.ItemDisplayInfos.size(),
-             rows.Items.size(), rows.Spells.size(), rows.SuperTracks.size(), rows.SkillLineAbilities.size(),
-             rows.ShapeshiftForms.size());
+             rows.Items.size(), rows.Spells.size(), rows.SuperTracks.size(), rows.QuestSuperTracks.size(),
+             rows.SkillLineAbilities.size(), rows.ShapeshiftForms.size());
     IndexClientSpells();
     IndexClientSpellRanks();
     IndexAdvancementEntryIds();
@@ -3992,6 +3993,9 @@ public:
     for (SuperTrackPatchRow const &row : rows.SuperTracks)
       bytes += SendSuperTrackRow(player, row);
 
+    for (QuestSuperTrackPatchRow const &row : rows.QuestSuperTracks)
+      bytes += SendQuestSuperTrackRow(player, row);
+
     for (SkillLineAbilityPatchRow const& row : rows.SkillLineAbilities)
         bytes += SendSkillLineAbilityRow(player, row);
 
@@ -4003,12 +4007,12 @@ public:
 
     LOG_INFO("coa",
              "Streamed {} CreatureModelData, {} CreatureDisplayInfo, {} ItemDisplayInfo, {} of {} Item, "
-             "{} Spell, {} SuperTrack, {} SkillLineAbility, {} SpellShapeshiftForm and {} VanityCollection "
-             "patch rows ({} bytes) to {} in {} ms",
+             "{} Spell, {} SuperTrack, {} QuestSuperTrack, {} SkillLineAbility, {} SpellShapeshiftForm and "
+             "{} VanityCollection patch rows ({} bytes) to {} in {} ms",
              rows.CreatureModels.size(), sent, rows.ItemDisplayInfos.size(), sentItems.Rows,
-             rows.Items.size(), sentSpells, rows.SuperTracks.size(), rows.SkillLineAbilities.size(),
-             rows.ShapeshiftForms.size(), rows.VanityCollections.size(), bytes, player->GetName(),
-             GetMSTimeDiffToNow(startTime));
+             rows.Items.size(), sentSpells, rows.SuperTracks.size(), rows.QuestSuperTracks.size(),
+             rows.SkillLineAbilities.size(), rows.ShapeshiftForms.size(), rows.VanityCollections.size(), bytes,
+             player->GetName(), GetMSTimeDiffToNow(startTime));
   }
 
 private:
@@ -4029,6 +4033,12 @@ private:
 
   using ItemPatchRow = std::array<uint32, 8>;
   using SuperTrackPatchRow = std::array<uint32, 8>;
+  static constexpr uint32 QUEST_SUPER_TRACK_OBJECTIVE_COUNT = 4;
+  static constexpr uint32 QUEST_SUPER_TRACK_NODES_PER_SLOT = 20;
+  static constexpr uint32 QUEST_SUPER_TRACK_FIRST_NODE_FIELD = 2;
+  static constexpr uint32 QUEST_SUPER_TRACK_DBC_FIELD_COUNT = QUEST_SUPER_TRACK_FIRST_NODE_FIELD +
+      (QUEST_SUPER_TRACK_OBJECTIVE_COUNT + 1) * QUEST_SUPER_TRACK_NODES_PER_SLOT;
+  using QuestSuperTrackPatchRow = std::array<uint32, QUEST_SUPER_TRACK_DBC_FIELD_COUNT>;
     static constexpr uint32 SKILL_LINE_ABILITY_DBC_FIELD_COUNT = 14;
     using SkillLineAbilityPatchRow = std::array<uint32, SKILL_LINE_ABILITY_DBC_FIELD_COUNT>;
 
@@ -4122,6 +4132,7 @@ private:
     std::vector<SpellPatchRow> Spells;
     std::unordered_map<uint32, std::size_t> SpellRowIndexById;
     std::vector<SuperTrackPatchRow> SuperTracks;
+    std::vector<QuestSuperTrackPatchRow> QuestSuperTracks;
     std::vector<SkillLineAbilityPatchRow> SkillLineAbilities;
     std::vector<ShapeshiftFormPatchRow> ShapeshiftForms;
     std::vector<CreatureModelPatchRow> CreatureModels;
@@ -4524,6 +4535,14 @@ private:
     return SendRowPacket(player, packet);
   }
 
+  std::size_t SendQuestSuperTrackRow(Player *player,
+                                     QuestSuperTrackPatchRow const &row) const {
+    WorldPacket packet(SMSG_PATCH_QUEST_SUPER_TRACK, row.size() * sizeof(uint32));
+    for (uint32 value : row)
+      packet << value;
+    return SendRowPacket(player, packet);
+  }
+
     static std::size_t SendSkillLineAbilityRow(Player* player, SkillLineAbilityPatchRow const& row)
     {
         WorldPacket packet(SMSG_PATCH_SKILL_LINE_ABILITY, row.size() * sizeof(uint32));
@@ -4706,6 +4725,48 @@ private:
     return rows;
   }
 
+  static std::vector<QuestSuperTrackPatchRow> LoadQuestSuperTrackPatchRows() {
+    std::vector<QuestSuperTrackPatchRow> rows;
+    QueryResult result = WorldDatabase.Query(
+        "SELECT `ID`, `QuestID`, `ObjectiveIndex`, `NodeIndex`, `SuperTrackID` "
+        "FROM `coa_client_quest_super_track` ORDER BY `ID`");
+    if (!result)
+      return rows;
+
+    do {
+      Field const *fields = result->Fetch();
+      uint32 const id = fields[0].Get<uint32>();
+      uint32 const questId = fields[1].Get<uint32>();
+      int8 const objectiveIndex = fields[2].Get<int8>();
+      uint8 const nodeIndex = fields[3].Get<uint8>();
+      if (objectiveIndex < -1 || objectiveIndex >= int8(QUEST_SUPER_TRACK_OBJECTIVE_COUNT) ||
+          nodeIndex >= QUEST_SUPER_TRACK_NODES_PER_SLOT)
+      {
+        LOG_ERROR("coa", "coa_client_quest_super_track {} has invalid objective {} node {}", id,
+                  objectiveIndex, nodeIndex);
+        continue;
+      }
+
+      if (rows.empty() || rows.back()[0] != id)
+      {
+        QuestSuperTrackPatchRow &row = rows.emplace_back();
+        row[0] = id;
+        row[1] = questId;
+      }
+      else if (rows.back()[1] != questId)
+      {
+        LOG_ERROR("coa", "coa_client_quest_super_track {} mixes quests {} and {}", id, rows.back()[1], questId);
+        continue;
+      }
+
+      uint32 const slot = objectiveIndex < 0 ? QUEST_SUPER_TRACK_OBJECTIVE_COUNT : uint32(objectiveIndex);
+      rows.back()[QUEST_SUPER_TRACK_FIRST_NODE_FIELD + slot * QUEST_SUPER_TRACK_NODES_PER_SLOT + nodeIndex] =
+          fields[4].Get<uint32>();
+    } while (result->NextRow());
+
+    return rows;
+  }
+
   PreparedPatchRows const &GetPreparedPatchRows() {
     std::lock_guard lock(_cacheMutex);
     if (!_rowsPrepared)
@@ -4727,6 +4788,7 @@ private:
       for (std::size_t index = 0; index < _rows.Spells.size(); ++index)
         _rows.SpellRowIndexById.emplace(_rows.Spells[index].Values[0], index);
       _rows.SuperTracks = LoadSuperTrackPatchRows();
+      _rows.QuestSuperTracks = LoadQuestSuperTrackPatchRows();
       _rows.SkillLineAbilities = LoadSkillLineAbilityPatchRows();
       _rows.ShapeshiftForms = LoadShapeshiftFormPatchRows();
       _rows.VanityCollections = LoadVanityCollectionPatchRows();
