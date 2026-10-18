@@ -2,6 +2,7 @@
 
 #include "AscensionRaidReleasePolicy.h"
 #include "Config.h"
+#include "DBCStores.h"
 #include "DBCStructure.h"
 #include "Language.h"
 #include "Player.h"
@@ -11,12 +12,12 @@
 
 namespace
 {
-uint32 g_raidReleaseStage = RaidRelease::AllRaidsReleased;
+uint32 g_raidReleaseStage = RaidRelease::StageMoltenCore;
 
 void LoadRaidReleaseStage()
 {
     g_raidReleaseStage = sConfigMgr->GetOption<uint32>("Ascension.CallboardCache.ReleaseStage",
-        RaidRelease::AllRaidsReleased);
+        RaidRelease::StageMoltenCore);
 }
 
 class ascension_raid_release_config : public WorldScript
@@ -46,13 +47,26 @@ public:
     bool OnPlayerCanEnterMap(Player* player, MapEntry const* entry, InstanceTemplate const*, MapDifficulty const*,
         bool) override
     {
-        if (RaidRelease::IsRaidReleased(entry->MapID, g_raidReleaseStage))
+        bool released = RaidRelease::IsRaidReleased(entry->MapID, g_raidReleaseStage);
+        if (released && !entry->IsRaid())
+        {
+            Difficulty difficulty = player->GetDifficulty(false);
+            GetDownscaledMapDifficultyData(entry->MapID, difficulty);
+            released = RaidRelease::IsDungeonDifficultyReleased(difficulty, g_raidReleaseStage);
+        }
+
+        if (released)
             return true;
 
         player->GetSession()->SendAreaTriggerMessage(LANG_INSTANCE_CLOSED);
         return false;
     }
 };
+}
+
+std::uint32_t RaidRelease::ReleasedStage()
+{
+    return g_raidReleaseStage;
 }
 
 void AddSC_AscensionRaidRelease()

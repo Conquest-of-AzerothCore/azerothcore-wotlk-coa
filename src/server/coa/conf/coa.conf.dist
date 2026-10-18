@@ -466,19 +466,27 @@ Ascension.PrestigiousCache.TbcStages = 0
 
 #
 #    Ascension.CallboardCache.ReleaseStage
-#        Description: The realm's current content progression stage, 0-7, in the order the
-#                     Callboard Caches released: Heroic and Mythic Dungeons, Zul'Gurub,
-#                     Molten Core, Onyxia's Lair, Blackwing Lair, Ruins of Ahn'Qiraj,
-#                     Temple of Ahn'Qiraj, Naxxramas. A generic Callboard Cache resolves
-#                     to a tier at or below this stage.
-#                     The same stage gates the Classic raids: a raid above it is closed,
-#                     entering it shows "Instance is closed" and a character logging in
-#                     inside it is moved out (0 closes every raid, 2 opens Zul'Gurub and
-#                     Molten Core). Game Masters still enter; other maps are not affected.
-#                     Applied on .reload config.
-#        Default:     7
+#        Description: The realm's current content progression stage, 0-8. Every stage also
+#                     releases the stages before it:
+#                     0 - normal dungeons only
+#                     1 - Heroic Dungeons
+#                     2 - Mythic Dungeons
+#                     3 - Molten Core
+#                     4 - Zul'Gurub
+#                     5 - Onyxia's Lair
+#                     6 - Blackwing Lair
+#                     7 - Ruins of Ahn'Qiraj and Temple of Ahn'Qiraj
+#                     8 - Naxxramas
+#                     A raid or dungeon difficulty above the stage is closed: entering it
+#                     shows "Instance is closed" and a character logging in inside it is
+#                     moved out. Game Masters still enter; other maps are not affected. The
+#                     client lists Heroic and Mythic difficulties only once they are released.
+#                     Callboard Caches follow the same stages: only released caches are
+#                     earned, and a generic Callboard Cache resolves to a released tier.
+#                     Applied on .reload config; the client's difficulty list on next login.
+#        Default:     3
 
-Ascension.CallboardCache.ReleaseStage = 7
+Ascension.CallboardCache.ReleaseStage = 3
 
 #
 #    Ascension.CallboardCache.PreviousStageOnly

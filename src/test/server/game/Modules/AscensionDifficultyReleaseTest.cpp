@@ -18,3 +18,17 @@ TEST(AscensionDifficultyRelease, ActiveEventMatchesTheClientGameEventInfoLayout)
     while (data.rpos() < data.size())
         EXPECT_EQ(data.read<uint8>(), 0u) << data.rpos();
 }
+
+TEST(AscensionDifficultyRelease, ReleasedEventsFollowTheReleaseLadder)
+{
+    using AscensionDifficultyRelease::HeroicDungeonEvents;
+    using AscensionDifficultyRelease::MythicDungeonEvents;
+    std::vector<uint16> const heroic(HeroicDungeonEvents.begin(), HeroicDungeonEvents.end());
+    std::vector<uint16> both = heroic;
+    both.insert(both.end(), MythicDungeonEvents.begin(), MythicDungeonEvents.end());
+
+    EXPECT_TRUE(AscensionDifficultyRelease::ReleasedEvents(0).empty());
+    EXPECT_EQ(AscensionDifficultyRelease::ReleasedEvents(1), heroic);
+    EXPECT_EQ(AscensionDifficultyRelease::ReleasedEvents(2), both);
+    EXPECT_EQ(AscensionDifficultyRelease::ReleasedEvents(8), both);
+}

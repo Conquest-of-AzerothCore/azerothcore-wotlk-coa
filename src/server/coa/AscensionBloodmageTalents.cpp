@@ -56,6 +56,10 @@ enum BloodmageTalentSpells : uint32
     SPELL_BLOODLORDS_CURSE = 707449,
     SPELL_BLOOD_MOON = 707623,
     SPELL_BLOOD_MOON_HEAL = 572786,
+    SPELL_APOTHEOSIS = 804195,
+    SPELL_DARK_FEAST = 804203,
+    SPELL_APOTHEOSIS_HEAL = 807857,
+    SPELL_DARK_FEAST_HEAL = 807934,
     SPELL_CURSED_BLOOD = 707435,
     SPELL_CURSED_BLOOD_RUPTURE = 707708,
     SPELL_BLOODSURGE = 553267,
@@ -699,6 +703,45 @@ class aura_ascension_bloodmage_blood_moon : public AuraScript
     {
         DoCheckProc += AuraCheckProcFn(aura_ascension_bloodmage_blood_moon::Check);
         OnEffectProc += AuraEffectProcFn(aura_ascension_bloodmage_blood_moon::Proc, EFFECT_0, AuraType(354));
+    }
+};
+
+class aura_ascension_bloodmage_apotheosis : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_bloodmage_apotheosis);
+
+    bool Validate(SpellInfo const* info) override
+    {
+        SpellInfo const* shadow = sSpellMgr->GetSpellInfo(SPELL_APOTHEOSIS_HEAL);
+        SpellInfo const* feast = sSpellMgr->GetSpellInfo(SPELL_DARK_FEAST_HEAL);
+        return (info->Id == SPELL_APOTHEOSIS || info->Id == SPELL_DARK_FEAST) &&
+            info->Effects[EFFECT_0].IsAura(AuraType(354)) &&
+            ((info->Id == SPELL_APOTHEOSIS && info->Effects[EFFECT_0].TriggerSpell == SPELL_APOTHEOSIS_HEAL && shadow &&
+                shadow->Effects[EFFECT_0].Effect == SPELL_EFFECT_HEAL) ||
+            (info->Id == SPELL_DARK_FEAST && info->Effects[EFFECT_0].TriggerSpell == SPELL_DARK_FEAST_HEAL && feast &&
+                feast->Effects[EFFECT_0].Effect == SPELL_EFFECT_HEAL));
+    }
+
+    bool Check(ProcEventInfo& event)
+    {
+        if (!IsBloodmageDamageProc(GetTarget(), GetCaster(), event))
+            return false;
+        return GetSpellInfo()->Id != SPELL_APOTHEOSIS ||
+            (event.GetDamageInfo()->GetSchoolMask() & SPELL_SCHOOL_MASK_SHADOW);
+    }
+
+    void Proc(AuraEffect const* effect, ProcEventInfo& event)
+    {
+        PreventDefaultAction();
+        if (int32 heal = BloodmageProcShare(effect, event))
+            GetTarget()->CastCustomSpell(GetSpellInfo()->Effects[EFFECT_0].TriggerSpell, SPELLVALUE_BASE_POINT0,
+                heal, GetTarget(), TRIGGERED_FULL_MASK);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(aura_ascension_bloodmage_apotheosis::Check);
+        OnEffectProc += AuraEffectProcFn(aura_ascension_bloodmage_apotheosis::Proc, EFFECT_0, AuraType(354));
     }
 };
 
@@ -1590,6 +1633,7 @@ void AddSC_AscensionBloodmageTalents()
     RegisterSpellScript(aura_ascension_bloodmage_blood_scent);
     RegisterSpellScript(aura_ascension_bloodmage_thick_pelt);
     RegisterSpellScript(aura_ascension_bloodmage_blood_moon);
+    RegisterSpellScript(aura_ascension_bloodmage_apotheosis);
     RegisterSpellScript(aura_ascension_bloodmage_cursed_blood);
     RegisterSpellScript(aura_ascension_bloodmage_transgression);
     RegisterSpellScript(aura_ascension_bloodmage_essence_harvester);

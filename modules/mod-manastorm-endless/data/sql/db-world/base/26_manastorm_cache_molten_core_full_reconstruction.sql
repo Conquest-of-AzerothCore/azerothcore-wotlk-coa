@@ -96,7 +96,7 @@ CREATE TEMPORARY TABLE `tmp_ms_mc_source` (
     `Source` VARCHAR(32) NOT NULL,
     `Item` INT UNSIGNED NOT NULL,
     PRIMARY KEY (`Source`, `Item`)
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- MoltenCore: 106 explicit base candidates.
 INSERT INTO `tmp_ms_mc_source` (`Source`, `Item`) VALUES
@@ -971,7 +971,7 @@ CREATE TEMPORARY TABLE `tmp_ms_mc_family` (
     `Tier` VARCHAR(16) NOT NULL,
     `SpecificMarker` VARCHAR(64) NOT NULL,
     `Expected` INT UNSIGNED NOT NULL
-) ENGINE=InnoDB;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 INSERT INTO `tmp_ms_mc_family` (`Entry`, `Label`, `Source`, `Tier`, `SpecificMarker`, `Expected`) VALUES
 (9002001, 'Normal Molten Core', 'MoltenCore', '', '', 106),
 (9002002, 'Heroic Molten Core', 'MoltenCore', 'Heroic', '@Heroic Molten Core@%', 86),

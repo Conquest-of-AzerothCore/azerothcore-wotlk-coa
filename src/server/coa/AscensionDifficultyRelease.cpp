@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionDifficultyRelease.h"
+#include "AscensionRaidReleasePolicy.h"
 #include "Player.h"
 #include "PlayerScript.h"
 
@@ -22,14 +23,23 @@ WorldPacket BuildActiveEvent(uint16 eventId)
     return data;
 }
 
+std::vector<uint16> ReleasedEvents(uint32 releasedStage)
+{
+    std::vector<uint16> released;
+    if (RaidRelease::IsDungeonDifficultyReleased(RaidRelease::DungeonDifficultyHeroic, releasedStage))
+        released.insert(released.end(), HeroicDungeonEvents.begin(), HeroicDungeonEvents.end());
+    if (RaidRelease::IsDungeonDifficultyReleased(RaidRelease::DungeonDifficultyMythic, releasedStage))
+        released.insert(released.end(), MythicDungeonEvents.begin(), MythicDungeonEvents.end());
+    return released;
+}
+
 void SendReleasedDifficulties(Player* player)
 {
-    for (auto const& events : { HeroicDungeonEvents, MythicDungeonEvents })
-        for (uint16 eventId : events)
-        {
-            WorldPacket data = BuildActiveEvent(eventId);
-            player->SendDirectMessage(&data);
-        }
+    for (uint16 eventId : ReleasedEvents(RaidRelease::ReleasedStage()))
+    {
+        WorldPacket data = BuildActiveEvent(eventId);
+        player->SendDirectMessage(&data);
+    }
 }
 
 class LoginAnnouncer : public PlayerScript

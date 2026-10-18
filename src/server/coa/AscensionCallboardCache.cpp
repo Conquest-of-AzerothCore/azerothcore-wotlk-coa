@@ -2,6 +2,7 @@
 #include "AscensionAverageItemLevel.h"
 #include "AscensionCacheRewards.h"
 #include "AscensionCompatOpcodes.h"
+#include "AscensionRaidReleasePolicy.h"
 #include "AscensionSpecLoot.h"
 #include "Chat.h"
 #include "Config.h"
@@ -21,6 +22,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include <algorithm>
+#include <array>
 #include <mutex>
 #include <unordered_map>
 #include <vector>
@@ -44,23 +46,29 @@ constexpr uint32 ReachedItemLevelRecountVersion = 2;
 constexpr uint32 HighestItemLevelReachedCriterion = 80129;
 constexpr uint32 PointsPerDisplayedPoint = 10;
 
-std::vector<std::vector<uint32>> const CallboardTiers = {
-    { 1615001, 1615002 },
-    { 1615003 },
-    { 1615004 },
-    { 1615005 },
-    { 1615006 },
-    { 1615007 },
-    { 1615008 },
-    { 1615009 }
+struct StagedCache
+{
+    uint32 stage;
+    uint32 cacheItemId;
 };
+
+std::array<StagedCache, 9> const CallboardTiers = {{
+    { RaidRelease::StageHeroicDungeons, 1615001 },
+    { RaidRelease::StageMythicDungeons, 1615002 },
+    { RaidRelease::StageMoltenCore, 1615004 },
+    { RaidRelease::StageZulGurub, 1615003 },
+    { RaidRelease::StageOnyxiasLair, 1615005 },
+    { RaidRelease::StageBlackwingLair, 1615006 },
+    { RaidRelease::StageAhnQiraj, 1615007 },
+    { RaidRelease::StageAhnQiraj, 1615008 },
+    { RaidRelease::StageNaxxramas, 1615009 }
+}};
 
 using CallboardPool = std::vector<AscensionCacheRewards::Reward>;
 
 struct CacheTier
 {
     uint32 itemLevel;
-    uint8 releaseStage;
     uint32 cacheItemId;
 };
 
@@ -70,7 +78,6 @@ std::unordered_map<uint32, CallboardPool> g_pools;
 std::unordered_map<uint32, uint32> g_questPoints;
 std::vector<CacheTier> g_cacheTiers;
 
-uint8 g_releaseStage = 7;
 uint32 g_itemLevelAllowance = 6;
 bool g_previousStageOnly = false;
 uint32 g_cachePoints = 150;
@@ -103,13 +110,13 @@ void LoadCallboardCacheTiers()
 {
     std::vector<CacheTier> tiers;
     if (QueryResult result = WorldDatabase.Query(
-            "SELECT `ItemLevel`, `ReleaseStage`, `CacheItemId` FROM `ascension_callboard_cache_tier` "
+            "SELECT `ItemLevel`, `CacheItemId` FROM `ascension_callboard_cache_tier` "
             "ORDER BY `ItemLevel` DESC"))
     {
         do
         {
             Field* fields = result->Fetch();
-            tiers.push_back({ fields[0].Get<uint16>(), fields[1].Get<uint8>(), fields[2].Get<uint32>() });
+            tiers.push_back({ fields[0].Get<uint16>(), fields[1].Get<uint32>() });
         } while (result->NextRow());
     }
     else
@@ -124,7 +131,6 @@ void LoadCallboardCacheTiers()
 
 void LoadCallboardCachePools()
 {
-    g_releaseStage = uint8(sConfigMgr->GetOption<uint32>("Ascension.CallboardCache.ReleaseStage", 7));
     g_itemLevelAllowance = sConfigMgr->GetOption<uint32>("Ascension.CallboardCache.ItemLevelAllowance", 6);
     g_previousStageOnly = sConfigMgr->GetOption<bool>("Ascension.CallboardCache.PreviousStageOnly", false);
     g_cachePoints = std::max<uint32>(1, sConfigMgr->GetOption<uint32>("Ascension.CallboardCache.CachePoints", 150));
@@ -171,49 +177,50 @@ uint32 HighestItemLevel(CallboardPool const& pool)
     return highest;
 }
 
-uint8 ReleasedStage()
+uint32 HighestStage(uint32 cacheItemId)
 {
-    return std::min<uint8>(g_releaseStage, uint8(CallboardTiers.size() - 1));
-}
-
-uint8 HighestStage(uint32 cacheItemId)
-{
-    uint8 highest = ReleasedStage();
+    uint32 highest = RaidRelease::ReleasedStage();
     if ((g_previousStageOnly || cacheItemId == CallboardGenericOld) && highest > 0)
         --highest;
     return highest;
 }
 
+uint32 CacheStage(uint32 cacheItemId)
+{
+    if (cacheItemId == CallboardGenericVoucher)
+        return CallboardTiers.front().stage;
+    for (StagedCache const& tier : CallboardTiers)
+        if (tier.cacheItemId == cacheItemId)
+            return tier.stage;
+    return 0;
+}
+
 uint32 ResolveGenericTier(Player* player, uint32 cacheItemId)
 {
-    uint8 const highest = HighestStage(cacheItemId);
+    uint32 const highest = HighestStage(cacheItemId);
     uint32 averageItemLevel = uint32(AscensionAverageItemLevel::Equipped(player));
     uint32 chosen = 0;
+    uint32 chosenItemLevel = 0;
+    uint32 lowest = 0;
 
-    for (uint8 index = 0; index <= highest; ++index)
+    for (StagedCache const& tier : CallboardTiers)
     {
-        for (uint32 candidate : CallboardTiers[index])
+        if (tier.stage > highest)
+            continue;
+        CallboardPool const* pool = GetPool(tier.cacheItemId);
+        if (!pool || pool->empty())
+            continue;
+        if (!lowest)
+            lowest = tier.cacheItemId;
+        uint32 const itemLevel = HighestItemLevel(*pool);
+        if (itemLevel <= averageItemLevel + g_itemLevelAllowance && (!chosen || itemLevel >= chosenItemLevel))
         {
-            CallboardPool const* pool = GetPool(candidate);
-            if (!pool || pool->empty())
-                continue;
-            if (HighestItemLevel(*pool) <= averageItemLevel + g_itemLevelAllowance)
-                chosen = candidate;
+            chosen = tier.cacheItemId;
+            chosenItemLevel = itemLevel;
         }
     }
 
-    if (!chosen)
-    {
-        for (uint8 index = 0; index <= highest && !chosen; ++index)
-            for (uint32 candidate : CallboardTiers[index])
-                if (CallboardPool const* pool = GetPool(candidate))
-                    if (!pool->empty())
-                    {
-                        chosen = candidate;
-                        break;
-                    }
-    }
-    return chosen;
+    return chosen ? chosen : lowest;
 }
 
 bool PickReward(Player* player, CallboardPool const& pool, uint32 averageItemLevel,
@@ -298,11 +305,11 @@ uint32 QuestPoints(uint32 questId)
 
 std::vector<CacheTier> ReleasedCacheTiers()
 {
-    uint8 const stage = ReleasedStage();
+    uint32 const stage = RaidRelease::ReleasedStage();
     std::vector<CacheTier> released;
     std::lock_guard<std::mutex> guard(g_poolLock);
     for (CacheTier const& tier : g_cacheTiers)
-        if (tier.releaseStage <= stage)
+        if (CacheStage(tier.cacheItemId) <= stage)
             released.push_back(tier);
     return released;
 }
