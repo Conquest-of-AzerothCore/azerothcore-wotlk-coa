@@ -1,0 +1,173 @@
+{
+  "schema": 1,
+  "name": "Waking Crypts raises Crypt Plague damage by 50% (#4149)",
+  "contract": "Waking Crypts 570136 (CharacterAdvancement 33750, Death tab) reads \"Increases the damage of Crypt Plague by $s1% and Crypt Swarm now deals $s2% more damage for each Necromancer disease you have on the target.\" Effect 0 is SPELL_AURA_ADD_PCT_MODIFIER MiscValue 22 (SPELLMOD_DOT), BasePoints 49 + 1 = 50, EffectSpellClassMask (0, 0x800000, 0) in family 29, which matches only the Crypt Plague debuff 570131 (family flags 0, 0x800000, 0); Unit::SpellDamageBonusDone applies it to periodic damage, so Crypt Plague ticks are calculated at x1.50 while Flesh to Worms 500338 (0x4000, 0, 0x20) keeps x1.00. Effect 1 (BasePoints 3 + 1 = 4) is turned into a dummy by the load contract and implemented in the Necromancer damage-taken hook: Crypt Swarm damage 800343 is multiplied by 1 + 0.04 per distinct Necromancer disease the caster has on the target (AscensionNecromancer::Diseases counts auras, not stacks). Expected: with the talent, Crypt Plague ticks are calculated at x1.50 and Flesh to Worms at x1.00; Crypt Swarm gets no bonus without a disease; unlearning restores x1.00 Crypt Plague damage. The per-disease Crypt Swarm term is not asserted: script_spell_damage_taken needs a player victim and the Crypt Plague helper 570132 cannot target an enemy player (SPELL_FAILED_BAD_TARGETS).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "necro",
+      "race": 5,
+      "class": 23,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "victim",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "golem",
+      "owner": "necro",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "pvp",
+      "actor": "necro",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "victim",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "actor": "victim",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 570132
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 500338
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Waking Crypts is not active yet",
+      "actor": "necro",
+      "metric": "aura",
+      "spell": 570136,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro",
+      "metric": "spell_damage_done",
+      "target": "golem",
+      "spell": 570131,
+      "periodic": true,
+      "save_as": "plague0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro",
+      "metric": "spell_damage_done",
+      "target": "golem",
+      "spell": 500338,
+      "periodic": true,
+      "save_as": "worms0"
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 570136
+    },
+    {
+      "action": "assert",
+      "label": "The talent aura is applied",
+      "actor": "necro",
+      "metric": "aura",
+      "spell": 570136,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Crypt Plague periodic damage is raised by 50%",
+      "actor": "necro",
+      "metric": "spell_damage_done",
+      "target": "golem",
+      "spell": 570131,
+      "periodic": true,
+      "ratio_to": "plague0",
+      "min": 1.49,
+      "max": 1.51
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Flesh to Worms periodic damage is unchanged",
+      "actor": "necro",
+      "metric": "spell_damage_done",
+      "target": "golem",
+      "spell": 500338,
+      "periodic": true,
+      "ratio_to": "worms0",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Crypt Swarm gets no bonus without a disease",
+      "actor": "victim",
+      "metric": "script_spell_damage_taken",
+      "target": "necro",
+      "spell": 800343,
+      "equals": 1000
+    },
+    {
+      "action": "unlearn",
+      "actor": "necro",
+      "spell": 570136
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning removes the talent aura",
+      "actor": "necro",
+      "metric": "aura",
+      "spell": 570136,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Crypt Swarm stays unmodified after unlearning",
+      "actor": "victim",
+      "metric": "script_spell_damage_taken",
+      "target": "necro",
+      "spell": 800343,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Unlearning restores Crypt Plague damage",
+      "actor": "necro",
+      "metric": "spell_damage_done",
+      "target": "golem",
+      "spell": 570131,
+      "periodic": true,
+      "ratio_to": "plague0",
+      "min": 0.999,
+      "max": 1.001
+    }
+  ]
+}
