@@ -13,18 +13,24 @@ MANAGED_LABELS = [
     "Bloodmage",
     "Bug",
     "Chronomancer",
-    "Class Fix",
     "Config",
     "CPP Edit",
+    "Crash Fix",
     "Cultist",
     "DB",
+    "Dungeon",
+    "Feature",
     "Felsworn",
     "Guardian",
+    "Item",
     "Knight of Xoroth",
+    "Manastorm",
     "Necromancer",
     "Not Tested",
     "Primalist",
     "Pyromancer",
+    "Quest",
+    "Raid",
     "Ranger",
     "Reaper",
     "Runemaster",
@@ -36,6 +42,7 @@ MANAGED_LABELS = [
     "Tested",
     "Tinker",
     "Venomancer",
+    "Wildcard",
     "Witch Doctor",
     "Witch Hunter",
 ]
@@ -91,13 +98,57 @@ CLASS_ID_LABELS = {
 }
 
 
-CATEGORY_PATTERNS = {
-    "Class Fix": [
-        r"\bclass\s+fix\b",
-        r"\bclass\s+bug\b",
-        r"\bfix\s+class\b",
-    ],
+REPORT_SECTION_LABELS = {
+    "quest": "Quest",
+    "item": "Item",
+    "dungeon": "Dungeon",
+    "raid": "Raid",
+    "crash": "Crash Fix",
+}
 
+
+SCOPE_LABELS = {
+    "quest": "Quest",
+    "quests": "Quest",
+    "item": "Item",
+    "items": "Item",
+    "dungeon": "Dungeon",
+    "dungeons": "Dungeon",
+    "raid": "Raid",
+    "raids": "Raid",
+    "manastorm": "Manastorm",
+    "wildcard": "Wildcard",
+    "xoroth": "Knight of Xoroth",
+    **{label.replace(" ", "").casefold(): label for label in CLASS_ID_LABELS.values()},
+}
+
+
+TITLE_PATTERNS = {
+    "Dungeon": r"\bdungeons?\b",
+    "Raid": r"\braids?\b",
+    "Crash Fix": (
+        r"\b(?:client|server|game|realm|worldserver|instant|core)\s+crash"
+        r"|\bcrash(?:es|ed|ing)?\s+(?:the\s+|my\s+)?(?:client|server|game|realm|worldserver|wow)\b"
+        r"|\b(?:prevent|avoid|fix)\s+(?:a\s+|the\s+)?(?:\w+\s+)?crash\b"
+        r"|\bsegfault|\bSIGSEGV\b"
+    ),
+}
+
+
+DESCRIPTION_PATTERNS = {
+    "Manastorm": r"\bmanastorm\b",
+    "Wildcard": r"\bwildcard\b",
+}
+
+
+REPORTER_LINE = re.compile(
+    r"^(?:[ \t]*Class(?:[ \t]+ID)?[ \t]*:|\*\*Character:\*\*).*$",
+    re.IGNORECASE | re.MULTILINE,
+)
+CONVENTIONAL_TITLE = re.compile(r"^(\w+)(?:\(([^)]*)\))?!?:")
+
+
+CATEGORY_PATTERNS = {
     "CPP Edit": [
         r"\bc\+\+(?!\w)",
         r"\bcpp\b",
@@ -180,23 +231,31 @@ def determine_labels(issue):
     body = issue.get("body") or ""
 
     text = f"{title}\n{body}"
+    is_pull_request = "pull_request" in issue
 
     labels = []
 
+    if not is_pull_request and is_spell_report(body):
+        labels.extend(reporter_classes(body))
 
-    for match in re.finditer(
-        r"^[ \t]*Class[ \t]+ID[ \t]*:[ \t]*([0-9]{1,3})[ \t]*\r?$",
-        body,
-        re.IGNORECASE | re.MULTILINE,
-    ):
-        label = CLASS_ID_LABELS.get(int(match.group(1)))
-        if label:
-            labels.append(label)
-
+    described_text = f"{title}\n{REPORTER_LINE.sub('', body)}"
     for label, pattern in CLASS_PATTERNS.items():
-        if re.search(pattern, text, re.IGNORECASE):
+        if re.search(pattern, described_text, re.IGNORECASE):
             labels.append(label)
 
+    if is_pull_request:
+        labels.extend(pull_request_title_labels(title))
+    else:
+        labels.extend(report_section_labels(title, body))
+
+    reported_text = title if is_pull_request else f"{title}\n{report_description(body)}"
+    for label, pattern in DESCRIPTION_PATTERNS.items():
+        if re.search(pattern, reported_text, re.IGNORECASE):
+            labels.append(label)
+
+    for label, pattern in TITLE_PATTERNS.items():
+        if re.search(pattern, title, re.IGNORECASE):
+            labels.append(label)
 
     for label, patterns in CATEGORY_PATTERNS.items():
         for pattern in patterns:
@@ -209,6 +268,69 @@ def determine_labels(issue):
         labels.append(status)
 
     return list(dict.fromkeys(labels))
+
+
+def is_spell_report(body):
+    return bool(re.search(
+        r"^(?:####[ \t]+Spell|\*\*Category:\*\*[ \t]*Spell\b)[^\n]*$",
+        body,
+        re.IGNORECASE | re.MULTILINE,
+    ))
+
+
+def reporter_classes(body):
+    labels = []
+    for match in re.finditer(
+        r"^[ \t]*Class[ \t]+ID[ \t]*:[ \t]*([0-9]{1,3})[ \t]*\r?$",
+        body,
+        re.IGNORECASE | re.MULTILINE,
+    ):
+        label = CLASS_ID_LABELS.get(int(match.group(1)))
+        if label:
+            labels.append(label)
+
+    for character in re.findall(r"^\*\*Character:\*\*.*$", body, re.IGNORECASE | re.MULTILINE):
+        for label, pattern in CLASS_PATTERNS.items():
+            if re.search(pattern, character, re.IGNORECASE):
+                labels.append(label)
+    return labels
+
+
+def report_section_labels(title, body):
+    sections = re.findall(r"^####[ \t]+(\w+)[ \t]*\r?$", body, re.MULTILINE)
+    categories = re.findall(r"^\*\*Category:\*\*[ \t]*(.+?)[ \t]*\r?$", body, re.IGNORECASE | re.MULTILINE)
+    sections += [part for category in categories for part in category.split("/")]
+    prefix = re.match(r"\[([^\]]+)\]", title)
+    if prefix:
+        sections += prefix.group(1).split("/")
+    return [
+        REPORT_SECTION_LABELS[section.strip().casefold()]
+        for section in sections
+        if section.strip().casefold() in REPORT_SECTION_LABELS
+    ]
+
+
+def report_description(body):
+    match = re.search(
+        r"^(?:####[ \t]+Issue|###[ \t]+Description)[ \t]*\r?$(.*?)(?=^Location:|^###[ \t]|^<sub>|\Z)",
+        body,
+        re.IGNORECASE | re.MULTILINE | re.DOTALL,
+    )
+    return match.group(1) if match else ""
+
+
+def pull_request_title_labels(title):
+    match = CONVENTIONAL_TITLE.match(title)
+    if not match:
+        return []
+
+    kind, scope = match.groups()
+    labels = ["Feature"] if kind.casefold() == "feat" else []
+    for part in (scope or "").split("/"):
+        label = SCOPE_LABELS.get(part.strip().casefold())
+        if label:
+            labels.append(label)
+    return labels
 
 
 def determine_testing_status(body):
