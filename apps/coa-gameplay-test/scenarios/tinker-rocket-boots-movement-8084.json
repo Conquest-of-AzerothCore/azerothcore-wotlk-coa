@@ -1,0 +1,158 @@
+{
+  "contract": "#8084: with W held or auto-run on, Rocket Boots stops the character. Root cause is the same as Flame Step #6527: the 760384 LEAP_BACK knockback is a server-forced displacement that hands the client's movement over and drops auto-run. The fix keeps the same lunge only for a standing caster and otherwise carries the boost with a run-speed surge at the leap's own 15 yd/s for the 1s immunity window, leaving client movement untouched. This scenario pins the moving surge and its restore, plus that no forced spline displaces the fixture.",
+  "creatures": [
+    {
+      "distance": 35,
+      "entry": 36,
+      "health": 1000000,
+      "id": "dummy",
+      "level": 80,
+      "owner": "tinker"
+    }
+  ],
+  "location": {
+    "map": 0,
+    "o": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711
+  },
+  "name": "Rocket Boots leaves a moving caster's movement alone (#8084)",
+  "players": [
+    {
+      "class": 28,
+      "id": "tinker",
+      "level": 80,
+      "race": 1
+    }
+  ],
+  "schema": 1,
+  "timeout_ms": 90000,
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "label": "Learn Rocket Boots",
+      "spell": 500241
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "equals": 1,
+      "label": "SETUP: the Tinker knows Rocket Boots",
+      "metric": "knows_spell",
+      "spell": 500241
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "label": "Baseline distance to the dummy ahead",
+      "metric": "distance_2d",
+      "save_as": "d0",
+      "target": "dummy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "label": "Baseline run speed rate",
+      "metric": "run_speed_rate",
+      "save_as": "rate0"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "label": "SETUP: the fixture starts at an unsurging run speed rate",
+      "max": 1.2,
+      "metric": "run_speed_rate",
+      "min": 0.5
+    },
+    {
+      "action": "set_moving",
+      "actor": "tinker",
+      "enabled": true,
+      "label": "Start moving forward, as auto-run or a held key does"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "equals": 1,
+      "label": "SETUP: the Tinker is moving",
+      "metric": "moving"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "label": "Rocket Boots while moving",
+      "spell": 500241
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "label": "DISCRIMINATING: the moving boost carries the caster with a run speed surge instead of a forced displacement",
+      "metric": "run_speed_rate",
+      "min": 1.5,
+      "relative_to": "rate0",
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Let the surge run its course and any displacement finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "label": "DISCRIMINATING: the moving cast left the caster where the client is steering it",
+      "max": 0.5,
+      "metric": "distance_2d",
+      "min": -0.5,
+      "relative_to": "d0",
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "label": "The boost restored the run speed rate it borrowed",
+      "max": 0.05,
+      "metric": "run_speed_rate",
+      "min": -0.05,
+      "relative_to": "rate0",
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "equals": 1,
+      "label": "SETUP: the caster is still flagged as moving",
+      "metric": "moving"
+    },
+    {
+      "action": "set_moving",
+      "actor": "tinker",
+      "enabled": false,
+      "label": "Stop moving"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "equals": 0,
+      "label": "SETUP: the Tinker is standing still",
+      "metric": "moving"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "label": "Rocket Boots is back from cooldown",
+      "spell": 500241
+    }
+  ]
+}
