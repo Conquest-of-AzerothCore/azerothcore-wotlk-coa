@@ -1092,6 +1092,9 @@ void ApplyAscensionClassMechanics(SpellInfo* spellInfo)
 
     ApplyAscensionGuardianResourceContracts(spellInfo);
 
+    if (spellInfo->Id == 707188)
+        spellInfo->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_DUMMY;
+
     ApplyAscensionClassMechanics19To25(spellInfo);
     ApplyAscensionBarbarianSpellChanges(spellInfo);
     ApplyAscensionWarcraftRebornWarriorContracts(spellInfo);
