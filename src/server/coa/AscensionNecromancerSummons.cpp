@@ -432,6 +432,11 @@ class npc_ascension_necromancer : public ScriptedAI
         if (key == 1)
             _target = guid;
     }
+    void JustDied(Unit*) override
+    {
+        if (uint32 champion = ChampionAura(me->GetEntry()))
+            me->RemoveOwnedAura(champion);
+    }
     void MovementInform(uint32 type, uint32 id) override
     {
         if (me->GetEntry() == 523032 && type == POINT_MOTION_TYPE && id == 1)

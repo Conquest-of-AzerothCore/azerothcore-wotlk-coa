@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Icebound Champion buff and its immunities end when the Champion dies (#4140)",
+  "contract": "Icebound Champion 807813 summons creature 500484 for 20000 ms (DurationIndex 18) and reads '...prevents you from being silenced or interrupted and reduces the pushback suffered ... by $807812s1% for $d.' The Champion carries passive 807812, whose three effects are SPELL_EFFECT_APPLY_AREA_AURA_OWNER, radius index 12 (100 yd): effect 0 SPELL_AURA_REDUCE_PUSHBACK BasePoints 49 + DieSides 1 = 50, effect 1 SPELL_AURA_MECHANIC_IMMUNITY MiscValue 26 (interrupt), effect 2 SPELL_AURA_MECHANIC_IMMUNITY MiscValue 9 (silence). The owner is therefore immune to Silence 15487 (spell Mechanic 9) and to Kick 1766 effect 0 (SPELL_EFFECT_INTERRUPT_CAST, EffectMechanic 26) while the Champion stands. Sacrifice Undead 807938 (family 29 word 2 0x4000000) kills every Necromancer minion, Champions included, about 3 s into the 20 s lifetime; the owner must lose 807812 and both immunities within 2 s instead of keeping them until the timed despawn.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "ice", "race": 5, "class": 23, "level": 80 },
+    { "id": "probe", "race": 1, "class": 4, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "ice", "spell": 807813 },
+    { "action": "learn", "actor": "ice", "spell": 807938 },
+    {
+      "action": "assert", "label": "CONTROL: no Champion buff before the summon", "actor": "ice",
+      "metric": "aura", "spell": 807812, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: Silence applies before the summon", "actor": "ice",
+      "metric": "spell_immune", "spell": 15487, "target": "probe", "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: Kick interrupts before the summon", "actor": "ice",
+      "metric": "spell_effect_immune", "spell": 1766, "effect": 0, "target": "probe", "equals": 0
+    },
+    { "action": "cast", "label": "Summon the Icebound Champion", "actor": "ice", "spell": 807813 },
+    {
+      "action": "assert", "label": "SETUP: one Icebound Champion is summoned", "actor": "ice",
+      "metric": "owned_creature_count", "entry": 500484, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The Necromancer is aided by the Icebound Champion", "actor": "ice",
+      "metric": "aura", "spell": 807812, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The buff reduces spell pushback by 50%", "actor": "ice",
+      "metric": "aura_amount", "spell": 807812, "effect": 0, "equals": 50
+    },
+    {
+      "action": "assert", "label": "The buff prevents silence", "actor": "ice",
+      "metric": "spell_immune", "spell": 15487, "target": "probe", "equals": 1
+    },
+    {
+      "action": "assert", "label": "The buff prevents interrupts", "actor": "ice",
+      "metric": "spell_effect_immune", "spell": 1766, "effect": 0, "target": "probe", "equals": 1
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+    { "action": "cast", "label": "Sacrifice Undead kills the Champion", "actor": "ice", "spell": 807938 },
+    {
+      "action": "assert", "label": "SETUP: the Icebound Champion is dead", "actor": "ice",
+      "metric": "owned_creature_count", "entry": 500484, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the buff ends with the Champion, not at its 20 s despawn",
+      "actor": "ice", "metric": "aura", "spell": 807812, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Silence applies again once the Champion is dead", "actor": "ice",
+      "metric": "spell_immune", "spell": 15487, "target": "probe", "equals": 0
+    },
+    {
+      "action": "assert", "label": "Kick interrupts again once the Champion is dead", "actor": "ice",
+      "metric": "spell_effect_immune", "spell": 1766, "effect": 0, "target": "probe", "equals": 0
+    }
+  ]
+}

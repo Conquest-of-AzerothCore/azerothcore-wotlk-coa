@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Gravebound Champion buff ends when the Champion dies (#4139)",
+  "contract": "Gravebound Champion 805049 summons creature 500482 for 20000 ms (DurationIndex 18) and reads 'Summon a Gravebound Champion that redirects $805050s3% of all damage the caster takes to themselves for $d.' The Champion carries passive 805050, whose effect 2 is SPELL_EFFECT_APPLY_AREA_AURA_OWNER with SPELL_AURA_SPLIT_DAMAGE_PCT, BasePoints 49 + DieSides 1 = 50, radius index 12 (100 yd), so the owning Necromancer is buffed with 50% damage redirection while the Champion stands. The redirection is the Champion's own, so the buff must end with the Champion. Sacrifice Undead 807938 (family 29 word 2 0x4000000) kills every Necromancer minion, Champions included, about 3 s into the 20 s lifetime; the owner must lose 805050 within 2 s instead of keeping it until the timed despawn.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "grave", "race": 5, "class": 23, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "grave", "spell": 805049 },
+    { "action": "learn", "actor": "grave", "spell": 807938 },
+    {
+      "action": "assert", "label": "CONTROL: no Champion buff before the summon", "actor": "grave",
+      "metric": "aura", "spell": 805050, "equals": 0
+    },
+    { "action": "cast", "label": "Summon the Gravebound Champion", "actor": "grave", "spell": 805049 },
+    {
+      "action": "assert", "label": "SETUP: one Gravebound Champion is summoned", "actor": "grave",
+      "metric": "owned_creature_count", "entry": 500482, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The Necromancer is aided by the Gravebound Champion", "actor": "grave",
+      "metric": "aura", "spell": 805050, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The buff redirects 50% of damage taken", "actor": "grave",
+      "metric": "aura_amount", "spell": 805050, "effect": 2, "equals": 50
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+    { "action": "cast", "label": "Sacrifice Undead kills the Champion", "actor": "grave", "spell": 807938 },
+    {
+      "action": "assert", "label": "SETUP: the Gravebound Champion is dead", "actor": "grave",
+      "metric": "owned_creature_count", "entry": 500482, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the buff ends with the Champion, not at its 20 s despawn",
+      "actor": "grave", "metric": "aura", "spell": 805050, "equals": 0, "within_ms": 2000
+    }
+  ]
+}
