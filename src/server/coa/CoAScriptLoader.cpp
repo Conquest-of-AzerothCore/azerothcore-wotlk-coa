@@ -88,6 +88,7 @@ void AddSC_AscensionWildcardElementalBlast();
 void AddAscensionFreepickScripts();
 void AddAscensionHeroBloomingShotScripts();
 void AddAscensionMysticEnchantScripts();
+void AddSC_AscensionMysticEnchantProcs();
 void AddAscensionBuildCreatorScripts();
 void AddAscensionWarcraftRebornScripts();
 void AddAscensionWarcraftRebornWarriorScripts();
@@ -687,6 +688,7 @@ void AddCoAScripts()
     AddAscensionFreepickScripts();
     AddAscensionHeroBloomingShotScripts();
     AddAscensionMysticEnchantScripts();
+    AddSC_AscensionMysticEnchantProcs();
     AddAscensionBuildCreatorScripts();
     AddAscensionWarcraftRebornScripts();
     AddAscensionWarcraftRebornWarriorScripts();
