@@ -33,6 +33,11 @@ bool Ranged(uint32 entry)
 {
     return entry == 50076 || entry == 50075 || entry == 50323 || entry == 50177 || entry == 50067;
 }
+bool InReach(Creature const* minion, Unit const* target)
+{
+    return !Ranged(minion->GetEntry()) ||
+           (minion->IsWithinDistInMap(target, 40.0f) && minion->IsWithinLOSInMap(target));
+}
 bool Follows(uint32 entry)
 {
     return !Stationary(entry) && entry != 523032 && entry != 542065;
@@ -483,7 +488,7 @@ class npc_ascension_necromancer : public ScriptedAI
     {
         Player* player = Owner(me);
         if (player && !Stationary(me->GetEntry()) && me->GetEntry() != 523032 && !Pacified(player) && target &&
-            player->IsValidAttackTarget(target))
+            player->IsValidAttackTarget(target) && InReach(me, target))
             ScriptedAI::AttackStart(target);
     }
     void Regroup(Player* player)
@@ -527,7 +532,7 @@ class npc_ascension_necromancer : public ScriptedAI
     {
         Player* player = Owner(me);
         Unit* target = ObjectAccessor::GetUnit(*me, _target);
-        if (action != 1 || !player || Pacified(player) || !target || !target->IsAlive() ||
+        if (action != 1 || !player || Pacified(player) || !target || !target->IsAlive() || !InReach(me, target) ||
             !Responds(me->GetEntry(), _command) || me->HasUnitState(UNIT_STATE_CONTROLLED))
             return;
         AttackStart(target);
@@ -644,6 +649,8 @@ class npc_ascension_necromancer : public ScriptedAI
                 {
                     me->SetReactState(REACT_PASSIVE);
                 }
+                if (Unit* victim = me->GetVictim(); victim && !InReach(me, victim))
+                    me->AttackStop();
                 if (passive)
                 {
                     me->AttackStop();
@@ -656,7 +663,7 @@ class npc_ascension_necromancer : public ScriptedAI
                 else if (!me->GetVictim() && me->GetEntry() != 523032)
                 {
                     Unit* target = ObjectAccessor::GetUnit(*me, State(player).focus);
-                    if (!target || !player->IsValidAttackTarget(target))
+                    if (!target || !player->IsValidAttackTarget(target) || !InReach(me, target))
                         target = player->GetVictim();
                     if (!target && !player->getAttackers().empty())
                         target = *player->getAttackers().begin();
@@ -670,7 +677,7 @@ class npc_ascension_necromancer : public ScriptedAI
                             }
                     if (target)
                         AttackStart(target);
-                    else if (Follows(me->GetEntry()))
+                    if (!me->GetVictim() && Follows(me->GetEntry()))
                         Regroup(player);
                 }
                 if (me->GetEntry() == 50078 && me->IsAlive() && !me->GetVictim() && me->getAttackers().empty() &&
@@ -695,7 +702,7 @@ class npc_ascension_necromancer : public ScriptedAI
                 {
                     if (me->GetEntry() == 50068)
                         Cast(me, me, 802353);
-                    if (Unit* victim = me->GetVictim())
+                    if (Unit* victim = me->GetVictim(); victim && InReach(me, victim))
                         if (uint32 ability = AttackSpell(me->GetEntry()))
                             if (!me->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
                                 Cast(me, victim, ability);
