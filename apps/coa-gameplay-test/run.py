@@ -171,6 +171,7 @@ ACTIONS = {
     'dungeon_difficulty_packet': ({'actor', 'value'}, {'actor', 'value'}),
     'ascension_dungeon_difficulty_packet': ({'actor', 'value'}, {'actor', 'value'}),
     'console': ({'command'}, {'command'}),
+    'game_event': ({'event', 'active'}, {'event', 'active'}),
     'command': ({'actor', 'command'}, {'actor', 'command', 'rejected'}),
     'whisper': ({'actor', 'to', 'text'}, {'actor', 'to', 'text', 'language'}),
     'wait': ({'ms'}, {'ms'}),
@@ -385,6 +386,9 @@ def validate(scenario):
                         f'{where}: player command must start with a dot')
                 if 'rejected' in step:
                     require(type(step['rejected']) is bool, f'{where}: rejected must be boolean')
+        if action == 'game_event':
+            number(step['event'], f'{where}.event', 1, 2**16 - 1, True)
+            require(type(step['active']) is bool, f'{where}: active must be boolean')
         if action == 'whisper':
             require(isinstance(step['to'], str) and step['to'].strip()
                     and isinstance(step['text'], str) and step['text'].strip(),
