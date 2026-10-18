@@ -6,6 +6,7 @@
 #include "ManastormMgr.h"
 
 #include "AllCreatureScript.h"
+#include "GlobalScript.h"
 #include "AllSpellScript.h"
 #include "DBCStructure.h"
 #include "UnitScript.h"
@@ -130,10 +131,7 @@ namespace
                 return SPELL_CAST_OK;
             }
 
-            //
-            // The baseline combat/survival tools are active-stage only.
-            //
-            if (!mgr.IsPlayerInActiveEndlessStage(
+            if (!mgr.IsPlayerInUsableEndlessStage(
                 player))
             {
                 return SPELL_FAILED_NOT_HERE;
@@ -359,6 +357,38 @@ namespace
                     HandleAfterHit);
         }
     };
+
+class manastorm_safety_spells : public GlobalScript
+{
+public:
+    manastorm_safety_spells() : GlobalScript("manastorm_safety_spells", {GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR}) { }
+
+    void OnLoadSpellCustomAttr(SpellInfo* spell) override
+    {
+        if (!ManastormModuleConfig::Enabled() || !spell)
+            return;
+
+        if (spell->Id == 93306)
+        {
+            spell->AuraInterruptFlags = 0;
+            return;
+        }
+
+        if (spell->Id != 93307)
+            return;
+
+        spell->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
+        spell->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_SCHOOL_IMMUNITY;
+        spell->Effects[EFFECT_0].MiscValue = SPELL_SCHOOL_MASK_ALL;
+        spell->Effects[EFFECT_0].BasePoints = 0;
+        spell->Effects[EFFECT_1].Effect = SPELL_EFFECT_APPLY_AURA;
+        spell->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_MOD_UNATTACKABLE;
+        spell->Attributes |= SPELL_ATTR0_NO_AURA_CANCEL;
+        spell->AttributesEx3 &= ~SPELL_ATTR3_ONLY_ON_PLAYER;
+        spell->AttributesCu |= SPELL_ATTR0_CU_POSITIVE;
+        spell->AuraInterruptFlags = 0;
+    }
+};
 
 class manastorm_worldscript : public WorldScript
 {
@@ -1178,6 +1208,7 @@ public:
 
 void AddSC_manastorm()
 {
+    new manastorm_safety_spells();
     new manastorm_worldscript();
     new manastorm_creaturescript();
     new manastorm_unitscript();

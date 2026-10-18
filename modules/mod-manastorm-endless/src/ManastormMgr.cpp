@@ -6,6 +6,8 @@
 
 #include "ObjectAccessor.h"
 #include "Creature.h"
+#include "DynamicObject.h"
+#include "Pet.h"
 #include "CreatureAI.h"
 #include "GameObject.h"
 #include "DBCStores.h"
@@ -2760,10 +2762,128 @@ namespace
         }
     }
 
+    bool SuppressPreparingCompanionAttack(Unit* attacker, ManastormRun const& run, uint32& damage)
+    {
+        if (!attacker || attacker->IsPlayer() || run.GetState() != ManastormRunState::Preparing)
+            return false;
+
+        damage = 0;
+        attacker->AttackStop();
+        return true;
+    }
+
+    void ApplySafetyBubbleProtection(Unit* unit, ManastormRun const& run)
+    {
+        if (!unit || !unit->IsAlive() || !unit->IsInWorld() ||
+            unit->GetMapId() != run.GetSegment().MapId || unit->GetInstanceId() != run.GetInstanceId() ||
+            run.GetState() != ManastormRunState::Preparing)
+            return;
+
+        if (!unit->HasAura(SPELL_SAFETY_BUBBLE_HELPER))
+            unit->CastSpell(unit, SPELL_SAFETY_BUBBLE_HELPER, true);
+        if (Aura* aura = unit->GetAura(SPELL_SAFETY_BUBBLE_HELPER))
+        {
+            aura->SetMaxDuration(int32(run.GetPreparationProtectionRemainingMs()));
+            aura->SetDuration(int32(run.GetPreparationProtectionRemainingMs()));
+        }
+    }
+
+    void CaptureStageCompanions(Player* player, ManastormRun& run)
+    {
+        auto& saved = run.CompanionTransfers[player->GetGUID().GetCounter()];
+        saved.clear();
+        for (Unit* controlled : player->m_Controlled)
+        {
+            if (!controlled || !controlled->IsAlive() || !controlled->IsInWorld() ||
+                controlled->GetOwnerGUID() != player->GetGUID() || controlled->GetCharmerGUID())
+                continue;
+
+            Creature* creature = controlled->ToCreature();
+            if (!creature || (!creature->IsGuardian() && !creature->IsPet()))
+                continue;
+
+            Pet* pet = creature->ToPet();
+            if (pet && !pet->isTemporarySummoned())
+                continue;
+            TempSummon* summon = creature->ToTempSummon();
+            if (!pet && (!summon || !summon->m_Properties))
+                continue;
+
+            ManastormRun::CompanionTransfer state;
+            state.Entry = creature->GetEntry();
+            state.Spell = creature->GetUInt32Value(UNIT_CREATED_BY_SPELL);
+            if (pet && (!state.Spell || !sSpellMgr->GetSpellInfo(state.Spell)))
+                continue;
+            state.Properties = summon && summon->m_Properties ? summon->m_Properties->Id : 0;
+            state.RemainingMs = pet ? uint32(pet->GetDuration().count()) : summon->GetTimer();
+            state.CapturedMs = getMSTime();
+            state.SummonType = summon ? uint32(summon->GetSummonType()) : 0;
+            state.HealthPct = creature->GetHealthPct();
+            state.Power = creature->GetPower(creature->getPowerType());
+            state.ReactState = uint8(creature->GetReactState());
+            state.TemporaryPet = pet != nullptr;
+            saved.push_back(state);
+        }
+    }
+
+    void RestoreStageCompanions(Player* player, ManastormRun& run)
+    {
+        auto found = run.CompanionTransfers.find(player->GetGUID().GetCounter());
+        if (found == run.CompanionTransfers.end() || !player->IsAlive())
+            return;
+
+        auto saved = std::move(found->second);
+        run.CompanionTransfers.erase(found);
+        for (auto const& state : saved)
+        {
+            uint32 const elapsed = getMSTimeDiff(state.CapturedMs, getMSTime());
+            if (state.RemainingMs && elapsed >= state.RemainingMs)
+                continue;
+            uint32 const remaining = state.RemainingMs ? state.RemainingMs - elapsed : 0;
+            Creature* restored = nullptr;
+            if (state.TemporaryPet)
+            {
+                if (player->GetPet() || player->GetTemporaryUnsummonedPetNumber())
+                    continue;
+                player->CastSpell(player, state.Spell, true);
+                if (Pet* pet = player->GetPet())
+                {
+                    if (pet->GetEntry() != state.Entry)
+                        continue;
+                    pet->SetDuration(Milliseconds(remaining));
+                    restored = pet;
+                }
+            }
+            else
+            {
+                SummonPropertiesEntry const* properties = sSummonPropertiesStore.LookupEntry(state.Properties);
+                if (!properties)
+                    continue;
+                if (TempSummon* summon = player->GetMap()->SummonCreature(state.Entry, player->GetPosition(),
+                        properties, remaining, player, state.Spell))
+                {
+                    summon->SetTempSummonType(TempSummonType(state.SummonType));
+                    summon->SetTimer(remaining);
+                    restored = summon;
+                }
+            }
+            if (!restored)
+                continue;
+            restored->SetHealth(std::max(1u, restored->CountPctFromMaxHealth(state.HealthPct)));
+            restored->SetPower(restored->getPowerType(), std::min(state.Power, restored->GetMaxPower(restored->getPowerType())));
+            restored->SetReactState(ReactStates(state.ReactState));
+            ApplySafetyBubbleProtection(restored, run);
+        }
+    }
+
     void ClearSafetyBubble(Player* player)
     {
         if (!player)
             return;
+
+        for (Unit* companion : player->m_Controlled)
+            if (companion && companion->GetOwnerGUID() == player->GetGUID())
+                companion->RemoveAurasDueToSpell(SPELL_SAFETY_BUBBLE_HELPER);
 
         for (uint32 spellId :
             SAFETY_BUBBLE_CLEANUP_SPELLS)
@@ -2817,7 +2937,7 @@ namespace
     constexpr uint32 HEART_PROJECTILE_LAUNCHER_LIFETIME_MS = 35000;
     constexpr uint32 HEART_PICKUP_ARM_DELAY_MS = 1000;
     constexpr uint32 HEART_PICKUP_CHECK_INTERVAL_MS = 500;
-    constexpr float HEART_PICKUP_DISTANCE = 2.0f;
+    constexpr float HEART_PICKUP_DISTANCE = 1.0f;
 
     constexpr float HEART_MIN_LANDING_DISTANCE = 10.0f;
     constexpr float HEART_MAX_LANDING_DISTANCE = 20.0f;
@@ -3654,6 +3774,37 @@ bool ManastormMgr::IsPlayerInActiveEndlessStage(
         run->GetInstanceId();
 }
 
+bool ManastormMgr::IsPlayerInUsableEndlessStage(
+    Player const* player) const
+{
+    if (!player)
+        return false;
+
+    ManastormRun const* run =
+        GetRunFor(player);
+
+    if (!run)
+        return false;
+
+    if (run->GetState() != ManastormRunState::Preparing &&
+        run->GetState() != ManastormRunState::Active &&
+        run->GetState() != ManastormRunState::StageComplete)
+    {
+        return false;
+    }
+
+    Map const* map = player->FindMap();
+
+    if (!map)
+        return false;
+
+    return
+        map->GetId() ==
+        run->GetSegment().MapId &&
+        map->GetInstanceId() ==
+        run->GetInstanceId();
+}
+
 bool ManastormMgr::HasManastormPotionCharge(
     Player const* player) const
 {
@@ -3674,7 +3825,7 @@ bool ManastormMgr::ConsumeManastormPotionCharge(
     Player* player)
 {
     if (!player ||
-        !IsPlayerInActiveEndlessStage(player))
+        !IsPlayerInUsableEndlessStage(player))
     {
         return false;
     }
@@ -4926,6 +5077,7 @@ bool ManastormMgr::PrepareStage(
             continue;
         }
 
+        CaptureStageCompanions(member, run);
         member->CombatStopWithPets(
             true);
 
@@ -5751,6 +5903,9 @@ bool ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
         map->GetInstanceId() != run->GetInstanceId())
         return true;
 
+    if (run->GetState() == ManastormRunState::Preparing || run->GetState() == ManastormRunState::Active)
+        RestoreStageCompanions(player, *run);
+
     if (run->GetState() == ManastormRunState::Preparing)
     {
         GameTele const* entrance = sObjectMgr->GetGameTele(segment.StartGameTeleId);
@@ -5798,6 +5953,13 @@ bool ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
         // after the Safety Bubble has been created; later party members reach
         // the same hook as they arrive in the already-initialized stage.
         //
+        ApplySafetyBubbleProtection(player, *run);
+        for (Unit* companion : player->m_Controlled)
+            if (companion && companion->GetOwnerGUID() == player->GetGUID())
+                ApplySafetyBubbleProtection(companion, *run);
+        if (DynamicObject* bubble = player->GetDynObject(SPELL_SAFETY_BUBBLE))
+            bubble->SetDuration(int32(run->GetPreparationProtectionRemainingMs()));
+
         ManastormVoiceOfMillhouse::OnPlayerEnteredProtection(
             *run,
             player);
@@ -7058,6 +7220,9 @@ void ManastormMgr::OnDamage(
 
         if (exactStageMember)
         {
+            if (SuppressPreparingCompanionAttack(attacker, *run, damage))
+                return;
+
             run->RequestStart();
 
             if (!OnPlayerEnterMap(
@@ -7290,6 +7455,11 @@ bool ManastormMgr::ForceStageAffix(
 
 void ManastormMgr::OnCreatureAddWorld(Creature* creature)
 {
+    if (creature)
+        if (Player* owner = creature->GetCharmerOrOwnerPlayerOrPlayerItself())
+            if (ManastormRun const* run = GetRunFor(owner))
+                ApplySafetyBubbleProtection(creature, *run);
+
     // Cosmetic toy pickups never join stage objectives, affixes or healing hearts.
     if (!creature ||
         creature->GetEntry() == NPC_EMPTY_HEART_CONTAINER ||
@@ -9219,7 +9389,7 @@ void ManastormMgr::UpdateHeartPickups(uint32 diff)
             {
                 Player* member = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid));
                 if (member && member->IsInWorld() && member->IsAlive() && !member->IsBeingTeleported() &&
-                    member->FindMap() == map && member->IsWithinDistInMap(heart, HEART_PICKUP_DISTANCE))
+                    member->FindMap() == map && member->GetExactDist(heart) <= HEART_PICKUP_DISTANCE)
                 {
                     player = member;
                     break;
@@ -9347,6 +9517,11 @@ void ManastormMgr::Update(uint32 diff)
                         sObjectMgr->GetGameTele(
                             run.GetSegment()
                                 .StartGameTeleId);
+
+                    ApplySafetyBubbleProtection(member, run);
+                    for (Unit* companion : member->m_Controlled)
+                        if (companion && companion->GetOwnerGUID() == member->GetGUID())
+                            ApplySafetyBubbleProtection(companion, run);
 
                     if (run.StartRequested() ||
                         (entrance &&

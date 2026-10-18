@@ -1,4 +1,5 @@
 #include "ManastormAffixEngine.h"
+#include "ManastormModuleConfig.h"
 
 #include "Creature.h"
 #include "Log.h"
@@ -13,6 +14,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <limits>
 #include <string>
 #include <utility>
 #include <vector>
@@ -38,7 +40,6 @@ constexpr uint32 SPELL_FUNGAL_AURA = 93379;
 constexpr uint32 SPELL_BONESTORM_AURA = 93369;
 constexpr float BONESTORM_RUN_SPEED_RATE = 0.85f;
 constexpr uint32 SPELL_OVERWHELMING_COSMETIC_AURA = 93414;
-
 
 bool IsPlayerControlledCreature(Creature const* creature)
 {
@@ -253,8 +254,19 @@ void ManastormAffixEngine::InitializeStage(
 {
     run.ClearStageAffixState();
 
+    if (run.GetCreatureLevel() < ManastormModuleConfig::AffixMinimumLevel())
+        return;
+
     ManastormDataStore const& store =
         ManastormDataStore::Instance();
+
+    uint32 firstUnlockDepth = std::numeric_limits<uint32>::max();
+    for (auto const& pair : store.GetAffixes())
+        if (pair.second.AutomaticSelection &&
+            pair.second.Availability == ManastormAffixAvailabilityKind::ProgressionUnlock)
+            firstUnlockDepth = std::min(firstUnlockDepth, pair.second.UnlockDepth);
+    if (run.GetDepth() <= firstUnlockDepth)
+        return;
 
     ManastormAffixPolicy const* policy =
         store.GetAffixPolicyForDepth(

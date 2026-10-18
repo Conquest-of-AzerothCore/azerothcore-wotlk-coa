@@ -24,6 +24,22 @@ public:
         ManastormSegment const& segment,
         ManastormScalingPoint const& scaling);
 
+    struct CompanionTransfer
+    {
+        uint32 Entry = 0;
+        uint32 Spell = 0;
+        uint32 Properties = 0;
+        uint32 RemainingMs = 0;
+        uint32 CapturedMs = 0;
+        uint32 SummonType = 0;
+        float HealthPct = 100.0f;
+        uint32 Power = 0;
+        uint8 ReactState = 0;
+        bool TemporaryPet = false;
+    };
+
+    std::unordered_map<ObjectGuid::LowType, std::vector<CompanionTransfer>> CompanionTransfers;
+
     uint64 GetRunId() const { return _runId; }
     uint64 GetSeed() const { return _seed; }
 

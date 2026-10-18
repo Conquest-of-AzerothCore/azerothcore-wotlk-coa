@@ -50,6 +50,8 @@ public:
 
     void OpenClientUI(Player* player) const;
 
+    bool IsPlayerInUsableEndlessStage(Player const* player) const;
+
     bool IsPlayerInActiveEndlessStage(
         Player const* player) const;
 

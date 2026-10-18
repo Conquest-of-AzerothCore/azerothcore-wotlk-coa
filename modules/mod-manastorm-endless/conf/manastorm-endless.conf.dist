@@ -3,6 +3,10 @@
 # Enable/disable the Manastorm gameplay module (requires restart).
 Manastorm.Enable = 1
 
+# Automatic affixes require this stage creature level and completion of the first native affix unlock depth.
+# Individual progression affixes still require their matching native unlock/toast; those depths are unchanged.
+Manastorm.AffixMinimumLevel = 50
+
 # Client integration mode (requires restart):
 #   1 = reconstructed 3.3.5 client addon transport (MANASTORM addon prefix)
 #   2 = original Ascension native Manastorm protocol (uses the included CoA native opcode bridge)

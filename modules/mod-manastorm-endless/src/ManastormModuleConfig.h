@@ -13,6 +13,7 @@ namespace ManastormModuleConfig
 {
     void Load(bool reload);
     bool Enabled();
+    uint8 AffixMinimumLevel();
     ManastormClientMode ClientMode();
     bool IsReconstructedClientMode();
     bool IsNativeClientMode();

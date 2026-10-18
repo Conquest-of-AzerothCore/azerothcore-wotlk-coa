@@ -2312,6 +2312,9 @@ bool ManastormRewards::TrySpawnTreasureKeeper(
     run.SetTreasureKeeperGuid(
         keeper->GetGUID());
 
+    keeper->SetImmuneToPC(false);
+    keeper->SetImmuneToNPC(false);
+    keeper->RemoveNpcFlag(UNIT_NPC_FLAG_BANKER);
     keeper->SetFaction(14);
     keeper->SetReactState(
         REACT_AGGRESSIVE);

@@ -1,6 +1,7 @@
 #include "ManastormModuleConfig.h"
 
 #include "Config.h"
+#include <algorithm>
 #include "Log.h"
 
 namespace ManastormModuleConfig
@@ -8,6 +9,7 @@ namespace ManastormModuleConfig
     namespace
     {
         bool enabled = true;
+        uint8 affixMinimumLevel = 50;
         ManastormClientMode clientMode = ManastormClientMode::Ascension;
     }
 
@@ -24,10 +26,16 @@ namespace ManastormModuleConfig
                     "keeping enabled={} clientMode={} for this process.", enabled, uint32(clientMode));
             return;
         }
+        affixMinimumLevel = uint8(std::clamp(sConfigMgr->GetOption<uint32>("Manastorm.AffixMinimumLevel", 50), 1u, 80u));
         enabled = requestedEnabled;
         clientMode = requestedMode == 2 ? ManastormClientMode::Ascension : ManastormClientMode::Reconstructed;
         if (requestedMode != 1 && requestedMode != 2)
             LOG_ERROR("module.manastorm.endless", "Invalid Manastorm.ClientMode={}; using Mode 1.", requestedMode);
+    }
+
+    uint8 AffixMinimumLevel()
+    {
+        return affixMinimumLevel;
     }
 
     bool Enabled()
