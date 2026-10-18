@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Worldforged items upgrade into their dungeon variant before the Zul'Gurub tier (#7934)",
+  "contract": [
+    "ItemAddon.dbc lists every Worldforged variant against its base item (f40). Decayed Breeches 521121 (green, item",
+    "level 10) has a blue dungeon variant 1389233 (item level 60) and the Zul'Gurub variant 1379719 (epic, item level",
+    "64). The first-rank recipe went from the base straight to 1379719. The base now upgrades into the dungeon variant",
+    "(store key 4389233, always open, 5000 Runes of Ascension) and the dungeon variant into 1379719 (the old recipe,",
+    "key 1569, 5000 runes). The base can no longer be bought up to the Zul'Gurub tier directly."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "add_item", "actor": "hero", "item": 521121 },
+    { "action": "add_item", "actor": "hero", "item": 375250, "count": 10000 },
+    { "action": "client_packet", "label": "Try the old direct upgrade to the Zul'Gurub tier", "actor": "hero", "opcode": 1723, "fields": [{"u32": 1569}, {"u32": 1}] },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "DISCRIMINATING: the base cannot skip the dungeon variant", "actor": "hero", "metric": "item_count", "item": 1379719, "equals": 0 },
+    { "action": "assert", "label": "and keeps its item", "actor": "hero", "metric": "item_count", "item": 521121, "equals": 1 },
+    { "action": "client_packet", "label": "Upgrade the base into the dungeon variant", "actor": "hero", "opcode": 1723, "fields": [{"u32": 4389233}, {"u32": 1}] },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "The dungeon variant is sold", "actor": "hero", "metric": "item_count", "item": 1389233, "equals": 1 },
+    { "action": "assert", "label": "in place of the base", "actor": "hero", "metric": "item_count", "item": 521121, "equals": 0 },
+    { "action": "assert", "label": "for 5000 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 5000 },
+    { "action": "client_packet", "label": "Upgrade the dungeon variant to the Zul'Gurub tier", "actor": "hero", "opcode": 1723, "fields": [{"u32": 1569}, {"u32": 1}] },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "The Zul'Gurub tier is sold", "actor": "hero", "metric": "item_count", "item": 1379719, "equals": 1 },
+    { "action": "assert", "label": "in place of the dungeon variant", "actor": "hero", "metric": "item_count", "item": 1389233, "equals": 0 },
+    { "action": "assert", "label": "for another 5000 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 0 }
+  ]
+}
