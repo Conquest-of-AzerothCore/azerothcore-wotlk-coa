@@ -101,9 +101,9 @@ uint32 AttackSpell(uint32 entry)
     case 50075:
         return 801513;
     case 50076:
-        return 801516;
+        return 800609;
     case 50323:
-        return 822074;
+        return 803406;
     case 500484:
         return 801513;
     default:
@@ -564,6 +564,9 @@ class npc_ascension_necromancer : public ScriptedAI
         case 50133:
         case 50303:
             Cast(me, target, 801518);
+            break;
+        case 50076:
+            Cast(me, target, 801516);
             break;
         case 50323:
             Cast(me, target, 822074);

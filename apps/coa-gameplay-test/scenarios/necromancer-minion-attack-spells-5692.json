@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Crypt Fiends attack with Frozen Barbs and Skeletal Archers with Skeletal Arrow (#5692)",
+  "contract": "Live CoA combat logs (C:/CoA/SUB/old-logs, 160 logs, 2026-06 to 2026-09) show Crypt Fiend 50323 attacking with SPELL_CAST_START 803406 'Frozen Barbs' ('Summons several crypt scarabs to attack the caster's target', 3 s cast, SpellVisual 989936 whose missile is 'Missile: Crypt Scarab') and Skeletal Archer 50076 attacking with 800609 'Skeletal Arrow' (27238 casts, bow weapon damage, SpellVisual 989928). 801516 'Command: Skeletal Archer' never appears in those logs, and 822074 'Frost-Congealed Barbs' (Rank 'Command: Crypt Fiends') starts only when every Crypt Fiend fires it at the same moment. AscensionNecromancerSummons.cpp AttackSpell(entry) fed the periodic 3 s attack loop with the Command spells 822074 and 801516, so the minions showed frost bolts and shadow bolts instead of scarabs and arrows. After one Command: Undead sets their victim, the fixed minions keep casting 803406 and 800609 on their own, and the Command spells fire only for the Command itself.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "n", "entry": 36, "level": 60, "health": 1000000, "distance": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the Life Force aura settle", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: Command accuracy is independent of the minion attack loop",
+      "actor": "n", "metric": "spell_hit_chance", "min": 100 },
+    { "action": "learn", "actor": "n", "spell": 504859 },
+    { "action": "learn", "actor": "n", "spell": 805040 },
+    { "action": "learn", "actor": "n", "spell": 504868 },
+    { "action": "cast", "label": "Raise: Crypt Fiend", "actor": "n", "spell": 504859 },
+    {
+      "action": "assert", "label": "SETUP: Crypt Fiend raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50323, "min": 1, "within_ms": 8000
+    },
+    { "action": "cast", "label": "Animate: Skeletal Archer", "actor": "n", "spell": 805040 },
+    {
+      "action": "assert", "label": "SETUP: three Skeletal Archers animated", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50076, "equals": 3, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let the minions take formation", "ms": 1500 },
+    {
+      "action": "assert", "label": "CONTROL: no Frozen Barbs before a victim is set", "actor": "n",
+      "metric": "spell_go_count", "spell": 803406, "entry": 50323, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: no Skeletal Arrow before a victim is set", "actor": "n",
+      "metric": "spell_go_count", "spell": 800609, "entry": 50076, "equals": 0
+    },
+    { "action": "cast", "label": "Command: Undead on the golem", "actor": "n", "spell": 504868, "target": "golem" },
+    {
+      "action": "assert", "label": "SETUP: the Command fires the Crypt Fiend command barbs once", "actor": "n",
+      "metric": "spell_go_count", "spell": 822074, "entry": 50323, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "snapshot", "actor": "n",
+      "metric": "spell_go_count", "spell": 822074, "entry": 50323, "save_as": "fiend_command"
+    },
+    {
+      "action": "snapshot", "actor": "n",
+      "metric": "spell_go_count", "spell": 801516, "entry": 50076, "save_as": "archer_command"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Crypt Fiend attacks with Frozen Barbs on its own",
+      "actor": "n", "metric": "spell_go_count", "spell": 803406, "entry": 50323, "min": 1, "within_ms": 9000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Skeletal Archers attack with Skeletal Arrow on their own",
+      "actor": "n", "metric": "spell_go_count", "spell": 800609, "entry": 50076, "min": 1, "within_ms": 9000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the periodic loop no longer repeats the Crypt Fiend command spell",
+      "actor": "n", "metric": "spell_go_count", "spell": 822074, "entry": 50323,
+      "relative_to": "fiend_command", "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the periodic loop no longer repeats the Skeletal Archer command spell",
+      "actor": "n", "metric": "spell_go_count", "spell": 801516, "entry": 50076,
+      "relative_to": "archer_command", "equals": 0
+    }
+  ]
+}
