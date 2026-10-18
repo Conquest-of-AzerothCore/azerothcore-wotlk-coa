@@ -30,7 +30,7 @@
 #include "GameTime.h"
 #include "ScriptedCreature.h"
 #include "SpellAuraEffects.h"
-#include "TaskScheduler.h"
+#include "TemporarySummon.h"
 #include "../../../src/server/scripts/EasternKingdoms/ZulGurub/zulgurub.h"
 #include "zg_coa_common.h"
 
@@ -93,7 +93,6 @@ namespace
             BossAI::JustEngagedWith(who);
             Talk(SAY_AGGRO);
             me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
-            _scheduler.CancelAll();
 
             events.ScheduleEvent(EVENT_TELEPORT, 5s);
             events.ScheduleEvent(EVENT_HEX, 8s);
@@ -137,6 +136,15 @@ namespace
             me->CastCustomSpell(me, SPELL_FRIENDS_ON_THE_OTHER_SIDE, nullptr, &bonus, nullptr, true);
         }
 
+        void TrackShades(Unit* summoner)
+        {
+            std::list<Creature*> shades;
+            summoner->GetCreatureListWithEntryInGrid(shades, NPC_SHADE_OF_JINDO, 5.0f);
+            for (Creature* shade : shades)
+                if (shade->IsSummon() && shade->ToTempSummon()->GetSummonerGUID() == summoner->GetGUID())
+                    _shadeGuids.insert(shade->GetGUID());
+        }
+
         void OnSpellCast(SpellInfo const* spell) override
         {
             BossAI::OnSpellCast(spell);
@@ -149,6 +157,7 @@ namespace
                         me->AddAura(SPELL_DELUSIONS_VISION, target);
                         me->CastSpell(target, SPELL_DELUSIONS_DOT, true);
                         target->CastSpell(target, SPELL_SUMMON_SHADE_OF_JINDO, true);
+                        TrackShades(target);
                         _delusions[target->GetGUID()] = GameTime::GetGameTimeMS();
                     }
                     break;
@@ -194,25 +203,32 @@ namespace
             }
         }
 
+        void DespawnShades()
+        {
+            for (ObjectGuid const& guid : _shadeGuids)
+                if (Creature* shade = ObjectAccessor::GetCreature(*me, guid))
+                    shade->DespawnOrUnsummon();
+            _shadeGuids.clear();
+        }
+
         void EnterEvadeMode(EvadeReason why) override
         {
             if (CreatureAI::_EnterEvadeMode(why))
             {
+                DespawnShades();
                 Reset();
                 me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_DANCE);
-                _scheduler.Schedule(4s, [this](TaskContext)
+                Creature* jindo = me;
+                me->m_Events.AddEventAtOffset([jindo]()
                 {
-                    me->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
-                    me->AddUnitState(UNIT_STATE_EVADE);
-                    me->GetMotionMaster()->MoveTargetedHome();
-                });
+                    jindo->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_NONE);
+                    jindo->GetMotionMaster()->MoveTargetedHome();
+                }, 4s);
             }
         }
 
         void UpdateAI(uint32 diff) override
         {
-            _scheduler.Update(diff);
-
             if (!UpdateVictim())
                 return;
 
@@ -271,10 +287,10 @@ namespace
         }
 
     private:
-        TaskScheduler _scheduler;
         ObjectGuid _target;
         std::map<ObjectGuid, Milliseconds> _delusions;
         uint8 _shades = 0;
+        GuidSet _shadeGuids;
     };
 }
 

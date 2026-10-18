@@ -1,0 +1,125 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Jin'do the Hexxer resets after a wipe and takes his Shades with him (#5800)",
+  "contract": [
+    "An evading boss walks home, leaves evade and can be pulled again, and the adds of the failed attempt leave with",
+    "it (#5800). Jin'do (11380) dances for 4 s after the raid wipes, then returns to his home position out of combat.",
+    "The Shade of Jin'do (14986) that Delusions of Jin'do makes the cursed player summon despawns with that reset",
+    "instead of staying invisible and hostile. The runner holds every step while a fixture evades, so a Jin'do that",
+    "never leaves evade times the case out. Delusions moves the cursed player to phase 3, which in the world still",
+    "shares phase 1 with Jin'do; the fixture lives in the lane's own phase, so here Jin'do already loses the hero",
+    "and resets when the Shade appears, through the same evade as after a wipe."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 309,
+    "x": -11515.8,
+    "y": -1275.48,
+    "z": 79.6621,
+    "o": 3.15905,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 11380,
+      "level": 63,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Shade of Jin'do exists before the pull",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 14986,
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "label": "Engage Jin'do",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Jin'do fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Delusions of Jin'do curses the hero, who summons a Shade of Jin'do with it",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2118512,
+      "equals": 1,
+      "within_ms": 25000
+    },
+    {
+      "action": "die",
+      "label": "The raid wipes",
+      "actor": "hero"
+    },
+    {
+      "action": "wait",
+      "label": "Let Jin'do dance, walk home and leave evade",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Jin'do left evade and is out of combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Jin'do walked back to his home position",
+      "actor": "boss",
+      "metric": "point_distance_2d",
+      "x": -11511.8,
+      "y": -1275.48,
+      "max": 5
+    },
+    {
+      "action": "assert",
+      "label": "The Shade of Jin'do despawned with the reset",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 14986,
+      "equals": 0
+    }
+  ]
+}
