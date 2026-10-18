@@ -193,7 +193,7 @@ class aura_ascension_tinker_event : public AuraScript
                 break;
             case 560785: PetCast(player,nullptr,808008); break;
             case 705815: Grant(player,537247); break;
-            case 680975: Grant(player,681245); Refresh(player); break;
+            case 680975: player->RestoreSpellCharge(504527); Grant(player,681245); Refresh(player); break;
             case 573247: Cast(player,target,653247); break;
             case 806627: Cast(player,player,806628); break;
             case 503552: Grant(player,503553); break;
