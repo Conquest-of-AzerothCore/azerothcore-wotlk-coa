@@ -27,8 +27,9 @@
     "Mana is refilled to 1000 for each cast to isolate stacking from resource exhaustion; native level-60",
     "Necromancer base mana 1373 makes the highest tested cost Greater Foul 69% (947). All tested",
     "applications are normal casts to grouped players. Stamina, spell power, Frost resistance and",
-    "live aura amounts/presence are measured. This does not establish an exclusion between Foul and Grim",
-    "Mandates, nor client icon rendering or bot rotation behavior."
+    "live aura amounts/presence are measured. Foul and Grim Mandates share one Mandate per Necromancer",
+    "on each target (#4136), so the second Necromancer's Greater Grim replaces its own Greater Foul. This",
+    "does not establish client icon rendering or bot rotation behavior."
   ],
   "timeout_ms": 240000,
   "location": {
@@ -1489,22 +1490,21 @@
     },
     {
       "action": "assert",
-      "label": "foul: independent Greater buffs can coexist",
+      "label": "foul: the same Necromancer's Greater Grim replaced its Greater Foul",
       "actor": "ally",
       "metric": "aura",
       "spell": 680286,
-      "equals": 1,
-      "within_ms": 3000,
-      "caster": "second"
+      "equals": 0,
+      "within_ms": 3000
     },
     {
       "action": "assert",
-      "label": "foul: another buff pair does not remove or duplicate this effect",
+      "label": "foul: the replaced Mandate leaves no stamina behind",
       "actor": "ally",
       "metric": "stat",
       "stat": 2,
       "relative_to": "foul_before",
-      "equals": 54
+      "equals": 0
     },
     {
       "action": "assert",
