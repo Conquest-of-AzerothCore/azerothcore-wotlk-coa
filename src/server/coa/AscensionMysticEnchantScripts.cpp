@@ -13,6 +13,7 @@
 #include "GridNotifiers.h"
 #include "GameTime.h"
 #include "GridNotifiersImpl.h"
+#include "Group.h"
 #include "ObjectAccessor.h"
 #include "Pet.h"
 #include "Player.h"
@@ -207,7 +208,7 @@ private:
         if (!damage || !player || !player->HasAura(SPELL_FEEDING_THE_ABYSS))
             return;
         float const chance = FEEDING_THE_ABYSS_BASE_CHANCE +
-            player->GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + SPELL_SCHOOL_SHADOW);
+            player->GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + uint32(SPELL_SCHOOL_SHADOW));
         if (!roll_chance_f(chance))
             return;
         AbyssStored[player->GetGUID()] += damage;
@@ -348,8 +349,8 @@ class spell_ascension_mystic_renewed_through_absolution : public AuraScript
 };
 
 // Atonement: "Dealing damage with Smite or Holy Fire heals a nearby ally ... Dealing damage with Penance heals three
-// nearby allies ... Casting any of these spells grants Atonement." The heal spells pick their own targets (one and
-// three within 30 yards). Rules: direct damage of Smite / Holy Fire, damage of Penance.
+// nearby allies ... Casting any of these spells grants Atonement." The heals' targets are chosen by
+// spell_ascension_mystic_atonement_heal. Rules: direct damage of Smite / Holy Fire, damage of Penance.
 class spell_ascension_mystic_atonement : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_atonement);
@@ -367,6 +368,61 @@ class spell_ascension_mystic_atonement : public AuraScript
     {
         OnEffectProc += AuraEffectProcFn(spell_ascension_mystic_atonement::HandleProc, EFFECT_0,
             SPELL_AURA_PROC_TRIGGER_SPELL);
+    }
+};
+
+// Atonement's heals go to the lowest-health allies, like the Cataclysm / Mists of Pandaria talent the enchant copies
+// ("heal a nearby low health friendly target"): one for Smite and Holy Fire, three for Penance, among the caster's
+// party or raid and their pets within the spell's radius of the caster. The heal spells' own area targeting cannot
+// express that (Penance's uses an entry-checked area that finds no one without conditions), so the list is replaced.
+class spell_ascension_mystic_atonement_heal : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_mystic_atonement_heal);
+
+    void SelectLowest(std::list<WorldObject*>& targets)
+    {
+        targets.clear();
+        Player* caster = GetCaster() ? GetCaster()->ToPlayer() : nullptr;
+        if (!caster)
+            return;
+        float const radius = GetSpellInfo()->Effects[EFFECT_0].CalcRadius(caster);
+        std::list<Unit*> allies;
+        auto consider = [&](Unit* unit)
+        {
+            if (unit && unit->IsAlive() && unit->IsInMap(caster) && caster->IsWithinDistInMap(unit, radius) &&
+                caster->IsValidAssistTarget(unit))
+                allies.push_back(unit);
+        };
+        auto considerWithPet = [&](Player* player)
+        {
+            consider(player);
+            consider(player->GetPet());
+        };
+        if (Group* group = caster->GetGroup())
+        {
+            for (GroupReference* ref = group->GetFirstMember(); ref; ref = ref->next())
+                if (Player* member = ref->GetSource())
+                    considerWithPet(member);
+        }
+        else
+            considerWithPet(caster);
+
+        allies.sort(Acore::HealthPctOrderPred());
+        uint32 const count = std::max<uint32>(GetSpellInfo()->MaxAffectedTargets, 1);
+        for (Unit* ally : allies)
+        {
+            if (targets.size() >= count)
+                break;
+            targets.push_back(ally);
+        }
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ascension_mystic_atonement_heal::SelectLowest,
+            EFFECT_ALL, TARGET_UNIT_DEST_AREA_ALLY);
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ascension_mystic_atonement_heal::SelectLowest,
+            EFFECT_ALL, TARGET_UNIT_DEST_AREA_ENTRY);
     }
 };
 
@@ -593,6 +649,7 @@ void AddSC_AscensionMysticEnchantScripts()
     RegisterSpellScript(spell_ascension_mystic_water_nova);
     RegisterSpellScript(spell_ascension_mystic_renewed_through_absolution);
     RegisterSpellScript(spell_ascension_mystic_atonement);
+    RegisterSpellScript(spell_ascension_mystic_atonement_heal);
     RegisterSpellScript(spell_ascension_mystic_fury_of_the_wind);
     RegisterSpellScript(spell_ascension_mystic_elunes_fury);
     RegisterSpellScript(spell_ascension_mystic_lightning_fangs);

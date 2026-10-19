@@ -2,13 +2,15 @@
 -- decides when each fires is in rev_20261018_90 (coa_mystic_enchant_proc); these bind the action scripts and give the
 -- helper auras the proc data their tooltips describe.
 DELETE FROM `spell_script_names` WHERE `ScriptName` IN ('spell_ascension_mystic_renewed_through_absolution',
-    'spell_ascension_mystic_atonement', 'spell_ascension_mystic_fury_of_the_wind', 'spell_ascension_mystic_elunes_fury',
+    'spell_ascension_mystic_atonement', 'spell_ascension_mystic_atonement_heal', 'spell_ascension_mystic_fury_of_the_wind', 'spell_ascension_mystic_elunes_fury',
     'spell_ascension_mystic_lightning_fangs', 'spell_ascension_mystic_demonic_whirl', 'spell_ascension_mystic_vampiric_death',
     'spell_ascension_mystic_savage_frenzy', 'spell_ascension_mystic_shattered_renewal',
     'spell_ascension_mystic_arcane_conduit_trigger', 'spell_ascension_mystic_water_nova');
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (1571422, 'spell_ascension_mystic_renewed_through_absolution'),
 (1567777, 'spell_ascension_mystic_atonement'),
+(1567779, 'spell_ascension_mystic_atonement_heal'),
+(1567780, 'spell_ascension_mystic_atonement_heal'),
 (1590417, 'spell_ascension_mystic_fury_of_the_wind'),
 (1583363, 'spell_ascension_mystic_elunes_fury'),
 (1180160, 'spell_ascension_mystic_lightning_fangs'),
