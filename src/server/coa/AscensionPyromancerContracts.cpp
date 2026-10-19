@@ -13,7 +13,11 @@ namespace AscensionPyromancer
 {
 void ApplyContracts(SpellInfo* info)
 {
-    if (!info || info->SpellFamilyName != 30)
+    if (!info)
+        return;
+    if ((info->Id == 680369 || info->Id == 280586) && info->Effects[EFFECT_1].IsAura(SPELL_AURA_MOD_ROOT))
+        info->AttributesCu &= ~SPELL_ATTR0_CU_NEGATIVE;
+    if (info->SpellFamilyName != 30)
         return;
     uint32 id = info->Id;
     auto dummy = [info](uint8 slot)
