@@ -100,6 +100,7 @@ void AddAscensionTamingScripts();
 void AddAscensionBarnabusWhistleScripts();
 void AddAscensionPepeVanityScripts();
 void AddAscensionRaidMarkerScripts();
+void AddCoAContainerTriggerScripts();
 void AddAscensionAchievementConditionScripts();
 void AddAscensionAccountInfoScripts();
 void AddCoAGameplayTestScripts();
@@ -698,6 +699,7 @@ void AddCoAScripts()
     AddAscensionBarnabusWhistleScripts();
     AddAscensionPepeVanityScripts();
     AddAscensionRaidMarkerScripts();
+    AddCoAContainerTriggerScripts();
     AddAscensionAchievementConditionScripts();
     AddAscensionAccountInfoScripts();
     AddCoAGameplayTestScripts();
