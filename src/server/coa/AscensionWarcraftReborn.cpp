@@ -87,6 +87,13 @@ std::vector<std::pair<uint32, uint32>> LoadTwins(bool ranked)
         [](std::uint32_t spellId) { return sSpellMgr->GetFirstSpellInChain(spellId); }, &LayoutOf);
 }
 
+void ApplyStockProficiencies()
+{
+    for (SkillLineAbilityEntry const* ability : sSkillLineAbilityStore)
+        if (uint32 const classMask = ProficiencyClassMask(ability->Spell, ability->ClassMask); classMask != ability->ClassMask)
+            const_cast<SkillLineAbilityEntry*>(ability)->ClassMask = classMask;
+}
+
 std::vector<std::vector<uint32>> LoadRankChains()
 {
     CurrentRealm = AscensionFreepick::ReadRealm();
@@ -99,6 +106,7 @@ std::vector<std::vector<uint32>> LoadRankChains()
         RebornRealm = false;
         return {};
     }
+    ApplyStockProficiencies();
     return RankChains(Loaded);
 }
 
@@ -189,6 +197,22 @@ void LearnClassSkills(Player* player)
         SkillLineEntry const* skill = sSkillLineStore.LookupEntry(skillId);
         if (skill && skill->categoryId == SKILL_CATEGORY_CLASS && !player->HasSkill(skillId))
             player->LearnDefaultSkill(skillId, 0);
+    }
+}
+
+void LearnOutfitSkills(Player* player)
+{
+    CharStartOutfitEntry const* outfit = GetCharStartOutfitEntry(player->getRace(), player->getClass(), player->getGender());
+    if (!outfit)
+        return;
+    for (int32 itemId : outfit->ItemId)
+    {
+        ItemTemplate const* proto = itemId > 0 ? sObjectMgr->GetItemTemplate(uint32(itemId)) : nullptr;
+        if (!proto)
+            continue;
+        uint32 const skill = proto->GetSkill();
+        if (skill && !player->HasSkill(skill) && StockClassUses(player->getClass(), proto->Class, proto->SubClass))
+            player->LearnDefaultSkill(skill, 0);
     }
 }
 
@@ -305,6 +329,7 @@ public:
         if (!IsRebornPlayer(player))
             return;
         LearnClassSkills(player);
+        LearnOutfitSkills(player);
         LearnMissing(player, StartingSpells(Loaded, CurrentRealm, player->getClass(), StartLevel(player)));
         LearnMissing(player, AutomaticSpells(Loaded, CurrentRealm, player->getClass(), player->GetLevel()));
         LearnGrantedSpells(player);

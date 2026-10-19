@@ -29,6 +29,7 @@ MAIN = r"""
 #include "DBCStores.h"
 #include <algorithm>
 #include <cstdio>
+#include <map>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -74,7 +75,7 @@ TrainerSpell Stock(std::uint32_t spellId, std::uint32_t cost, std::uint32_t leve
     return row;
 }
 
-constexpr std::uint32_t WARRIOR = 1, PALADIN = 2, HUNTER = 3, PRIEST = 5, MAGE = 8, WARLOCK = 9, HERO = 10;
+constexpr std::uint32_t WARRIOR = 1, PALADIN = 2, HUNTER = 3, ROGUE = 4, PRIEST = 5, MAGE = 8, WARLOCK = 9, HERO = 10;
 constexpr std::uint32_t RANGER = 12;
 constexpr std::uint32_t IMPROVED_SHADOW_BOLT = 13354, BANE = 13359, UNBREAKABLE_WILL = 12678;
 constexpr std::uint32_t SHADOW_BOLT_ENTRY = 18581;
@@ -251,6 +252,35 @@ int main(int, char** argv)
     Check(TrainerSpells(data, freepick, PRIEST, { Stock(591, 100, 6), Stock(48123, 5000, 79) }, exists, added)
             .size() == 2,
         "on a free-pick realm the rules add nothing to a trainer");
+
+    ClientDBC abilities;
+    std::map<std::uint32_t, std::uint32_t> proficiencyMasks;
+    if (abilities.Load(GetClientDBCPath("SkillLineAbility.dbc"), 5))
+        for (std::uint32_t index = 0; index < abilities.GetRecordCount(); ++index)
+        {
+            ClientDBC::Record const record = abilities.GetRecord(index);
+            std::uint32_t const spell = record.GetUInt32(2);
+            if (spell == 1180 || spell == 201 || spell == 9077 || spell == 750)
+                proficiencyMasks[spell] = record.GetUInt32(4);
+        }
+    auto const allows = [&proficiencyMasks](std::uint32_t spell, std::uint32_t classId, bool stock)
+    {
+        std::uint32_t const mask = stock ? ProficiencyClassMask(spell, proficiencyMasks[spell]) : proficiencyMasks[spell];
+        return !mask || (mask & (1u << (classId - 1)));
+    };
+    Check(proficiencyMasks.size() == 4 && !allows(1180, ROGUE, false) && !allows(201, WARLOCK, false),
+        "the client's Daggers and One-Handed Swords proficiency rows leave out rogues and warlocks");
+    Check(allows(1180, ROGUE, true) && allows(201, WARLOCK, true) && allows(9077, ROGUE, true) &&
+            !allows(201, PRIEST, true) && !allows(750, MAGE, true) && allows(750, PALADIN, true),
+        "on Warcraft Reborn the proficiency rows follow the stock classes: rogue Daggers and Leather, warlock "
+        "One-Handed Swords, paladin Plate, but no priest swords or mage Plate");
+    Check(allows(1180, HERO, true) && allows(201, HERO, true) &&
+            ProficiencyClassMask(133, 0x40) == 0x40 && ProficiencyClassMask(750, 0) == (~0x5DFu | 0x3u),
+        "the stock class rules leave other classes and other spells as the client has them");
+    Check(StockClassUses(ROGUE, ITEM_CLASS_WEAPON_ID, 7) && StockClassUses(HUNTER, ITEM_CLASS_WEAPON_ID, 2) &&
+            StockClassUses(WARRIOR, ITEM_CLASS_WEAPON_ID, 16) && !StockClassUses(ROGUE, ITEM_CLASS_ARMOR_ID, 3) &&
+            !StockClassUses(MAGE, ITEM_CLASS_WEAPON_ID, 0) && !StockClassUses(HERO, ITEM_CLASS_WEAPON_ID, 7),
+        "a starting rogue sword, hunter bow and warrior throwing axe are usable, rogue mail and a mage axe are not");
 
     std::vector<std::pair<std::uint32_t, std::uint32_t>> const twins = SpellTwins(spellCount,
         [&layouts](std::uint32_t spellId) -> std::optional<SpellLayout>

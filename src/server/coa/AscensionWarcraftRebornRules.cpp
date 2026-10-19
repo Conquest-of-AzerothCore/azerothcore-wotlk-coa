@@ -62,6 +62,66 @@ std::vector<std::uint32_t> FirstRanks(Data const& data, Realm const& realm, std:
     }
     return spells;
 }
+
+constexpr std::uint32_t WARRIOR = 0x1;
+constexpr std::uint32_t PALADIN = 0x2;
+constexpr std::uint32_t HUNTER = 0x4;
+constexpr std::uint32_t ROGUE = 0x8;
+constexpr std::uint32_t PRIEST = 0x10;
+constexpr std::uint32_t SHAMAN = 0x40;
+constexpr std::uint32_t MAGE = 0x80;
+constexpr std::uint32_t WARLOCK = 0x100;
+constexpr std::uint32_t DRUID = 0x400;
+constexpr std::uint32_t ORIGINAL_CLASSES = WARRIOR | PALADIN | HUNTER | ROGUE | PRIEST | SHAMAN | MAGE | WARLOCK | DRUID;
+constexpr std::uint32_t NO_ITEM = 0xFFFFFFFF;
+
+struct StockProficiency
+{
+    std::uint32_t Spell;
+    std::uint32_t ItemClass;
+    std::uint32_t ItemSubClass;
+    std::uint32_t Classes;
+};
+
+constexpr std::array<StockProficiency, 21> STOCK_PROFICIENCIES = {{
+    { 196, ITEM_CLASS_WEAPON_ID, 0, WARRIOR | PALADIN | HUNTER | ROGUE | SHAMAN },
+    { 197, ITEM_CLASS_WEAPON_ID, 1, WARRIOR | PALADIN | HUNTER | SHAMAN },
+    { 264, ITEM_CLASS_WEAPON_ID, 2, WARRIOR | HUNTER | ROGUE },
+    { 266, ITEM_CLASS_WEAPON_ID, 3, WARRIOR | HUNTER | ROGUE },
+    { 198, ITEM_CLASS_WEAPON_ID, 4, WARRIOR | PALADIN | ROGUE | PRIEST | SHAMAN | DRUID },
+    { 199, ITEM_CLASS_WEAPON_ID, 5, WARRIOR | PALADIN | SHAMAN | DRUID },
+    { 200, ITEM_CLASS_WEAPON_ID, 6, WARRIOR | PALADIN | HUNTER | DRUID },
+    { 201, ITEM_CLASS_WEAPON_ID, 7, WARRIOR | PALADIN | HUNTER | ROGUE | MAGE | WARLOCK },
+    { 202, ITEM_CLASS_WEAPON_ID, 8, WARRIOR | PALADIN | HUNTER },
+    { 227, ITEM_CLASS_WEAPON_ID, 10, WARRIOR | HUNTER | PRIEST | SHAMAN | MAGE | WARLOCK | DRUID },
+    { 15590, ITEM_CLASS_WEAPON_ID, 13, WARRIOR | HUNTER | ROGUE | SHAMAN | DRUID },
+    { 1180, ITEM_CLASS_WEAPON_ID, 15, WARRIOR | HUNTER | ROGUE | PRIEST | SHAMAN | MAGE | WARLOCK | DRUID },
+    { 2567, ITEM_CLASS_WEAPON_ID, 16, WARRIOR | HUNTER | ROGUE },
+    { 5011, ITEM_CLASS_WEAPON_ID, 18, WARRIOR | HUNTER | ROGUE },
+    { 5009, ITEM_CLASS_WEAPON_ID, 19, PRIEST | MAGE | WARLOCK },
+    { 674, NO_ITEM, NO_ITEM, WARRIOR | HUNTER | ROGUE },
+    { 9078, ITEM_CLASS_ARMOR_ID, 1, ORIGINAL_CLASSES },
+    { 9077, ITEM_CLASS_ARMOR_ID, 2, WARRIOR | PALADIN | HUNTER | ROGUE | SHAMAN | DRUID },
+    { 8737, ITEM_CLASS_ARMOR_ID, 3, WARRIOR | PALADIN | HUNTER | SHAMAN },
+    { 750, ITEM_CLASS_ARMOR_ID, 4, WARRIOR | PALADIN },
+    { 9116, ITEM_CLASS_ARMOR_ID, 6, WARRIOR | PALADIN | SHAMAN },
+}};
+}
+
+std::uint32_t ProficiencyClassMask(std::uint32_t spellId, std::uint32_t classMask)
+{
+    for (StockProficiency const& proficiency : STOCK_PROFICIENCIES)
+        if (proficiency.Spell == spellId)
+            return ((classMask ? classMask : ~0u) & ~ORIGINAL_CLASSES) | proficiency.Classes;
+    return classMask;
+}
+
+bool StockClassUses(std::uint32_t classId, std::uint32_t itemClass, std::uint32_t itemSubClass)
+{
+    for (StockProficiency const& proficiency : STOCK_PROFICIENCIES)
+        if (proficiency.ItemClass == itemClass && proficiency.ItemSubClass == itemSubClass)
+            return classId && (proficiency.Classes & (1u << (classId - 1)));
+    return false;
 }
 
 std::vector<Grant> const& Grants()
