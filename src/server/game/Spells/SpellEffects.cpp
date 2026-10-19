@@ -574,9 +574,9 @@ void Spell::EffectAscensionModifyAuraDuration(SpellEffIndex effIndex)
     }
 }
 
-// Ascension effect 171: change the charges of the MiscValue aura on the target by the effect value (Backdraft and
-// Fingers of Frost "consume charge" -1, Static Shock and Dynamic Charge add Lightning Shield charges). An aura brought
-// to no charges is removed, as a spent charge aura is.
+// Ascension effect 171: change the charges of the MiscValue aura on the target by the base points, without the die
+// roll (Baleful Hammer's tooltip adds m1-1 charges; Backdraft and Fingers of Frost "consume charge" -1, Static Shock
+// adds Lightning Shield charges). An aura brought to no charges is removed, as a spent charge aura is.
 void Spell::EffectAscensionModifyAuraCharges(SpellEffIndex effIndex)
 {
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
@@ -584,7 +584,7 @@ void Spell::EffectAscensionModifyAuraCharges(SpellEffIndex effIndex)
 
     Unit* target = unitTarget ? unitTarget : m_caster;
     SpellEffectInfo const& effect = m_spellInfo->Effects[effIndex];
-    if (!target || !effect.MiscValue || !damage)
+    if (!target || !effect.MiscValue || !effect.BasePoints)
         return;
 
     Aura* aura = target->GetAuraOfRankedSpell(effect.MiscValue, m_caster->GetGUID());
@@ -593,7 +593,7 @@ void Spell::EffectAscensionModifyAuraCharges(SpellEffIndex effIndex)
     if (!aura)
         return;
 
-    int32 const charges = int32(aura->GetCharges()) + damage;
+    int32 const charges = int32(aura->GetCharges()) + effect.BasePoints;
     if (charges <= 0)
         aura->Remove(AURA_REMOVE_BY_EXPIRE);
     else
