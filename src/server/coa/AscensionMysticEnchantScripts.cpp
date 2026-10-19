@@ -89,6 +89,9 @@ enum MysticEnchantScriptSpells : uint32
     SPELL_BLESSING_DIVINES                 = 1571467,
     SPELL_BLESSING_RADIANCE                = 1571470,
     SPELL_BLESSING_MENDING                 = 1571471,
+    // Cauterize
+    SPELL_CAUTERIZE_BURN                   = 1181411,
+    SPELL_CAUTERIZE_SLOW_CLEAR             = 1181413,
     // Heavy Thunder
     SPELL_HEAVY_THUNDER                    = 1181080,
     SPELL_HEAVY_THUNDER_COUNTER            = 1181081,
@@ -110,6 +113,9 @@ constexpr int32 ELUNES_FURY_MAX_MS = 60000;
 constexpr int32 SAVAGE_FRENZY_EXTENSION_MS = 6000;
 constexpr float FURY_OF_THE_WIND_RANGE = 8.0f;
 constexpr Milliseconds SHATTERED_RENEWAL_COOLDOWN = 1s;
+constexpr Milliseconds CAUTERIZE_COOLDOWN = 1min;
+constexpr uint32 CAUTERIZE_HEALTH_PCT = 35;
+constexpr uint32 SHIELD_MASTERS_RESOLVE_HEALTH_PCT = 50;
 
 bool IsPriestSpell(SpellInfo const* spell, uint32 flag0, uint32 flag1)
 {
@@ -678,6 +684,72 @@ class spell_ascension_mystic_blessing_of_the_divines : public AuraScript
     }
 };
 
+// The two enchants below carry a school absorb of 1 point and no script: the first hit drained it and removed the whole
+// enchant aura with it (proc effects included). Their absorbs are conditional, so the amount is unlimited (-1) and the
+// script decides each hit.
+
+// Shield Master's Resolve: "damage taken while you are below 50% health is reduced by 10%" (effect 1 carries the 10).
+class spell_ascension_mystic_shield_masters_resolve : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_mystic_shield_masters_resolve);
+
+    void CalcAmount(AuraEffect const*, int32& amount, bool& /*canBeRecalculated*/)
+    {
+        amount = -1;
+    }
+
+    void Absorb(AuraEffect*, DamageInfo& dmgInfo, uint32& absorbAmount)
+    {
+        AuraEffect const* reduction = GetEffect(EFFECT_1);
+        absorbAmount = reduction && GetTarget()->HealthBelowPct(SHIELD_MASTERS_RESOLVE_HEALTH_PCT) ?
+            CalculatePct(dmgInfo.GetDamage(), reduction->GetAmount()) : 0;
+    }
+
+    void Register() override
+    {
+        DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_ascension_mystic_shield_masters_resolve::CalcAmount, EFFECT_2,
+            SPELL_AURA_SCHOOL_ABSORB);
+        OnEffectAbsorb += AuraEffectAbsorbFn(spell_ascension_mystic_shield_masters_resolve::Absorb, EFFECT_2);
+    }
+};
+
+// Cauterize: "An attack which would otherwise kill you will instead bring you to 35% maximum health. When this happens
+// all movement speed impairing effects are removed and you gain 50% movement speed for 6 sec, but burn, taking 3% health
+// as Fire damage every second. This effect can only occur once every minute." 1181413 clears the slows, 1181411 is the
+// speed and the burn.
+class spell_ascension_mystic_cauterize : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_mystic_cauterize);
+
+    TimePoint _ready{};
+
+    void CalcAmount(AuraEffect const*, int32& amount, bool& /*canBeRecalculated*/)
+    {
+        amount = -1;
+    }
+
+    void Absorb(AuraEffect*, DamageInfo& dmgInfo, uint32& absorbAmount)
+    {
+        absorbAmount = 0;
+        Unit* target = GetTarget();
+        TimePoint const now = GameTime::Now();
+        if (dmgInfo.GetDamage() < target->GetHealth() || now < _ready)
+            return;
+        _ready = now + CAUTERIZE_COOLDOWN;
+        absorbAmount = dmgInfo.GetDamage();
+        target->SetHealth(std::max<uint32>(1, target->CountPctFromMaxHealth(CAUTERIZE_HEALTH_PCT)));
+        target->CastSpell(target, SPELL_CAUTERIZE_SLOW_CLEAR, true);
+        target->CastSpell(target, SPELL_CAUTERIZE_BURN, true);
+    }
+
+    void Register() override
+    {
+        DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_ascension_mystic_cauterize::CalcAmount, EFFECT_0,
+            SPELL_AURA_SCHOOL_ABSORB);
+        OnEffectAbsorb += AuraEffectAbsorbFn(spell_ascension_mystic_cauterize::Absorb, EFFECT_0);
+    }
+};
+
 // Heavy Thunder: "Hitting single target with Thunder Clap will cause next Thunder Clap gain 40% increase critical strike
 // chance" (and costs no rage). Every Thunder Clap hit stacks the 100 ms counter (rule: damage of Thunder Clap); the
 // cast's delayed trigger (rule: cast of Thunder Clap) checks it after its delay and empowers the next Thunder Clap
@@ -763,4 +835,6 @@ void AddSC_AscensionMysticEnchantScripts()
     RegisterSpellScript(spell_ascension_mystic_arcane_conduit_trigger);
     RegisterSpellScript(spell_ascension_mystic_heavy_thunder_check);
     RegisterSpellScript(spell_ascension_mystic_blessing_of_the_divines);
+    RegisterSpellScript(spell_ascension_mystic_shield_masters_resolve);
+    RegisterSpellScript(spell_ascension_mystic_cauterize);
 }
