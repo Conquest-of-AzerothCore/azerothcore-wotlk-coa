@@ -1620,7 +1620,7 @@ void Spell::EffectJumpDest(SpellEffIndex effIndex)
     CalculateJumpSpeeds(effIndex, dist, speedXY, speedZ);
 
     // Override, calculations are incorrect
-    if (m_spellInfo->Id == 49376) // feral charge
+    if (sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == 49376) // feral charge
     {
         speedXY = pow(speedZ * 10, 8);
         m_caster->GetMotionMaster()->MoveJump(x, y, z, speedXY, speedZ, 0, ObjectAccessor::GetUnit(*m_caster, m_caster->GetGuidValue(UNIT_FIELD_TARGET)));
@@ -1954,7 +1954,7 @@ void Spell::EffectPowerBurn(SpellEffIndex effIndex)
         return;
 
     // burn x% of target's mana, up to maximum of 2x% of caster's mana (Mana Burn)
-    if (m_spellInfo->Id == 8129)
+    if (sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == 8129)
     {
         int32 maxDamage = int32(CalculatePct(m_caster->GetMaxPower(PowerType), damage * 2));
         damage = int32(CalculatePct(unitTarget->GetMaxPower(PowerType), damage));
@@ -2652,7 +2652,8 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
                 return;
             }
         }
-        else if (m_spellInfo->Id == 1842 && gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP)
+        else if (sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == 1842 &&
+            gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP)
         {
             gameObjTarget->SetLootState(GO_JUST_DEACTIVATED);
             if (gameObjTarget->getLootState() == GO_JUST_DEACTIVATED && !gameObjTarget->GetOwner()) // pussywizard
@@ -2950,7 +2951,7 @@ void Spell::EffectSummonType(SpellEffIndex effIndex)
                             return;
 
                         // Mana Tide Totem
-                        if (m_spellInfo->Id == 16190)
+                        if (sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == 16190)
                             damage = m_caster->CountPctFromMaxHealth(10);
 
                         if (damage && properties->Type != SUMMON_TYPE_LIGHTWELL) // Health set in script for lightwell
@@ -5358,7 +5359,7 @@ void Spell::EffectForceDeselect(SpellEffIndex /*effIndex*/)
         (*itr)->AttackStop();
 
     // Xinef: Mirror images code Initialize Images
-    if (m_spellInfo->Id == 58836)
+    if (sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == 58836)
     {
         std::vector<Unit*> images;
         for (Unit::ControlSet::const_iterator itr = m_caster->m_Controlled.begin(); itr != m_caster->m_Controlled.end(); ++itr)
