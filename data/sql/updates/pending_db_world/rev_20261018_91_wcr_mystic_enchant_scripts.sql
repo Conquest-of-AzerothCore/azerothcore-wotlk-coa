@@ -5,7 +5,8 @@ DELETE FROM `spell_script_names` WHERE `ScriptName` IN ('spell_ascension_mystic_
     'spell_ascension_mystic_atonement', 'spell_ascension_mystic_atonement_heal', 'spell_ascension_mystic_fury_of_the_wind', 'spell_ascension_mystic_elunes_fury',
     'spell_ascension_mystic_lightning_fangs', 'spell_ascension_mystic_demonic_whirl', 'spell_ascension_mystic_vampiric_death',
     'spell_ascension_mystic_savage_frenzy', 'spell_ascension_mystic_shattered_renewal',
-    'spell_ascension_mystic_arcane_conduit_trigger', 'spell_ascension_mystic_water_nova');
+    'spell_ascension_mystic_arcane_conduit_trigger', 'spell_ascension_mystic_water_nova',
+    'spell_ascension_mystic_heavy_thunder_check', 'spell_ascension_mystic_blessing_of_the_divines');
 INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (1571422, 'spell_ascension_mystic_renewed_through_absolution'),
 (1567777, 'spell_ascension_mystic_atonement'),
@@ -19,7 +20,9 @@ INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
 (1180330, 'spell_ascension_mystic_savage_frenzy'),
 (1181000, 'spell_ascension_mystic_shattered_renewal'),
 (1181434, 'spell_ascension_mystic_arcane_conduit_trigger'),
-(1569696, 'spell_ascension_mystic_water_nova');
+(1569696, 'spell_ascension_mystic_water_nova'),
+(1181083, 'spell_ascension_mystic_heavy_thunder_check'),
+(1571465, 'spell_ascension_mystic_blessing_of_the_divines');
 
 -- Shadow Funnel's Voidwalker aura (Void Nova) and Lightning Fangs' wolf charge proc on the wearer's melee auto
 -- attacks; Shattered Renewal's Weakened Soul removal procs on a kill (its script checks experience/honor).

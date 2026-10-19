@@ -10,9 +10,11 @@
 // an aura arriving on the pet, a shield breaking, the dummy Evocation fires every tick.
 
 #include "CellImpl.h"
+#include "Containers.h"
 #include "GridNotifiers.h"
 #include "GameTime.h"
 #include "GridNotifiersImpl.h"
+#include "Item.h"
 #include "Group.h"
 #include "ObjectAccessor.h"
 #include "Pet.h"
@@ -83,6 +85,14 @@ enum MysticEnchantScriptSpells : uint32
     SPELL_FEEDING_THE_ABYSS_STORED         = 1154365,
     SPELL_ABYSSAL_ERUPTION_READY           = 1154366,
     SPELL_ABYSSAL_ERUPTION                 = 1154367,
+    // Blessing of the Divines
+    SPELL_BLESSING_DIVINES                 = 1571467,
+    SPELL_BLESSING_RADIANCE                = 1571470,
+    SPELL_BLESSING_MENDING                 = 1571471,
+    // Heavy Thunder
+    SPELL_HEAVY_THUNDER                    = 1181080,
+    SPELL_HEAVY_THUNDER_COUNTER            = 1181081,
+    SPELL_HEAVY_THUNDER_EMPOWERED          = 1181082,
 };
 
 constexpr uint32 PRIEST_RENEW_FLAG0 = 0x40;
@@ -92,6 +102,7 @@ constexpr uint32 PRIEST_VAMPIRIC_TOUCH_FLAG1 = 0x400;
 constexpr uint32 WARLOCK_HEALTH_FUNNEL_FLAG0 = 0x1000000;
 constexpr uint32 WARLOCK_LIFE_TAP_FLAG0 = 0x40000;
 constexpr uint32 SHAMAN_FROST_SHOCK_FLAG0 = 0x80000000;
+constexpr uint32 WARRIOR_THUNDER_CLAP_FLAG0 = 0x80;
 constexpr uint8 PURITY_OF_LIGHT_MAX_CHARGES = 2;
 constexpr int32 FEEDING_THE_ABYSS_BASE_CHANCE = 10;
 constexpr int32 ELUNES_FURY_PER_HIT_MS = 1000;
@@ -191,8 +202,9 @@ public:
         Hunger(target, damage);
     }
 
-    void ModifySpellDamageTaken(Unit* target, Unit* /*attacker*/, int32& damage, SpellInfo const* spellInfo) override
+    void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo) override
     {
+        HeavyThunder(attacker, damage, spellInfo);
         if (!spellInfo || !(spellInfo->GetSchoolMask() & SPELL_SCHOOL_MASK_NORMAL) || damage <= 0)
             return;
         uint32 amount = uint32(damage);
@@ -203,6 +215,20 @@ public:
     static std::unordered_map<ObjectGuid, uint32> AbyssStored;
 
 private:
+    // Heavy Thunder: "Your Thunder Clap deals 20% more damage when using single Two-Handed Weapon" (effect 0, a dummy).
+    static void HeavyThunder(Unit* attacker, int32& damage, SpellInfo const* spellInfo)
+    {
+        Player* player = attacker ? attacker->ToPlayer() : nullptr;
+        if (!player || damage <= 0 || !spellInfo || spellInfo->SpellFamilyName != SPELLFAMILY_WARRIOR ||
+            !(spellInfo->SpellFamilyFlags[0] & WARRIOR_THUNDER_CLAP_FLAG0))
+            return;
+        AuraEffect const* heavy = player->GetAuraEffect(SPELL_HEAVY_THUNDER, EFFECT_0);
+        Item const* mainHand = heavy ? player->GetWeaponForAttack(BASE_ATTACK, true) : nullptr;
+        if (mainHand && mainHand->GetTemplate()->InventoryType == INVTYPE_2HWEAPON &&
+            !player->GetWeaponForAttack(OFF_ATTACK, true))
+            AddPct(damage, heavy->GetAmount());
+    }
+
     static void Hunger(Unit* target, uint32& damage)
     {
         Player* player = target ? target->ToPlayer() : nullptr;
@@ -626,6 +652,71 @@ class spell_ascension_mystic_shattered_renewal : public AuraScript
     }
 };
 
+// Blessing of the Divines: "Your Paladin heals have a 33% chance to trigger a random blessing. This can only occur
+// once every 5 seconds." The proc effect has no trigger spell; the three blessings are the tooltip's @s: spells.
+// Rule: heal of a Paladin ability, cooldown 5 sec.
+class spell_ascension_mystic_blessing_of_the_divines : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_mystic_blessing_of_the_divines);
+
+    void HandleProc(AuraEffect const*, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        static constexpr std::array<uint32, 3> BLESSINGS = { SPELL_BLESSING_DIVINES, SPELL_BLESSING_RADIANCE,
+            SPELL_BLESSING_MENDING };
+        Unit* caster = GetTarget();
+        Unit* target = eventInfo.GetActionTarget();
+        if (!target || !caster->IsFriendlyTo(target))
+            target = caster;
+        caster->CastSpell(target, Acore::Containers::SelectRandomContainerElement(BLESSINGS), true);
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(spell_ascension_mystic_blessing_of_the_divines::HandleProc, EFFECT_0,
+            SPELL_AURA_PROC_TRIGGER_SPELL);
+    }
+};
+
+// Heavy Thunder: "Hitting single target with Thunder Clap will cause next Thunder Clap gain 40% increase critical strike
+// chance" (and costs no rage). Every Thunder Clap hit stacks the 100 ms counter (rule: damage of Thunder Clap); the
+// cast's delayed trigger (rule: cast of Thunder Clap) checks it after its delay and empowers the next Thunder Clap
+// only at one stack. The empowerment removes the counter itself; otherwise it is dropped here.
+class spell_ascension_mystic_heavy_thunder_check : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_mystic_heavy_thunder_check);
+
+    void Schedule(SpellEffIndex effIndex)
+    {
+        PreventHitDefaultEffect(effIndex);
+        Unit* caster = GetCaster();
+        if (!caster)
+            return;
+        Milliseconds const delay(std::max<int32>(1, GetSpellInfo()->Effects[effIndex].CalcValue(caster)));
+        caster->m_Events.AddEventAtOffset([caster]()
+        {
+            Aura const* counter = caster->GetAura(SPELL_HEAVY_THUNDER_COUNTER);
+            if (counter && counter->GetStackAmount() == 1)
+                caster->CastSpell(caster, SPELL_HEAVY_THUNDER_EMPOWERED, true);
+            else
+                caster->RemoveAurasDueToSpell(SPELL_HEAVY_THUNDER_COUNTER);
+        }, delay);
+    }
+
+    void PreventTarget(SpellEffIndex effIndex)
+    {
+        PreventHitDefaultEffect(effIndex);
+    }
+
+    void Register() override
+    {
+        OnEffectLaunch += SpellEffectFn(spell_ascension_mystic_heavy_thunder_check::Schedule, EFFECT_0,
+            SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED);
+        OnEffectLaunchTarget += SpellEffectFn(spell_ascension_mystic_heavy_thunder_check::PreventTarget, EFFECT_0,
+            SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED);
+    }
+};
+
 // Arcane Conduit: "every second you fire an Arcane Surge, dealing Arcane damage to your target and reduces the
 // cooldown of Arcane Power, Presence of Mind and Evocation by 10 sec." Reborn Evocation's periodic trigger casts
 // the Arcane Conduit trigger (1181434), a dummy, on every tick; with the enchant it fires the surge.
@@ -670,4 +761,6 @@ void AddSC_AscensionMysticEnchantScripts()
     RegisterSpellScript(spell_ascension_mystic_savage_frenzy);
     RegisterSpellScript(spell_ascension_mystic_shattered_renewal);
     RegisterSpellScript(spell_ascension_mystic_arcane_conduit_trigger);
+    RegisterSpellScript(spell_ascension_mystic_heavy_thunder_check);
+    RegisterSpellScript(spell_ascension_mystic_blessing_of_the_divines);
 }

@@ -1459,12 +1459,9 @@ class spell_dru_glyph_of_rejuvenation : public AuraScript
 
     bool CheckProc(ProcEventInfo& eventInfo)
     {
-        Unit* target = eventInfo.GetActionTarget();
-        if (!target)
-            return false;
-
-        // Only proc if target is below health threshold
-        return target->HealthBelowPct(GetSpellInfo()->Effects[EFFECT_0].CalcValue());
+        // Ascension: "a 33% chance to heal the target for an additional 50%, regardless of the target's health" (stock:
+        // below 50% health). Effect 0 is the heal's share only.
+        return eventInfo.GetActionTarget() && eventInfo.GetHealInfo();
     }
 
     void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
