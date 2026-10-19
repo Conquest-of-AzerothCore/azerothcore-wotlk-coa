@@ -18,15 +18,6 @@
  ],
  "creatures": [
   {
-   "id": "e1",
-   "owner": "w",
-   "entry": 1601,
-   "level": 80,
-   "health": 10000000,
-   "distance": 3,
-   "stationary": true
-  },
-  {
    "id": "e2",
    "owner": "w",
    "entry": 1601,
@@ -167,7 +158,7 @@
    "action": "cast",
    "actor": "w",
    "spell": 1147502,
-   "target": "e1"
+   "target": "e2"
   },
   {
    "action": "wait",
@@ -192,7 +183,7 @@
    "action": "cast",
    "actor": "w",
    "spell": 1147502,
-   "target": "e1"
+   "target": "e2"
   },
   {
    "action": "wait",
@@ -217,7 +208,7 @@
    "action": "cast",
    "actor": "w",
    "spell": 1147502,
-   "target": "e1"
+   "target": "e2"
   },
   {
    "action": "wait",
