@@ -10436,6 +10436,17 @@ void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, Spell* s
         }
         else if (mod->type == SPELLMOD_PCT)
         {
+            // Ascension: a positive percent critical strike chance modifier adds percentage points ("increases the
+            // critical strike chance of your Mind Flay by 5%", "Fireball guaranteed crit QA aura" at 100). Stock data
+            // never has one; the negative stock case (Surge of Light's -100) keeps the multiplier below.
+            if (mod->op == SPELLMOD_CRITICAL_CHANCE && mod->value > 0)
+            {
+                if (totalflat < 100)
+                    totalflat += mod->value;
+                ApplyModToSpell(mod, spell);
+                return;
+            }
+
             // skip percent mods for null basevalue (most important for spell mods with charges)
             if (basevalue == T(0) || totalmul == 0.0f)
                 return;
