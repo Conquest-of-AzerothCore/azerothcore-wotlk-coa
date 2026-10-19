@@ -1,0 +1,157 @@
+{
+ "schema": 1,
+ "name": "Warcraft Reborn Mystic Enchant Cauterize turns a killing blow into 35% health and a burn",
+ "contract": [
+  "Cauterize 1181410: \"An attack which would otherwise kill you will instead bring you to 35% of your maximum health ... you gain 50% movement speed for 6 sec, but burn\" (1181411). Its 1-point absorb was drained by the first hit, which removed the enchant aura, and nothing saved the mage."
+ ],
+ "timeout_ms": 90000,
+ "players": [
+  {
+   "id": "w",
+   "race": 1,
+   "class": 8,
+   "level": 80,
+   "melee_hit_rating": 10000,
+   "spell_hit_rating": 10000,
+   "expertise_rating": 10000
+  }
+ ],
+ "creatures": [
+  {
+   "id": "a",
+   "owner": "w",
+   "entry": 25761,
+   "faction": 14,
+   "reaction": 1,
+   "level": 80,
+   "health": 1000000,
+   "distance": 2,
+   "stationary": true
+  }
+ ],
+ "steps": [
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 43,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 44,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 54,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 55,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 160,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 172,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "set_skill",
+   "actor": "w",
+   "skill": 95,
+   "value": 400,
+   "maximum": 400
+  },
+  {
+   "action": "add_item",
+   "actor": "w",
+   "item": 36528
+  },
+  {
+   "action": "equip",
+   "actor": "w",
+   "item": 36528,
+   "slot": 15
+  },
+  {
+   "action": "set_aura",
+   "actor": "w",
+   "spell": 1181410,
+   "stacks": 1
+  },
+  {
+   "action": "wait",
+   "ms": 500
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "aura",
+   "label": "enchant aura active",
+   "spell": 1181410,
+   "equals": 1
+  },
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "attack",
+   "actor": "w",
+   "target": "a"
+  },
+  {
+   "action": "wait",
+   "ms": 1500
+  },
+  {
+   "action": "set_health",
+   "actor": "w",
+   "value": 1
+  },
+  {
+   "action": "wait",
+   "ms": 4000
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "alive",
+   "label": "a killing blow leaves the mage alive",
+   "equals": 1
+  },
+  {
+   "action": "assert",
+   "actor": "w",
+   "metric": "aura",
+   "label": "Cauterize burn and speed (1181411) gained",
+   "spell": 1181411,
+   "equals": 1
+  },
+  {
+   "action": "stop_attack",
+   "actor": "w"
+  }
+ ]
+}

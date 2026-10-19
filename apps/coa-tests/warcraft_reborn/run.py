@@ -265,6 +265,8 @@ int main(int, char** argv)
     Check(twinned(1454, 1101454) && twinned(57946, 1157946),
         "every rank of Reborn Life Tap takes stock Life Tap's script and data");
     Check(twinned(53, 1100053) && twinned(20271, 1120271), "Reborn Backstab and Judgement of Light are twins");
+    Check(twinned(12867, 1312867) && twinned(56638, 1356638) && twinned(26016, 1326016),
+        "crossover Mystic Enchants Deep Wounds, Taste for Blood and Vindication twin their stock talents");
     Check(!twinned(160, 1100160) && std::none_of(twins.begin(), twins.end(),
             [&layouts](auto const& pair) { return layouts[pair.first] != layouts[pair.second]; }),
         "a stock spell and an unrelated spell 1100000 above it (Forked Lightning, Glyph of Slam) are not twins");
