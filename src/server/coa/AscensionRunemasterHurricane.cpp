@@ -81,7 +81,7 @@ bool StrikeHurricane(Unit* player, Aura* aura)
     float z = target->GetPositionZ();
     if (!player->IsUnderWater())
     {
-        float const ground = player->GetMap()->GetHeight(x, y, MAX_HEIGHT);
+        float const ground = player->GetMap()->GetHeight(x, y, player->GetPositionZ() + 2.0f, true, 10.0f);
         if (ground > INVALID_HEIGHT)
             z = ground;
     }
