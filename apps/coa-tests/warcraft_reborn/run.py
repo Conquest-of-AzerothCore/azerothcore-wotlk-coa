@@ -381,6 +381,28 @@ def check_reborn_coefficients(dbc):
     return ok
 
 
+DEEP_FREEZE_SQL = ROOT / "data/sql/updates/pending_db_world/rev_20261019_94_coa_reborn_deep_freeze_immunity_state.sql"
+
+
+def check_deep_freeze_immunity(dbc):
+    data = (dbc / "Spell.dbc").read_bytes()
+    count, fields, size, strings = struct.unpack_from("<4I", data, 4)
+    rows = {}
+    for row in range(count):
+        record = struct.unpack_from("<%dI" % fields, data, 20 + row * size)
+        if record[0] in (1171761, 1144572, 1100133):
+            rows[record[0]] = record
+    text = DEEP_FREEZE_SQL.read_text(encoding="utf-8")
+    proc = re.search(r"\(1171761, 0, 3, 0, (0x[0-9A-Fa-f]+), 0, 0, 0x5, 0x2, 256,", text)
+    mask = int(proc.group(1), 16) if proc else 0
+    ok = (len(rows) == 3 and rows[1171761][34] and rows[1171761][116] == 1171757 and mask and
+          rows[1144572][208] == 3 and rows[1144572][210] & mask and not rows[1100133][210] & mask and
+          "(1171761, 'spell_mage_deep_freeze_immunity_state')" in text)
+    print(f"{'PASS' if ok else 'FAIL'}: Reborn Deep Freeze Immunity State procs only from Deep Freeze on stun-immune "
+          "targets, not from Fireball")
+    return ok
+
+
 CLASS_SPELLS = sorted((ROOT / "data/sql/updates/pending_db_world").glob("rev_*_coa_reborn_*_spells.sql"))
 
 
@@ -443,7 +465,7 @@ def main():
         if build.returncode:
             raise SystemExit("Warcraft Reborn rules harness did not compile:\n" + build.stdout + build.stderr)
         result = subprocess.run([str(executable), str(args.dbc_dir.resolve())], text=True)
-        bindings_ok = check_form_only_bindings(args.dbc_dir.resolve())
+        bindings_ok = check_form_only_bindings(args.dbc_dir.resolve()) & check_deep_freeze_immunity(args.dbc_dir.resolve())
         twins_ok = (check_twin_copies() & check_reborn_coefficients(args.dbc_dir.resolve()) &
                     check_class_spell_bindings(args.dbc_dir.resolve()))
         raise SystemExit(result.returncode or (0 if bindings_ok and twins_ok else 1))
