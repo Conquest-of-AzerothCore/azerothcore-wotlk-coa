@@ -9,6 +9,10 @@
 // enchant can carry several proc effects with different events. spell_proc can only describe one event per aura
 // and selects by family flags, which Reborn abilities share widely, so each enchant gets a broad spell_proc row and
 // this script, which accepts an effect's proc only for its own event and abilities (coa_mystic_enchant_proc).
+//
+// Some enchants grant a buff that should last only while another aura does ("While Borrowed Time is active...",
+// "Your Divine Plea ... additionally increases"): their trigger spells are permanent auras, so they are granted and
+// removed with the aura they ride on instead (coa_mystic_enchant_aura_link).
 
 #include "DatabaseEnv.h"
 #include "Field.h"
@@ -26,6 +30,7 @@
 #include "StringConvert.h"
 #include "Tokenize.h"
 #include "Unit.h"
+#include "UnitScript.h"
 #include "WorldScript.h"
 #include <algorithm>
 #include <array>
@@ -49,10 +54,11 @@ enum class ProcEvent : uint8
     CriticalDamage,
     CriticalHeal,
     Critical,        // a critical damage or heal
-    Kill,            // the player kills a target that yields experience or honor (kill events carry no spell)
+    Kill,            // the player kills a target that yields experience or honor; spells/school = the killing blow
     Parry,           // the player parries a melee attack
     Dodged,          // the player's melee attack is dodged
-    AutoAttack       // the player's melee auto attack lands
+    AutoAttack,      // the player's melee auto attack lands
+    Damaged          // the player takes melee or ranged damage
 };
 
 std::unordered_map<std::string_view, ProcEvent> const EVENTS = {
@@ -61,7 +67,27 @@ std::unordered_map<std::string_view, ProcEvent> const EVENTS = {
     {"heal", ProcEvent::Heal}, {"direct_heal", ProcEvent::DirectHeal}, {"periodic_heal", ProcEvent::PeriodicHeal},
     {"critical_damage", ProcEvent::CriticalDamage}, {"critical_heal", ProcEvent::CriticalHeal},
     {"critical", ProcEvent::Critical}, {"kill", ProcEvent::Kill}, {"parry", ProcEvent::Parry},
-    {"dodged", ProcEvent::Dodged}, {"auto_attack", ProcEvent::AutoAttack}};
+    {"dodged", ProcEvent::Dodged}, {"auto_attack", ProcEvent::AutoAttack}, {"damaged", ProcEvent::Damaged}};
+
+// One clause of the conditions column, e.g. "power>50", "stacks:1571905>=6", "target_health_before<50".
+struct Condition
+{
+    enum class Kind : uint8
+    {
+        Power,              // the player's current power, in displayed units (rage and runic power / 10)
+        Health,             // the player's health, percent
+        TargetHealth,       // the action target's health, percent, after the event
+        TargetHealthBefore, // the action target's health, percent, before the event's heal
+        Stacks,             // stacks (or charges) of an aura on the player
+        TargetStacks,       // stacks of an aura on the action target, from the player
+        TargetOutOfCombat   // the action target is not in combat
+    };
+
+    Kind What = Kind::Power;
+    uint32 Aura = 0;
+    std::string_view Op;
+    int32 Value = 0;
+};
 
 struct EffectRule
 {
@@ -70,12 +96,135 @@ struct EffectRule
     std::unordered_set<uint32> Spells;     // every rank; empty = any spell
     std::vector<uint32> RequiresAura;      // "while X is active": the player has one of these
     std::vector<uint32> TargetAura;        // "on targets affected by your X": the target has one of these from the player
+    std::vector<Condition> Conditions;     // all must hold
+    std::vector<uint32> ConsumeAura;       // removed from the player when the effect procs (a counter that resets)
     float Chance = 100.0f;                 // rolled per effect, on top of the aura's own proc chance
     Milliseconds Cooldown = 0ms;           // per effect, per aura
 };
 
+struct AuraLink
+{
+    uint32 Enchant = 0;  // the Mystic Enchant aura the player must have
+    uint32 Grant = 0;    // cast on the player when the watched aura arrives, removed when it goes
+};
+
 std::unordered_map<uint32, std::array<std::vector<EffectRule const*>, MAX_SPELL_EFFECTS>> Rules;
 std::vector<EffectRule> Storage;
+std::unordered_map<uint32, std::vector<AuraLink>> Links;  // watched aura -> links
+
+// The spell and school of each player's last hit on a unit: kill events carry no spell, and "killing an enemy with
+// Execute / with Frost damage" needs the killing blow.
+struct LastHit
+{
+    ObjectGuid Attacker;
+    uint32 Spell = 0;
+    uint32 SchoolMask = 0;
+};
+std::unordered_map<ObjectGuid, LastHit> LastHits;
+
+std::string_view const OPS[] = {">=", "<=", "!=", ">", "<", "="};
+
+bool Compare(int32 value, std::string_view op, int32 wanted)
+{
+    if (op == ">=") return value >= wanted;
+    if (op == "<=") return value <= wanted;
+    if (op == "!=") return value != wanted;
+    if (op == ">") return value > wanted;
+    if (op == "<") return value < wanted;
+    return value == wanted;
+}
+
+Optional<Condition> ParseCondition(std::string_view text)
+{
+    static std::unordered_map<std::string_view, Condition::Kind> const KINDS = {
+        {"power", Condition::Kind::Power}, {"health", Condition::Kind::Health},
+        {"target_health", Condition::Kind::TargetHealth},
+        {"target_health_before", Condition::Kind::TargetHealthBefore},
+        {"stacks", Condition::Kind::Stacks}, {"target_stacks", Condition::Kind::TargetStacks},
+        {"target_out_of_combat", Condition::Kind::TargetOutOfCombat}};
+
+    Condition condition;
+    if (text == "target_out_of_combat")
+    {
+        condition.What = Condition::Kind::TargetOutOfCombat;
+        return condition;
+    }
+    for (std::string_view op : OPS)
+    {
+        std::size_t const at = text.find(op);
+        if (at == std::string_view::npos)
+            continue;
+        std::string_view name = text.substr(0, at);
+        Optional<int32> value = Acore::StringTo<int32>(text.substr(at + op.size()));
+        if (std::size_t const colon = name.find(':'); colon != std::string_view::npos)
+        {
+            Optional<uint32> aura = Acore::StringTo<uint32>(name.substr(colon + 1));
+            if (!aura)
+                return {};
+            condition.Aura = *aura;
+            name = name.substr(0, colon);
+        }
+        auto const kind = KINDS.find(name);
+        if (kind == KINDS.end() || !value)
+            return {};
+        condition.What = kind->second;
+        condition.Op = op;
+        condition.Value = *value;
+        return condition;
+    }
+    return {};
+}
+
+int32 HealthPct(Unit const* unit, int64 offset = 0)
+{
+    if (!unit || !unit->GetMaxHealth())
+        return 0;
+    return int32((int64(unit->GetHealth()) + offset) * 100 / int64(unit->GetMaxHealth()));
+}
+
+int32 Stacks(Unit const* unit, uint32 aura, ObjectGuid caster = ObjectGuid::Empty)
+{
+    Aura const* found = unit ? unit->GetAura(aura, caster) : nullptr;
+    if (!found)
+        return 0;
+    return found->GetStackAmount() > 1 || !found->GetCharges() ? found->GetStackAmount() : found->GetCharges();
+}
+
+bool Holds(Condition const& condition, ProcEventInfo& eventInfo)
+{
+    Unit* actor = eventInfo.GetActor();
+    Unit* target = eventInfo.GetActionTarget();
+    switch (condition.What)
+    {
+        case Condition::Kind::Power:
+        {
+            if (!actor)
+                return false;
+            Powers const power = actor->getPowerType();
+            int32 value = actor->GetPower(power);
+            if (power == POWER_RAGE || power == POWER_RUNIC_POWER)
+                value /= 10;
+            return Compare(value, condition.Op, condition.Value);
+        }
+        case Condition::Kind::Health:
+            return actor && Compare(HealthPct(actor), condition.Op, condition.Value);
+        case Condition::Kind::TargetHealth:
+            return target && Compare(HealthPct(target), condition.Op, condition.Value);
+        case Condition::Kind::TargetHealthBefore:
+        {
+            HealInfo const* heal = eventInfo.GetHealInfo();
+            int64 const healed = heal ? int64(heal->GetEffectiveHeal()) : 0;
+            return target && Compare(HealthPct(target, -healed), condition.Op, condition.Value);
+        }
+        case Condition::Kind::Stacks:
+            return Compare(Stacks(actor, condition.Aura), condition.Op, condition.Value);
+        case Condition::Kind::TargetStacks:
+            return actor && Compare(Stacks(target, condition.Aura, actor->GetGUID()), condition.Op, condition.Value);
+        case Condition::Kind::TargetOutOfCombat:
+            return target && !target->IsInCombat();
+    }
+    return false;
+}
 
 bool Periodic(ProcEventInfo const& eventInfo)
 {
@@ -115,8 +264,23 @@ bool Conditions(EffectRule const& rule, ProcEventInfo& eventInfo)
     Unit* actor = eventInfo.GetActor();
     if (!rule.RequiresAura.empty() && !HasAny(actor, rule.RequiresAura))
         return false;
-    return rule.TargetAura.empty() ||
-        (actor && HasAny(eventInfo.GetActionTarget(), rule.TargetAura, actor->GetGUID()));
+    if (!rule.TargetAura.empty() && !(actor && HasAny(eventInfo.GetActionTarget(), rule.TargetAura, actor->GetGUID())))
+        return false;
+    return std::all_of(rule.Conditions.begin(), rule.Conditions.end(),
+        [&eventInfo](Condition const& condition) { return Holds(condition, eventInfo); });
+}
+
+bool KillingBlowMatches(EffectRule const& rule, ProcEventInfo& eventInfo)
+{
+    if (rule.Spells.empty() && !rule.SchoolMask)
+        return true;
+    Unit* actor = eventInfo.GetActor();
+    Unit* victim = eventInfo.GetActionTarget();
+    auto const itr = victim ? LastHits.find(victim->GetGUID()) : LastHits.end();
+    if (!actor || itr == LastHits.end() || itr->second.Attacker != actor->GetGUID())
+        return false;
+    return (rule.Spells.empty() || rule.Spells.contains(itr->second.Spell)) &&
+        (!rule.SchoolMask || (itr->second.SchoolMask & rule.SchoolMask));
 }
 
 bool Matches(EffectRule const& rule, ProcEventInfo& eventInfo)
@@ -128,7 +292,8 @@ bool Matches(EffectRule const& rule, ProcEventInfo& eventInfo)
         if (!(eventInfo.GetTypeMask() & PROC_FLAG_KILL))
             return false;
         Player* player = eventInfo.GetActor() ? eventInfo.GetActor()->ToPlayer() : nullptr;
-        return player && eventInfo.GetActionTarget() && player->isHonorOrXPTarget(eventInfo.GetActionTarget());
+        return player && eventInfo.GetActionTarget() && player->isHonorOrXPTarget(eventInfo.GetActionTarget()) &&
+            KillingBlowMatches(rule, eventInfo);
     }
     if (rule.Event == ProcEvent::Parry)
         return (eventInfo.GetTypeMask() & (PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK | PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS)) &&
@@ -136,6 +301,9 @@ bool Matches(EffectRule const& rule, ProcEventInfo& eventInfo)
     if (rule.Event == ProcEvent::AutoAttack)
         return (eventInfo.GetTypeMask() & PROC_FLAG_DONE_MELEE_AUTO_ATTACK) &&
             (eventInfo.GetHitMask() & (PROC_HIT_NORMAL | PROC_HIT_CRITICAL));
+    if (rule.Event == ProcEvent::Damaged)
+        return (eventInfo.GetTypeMask() & (PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK | PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS |
+            PROC_FLAG_TAKEN_RANGED_AUTO_ATTACK | PROC_FLAG_TAKEN_SPELL_RANGED_DMG_CLASS)) && Dealt(eventInfo);
     if (rule.Event == ProcEvent::Dodged)
         return (eventInfo.GetTypeMask() & (PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS)) &&
             (eventInfo.GetHitMask() & PROC_HIT_DODGE);
@@ -182,6 +350,7 @@ class spell_ascension_mystic_enchant_proc : public AuraScript
     PrepareAuraScript(spell_ascension_mystic_enchant_proc);
 
     std::array<TimePoint, MAX_SPELL_EFFECTS> _ready{};
+    std::array<EffectRule const*, MAX_SPELL_EFFECTS> _fired{};
 
     bool CheckEffect(AuraEffect const* effect, ProcEventInfo& eventInfo)
     {
@@ -202,15 +371,94 @@ class spell_ascension_mystic_enchant_proc : public AuraScript
         if (rule->Chance < 100.0f && !roll_chance_f(rule->Chance))
             return false;
         _ready[effect->GetEffIndex()] = now + rule->Cooldown;
+        _fired[effect->GetEffIndex()] = rule;
         return true;
+    }
+
+    // after the trigger spell: a counter consumed here is not refilled by an earlier effect of the same event
+    void Consume(AuraEffect const* effect, ProcEventInfo&)
+    {
+        EffectRule const* rule = _fired[effect->GetEffIndex()];
+        _fired[effect->GetEffIndex()] = nullptr;
+        if (!rule)
+            return;
+        for (uint32 aura : rule->ConsumeAura)
+            GetTarget()->RemoveAurasDueToSpell(aura);
     }
 
     void Register() override
     {
         DoCheckEffectProc += AuraCheckEffectProcFn(spell_ascension_mystic_enchant_proc::CheckEffect, EFFECT_ALL,
             SPELL_AURA_PROC_TRIGGER_SPELL);
+        AfterEffectProc += AuraEffectProcFn(spell_ascension_mystic_enchant_proc::Consume, EFFECT_ALL,
+            SPELL_AURA_PROC_TRIGGER_SPELL);
     }
 };
+
+class AscensionMysticEnchantProcsUnit final : public UnitScript
+{
+public:
+    AscensionMysticEnchantProcsUnit() : UnitScript("AscensionMysticEnchantProcsUnit", true,
+        { UNITHOOK_ON_AURA_APPLY, UNITHOOK_ON_AURA_REMOVE, UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN,
+          UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK, UNITHOOK_MODIFY_MELEE_DAMAGE }) { }
+
+    void OnAuraApply(Unit* unit, Aura* aura) override
+    {
+        auto const itr = Links.find(aura->GetId());
+        if (itr == Links.end() || !unit->IsPlayer())
+            return;
+        for (AuraLink const& link : itr->second)
+            if (unit->HasAura(link.Enchant) && !unit->HasAura(link.Grant))
+                unit->CastSpell(unit, link.Grant, true);
+    }
+
+    void OnAuraRemove(Unit* unit, AuraApplication* application, AuraRemoveMode) override
+    {
+        auto const itr = Links.find(application->GetBase()->GetId());
+        if (itr == Links.end() || !unit->IsPlayer())
+            return;
+        for (AuraLink const& link : itr->second)
+            unit->RemoveAurasDueToSpell(link.Grant);
+    }
+
+    void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32&, SpellInfo const* spellInfo) override
+    {
+        Record(target, attacker, spellInfo);
+    }
+
+    void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32&, SpellInfo const* spellInfo) override
+    {
+        Record(target, attacker, spellInfo);
+    }
+
+    void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32&) override
+    {
+        Record(target, attacker, nullptr);
+    }
+
+private:
+    static void Record(Unit* target, Unit* attacker, SpellInfo const* spellInfo)
+    {
+        if (!target || !attacker || !attacker->IsPlayer() || target->IsPlayer())
+            return;
+        LastHit& hit = LastHits[target->GetGUID()];
+        hit.Attacker = attacker->GetGUID();
+        hit.Spell = spellInfo ? spellInfo->Id : 0;
+        hit.SchoolMask = spellInfo ? spellInfo->GetSchoolMask() : SPELL_SCHOOL_MASK_NORMAL;
+        // the map only needs the units being fought; a rough bound keeps despawned targets from piling up
+        if (LastHits.size() > 20000)
+            LastHits.clear();
+    }
+};
+
+std::vector<uint32> Ids(std::string const& text)
+{
+    std::vector<uint32> ids;
+    for (std::string_view token : Acore::Tokenize(text, ' ', false))
+        if (Optional<uint32> id = Acore::StringTo<uint32>(token))
+            ids.push_back(*id);
+    return ids;
+}
 
 class AscensionMysticEnchantProcsWorld final : public WorldScript
 {
@@ -219,10 +467,17 @@ public:
 
     void OnStartup() override
     {
+        LoadRules();
+        LoadLinks();
+    }
+
+private:
+    static void LoadRules()
+    {
         Rules.clear();
         Storage.clear();
         QueryResult result = WorldDatabase.Query("SELECT enchant_spell, effect, event, school_mask, spells, chance, "
-            "cooldown_ms, requires_aura, target_aura FROM coa_mystic_enchant_proc");
+            "cooldown_ms, requires_aura, target_aura, conditions, consume_aura FROM coa_mystic_enchant_proc");
         if (!result)
         {
             LOG_INFO("server.loading", ">> Loaded 0 Mystic Enchant proc rules");
@@ -246,19 +501,28 @@ public:
             EffectRule rule;
             rule.Event = event->second;
             rule.SchoolMask = fields[3].Get<uint32>();
-            std::string const spells = fields[4].Get<std::string>();
-            for (std::string_view token : Acore::Tokenize(spells, ' ', false))
-                if (Optional<uint32> id = Acore::StringTo<uint32>(token))
-                    rule.Spells.insert(*id);
+            for (uint32 id : Ids(fields[4].Get<std::string>()))
+                rule.Spells.insert(id);
             rule.Chance = fields[5].Get<float>();
             rule.Cooldown = Milliseconds(fields[6].Get<uint32>());
-            for (uint8 column : { uint8(7), uint8(8) })
+            rule.RequiresAura = Ids(fields[7].Get<std::string>());
+            rule.TargetAura = Ids(fields[8].Get<std::string>());
+            std::string const conditions = fields[9].Get<std::string>();
+            bool valid = true;
+            for (std::string_view token : Acore::Tokenize(conditions, ' ', false))
             {
-                std::string const auras = fields[column].Get<std::string>();
-                for (std::string_view token : Acore::Tokenize(auras, ' ', false))
-                    if (Optional<uint32> id = Acore::StringTo<uint32>(token))
-                        (column == 7 ? rule.RequiresAura : rule.TargetAura).push_back(*id);
+                if (Optional<Condition> condition = ParseCondition(token))
+                    rule.Conditions.push_back(*condition);
+                else
+                    valid = false;
             }
+            if (!valid)
+            {
+                LOG_ERROR("sql.sql", "coa_mystic_enchant_proc: spell {} effect {} has an unknown condition '{}'",
+                    spell, effect, conditions);
+                continue;
+            }
+            rule.ConsumeAura = Ids(fields[10].Get<std::string>());
             Storage.push_back(std::move(rule));
             keys.emplace_back(spell, effect);
         } while (result->NextRow());
@@ -266,11 +530,36 @@ public:
             Rules[keys[index].first][keys[index].second].push_back(&Storage[index]);
         LOG_INFO("server.loading", ">> Loaded {} Mystic Enchant proc rules for {} enchants", Storage.size(), Rules.size());
     }
+
+    static void LoadLinks()
+    {
+        Links.clear();
+        QueryResult result = WorldDatabase.Query("SELECT enchant_spell, aura, grant_spell FROM coa_mystic_enchant_aura_link");
+        uint32 count = 0;
+        if (result)
+        {
+            do
+            {
+                Field* fields = result->Fetch();
+                uint32 const grant = fields[2].Get<uint32>();
+                if (!sSpellMgr->GetSpellInfo(grant))
+                {
+                    LOG_ERROR("sql.sql", "coa_mystic_enchant_aura_link: grant spell {} does not exist", grant);
+                    continue;
+                }
+                for (uint32 aura : Ids(fields[1].Get<std::string>()))
+                    Links[aura].push_back({ fields[0].Get<uint32>(), grant });
+                ++count;
+            } while (result->NextRow());
+        }
+        LOG_INFO("server.loading", ">> Loaded {} Mystic Enchant aura links", count);
+    }
 };
 }
 
 void AddSC_AscensionMysticEnchantProcs()
 {
     RegisterSpellScript(spell_ascension_mystic_enchant_proc);
+    new AscensionMysticEnchantProcsUnit();
     new AscensionMysticEnchantProcsWorld();
 }

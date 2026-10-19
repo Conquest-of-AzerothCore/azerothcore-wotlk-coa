@@ -242,14 +242,14 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectAscensionPlaySpellVisualKit,              //168 SPELL_EFFECT_ASCENSION_PLAY_SPELL_VISUAL_KIT
     &Spell::EffectNULL,                                     //169 SPELL_EFFECT_ASCENSION_SPREAD_AURA
     &Spell::EffectNULL,                                     //170 SPELL_EFFECT_ASCENSION_SPREAD_AURA_2
-    &Spell::EffectNULL,                                     //171 unknown Ascension effect
+    &Spell::EffectAscensionModifyAuraCharges,               //171 SPELL_EFFECT_ASCENSION_MODIFY_AURA_CHARGES
     &Spell::EffectNULL,                                     //172 unknown Ascension effect
     &Spell::EffectAscensionRefreshAura,                     //173 SPELL_EFFECT_ASCENSION_REFRESH_AURA
     &Spell::EffectAscensionPctDamage,                       //174 Ascension percent damage (target max health / caster melee)
     &Spell::EffectAscensionModifyAuraStacks,                //175 SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS
     &Spell::EffectAscensionModifyAuraStacksBySpell,         //176 SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS_2
     &Spell::EffectAscensionModifyAuraDuration,              //177 SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION
-    &Spell::EffectNULL,                                     //178 unknown Ascension effect
+    &Spell::EffectAscensionTriggerSpellWithDuration,        //178 SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DURATION
     &Spell::EffectNULL,                                     //179 unknown Ascension effect
     &Spell::EffectNULL,                                     //180 unknown Ascension effect
     &Spell::EffectAscensionRestoreBaseHealthPct,            //181 SPELL_EFFECT_ASCENSION_RESTORE_BASE_HEALTH_PCT
@@ -263,7 +263,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectNULL,                                     //189 unknown Ascension effect
     &Spell::EffectApplyAreaAura,                            //190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS
     &Spell::EffectNULL,                                     //191 unknown Ascension effect
-    &Spell::EffectNULL,                                     //192 unknown Ascension effect
+    &Spell::EffectAscensionModifyCooldownPct,               //192 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT
     &Spell::EffectDelayedTriggerSpell,                      //193 Ascension delayed trigger (Amplitude)
     &Spell::EffectNULL,                                     //194 unknown Ascension effect
     &Spell::EffectAscensionResetCooldown,                   //195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN
@@ -572,6 +572,76 @@ void Spell::EffectAscensionModifyAuraDuration(SpellEffIndex effIndex)
         else
             aura->SetDuration(duration);
     }
+}
+
+// Ascension effect 171: change the charges of the MiscValue aura on the target by the effect value (Backdraft and
+// Fingers of Frost "consume charge" -1, Static Shock and Dynamic Charge add Lightning Shield charges). An aura brought
+// to no charges is removed, as a spent charge aura is.
+void Spell::EffectAscensionModifyAuraCharges(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+        return;
+
+    Unit* target = unitTarget ? unitTarget : m_caster;
+    SpellEffectInfo const& effect = m_spellInfo->Effects[effIndex];
+    if (!target || !effect.MiscValue || !damage)
+        return;
+
+    Aura* aura = target->GetAuraOfRankedSpell(effect.MiscValue, m_caster->GetGUID());
+    if (!aura)
+        aura = target->GetAuraOfRankedSpell(effect.MiscValue);
+    if (!aura)
+        return;
+
+    int32 const charges = int32(aura->GetCharges()) + damage;
+    if (charges <= 0)
+        aura->Remove(AURA_REMOVE_BY_EXPIRE);
+    else
+        aura->SetCharges(uint8(std::min(charges, 255)));
+}
+
+// Ascension effect 178: cast TriggerSpell on the target with its duration set to the effect value in milliseconds
+// (Shield Block for 4 sec, Enrage for 6 sec, Nature's Grace for 6 sec).
+void Spell::EffectAscensionTriggerSpellWithDuration(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+        return;
+
+    Unit* target = unitTarget ? unitTarget : m_caster;
+    uint32 const trigger = m_spellInfo->Effects[effIndex].TriggerSpell;
+    if (!target || !trigger || !sSpellMgr->GetSpellInfo(trigger))
+        return;
+
+    m_caster->CastSpell(target, trigger, true, nullptr, nullptr, m_originalCasterGUID);
+    if (damage <= 0)
+        return;
+    if (Aura* aura = target->GetAura(trigger, m_caster->GetGUID()))
+    {
+        aura->SetMaxDuration(damage);
+        aura->SetDuration(damage);
+    }
+}
+
+// Ascension effect 192: shorten the remaining cooldown of the MiscValue spell by the effect value as a percentage of
+// it ("the cooldown of Desperate Prayer is reduced by 50%" = 50; a negative value lengthens it).
+void Spell::EffectAscensionModifyCooldownPct(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+        return;
+
+    Unit* target = unitTarget ? unitTarget : m_caster;
+    Player* player = target ? target->ToPlayer() : nullptr;
+    uint32 const spell = uint32(m_spellInfo->Effects[effIndex].MiscValue);
+    if (!player || !spell || !damage)
+        return;
+
+    uint32 const remaining = player->GetSpellCooldownDelay(spell);
+    if (!remaining)
+        return;
+    int32 const change = int32(CalculatePct(remaining, std::abs(damage)));
+    if (!change)
+        return; // ModifyAscensionCooldown reads 0 as "reset"
+    ModifyAscensionCooldown(player, spell, damage > 0 ? -change : change, false);
 }
 
 // Ascension effect 174: damage as a percentage. MiscValue 1 = of the caster's melee damage ("X% of melee damage"),
