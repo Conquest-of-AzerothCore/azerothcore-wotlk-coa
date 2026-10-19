@@ -26,6 +26,7 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include "UnitScript.h"
+#include <array>
 #include <list>
 #include <unordered_map>
 
@@ -253,8 +254,10 @@ private:
 std::unordered_map<ObjectGuid, uint32> AscensionMysticEnchantHealShare::AbyssStored;
 
 // Feeding the Abyss: the next Life Tap after the store is fed releases it as Abyssal Eruption, damaging nearby
-// enemies and healing you and your pet. The tooltip gives no ratio, so the eruption carries the stored amount itself
-// on all three of its effects (our reading).
+// enemies and healing you and your pet. The tooltip gives no ratio; the data does: the store aura's second effect is
+// 30 and the ready buff reads "your next Life Tap will do $w2 additional damage and healing", so the eruption is its
+// own base plus 30% of the stored damage. Nothing in the data bounds the store, and a soaked killing blow would come
+// back out at full size (the uncapped Reckoning of 2005), so the bonus is capped at the caster's maximum health.
 class AscensionMysticEnchantLifeTap final : public PlayerScript
 {
 public:
@@ -270,8 +273,17 @@ public:
         int32 const stored = itr == AscensionMysticEnchantHealShare::AbyssStored.end() ? 0 : int32(itr->second);
         AscensionMysticEnchantHealShare::AbyssStored.erase(player->GetGUID());
         player->RemoveAurasDueToSpell(SPELL_ABYSSAL_ERUPTION_READY);
-        if (stored > 0)
-            player->CastCustomSpell(player, SPELL_ABYSSAL_ERUPTION, &stored, &stored, &stored, true);
+        SpellInfo const* store = sSpellMgr->GetSpellInfo(SPELL_FEEDING_THE_ABYSS_STORED);
+        SpellInfo const* eruption = sSpellMgr->GetSpellInfo(SPELL_ABYSSAL_ERUPTION);
+        if (stored <= 0 || !store || !eruption)
+            return;
+        int32 const bonus = std::min<int32>(CalculatePct(stored, store->Effects[EFFECT_1].BasePoints),
+            int32(player->GetMaxHealth()));
+        std::array<int32, MAX_SPELL_EFFECTS> amounts{};
+        for (uint8 effect = 0; effect < MAX_SPELL_EFFECTS; ++effect)
+            amounts[effect] = eruption->Effects[effect].CalcValue(player) + bonus;
+        player->CastCustomSpell(player, SPELL_ABYSSAL_ERUPTION, &amounts[EFFECT_0], &amounts[EFFECT_1],
+            &amounts[EFFECT_2], true);
     }
 };
 
