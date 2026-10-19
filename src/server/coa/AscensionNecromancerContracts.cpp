@@ -184,6 +184,8 @@ void ApplyContracts(SpellInfo* info)
     }
     if (id == 500991)
         info->RangeEntry = sSpellRangeStore.LookupEntry(SPELL_RANGE_THIRTY_YARDS);
+    if (id == 504868 || id == 504907)
+        info->AttributesEx3 |= SPELL_ATTR3_ALWAYS_HIT;
     if (id == 300580)
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             if (info->Effects[i].IsEffect())
