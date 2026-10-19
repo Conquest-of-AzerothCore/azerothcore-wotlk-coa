@@ -1,0 +1,224 @@
+{
+  "schema": 1,
+  "name": "PvP trinket health: Insignia of the Alliance adds 400 maximum health only inside an arena",
+  "contract": "Insignia of the Alliance (18863) equips Pvp Trinket Rare (26830), whose tooltip reads: while in Arena or Battleground, increases your maximum health by 400. Outside an arena the wearer lacks the health aura 26832; once inside a rated 1v1 arena the wearer gains 26832 and exactly 400 maximum health, while the opponent without the trinket does not.",
+  "timeout_ms": 240000,
+  "players": [
+    {
+      "id": "wearer",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "opponent",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8809.6,
+    "y": 625.0,
+    "z": 94.979,
+    "o": 2.1
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the characters settle",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "Grant the trinket",
+      "actor": "wearer",
+      "item": 18863
+    },
+    {
+      "action": "equip",
+      "label": "Equip it in the first trinket slot",
+      "actor": "wearer",
+      "item": 18863,
+      "slot": 12
+    },
+    {
+      "action": "assert",
+      "label": "The trinket's equip aura is applied",
+      "actor": "wearer",
+      "metric": "aura",
+      "spell": 26830,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Give an outside-arena health aura time to appear",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Outside an arena the health aura is absent",
+      "actor": "wearer",
+      "metric": "aura",
+      "spell": 26832,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Remember the wearer's maximum health outside the arena",
+      "actor": "wearer",
+      "metric": "max_health",
+      "save_as": "wearer_outside"
+    },
+    {
+      "action": "snapshot",
+      "label": "Remember the opponent's maximum health outside the arena",
+      "actor": "opponent",
+      "metric": "max_health",
+      "save_as": "opponent_outside"
+    },
+    {
+      "action": "client_packet",
+      "label": "The wearer joins the rated 1v1 solo queue",
+      "actor": "wearer",
+      "opcode": 1473,
+      "fields": [
+        {
+          "u32": 5
+        },
+        {
+          "u32": 8
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "label": "Let the join reach the world update",
+      "ms": 500
+    },
+    {
+      "action": "client_packet",
+      "label": "The opponent joins",
+      "actor": "opponent",
+      "opcode": 1473,
+      "fields": [
+        {
+          "u32": 5
+        },
+        {
+          "u32": 8
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "label": "Let the queue match the two players",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "The wearer enters the arena",
+      "actor": "wearer",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 1
+        },
+        {
+          "u8": 14
+        },
+        {
+          "invited_battleground_type": "wearer"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The opponent enters the arena",
+      "actor": "opponent",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 1
+        },
+        {
+          "u8": 14
+        },
+        {
+          "invited_battleground_type": "opponent"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The wearer is in the arena",
+      "actor": "wearer",
+      "metric": "in_arena",
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The opponent is in the arena",
+      "actor": "opponent",
+      "metric": "in_arena",
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Inside the arena the wearer gains the health aura",
+      "actor": "wearer",
+      "metric": "aura",
+      "spell": 26832,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and exactly 400 maximum health",
+      "actor": "wearer",
+      "metric": "max_health",
+      "relative_to": "wearer_outside",
+      "equals": 400
+    },
+    {
+      "action": "assert",
+      "label": "The opponent without the trinket lacks the health aura",
+      "actor": "opponent",
+      "metric": "aura",
+      "spell": 26832,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "and keeps its maximum health",
+      "actor": "opponent",
+      "metric": "max_health",
+      "relative_to": "opponent_outside",
+      "equals": 0
+    }
+  ]
+}
