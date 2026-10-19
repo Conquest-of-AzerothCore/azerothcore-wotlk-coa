@@ -18,6 +18,7 @@
 #include "Chat.h"
 #include "Config.h"
 #include "Creature.h"
+#include "DBCStores.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "ScriptedGossip.h"
@@ -52,21 +53,23 @@ namespace
     struct ScrollStore
     {
         char const* Icon;
-        char const* Class;
+        uint8 ClassId;   ///< ChrClasses ClassID; the label comes from the DBC
         uint32 Vendor;
     };
 
+    // The class name is NOT stored here: it is read from ChrClasses.dbc in the
+    // player's own locale, so one row per store is enough for every language.
     constexpr std::array<ScrollStore, 10> SCROLL_STORES = { {
-        { "Ability_Rogue_Ambush", "Warrior", 9781002 },
-        { "Ability_ThunderBolt", "Paladin", 9781003 },
-        { "Ability_MeleeDamage", "Hunter", 9781004 },
-        { "Spell_Shadow_RitualOfSacrifice", "Rogue", 9781005 },
-        { "Spell_Holy_HolySmite", "Priest", 9781006 },
-        { "Spell_DeathKnight_IceTouch", "Death Knight", 9781007 },
-        { "Spell_Nature_Lightning", "Shaman", 9781008 },
-        { "Spell_Fire_FlameBolt", "Mage", 9781009 },
-        { "Spell_Shadow_ShadowBolt", "Warlock", 9781010 },
-        { "Spell_Nature_AbolishMagic", "Druid", 9781011 },
+        { "Ability_Rogue_Ambush",           1, 9781002 }, // Warrior
+        { "Ability_ThunderBolt",            2, 9781003 }, // Paladin
+        { "Ability_MeleeDamage",            3, 9781004 }, // Hunter
+        { "Spell_Shadow_RitualOfSacrifice", 4, 9781005 }, // Rogue
+        { "Spell_Holy_HolySmite",           5, 9781006 }, // Priest
+        { "Spell_DeathKnight_IceTouch",     6, 9781007 }, // Death Knight
+        { "Spell_Nature_Lightning",         7, 9781008 }, // Shaman
+        { "Spell_Fire_FlameBolt",           8, 9781009 }, // Mage
+        { "Spell_Shadow_ShadowBolt",        9, 9781010 }, // Warlock
+        { "Spell_Nature_AbolishMagic",     11, 9781011 }, // Druid
     } };
 
     std::string IconText(std::string const& icon, std::string const& text)
@@ -79,6 +82,30 @@ namespace
         AddGossipItemFor(player, INVISIBLE_GOSSIP_ICON, IconText(icon, text), GOSSIP_SENDER_MAIN, action);
     }
 
+    /// An option whose label is a row of `module_string`, shown in the
+    /// player's own locale.
+    void AddLocalizedOption(Player* player, std::string const& icon, uint32 stringId, uint32 action)
+    {
+        ChatHandler handler(player->GetSession());
+        AddOption(player, icon, handler.GetModuleString(Worldforged::MODULE_NAME, stringId)->c_str(), action);
+    }
+
+    /// The class name in the player's own locale, straight from ChrClasses.dbc.
+    /// An empty string means the DBC knows the class under no name at all,
+    /// which has not been seen.
+    std::string LocalizedClassName(Player* player, uint8 classId)
+    {
+        if (ChrClassesEntry const* cls = sChrClassesStore.LookupEntry(classId))
+        {
+            int32 const locale = player->GetSession()->GetSessionDbLocaleIndex();
+            if (locale >= 0 && size_t(locale) < 16 && cls->name[locale])
+                return cls->name[locale];
+            if (cls->name[LOCALE_enUS])
+                return cls->name[LOCALE_enUS];
+        }
+        return {};
+    }
+
     bool SellsAltars()
     {
         return AscensionFreepick::RealmOffersMysticAltars();
@@ -87,14 +114,14 @@ namespace
     void SendMainMenu(Player* player, Creature* creature)
     {
         ClearGossipMenuFor(player);
-        AddOption(player, "Inv_Misc_Coin_02", "General Goods", ACTION_GENERAL_GOODS);
-        AddOption(player, "inv_axe_09", "Heirlooms |cffFF0000(Requires a level 60)|r", ACTION_HEIRLOOMS);
+        AddLocalizedOption(player, "Inv_Misc_Coin_02", Worldforged::LANG_WORLDFORGED_MENU_GENERAL_GOODS, ACTION_GENERAL_GOODS);
+        AddLocalizedOption(player, "inv_axe_09", Worldforged::LANG_WORLDFORGED_MENU_HEIRLOOMS, ACTION_HEIRLOOMS);
         if (AscensionFreepick::IsFreepickHero(player))
-            AddOption(player, "inv_misc_scrollunrolled01c", "Mystic Scrolls", ACTION_MYSTIC_SCROLLS);
+            AddLocalizedOption(player, "inv_misc_scrollunrolled01c", Worldforged::LANG_WORLDFORGED_MENU_MYSTIC_SCROLLS, ACTION_MYSTIC_SCROLLS);
         if (SellsAltars())
-            AddOption(player, "ability_racial_arcaneaffinity", "Altars", ACTION_ALTARS);
-        AddOption(player, "Mail_GMIcon", "Upgrade Worldforged Weapons", ACTION_WEAPONS);
-        AddOption(player, "Mail_GMIcon", "Upgrade Worldforged Armor", ACTION_ARMOUR);
+            AddLocalizedOption(player, "ability_racial_arcaneaffinity", Worldforged::LANG_WORLDFORGED_MENU_ALTARS, ACTION_ALTARS);
+        AddLocalizedOption(player, "Mail_GMIcon", Worldforged::LANG_WORLDFORGED_MENU_UPGRADE_WEAPONS, ACTION_WEAPONS);
+        AddLocalizedOption(player, "Mail_GMIcon", Worldforged::LANG_WORLDFORGED_MENU_UPGRADE_ARMOUR, ACTION_ARMOUR);
         SendGossipMenuFor(player, Worldforged::GUARDIAN_ENTRY, creature->GetGUID());
     }
 
@@ -102,7 +129,7 @@ namespace
     {
         ClearGossipMenuFor(player);
         for (uint32 index = 0; index < SCROLL_STORES.size(); ++index)
-            AddOption(player, SCROLL_STORES[index].Icon, SCROLL_STORES[index].Class,
+            AddOption(player, SCROLL_STORES[index].Icon, LocalizedClassName(player, SCROLL_STORES[index].ClassId),
                 ACTION_MYSTIC_SCROLL_CLASS + index);
         SendGossipMenuFor(player, Worldforged::GUARDIAN_ENTRY, creature->GetGUID());
     }
@@ -138,7 +165,8 @@ public:
             case ACTION_HEIRLOOMS:
                 if (player->GetLevel() < HEIRLOOM_LEVEL)
                 {
-                    ChatHandler(player->GetSession()).SendSysMessage("You must be level 60 to buy heirlooms.");
+                    ChatHandler(player->GetSession()).PSendModuleSysMessage(
+                        Worldforged::MODULE_NAME, Worldforged::LANG_WORLDFORGED_HEIRLOOM_LEVEL_REQUIRED);
                     SendMainMenu(player, creature);
                     return true;
                 }

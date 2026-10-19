@@ -20,6 +20,7 @@
 #include "AscensionCompatOpcodes.h"
 #include "AscensionItemScaling.h"
 
+#include "Chat.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
 #include "Field.h"
@@ -120,6 +121,16 @@ namespace
         session->SendPacket(&packet);
     }
 
+    /// The store window shows the result string it is given, so every failure
+    /// message the player can read goes through the module string system here.
+    /// RESULT_QUERY_OK and RESULT_PURCHASE_OK are exempt: the client compares
+    /// those two against fixed English text.
+    void SendPurchaseFailure(WorldSession* session, uint32 stringId)
+    {
+        SendPurchaseResult(session, ChatHandler(session).PGetParseModuleString(
+            Worldforged::MODULE_NAME, stringId).c_str());
+    }
+
     bool HandleQuery(WorldSession* session, WorldPacket const& packet)
     {
         Player* player = session->GetPlayer();
@@ -169,22 +180,30 @@ namespace
 
         if (!player->HasItemCount(recipe.baseItem, 1, true))
         {
-            SendPurchaseResult(session, "You no longer carry the item to upgrade.");
+            SendPurchaseFailure(session, Worldforged::LANG_WORLDFORGED_PURCHASE_LOST_BASE_ITEM);
             return true;
         }
 
         if (!Worldforged::IsUnlocked(session->GetAccountId(), recipe.unlockCreature))
         {
-            CreatureTemplate const* boss = sObjectMgr->GetCreatureTemplate(recipe.unlockCreature);
-            std::string const message = Acore::StringFormat("Defeat {} to unlock this upgrade for your account.",
-                                                            boss ? boss->Name : "the raid's last boss");
-            SendPurchaseResult(session, message.c_str());
+            // The boss name is localized like any creature name: the row in
+            // creature_template holds enUS, creature_template_locale the rest.
+            std::string bossName = "the raid's last boss";
+            if (CreatureTemplate const* boss = sObjectMgr->GetCreatureTemplate(recipe.unlockCreature))
+            {
+                bossName = boss->Name;
+                if (CreatureLocale const* locale = sObjectMgr->GetCreatureLocale(recipe.unlockCreature))
+                    ObjectMgr::GetLocaleString(locale->Name, session->GetSessionDbLocaleIndex(), bossName);
+            }
+
+            SendPurchaseResult(session, ChatHandler(session).PGetParseModuleString(
+                Worldforged::MODULE_NAME, Worldforged::LANG_WORLDFORGED_PURCHASE_LOCKED, bossName).c_str());
             return true;
         }
 
         if (!player->HasItemCount(Worldforged::CURRENCY_ITEM, cost, true))
         {
-            SendPurchaseResult(session, "You do not have enough Runes of Ascension.");
+            SendPurchaseFailure(session, Worldforged::LANG_WORLDFORGED_PURCHASE_NO_CURRENCY);
             return true;
         }
 
@@ -196,7 +215,7 @@ namespace
         if (fits != EQUIP_ERR_OK)
         {
             player->SendEquipError(fits, nullptr, nullptr, recipe.targetItem);
-            SendPurchaseResult(session, "You have no room for the upgraded item.");
+            SendPurchaseFailure(session, Worldforged::LANG_WORLDFORGED_PURCHASE_NO_ROOM);
             return true;
         }
 

@@ -75,6 +75,28 @@ namespace Worldforged
     constexpr char const* RESULT_QUERY_OK = "QUERY_CUSTOM_STORE_OK";
     constexpr char const* RESULT_PURCHASE_OK = "PURCHASE_CUSTOM_STORE_ITEM_OK";
 
+    // How this module is named in `module_string` and `module_string_locale`.
+    // Every player-facing string lives there and is picked by session locale,
+    // the same way mod-transmog does it; the ids below are the rows in it.
+    constexpr char const* MODULE_NAME = "mod-worldforged-upgrades";
+
+    // Rows of `module_string` for this module. The ids are stable: renumbering
+    // them means rewriting the SQL migration, so append, never reorder.
+    enum WorldforgedStrings : uint32
+    {
+        LANG_WORLDFORGED_MENU_GENERAL_GOODS      = 1,  // Guardian menu
+        LANG_WORLDFORGED_MENU_HEIRLOOMS          = 2,  // Guardian menu
+        LANG_WORLDFORGED_MENU_MYSTIC_SCROLLS     = 3,  // Guardian menu
+        LANG_WORLDFORGED_MENU_ALTARS             = 4,  // Guardian menu
+        LANG_WORLDFORGED_MENU_UPGRADE_WEAPONS    = 5,  // Guardian menu
+        LANG_WORLDFORGED_MENU_UPGRADE_ARMOUR     = 6,  // Guardian menu
+        LANG_WORLDFORGED_HEIRLOOM_LEVEL_REQUIRED = 7, // Guardian, level check
+        LANG_WORLDFORGED_PURCHASE_LOST_BASE_ITEM = 8, // Store, purchase failed
+        LANG_WORLDFORGED_PURCHASE_LOCKED         = 9,  // Store, raid boss pending
+        LANG_WORLDFORGED_PURCHASE_NO_CURRENCY    = 10, // Store, not enough runes
+        LANG_WORLDFORGED_PURCHASE_NO_ROOM        = 11, // Store, bags are full
+    };
+
     struct Recipe
     {
         uint32 key = 0;          ///< what the client sends back when buying
