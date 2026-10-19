@@ -2054,7 +2054,8 @@ private:
         ForEachOwnedItem(player, false, [&](Item* item)
         {
             auto itr = g_chainOf.find(item->GetEntry());
-            if (itr == g_chainOf.end() || !itr->second.second)
+            if (itr == g_chainOf.end() || !itr->second.second ||
+                player->PlayerTalkClass->GetGossipMenu().GetMenuItemCount() >= GOSSIP_MAX_MENU_ITEMS - 1)
                 return;
             std::string const name = item->GetTemplate()->Name1;
             std::string const level = LevelName(itr->second.second);

@@ -42,7 +42,11 @@ GossipMenu::~GossipMenu()
 
 void GossipMenu::AddMenuItem(int32 menuItemId, uint8 icon, std::string const& message, uint32 sender, uint32 action, std::string const& boxMessage, uint32 boxMoney, bool coded /*= false*/)
 {
-    ASSERT(_menuItems.size() <= GOSSIP_MAX_MENU_ITEMS);
+    if (_menuItems.size() >= GOSSIP_MAX_MENU_ITEMS)
+    {
+        LOG_ERROR("misc", "GossipMenu::AddMenuItem: menu {} is full ({} options), dropping \"{}\"", _menuId, GOSSIP_MAX_MENU_ITEMS, message);
+        return;
+    }
 
     // Find a free new id - script case
     if (menuItemId == -1)
