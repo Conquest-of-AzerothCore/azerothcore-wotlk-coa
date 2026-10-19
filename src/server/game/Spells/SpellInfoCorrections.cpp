@@ -22,6 +22,10 @@
 #include "SpellInfo.h"
 #include "SpellMgr.h"
 
+// Warcraft Reborn crossover Mystic Enchants (stock talent + 1,300,000) already carry Ascension's own retargeting at
+// Reborn spells (Improved Devotion Aura's modifier names Reborn Devotion Aura); a stock correction would undo it
+constexpr uint32 CROSSOVER_TWIN_OFFSET = 1300000;
+
 inline bool SameSpellTuning(SpellInfo const* first, SpellInfo const* second)
 {
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
@@ -58,7 +62,8 @@ inline void ApplySpellFix(std::initializer_list<uint32> spellIds, void(*fix)(Spe
         std::vector<SpellInfo*> twins;
         auto const [begin, end] = sSpellMgr->GetSpellTwins().equal_range(spellId);
         for (auto itr = begin; itr != end; ++itr)
-            if (SpellInfo const* twin = sSpellMgr->GetSpellInfo(itr->second); twin && SameSpellTuning(spellInfo, twin))
+            if (SpellInfo const* twin = sSpellMgr->GetSpellInfo(itr->second); twin && SameSpellTuning(spellInfo, twin) &&
+                itr->second - spellId != CROSSOVER_TWIN_OFFSET)
                 twins.push_back(const_cast<SpellInfo*>(twin));
 
         fix(const_cast<SpellInfo*>(spellInfo));
