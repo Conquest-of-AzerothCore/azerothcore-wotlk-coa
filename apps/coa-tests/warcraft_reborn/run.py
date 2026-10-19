@@ -285,6 +285,9 @@ int main(int, char** argv)
     };
     Check(namesake(50880, 1150880) && namesake(133, 1100133) && !namesake(1454, 1101454) && !namesake(160, 1100160),
         "a differently built Reborn spell of the same name (Icy Talons, Fireball) is a namesake, a twin or an unrelated spell is not");
+    Check(namesake(5487, 1105487) && namesake(9634, 1109634) && !twinned(5487, 1105487) && twinned(779, 1100779) &&
+            twinned(5229, 1105229) && twinned(768, 1100768),
+        "Reborn Bear and Dire Bear Form are namesakes, not twins, of the forms stock Swipe, Enrage and Bash require");
 
     std::unordered_map<std::uint32_t, std::uint32_t> const stockSlam = { { 1464, 1464 }, { 8820, 1464 }, { 11604, 1464 },
         { 11605, 1464 }, { 25241, 1464 }, { 25242, 1464 }, { 47474, 1464 }, { 47475, 1464 } };
@@ -345,7 +348,7 @@ TWIN_COPIES = {
         "CopyToSpellTwins(mSpellCooldownOverrideMap);", "CopyToSpellTwins(mSpellProcMap);",
         "CopyToSpellTwins(mSpellBonusMap);", "CopyToSpellTwins(mSpellThreatMap);",
         "CopyToSpellTwins(mSpellMixologyMap);", "CopyToSpellTwins(mSpellCones);", "twinRequirements", "twinGroups",
-        "twinLinks", "mSpellTargetPositions[{ twin, SpellEffIndex(i) }]", "mSpellPetAuraMap.emplace((twin << 8) + i",
+        "twinLinks", "GetSpellTwinFor(spellReq, twin->second)", "mSpellTargetPositions[{ twin, SpellEffIndex(i) }]", "mSpellPetAuraMap.emplace((twin << 8) + i",
         "databaseAttributes.contains(twin)"],
     "src/server/game/Globals/ObjectMgr.cpp": ["sSpellMgr->GetSpellTwins()"],
     "src/server/game/World/World.cpp": ["sSpellMgr->LoadSpellTwins(false);", "sSpellMgr->LoadSpellTwins(true);"],
