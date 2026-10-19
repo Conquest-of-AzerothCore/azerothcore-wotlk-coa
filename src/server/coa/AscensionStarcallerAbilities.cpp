@@ -323,7 +323,7 @@ class starcaller_spells : public AllSpellScript
                             break;
                     }
             }
-            if ((Any(info, {801990, 574328}) && player->HasAura(800504)) ||
+            if ((Any(info, {801990, 574328}) && (player->HasAura(800504) || player->HasAura(803554))) ||
                 (Any(info, {575030, 801987}) && critical && player->HasAura(704725)))
                 Cast(player, target, 574154);
             if (Any(info, {801990, 574328}) && player->HasAura(300237))

@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "name": "Eclipsing Arrows marks allies healed by Hand of Elune (#7524)",
+  "contract": "#7524: healing with Hand of Elune never applies the Eclipsing Arrows mark (574154). Engine path: AscensionStarcallerAbilities OnSpellHitResult casts 574154 on the healed target when the spell is Hand of Elune (801990) or Touch of Moonlight (574328) and the caster holds the talent aura, either current rank 800504 or legacy sibling 803554 (same passive shape, no acquisition rows, never referenced in code before this fix). Both legs pin their path with direct learns: a damaged ally healed by 801990 must carry aura 574154 from the caster. Talent acquisition itself is covered in game.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "star",
+      "race": 1,
+      "class": 26,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "star2",
+      "race": 1,
+      "class": 26,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI, level scaling and the login patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "learn",
+      "actor": "star",
+      "label": "Learn Eclipsing Arrows",
+      "spell": 800504
+    },
+    {
+      "action": "learn",
+      "actor": "star",
+      "label": "Learn Hand of Elune",
+      "spell": 801990
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "equals": 1,
+      "label": "SETUP: the talent aura is present",
+      "metric": "aura",
+      "spell": 800504,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "label": "Wound the ally so the heal lands for nonzero",
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "star",
+      "label": "Heal the ally with Hand of Elune",
+      "spell": 801990,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "star",
+      "equals": 0,
+      "label": "SETUP: Hand of Elune cast accepted",
+      "metric": "cast_failure",
+      "spell": 801990
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "label": "DISCRIMINATING: the healed ally carries the Eclipsing Arrows mark",
+      "metric": "aura",
+      "spell": 574154,
+      "caster": "star",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "STREAM: the mark row reaches the client with its wording",
+      "actor": "star",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 574154,
+      "text": "Huntress Shot",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "star2",
+      "label": "Learn legacy Eclipsing Arrows",
+      "spell": 803554
+    },
+    {
+      "action": "learn",
+      "actor": "star2",
+      "label": "Learn Hand of Elune",
+      "spell": 801990
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "label": "Wound the ally again so the heal lands for nonzero",
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "star2",
+      "label": "Heal the ally with Hand of Elune",
+      "spell": 801990,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "label": "DISCRIMINATING: the legacy rank marks too",
+      "metric": "aura",
+      "spell": 574154,
+      "caster": "star2",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}
