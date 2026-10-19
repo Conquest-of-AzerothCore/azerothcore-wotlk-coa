@@ -18,10 +18,12 @@
 #include "Field.h"
 #include "GameTime.h"
 #include "Log.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "QueryResult.h"
 #include "Random.h"
 #include "ScriptMgr.h"
+#include "Spell.h"
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellInfo.h"
@@ -375,6 +377,32 @@ class spell_ascension_mystic_enchant_proc : public AuraScript
         return true;
     }
 
+    // A cast-phase event carries no action target (Spell::_cast procs with none), so the stock handler casts the
+    // trigger at nothing, and a trigger that needs a unit (Madness's tentacles at the enemy, Heavy Thunder's delayed
+    // check) fails silently. Aim it at the cast's own unit target, or at the player for a helpful trigger. An enchant
+    // with an action script of its own (AscensionMysticEnchantScripts.cpp) supplies the action itself.
+    void AimCastTrigger(AuraEffect const* effect, ProcEventInfo& eventInfo)
+    {
+        if (eventInfo.GetActionTarget() || HasActionScript())
+            return;
+        SpellInfo const* trigger = sSpellMgr->GetSpellInfo(effect->GetSpellInfo()->Effects[effect->GetEffIndex()].TriggerSpell);
+        if (!trigger)
+            return;
+        Unit* caster = GetTarget();
+        Spell const* spell = eventInfo.GetProcSpell();
+        Unit* target = spell ? spell->m_targets.GetUnitTarget() : nullptr;
+        if (!target || (trigger->IsPositive() && !caster->IsFriendlyTo(target)))
+            target = caster;
+        PreventDefaultAction();
+        caster->CastSpell(target, trigger, true, nullptr, effect);
+    }
+
+    bool HasActionScript() const
+    {
+        SpellScriptsBounds const bounds = sObjectMgr->GetSpellScriptsBounds(GetId());
+        return std::distance(bounds.first, bounds.second) > 1;
+    }
+
     // after the trigger spell: a counter consumed here is not refilled by an earlier effect of the same event
     void Consume(AuraEffect const* effect, ProcEventInfo&)
     {
@@ -389,6 +417,8 @@ class spell_ascension_mystic_enchant_proc : public AuraScript
     void Register() override
     {
         DoCheckEffectProc += AuraCheckEffectProcFn(spell_ascension_mystic_enchant_proc::CheckEffect, EFFECT_ALL,
+            SPELL_AURA_PROC_TRIGGER_SPELL);
+        OnEffectProc += AuraEffectProcFn(spell_ascension_mystic_enchant_proc::AimCastTrigger, EFFECT_ALL,
             SPELL_AURA_PROC_TRIGGER_SPELL);
         AfterEffectProc += AuraEffectProcFn(spell_ascension_mystic_enchant_proc::Consume, EFFECT_ALL,
             SPELL_AURA_PROC_TRIGGER_SPELL);
