@@ -192,10 +192,17 @@ int32 Stacks(Unit const* unit, uint32 aura, ObjectGuid caster = ObjectGuid::Empt
     return found->GetStackAmount() > 1 || !found->GetCharges() ? found->GetStackAmount() : found->GetCharges();
 }
 
-bool Holds(Condition const& condition, ProcEventInfo& eventInfo)
+// The enchant's wearer and the other side of the event. On a taken event (damaged, parry) the event's actor is the
+// attacker, so "health<35" or "stacks:Shield Block" must read the wearer, not the actor.
+std::pair<Unit*, Unit*> Sides(Unit* owner, ProcEventInfo& eventInfo)
 {
     Unit* actor = eventInfo.GetActor();
-    Unit* target = eventInfo.GetActionTarget();
+    return { owner, actor == owner ? eventInfo.GetActionTarget() : actor };
+}
+
+bool Holds(Condition const& condition, Unit* owner, ProcEventInfo& eventInfo)
+{
+    auto const [actor, target] = Sides(owner, eventInfo);
     switch (condition.What)
     {
         case Condition::Kind::Power:
@@ -261,15 +268,15 @@ bool HasAny(Unit const* unit, std::vector<uint32> const& auras, ObjectGuid caste
         [unit, caster](uint32 aura) { return unit->HasAura(aura, caster); });
 }
 
-bool Conditions(EffectRule const& rule, ProcEventInfo& eventInfo)
+bool Conditions(EffectRule const& rule, Unit* owner, ProcEventInfo& eventInfo)
 {
-    Unit* actor = eventInfo.GetActor();
+    auto const [actor, target] = Sides(owner, eventInfo);
     if (!rule.RequiresAura.empty() && !HasAny(actor, rule.RequiresAura))
         return false;
-    if (!rule.TargetAura.empty() && !(actor && HasAny(eventInfo.GetActionTarget(), rule.TargetAura, actor->GetGUID())))
+    if (!rule.TargetAura.empty() && !(actor && HasAny(target, rule.TargetAura, actor->GetGUID())))
         return false;
     return std::all_of(rule.Conditions.begin(), rule.Conditions.end(),
-        [&eventInfo](Condition const& condition) { return Holds(condition, eventInfo); });
+        [owner, &eventInfo](Condition const& condition) { return Holds(condition, owner, eventInfo); });
 }
 
 bool KillingBlowMatches(EffectRule const& rule, ProcEventInfo& eventInfo)
@@ -285,9 +292,9 @@ bool KillingBlowMatches(EffectRule const& rule, ProcEventInfo& eventInfo)
         (!rule.SchoolMask || (itr->second.SchoolMask & rule.SchoolMask));
 }
 
-bool Matches(EffectRule const& rule, ProcEventInfo& eventInfo)
+bool Matches(EffectRule const& rule, Unit* owner, ProcEventInfo& eventInfo)
 {
-    if (!Conditions(rule, eventInfo))
+    if (!Conditions(rule, owner, eventInfo))
         return false;
     if (rule.Event == ProcEvent::Kill)
     {
@@ -363,7 +370,7 @@ class spell_ascension_mystic_enchant_proc : public AuraScript
         // row admits
         std::vector<EffectRule const*> const& rules = itr->second[effect->GetEffIndex()];
         auto const match = std::find_if(rules.begin(), rules.end(),
-            [&eventInfo](EffectRule const* rule) { return Matches(*rule, eventInfo); });
+            [this, &eventInfo](EffectRule const* rule) { return Matches(*rule, GetTarget(), eventInfo); });
         if (match == rules.end())
             return false;
         EffectRule const* rule = *match;
