@@ -55,7 +55,8 @@ public:
         };
         static ChatCommandTable commandTable =
         {
-            { "teleport", teleCommandTable }
+            { "teleport", teleCommandTable },
+            { "tele",     teleCommandTable }
         };
         return commandTable;
     }
