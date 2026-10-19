@@ -230,10 +230,10 @@ namespace
     /// These exclusions are not optional: a creature that belongs to somebody - a pet, a guardian, a
     /// summon, a totem, a charmed unit - must never be re-levelled, and neither must a trigger, a
     /// critter or a non-combat pet, which are scenery with a health bar. A world boss is authored for a
-    /// raid at its level, and a creature that serves (any npcflag but gossip) or cannot be fought keeps its level
-    /// for everyone. Those two are read from the creature's spawn and template rather than from its
-    /// live flags, which scripts toggle during events: a client caches the level it was told, so the
-    /// view must not appear and vanish with them.
+    /// raid at its level, and a creature that cannot be fought keeps its level for everyone. A creature
+    /// that serves (any npcflag but gossip) is decided per character in `ViewableBy`. Both flags are read
+    /// from the creature's spawn and template rather than from its live flags, which scripts toggle during
+    /// events: a client caches the level it was told, so the view must not appear and vanish with them.
     ///
     /// The maps are the open world the realm lists and the classic dungeons with a band. Raids,
     /// battlegrounds and arenas never scale, and neither does CoA's scripted private content. A dungeon
@@ -274,8 +274,22 @@ namespace
         uint32 unitFlags = 0;
         uint32 dynamicFlags = 0;
         ObjectMgr::ChooseCreatureFlags(info, npcFlags, unitFlags, dynamicFlags, creature->GetCreatureData());
-        return !(npcFlags & ~UNIT_NPC_FLAG_GOSSIP) &&
-               !(unitFlags & (UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC));
+        return !(unitFlags & (UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC));
+    }
+
+    /// Whether a creature offers a service (any npcflag but gossip), read from its spawn and template for
+    /// the same reason as in `ViewableCreature`.
+    bool Serves(Creature const* creature)
+    {
+        CreatureTemplate const* info = creature->GetCreatureTemplate();
+        if (!info)
+            return false;
+
+        uint32 npcFlags = 0;
+        uint32 unitFlags = 0;
+        uint32 dynamicFlags = 0;
+        ObjectMgr::ChooseCreatureFlags(info, npcFlags, unitFlags, dynamicFlags, creature->GetCreatureData());
+        return (npcFlags & ~UNIT_NPC_FLAG_GOSSIP) != 0;
     }
 
     /// Whether this character's version of this creature is theirs to fight.
@@ -286,13 +300,19 @@ namespace
     /// immunities and flags, so a creature would appear and vanish as a view depending on whether it
     /// could be seen at that instant - and a client caches the level it was told, so the level it
     /// displays would flap with it. The reaction is faction and faction state: hostile and neutral
-    /// creatures scale for a character, friendly ones do not.
+    /// creatures scale for a character, friendly ones do not. A creature that serves scales only for a
+    /// character it is hostile to, who cannot use its service: the Hillsbrad Fields smiths are vendors
+    /// to the Alliance and quest kills for the Horde, while a neutral goblin vendor stays at its level.
     ///
     /// Deliberately not excluded: a game master. A view is only ever one client's, so a GM who turned
     /// scaling on sees the same world a player would.
     bool ViewableBy(Player const* viewer, Creature const* creature)
     {
-        return viewer && creature && viewer->GetReactionTo(creature) <= REP_NEUTRAL;
+        if (!viewer || !creature)
+            return false;
+
+        ReputationRank const reaction = viewer->GetReactionTo(creature);
+        return Serves(creature) ? reaction < REP_NEUTRAL : reaction <= REP_NEUTRAL;
     }
 
     bool ViewFor(Creature const* creature, Player* viewer, CreatureView& view)
