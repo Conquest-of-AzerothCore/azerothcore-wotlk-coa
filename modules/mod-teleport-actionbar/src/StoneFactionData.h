@@ -146,7 +146,7 @@ inline constexpr Entry TeleportFactions[] =
     { 76886   , Alliance, "Wintergarde Keep" },
     { 76889   , Horde   , "Agmar's Hammer" },
     { 1777090 , Horde   , "Bloodhoof Village" },
-    { 777021  , Horde   , "Bloodvenom Post" },
+    { 777021  , Both    , "Bloodvenom Post" },
     { 1777049 , Horde   , "Brackenwall Village" },
     { 1777085 , Horde   , "Brill" },
     { 1777024 , Horde   , "Camp Mojache" },
