@@ -97,6 +97,8 @@ std::vector<std::pair<std::uint32_t, std::uint32_t>> RankTwins(std::vector<std::
 
 std::uint32_t ProficiencyClassMask(std::uint32_t spellId, std::uint32_t classMask);
 
+std::uint32_t SkillClassMask(std::uint32_t skillId, std::uint32_t classMask);
+
 bool StockClassUses(std::uint32_t classId, std::uint32_t itemClass, std::uint32_t itemSubClass);
 
 std::vector<TrainerSpell> TrainerSpells(Data const& data, AscensionFreepick::Realm const& realm, std::uint32_t classId,

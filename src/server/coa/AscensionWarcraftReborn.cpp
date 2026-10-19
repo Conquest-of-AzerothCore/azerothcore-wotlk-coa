@@ -92,6 +92,9 @@ void ApplyStockProficiencies()
     for (SkillLineAbilityEntry const* ability : sSkillLineAbilityStore)
         if (uint32 const classMask = ProficiencyClassMask(ability->Spell, ability->ClassMask); classMask != ability->ClassMask)
             const_cast<SkillLineAbilityEntry*>(ability)->ClassMask = classMask;
+    for (SkillRaceClassInfoEntry const* info : sSkillRaceClassInfoStore)
+        if (uint32 const classMask = SkillClassMask(info->SkillID, info->ClassMask); classMask != info->ClassMask)
+            const_cast<SkillRaceClassInfoEntry*>(info)->ClassMask = classMask;
 }
 
 std::vector<std::vector<uint32>> LoadRankChains()

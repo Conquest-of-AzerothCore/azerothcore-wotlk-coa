@@ -281,6 +281,18 @@ int main(int, char** argv)
             StockClassUses(WARRIOR, ITEM_CLASS_WEAPON_ID, 16) && !StockClassUses(ROGUE, ITEM_CLASS_ARMOR_ID, 3) &&
             !StockClassUses(MAGE, ITEM_CLASS_WEAPON_ID, 0) && !StockClassUses(HERO, ITEM_CLASS_WEAPON_ID, 7),
         "a starting rogue sword, hunter bow and warrior throwing axe are usable, rogue mail and a mage axe are not");
+    ClientDBC skillClasses;
+    std::uint32_t thrownClasses = 0;
+    if (skillClasses.Load(GetClientDBCPath("SkillRaceClassInfo.dbc"), 4))
+        for (std::uint32_t index = 0; index < skillClasses.GetRecordCount(); ++index)
+            if (skillClasses.GetRecord(index).GetUInt32(1) == 176)
+                thrownClasses = skillClasses.GetRecord(index).GetUInt32(3);
+    std::uint32_t const rebornThrown = SkillClassMask(176, thrownClasses);
+    Check(thrownClasses && !(thrownClasses & (1u << (WARRIOR - 1))) && (rebornThrown & (1u << (WARRIOR - 1))) &&
+            (rebornThrown & (1u << (HUNTER - 1))) && !(rebornThrown & (1u << (MAGE - 1))) &&
+            (rebornThrown & (1u << (HERO - 1))) && SkillClassMask(293, 0xFFFFFFFF) == (~0x5DFu | 0x3u),
+        "the Thrown skill, which the client gives only rogues, also opens to warriors and hunters, and Plate only to "
+        "warriors and paladins among the original classes");
 
     std::vector<std::pair<std::uint32_t, std::uint32_t>> const twins = SpellTwins(spellCount,
         [&layouts](std::uint32_t spellId) -> std::optional<SpellLayout>
