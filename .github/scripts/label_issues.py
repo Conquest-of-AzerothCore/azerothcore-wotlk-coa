@@ -16,6 +16,7 @@ MANAGED_LABELS = [
     "Config",
     "CPP Edit",
     "Crash Fix",
+    "Creature",
     "Cultist",
     "DB",
     "Dungeon",
@@ -27,6 +28,7 @@ MANAGED_LABELS = [
     "Manastorm",
     "Necromancer",
     "Not Tested",
+    "Object",
     "Primalist",
     "Pyromancer",
     "Quest",
@@ -42,6 +44,7 @@ MANAGED_LABELS = [
     "Tested",
     "Tinker",
     "Venomancer",
+    "WarcraftReborn",
     "Wildcard",
     "Witch Doctor",
     "Witch Hunter",
@@ -104,6 +107,11 @@ REPORT_SECTION_LABELS = {
     "dungeon": "Dungeon",
     "raid": "Raid",
     "crash": "Crash Fix",
+    "creature": "Creature",
+    "npc": "Creature",
+    "object": "Object",
+    "gameobject": "Object",
+    "warcraftreborn": "WarcraftReborn",
 }
 
 
@@ -119,6 +127,15 @@ SCOPE_LABELS = {
     "manastorm": "Manastorm",
     "wildcard": "Wildcard",
     "xoroth": "Knight of Xoroth",
+    "creature": "Creature",
+    "creatures": "Creature",
+    "npc": "Creature",
+    "npcs": "Creature",
+    "object": "Object",
+    "objects": "Object",
+    "gameobject": "Object",
+    "gameobjects": "Object",
+    "warcraftreborn": "WarcraftReborn",
     **{label.replace(" ", "").casefold(): label for label in CLASS_ID_LABELS.values()},
 }
 
@@ -138,6 +155,10 @@ TITLE_PATTERNS = {
 DESCRIPTION_PATTERNS = {
     "Manastorm": r"\bmanastorm\b",
     "Wildcard": r"\bwildcard\b",
+    "WarcraftReborn": (
+        r"\bwarcraft\s*reborn\b"
+        r"|\breborn\s+(?:warrior|paladin|hunter|rogue|priest|death\s+knight|shaman|mage|warlock|druid)s?\b"
+    ),
 }
 
 

@@ -139,6 +139,33 @@ class LabelIssuesTests(unittest.TestCase):
             with self.subTest(issue=issue):
                 self.assertEqual(label_issues.determine_labels(issue), expected)
 
+    def test_creature_and_object_from_report_category_or_title_prefix(self):
+        for issue, expected in (
+            ({"title": "[Creature/NPC] NPC placed in tree, Tarren Mill"}, ["Creature"]),
+            ({"title": "[NPC] Meven Korgal stands in the wrong spot"}, ["Creature"]),
+            ({"title": "Honon", "body": "**Category:** Creature/NPC\n"}, ["Creature"]),
+            ({"body": "#### Creature\nDisciple of Naralex [ID: 3678]"}, ["Creature"]),
+            ({"title": "[Object] Voodoo Cauldron"}, ["Object"]),
+            ({"title": "Keg", "body": "**Category:** GameObject\n"}, ["Object"]),
+            ({"title": "Wardrobe has no effect on tamed creatures"}, []),
+            ({"title": "Missing environment object"}, []),
+        ):
+            with self.subTest(issue=issue):
+                self.assertEqual(label_issues.determine_labels(issue), expected)
+
+    def test_warcraft_reborn_from_title_or_report_description(self):
+        for issue, expected in (
+            ({"title": "Warcraft Reborn Warlock spells that did nothing"}, ["WarcraftReborn"]),
+            ({"title": "Reborn Druid abilities ignore their tooltips"}, ["WarcraftReborn"]),
+            ({"title": "Soul Fire", "body": "#### Issue\nOn WarcraftReborn the cast never finishes\n\nLocation: 1 2 3 0"},
+             ["WarcraftReborn"]),
+            ({"title": "[WarcraftReborn] Holy Nova"}, ["WarcraftReborn"]),
+            ({"title": "Reborn Guardian ignores AoE avoidance"}, ["Guardian"]),
+            ({"title": "Racials", "body": "Only local change: Warcraft Reborn disabled"}, []),
+        ):
+            with self.subTest(issue=issue):
+                self.assertEqual(label_issues.determine_labels(issue), expected)
+
     def test_pull_request_title_scope_and_type(self):
         for title, expected in (
             ("feat(CoA/Manastorm): add loadouts", ["Feature", "Manastorm"]),
@@ -149,6 +176,11 @@ class LabelIssuesTests(unittest.TestCase):
             ("fix(CoA/Items): stream item rows", ["Item"]),
             ("fix(CoA/Dungeons): boss kits", ["Dungeon"]),
             ("fix(CoA/Wildcard): form eligibility", ["Wildcard"]),
+            ("fix(CoA/Creature): Bael'dun Excavator model", ["Creature"]),
+            ("fix(CoA/Creatures/NPC): boss ranks", ["Creature"]),
+            ("fix(CoA/GameObject): Brumbof barrel", ["Object"]),
+            ("fix(CoA/WarcraftReborn): Rogue talents", ["WarcraftReborn"]),
+            ("fix(CoA): Warcraft Reborn Shaman spells that did nothing", ["WarcraftReborn"]),
             ("fix(Core): prevent a crash on logout", ["Crash Fix", "Bug"]),
         ):
             with self.subTest(title=title):
