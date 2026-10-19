@@ -372,7 +372,8 @@ class spell_ascension_mystic_enchant_proc : public AuraScript
             return false;
         if (rule->Chance < 100.0f && !roll_chance_f(rule->Chance))
             return false;
-        _ready[effect->GetEffIndex()] = now + rule->Cooldown;
+        // the cooldown starts when the effect procs (Consume): the aura's own proc chance is rolled after this check,
+        // and a failed roll must not lock the effect out
         _fired[effect->GetEffIndex()] = rule;
         return true;
     }
@@ -410,6 +411,7 @@ class spell_ascension_mystic_enchant_proc : public AuraScript
         _fired[effect->GetEffIndex()] = nullptr;
         if (!rule)
             return;
+        _ready[effect->GetEffIndex()] = GameTime::Now() + rule->Cooldown;
         for (uint32 aura : rule->ConsumeAura)
             GetTarget()->RemoveAurasDueToSpell(aura);
     }
