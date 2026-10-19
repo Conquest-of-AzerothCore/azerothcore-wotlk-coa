@@ -221,7 +221,6 @@ void SyncAuras(Player* player, State& state)
         if (!wanted.contains(spell))
         {
             player->RemoveAurasDueToSpell(spell);
-            // only the temporary grant goes: a spell the player learned some other way stays
             if (Enchant const* enchant = Loaded.FindSpell(spell); enchant && enchant->Taught)
                 player->removeSpell(enchant->Taught, SPEC_MASK_ALL, true);
         }

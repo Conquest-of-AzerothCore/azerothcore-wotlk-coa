@@ -2,13 +2,6 @@
  * Copyright (C) 2016+ AzerothCore <www.azerothcore.org>, released under GNU AGPL v3 license: https://github.com/azerothcore/azerothcore-wotlk/blob/master/LICENSE-AGPL3
  */
 
-// Warcraft Reborn Mystic Enchants whose effect is a dummy, has no trigger spell, or lives outside the proc system.
-//
-// Where an enchant procs, spell_ascension_mystic_enchant_proc (AscensionMysticEnchantProcs.cpp) still decides WHEN
-// from coa_mystic_enchant_proc; the AuraScripts here, registered on the same enchant, only supply WHAT happens
-// (PreventDefaultAction, then the action the tooltip names). The rest hook what is not a proc: healing received,
-// an aura arriving on the pet, a shield breaking, the dummy Evocation fires every tick.
-
 #include "CellImpl.h"
 #include "Containers.h"
 #include "GridNotifiers.h"
@@ -36,63 +29,45 @@ namespace
 {
 enum MysticEnchantScriptSpells : uint32
 {
-    // Dread Communion
     SPELL_DREAD_COMMUNION                  = 1180473,
-    // Renewed Through Absolution
     SPELL_RENEWED_THROUGH_ABSOLUTION_HEAL  = 1571424,
     SPELL_WEAKENED_SOUL                    = 1106788,
-    // Atonement
     SPELL_ATONEMENT_SINGLE_HEAL            = 1567779,
     SPELL_ATONEMENT_PENANCE_HEAL           = 1567780,
     SPELL_ATONEMENT_BUFF                   = 1567778,
-    // Fury of the Wind
     SPELL_FURY_OF_THE_WIND_JUMP            = 1590418,
     SPELL_FURY_OF_THE_WIND_SELF            = 1590421,
-    // Elune's Fury
     SPELL_ELUNES_FURY_CRIT                 = 1583365,
-    // Shadow Funnel
     SPELL_SHADOW_FUNNEL                    = 1180900,
     SPELL_SHADOW_FUNNEL_PET                = 1180901,
-    // Lightning Fangs
     SPELL_LIGHTNING_CHARGED                = 1180161,
     NPC_FERAL_SPIRIT_WOLF                  = 1129264,
-    // Demonic Whirl
     SPELL_DEMONIC_WHIRL_WHIRLWIND          = 1180111,
-    // Vampiric Death
     SPELL_VAMPIRIC_DEATH                   = 1180080,
     SPELL_VAMPIRIC_DEATH_DAMAGE            = 1180081,
     SPELL_SHADOW_WORD_DEATH_BACKLASH       = 1132409,
-    // Arcane Conduit
     SPELL_ARCANE_CONDUIT                   = 1181430,
     SPELL_ARCANE_SURGE                     = 1181431,
     SPELL_ARCANE_CONDUIT_TRIGGER           = 1181434,
-    // Shattered Renewal
     SPELL_SHATTERED_RENEWAL                = 1181000,
     SPELL_SHATTERED_RENEWAL_MANA           = 1181001,
     SPELL_SHATTERED_RENEWAL_WEAKENED_SOUL  = 1181002,
-    // Savage Frenzy
     SPELL_SAVAGE_ROAR                      = 1152610,
-    // Purity of Light
     SPELL_PURITY_OF_LIGHT                  = 1581027,
     SPELL_SURGE_OF_LIGHT                   = 1133151,
     SPELL_SURGE_OF_LIGHT_PURE              = 1333151,
-    // Hydromancer: Water Nova
     SPELL_WATER_NOVA_POOL                  = 1569715,
     SPELL_WATER_NOVA_ELECTRIFIED           = 1569735,
-    // Feeding the Abyss
     SPELL_FEEDING_THE_ABYSS                = 1154364,
     SPELL_FEEDING_THE_ABYSS_VISUAL         = 1154362,
     SPELL_FEEDING_THE_ABYSS_STORED         = 1154365,
     SPELL_ABYSSAL_ERUPTION_READY           = 1154366,
     SPELL_ABYSSAL_ERUPTION                 = 1154367,
-    // Blessing of the Divines
     SPELL_BLESSING_DIVINES                 = 1571467,
     SPELL_BLESSING_RADIANCE                = 1571470,
     SPELL_BLESSING_MENDING                 = 1571471,
-    // Cauterize
     SPELL_CAUTERIZE_BURN                   = 1181411,
     SPELL_CAUTERIZE_SLOW_CLEAR             = 1181413,
-    // Heavy Thunder
     SPELL_HEAVY_THUNDER                    = 1181080,
     SPELL_HEAVY_THUNDER_COUNTER            = 1181081,
     SPELL_HEAVY_THUNDER_EMPOWERED          = 1181082,
@@ -123,8 +98,6 @@ bool IsPriestSpell(SpellInfo const* spell, uint32 flag0, uint32 flag1)
         ((flag0 && (spell->SpellFamilyFlags[0] & flag0)) || (flag1 && (spell->SpellFamilyFlags[1] & flag1)));
 }
 
-// Dread Communion: "Your demon is healed for 25% of the healing you receive." The Demonic Empowerment
-// half is a proc rule; this is the share, which no proc event carries (healing received).
 class AscensionMysticEnchantHealShare final : public UnitScript
 {
 public:
@@ -132,7 +105,7 @@ public:
         { UNITHOOK_MODIFY_HEAL_RECEIVED, UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK, UNITHOOK_ON_AURA_APPLY,
           UNITHOOK_ON_AURA_REMOVE, UNITHOOK_MODIFY_MELEE_DAMAGE, UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN }) { }
 
-    void ModifyHealReceived(Unit* target, Unit* /*healer*/, uint32& heal, SpellInfo const* /*spellInfo*/) override
+    void ModifyHealReceived(Unit* target, Unit*, uint32& heal, SpellInfo const*) override
     {
         if (!heal || !target || !target->IsPlayer())
             return;
@@ -141,12 +114,10 @@ public:
         if (!pet || !pet->IsAlive() || pet->IsFullHealth())
             return;
         SpellInfo const* spellInfo = share->GetSpellInfo();
-        // the share is the tooltip's 25%: no effect of the enchant carries it
         HealInfo healInfo(target, pet, CalculatePct(heal, 25), spellInfo, spellInfo->GetSchoolMask());
         target->HealBySpell(healInfo);
     }
 
-    // Vampiric Death: "the damage you take from your Shadow Word: Death is reduced by 40%" (effect 1, a dummy).
     void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage, SpellInfo const* spellInfo) override
     {
         if (!spellInfo || spellInfo->Id != SPELL_SHADOW_WORD_DEATH_BACKLASH || target != attacker)
@@ -155,7 +126,6 @@ public:
             damage = uint32(uint64(damage) * uint32(std::max(0, 100 + reduction->GetAmount())) / 100);
     }
 
-    // Shadow Funnel: "While channeling Health Funnel on your Voidwalker, its auto-attacks trigger a Void Nova".
     void OnAuraApply(Unit* unit, Aura* aura) override
     {
         if (aura->GetId() == SPELL_SURGE_OF_LIGHT && unit->HasAura(SPELL_PURITY_OF_LIGHT))
@@ -175,7 +145,6 @@ public:
     void OnAuraRemove(Unit* unit, AuraApplication* application, AuraRemoveMode mode) override
     {
         Aura const* aura = application->GetBase();
-        // Feeding the Abyss: "After 10 seconds the stored damage is fed to the abyss, causing your next Life Tap to..."
         if (aura->GetId() == SPELL_FEEDING_THE_ABYSS_STORED && mode == AURA_REMOVE_BY_EXPIRE &&
             AbyssStored.contains(unit->GetGUID()))
         {
@@ -185,8 +154,6 @@ public:
         if (IsHealthFunnel(aura->GetSpellInfo()) && IsVoidwalker(unit))
             unit->RemoveAurasDueToSpell(SPELL_SHADOW_FUNNEL_PET);
 
-        // Shattered Renewal: "When your Power Word: Shield breaks from damage, it restores 5% base mana to you. This can
-        // only occur once per second."
         if (mode != AURA_REMOVE_BY_ENEMY_SPELL || !IsPriestSpell(aura->GetSpellInfo(), PRIEST_SHIELD_FLAG0, 0) ||
             !aura->GetSpellInfo()->HasAura(SPELL_AURA_SCHOOL_ABSORB))
             return;
@@ -201,9 +168,7 @@ public:
         caster->CastSpell(caster, SPELL_SHATTERED_RENEWAL_MANA, true);
     }
 
-    // Feeding the Abyss: "Your ability to Dodge is replaced with a dark hunger. You have a chance to fully absorb
-    // incoming physical damage, storing it for later use." Chance: 10% plus your spell critical strike chance.
-    void ModifyMeleeDamage(Unit* target, Unit* /*attacker*/, uint32& damage) override
+    void ModifyMeleeDamage(Unit* target, Unit*, uint32& damage) override
     {
         Hunger(target, damage);
     }
@@ -221,7 +186,6 @@ public:
     static std::unordered_map<ObjectGuid, uint32> AbyssStored;
 
 private:
-    // Heavy Thunder: "Your Thunder Clap deals 20% more damage when using single Two-Handed Weapon" (effect 0, a dummy).
     static void HeavyThunder(Unit* attacker, int32& damage, SpellInfo const* spellInfo)
     {
         Player* player = attacker ? attacker->ToPlayer() : nullptr;
@@ -247,14 +211,10 @@ private:
         AbyssStored[player->GetGUID()] += damage;
         damage = 0;
         player->CastSpell(player, SPELL_FEEDING_THE_ABYSS_VISUAL, true);
-        // the 10 second window starts with the first absorb; later absorbs add to the same store
         if (!player->HasAura(SPELL_FEEDING_THE_ABYSS_STORED))
             player->CastSpell(player, SPELL_FEEDING_THE_ABYSS_STORED, true);
     }
 
-    // Purity of Light: "Surge of Light no longer prevents a critical strike from Flash Heal or Smite and allows it to
-    // be stacked up to 2 times. However, Surge of Light only reduces the mana cost by 60%." Reborn's 1333151 is that
-    // buff; it is spent by charge, one per Flash Heal or Smite.
     static void ApplyPureSurge(Unit* unit)
     {
         unit->RemoveAurasDueToSpell(SPELL_SURGE_OF_LIGHT);
@@ -285,17 +245,12 @@ private:
 
 std::unordered_map<ObjectGuid, uint32> AscensionMysticEnchantHealShare::AbyssStored;
 
-// Feeding the Abyss: the next Life Tap after the store is fed releases it as Abyssal Eruption, damaging nearby
-// enemies and healing you and your pet. The tooltip gives no ratio; the data does: the store aura's second effect is
-// 30 and the ready buff reads "your next Life Tap will do $w2 additional damage and healing", so the eruption is its
-// own base plus 30% of the stored damage. Nothing in the data bounds the store, and a soaked killing blow would come
-// back out at full size (the uncapped Reckoning of 2005), so the bonus is capped at the caster's maximum health.
 class AscensionMysticEnchantLifeTap final : public PlayerScript
 {
 public:
     AscensionMysticEnchantLifeTap() : PlayerScript("AscensionMysticEnchantLifeTap", { PLAYERHOOK_ON_SPELL_CAST }) { }
 
-    void OnPlayerSpellCast(Player* player, Spell* spell, bool /*skipCheck*/) override
+    void OnPlayerSpellCast(Player* player, Spell* spell, bool) override
     {
         SpellInfo const* info = spell->GetSpellInfo();
         if (info->SpellFamilyName != SPELLFAMILY_WARLOCK || !(info->SpellFamilyFlags[0] & WARLOCK_LIFE_TAP_FLAG0) ||
@@ -319,9 +274,6 @@ public:
     }
 };
 
-// Hydromancer: Water Nova: "Casting Frost Shock on an enemy leaves behind a pool of splashing water for 6 sec ...
-// Dealing damage with Lightning Bolt or Chain Lightning, electrifies the water". Rules: hit of Frost Shock, damage of
-// Lightning Bolt / Chain Lightning.
 class spell_ascension_mystic_water_nova : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_water_nova);
@@ -335,7 +287,6 @@ class spell_ascension_mystic_water_nova : public AuraScript
             return;
         if (spell->SpellFamilyName == SPELLFAMILY_SHAMAN && (spell->SpellFamilyFlags[0] & SHAMAN_FROST_SHOCK_FLAG0))
         {
-            // the pool's first effect needs a unit target; the core takes the area's position from it
             if (Unit* target = eventInfo.GetActionTarget())
                 caster->CastSpell(target, SPELL_WATER_NOVA_POOL, true);
             return;
@@ -355,9 +306,6 @@ class spell_ascension_mystic_water_nova : public AuraScript
     }
 };
 
-// Renewed Through Absolution: "Penance consumes your Renew to heal your target and nearby allies for an additional
-// N Holy healing. Consuming Renew this way also reduces the duration of your active Weakened Soul by 3 sec."
-// Rule: heal of Penance on a target with your Renew.
 class spell_ascension_mystic_renewed_through_absolution : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_renewed_through_absolution);
@@ -392,9 +340,6 @@ class spell_ascension_mystic_renewed_through_absolution : public AuraScript
     }
 };
 
-// Atonement: "Dealing damage with Smite or Holy Fire heals a nearby ally ... Dealing damage with Penance heals three
-// nearby allies ... Casting any of these spells grants Atonement." The heals' targets are chosen by
-// spell_ascension_mystic_atonement_heal. Rules: direct damage of Smite / Holy Fire, damage of Penance.
 class spell_ascension_mystic_atonement : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_atonement);
@@ -415,10 +360,6 @@ class spell_ascension_mystic_atonement : public AuraScript
     }
 };
 
-// Atonement's heals go to the lowest-health allies, like the Cataclysm / Mists of Pandaria talent the enchant copies
-// ("heal a nearby low health friendly target"): one for Smite and Holy Fire, three for Penance, among the caster's
-// party or raid and their pets within the spell's radius of the caster. The heal spells' own area targeting cannot
-// express that (Penance's uses an entry-checked area that finds no one without conditions), so the list is replaced.
 class spell_ascension_mystic_atonement_heal : public SpellScript
 {
     PrepareSpellScript(spell_ascension_mystic_atonement_heal);
@@ -470,9 +411,6 @@ class spell_ascension_mystic_atonement_heal : public SpellScript
     }
 };
 
-// Fury of the Wind: "Your Windfury Weapon can jump to 2 nearby enemies but each jump reduces its damage by 25%. If no
-// other enemies are nearby the wind jumps to you instead, increasing your physical damage by 20% ... and attack speed
-// by 20% for 20 sec." Rule: damage of Windfury Attack.
 class spell_ascension_mystic_fury_of_the_wind : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_fury_of_the_wind);
@@ -502,8 +440,6 @@ class spell_ascension_mystic_fury_of_the_wind : public AuraScript
     }
 };
 
-// Elune's Fury: "dealing damage with Starfall increases your critical strike chance by 15%, lasting for 1 second per
-// target hit" (trigger 1583364: 1 sec per hit, 60 sec at most). Rule: damage of Starfall.
 class spell_ascension_mystic_elunes_fury : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_elunes_fury);
@@ -534,8 +470,6 @@ class spell_ascension_mystic_elunes_fury : public AuraScript
     }
 };
 
-// Lightning Fangs: "Using Stormstrike charges your Spirit Wolves with lightning, causing their auto attacks to deal
-// extra Nature damage for 6 seconds." Rule: cast of Stormstrike.
 class spell_ascension_mystic_lightning_fangs : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_lightning_fangs);
@@ -557,8 +491,6 @@ class spell_ascension_mystic_lightning_fangs : public AuraScript
     }
 };
 
-// Demonic Whirl: "Dealing damage with Shadow Bolt or Incinerate causes your Felguard to cast a Whirlwind ... This can
-// only occur once every 3 sec." Rule: damage of Shadow Bolt / Incinerate, cooldown 3 sec.
 class spell_ascension_mystic_demonic_whirl : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_demonic_whirl);
@@ -579,8 +511,6 @@ class spell_ascension_mystic_demonic_whirl : public AuraScript
     }
 };
 
-// Vampiric Death: "Shadow Word: Death consumes your Vampiric Touch on the target to deal damage based on 60% of the
-// total damage of your Vampiric Touch." Rule: hit of Shadow Word: Death on a target with your Vampiric Touch.
 class spell_ascension_mystic_vampiric_death : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_vampiric_death);
@@ -610,8 +540,6 @@ class spell_ascension_mystic_vampiric_death : public AuraScript
     }
 };
 
-// Savage Frenzy: "Every time you hit with Feral Frenzy the duration of your Savage Roar is increased by 6 sec."
-// Rule: damage of Feral Frenzy.
 class spell_ascension_mystic_savage_frenzy : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_savage_frenzy);
@@ -634,8 +562,6 @@ class spell_ascension_mystic_savage_frenzy : public AuraScript
     }
 };
 
-// Shattered Renewal: "After killing an opponent that yields experience or honor your Weakened Soul is removed from
-// you." Effect 0 is a dummy aura carrying the trigger, so it is not a proc-trigger effect the rule engine sees.
 class spell_ascension_mystic_shattered_renewal : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_shattered_renewal);
@@ -658,9 +584,6 @@ class spell_ascension_mystic_shattered_renewal : public AuraScript
     }
 };
 
-// Blessing of the Divines: "Your Paladin heals have a 33% chance to trigger a random blessing. This can only occur
-// once every 5 seconds." The proc effect has no trigger spell; the three blessings are the tooltip's @s: spells.
-// Rule: heal of a Paladin ability, cooldown 5 sec.
 class spell_ascension_mystic_blessing_of_the_divines : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_blessing_of_the_divines);
@@ -684,16 +607,11 @@ class spell_ascension_mystic_blessing_of_the_divines : public AuraScript
     }
 };
 
-// The two enchants below carry a school absorb of 1 point and no script: the first hit drained it and removed the whole
-// enchant aura with it (proc effects included). Their absorbs are conditional, so the amount is unlimited (-1) and the
-// script decides each hit.
-
-// Shield Master's Resolve: "damage taken while you are below 50% health is reduced by 10%" (effect 1 carries the 10).
 class spell_ascension_mystic_shield_masters_resolve : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_shield_masters_resolve);
 
-    void CalcAmount(AuraEffect const*, int32& amount, bool& /*canBeRecalculated*/)
+    void CalcAmount(AuraEffect const*, int32& amount, bool&)
     {
         amount = -1;
     }
@@ -713,17 +631,13 @@ class spell_ascension_mystic_shield_masters_resolve : public AuraScript
     }
 };
 
-// Cauterize: "An attack which would otherwise kill you will instead bring you to 35% maximum health. When this happens
-// all movement speed impairing effects are removed and you gain 50% movement speed for 6 sec, but burn, taking 3% health
-// as Fire damage every second. This effect can only occur once every minute." 1181413 clears the slows, 1181411 is the
-// speed and the burn.
 class spell_ascension_mystic_cauterize : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_cauterize);
 
     TimePoint _ready{};
 
-    void CalcAmount(AuraEffect const*, int32& amount, bool& /*canBeRecalculated*/)
+    void CalcAmount(AuraEffect const*, int32& amount, bool&)
     {
         amount = -1;
     }
@@ -750,10 +664,6 @@ class spell_ascension_mystic_cauterize : public AuraScript
     }
 };
 
-// Heavy Thunder: "Hitting single target with Thunder Clap will cause next Thunder Clap gain 40% increase critical strike
-// chance" (and costs no rage). Every Thunder Clap hit stacks the 100 ms counter (rule: damage of Thunder Clap); the
-// cast's delayed trigger (rule: cast of Thunder Clap) checks it after its delay and empowers the next Thunder Clap
-// only at one stack. The empowerment removes the counter itself; otherwise it is dropped here.
 class spell_ascension_mystic_heavy_thunder_check : public SpellScript
 {
     PrepareSpellScript(spell_ascension_mystic_heavy_thunder_check);
@@ -789,9 +699,6 @@ class spell_ascension_mystic_heavy_thunder_check : public SpellScript
     }
 };
 
-// Arcane Conduit: "every second you fire an Arcane Surge, dealing Arcane damage to your target and reduces the
-// cooldown of Arcane Power, Presence of Mind and Evocation by 10 sec." Reborn Evocation's periodic trigger casts
-// the Arcane Conduit trigger (1181434), a dummy, on every tick; with the enchant it fires the surge.
 class spell_ascension_mystic_arcane_conduit_trigger : public SpellScript
 {
     PrepareSpellScript(spell_ascension_mystic_arcane_conduit_trigger);

@@ -17,7 +17,6 @@
 namespace AscensionWarcraftReborn
 {
 constexpr std::uint32_t REBORN_SPELL_OFFSET = 1100000;
-// Mystic Enchant copies of stock talents ("Crossover Talent": Deep Wounds 1312867 is talent 12867)
 constexpr std::uint32_t CROSSOVER_SPELL_OFFSET = 1300000;
 constexpr std::uint32_t BLIZZARD_SPELL_END = 100000;
 constexpr std::uint32_t REBORN_SKILL_OFFSET = 11000;

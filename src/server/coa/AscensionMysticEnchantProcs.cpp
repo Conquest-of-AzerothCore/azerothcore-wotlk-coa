@@ -2,18 +2,6 @@
  * Copyright (C) 2016+ AzerothCore <www.azerothcore.org>, released under GNU AGPL v3 license: https://github.com/azerothcore/azerothcore-wotlk/blob/master/LICENSE-AGPL3
  */
 
-// Warcraft Reborn Mystic Enchants whose proc event lived server-side on Ascension.
-//
-// Most custom enchants are a proc-trigger aura with ProcFlags 0 and no class mask: the only record of the event is
-// the tooltip ("Casting Wrath restores 20 energy", "Dealing damage with Mongoose Bite applies Deadly Bite"), and an
-// enchant can carry several proc effects with different events. spell_proc can only describe one event per aura
-// and selects by family flags, which Reborn abilities share widely, so each enchant gets a broad spell_proc row and
-// this script, which accepts an effect's proc only for its own event and abilities (coa_mystic_enchant_proc).
-//
-// Some enchants grant a buff that should last only while another aura does ("While Borrowed Time is active...",
-// "Your Divine Plea ... additionally increases"): their trigger spells are permanent auras, so they are granted and
-// removed with the aura they ride on instead (coa_mystic_enchant_aura_link).
-
 #include "DatabaseEnv.h"
 #include "Field.h"
 #include "GameTime.h"
@@ -45,22 +33,22 @@ namespace
 {
 enum class ProcEvent : uint8
 {
-    Cast,            // the spell is cast (cast phase)
-    Hit,             // the spell lands, whatever it does
-    Damage,          // the spell deals damage, direct or periodic
+    Cast,
+    Hit,
+    Damage,
     DirectDamage,
     PeriodicDamage,
-    Heal,            // the spell heals, direct or periodic
+    Heal,
     DirectHeal,
     PeriodicHeal,
     CriticalDamage,
     CriticalHeal,
-    Critical,        // a critical damage or heal
-    Kill,            // the player kills a target that yields experience or honor; spells/school = the killing blow
-    Parry,           // the player parries a melee attack
-    Dodged,          // the player's melee attack is dodged
-    AutoAttack,      // the player's melee auto attack lands
-    Damaged          // the player takes melee or ranged damage
+    Critical,
+    Kill,
+    Parry,
+    Dodged,
+    AutoAttack,
+    Damaged
 };
 
 std::unordered_map<std::string_view, ProcEvent> const EVENTS = {
@@ -71,18 +59,17 @@ std::unordered_map<std::string_view, ProcEvent> const EVENTS = {
     {"critical", ProcEvent::Critical}, {"kill", ProcEvent::Kill}, {"parry", ProcEvent::Parry},
     {"dodged", ProcEvent::Dodged}, {"auto_attack", ProcEvent::AutoAttack}, {"damaged", ProcEvent::Damaged}};
 
-// One clause of the conditions column, e.g. "power>50", "stacks:1571905>=6", "target_health_before<50".
 struct Condition
 {
     enum class Kind : uint8
     {
-        Power,              // the player's current power, in displayed units (rage and runic power / 10)
-        Health,             // the player's health, percent
-        TargetHealth,       // the action target's health, percent, after the event
-        TargetHealthBefore, // the action target's health, percent, before the event's heal
-        Stacks,             // stacks (or charges) of an aura on the player
-        TargetStacks,       // stacks of an aura on the action target, from the player
-        TargetOutOfCombat   // the action target is not in combat
+        Power,
+        Health,
+        TargetHealth,
+        TargetHealthBefore,
+        Stacks,
+        TargetStacks,
+        TargetOutOfCombat
     };
 
     Kind What = Kind::Power;
@@ -94,28 +81,26 @@ struct Condition
 struct EffectRule
 {
     ProcEvent Event = ProcEvent::Cast;
-    uint32 SchoolMask = 0;                 // 0 = any school
-    std::unordered_set<uint32> Spells;     // every rank; empty = any spell
-    std::vector<uint32> RequiresAura;      // "while X is active": the player has one of these
-    std::vector<uint32> TargetAura;        // "on targets affected by your X": the target has one of these from the player
-    std::vector<Condition> Conditions;     // all must hold
-    std::vector<uint32> ConsumeAura;       // removed from the player when the effect procs (a counter that resets)
-    float Chance = 100.0f;                 // rolled per effect, on top of the aura's own proc chance
-    Milliseconds Cooldown = 0ms;           // per effect, per aura
+    uint32 SchoolMask = 0;
+    std::unordered_set<uint32> Spells;
+    std::vector<uint32> RequiresAura;
+    std::vector<uint32> TargetAura;
+    std::vector<Condition> Conditions;
+    std::vector<uint32> ConsumeAura;
+    float Chance = 100.0f;
+    Milliseconds Cooldown = 0ms;
 };
 
 struct AuraLink
 {
-    uint32 Enchant = 0;  // the Mystic Enchant aura the player must have
-    uint32 Grant = 0;    // cast on the player when the watched aura arrives, removed when it goes
+    uint32 Enchant = 0;
+    uint32 Grant = 0;
 };
 
 std::unordered_map<uint32, std::array<std::vector<EffectRule const*>, MAX_SPELL_EFFECTS>> Rules;
 std::vector<EffectRule> Storage;
-std::unordered_map<uint32, std::vector<AuraLink>> Links;  // watched aura -> links
+std::unordered_map<uint32, std::vector<AuraLink>> Links;
 
-// The spell and school of each player's last hit on a unit: kill events carry no spell, and "killing an enemy with
-// Execute / with Frost damage" needs the killing blow.
 struct LastHit
 {
     ObjectGuid Attacker;
@@ -192,8 +177,6 @@ int32 Stacks(Unit const* unit, uint32 aura, ObjectGuid caster = ObjectGuid::Empt
     return found->GetStackAmount() > 1 || !found->GetCharges() ? found->GetStackAmount() : found->GetCharges();
 }
 
-// The enchant's wearer and the other side of the event. On a taken event (damaged, parry) the event's actor is the
-// attacker, so "health<35" or "stacks:Shield Block" must read the wearer, not the actor.
 std::pair<Unit*, Unit*> Sides(Unit* owner, ProcEventInfo& eventInfo)
 {
     Unit* actor = eventInfo.GetActor();
@@ -366,8 +349,6 @@ class spell_ascension_mystic_enchant_proc : public AuraScript
         auto const itr = Rules.find(GetId());
         if (itr == Rules.end())
             return false;
-        // an effect without a matching rule never procs: it would otherwise fire on every event the broad spell_proc
-        // row admits
         std::vector<EffectRule const*> const& rules = itr->second[effect->GetEffIndex()];
         auto const match = std::find_if(rules.begin(), rules.end(),
             [this, &eventInfo](EffectRule const* rule) { return Matches(*rule, GetTarget(), eventInfo); });
@@ -379,16 +360,10 @@ class spell_ascension_mystic_enchant_proc : public AuraScript
             return false;
         if (rule->Chance < 100.0f && !roll_chance_f(rule->Chance))
             return false;
-        // the cooldown starts when the effect procs (Consume): the aura's own proc chance is rolled after this check,
-        // and a failed roll must not lock the effect out
         _fired[effect->GetEffIndex()] = rule;
         return true;
     }
 
-    // A cast-phase event carries no action target (Spell::_cast procs with none), so the stock handler casts the
-    // trigger at nothing, and a trigger that needs a unit (Madness's tentacles at the enemy, Heavy Thunder's delayed
-    // check) fails silently. Aim it at the cast's own unit target, or at the player for a helpful trigger. An enchant
-    // with an action script of its own (AscensionMysticEnchantScripts.cpp) supplies the action itself.
     void AimCastTrigger(AuraEffect const* effect, ProcEventInfo& eventInfo)
     {
         if (eventInfo.GetActionTarget() || HasActionScript())
@@ -411,7 +386,6 @@ class spell_ascension_mystic_enchant_proc : public AuraScript
         return std::distance(bounds.first, bounds.second) > 1;
     }
 
-    // after the trigger spell: a counter consumed here is not refilled by an earlier effect of the same event
     void Consume(AuraEffect const* effect, ProcEventInfo&)
     {
         EffectRule const* rule = _fired[effect->GetEffIndex()];
@@ -484,7 +458,6 @@ private:
         hit.Attacker = attacker->GetGUID();
         hit.Spell = spellInfo ? spellInfo->Id : 0;
         hit.SchoolMask = spellInfo ? spellInfo->GetSchoolMask() : SPELL_SCHOOL_MASK_NORMAL;
-        // the map only needs the units being fought; a rough bound keeps despawned targets from piling up
         if (LastHits.size() > 20000)
             LastHits.clear();
     }

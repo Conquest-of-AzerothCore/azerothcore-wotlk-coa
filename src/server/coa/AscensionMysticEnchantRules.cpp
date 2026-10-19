@@ -252,8 +252,6 @@ Enchant const* Catalog::FindItem(std::uint32_t item) const
     return itr == ByItem.end() ? nullptr : &Rows[itr->second];
 }
 
-// The spell a "Teaches you:" enchant grants is named only by its description's @s:<spell>@ token; the core does not
-// load spell descriptions, so they are read from the client Spell.dbc.
 namespace
 {
 std::unordered_map<std::uint32_t, std::uint32_t> TaughtSpells()
