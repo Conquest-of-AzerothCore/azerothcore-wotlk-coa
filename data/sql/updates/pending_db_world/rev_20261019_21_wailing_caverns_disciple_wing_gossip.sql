@@ -1,0 +1,4 @@
+-- Disciple of Naralex: hide the Mutanus event start in Wailing Caverns wings that end before Mutanus
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 15 AND `SourceGroup` = 201 AND `SourceEntry` = 0 AND `SourceId` = 0 AND `ElseGroup` = 0 AND `ConditionTypeOrReference` = 13 AND `ConditionTarget` = 0 AND `ConditionValue1` = 5 AND `ConditionValue2` = 1 AND `ConditionValue3` = 0;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(15, 201, 0, 0, 0, 13, 0, 5, 1, 0, 1, 0, 0, '', 'Disciple of Naralex - Hide event start in a Wailing Caverns wing that ends before Mutanus');

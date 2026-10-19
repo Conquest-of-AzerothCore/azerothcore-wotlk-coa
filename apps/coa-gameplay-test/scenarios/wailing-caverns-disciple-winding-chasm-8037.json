@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Wailing Caverns: the Disciple of Naralex does not start Mutanus in Winding Chasm (#8037)",
+  "contract": [
+    "Decision on #8037: the Disciple of Naralex 3678 offers 'Let the event begin!' (gossip menu 201) in Dreamer's",
+    "Rock, full runs and Pit of Fangs, but not in a wing whose final boss is not Mutanus 3654. Winding Chasm",
+    "(LFGDungeons 1031) ends on Skum 3674, so a Dungeon Finder group assigned it must see no option."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 43, "x": -132.0, "y": 125.4, "z": -78.1, "o": 3.14},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 20},
+    {"id": "mate", "race": 1, "class": 1, "level": 20}
+  ],
+  "creatures": [
+    {"id": "disciple", "owner": "hero", "entry": 3678, "distance": 3, "faction": 35, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 2000},
+    {"label": "SETUP: the hero is in Wailing Caverns", "action": "assert", "actor": "hero", "metric": "map_id",
+     "equals": 43},
+    {"label": "SETUP: the instance is Normal", "action": "assert", "actor": "hero", "metric": "map_difficulty",
+     "equals": 0},
+    {"action": "group", "actor": "hero", "target": "mate"},
+    {"label": "the group is assigned Wailing Caverns - Winding Chasm", "action": "lfg_dungeon", "actor": "hero",
+     "dungeon": 1031},
+    {"label": "the hero opens the Disciple's gossip", "action": "gossip_hello", "actor": "hero",
+     "target": "disciple"},
+    {"label": "DISCRIMINATING: Winding Chasm offers no Mutanus event", "action": "assert", "actor": "hero",
+     "metric": "gossip_options", "equals": 0}
+  ]
+}
