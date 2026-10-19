@@ -34,7 +34,10 @@ enum WitchHunterCastSpells
     SPELL_SHADOW_RAGE_PET = 804192,
     SPELL_SHARPSHOOTER = 705456,
     SPELL_SHARPSHOOTER_ENERGIZE = 704385,
-    SPELL_DEAL_WITH_THE_DEVIL = 680255
+    SPELL_DEAL_WITH_THE_DEVIL = 680255,
+    SPELL_SHADOWSTORM_DAMAGE = 520278,
+    SPELL_SHADOWSTORM_HEAL = 520793,
+    SPELL_SHADOWSTORM_LEECH = 520794
 };
 
 enum WitchHunterHounds
@@ -259,6 +262,12 @@ class spell_ascension_witch_hunter_ability : public SpellScript
             target->HasAura(680517, player->GetGUID()))
             player->CastCustomSpell(574335, SPELLVALUE_BASE_POINT0, int32(player->CountPctFromMaxHealth(1)), player,
                                     TRIGGERED_FULL_MASK);
+        if (id == SPELL_SHADOWSTORM_DAMAGE && dealt)
+            player->CastCustomSpell(
+                SPELL_SHADOWSTORM_HEAL, SPELLVALUE_BASE_POINT0,
+                int32(CalculatePct(uint64(dealt),
+                                   sSpellMgr->AssertSpellInfo(SPELL_SHADOWSTORM_LEECH)->Effects[EFFECT_0].CalcValue())),
+                player, TRIGGERED_FULL_MASK);
         if (id == 503662 && dealt && player->HasAura(680544))
             for (uint32 stack : {681413, 681523})
                 if (Aura* aura = target->GetAura(stack, player->GetGUID()))
