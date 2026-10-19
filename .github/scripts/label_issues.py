@@ -20,23 +20,30 @@ MANAGED_LABELS = [
     "Cultist",
     "DB",
     "Dungeon",
+    "Druid",
     "Feature",
     "Felsworn",
     "Guardian",
+    "Hunter",
     "Item",
     "Knight of Xoroth",
+    "Mage",
     "Manastorm",
     "Necromancer",
     "Not Tested",
     "Object",
+    "Paladin",
     "Primalist",
+    "Priest",
     "Pyromancer",
     "Quest",
     "Raid",
     "Ranger",
     "Reaper",
+    "Rogue",
     "Runemaster",
     "Script",
+    "Shaman",
     "Starcaller",
     "Stormbringer",
     "Sun Cleric",
@@ -45,6 +52,8 @@ MANAGED_LABELS = [
     "Tinker",
     "Venomancer",
     "WarcraftReborn",
+    "Warlock",
+    "Warrior",
     "Wildcard",
     "Witch Doctor",
     "Witch Hunter",
@@ -101,6 +110,23 @@ CLASS_ID_LABELS = {
 }
 
 
+REBORN_CLASS_ID_LABELS = {
+    1: "Warrior",
+    2: "Paladin",
+    3: "Hunter",
+    4: "Rogue",
+    5: "Priest",
+    7: "Shaman",
+    8: "Mage",
+    9: "Warlock",
+    11: "Druid",
+}
+REBORN_CLASS_MENTION = re.compile(
+    r"\b(?:warcraft\s*)?reborn\s+(" + "|".join(REBORN_CLASS_ID_LABELS.values()) + r")s?\b",
+    re.IGNORECASE,
+)
+
+
 REPORT_SECTION_LABELS = {
     "quest": "Quest",
     "item": "Item",
@@ -137,6 +163,7 @@ SCOPE_LABELS = {
     "gameobjects": "Object",
     "warcraftreborn": "WarcraftReborn",
     **{label.replace(" ", "").casefold(): label for label in CLASS_ID_LABELS.values()},
+    **{label.casefold(): label for label in REBORN_CLASS_ID_LABELS.values()},
 }
 
 
@@ -273,6 +300,7 @@ def determine_labels(issue):
     for label, pattern in DESCRIPTION_PATTERNS.items():
         if re.search(pattern, reported_text, re.IGNORECASE):
             labels.append(label)
+    labels.extend(reborn_class_mentions(reported_text))
 
     for label, pattern in TITLE_PATTERNS.items():
         if re.search(pattern, title, re.IGNORECASE):
@@ -283,6 +311,9 @@ def determine_labels(issue):
             if re.search(pattern, text, re.IGNORECASE):
                 labels.append(label)
                 break
+
+    if any(label in REBORN_CLASS_ID_LABELS.values() for label in labels):
+        labels.append("WarcraftReborn")
 
     status = determine_testing_status(body)
     if status:
@@ -306,7 +337,8 @@ def reporter_classes(body):
         body,
         re.IGNORECASE | re.MULTILINE,
     ):
-        label = CLASS_ID_LABELS.get(int(match.group(1)))
+        class_id = int(match.group(1))
+        label = CLASS_ID_LABELS.get(class_id) or REBORN_CLASS_ID_LABELS.get(class_id)
         if label:
             labels.append(label)
 
@@ -314,7 +346,15 @@ def reporter_classes(body):
         for label, pattern in CLASS_PATTERNS.items():
             if re.search(pattern, character, re.IGNORECASE):
                 labels.append(label)
+        for label in REBORN_CLASS_ID_LABELS.values():
+            if re.search(rf"\blevel\s+\d+\s+{label}\b", character, re.IGNORECASE):
+                labels.append(label)
     return labels
+
+
+def reborn_class_mentions(text):
+    by_name = {label.casefold(): label for label in REBORN_CLASS_ID_LABELS.values()}
+    return [by_name[match.casefold()] for match in REBORN_CLASS_MENTION.findall(text)]
 
 
 def report_section_labels(title, body):

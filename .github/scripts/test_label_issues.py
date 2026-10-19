@@ -55,6 +55,52 @@ class LabelIssuesTests(unittest.TestCase):
                 body = f"#### Spell\nFireball\n\nClass ID: {class_id}"
                 self.assertEqual(label_issues.determine_labels({"body": body}), [label])
 
+    def test_reborn_class_ids_match_server_definitions(self):
+        root = Path(__file__).resolve().parents[2]
+        source = (root / "src/server/shared/SharedDefines.h").read_text(encoding="utf-8")
+        classes = source.split("enum Classes\n{", 1)[1].split("};", 1)[0]
+        expected = {
+            int(class_id): title.strip()
+            for class_id, title in re.findall(r"CLASS_\w+\s*=\s*(\d+),?\s*// TITLE ([^\n]+)", classes)
+            if 1 <= int(class_id) <= 11 and title.strip() not in {"Death Knight", "Hero"}
+        }
+        self.assertEqual(label_issues.REBORN_CLASS_ID_LABELS, expected)
+        self.assertTrue(set(expected.values()).issubset(label_issues.MANAGED_LABELS))
+        for class_id, label in expected.items():
+            with self.subTest(class_id=class_id):
+                body = f"#### Spell\nFireball\n\nClass ID: {class_id}"
+                self.assertEqual(label_issues.determine_labels({"body": body}), [label, "WarcraftReborn"])
+
+    def test_reborn_class_from_website_spell_report(self):
+        for character, expected in (
+            ("level 12 Rogue", ["Rogue", "WarcraftReborn"]),
+            ("level 60 Witch Hunter", ["Witch Hunter"]),
+        ):
+            with self.subTest(character=character):
+                issue = {
+                    "title": "[Spell/Class] Ambush",
+                    "body": f"**Category:** Spell/Class\n**Character:** [Ing](https://example.invalid) — {character}\n",
+                }
+                self.assertEqual(label_issues.determine_labels(issue), expected)
+
+    def test_reborn_class_names_in_free_text_do_not_add_labels(self):
+        for issue, expected in (
+            ({"title": "Rogue Flame Spirits in Stonetalon Mountains are Small"}, []),
+            ({"title": "Necromancer - Skeletal Mage"}, ["Necromancer"]),
+            ({"title": 'Witch Hunter: "Bounty Hunter" aura'}, ["Witch Hunter"]),
+            ({"title": "Starter weapons", "body": "#### Item\nWorn Axe\nClass: HUNTER\nClass ID: 3"}, ["Item"]),
+        ):
+            with self.subTest(issue=issue):
+                self.assertEqual(label_issues.determine_labels(issue), expected)
+
+    def test_reborn_class_adds_warcraft_reborn_label(self):
+        issue = {"body": "#### Spell\nSinister Strike\nClass ID: 4", "labels": [{"name": "Bug"}]}
+        with patch.object(label_issues, "gh") as gh:
+            label_issues.update_issue("42", issue, label_issues.determine_labels(issue))
+        gh.assert_called_once_with(
+            "issue", "edit", "42", "--add-label", "Rogue,WarcraftReborn", "--repo", "owner/repo",
+        )
+
     def test_class_id_field_whitespace_and_line_endings(self):
         body = "#### Spell\r\nFireball\r\n### Server context\r\n  class ID :\t22 \r\nLevel: 11\r\n"
         self.assertEqual(label_issues.determine_labels({"body": body}), ["Chronomancer"])
@@ -155,8 +201,8 @@ class LabelIssuesTests(unittest.TestCase):
 
     def test_warcraft_reborn_from_title_or_report_description(self):
         for issue, expected in (
-            ({"title": "Warcraft Reborn Warlock spells that did nothing"}, ["WarcraftReborn"]),
-            ({"title": "Reborn Druid abilities ignore their tooltips"}, ["WarcraftReborn"]),
+            ({"title": "Warcraft Reborn Warlock spells that did nothing"}, ["WarcraftReborn", "Warlock"]),
+            ({"title": "Reborn Druid abilities ignore their tooltips"}, ["WarcraftReborn", "Druid"]),
             ({"title": "Soul Fire", "body": "#### Issue\nOn WarcraftReborn the cast never finishes\n\nLocation: 1 2 3 0"},
              ["WarcraftReborn"]),
             ({"title": "[WarcraftReborn] Holy Nova"}, ["WarcraftReborn"]),
@@ -180,7 +226,8 @@ class LabelIssuesTests(unittest.TestCase):
             ("fix(CoA/Creatures/NPC): boss ranks", ["Creature"]),
             ("fix(CoA/GameObject): Brumbof barrel", ["Object"]),
             ("fix(CoA/WarcraftReborn): Rogue talents", ["WarcraftReborn"]),
-            ("fix(CoA): Warcraft Reborn Shaman spells that did nothing", ["WarcraftReborn"]),
+            ("fix(CoA): Warcraft Reborn Shaman spells that did nothing", ["WarcraftReborn", "Shaman"]),
+            ("fix(CoA/Rogue): Sinister Strike combo points", ["Rogue", "WarcraftReborn"]),
             ("fix(Core): prevent a crash on logout", ["Crash Fix", "Bug"]),
         ):
             with self.subTest(title=title):
