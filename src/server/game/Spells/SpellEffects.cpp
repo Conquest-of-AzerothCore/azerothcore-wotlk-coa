@@ -3892,8 +3892,8 @@ void Spell::EffectTaunt(SpellEffIndex /*effIndex*/)
         return;
 
     // xinef: Hand of Reckoning, cast before checking canhavethreatlist. fixes damage against pets
-    if (m_spellInfo->Id == 62124 && unitTarget->GetVictim() != m_caster)
-        m_caster->CastSpell(unitTarget, 67485, true);
+    if (sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == 62124 && unitTarget->GetVictim() != m_caster)
+        m_caster->CastSpell(unitTarget, sSpellMgr->GetSpellTwinFor(67485, m_spellInfo->Id), true);
 
     if (!unitTarget->CanHaveThreatList())
     {
