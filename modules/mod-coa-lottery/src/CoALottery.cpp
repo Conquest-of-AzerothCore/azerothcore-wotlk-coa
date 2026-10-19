@@ -792,10 +792,12 @@ namespace
                     uint32 tickets = fields[2].Get<uint32>();
                     uint32 complimentary = fields[4].Get<uint32>();
                     bool houseWin = fields[3].Get<uint8>() != 0;
+                    uint32 total = fields[5].Get<uint32>();
                     if (houseWin)
-                        text += Acore::StringFormat("\n{}: {}g{}s{}c jackpot, {} house tickets, 0 purchased tickets. "
+                        text += Acore::StringFormat("\n{}: {}g{}s{}c jackpot, {} house tickets, {} purchased tickets. "
                             "The pot was destroyed!\n",
-                            name, copper / 10000, copper / 100 % 100, copper % 100, tickets);
+                            name, copper / 10000, copper / 100 % 100, copper % 100, tickets,
+                            total > tickets ? total - tickets : 0);
                     else if (complimentary)
                         text += Acore::StringFormat("\n{} won {}g{}s{}c with {} tickets ({} complimentary).\n",
                             name, copper / 10000, copper / 100 % 100, copper % 100, tickets, complimentary);

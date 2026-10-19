@@ -52,7 +52,8 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_DEL_WORLDFORGED_LOOT,
         "DELETE FROM character_worldforged_loot WHERE guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_LOTTERY_RECENT_WINNERS,
-        "SELECT winner_name, gold_copper, winner_tickets, house_win, complimentary_tickets FROM coa_lottery_winner "
+        "SELECT winner_name, gold_copper, winner_tickets, house_win, complimentary_tickets, total_tickets "
+        "FROM coa_lottery_winner "
         "ORDER BY drawn_at DESC, round_id DESC LIMIT 5", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_LOTTERY_WINNER_IDENTITY,
         "SELECT name, account FROM characters WHERE guid = ? AND deleteDate IS NULL "

@@ -146,7 +146,7 @@ def persistence():
     print('PASS: persistent house tickets, Gallywix identity, destroyed pot, no mail/item payout, rollback and reseed')
 
     ledger = db.execute(queries['CHAR_SEL_LOTTERY_RECENT_WINNERS']).fetchall()
-    assert ledger == [('Trade Prince Gallywix', 10100000, 100, 1, 0), ('FirstWinner', 100000, 1, 0, 0)]
+    assert ledger == [('Trade Prince Gallywix', 10100000, 100, 1, 0, 100), ('FirstWinner', 100000, 1, 0, 0, 1)]
     for identifier in range(10, 16):
         record = (identifier, 2000000, 0, 0, 'Trade Prince Gallywix', 10000000, 0, '', 100, 100, 0, 1, 10000000, 0, 0)
         db.execute(queries['CHAR_INS_LOTTERY_WINNER'], record)

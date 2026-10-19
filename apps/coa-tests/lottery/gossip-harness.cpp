@@ -79,7 +79,7 @@ struct Field
 };
 struct Result
 {
-    std::vector<std::array<Field, 5>> rows;
+    std::vector<std::array<Field, 6>> rows;
     size_t index = 0;
     Field* Fetch() {return rows[index].data();}
     bool NextRow() {return ++index < rows.size();}
@@ -129,11 +129,11 @@ void Run()
     script.OnGossipSelect(&player, &gallywix, GOSSIP_SENDER_MAIN, GallywixWinnersAction);
     Require(player.talk.text.find("No recent winners") != std::string::npos);
     CharacterDatabase.result = std::make_shared<Result>();
-    CharacterDatabase.result->rows.push_back({Field{"Alice", 0}, Field{"", 10000001}, Field{"", 7}, Field{"", 0}});
-    CharacterDatabase.result->rows.push_back({Field{"Trade Prince Gallywix", 0}, Field{"", 123400}, Field{"", 100}, Field{"", 1}});
+    CharacterDatabase.result->rows.push_back({Field{"Alice", 0}, Field{"", 10000001}, Field{"", 7}, Field{"", 0}, Field{"", 0}, Field{"", 107}});
+    CharacterDatabase.result->rows.push_back({Field{"Trade Prince Gallywix", 0}, Field{"", 123400}, Field{"", 100}, Field{"", 1}, Field{"", 0}, Field{"", 103}});
     script.OnGossipSelect(&player, &gallywix, GOSSIP_SENDER_MAIN, GallywixWinnersAction);
     Require(player.talk.text.find("Alice won 1000g0s1c with 7 purchased tickets") != std::string::npos);
-    Require(player.talk.text.find("100 house tickets, 0 purchased tickets") != std::string::npos);
+    Require(player.talk.text.find("100 house tickets, 3 purchased tickets") != std::string::npos);
     Require(player.talk.text.find("pot was destroyed") != std::string::npos);
     settings.enabled = false;
     ready = false;
