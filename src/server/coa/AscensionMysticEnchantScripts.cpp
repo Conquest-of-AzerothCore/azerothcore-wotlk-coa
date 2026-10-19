@@ -303,9 +303,9 @@ class spell_ascension_mystic_water_nova : public AuraScript
             return;
         if (spell->SpellFamilyName == SPELLFAMILY_SHAMAN && (spell->SpellFamilyFlags[0] & SHAMAN_FROST_SHOCK_FLAG0))
         {
+            // the pool's first effect needs a unit target; the core takes the area's position from it
             if (Unit* target = eventInfo.GetActionTarget())
-                caster->CastSpell(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(),
-                    SPELL_WATER_NOVA_POOL, true);
+                caster->CastSpell(target, SPELL_WATER_NOVA_POOL, true);
             return;
         }
         if (DynamicObject* pool = caster->GetDynObject(SPELL_WATER_NOVA_POOL))
