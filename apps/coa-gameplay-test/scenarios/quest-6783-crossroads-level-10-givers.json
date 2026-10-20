@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Quest 6783: Crossroads quest givers offer their level 10 quests to level 10 Horde characters",
+  "contract": "Issue 6783: a level 10 Horde Pyromancer found every quest giver at the Crossroads and the Sepulcher showing a grey marker and offering nothing. Sergra Darkthorn (3338, faction 125, level 60, spawn 13167) starts Plainstrider Menace (844, MinLevel 10, QuestLevel 12, AllowableRaces 690) and Thork (3429, faction 29, level 42, spawn 14344) starts Disrupt the Attacks (871, MinLevel 9). GetQuestDialogStatus shows the grey unavailable marker (1) only while MinLevel is not met and the available marker (8) once it is. Expected: a level 9 orc sees 1 at Sergra and cannot take 844 (control); a level 10 orc Pyromancer and a level 10 Blood Elf Pyromancer see 8 at Sergra and at Thork and can take 844 and 871. Each character talks to its own givers, since the lane phase hides the world spawns. Client rendering is not tested.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": -436.9, "y": -2641.1, "z": 95.78, "o": 0 },
+  "players": [
+    { "id": "early", "race": 2, "class": 1, "level": 9 },
+    { "id": "orc", "race": 2, "class": 24, "level": 10 },
+    { "id": "elf", "race": 10, "class": 24, "level": 10 }
+  ],
+  "creatures": [
+    { "id": "sergra_early", "owner": "early", "entry": 3338, "distance": 2, "faction": 125, "level": 60 },
+    { "id": "sergra_orc", "owner": "orc", "entry": 3338, "distance": 2, "faction": 125, "level": 60 },
+    { "id": "sergra_elf", "owner": "elf", "entry": 3338, "distance": 2, "faction": 125, "level": 60 },
+    { "id": "thork_orc", "owner": "orc", "entry": 3429, "distance": 4, "faction": 29, "level": 42 },
+    { "id": "thork_elf", "owner": "elf", "entry": 3429, "distance": 4, "faction": 29, "level": 42 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "assert", "label": "Sergra shows the level 9 orc the grey marker", "actor": "early", "metric": "dialog_status", "entry": 3338, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "The level 9 orc cannot take Plainstrider Menace yet", "actor": "early", "metric": "quest_takeable", "quest": 844, "equals": 0 },
+    { "action": "assert", "label": "Sergra offers the level 10 orc Pyromancer a quest", "actor": "orc", "metric": "dialog_status", "entry": 3338, "equals": 8, "within_ms": 5000 },
+    { "action": "assert", "label": "Thork offers the level 10 orc Pyromancer a quest", "actor": "orc", "metric": "dialog_status", "entry": 3429, "equals": 8, "within_ms": 5000 },
+    { "action": "assert", "label": "The level 10 orc Pyromancer can take Plainstrider Menace", "actor": "orc", "metric": "quest_takeable", "quest": 844, "equals": 1 },
+    { "action": "assert", "label": "The level 10 orc Pyromancer can take Disrupt the Attacks", "actor": "orc", "metric": "quest_takeable", "quest": 871, "equals": 1 },
+    { "action": "assert", "label": "Sergra offers the level 10 Blood Elf Pyromancer a quest", "actor": "elf", "metric": "dialog_status", "entry": 3338, "equals": 8, "within_ms": 5000 },
+    { "action": "assert", "label": "Thork offers the level 10 Blood Elf Pyromancer a quest", "actor": "elf", "metric": "dialog_status", "entry": 3429, "equals": 8, "within_ms": 5000 },
+    { "action": "assert", "label": "The level 10 Blood Elf Pyromancer can take Plainstrider Menace", "actor": "elf", "metric": "quest_takeable", "quest": 844, "equals": 1 },
+    { "action": "gossip_hello", "label": "Talk to Sergra", "actor": "elf", "target": "sergra_elf" },
+    { "action": "assert", "label": "Sergra's quest menu lists Plainstrider Menace", "actor": "elf", "metric": "quest_menu_has", "quest": 844, "equals": 1 }
+  ]
+}
