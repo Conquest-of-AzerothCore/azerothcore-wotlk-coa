@@ -32,7 +32,9 @@ enum RunemasterTalentProcSpells : uint32
     SPELL_ICE_ENGRAVING_PROC = 653266,
     SPELL_ICE_ENGRAVING_SLOW = 653231,
     SPELL_ICEBOUND_MOMENTUM = 712490,
-    SPELL_ICEBOUND_MOMENTUM_DAMAGE = 712491
+    SPELL_ICEBOUND_MOMENTUM_DAMAGE = 712491,
+    SPELL_WATER_ENGRAVING_FROST = 712492,
+    SPELL_ARCANE_ENGRAVING_DETONATION = 712493
 };
 
 bool IsRunemaster(Unit const* unit)
@@ -349,6 +351,85 @@ class aura_ascension_runemaster_icebound_momentum : public AuraScript
     }
 };
 
+class spell_ascension_runemaster_water_engraving : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_runemaster_water_engraving);
+
+    bool Validate(SpellInfo const*) override { return ValidateSpellInfo({SPELL_WATER_ENGRAVING_FROST}); }
+
+    void Drain(SpellEffIndex effIndex)
+    {
+        PreventHitDefaultEffect(effIndex);
+        Unit* caster = GetCaster();
+        Unit* target = GetHitUnit();
+        if (!target || target == caster || !target->IsAlive() || !target->HasActivePowerType(POWER_MANA))
+            return;
+        int32 const limit = int32(CalculatePct(caster->GetMaxPower(POWER_MANA), GetEffectValue()));
+        _drained = -target->ModifyPower(POWER_MANA, -limit);
+        if (_drained > 0)
+            caster->EnergizeBySpell(caster, GetSpellInfo()->Id, uint32(_drained), POWER_MANA);
+    }
+
+    void Strike(SpellEffIndex effIndex)
+    {
+        PreventHitDefaultEffect(effIndex);
+        if (_drained > 0)
+            GetCaster()->CastCustomSpell(SPELL_WATER_ENGRAVING_FROST, SPELLVALUE_BASE_POINT0, _drained, GetHitUnit(),
+                TRIGGERED_FULL_MASK);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_ascension_runemaster_water_engraving::Drain, EFFECT_0,
+            SPELL_EFFECT_POWER_DRAIN);
+        OnEffectHitTarget += SpellEffectFn(spell_ascension_runemaster_water_engraving::Strike, EFFECT_2,
+            SPELL_EFFECT_DUMMY);
+    }
+
+    int32 _drained = 0;
+};
+
+class aura_ascension_runemaster_arcane_engraving_mark : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_runemaster_arcane_engraving_mark);
+
+    bool Validate(SpellInfo const*) override { return ValidateSpellInfo({SPELL_ARCANE_ENGRAVING_DETONATION}); }
+
+    bool CheckHeal(ProcEventInfo& event)
+    {
+        HealInfo const* heal = event.GetHealInfo();
+        return heal && heal->GetEffectiveHeal() && event.GetActionTarget() == GetTarget();
+    }
+
+    void StoreHeal(AuraEffect const*, ProcEventInfo& event)
+    {
+        PreventDefaultAction();
+        _stored += event.GetHealInfo()->GetEffectiveHeal();
+    }
+
+    void Detonate(AuraEffect const* effect, AuraEffectHandleModes)
+    {
+        Unit* caster = GetCaster();
+        uint64 const amount = CalculatePct(_stored, std::max(effect->GetAmount(), 0));
+        if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE && caster && amount &&
+            GetTarget()->IsAlive())
+            caster->CastCustomSpell(SPELL_ARCANE_ENGRAVING_DETONATION, SPELLVALUE_BASE_POINT0,
+                int32(std::min<uint64>(amount, std::numeric_limits<int32>::max())), GetTarget(), TRIGGERED_FULL_MASK,
+                nullptr, effect);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(aura_ascension_runemaster_arcane_engraving_mark::CheckHeal);
+        OnEffectProc += AuraEffectProcFn(aura_ascension_runemaster_arcane_engraving_mark::StoreHeal, EFFECT_1,
+            SPELL_AURA_DUMMY);
+        AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_runemaster_arcane_engraving_mark::Detonate, EFFECT_1,
+            SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+    }
+
+    uint64 _stored = 0;
+};
+
 class runemaster_ley_power_metadata : public GlobalScript
 {
 public:
@@ -361,7 +442,11 @@ public:
         {
             if (info->Id == SPELL_ICEBOUND_MOMENTUM)
                 info->ProcFlags = PROC_FLAG_TAKEN_DAMAGE;
-            if (info->Id == SPELL_ICEBOUND_MOMENTUM_DAMAGE)
+            if (info->Id == SPELL_ENGRAVING_ARCANE)
+                info->ProcFlags = PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_POS |
+                    PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS | PROC_FLAG_TAKEN_PERIODIC;
+            if (info->Id == SPELL_ICEBOUND_MOMENTUM_DAMAGE || info->Id == SPELL_WATER_ENGRAVING_FROST ||
+                info->Id == SPELL_ARCANE_ENGRAVING_DETONATION)
             {
                 info->AscensionInheritsResolvedAmount = true;
                 info->Effects[EFFECT_0].BonusMultiplier = 0.0f;
@@ -390,5 +475,7 @@ void AddSC_AscensionRunemasterTalentProcs()
     RegisterSpellScript(aura_ascension_runemaster_harvested_ley_energy);
     new runemaster_ice_engraving_hits();
     RegisterSpellScript(aura_ascension_runemaster_icebound_momentum);
+    RegisterSpellScript(spell_ascension_runemaster_water_engraving);
+    RegisterSpellScript(aura_ascension_runemaster_arcane_engraving_mark);
     new runemaster_ley_power_metadata();
 }
