@@ -3474,8 +3474,12 @@ void SpellMgr::LoadSpellInfoCustomAttributes()
     }
     else
     {
-        for (count = 0; result->NextRow(); ++count)
+        count = 0;
+
+        do
         {
+            ++count;
+
             Field const* fields = result->Fetch();
 
             uint32 const spellId = fields[0].Get<uint32>();
@@ -3535,7 +3539,7 @@ void SpellMgr::LoadSpellInfoCustomAttributes()
 
             spellInfo->AttributesCu |= attributes;
             databaseAttributes[spellId] = attributes;
-        }
+        } while (result->NextRow());
 
         for (auto const& [source, twin] : _spellTwins)
         {
