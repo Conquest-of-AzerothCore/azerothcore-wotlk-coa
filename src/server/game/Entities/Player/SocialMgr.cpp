@@ -248,6 +248,9 @@ void SocialMgr::GetFriendInfo(Player* player, ObjectGuid const& friendGUID, Frie
             friendInfo.Status = FRIEND_STATUS_AFK;
         if (pFriend->isDND())
             friendInfo.Status = FRIEND_STATUS_DND;
+        if (player->GetSession()->GetRecruiterId() == pFriend->GetSession()->GetAccountId() ||
+            pFriend->GetSession()->GetRecruiterId() == player->GetSession()->GetAccountId())
+            friendInfo.Status = FriendStatus(friendInfo.Status | FRIEND_STATUS_RAF);
         friendInfo.Area = pFriend->GetZoneId();
         friendInfo.Level = pFriend->GetLevel();
         friendInfo.Class = pFriend->getClass();

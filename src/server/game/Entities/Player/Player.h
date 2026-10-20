@@ -2239,8 +2239,8 @@ public:
     bool isHonorOrXPTarget(Unit* victim) const;
 
     bool GetsRecruitAFriendBonus(bool forXP);
-    uint8 GetGrantableLevels() { return m_grantableLevels; }
-    void SetGrantableLevels(uint8 val) { m_grantableLevels = val; }
+    uint8 GetGrantableLevels() const { return m_grantableLevels; }
+    void SetGrantableLevels(uint8 val);
 
     ReputationMgr&       GetReputationMgr()       { return *m_reputationMgr; }
     [[nodiscard]] ReputationMgr const& GetReputationMgr() const { return *m_reputationMgr; }

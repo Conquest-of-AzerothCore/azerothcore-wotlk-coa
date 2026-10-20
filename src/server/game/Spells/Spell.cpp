@@ -731,6 +731,13 @@ void Spell::InitExplicitTargets(SpellCastTargets const& targets)
 {
     m_targets = targets;
     m_originalTargetGUID = targets.GetObjectTargetGUID();
+    if (m_spellInfo->HasEffect(SPELL_EFFECT_SUMMON_RAF_FRIEND) && m_caster->IsPlayer())
+    {
+        if (m_originalTargetGUID.IsEmpty())
+            m_originalTargetGUID = m_caster->ToPlayer()->GetTarget();
+        m_targets.RemoveObjectTarget();
+        return;
+    }
     // this function tries to correct spell explicit targets for spell
     // client doesn't send explicit targets correctly sometimes - we need to fix such spells serverside
     // this also makes sure that we correctly send explicit targets to client (removes redundant data)
@@ -2039,6 +2046,13 @@ void Spell::SelectEffectTypeImplicitTargets(uint8 effIndex)
     switch (m_spellInfo->Effects[effIndex].Effect)
     {
         case SPELL_EFFECT_SUMMON_RAF_FRIEND:
+        {
+            WorldObject* target = ObjectAccessor::FindPlayer(m_originalTargetGUID);
+            CallScriptObjectTargetSelectHandlers(target, SpellEffIndex(effIndex), SpellImplicitTargetInfo());
+            if (target && target->IsPlayer())
+                AddUnitTarget(target->ToUnit(), 1 << effIndex, false);
+            return;
+        }
         case SPELL_EFFECT_SUMMON_PLAYER:
             if (m_caster->IsPlayer() && m_caster->ToPlayer()->GetTarget())
             {
@@ -6646,15 +6660,10 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
                         return SPELL_FAILED_BAD_TARGETS;
 
                     Player* playerCaster = m_caster->ToPlayer();
-                    //
-                    if (!(playerCaster->GetTarget()))
-                        return SPELL_FAILED_BAD_TARGETS;
-
-                    Player* target = ObjectAccessor::FindPlayer(m_caster->ToPlayer()->GetTarget());
-
-                    if (!target ||
-                            !(target->GetSession()->GetRecruiterId() == playerCaster->GetSession()->GetAccountId() || target->GetSession()->GetAccountId() == playerCaster->GetSession()->GetRecruiterId()))
-                        return SPELL_FAILED_BAD_TARGETS;
+                    Player* target = ObjectAccessor::FindPlayer(m_originalTargetGUID);
+                    SpellCastResult const result = playerCaster->GetSession()->CheckRecruitAFriendSummon(target);
+                    if (result != SPELL_CAST_OK)
+                        return result;
 
                     // Xinef: Implement summon pending error
                     if (target->GetSummonExpireTimer() > GameTime::GetGameTime().count())
@@ -8243,13 +8252,7 @@ bool Spell::CheckEffectTarget(Unit const* target, uint32 eff) const
         case SPELL_EFFECT_SUMMON_RAF_FRIEND:
             if (!m_caster->IsPlayer() || !target->IsPlayer())
                 return false;
-            if (m_caster->ToPlayer()->GetSession()->IsARecruiter() && target->ToPlayer()->GetSession()->GetRecruiterId() != m_caster->ToPlayer()->GetSession()->GetAccountId())
-                return false;
-            if (m_caster->ToPlayer()->GetSession()->GetRecruiterId() != target->ToPlayer()->GetSession()->GetAccountId() && target->ToPlayer()->GetSession()->IsARecruiter())
-                return false;
-            if (target->ToPlayer()->GetLevel() >= sWorld->getIntConfig(CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL))
-                return false;
-            break;
+            return m_caster->ToPlayer()->GetSession()->CheckRecruitAFriendSummon(target->ToPlayer()) == SPELL_CAST_OK;
         default: // normal case
         {
             uint32 losChecks = LINEOFSIGHT_ALL_CHECKS;

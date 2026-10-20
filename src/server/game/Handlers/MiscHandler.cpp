@@ -261,6 +261,10 @@ void WorldSession::HandleGossipSelectOptionOpcode(WorldPacket& recv_data)
         return;
     }
 
+    if (guid.IsPlayer() && HandleRecruitAFriendInviteResponse(menuId,
+        _player->PlayerTalkClass->GetGossipOptionAction(gossipListId)))
+        return;
+
     // remove fake death
     if (GetPlayer()->HasUnitState(UNIT_STATE_DIED))
         GetPlayer()->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);

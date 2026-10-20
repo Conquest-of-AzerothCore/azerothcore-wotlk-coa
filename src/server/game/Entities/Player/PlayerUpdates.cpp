@@ -107,6 +107,8 @@ void Player::Update(uint32 p_time)
         }
     }
 
+    GetSession()->UpdateRecruitAFriendRewards();
+
     time_t lastTick = m_Last_tick;
     if (now > m_Last_tick)
     {

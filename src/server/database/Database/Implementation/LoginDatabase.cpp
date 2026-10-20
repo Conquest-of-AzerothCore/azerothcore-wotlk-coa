@@ -23,6 +23,18 @@ void LoginDatabaseConnection::DoPrepareStatements()
     if (!m_reconnecting)
         m_stmts.resize(MAX_LOGINDATABASE_STATEMENTS);
 
+    PrepareStatement(LOGIN_INS_RAF_LINK_LOCK, "INSERT IGNORE INTO raf_link_lock (id) VALUES (1)", CONNECTION_ASYNC);
+    PrepareStatement(LOGIN_UPD_RAF_LINK_LOCK, "UPDATE raf_link_lock SET generation = generation + 1 WHERE id = 1", CONNECTION_ASYNC);
+    PrepareStatement(LOGIN_INS_RAF_ACCOUNT, "INSERT IGNORE INTO raf_accounts (account_id, started_at) SELECT id, UNIX_TIMESTAMP() FROM account WHERE id = ? AND recruiter <> 0", CONNECTION_BOTH);
+    PrepareStatement(LOGIN_INS_RAF_PROGRESS, "INSERT IGNORE INTO raf_progress (account_id, realm_id, guid, baseline_time, played_time, session_token) VALUES (?, ?, ?, ?, ?, ?)", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_UPD_RAF_PROGRESS, "UPDATE raf_progress SET qualified_seconds = LEAST(7200, qualified_seconds + IF(session_token = ?, GREATEST(played_time, ?) - played_time, 0)), played_time = IF(session_token = ?, GREATEST(played_time, ?), ?), session_token = ? WHERE account_id = ? AND realm_id = ? AND guid = ?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_UPD_RAF_VALIDATION, "UPDATE raf_accounts a SET validated_at = UNIX_TIMESTAMP() WHERE a.account_id = ? AND a.validated_at IS NULL AND EXISTS (SELECT 1 FROM raf_progress p WHERE p.account_id = a.account_id AND p.qualified_seconds >= 7200)", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_SEL_RAF_RECRUITS, "SELECT a.id, r.validated_at, COALESCE(MAX(p.qualified_seconds), 0) FROM account a LEFT JOIN raf_accounts r ON r.account_id = a.id LEFT JOIN raf_progress p ON p.account_id = a.id WHERE a.recruiter = ? GROUP BY a.id, r.validated_at ORDER BY a.id", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_SEL_RAF_VALID_COUNT, "SELECT COUNT(*) FROM account a JOIN raf_accounts r ON r.account_id = a.id WHERE a.recruiter = ? AND r.validated_at IS NOT NULL", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_INS_RAF_CLAIM, "INSERT IGNORE INTO raf_claims (account_id, reward_id, realm_id, guid, item_id, quantity, created_at) SELECT ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP() WHERE (SELECT COUNT(*) FROM account a JOIN raf_accounts r ON r.account_id = a.id WHERE a.recruiter = ? AND r.validated_at IS NOT NULL) >= ?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_SEL_RAF_CLAIMS, "SELECT claim_id, reward_id, realm_id, guid, item_id, quantity, delivered_at FROM raf_claims WHERE account_id = ? ORDER BY claim_id", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_UPD_RAF_CLAIM_DELIVERED, "UPDATE raf_claims SET delivered_at = UNIX_TIMESTAMP() WHERE claim_id = ? AND delivered_at IS NULL", CONNECTION_SYNCH);
+
     // COUNT always returns a row: a failed read must not prove an ID absent.
     PrepareStatement(LOGIN_SEL_FRESH_CHECK_ACCOUNT_COUNT, "SELECT COUNT(*) FROM account WHERE id = ?", CONNECTION_SYNCH);
 
@@ -114,6 +126,13 @@ void LoginDatabaseConnection::DoPrepareStatements()
     PrepareStatement(LOGIN_SEL_ACCOUNT_INFO, "SELECT a.username, a.last_ip, aa.gmlevel, a.expansion FROM account a LEFT JOIN account_access aa ON (a.id = aa.id) WHERE a.id = ? ORDER BY a.last_ip", CONNECTION_SYNCH); // Only used in ".account onlinelist" command
     PrepareStatement(LOGIN_SEL_ACCOUNT_ACCESS_GMLEVEL_TEST, "SELECT 1 FROM account_access WHERE id = ? AND gmlevel > ?", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_ACCOUNT_ACCESS, "SELECT a.id, aa.gmlevel, aa.RealmID FROM account a LEFT JOIN account_access aa ON (a.id = aa.id) WHERE a.username = ?", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_UPD_RAF_RECRUITER,
+        "WITH RECURSIVE ancestors AS (SELECT id, recruiter FROM account WHERE id = ? "
+        "UNION DISTINCT SELECT a.id, a.recruiter FROM account a JOIN ancestors p ON a.id = p.recruiter) "
+        "UPDATE account recruit JOIN (SELECT COUNT(*) AS blocked FROM ancestors WHERE id = ?) ancestry "
+        "SET recruit.recruiter = ? WHERE recruit.id = ? AND recruit.recruiter = 0 AND ancestry.blocked = 0",
+        CONNECTION_ASYNC);
+    PrepareStatement(LOGIN_SEL_RAF_STATUS, "SELECT recruiter FROM account WHERE id = ?", CONNECTION_ASYNC);
     PrepareStatement(LOGIN_SEL_ACCOUNT_RECRUITER, "SELECT 1 FROM account WHERE recruiter = ?", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_BANS, "SELECT 1 FROM account_banned WHERE id = ? AND active = 1 UNION SELECT 1 FROM ip_banned WHERE ip = ?", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_ACCOUNT_WHOIS, "SELECT username, email, last_ip FROM account WHERE id = ?", CONNECTION_SYNCH);

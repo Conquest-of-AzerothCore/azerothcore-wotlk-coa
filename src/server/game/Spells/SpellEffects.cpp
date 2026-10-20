@@ -6848,14 +6848,14 @@ void Spell::EffectSummonRaFFriend(SpellEffIndex  /*effIndex*/)
         return;
 
     Player* player = unitTarget->ToPlayer();
-    if (!player)
-    {
+    if (!player || m_caster->ToPlayer()->GetSession()->CheckRecruitAFriendSummon(player) != SPELL_CAST_OK ||
+        player->GetSummonExpireTimer() > GameTime::GetGameTime().count())
         return;
-    }
 
     float x, y, z;
     m_caster->GetPosition(x, y, z);
-    unitTarget->ToPlayer()->SetSummonPoint(m_caster->GetMapId(), x, y, z);
+    player->SetSummonPoint(m_caster->GetMapId(), x, y, z);
+    player->GetSession()->SetRecruitAFriendSummoner(m_caster->GetGUID());
     WorldPacket data(SMSG_SUMMON_REQUEST, 8 + 4 + 4);
     data << m_caster->GetGUID();
     data << uint32(m_caster->GetZoneId());

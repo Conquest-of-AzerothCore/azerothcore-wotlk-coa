@@ -869,6 +869,9 @@ void WorldSession::HandleSummonResponseOpcode(WorldPacket& recvData)
     recvData >> summoner_guid;
     recvData >> agree;
 
+    if (!ValidateRecruitAFriendSummon(summoner_guid, agree))
+        return;
+
     if (!agree)
     {
         // A declined summon has to clear the pending request even when the
