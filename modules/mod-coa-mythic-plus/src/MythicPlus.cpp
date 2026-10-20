@@ -2050,7 +2050,11 @@ private:
     {
         ClearGossipMenuFor(player);
         AddInfo(player);
-        AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, Opt("INV_Misc_Bag_07", "You can MASS recycle items by selling them to me.", 24), MENU_RECYCLE, 0);
+        uint32 sellList = 1;
+        for (; sellList < 16; ++sellList)
+            if (VendorItemData const* items = sObjectMgr->GetNpcVendorItemList(EDRIM_VENDOR_BASE + sellList); items && !items->Empty())
+                break;
+        AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, Opt("INV_Misc_Bag_07", "You can MASS recycle items by selling them to me.", 24), DO_BUY, sellList);
         ForEachOwnedItem(player, false, [&](Item* item)
         {
             auto itr = g_chainOf.find(item->GetEntry());
