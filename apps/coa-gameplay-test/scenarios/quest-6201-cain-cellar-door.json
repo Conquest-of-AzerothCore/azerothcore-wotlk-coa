@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "The True Heir of the Cains: the Repaired Cellar Key opens the Cain manor cellar door",
+  "contract": "Issue #6201. The Cain manor cellar door 2300524 opens for a player holding the Repaired Cellar Key 559141 and stays shut, with the notice \"The door is locked.\", for anyone else. The CoA client builds the key from item data without a use spell, so the door carries no lock and go_coa_cain_cellar_door decides (rev_20261001_31_coa_cain_cellar_door_script). This case clicks a door the player owns once without the key and once with it, and reads the door's own state each time.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": 1938.0, "y": 1966.0, "z": 155.85, "o": 0.785 },
+  "players": [
+    { "id": "heir", "race": 5, "class": 1, "level": 6 }
+  ],
+  "steps": [
+    { "action": "assert", "actor": "heir", "metric": "item_count", "item": 559141, "equals": 0 },
+    { "action": "summon_gameobject", "actor": "heir", "entry": 2300524, "distance": 2 },
+    { "action": "assert", "label": "CONTROL: the cellar door stands shut beside the heir", "actor": "heir",
+      "metric": "nearby_gameobject_state", "entry": 2300524, "equals": 1, "within_ms": 2000 },
+
+    { "action": "use_gameobject", "label": "Click the door without the key", "actor": "heir", "entry": 2300524 },
+    { "action": "assert", "label": "The heir is told the door is locked", "actor": "heir",
+      "metric": "notification_contains", "text": "The door is locked.", "equals": 1, "within_ms": 2000 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "Without the key the door stays shut", "actor": "heir",
+      "metric": "nearby_gameobject_state", "entry": 2300524, "equals": 1 },
+
+    { "action": "add_item", "actor": "heir", "item": 559141 },
+    { "action": "assert", "actor": "heir", "metric": "item_count", "item": 559141, "equals": 1 },
+    { "action": "snapshot", "actor": "heir", "metric": "notifications", "save_as": "notices" },
+    { "action": "use_gameobject", "label": "Click the door holding the Repaired Cellar Key", "actor": "heir",
+      "entry": 2300524 },
+    { "action": "assert", "label": "DISCRIMINATING: the key opens the cellar door", "actor": "heir",
+      "metric": "nearby_gameobject_state", "entry": 2300524, "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "The key holder is not told the door is locked", "actor": "heir",
+      "metric": "notifications", "relative_to": "notices", "equals": 0 }
+  ]
+}
