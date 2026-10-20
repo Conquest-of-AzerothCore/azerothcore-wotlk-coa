@@ -893,6 +893,14 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_MANASTORM_INVENTORY_ITEM, "SELECT COUNT(*) FROM character_inventory ci INNER JOIN item_instance ii ON ii.guid = ci.item AND ii.owner_guid = ci.guid WHERE ci.guid = ? AND ci.item = ?", CONNECTION_SYNCH);
 
 #ifdef MOD_MANASTORM_ENDLESS
+    PrepareStatement(CHAR_SEL_MANASTORM_WEEKLY_CACHE,
+        "SELECT COALESCE(MAX(reset_at), 0), COALESCE(MAX(caches_received), 0) FROM manastorm_weekly_cache_lockout WHERE guid = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_MANASTORM_WEEKLY_CACHE,
+        "INSERT INTO manastorm_weekly_cache_lockout (guid, reset_at, caches_received) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE reset_at = IF(reset_at = ? AND caches_received = ?, VALUES(reset_at), 0), caches_received = VALUES(caches_received)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_INS_MANASTORM_STAGE_RECEIPT,
+        "INSERT INTO character_manastorm_stage_receipt (guid, run_seed, run_id, depth) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_MANASTORM_FIRST_CLEAR,
+        "SELECT COUNT(*) FROM character_manastorm_completed_depth WHERE guid = ? AND mode = ? AND track = ? AND depth = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_MANASTORM_COMPLETION_REWARD, "SELECT remainder_bp, earned FROM character_manastorm_completion_reward_state WHERE guid = ? AND mode = ? AND track = ? AND reward_key = ? LIMIT 1", CONNECTION_SYNCH);
     PrepareStatement(CHAR_REP_MANASTORM_COMPLETION_REWARD, "INSERT INTO character_manastorm_completion_reward_state (guid, mode, track, reward_key, remainder_bp, earned) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE remainder_bp = VALUES(remainder_bp), earned = VALUES(earned)", CONNECTION_ASYNC);
 #endif

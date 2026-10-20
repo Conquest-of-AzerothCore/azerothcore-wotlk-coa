@@ -283,3 +283,29 @@ backend and SQL files were preserved during the merge. The earlier builds and
 in-game acceptance apply to the preceding integration revision, not this new
 source synchronization. No rebuild, database import or repack deployment was
 performed for this merge; a build/runtime check of this revision remains pending.
+
+### Regular endgame-cache weekly lockout
+
+`Manastorm.WeeklyCacheLockout.Enabled` defaults to 1 and `Manastorm.WeeklyCacheLockout.Limit`
+to 5. Both are reloadable. Enabled = 0 disables restrictions; enabled with limit 0 blocks all
+regular endgame-cache awards. Limits outside 0..255 log an error and use 5.
+
+The counter belongs to one character, shared across endgame group modes and gear tiers, and follows
+the core weekly quest reset schedule. Normal-track caches remain exempt even at level 60.
+First-clear bonus caches, Treasure Keeper caches, Greedy Demon, currencies, cases, card packs,
+experience and floor progression are unchanged. Reward source and the run track determine eligibility;
+sharing an item ID with a regular cache does not make a bonus reward count. Pity is preserved while capped.
+
+Apply both `rev_1792493075163811100.sql` and `rev_1792515600000000000.sql` through the supported
+character updater to each character database. The earlier migration is preserved unchanged.
+`manastorm_weekly_cache_lockout` stores one row per character; expired periods read as zero.
+Old allowance history is retained separately and is not imported because it included exempt normal-track awards.
+Counter updates compare the previously read period and count; a stale concurrent update violates the positive
+reset constraint and rolls back the entire payout. Stage receipts also prevent repeat payouts.
+Counters, receipts, progression and durable reward mail commit together; opening a cache spends nothing.
+
+The original native normal-cache reward icon and physical cache IDs receive lockout state in endgame
+contexts only. When guaranteed bonus caches are present, the tracker keeps their icon unlocked while
+showing regular-cache quota progress. The queue regular-cache icon still reflects its weekly lock.
+No client files, opcodes, loot tables or reward delivery systems are replaced. Reset countdown presentation
+still requires a matching-client check because of the known utility field-name mismatch.

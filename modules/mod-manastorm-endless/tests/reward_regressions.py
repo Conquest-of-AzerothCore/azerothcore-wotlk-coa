@@ -261,7 +261,7 @@ def main() -> None:
     assert "(rule.NonWildcardOnly && wildcard)" in stage_block
     assert "wildcard ? run.GetBonusAbilityCaseCount() : 0u" in stage_block
     assert "wildcard ? run.GetBonusTalentCaseCount() : 0u" in stage_block
-    assert ".BuildVisibilityRecords(player->GetGUID().GetCounter())" in bridge_cpp
+    assert ".BuildVisibilityRecords(player->GetGUID().GetCounter(), endgameRewards, guaranteedCaches)" in bridge_cpp
     mode_sql = (ROOT / "data/sql/db-world/base/41_manastorm_game_mode_rewards.sql").read_text(encoding="utf-8")
     assert "('BONUS_CACHE_OTHER', 1478051, 1, 1, 0, 1, 0, 0, 1)" in mode_sql
     assert "item_loot_template" not in mode_sql

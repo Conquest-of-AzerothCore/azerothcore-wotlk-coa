@@ -18,6 +18,9 @@
 #include "QueryResult.h"
 #include "Random.h"
 #include "WorldSession.h"
+#include "World.h"
+#include "Timer.h"
+#include "StringFormat.h"
 
 #include <algorithm>
 #include <cmath>
@@ -75,6 +78,8 @@ struct ManastormRewardPublication
     ObjectGuid::LowType CharacterGuid = 0;
     Mail MailData{};
     std::vector<std::unique_ptr<Item>> Items;
+    bool HasWeeklyAllowance = false;
+    ManastormWeeklyCacheAllowance WeeklyAllowance;
 };
 
 ManastormRewards& ManastormRewards::Instance()
@@ -904,6 +909,13 @@ bool ManastormRewards::ValidateCharacterSchema() const
         return false;
     }
 
+    if (!CharacterDatabase.Query("SELECT COUNT(*) FROM manastorm_weekly_cache_lockout WHERE guid = 0") ||
+        !CharacterDatabase.Query("SELECT COUNT(*) FROM character_manastorm_stage_receipt WHERE guid = 0"))
+    {
+        LOG_ERROR(LOG_FILTER, "Apply the Manastorm weekly cache character migration before enabling this module.");
+        return false;
+    }
+
     if (!_completionRewards.empty() &&
         !CharacterDatabase.Query(
             "SELECT COUNT(*) FROM character_manastorm_completion_reward_state WHERE guid = 0"))
@@ -920,6 +932,74 @@ bool ManastormRewards::ValidateCharacterSchema() const
         return false;
     }
 
+    return true;
+}
+
+bool ManastormRewards::PrepareNormalCacheReward(ObjectGuid::LowType characterGuid, bool endgame,
+    ManastormRewardStateSnapshot const& state, CharacterDatabaseTransaction const& transaction,
+    bool& wonNormalCache, uint32& nextCacheChance, ManastormWeeklyCacheAllowance& allowance,
+    std::string& error) const
+{
+    wonNormalCache = false;
+    nextCacheChance = state.CacheChancePct;
+    allowance = {};
+    if (endgame && !LoadWeeklyCacheAllowance(characterGuid, allowance))
+    {
+        error = "Unable to read Manastorm weekly cache state.";
+        return false;
+    }
+    bool const canEarnNormalCache = allowance.CanEarn();
+    wonNormalCache = canEarnNormalCache &&
+        (state.CacheChancePct >= 100 ||
+            (state.CacheChancePct > 0 && urand(1, 100) <= state.CacheChancePct));
+
+    nextCacheChance = !canEarnNormalCache ? state.CacheChancePct :
+        wonNormalCache
+        ? 0
+        : std::min<uint32>(
+            100,
+            state.CacheChancePct +
+                CACHE_PITY_STEP_PCT);
+
+    if (wonNormalCache && allowance.Enabled)
+    {
+        auto* claim = CharacterDatabase.GetPreparedStatement(CHAR_INS_MANASTORM_WEEKLY_CACHE);
+        claim->SetData(0, characterGuid);
+        claim->SetData(1, allowance.ResetTime);
+        claim->SetData(2, ++allowance.Earned);
+        claim->SetData(3, allowance.SavedResetTime);
+        claim->SetData(4, allowance.SavedEarned);
+        transaction->Append(claim);
+    }
+
+    return true;
+}
+
+bool ManastormRewards::LoadWeeklyCacheAllowance(ObjectGuid::LowType characterGuid,
+    ManastormWeeklyCacheAllowance& allowance) const
+{
+    allowance = {};
+    allowance.Enabled = ManastormModuleConfig::WeeklyCacheLockoutEnabled();
+    allowance.Limit = ManastormModuleConfig::WeeklyCacheLockoutLimit();
+    if (!allowance.Enabled)
+        return true;
+
+    auto const now = GameTime::GetGameTime();
+    auto reset = sWorld->GetNextWeeklyQuestsResetTime();
+    if (reset <= now)
+        reset = Seconds(Acore::Time::GetNextTimeWithDayAndHour(4, 6, now.count()));
+    allowance.ResetTime = uint32(reset.count());
+    auto* statement = CharacterDatabase.GetPreparedStatement(CHAR_SEL_MANASTORM_WEEKLY_CACHE);
+    statement->SetData(0, characterGuid);
+    PreparedQueryResult result = CharacterDatabase.Query(statement);
+    if (!result)
+        return false;
+    Field* fields = result->Fetch();
+    allowance.SavedResetTime = fields[0].Get<uint32>();
+    allowance.SavedEarned = fields[1].Get<uint32>();
+    if (allowance.SavedResetTime > allowance.ResetTime)
+        return false;
+    allowance.Earned = allowance.SavedResetTime == allowance.ResetTime ? allowance.SavedEarned : 0;
     return true;
 }
 
@@ -1249,39 +1329,37 @@ bool ManastormRewards::PrepareStageCompletion(
             return false;
         }
 
-        QueryResult completed =
-            CharacterDatabase.Query(
-                "SELECT 1 "
-                "FROM character_manastorm_completed_depth "
-                "WHERE guid = {} "
-                "AND mode = {} "
-                "AND track = {} "
-                "AND depth = {} "
-                "LIMIT 1",
-                characterGuid,
-                uint32(
-                    uint8(
-                        run.GetMode())),
-                uint32(track),
-                run.GetDepth());
+        auto* receipt = CharacterDatabase.GetPreparedStatement(CHAR_INS_MANASTORM_STAGE_RECEIPT);
+        receipt->SetData(0, characterGuid);
+        receipt->SetData(1, run.GetSeed());
+        receipt->SetData(2, run.GetRunId());
+        receipt->SetData(3, run.GetDepth());
+        transaction->Append(receipt);
 
-        bool const firstClear =
-            !completed;
+        auto* selectClear = CharacterDatabase.GetPreparedStatement(CHAR_SEL_MANASTORM_FIRST_CLEAR);
+        selectClear->SetData(0, characterGuid);
+        selectClear->SetData(1, uint8(run.GetMode()));
+        selectClear->SetData(2, track);
+        selectClear->SetData(3, run.GetDepth());
+        PreparedQueryResult completed = CharacterDatabase.Query(selectClear);
+        ManastormWeeklyCacheAllowance allowance;
+        if (!completed)
+        {
+            error = "Unable to read Manastorm first-clear state.";
+            publications.clear();
+            return false;
+        }
+        bool const firstClear = completed->Fetch()[0].Get<uint64>() == 0;
         bool const wildcard = (GetActiveGameModeMask(characterGuid) & GAME_MODE_WILDCARD) != 0;
 
-        bool const wonNormalCache =
-            state.CacheChancePct >= 100 ||
-            (state.CacheChancePct > 0 &&
-                urand(1, 100) <=
-                    state.CacheChancePct);
-
-        uint32 const nextCacheChance =
-            wonNormalCache
-            ? 0
-            : std::min<uint32>(
-                100,
-                state.CacheChancePct +
-                    CACHE_PITY_STEP_PCT);
+        bool wonNormalCache = false;
+        uint32 nextCacheChance = state.CacheChancePct;
+        if (!PrepareNormalCacheReward(characterGuid, run.IsEndgame(), state, transaction,
+            wonNormalCache, nextCacheChance, allowance, error))
+        {
+            publications.clear();
+            return false;
+        }
 
         uint32 nextBedlamRemainder =
             state.BedlamRemainderBp;
@@ -1570,9 +1648,21 @@ bool ManastormRewards::PrepareStageCompletion(
             transaction->Append(saveState);
         }
 
+        std::size_t const firstPublication = publications.size();
         if (!PrepareItemDelivery(characterGuid, stacks, transaction, publications, error,
             "Manastorm: level " + std::to_string(run.GetDepth())))
             return false;
+        if (allowance.Enabled)
+        {
+            if (firstPublication == publications.size())
+            {
+                auto notice = std::make_shared<ManastormRewardPublication>();
+                notice->CharacterGuid = characterGuid;
+                publications.push_back(std::move(notice));
+            }
+            publications[firstPublication]->HasWeeklyAllowance = true;
+            publications[firstPublication]->WeeklyAllowance = allowance;
+        }
 
         LOG_INFO(
             LOG_FILTER,
@@ -1883,6 +1973,18 @@ void ManastormRewards::PublishCommitted(
                             publication->
                                 CharacterGuid));
 
+        if (player && publication->HasWeeklyAllowance)
+        {
+            ManastormWeeklyCacheAllowance const& allowance = publication->WeeklyAllowance;
+            player->SendSystemMessage(Acore::StringFormat(
+                "Manastorm regular endgame caches: {}/{} earned this week; {} remaining. Reset: {} (server time). "
+                "Bonus caches are exempt.", allowance.Earned, allowance.Limit,
+                allowance.Earned < allowance.Limit ? allowance.Limit - allowance.Earned : 0,
+                Acore::Time::TimeToTimestampStr(Seconds(allowance.ResetTime))).c_str());
+        }
+        if (!publication->MailData.messageID)
+            continue;
+
         //
         // The stage-completion transaction has already committed every reward
         // item into a durable mailbox escrow. This gives us a crash-safe source
@@ -2163,7 +2265,7 @@ uint32 ManastormRewards::GetActiveGameModeMask(ObjectGuid::LowType characterGuid
 }
 
 std::vector<ManastormRewardVisibilityRecord>
-ManastormRewards::BuildVisibilityRecords(ObjectGuid::LowType characterGuid) const
+ManastormRewards::BuildVisibilityRecords(ObjectGuid::LowType characterGuid, bool endgame, uint32 bonusCaches) const
 {
     bool const wildcard = (GetActiveGameModeMask(characterGuid) & GAME_MODE_WILDCARD) != 0;
     std::vector<
@@ -2172,6 +2274,9 @@ ManastormRewards::BuildVisibilityRecords(ObjectGuid::LowType characterGuid) cons
 
     records.reserve(
         _potentialRewards.size());
+
+    ManastormWeeklyCacheAllowance allowance;
+    bool const allowanceAvailable = !endgame || LoadWeeklyCacheAllowance(characterGuid, allowance);
 
     for (PotentialReward const& reward :
         _potentialRewards)
@@ -2185,7 +2290,7 @@ ManastormRewards::BuildVisibilityRecords(ObjectGuid::LowType characterGuid) cons
         //   1 = HIDE
         //   2 = LOCKED_RATE_LIMIT_EXHAUSTED
         //
-        // No reward rate-limit policy is being fabricated here.
+        // Only the normal-cache icon uses the configured shared character allowance.
         record.Action =
             reward.Enabled &&
                 ((reward.ItemEntry != 1278049 && reward.ItemEntry != 1278048 &&
@@ -2193,8 +2298,44 @@ ManastormRewards::BuildVisibilityRecords(ObjectGuid::LowType characterGuid) cons
             ? 0
             : 1;
 
+        if (record.ItemEntry == 97884 && record.Action == 0 && allowance.Enabled)
+        {
+            record.Action = allowanceAvailable && allowance.CanEarn() ? 0 : 2;
+            record.EarnedQuantity = allowance.Earned;
+            record.MaxQuantity = allowance.Limit;
+            record.RemainingQuantity = allowanceAvailable && allowance.Earned < allowance.Limit
+                ? allowance.Limit - allowance.Earned : 0;
+            record.WindowEnd = allowance.ResetTime;
+            record.LockEndTimestamp = record.Action == 2 ? allowance.ResetTime : 0;
+            uint32 const now = uint32(GameTime::GetGameTime().count());
+            record.SecondsRemaining = allowance.ResetTime > now ? allowance.ResetTime - now : 0;
+        }
+
         records.push_back(
             record);
+    }
+
+    auto const normalCache = std::find_if(records.begin(), records.end(),
+        [](ManastormRewardVisibilityRecord const& record) { return record.ItemEntry == 97884; });
+    if (normalCache != records.end())
+    {
+        ManastormRewardVisibilityRecord const allowanceRecord = *normalCache;
+        for (CacheBracket const& bracket : _cacheBrackets)
+        {
+            auto const existing = std::find_if(records.begin(), records.end(),
+                [&bracket](ManastormRewardVisibilityRecord const& record)
+                { return record.ItemEntry == bracket.CacheItemEntry; });
+            if (existing != records.end())
+                continue;
+            ManastormRewardVisibilityRecord record = allowanceRecord;
+            record.ItemEntry = bracket.CacheItemEntry;
+            if (bonusCaches)
+            {
+                record.Action = record.Action == 2 ? 0 : record.Action;
+                record.LockEndTimestamp = 0;
+            }
+            records.push_back(record);
+        }
     }
 
     return records;

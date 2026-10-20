@@ -24,6 +24,18 @@ struct ManastormRewardStateSnapshot
     uint64 BonzoEarned = 0;
 };
 
+struct ManastormWeeklyCacheAllowance
+{
+    bool Enabled = false;
+    uint32 SavedResetTime = 0;
+    uint32 SavedEarned = 0;
+    uint32 Earned = 0;
+    uint32 Limit = 0;
+    uint32 ResetTime = 0;
+
+    bool CanEarn() const { return !Enabled || Earned < Limit; }
+};
+
 struct ManastormRewardVisibilityRecord
 {
     uint32 ItemEntry = 0;
@@ -58,13 +70,16 @@ public:
         std::vector<std::shared_ptr<ManastormRewardPublication>>& publications,
         std::string& error) const;
 
+    bool LoadWeeklyCacheAllowance(ObjectGuid::LowType characterGuid,
+        ManastormWeeklyCacheAllowance& allowance) const;
+
     bool SettlePendingCurrency(ObjectGuid::LowType characterGuid) const;
 
     void PublishCommitted(
         std::vector<std::shared_ptr<ManastormRewardPublication>>& publications) const;
 
     std::vector<ManastormRewardVisibilityRecord>
-        BuildVisibilityRecords(ObjectGuid::LowType characterGuid) const;
+        BuildVisibilityRecords(ObjectGuid::LowType characterGuid, bool endgame, uint32 bonusCaches = 0) const;
 
     bool ResolveCacheItemEntry(
         bool endgame,
@@ -164,6 +179,11 @@ private:
         uint32 TalentCaseItem = 0;
         uint32 CaseCount = 0;
     };
+
+    bool PrepareNormalCacheReward(ObjectGuid::LowType characterGuid, bool endgame,
+        ManastormRewardStateSnapshot const& state, CharacterDatabaseTransaction const& transaction,
+        bool& wonNormalCache, uint32& nextCacheChance, ManastormWeeklyCacheAllowance& allowance,
+        std::string& error) const;
 
     bool PrepareItemDelivery(
         ObjectGuid::LowType characterGuid,

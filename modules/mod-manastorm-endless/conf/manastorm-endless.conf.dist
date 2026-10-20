@@ -3,6 +3,15 @@
 # Enable/disable the Manastorm gameplay module (requires restart).
 Manastorm.Enable = 1
 
+# Weekly cap for regular endgame-track caches only, per character and shared across modes/tiers.
+# Leveling and normal-track caches (including level 60), first-clear bonus caches,
+# Treasure Keeper caches, currencies, cases, card packs and Greedy Demon rewards are exempt.
+# Uses the core weekly quest reset schedule. Both options are reloadable.
+Manastorm.WeeklyCacheLockout.Enabled = 1
+# Valid range: 0..255; invalid values log an error and fall back to 5.
+# With Enabled = 1, Limit = 0 blocks all regular endgame cache awards.
+Manastorm.WeeklyCacheLockout.Limit = 5
+
 # Automatic affixes require this stage creature level and completion of the first native affix unlock depth.
 # Individual progression affixes still require their matching native unlock/toast; those depths are unchanged.
 Manastorm.AffixMinimumLevel = 50
