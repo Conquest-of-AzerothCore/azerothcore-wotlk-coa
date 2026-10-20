@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "name": "Dice of Destiny is sold only on Wildcard realms",
+  "contract": [
+    "Dice of Destiny 777992 is the Wildcard reroll item. rev_20260929_91 listed it on six general goods vendors on every realm. It now belongs to game_event_npc_vendor of the internal Wildcard season event 194, which the worldserver starts only on a realm that plays Wildcard, so a realm that does not play Wildcard keeps the vendors' general goods without the dice."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "alliance",
+      "race": 1,
+      "class": 1,
+      "level": 10
+    },
+    {
+      "id": "horde",
+      "race": 5,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "creatures": [
+    {
+      "id": "danil",
+      "owner": "alliance",
+      "entry": 152,
+      "faction": 35,
+      "level": 30,
+      "distance": 2
+    },
+    {
+      "id": "kien",
+      "owner": "horde",
+      "entry": 2115,
+      "faction": 35,
+      "level": 30,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 414,
+      "fields": [
+        {
+          "actor_guid": "danil"
+        }
+      ],
+      "consumed": false,
+      "label": "ask vendor 152 for its goods"
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "vendor_list_packets",
+      "min": 1,
+      "within_ms": 2000,
+      "label": "vendor 152 opens its goods"
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "vendor_items",
+      "min": 1,
+      "label": "vendor 152 still sells its general goods"
+    },
+    {
+      "action": "assert",
+      "actor": "alliance",
+      "metric": "vendor_price",
+      "item": 777992,
+      "equals": -1,
+      "label": "vendor 152 does not list Dice of Destiny on a realm that does not play Wildcard"
+    },
+    {
+      "action": "client_packet",
+      "actor": "horde",
+      "opcode": 414,
+      "fields": [
+        {
+          "actor_guid": "kien"
+        }
+      ],
+      "consumed": false,
+      "label": "ask vendor 2115 for its goods"
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "vendor_list_packets",
+      "min": 1,
+      "within_ms": 2000,
+      "label": "vendor 2115 opens its goods"
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "vendor_items",
+      "min": 1,
+      "label": "vendor 2115 still sells its general goods"
+    },
+    {
+      "action": "assert",
+      "actor": "horde",
+      "metric": "vendor_price",
+      "item": 777992,
+      "equals": -1,
+      "label": "vendor 2115 does not list Dice of Destiny on a realm that does not play Wildcard"
+    }
+  ]
+}
