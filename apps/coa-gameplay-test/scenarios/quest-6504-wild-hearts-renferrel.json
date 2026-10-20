@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Wild Hearts: Apothecary Renferrel takes the quest back (#6504)",
+  "contract": "Quest 429 Wild Hearts is ended by Apothecary Renferrel 1937, whose spawn guid 17612 stands at The Sepulcher in Silverpine Forest. Patch-WB1 raised the ground there, which buried him at the stock 522.45, 1652.3, 125.84; rev_20261010_95 (#7185) lifted him to z 128.01 and rev_20261010_99 (#7244) moved him to his WB1 placement 516.17, 1625.86. The reporter stood 78 yards from the stock spot. Expected: with the quest complete, Renferrel (template faction 68, level 14) lists 429 in his quest menu. Lane phasing hides the world spawn from harness players, so an owned Renferrel stands in for it.",
+  "timeout_ms": 30000,
+  "location": { "map": 0, "x": 516.173, "y": 1625.858, "z": 128.01, "o": 4.37993 },
+  "players": [
+    { "id": "forsaken", "race": 5, "class": 1, "level": 16 }
+  ],
+  "creatures": [
+    { "id": "renferrel", "owner": "forsaken", "entry": 1937, "distance": 2, "faction": 68, "level": 14 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "gossip_hello", "label": "Talk to Renferrel before taking the quest", "actor": "forsaken", "target": "renferrel" },
+    {
+      "action": "assert", "label": "Renferrel lists no Wild Hearts turn-in without the quest", "actor": "forsaken",
+      "metric": "quest_menu_has", "quest": 429, "equals": 0
+    },
+    { "action": "prepare_quest", "label": "Finish Wild Hearts", "actor": "forsaken", "quest": 429 },
+    { "action": "gossip_hello", "label": "Talk to Renferrel with the quest complete", "actor": "forsaken", "target": "renferrel" },
+    {
+      "action": "assert", "label": "Renferrel offers Wild Hearts for turn-in", "actor": "forsaken",
+      "metric": "quest_menu_has", "quest": 429, "equals": 1
+    }
+  ]
+}
