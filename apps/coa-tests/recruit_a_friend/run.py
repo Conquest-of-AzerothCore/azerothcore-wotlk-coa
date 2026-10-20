@@ -50,7 +50,7 @@ def main():
     else:
         summon = 'SpellCastResult WorldSession::CheckRecruitAFriendSummon(Player const*) const { return SPELL_FAILED_BAD_TARGETS; }'
     code = code.replace('// ACTUAL_SUMMON', summon)
-    code = code.replace('// SUMMON_AVAILABLE', '#define SUMMON_AVAILABLE ' + str(int('CheckRecruitAFriendSummon' in handlers)))
+    code = code.replace('// ACTUAL_AVAILABILITY', '#define SUMMON_AVAILABLE ' + str(int('CheckRecruitAFriendSummon' in handlers)))
     code = code.replace('// ACTUAL_REPUTATION', method(player, 'float Player::CalculateReputationGain('))
     confirmation = ''
     if 'bool WorldSession::ValidateRecruitAFriendSummon(' in handlers:

@@ -158,7 +158,7 @@ struct Spell {
 // ACTUAL_SUMMON
 // ACTUAL_REPUTATION
 // ACTUAL_CONFIRMATION
-// SUMMON_AVAILABLE
+// ACTUAL_AVAILABILITY
 int failures=0, checks=0;
 void check(bool okay,char const* name) {
     ++checks;
