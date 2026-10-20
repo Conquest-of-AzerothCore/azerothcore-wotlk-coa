@@ -70,6 +70,7 @@ std::vector<Grant> const& Grants()
         { DARK_APOTHEOSIS, { DARK_APOTHEOSIS_SPELLS.begin(), DARK_APOTHEOSIS_SPELLS.end() } },
         { 1101579, { 1101515, 1100883, 1102641, 1100982, 1356991 } },
         { 1160103, { 1100674 } },
+        { 1134428, { 1132215 } },
         { 1165139, { 1133891, 1105420 } } };
     return grants;
 }

@@ -270,6 +270,10 @@ int main(int, char** argv)
     Check(!twinned(160, 1100160) && std::none_of(twins.begin(), twins.end(),
             [&layouts](auto const& pair) { return layouts[pair.first] != layouts[pair.second]; }),
         "a stock spell and an unrelated spell 1100000 above it (Forked Lightning, Glyph of Slam) are not twins");
+    Check(Same(grant(1134428), { 1132215 }) && layouts[1132215].Auras[0] == 42 && layouts[1132216].Auras[0] == 262 &&
+            !twinned(32216, 1132216),
+        "Reborn Victory Rush teaches Reborn Victorious State, whose kill proc grants Reborn Victorious (aura 262), "
+        "which is no twin of stock Victorious");
     Check(!twinned(133, 1100133) && !twinned(172, 1100172) && !twinned(633, 1100633),
         "a Reborn spell with other effects than its stock namesake (Fireball, Corruption, Lay on Hands) takes nothing");
     Check(twins.size() > 7000, "the Reborn spell table is twinned with its stock spells");
