@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "A level-12 Venomancer spends its class and Stalking points and cannot exceed them (#6639)",
+  "contract": "#6639: a level-12 Venomancer could not save its talents ('localspec' errors). Classified already fixed on main: #5507 removed the .localspec bridge and the client talks to the server only through the native CMSG 0x0727 upload. CharacterAdvancementEssence gives class 29 2 class points (AE) and 1 specialization point (TE) at level 12. Choosing Stalking (ChrSpecs 53) uploads identity 4053 (92143) and its signature 7229 Hive Instinct (804968, 1 AE). Class entry 29607 Envenomed Weapons (300855, 1 AE) spends the second class point and Stalking entry 7189 Venomous Bite (630900, 1 TE) the specialization point; none has a level gate. A further class entry 6082 (300664, 1 AE) and Stalking entry 7190 Contagion (503851, 1 TE) must both be refused without changing the build.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 12 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Settle login", "ms": 5000 },
+    { "action": "specialization", "label": "Choose Stalking", "actor": "v", "id": 53 },
+    { "action": "assert", "label": "Stalking grants its identity", "actor": "v", "metric": "knows_spell",
+      "spell": 92143, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "Stalking grants its Hive Instinct signature", "actor": "v",
+      "metric": "knows_spell", "spell": 804968, "equals": 1, "within_ms": 1000 },
+    { "action": "advancement_rank", "label": "Spend the second class point on Envenomed Weapons", "actor": "v",
+      "entry": 29607, "rank": 1 },
+    { "action": "assert", "label": "Envenomed Weapons is learned", "actor": "v", "metric": "knows_spell",
+      "spell": 300855, "equals": 1, "within_ms": 1000 },
+    { "action": "advancement_rank", "label": "Spend the Stalking point on Venomous Bite", "actor": "v",
+      "entry": 7189, "rank": 1 },
+    { "action": "assert", "label": "Venomous Bite is learned", "actor": "v", "metric": "knows_spell",
+      "spell": 630900, "equals": 1, "within_ms": 1000 },
+    { "action": "advancement_rank", "label": "A third class point is refused", "actor": "v", "entry": 6082,
+      "rank": 1, "refused": true },
+    { "action": "assert", "label": "The refused class talent is not learned", "actor": "v", "metric": "knows_spell",
+      "spell": 300664, "equals": 0 },
+    { "action": "advancement_rank", "label": "A second Stalking point is refused", "actor": "v", "entry": 7190,
+      "rank": 1, "refused": true },
+    { "action": "assert", "label": "The refused Stalking talent is not learned", "actor": "v",
+      "metric": "knows_spell", "spell": 503851, "equals": 0 },
+    { "action": "assert", "label": "Venomous Bite is still learned after the refusals", "actor": "v",
+      "metric": "knows_spell", "spell": 630900, "equals": 1 },
+    { "action": "assert", "label": "Envenomed Weapons is still learned after the refusals", "actor": "v",
+      "metric": "knows_spell", "spell": 300855, "equals": 1 }
+  ]
+}
