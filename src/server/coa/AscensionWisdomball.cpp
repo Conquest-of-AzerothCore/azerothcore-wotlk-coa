@@ -312,10 +312,6 @@ bool CanOffer(Player* player, uint32 questId)
     if (!player->SatisfyQuestExclusiveGroup(quest, false))
         return false;
 
-    // A quest giver only offers a quest to the races it is for; the ball must not hand Horde quests to the Alliance.
-    if (!player->SatisfyQuestRace(quest, false))
-        return false;
-
     return true;
 }
 
