@@ -245,7 +245,7 @@ public:
                 case DATA_STATUES:
                     return _statuePhase;
                 case DATA_DEFENDER_KILLED:
-                    return _defendersKilled;
+                    return DEFENDERS_COUNT;
                 case TYPE_ATAL_ALARION:
                 case TYPE_JAMMAL_AN:
                 case TYPE_HAKKAR_EVENT:
