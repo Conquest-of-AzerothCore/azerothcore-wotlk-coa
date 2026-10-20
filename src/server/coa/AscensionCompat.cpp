@@ -4572,31 +4572,29 @@ private:
                 LOG_ERROR("coa", "coa_client_skill_line_ability {} has unknown SkillLine {}", id, skillLine);
         } while (result->NextRow());
 
-        ClientDBC abilities;
-        std::filesystem::path const serverDbc =
-            std::filesystem::path(sWorld->GetDataPath()) / "dbc" / "SkillLineAbility.dbc";
-        if (!abilities.Load(serverDbc.string(), SKILL_LINE_ABILITY_DBC_FIELD_COUNT))
+        for (auto skillLine = skillLines.begin(); skillLine != skillLines.end();)
         {
-            LOG_ERROR("coa", "Cannot read {}; skill line ability patches are not streamed", serverDbc.generic_string());
-            return rows;
-        }
-
-        for (uint32 index = 0; index < abilities.GetRecordCount(); ++index)
-        {
-            ClientDBC::Record const record = abilities.GetRecord(index);
-            auto const skillLine = skillLines.find(record.GetUInt32(0));
-            if (skillLine == skillLines.end())
+            SkillLineAbilityEntry const* entry = sSkillLineAbilityStore.LookupEntry(skillLine->first);
+            if (!entry || !entry->Spell)
+            {
+                LOG_ERROR("coa", "coa_client_skill_line_ability {} has no SkillLineAbility row", skillLine->first);
+                skillLine = skillLines.erase(skillLine);
                 continue;
+            }
 
             SkillLineAbilityPatchRow& row = rows.emplace_back();
-            for (uint32 field = 0; field < row.size(); ++field)
-                row[field] = record.GetUInt32(field);
+            row[0] = entry->ID;
             row[1] = skillLine->second;
-            skillLines.erase(skillLine);
+            row[2] = entry->Spell;
+            row[3] = entry->RaceMask;
+            row[4] = entry->ClassMask;
+            row[7] = entry->MinSkillLineRank;
+            row[8] = entry->SupercededBySpell;
+            row[9] = entry->AcquireMethod;
+            row[10] = entry->TrivialSkillLineRankHigh;
+            row[11] = entry->TrivialSkillLineRankLow;
+            skillLine = skillLines.erase(skillLine);
         }
-
-        for (auto const& [id, skillLine] : skillLines)
-            LOG_ERROR("coa", "coa_client_skill_line_ability {} has no SkillLineAbility.dbc row", id);
         return rows;
     }
 
@@ -8816,6 +8814,8 @@ public:
   void OnPlayerEquip(Player *player, Item *item, uint8, uint8,
                      bool) override {
     AscensionCollectionService::Instance().OnItemObtained(player, item);
+    if (ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED))
+      ReconcileAscensionPrimalistWeapon(player);
   }
 
   bool OnPlayerCanCastItemUseSpell(Player *player, Item *item, SpellCastTargets const &, uint8, uint32) override {

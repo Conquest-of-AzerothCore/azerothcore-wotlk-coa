@@ -13,6 +13,9 @@ using SpellEffIndex = uint8;
 using AuraEffectHandleModes = uint8;
 using TimePoint = uint32;
 constexpr uint32 CLASS_WILDWALKER = 31, BASE_ATTACK = 0, POWER_MANA = 0;
+constexpr uint32 ITEM_CLASS_WEAPON = 2, ITEM_CLASS_ARMOR = 4;
+constexpr uint32 INVTYPE_WEAPON = 13, INVTYPE_WEAPONMAINHAND = 21, INVTYPE_WEAPONOFFHAND = 22,
+    INVTYPE_2HWEAPON = 17, INVTYPE_BOW = 15, INVTYPE_SHIELD = 14, INVTYPE_AMMO = 24;
 [[maybe_unused]] constexpr uint32 SPELL_EFFECT_DUMMY = 3, SPELL_AURA_NONE = 0, SPELL_AURA_ANY = 999;
 [[maybe_unused]] constexpr uint32 SPELL_AURA_PROC_TRIGGER_SPELL = 42, SPELL_SCHOOL_MASK_NORMAL = 1,
     PROC_HIT_CRITICAL = 2;
@@ -63,6 +66,7 @@ struct Unit
     std::vector<std::tuple<Unit*, uint32>> casts;
     uint32 GetGUID() const { return guid; }
     bool IsAlive() const { return alive; }
+    bool HasAura(uint32 id) const { return auras.contains(id); }
     Player* GetSpellModOwner() { return nullptr; }
     void CastSpell(Unit* target, uint32 id, bool, void* = nullptr, AuraEffect const* = nullptr)
     {
@@ -72,7 +76,7 @@ struct Unit
     void RemoveAurasDueToSpell(uint32 id, uint32 = 0) { auras.erase(id); }
 };
 struct Pet : Unit { };
-struct ItemTemplate { uint32 Class = 2, SubClass = 0; };
+struct ItemTemplate { uint32 Class = 2, InventoryType = 13; };
 struct Item
 {
     ItemTemplate data;
@@ -190,21 +194,24 @@ struct AuraScript
 int main()
 {
     manager.rows[801242].Id = 801242;
-    manager.rows[801242].EquippedItemSubClassMask = 41105;
     manager.rows[704098].Id = 704098;
-    manager.rows[704098].EquippedItemSubClassMask = 1378;
     Player player;
     Item weapon;
     player.weapon = &weapon;
     assert(SelectPrimalWeapon(&player) == 801242);
-    weapon.data.SubClass = 1;
+    weapon.data.InventoryType = INVTYPE_WEAPONMAINHAND;
+    assert(SelectPrimalWeapon(&player) == 801242);
+    weapon.data.InventoryType = INVTYPE_2HWEAPON;
     assert(SelectPrimalWeapon(&player) == 704098);
-    for (uint32 subclass : {2u, 3u, 9u, 20u, 32u})
+    for (uint32 inventoryType : {INVTYPE_WEAPONOFFHAND, INVTYPE_BOW, INVTYPE_SHIELD, INVTYPE_AMMO})
     {
-        weapon.data.SubClass = subclass;
+        weapon.data.InventoryType = inventoryType;
         assert(!SelectPrimalWeapon(&player));
     }
-    weapon.data.SubClass = 0;
+    weapon.data.InventoryType = INVTYPE_WEAPON;
+    weapon.data.Class = ITEM_CLASS_ARMOR;
+    assert(!SelectPrimalWeapon(&player));
+    weapon.data.Class = ITEM_CLASS_WEAPON;
     weapon.broken = true;
     assert(!SelectPrimalWeapon(&player));
     weapon.broken = false;
@@ -279,7 +286,7 @@ int main()
     bestial.Remove(nullptr, 1);
     assert(!player.auras.contains(806070) && !pet.auras.contains(806071));
 
-    weapon.data.SubClass = 1;
+    weapon.data.InventoryType = INVTYPE_2HWEAPON;
     assert(!bestial.CheckProc(event));
     aura_ascension_primal_weapon primal;
     primal.fixtureTarget = &player;
