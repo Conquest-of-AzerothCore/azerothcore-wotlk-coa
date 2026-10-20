@@ -30,6 +30,7 @@ enum RunemasterTalentProcSpells : uint32
     SPELL_ENGRAVING_AIR = 653226,
     SPELL_AIR_ENGRAVING_PROC = 653225,
     SPELL_ICE_ENGRAVING_PROC = 653266,
+    SPELL_ICE_ENGRAVING_SLOW = 653231,
     SPELL_ICEBOUND_MOMENTUM = 712490,
     SPELL_ICEBOUND_MOMENTUM_DAMAGE = 712491
 };
@@ -307,7 +308,10 @@ public:
         if (info->Id == SPELL_ENGRAVING_ICE && info->SpellFamilyName == uint32(CLASS_SPIRIT_MAGE) + 6 &&
             IsRunemaster(caster) && caster->HasAura(SPELL_ICE_ENGRAVING_PROC, caster->GetGUID()) &&
             miss == SPELL_MISS_NONE && damage && target && target->IsAlive() && caster->IsValidAttackTarget(target))
+        {
+            caster->CastSpell(target, SPELL_ICE_ENGRAVING_SLOW, TRIGGERED_FULL_MASK);
             caster->CastSpell(target, SPELL_ICEBOUND_MOMENTUM, TRIGGERED_FULL_MASK);
+        }
     }
 };
 
