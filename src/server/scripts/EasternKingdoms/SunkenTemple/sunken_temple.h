@@ -25,6 +25,7 @@ enum DataTypes
     DATA_STATUES                = 10,
     DATA_DEFENDER_KILLED        = 11,
     DATA_ERANIKUS_FIGHT         = 12,
+    DATA_AWAKEN_SOULFLAYER      = 13,
     MAX_STATUE_PHASE            = 6,
     DEFENDERS_COUNT             = 6,
 
@@ -54,6 +55,12 @@ enum CreatureIds
     NPC_JAMMAL_AN_THE_PROPHET   = 5710,
     NPC_SHADE_OF_ERANIKUS       = 5709,
     NPC_SHADE_OF_HAKKAR         = 8440,
+    NPC_AVATAR_OF_HAKKAR        = 8443,
+    NPC_OGOM_THE_WRETCHED       = 5711,
+    NPC_MORPHAZ                 = 5719,
+    NPC_WEAVER                  = 5720,
+    NPC_DREAMSCYTHE             = 5721,
+    NPC_HAZZAS                  = 5722,
 };
 
 enum SpellIds

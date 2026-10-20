@@ -18,6 +18,7 @@
 #include "AreaTriggerScript.h"
 #include "CreatureAI.h"
 #include "EventMap.h"
+#include "GameObjectScript.h"
 #include "InstanceMapScript.h"
 #include "InstanceScript.h"
 #include "Player.h"
@@ -25,6 +26,40 @@
 #include "SpellScriptLoader.h"
 #include "Unit.h"
 #include "sunken_temple.h"
+#include <array>
+
+namespace
+{
+    struct EranikusWarden
+    {
+        uint32 entry;
+        uint8 group;
+    };
+
+    constexpr std::array<EranikusWarden, 7> EranikusWardens =
+    {{
+        { NPC_AVATAR_OF_HAKKAR, 0 },
+        { NPC_JAMMAL_AN_THE_PROPHET, 1 },
+        { NPC_OGOM_THE_WRETCHED, 1 },
+        { NPC_DREAMSCYTHE, 2 },
+        { NPC_WEAVER, 2 },
+        { NPC_HAZZAS, 3 },
+        { NPC_MORPHAZ, 3 },
+    }};
+
+    constexpr std::array<char const*, 4> EranikusWardenGroupNames =
+    {
+        "Avatar of Hakkar",
+        "Jammal'an the Prophet & Ogom the Wretched",
+        "Dreamscythe & Weaver",
+        "Hazzas & Morphaz",
+    };
+
+    constexpr uint32 AllEranikusWardensKilled = (1u << EranikusWardens.size()) - 1;
+    constexpr float EranikusSlumberNoticeRange = 40.0f;
+    constexpr float EranikusSlumberNoticeResetRange = 70.0f;
+    Position const ShadeOfHakkarSummonPosition = { -466.795f, 272.863f, -90.447f, 1.57f };
+}
 
 class instance_sunken_temple : public InstanceMapScript
 {
@@ -42,6 +77,7 @@ public:
         {
             _statuePhase = 0;
             _defendersKilled = 0;
+            _eranikusWardensKilled = 0;
             memset(&_encounters, 0, sizeof(_encounters));
         }
 
@@ -54,7 +90,8 @@ public:
                     break;
                 case NPC_SHADE_OF_ERANIKUS:
                     _shadeOfEranikusGUID = creature->GetGUID();
-                    creature->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+                    if (!IsEranikusAwake())
+                        creature->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
                     break;
             }
 
@@ -66,12 +103,70 @@ public:
         {
             if (unit->IsCreature() && unit->GetCreatureType() == CREATURE_TYPE_DRAGONKIN && unit->GetEntry() != NPC_SHADE_OF_ERANIKUS)
                 _dragonkinList.remove(unit->GetGUID());
-            if (unit->GetEntry() == NPC_JAMMAL_AN_THE_PROPHET)
-            {
-                if (Creature* cr = instance->GetCreature(_shadeOfEranikusGUID))
-                    cr->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
-            }
+            if (unit->IsCreature())
+                OnEranikusWardenDeath(unit->GetEntry());
+        }
 
+        bool IsEranikusAwake() const
+        {
+            return _eranikusWardensKilled == AllEranikusWardensKilled;
+        }
+
+        void OnEranikusWardenDeath(uint32 entry)
+        {
+            for (std::size_t i = 0; i < EranikusWardens.size(); ++i)
+                if (EranikusWardens[i].entry == entry)
+                    _eranikusWardensKilled |= 1u << i;
+
+            if (IsEranikusAwake())
+                if (Creature* eranikus = instance->GetCreature(_shadeOfEranikusGUID))
+                    eranikus->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+
+            SaveToDB();
+        }
+
+        std::string EranikusSlumberNotice() const
+        {
+            std::string notice = "Shade of Eranikus still slumbers, to awaken him defeat:";
+            for (std::size_t group = 0; group < EranikusWardenGroupNames.size(); ++group)
+            {
+                bool groupAlive = false;
+                for (std::size_t i = 0; i < EranikusWardens.size(); ++i)
+                    if (EranikusWardens[i].group == group && !(_eranikusWardensKilled & (1u << i)))
+                        groupAlive = true;
+
+                if (groupAlive)
+                    notice += std::string("\n") + EranikusWardenGroupNames[group];
+            }
+            return notice;
+        }
+
+        void NotifyPlayersNearSlumberingEranikus()
+        {
+            Creature* eranikus = instance->GetCreature(_shadeOfEranikusGUID);
+            if (!eranikus || IsEranikusAwake())
+                return;
+
+            instance->DoForAllPlayers([&](Player* player)
+            {
+                float const distance = player->GetDistance(eranikus);
+                if (distance > EranikusSlumberNoticeResetRange)
+                    _playersToldEranikusSlumbers.erase(player->GetGUID());
+                else if (distance <= EranikusSlumberNoticeRange && _playersToldEranikusSlumbers.insert(player->GetGUID()).second)
+                    eranikus->Whisper(EranikusSlumberNotice(), LANG_UNIVERSAL, player, true);
+            });
+        }
+
+        void AwakenSoulflayer()
+        {
+            if (GetData(TYPE_HAKKAR_EVENT) != NOT_STARTED)
+                return;
+
+            if (TempSummon* summon = instance->SummonCreature(NPC_SHADE_OF_HAKKAR, ShadeOfHakkarSummonPosition))
+            {
+                summon->SetTempSummonType(TEMPSUMMON_MANUAL_DESPAWN);
+                SetData(TYPE_HAKKAR_EVENT, IN_PROGRESS);
+            }
         }
 
         void OnGameObjectCreate(GameObject* gameobject) override
@@ -101,8 +196,7 @@ public:
                     break;
                 case GO_FORCEFIELD:
                     _forcefieldGUID = gameobject->GetGUID();
-                    if (_defendersKilled == DEFENDERS_COUNT)
-                        gameobject->SetGoState(GO_STATE_ACTIVE);
+                    gameobject->SetGoState(GO_STATE_ACTIVE);
             }
         }
 
@@ -113,6 +207,9 @@ public:
                 case DATA_STATUES:
                     _events.ScheduleEvent(DATA_STATUES, 0ms);
                     break;
+                case DATA_AWAKEN_SOULFLAYER:
+                    AwakenSoulflayer();
+                    return;
                 case DATA_DEFENDER_KILLED:
                     ++_defendersKilled;
                     if (_defendersKilled == DEFENDERS_COUNT)
@@ -161,6 +258,14 @@ public:
         void Update(uint32 diff) override
         {
             _events.Update(diff);
+
+            _eranikusSlumberNoticeTimer += diff;
+            if (_eranikusSlumberNoticeTimer >= 1000)
+            {
+                _eranikusSlumberNoticeTimer = 0;
+                NotifyPlayersNearSlumberingEranikus();
+            }
+
             switch (_events.ExecuteEvent())
             {
                 case DATA_STATUES:
@@ -179,6 +284,7 @@ public:
             data >> _encounters[2];
             data >> _statuePhase;
             data >> _defendersKilled;
+            data >> _eranikusWardensKilled;
         }
 
         void WriteSaveDataMore(std::ostringstream& data) override
@@ -187,13 +293,17 @@ public:
                 << _encounters[1] << ' '
                 << _encounters[2] << ' '
                 << _statuePhase << ' '
-                << _defendersKilled;
+                << _defendersKilled << ' '
+                << _eranikusWardensKilled;
         }
 
     private:
         uint32 _statuePhase;
         uint32 _defendersKilled;
+        uint32 _eranikusWardensKilled;
+        uint32 _eranikusSlumberNoticeTimer = 0;
         uint32 _encounters[MAX_ENCOUNTERS];
+        GuidSet _playersToldEranikusSlumbers;
 
         ObjectGuid _forcefieldGUID;
         ObjectGuid _jammalanGUID;
@@ -260,17 +370,8 @@ class spell_temple_of_atal_hakkar_awaken_the_soulflayer : public SpellScript
     void HandleSendEvent(SpellEffIndex effIndex)
     {
         PreventHitDefaultEffect(effIndex);
-        InstanceScript* instanceScript = GetCaster()->GetInstanceScript();
-        Map* map = GetCaster()->FindMap();
-        if (!map || !instanceScript || instanceScript->GetData(TYPE_HAKKAR_EVENT) != NOT_STARTED)
-            return;
-
-        Position pos = {-466.795f, 272.863f, -90.447f, 1.57f};
-        if (TempSummon* summon = map->SummonCreature(NPC_SHADE_OF_HAKKAR, pos))
-        {
-            summon->SetTempSummonType(TEMPSUMMON_MANUAL_DESPAWN);
-            instanceScript->SetData(TYPE_HAKKAR_EVENT, IN_PROGRESS);
-        }
+        if (InstanceScript* instanceScript = GetCaster()->GetInstanceScript())
+            instanceScript->SetData(DATA_AWAKEN_SOULFLAYER, 0);
     }
 
     void Register() override
@@ -279,10 +380,24 @@ class spell_temple_of_atal_hakkar_awaken_the_soulflayer : public SpellScript
     }
 };
 
+class go_hakkar_worship_altar : public GameObjectScript
+{
+public:
+    go_hakkar_worship_altar() : GameObjectScript("go_hakkar_worship_altar") { }
+
+    bool OnGossipHello(Player* /*player*/, GameObject* go) override
+    {
+        if (InstanceScript* instanceScript = go->GetInstanceScript())
+            instanceScript->SetData(DATA_AWAKEN_SOULFLAYER, 0);
+        return false;
+    }
+};
+
 void AddSC_instance_sunken_temple()
 {
     new instance_sunken_temple();
     new at_malfurion_stormrage();
+    new go_hakkar_worship_altar();
     RegisterSpellScript(spell_temple_of_atal_hakkar_hex_of_jammal_an_aura);
     RegisterSpellScript(spell_temple_of_atal_hakkar_awaken_the_soulflayer);
 }
