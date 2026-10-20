@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Crossroads: Brumbof Bramstum hands over the drumstick on his second gossip page",
+  "contract": "Issue #7422, live CoA recording (FloridaManLootGoblin L3eJpDS8ddY, 2026-08-11, 21:00-21:05): Brumbof Bramstum 753513's first page reads '<The drummer is busy playing his drum. He doesn't seem to notice you.>' and, while 'Dancing to the Beat' 255080 is taken without a Drumstick 355122, offers 'Excuse me, friend. I need a drumstick for someone, do you have one you can spare?'. Choosing it adds the Drumstick and opens a second page, 'I didn't realize there was another drummer here at the Crossroads. ... after the party!', with no further options, instead of closing the window.",
+  "timeout_ms": 60000,
+  "location": {"map": 1, "x": -541.0, "y": -2705.3, "z": 96.04, "o": 3.14},
+  "players": [
+    {"id": "hero", "race": 2, "class": 1, "level": 15}
+  ],
+  "creatures": [
+    {"id": "brumbof", "owner": "hero", "entry": 753513, "distance": 3, "faction": 35, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"label": "SETUP: the hero carries 255080 unfinished", "action": "prepare_quest", "actor": "hero",
+     "quest": 255080, "complete": false},
+    {"label": "SETUP: the hero drops the Drumstick the fixture handed over", "action": "destroy_item",
+     "actor": "hero", "item": 355122},
+    {"label": "SETUP: the hero has no Drumstick", "action": "assert", "actor": "hero", "metric": "item_count",
+     "item": 355122, "equals": 0},
+    {"label": "the hero opens Brumbof's gossip", "action": "gossip_hello", "actor": "hero", "target": "brumbof"},
+    {"label": "the first page offers one option", "action": "assert", "actor": "hero", "metric": "gossip_options",
+     "equals": 1},
+    {"label": "the option is the recorded request", "action": "assert", "actor": "hero",
+     "metric": "gossip_option_text", "index": 0,
+     "text": "Excuse me, friend. I need a drumstick for someone, do you have one you can spare?", "equals": 1},
+    {"label": "the hero asks for the drumstick", "action": "gossip_select", "actor": "hero", "option": 0},
+    {"label": "the hero receives the Drumstick", "action": "assert", "actor": "hero", "metric": "item_count",
+     "item": 355122, "equals": 1, "within_ms": 3000},
+    {"label": "DISCRIMINATING: the second page opens with no options", "action": "assert", "actor": "hero",
+     "metric": "gossip_options", "equals": 0},
+    {"label": "the second page text exists", "action": "assert", "actor": "hero", "metric": "gossip_text",
+     "id": 9010701, "equals": 1},
+    {"label": "the client asks for the first page text", "action": "client_packet", "actor": "hero",
+     "opcode": 383, "fields": [{"u32": 9010700}, {"actor_guid": "brumbof"}], "consumed": false},
+    {"label": "the first page describes the busy drummer", "action": "assert", "actor": "hero",
+     "metric": "server_packet_contains", "opcode": 384, "row": 9010700,
+     "text": "The drummer is busy playing his drum.", "equals": 1, "within_ms": 3000},
+    {"label": "the client asks for the second page text", "action": "client_packet", "actor": "hero",
+     "opcode": 383, "fields": [{"u32": 9010701}, {"actor_guid": "brumbof"}], "consumed": false},
+    {"label": "the second page names the other drummer", "action": "assert", "actor": "hero",
+     "metric": "server_packet_contains", "opcode": 384, "row": 9010701,
+     "text": "I didn't realize there was another drummer here at the Crossroads.", "equals": 1, "within_ms": 3000}
+  ]
+}
