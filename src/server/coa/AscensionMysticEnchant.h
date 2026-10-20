@@ -11,6 +11,8 @@ class Player;
 namespace AscensionMysticEnchant
 {
 bool ApplyGuide(Player* player, std::vector<GuideEnchant> const& guide);
+
+uint32 ClearActivePreset(Player* player);
 }
 
 #endif

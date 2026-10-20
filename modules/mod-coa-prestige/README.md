@@ -26,7 +26,8 @@ client piece reads:
 ## Activation
 
 Chromie refuses unless all of these hold:
-- the character is a Conquest of Azeroth class at `CoAPrestige.RequiredLevel`;
+- the character is a Conquest of Azeroth class, or a stock class on Warcraft Reborn, at
+  `CoAPrestige.RequiredLevel`;
 - it has a specialization;
 - it is alive, out of combat, not travelling and not in an instance.
 
@@ -76,6 +77,14 @@ specialization's Silas levelling track start over, and its Scrolls of Fortune (b
 Cases of Fortune and Bonus Manastorm Caches are deleted. The deleted scrolls become repurchasable at Silas at the
 level cap. Chromie's window reads their count from SMSG 0x720, which is sent before her gossip menu. The
 specialization lock covers the Wildcard specialization swap spells as well.
+
+## Warcraft Reborn
+
+A stock class on a Warcraft Reborn realm prestiges like a Conquest of Azeroth class, with the same
+requirements, rewards, reset and lock. Its specialization is its talent spec (1 or 2). Instead of
+class talents, the active talent spec's talents are reset, every Mystic Enchant in the active preset
+is removed, and the Reborn class spells above level 1 are forgotten (starting spells are learned
+again). Activating the other talent spec is refused until the Prestige level.
 
 ## Data
 

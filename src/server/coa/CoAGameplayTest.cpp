@@ -3260,6 +3260,8 @@ private:
         }
         if (metric == "talent_points")
             return player->GetFreeTalentPoints();
+        if (metric == "active_talent_spec")
+            return player->GetActiveSpec();
         if (metric == "bank_bag_slots")
             return player->GetBankBagSlotCount();
         if (metric == "taxi_node")
@@ -4227,6 +4229,12 @@ private:
                             Item* item = player->GetItemByEntry(value.get_value<uint32>());
                             Require(item != nullptr, "Packet item GUID requires a carried item");
                             request << item->GetGUID().GetRawValue();
+                        }
+                        else if (kind == "item_bag" || kind == "item_slot")
+                        {
+                            Item* item = player->GetItemByEntry(value.get_value<uint32>());
+                            Require(item != nullptr, "Packet item position requires a carried item");
+                            request << uint8(kind == "item_bag" ? item->GetBagSlot() : item->GetSlot());
                         }
                         else if (kind == "gameobject_guid")
                         {

@@ -16,10 +16,13 @@
  */
 
 #include "AllBattlegroundScript.h"
+#include "AllSpellScript.h"
 #include "AscensionHighRiskPolicy.h"
+#include "AscensionMysticEnchant.h"
 #include "AscensionRulesets.h"
 #include "AscensionSpecialization.h"
 #include "AscensionTalentReplacementData.h"
+#include "AscensionWarcraftReborn.h"
 #include "AscensionWildcard.h"
 #include "Battleground.h"
 #include "CoA.Prestige.API.h"
@@ -47,6 +50,7 @@
 #include "QuestDef.h"
 #include "ScriptMgr.h"
 #include "ScriptedGossip.h"
+#include "Spell.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "WorldPacket.h"
@@ -483,12 +487,14 @@ namespace
         State state = LoadState(player);
         uint32 const requiredLevel = g_requiredLevel;
         bool const wildcard = AscensionWildcard::IsWildcardHero(player);
+        bool const reborn = AscensionWarcraftReborn::IsRebornCharacter(player);
+        // A Warcraft Reborn character's specialization is its talent spec, 1 or 2.
         uint32 const specialization = wildcard ? AscensionWildcard::ActiveSpec(player) + 1 :
-            GetAscensionActiveSpecialization(player);
+            reborn ? player->GetActiveSpec() + 1u : GetAscensionActiveSpecialization(player);
 
         ActivationFacts facts;
         facts.enabled = g_enabled;
-        facts.customClass = wildcard || IsAscensionCustomClassId(player->getClass());
+        facts.customClass = wildcard || reborn || IsAscensionCustomClassId(player->getClass());
         facts.level = player->GetLevel();
         facts.requiredLevel = requiredLevel;
         facts.active = state.active;
@@ -520,8 +526,11 @@ namespace
         ResetQuests(player, requiredLevel);
 
         uint32 const talents = wildcard ? AscensionWildcard::PrestigeSpecialization(player) :
-            ForgetAscensionClassTalents(player);
-        std::unordered_set<uint32> const chains = ForgetRanksAbove(player, FirstLevel);
+            reborn ? AscensionWarcraftReborn::ResetActiveTalents(player) : ForgetAscensionClassTalents(player);
+        uint32 const enchants = reborn ? AscensionMysticEnchant::ClearActivePreset(player) : 0;
+        std::unordered_set<uint32> chains = ForgetRanksAbove(player, FirstLevel);
+        if (reborn)
+            chains.merge(AscensionWarcraftReborn::ForgetClassSpellsAbove(player, FirstLevel));
         player->GiveLevel(FirstLevel);
         player->SetUInt32Value(PLAYER_XP, 0);
         player->SetRestBonus(player->GetRestBonus());
@@ -566,9 +575,9 @@ namespace
         if (!mailed.empty())
             chat.SendSysMessage("Items that did not fit in your bags were sent to your mailbox.");
 
-        LOG_INFO("module.coa_prestige", "{} ({}) activated Prestige {} in specialization {}: {} talent spell(s) "
-            "and {} ability chain(s) forgotten.", player->GetName(), player->GetGUID().ToString(), state.level,
-            specialization, talents, chains.size());
+        LOG_INFO("module.coa_prestige", "{} ({}) activated Prestige {} in specialization {}: {} talent spell(s), "
+            "{} ability chain(s) and {} mystic enchant(s) removed.", player->GetName(), player->GetGUID().ToString(),
+            state.level, specialization, talents, chains.size(), enchants);
 
         if (!player->TeleportTo(start->mapId, start->positionX, start->positionY, start->positionZ,
                 start->orientation))
@@ -908,6 +917,31 @@ namespace CoAPrestige
     }
 }
 
+// A Warcraft Reborn character's specialization is its talent spec; the lock refuses the other spec's
+// activation spell (SPELL_EFFECT_TALENT_SPEC_SELECT, value 1 or 2).
+class coa_prestige_talent_spec_lock : public AllSpellScript
+{
+public:
+    coa_prestige_talent_spec_lock() : AllSpellScript("coa_prestige_talent_spec_lock",
+        { ALLSPELLHOOK_ON_SPELL_CHECK_CAST }) { }
+
+    void OnSpellCheckCast(Spell* spell, bool /*strict*/, SpellCastResult& result) override
+    {
+        Player* player = spell->GetCaster() ? spell->GetCaster()->ToPlayer() : nullptr;
+        if (!g_enabled || result != SPELL_CAST_OK || !player || !AscensionWarcraftReborn::IsRebornCharacter(player))
+            return;
+
+        for (SpellEffectInfo const& effect : spell->GetSpellInfo()->Effects)
+            if (effect.Effect == SPELL_EFFECT_TALENT_SPEC_SELECT &&
+                !IsSpecializationSwitchAllowed(LoadState(player), uint32(effect.CalcValue(player))))
+            {
+                ChatHandler(player->GetSession()).SendSysMessage(SpecializationLockedMessage(g_requiredLevel));
+                result = SPELL_FAILED_DONT_REPORT;
+                return;
+            }
+    }
+};
+
 // "Battlegrounds Completed" daily objective: credit every participant at BG end.
 class coa_prestige_daily_battleground : public AllBattlegroundScript
 {
@@ -952,5 +986,6 @@ void AddSC_coa_prestige()
     new coa_prestige_world();
     new coa_prestige_daily_battleground();
     new coa_prestige_daily_dungeon();
+    new coa_prestige_talent_spec_lock();
     AddAscensionSpecializationSwitchGuard(SpecializationSwitchRefusal);
 }

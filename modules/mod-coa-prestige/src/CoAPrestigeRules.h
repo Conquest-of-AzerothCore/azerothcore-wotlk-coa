@@ -145,7 +145,7 @@ namespace CoAPrestige
             case Refusal::Disabled:
                 return "Chromie cannot wind back time right now.";
             case Refusal::NotCustomClass:
-                return "Prestige Mode is only available to Conquest of Azeroth classes.";
+                return "Prestige Mode is only available to Conquest of Azeroth and Warcraft Reborn classes.";
             case Refusal::BelowLevel:
                 return "You must be level " + std::to_string(requiredLevel) +
                     " or higher to participate in Prestige Mode";

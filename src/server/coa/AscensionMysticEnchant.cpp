@@ -1031,6 +1031,28 @@ bool ApplyGuide(Player* player, std::vector<GuideEnchant> const& guide)
     SendChangedSlots(player, before, after);
     return true;
 }
+
+uint32 ClearActivePreset(Player* player)
+{
+    State* state = Ready ? Find(player) : nullptr;
+    if (!state)
+        return 0;
+    Slots const before = state->Active();
+    uint32 cleared = 0;
+    for (uint32 slot = 0; slot < SLOT_COUNT; ++slot)
+        if (before[slot])
+        {
+            state->Active()[slot] = 0;
+            SaveSlot(player, state->ActivePreset, slot, 0);
+            ++cleared;
+        }
+    if (cleared)
+    {
+        SyncAuras(player, *state);
+        SendChangedSlots(player, before, state->Active());
+    }
+    return cleared;
+}
 }
 
 void AddAscensionMysticEnchantScripts()

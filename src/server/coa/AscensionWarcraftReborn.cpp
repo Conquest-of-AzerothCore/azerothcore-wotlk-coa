@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionWarcraftReborn.h"
 #include "AscensionFreepick.h"
 #include "AscensionWarcraftRebornRules.h"
 #include "DBCStores.h"
@@ -372,6 +373,58 @@ public:
             BuildTrainers();
     }
 };
+}
+
+bool IsRebornCharacter(Player const* player)
+{
+    return player && IsRebornPlayer(player);
+}
+
+uint32 ResetActiveTalents(Player* player)
+{
+    if (!IsRebornCharacter(player))
+        return 0;
+    uint32 const before = player->GetFreeTalentPoints();
+    player->resetTalents(true);
+    return player->GetFreeTalentPoints() - std::min(before, player->GetFreeTalentPoints());
+}
+
+std::unordered_set<uint32> ForgetClassSpellsAbove(Player* player, uint8 level)
+{
+    std::unordered_set<uint32> chains;
+    if (!IsRebornCharacter(player))
+        return chains;
+
+    std::vector<uint32> const classSkills = ClassSkillLines(Loaded, CurrentRealm, player->getClass());
+    auto const onClassSkill = [&classSkills](uint32 spellId)
+    {
+        for (uint32 id : { spellId, sSpellMgr->GetFirstSpellInChain(spellId) })
+            if (auto const lines = Loaded.SkillLines.find(id); lines != Loaded.SkillLines.end())
+                for (uint32 skill : lines->second)
+                    if (std::find(classSkills.begin(), classSkills.end(), skill) != classSkills.end())
+                        return true;
+        return false;
+    };
+
+    std::vector<uint32> forget;
+    for (auto const& [spellId, spell] : player->GetSpellMap())
+    {
+        SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
+        if (spell->State != PLAYERSPELL_REMOVED && info && info->SpellLevel > level && !GetTalentSpellPos(spellId) &&
+            player->HasSpell(spellId) && onClassSkill(spellId))
+            forget.push_back(spellId);
+    }
+    for (uint32 spellId : forget)
+    {
+        uint32 const firstRank = sSpellMgr->GetFirstSpellInChain(spellId);
+        if (firstRank != spellId)
+            chains.insert(firstRank);
+        player->removeSpell(spellId, SPEC_MASK_ALL, false);
+    }
+
+    LearnMissing(player, StartingSpells(Loaded, CurrentRealm, player->getClass(), StartLevel(player)));
+    LearnMissing(player, AutomaticSpells(Loaded, CurrentRealm, player->getClass(), level));
+    return chains;
 }
 }
 
