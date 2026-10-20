@@ -118,7 +118,7 @@ class spell_warr_victory_rush : public SpellScript
     void HandleCast()
     {
         if (Unit* caster = GetCaster())
-            caster->RemoveAurasDueToSpell(SPELL_VICTORIOUS);
+            caster->RemoveAurasDueToSpell(sSpellMgr->GetSpellTwinFor(SPELL_VICTORIOUS, GetSpellInfo()->Id));
     }
 
     void Register() override

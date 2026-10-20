@@ -29,6 +29,11 @@ enum VultureCultNewborns : uint32
     SPELL_RESCUING_A_NEWBORN = 256715
 };
 
+constexpr uint32 QuestUneaseMakesTonguesWag = 1660037;
+constexpr uint32 SpellTikiMaskDestroying = 256719;
+constexpr uint32 GameObjectEnchantedTikiMask = 2300535;
+constexpr uint32 GameObjectChatteringTikiMask = 2300536;
+constexpr uint32 GameObjectPossessedTikiMask = 2300537;
 constexpr uint32 KalimdorMapId = 1;
 constexpr float MoonwellReach = 8.0f;
 constexpr float RemnantSearchReach = 20.0f;
@@ -169,11 +174,89 @@ class spell_coa_rescuing_a_newborn : public SpellScript
                                            SPELL_EFFECT_DUMMY);
     }
 };
+
+bool TikiMaskObjective(uint32 entry, uint8& objective)
+{
+    switch (entry)
+    {
+        case GameObjectEnchantedTikiMask:
+            objective = 0;
+            return true;
+        case GameObjectChatteringTikiMask:
+            objective = 1;
+            return true;
+        case GameObjectPossessedTikiMask:
+            objective = 2;
+            return true;
+        default:
+            return false;
+    }
+}
+
+class go_coa_tiki_maskAI : public SmartGameObjectAI
+{
+public:
+    explicit go_coa_tiki_maskAI(GameObject* go) : SmartGameObjectAI(go) { }
+
+    bool CanActivateToQuest(Player* player) override
+    {
+        return CanUseMask(player);
+    }
+
+    void BuildClientFlags(Player const* target, uint16& dynFlags, uint32&) override
+    {
+        if (!CanUseMask(target))
+            dynFlags |= GO_DYNFLAG_LO_NO_INTERACT;
+    }
+
+private:
+    bool CanUseMask(Player const* player) const
+    {
+        if (!player || player->GetQuestStatus(QuestUneaseMakesTonguesWag) != QUEST_STATUS_INCOMPLETE)
+            return false;
+
+        uint8 objective;
+        if (!TikiMaskObjective(me->GetEntry(), objective))
+            return false;
+
+        uint16 slot = player->FindQuestSlot(QuestUneaseMakesTonguesWag);
+        return slot < MAX_QUEST_LOG_SIZE && player->GetQuestSlotCounter(slot, objective) < 1;
+    }
+};
+
+class go_coa_tiki_mask : public GameObjectScript
+{
+public:
+    go_coa_tiki_mask() : GameObjectScript("go_coa_tiki_mask") { }
+
+    bool OnGossipHello(Player* player, GameObject* mask) override
+    {
+        if (player->GetQuestStatus(QuestUneaseMakesTonguesWag) != QUEST_STATUS_INCOMPLETE)
+            return true;
+
+        uint8 objective;
+        if (!TikiMaskObjective(mask->GetEntry(), objective))
+            return true;
+
+        uint16 slot = player->FindQuestSlot(QuestUneaseMakesTonguesWag);
+        if (slot >= MAX_QUEST_LOG_SIZE || player->GetQuestSlotCounter(slot, objective) >= 1)
+            return true;
+
+        player->CastSpell(mask, SpellTikiMaskDestroying, false);
+        return false;
+    }
+
+    GameObjectAI* GetAI(GameObject* go) const override
+    {
+        return new go_coa_tiki_maskAI(go);
+    }
+};
 }
 
 void AddSC_AscensionVultureCultQuests()
 {
     RegisterSpellScript(spell_coa_channeling_blessing_of_the_moon);
     RegisterSpellScript(spell_coa_rescuing_a_newborn);
+    new go_coa_tiki_mask();
     new go_coa_baby_night_elf();
 }

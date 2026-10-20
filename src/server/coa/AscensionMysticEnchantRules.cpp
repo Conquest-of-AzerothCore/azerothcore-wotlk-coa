@@ -252,16 +252,47 @@ Enchant const* Catalog::FindItem(std::uint32_t item) const
     return itr == ByItem.end() ? nullptr : &Rows[itr->second];
 }
 
+namespace
+{
+std::unordered_map<std::uint32_t, std::uint32_t> TaughtSpells()
+{
+    constexpr std::uint32_t SPELL_DESCRIPTION = 170;
+    std::unordered_map<std::uint32_t, std::uint32_t> taught;
+    ClientDBC spells;
+    if (!spells.Load(GetClientDBCPath("Spell.dbc"), SPELL_DESCRIPTION + 1))
+        return taught;
+    for (std::uint32_t index = 0; index < spells.GetRecordCount(); ++index)
+    {
+        ClientDBC::Record const record = spells.GetRecord(index);
+        std::string_view const description = record.GetString(SPELL_DESCRIPTION);
+        if (!description.starts_with("Teaches you"))
+            continue;
+        std::size_t const token = description.find("@s:");
+        if (token == std::string_view::npos)
+            continue;
+        std::uint32_t spell = 0;
+        for (std::size_t at = token + 3; at < description.size() && description[at] >= '0' && description[at] <= '9'; ++at)
+            spell = spell * 10 + std::uint32_t(description[at] - '0');
+        if (spell)
+            taught[record.GetUInt32(0)] = spell;
+    }
+    return taught;
+}
+}
+
 bool LoadCatalog(Catalog& catalog)
 {
     ClientDBC file;
     if (!file.Load(GetClientDBCPath("MysticEnchant.dbc"), FIELD_COUNT))
         return false;
+    std::unordered_map<std::uint32_t, std::uint32_t> const taught = TaughtSpells();
 
     Catalog loaded;
     for (std::uint32_t index = 0; index < file.GetRecordCount(); ++index)
     {
         loaded.Rows.push_back(ReadEnchant(file.GetRecord(index)));
+        if (auto const itr = taught.find(loaded.Rows.back().Spell); itr != taught.end())
+            loaded.Rows.back().Taught = itr->second;
         loaded.BySpell[loaded.Rows.back().Spell] = loaded.Rows.size() - 1;
         loaded.ByItem[loaded.Rows.back().Item] = loaded.Rows.size() - 1;
     }

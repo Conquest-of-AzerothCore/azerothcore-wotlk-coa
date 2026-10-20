@@ -566,7 +566,7 @@ def validate(scenario):
             require(step['actor'] in player_ids, f'{where}: {action} needs a player')
             number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
             number(step.get('distance', 2), f'{where}.distance', 0, 20)
-            number(step.get('duration_s', 300), f'{where}.duration_s', 1, 86400, True)
+            number(step.get('duration_s', 300), f'{where}.duration_s', 0, 86400, True)
         if action == 'discover_taxi_node':
             number(step['entry'], f'{where}.entry', 1, 2**31 - 1, True)
         if action == 'client_packet':

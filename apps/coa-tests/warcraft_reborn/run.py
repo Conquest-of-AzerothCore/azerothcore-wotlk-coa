@@ -29,6 +29,7 @@ MAIN = r"""
 #include "DBCStores.h"
 #include <algorithm>
 #include <cstdio>
+#include <map>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -74,7 +75,7 @@ TrainerSpell Stock(std::uint32_t spellId, std::uint32_t cost, std::uint32_t leve
     return row;
 }
 
-constexpr std::uint32_t WARRIOR = 1, PALADIN = 2, HUNTER = 3, PRIEST = 5, MAGE = 8, WARLOCK = 9, HERO = 10;
+constexpr std::uint32_t WARRIOR = 1, PALADIN = 2, HUNTER = 3, ROGUE = 4, PRIEST = 5, MAGE = 8, WARLOCK = 9, HERO = 10;
 constexpr std::uint32_t RANGER = 12;
 constexpr std::uint32_t IMPROVED_SHADOW_BOLT = 13354, BANE = 13359, UNBREAKABLE_WILL = 12678;
 constexpr std::uint32_t SHADOW_BOLT_ENTRY = 18581;
@@ -252,6 +253,47 @@ int main(int, char** argv)
             .size() == 2,
         "on a free-pick realm the rules add nothing to a trainer");
 
+    ClientDBC abilities;
+    std::map<std::uint32_t, std::uint32_t> proficiencyMasks;
+    if (abilities.Load(GetClientDBCPath("SkillLineAbility.dbc"), 5))
+        for (std::uint32_t index = 0; index < abilities.GetRecordCount(); ++index)
+        {
+            ClientDBC::Record const record = abilities.GetRecord(index);
+            std::uint32_t const spell = record.GetUInt32(2);
+            if (spell == 1180 || spell == 201 || spell == 9077 || spell == 750)
+                proficiencyMasks[spell] = record.GetUInt32(4);
+        }
+    auto const allows = [&proficiencyMasks](std::uint32_t spell, std::uint32_t classId, bool stock)
+    {
+        std::uint32_t const mask = stock ? ProficiencyClassMask(spell, proficiencyMasks[spell]) : proficiencyMasks[spell];
+        return !mask || (mask & (1u << (classId - 1)));
+    };
+    Check(proficiencyMasks.size() == 4 && !allows(1180, ROGUE, false) && !allows(201, WARLOCK, false),
+        "the client's Daggers and One-Handed Swords proficiency rows leave out rogues and warlocks");
+    Check(allows(1180, ROGUE, true) && allows(201, WARLOCK, true) && allows(9077, ROGUE, true) &&
+            !allows(201, PRIEST, true) && !allows(750, MAGE, true) && allows(750, PALADIN, true),
+        "on Warcraft Reborn the proficiency rows follow the stock classes: rogue Daggers and Leather, warlock "
+        "One-Handed Swords, paladin Plate, but no priest swords or mage Plate");
+    Check(allows(1180, HERO, true) && allows(201, HERO, true) &&
+            ProficiencyClassMask(133, 0x40) == 0x40 && ProficiencyClassMask(750, 0) == (~0x5DFu | 0x3u),
+        "the stock class rules leave other classes and other spells as the client has them");
+    Check(StockClassUses(ROGUE, ITEM_CLASS_WEAPON_ID, 7) && StockClassUses(HUNTER, ITEM_CLASS_WEAPON_ID, 2) &&
+            StockClassUses(WARRIOR, ITEM_CLASS_WEAPON_ID, 16) && !StockClassUses(ROGUE, ITEM_CLASS_ARMOR_ID, 3) &&
+            !StockClassUses(MAGE, ITEM_CLASS_WEAPON_ID, 0) && !StockClassUses(HERO, ITEM_CLASS_WEAPON_ID, 7),
+        "a starting rogue sword, hunter bow and warrior throwing axe are usable, rogue mail and a mage axe are not");
+    ClientDBC skillClasses;
+    std::uint32_t thrownClasses = 0;
+    if (skillClasses.Load(GetClientDBCPath("SkillRaceClassInfo.dbc"), 4))
+        for (std::uint32_t index = 0; index < skillClasses.GetRecordCount(); ++index)
+            if (skillClasses.GetRecord(index).GetUInt32(1) == 176)
+                thrownClasses = skillClasses.GetRecord(index).GetUInt32(3);
+    std::uint32_t const rebornThrown = SkillClassMask(176, thrownClasses);
+    Check(thrownClasses && !(thrownClasses & (1u << (WARRIOR - 1))) && (rebornThrown & (1u << (WARRIOR - 1))) &&
+            (rebornThrown & (1u << (HUNTER - 1))) && !(rebornThrown & (1u << (MAGE - 1))) &&
+            (rebornThrown & (1u << (HERO - 1))) && SkillClassMask(293, 0xFFFFFFFF) == (~0x5DFu | 0x3u),
+        "the Thrown skill, which the client gives only rogues, also opens to warriors and hunters, and Plate only to "
+        "warriors and paladins among the original classes");
+
     std::vector<std::pair<std::uint32_t, std::uint32_t>> const twins = SpellTwins(spellCount,
         [&layouts](std::uint32_t spellId) -> std::optional<SpellLayout>
         {
@@ -265,9 +307,15 @@ int main(int, char** argv)
     Check(twinned(1454, 1101454) && twinned(57946, 1157946),
         "every rank of Reborn Life Tap takes stock Life Tap's script and data");
     Check(twinned(53, 1100053) && twinned(20271, 1120271), "Reborn Backstab and Judgement of Light are twins");
+    Check(twinned(12867, 1312867) && twinned(56638, 1356638) && twinned(26016, 1326016),
+        "crossover Mystic Enchants Deep Wounds, Taste for Blood and Vindication twin their stock talents");
     Check(!twinned(160, 1100160) && std::none_of(twins.begin(), twins.end(),
             [&layouts](auto const& pair) { return layouts[pair.first] != layouts[pair.second]; }),
         "a stock spell and an unrelated spell 1100000 above it (Forked Lightning, Glyph of Slam) are not twins");
+    Check(Same(grant(1134428), { 1132215 }) && layouts[1132215].Auras[0] == 42 && layouts[1132216].Auras[0] == 262 &&
+            !twinned(32216, 1132216),
+        "Reborn Victory Rush teaches Reborn Victorious State, whose kill proc grants Reborn Victorious (aura 262), "
+        "which is no twin of stock Victorious");
     Check(!twinned(133, 1100133) && !twinned(172, 1100172) && !twinned(633, 1100633),
         "a Reborn spell with other effects than its stock namesake (Fireball, Corruption, Lay on Hands) takes nothing");
     Check(twins.size() > 7000, "the Reborn spell table is twinned with its stock spells");
@@ -283,6 +331,9 @@ int main(int, char** argv)
     };
     Check(namesake(50880, 1150880) && namesake(133, 1100133) && !namesake(1454, 1101454) && !namesake(160, 1100160),
         "a differently built Reborn spell of the same name (Icy Talons, Fireball) is a namesake, a twin or an unrelated spell is not");
+    Check(namesake(5487, 1105487) && namesake(9634, 1109634) && !twinned(5487, 1105487) && twinned(779, 1100779) &&
+            twinned(5229, 1105229) && twinned(768, 1100768),
+        "Reborn Bear and Dire Bear Form are namesakes, not twins, of the forms stock Swipe, Enrage and Bash require");
 
     std::unordered_map<std::uint32_t, std::uint32_t> const stockSlam = { { 1464, 1464 }, { 8820, 1464 }, { 11604, 1464 },
         { 11605, 1464 }, { 25241, 1464 }, { 25242, 1464 }, { 47474, 1464 }, { 47475, 1464 } };
@@ -343,7 +394,7 @@ TWIN_COPIES = {
         "CopyToSpellTwins(mSpellCooldownOverrideMap);", "CopyToSpellTwins(mSpellProcMap);",
         "CopyToSpellTwins(mSpellBonusMap);", "CopyToSpellTwins(mSpellThreatMap);",
         "CopyToSpellTwins(mSpellMixologyMap);", "CopyToSpellTwins(mSpellCones);", "twinRequirements", "twinGroups",
-        "twinLinks", "mSpellTargetPositions[{ twin, SpellEffIndex(i) }]", "mSpellPetAuraMap.emplace((twin << 8) + i",
+        "twinLinks", "GetSpellTwinFor(spellReq, twin->second)", "mSpellTargetPositions[{ twin, SpellEffIndex(i) }]", "mSpellPetAuraMap.emplace((twin << 8) + i",
         "databaseAttributes.contains(twin)"],
     "src/server/game/Globals/ObjectMgr.cpp": ["sSpellMgr->GetSpellTwins()"],
     "src/server/game/World/World.cpp": ["sSpellMgr->LoadSpellTwins(false);", "sSpellMgr->LoadSpellTwins(true);"],
@@ -376,6 +427,28 @@ def check_reborn_coefficients(dbc):
                               float(attack_power.group(1)) if attack_power else 0.0)
     ok = len(expected) == 9 and rows == expected
     print(f"{'PASS' if ok else 'FAIL'}: Reborn Life Tap and Counterattack use the coefficients their own tooltips give")
+    return ok
+
+
+DEEP_FREEZE_SQL = ROOT / "data/sql/updates/pending_db_world/rev_20261019_94_coa_reborn_deep_freeze_immunity_state.sql"
+
+
+def check_deep_freeze_immunity(dbc):
+    data = (dbc / "Spell.dbc").read_bytes()
+    count, fields, size, strings = struct.unpack_from("<4I", data, 4)
+    rows = {}
+    for row in range(count):
+        record = struct.unpack_from("<%dI" % fields, data, 20 + row * size)
+        if record[0] in (1171761, 1144572, 1100133):
+            rows[record[0]] = record
+    text = DEEP_FREEZE_SQL.read_text(encoding="utf-8")
+    proc = re.search(r"\(1171761, 0, 3, 0, (0x[0-9A-Fa-f]+), 0, 0, 0x5, 0x2, 256,", text)
+    mask = int(proc.group(1), 16) if proc else 0
+    ok = (len(rows) == 3 and rows[1171761][34] and rows[1171761][116] == 1171757 and mask and
+          rows[1144572][208] == 3 and rows[1144572][210] & mask and not rows[1100133][210] & mask and
+          "(1171761, 'spell_mage_deep_freeze_immunity_state')" in text)
+    print(f"{'PASS' if ok else 'FAIL'}: Reborn Deep Freeze Immunity State procs only from Deep Freeze on stun-immune "
+          "targets, not from Fireball")
     return ok
 
 
@@ -441,7 +514,7 @@ def main():
         if build.returncode:
             raise SystemExit("Warcraft Reborn rules harness did not compile:\n" + build.stdout + build.stderr)
         result = subprocess.run([str(executable), str(args.dbc_dir.resolve())], text=True)
-        bindings_ok = check_form_only_bindings(args.dbc_dir.resolve())
+        bindings_ok = check_form_only_bindings(args.dbc_dir.resolve()) & check_deep_freeze_immunity(args.dbc_dir.resolve())
         twins_ok = (check_twin_copies() & check_reborn_coefficients(args.dbc_dir.resolve()) &
                     check_class_spell_bindings(args.dbc_dir.resolve()))
         raise SystemExit(result.returncode or (0 if bindings_ok and twins_ok else 1))

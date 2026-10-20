@@ -658,7 +658,7 @@ void WorldConfig::BuildConfigCache()
     SetConfigValue<bool>(CONFIG_DBC_ENFORCE_ITEM_ATTRIBUTES, "DBC.EnforceItemAttributes", true);
 
     // Max instances per hour
-    SetConfigValue<uint32>(CONFIG_MAX_INSTANCES_PER_HOUR, "AccountInstancesPerHour", 5);
+    SetConfigValue<uint32>(CONFIG_MAX_INSTANCES_PER_HOUR, "AccountInstancesPerHour", 10);
 
     // AutoBroadcast
     SetConfigValue<bool>(CONFIG_AUTOBROADCAST, "AutoBroadcast.On", false);

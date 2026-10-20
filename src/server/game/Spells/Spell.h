@@ -315,6 +315,9 @@ public:
     void EffectAscensionModifyAuraStacks(SpellEffIndex effIndex);
     void EffectAscensionModifyAuraStacksBySpell(SpellEffIndex effIndex);
     void EffectAscensionModifyAuraDuration(SpellEffIndex effIndex);
+    void EffectAscensionModifyAuraCharges(SpellEffIndex effIndex);
+    void EffectAscensionTriggerSpellWithDuration(SpellEffIndex effIndex);
+    void EffectAscensionModifyCooldownPct(SpellEffIndex effIndex);
     void EffectAscensionRestoreBaseHealthPct(SpellEffIndex effIndex);
     void EffectAscensionPctDamage(SpellEffIndex effIndex);
     void EffectAscensionTriggerSpellDelayed(SpellEffIndex effIndex);

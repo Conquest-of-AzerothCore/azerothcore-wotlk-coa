@@ -179,21 +179,6 @@ namespace
                     for (uint8 i = 0; i < FIRST_HATCH; ++i)
                         HatchEgg();
                     break;
-                case SPELL_EVOLVE:
-                    if (Creature* spawn = HatchEgg())
-                    {
-                        spawn->AddAura(SPELL_EVOLVE, spawn);
-                        spawn->SetMaxHealth(spawn->GetMaxHealth() * 2);
-                        spawn->SetFullHealth();
-                    }
-                    break;
-                case SPELL_INFEST:
-                    if (Creature* spawn = HatchEgg())
-                    {
-                        spawn->AddAura(SPELL_INFEST, spawn);
-                        _festering.insert(spawn->GetGUID());
-                    }
-                    break;
                 case SPELL_ACID_SPIT:
                     if (Unit* tank = me->GetVictim())
                     {
@@ -209,13 +194,27 @@ namespace
             }
         }
 
-        // Drain Life heals her for what each tick deals.
-        void SpellHitTarget(Unit* /*target*/, SpellInfo const* spell) override
+        void SpellHitTarget(Unit* target, SpellInfo const* spell) override
         {
-            if (spell->Id != SPELL_DRAIN_LIFE_TICK)
-                return;
-            int32 heal = Info(me, INFO_DRAIN_LIFE);
-            me->CastCustomSpell(me, SPELL_DRAIN_LIFE_HEAL, &heal, nullptr, nullptr, true);
+            switch (spell->Id)
+            {
+                case SPELL_EVOLVE:
+                    target->SetMaxHealth(target->GetMaxHealth() * 2);
+                    target->SetFullHealth();
+                    break;
+                case SPELL_INFEST:
+                    _festering.insert(target->GetGUID());
+                    break;
+                // Drain Life heals her for what each tick deals.
+                case SPELL_DRAIN_LIFE_TICK:
+                {
+                    int32 heal = Info(me, INFO_DRAIN_LIFE);
+                    me->CastCustomSpell(me, SPELL_DRAIN_LIFE_HEAL, &heal, nullptr, nullptr, true);
+                    break;
+                }
+                default:
+                    break;
+            }
         }
 
         // A festering spawn bursts where it dies.
@@ -284,11 +283,13 @@ namespace
                         DoCastSelf(SPELL_HATCH_EGGS);
                         break;
                     case EVENT_EVOLVE:
-                        DoCastSelf(SPELL_EVOLVE);
+                        if (Creature* spawn = HatchEgg())
+                            DoCast(spawn, SPELL_EVOLVE);
                         events.ScheduleEvent(EVENT_EVOLVE, 60s, 0, PHASE_TROLL);
                         break;
                     case EVENT_INFEST:
-                        DoCastSelf(SPELL_INFEST);
+                        if (Creature* spawn = HatchEgg())
+                            DoCast(spawn, SPELL_INFEST);
                         events.ScheduleEvent(EVENT_INFEST, 60s, 0, PHASE_TROLL);
                         break;
                     case EVENT_ACID_SPIT:

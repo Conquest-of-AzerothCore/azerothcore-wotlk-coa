@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: High Priestess Mar'li does not Evolve herself (#8075)",
+  "contract": [
+    "Evolve (2118116) evolves a target spider egg: it heals its target to full health (effect 67) and applies a",
+    "+200% scale aura. Mar'li (14510) casts it 22 s into the troll phase on a Spawn of Mar'li (15041) she hatches",
+    "from the nearest standing egg (179985), never on herself, so she neither carries the Evolve aura nor heals to",
+    "full health. The world's eggs share phase 1 and the fixture lives in the lane's own phase, so the hero places",
+    "one egg after Hatch Eggs has used the others, for Evolve to hatch. It has no duration,",
+    "because the core does not count a timed player summon as spawned and Mar'li would pass it over. She picks",
+    "the egg as the cast starts, which can precede the placement, so the case allows one more 60 s Evolve cycle."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 309,
+    "x": -12326.5,
+    "y": -1577.11,
+    "z": 133.588,
+    "o": 4.817,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 14510,
+      "level": 63,
+      "health": 4979280,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "attack",
+      "label": "Engage High Priestess Mar'li",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li has her one-player flex health",
+      "actor": "boss",
+      "metric": "max_health",
+      "min": 4000000,
+      "max": 5000000
+    },
+    {
+      "action": "set_health",
+      "label": "Wound Mar'li to about 60%, above her spider phase",
+      "actor": "boss",
+      "value": 3000000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li is wounded and has not Evolved yet",
+      "actor": "boss",
+      "metric": "aura",
+      "spell": 2118116,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the troll phase reaches Hatch Eggs at 17 s",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118115,
+      "min": 1,
+      "within_ms": 25000
+    },
+    {
+      "action": "summon_gameobject",
+      "label": "Place a Spider Egg for Evolve to hatch",
+      "actor": "hero",
+      "entry": 179985,
+      "distance": 5,
+      "duration_s": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li is alive and still fighting",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li casts Evolve, at the latest one 60 s cycle after the egg appears",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118116,
+      "min": 1,
+      "within_ms": 75000
+    },
+    {
+      "action": "assert",
+      "label": "The Spawn of Mar'li hatched from the egg carries Evolve",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "spell": 2118116,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Mar'li does not carry Evolve",
+      "actor": "boss",
+      "metric": "aura",
+      "spell": 2118116,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mar'li was not healed to full health",
+      "actor": "boss",
+      "metric": "health_pct",
+      "max": 90
+    }
+  ]
+}

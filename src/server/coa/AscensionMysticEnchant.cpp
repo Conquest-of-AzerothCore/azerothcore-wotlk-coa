@@ -219,9 +219,15 @@ void SyncAuras(Player* player, State& state)
             ++wanted[spell];
     for (auto const& [spell, stacks] : state.Auras)
         if (!wanted.contains(spell))
+        {
             player->RemoveAurasDueToSpell(spell);
+            if (Enchant const* enchant = Loaded.FindSpell(spell); enchant && enchant->Taught)
+                player->removeSpell(enchant->Taught, SPEC_MASK_ALL, true);
+        }
     for (auto const& [spell, stacks] : wanted)
     {
+        if (Enchant const* enchant = Loaded.FindSpell(spell); enchant && enchant->Taught && !player->HasSpell(enchant->Taught))
+            player->learnSpell(enchant->Taught, true);
         Aura* aura = player->GetAura(spell);
         if (!aura)
             aura = player->AddAura(spell, player);

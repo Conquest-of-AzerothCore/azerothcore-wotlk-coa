@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "name": "Gorn Axefist opens the riding trainer window like Hank Dullahan (#7549)",
+  "contract": [
+    "Gorn Axefist (75133) is the Horde 'Riding Trainer' of the Path to Ascension, the counterpart of Hank Dullahan",
+    "(776785). A right click shows Hank's page, one option \"I seek training to ride a steed.\", and that option opens",
+    "the riding trainer window, in which Apprentice Riding (33388) is available at level 20."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "rider",
+      "race": 2,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "creatures": [
+    {
+      "id": "gorn",
+      "owner": "rider",
+      "entry": 75133,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "money",
+      "actor": "rider",
+      "copper": 100000,
+      "label": "enough gold for the first lesson"
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "rider",
+      "target": "gorn",
+      "label": "right-click Gorn Axefist"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "gossip_options",
+      "equals": 1,
+      "label": "his page carries one option"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "gossip_option_text",
+      "index": 0,
+      "text": "I seek training to ride a steed.",
+      "equals": 1,
+      "label": "the riding training option"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "rider",
+      "option": 0,
+      "label": "choose the training option"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "trainer_list_packets",
+      "equals": 1,
+      "label": "a trainer window is sent"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "metric": "trainer_window_state",
+      "spell": 33388,
+      "equals": 0,
+      "label": "Apprentice Riding is offered and available at level 20"
+    }
+  ]
+}

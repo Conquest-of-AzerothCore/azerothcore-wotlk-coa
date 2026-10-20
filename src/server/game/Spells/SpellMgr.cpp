@@ -1621,8 +1621,8 @@ void SpellMgr::LoadSpellRequired()
         {
             if (mSpellReq.contains(twin->second))
                 continue;
-            auto const reqTwin = _spellTwins.find(spellReq);
-            twinRequirements.emplace_back(twin->second, reqTwin != _spellTwins.end() ? reqTwin->second : spellReq);
+            // the requirement's own copy at the same offset, also when it is a namesake (Reborn Bear Form)
+            twinRequirements.emplace_back(twin->second, GetSpellTwinFor(spellReq, twin->second));
         }
     }
     for (auto const& [spellId, spellReq] : twinRequirements)

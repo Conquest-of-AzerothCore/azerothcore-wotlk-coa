@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "Special Seashell item line procs Pocket Tide on direct Frost or Nature damage (#8192)",
+  "contract": [
+    "Every Special Seashell (base 415059, dungeon and Zul'Gurub tiers on 312991, higher tiers on 316991 and 320991) equips a proc dummy that triggers its Pocket Tide haste buff. The dummies' DBC records carry ProcFlags 0, and the world had no spell_proc rows, so the auras never registered a proc handler and the trinkets never procced, no matter how long a Witchdoctor cast Malefic Arrow at a dummy.",
+    "The dummies' tooltips promise a $h% chance when dealing direct Frost or Nature damage, with a 30 second internal cooldown. The repair gives each dummy the landed done-spell masks (69904: melee, ranged, none and magic damage classes), restricted to damage spells of the Frost and Nature schools (mask 24) at the hit phase, 12% chance and a 30000 ms cooldown.",
+    "Malefic Arrow 801674 is direct Nature damage of the ranged damage class, so it raises DONE_SPELL_RANGED_DMG_CLASS with the Nature school and must proc the trinket; the reporter's casts never did. Periodic ticks are deliberately not proc events, because the tooltips say direct.",
+    "The loaded proc entries are asserted directly: spell_proc_chance reads the tooltip's 12, and a landed Nature direct event procs each equipped dummy aura at about 12%, while a periodic event and an unlanded cast-phase event each proc it zero times. Before the repair the auras have no proc entries at all, so the chance lookups fail and every rate reads 0.",
+    "A trinket-less control carries neither dummy aura."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    { "id": "m1", "owner": "doctor", "entry": 36, "level": 60, "health": 1000000, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "learn", "actor": "doctor", "spell": 707854 },
+    { "action": "learn", "actor": "doctor", "spell": 801674 },
+    { "action": "equip", "label": "Equip the worldforged Special Seashell trinket", "actor": "doctor", "item": 1378651, "slot": 12 },
+    { "action": "equip", "label": "Equip the base Special Seashell trinket", "actor": "doctor", "item": 415059, "slot": 13 },
+    { "action": "assert", "label": "SETUP: equipping applies the proc dummy aura", "actor": "doctor", "metric": "aura", "spell": 312991, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: equipping the base item applies its proc dummy aura", "actor": "doctor", "metric": "aura", "spell": 304014, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTROL: a trinket-less player carries no dummy aura", "actor": "control", "metric": "aura", "spell": 312991, "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTROL: a trinket-less player carries no base dummy aura", "actor": "control", "metric": "aura", "spell": 304014, "equals": 0, "within_ms": 3000 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the loaded proc entry carries the tooltip's 12% chance",
+      "actor": "doctor", "metric": "spell_proc_chance", "spell": 312991, "equals": 12
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the base item's proc entry carries the tooltip's 12% chance",
+      "actor": "doctor", "metric": "spell_proc_chance", "spell": 304014, "equals": 12
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: landed direct Nature damage (Malefic Arrow) procs at about 12%",
+      "actor": "doctor", "metric": "aura_proc_rate", "spell": 312991, "target": "m1",
+      "trigger_spell": 801674, "type_mask": 256, "phase_mask": 2, "spell_type_mask": 1, "hit_mask": 1,
+      "min": 6, "max": 18
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: landed direct Nature damage procs the base aura at about 12%",
+      "actor": "doctor", "metric": "aura_proc_rate", "spell": 304014, "target": "m1",
+      "trigger_spell": 801674, "type_mask": 256, "phase_mask": 2, "spell_type_mask": 1, "hit_mask": 1,
+      "min": 6, "max": 18
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a periodic Nature tick is not a proc event (tooltip says direct)",
+      "actor": "doctor", "metric": "aura_proc_rate", "spell": 312991, "target": "m1",
+      "trigger_spell": 801674, "type_mask": 262144, "phase_mask": 2, "spell_type_mask": 1, "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: an unlanded cast-phase event is not a proc event",
+      "actor": "doctor", "metric": "aura_proc_rate", "spell": 312991, "target": "m1",
+      "trigger_spell": 801674, "type_mask": 256, "phase_mask": 1, "spell_type_mask": 1, "hit_mask": 1,
+      "equals": 0
+    }
+  ]
+}

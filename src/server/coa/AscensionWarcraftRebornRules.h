@@ -17,7 +17,11 @@
 namespace AscensionWarcraftReborn
 {
 constexpr std::uint32_t REBORN_SPELL_OFFSET = 1100000;
+constexpr std::uint32_t CROSSOVER_SPELL_OFFSET = 1300000;
+constexpr std::uint32_t BLIZZARD_SPELL_END = 100000;
 constexpr std::uint32_t REBORN_SKILL_OFFSET = 11000;
+constexpr std::uint32_t ITEM_CLASS_WEAPON_ID = 2;
+constexpr std::uint32_t ITEM_CLASS_ARMOR_ID = 4;
 constexpr std::uint32_t ROW_ALTERNATE = 0x80000;
 constexpr std::size_t REQUIRED_ABILITY_COUNT = 3;
 constexpr std::uint32_t DARK_APOTHEOSIS = 1154321;
@@ -90,6 +94,12 @@ using FirstRank = std::function<std::uint32_t(std::uint32_t spellId)>;
 
 std::vector<std::pair<std::uint32_t, std::uint32_t>> RankTwins(std::vector<std::pair<std::uint32_t, std::uint32_t>> const& twins,
     LaterRanks const& laterRanks, FirstRank const& firstRank, SpellLayoutOf const& layout);
+
+std::uint32_t ProficiencyClassMask(std::uint32_t spellId, std::uint32_t classMask);
+
+std::uint32_t SkillClassMask(std::uint32_t skillId, std::uint32_t classMask);
+
+bool StockClassUses(std::uint32_t classId, std::uint32_t itemClass, std::uint32_t itemSubClass);
 
 std::vector<TrainerSpell> TrainerSpells(Data const& data, AscensionFreepick::Realm const& realm, std::uint32_t classId,
     std::vector<TrainerSpell> const& stock, SpellExists const& exists, RebornRow const& reborn);

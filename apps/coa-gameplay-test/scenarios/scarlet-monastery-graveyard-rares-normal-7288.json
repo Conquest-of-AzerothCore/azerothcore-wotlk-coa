@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Scarlet Monastery Graveyard: Fallen Champion, Ironspine and Azshir stay on Normal (#7288)",
+  "contract": [
+    "Decision on #7288: Fallen Champion 6488, Ironspine 6489 and Azshir the Sleepless 6490 are always present in",
+    "Scarlet Monastery on Normal. Their stock SmartAI row 0 (AI init, 90% chance, Normal-only flag 514)",
+    "force-despawned them 500 ms after initialisation. Two copies of each, spawned in a Normal instance, must all",
+    "remain after the despawn window; before the fix all six survive with probability 0.1^6."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 189, "x": 1688.99, "y": 1053.48, "z": 18.6775},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 30}
+  ],
+  "creatures": [
+    {"id": "champion_a", "owner": "hero", "entry": 6488, "distance": 4, "faction": 35, "level": 30},
+    {"id": "champion_b", "owner": "hero", "entry": 6488, "distance": 6, "faction": 35, "level": 30},
+    {"id": "ironspine_a", "owner": "hero", "entry": 6489, "distance": 8, "faction": 35, "level": 30},
+    {"id": "ironspine_b", "owner": "hero", "entry": 6489, "distance": 10, "faction": 35, "level": 30},
+    {"id": "azshir_a", "owner": "hero", "entry": 6490, "distance": 12, "faction": 35, "level": 30},
+    {"id": "azshir_b", "owner": "hero", "entry": 6490, "distance": 14, "faction": 35, "level": 30}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 5000},
+    {"label": "SETUP: the hero is in Scarlet Monastery", "action": "assert", "actor": "hero", "metric": "map_id",
+     "equals": 189},
+    {"label": "SETUP: the instance is Normal", "action": "assert", "actor": "hero", "metric": "map_difficulty",
+     "equals": 0},
+    {"label": "DISCRIMINATING: both Fallen Champions remain after the despawn window", "action": "assert",
+     "actor": "hero", "metric": "nearby_creature_count", "entry": 6488, "equals": 2},
+    {"label": "DISCRIMINATING: both Ironspines remain after the despawn window", "action": "assert",
+     "actor": "hero", "metric": "nearby_creature_count", "entry": 6489, "equals": 2},
+    {"label": "DISCRIMINATING: both Azshirs remain after the despawn window", "action": "assert",
+     "actor": "hero", "metric": "nearby_creature_count", "entry": 6490, "equals": 2}
+  ]
+}

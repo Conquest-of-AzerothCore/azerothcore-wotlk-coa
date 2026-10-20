@@ -1310,6 +1310,10 @@ void GameObject::Respawn()
 
 bool GameObject::ActivateToQuest(Player* target) const
 {
+    if (GameObjectAI* ai = AI())
+        if (!ai->CanActivateToQuest(target))
+            return false;
+
     if (target->HasQuestForGO(GetEntry()))
         return true;
 

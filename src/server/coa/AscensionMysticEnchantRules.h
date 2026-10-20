@@ -247,6 +247,7 @@ struct Enchant
     std::uint32_t RebornQuality = QUALITY_POOR;
     std::uint32_t RequiredLevel = 0;
     std::uint32_t Item = 0;
+    std::uint32_t Taught = 0;
     bool Worldforged = false;
     std::array<bool, REALM_COUNT> Realms{};
     std::uint64_t ClassMask = 0;

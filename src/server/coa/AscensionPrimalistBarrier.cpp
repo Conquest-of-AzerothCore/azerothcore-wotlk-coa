@@ -132,8 +132,6 @@ class spell_ascension_fury_of_earthmother_charge : public SpellScript
         Aura* barrier = owner->GetAura(RockBarrier, owner->GetGUID());
         if (!barrier)
             return;
-        if (barrier->GetCharges() < 255)
-            barrier->SetCharges(barrier->GetCharges() + 1);
         if (Aura* helper = owner->GetAura(BarrierModifiers, owner->GetGUID()))
         {
             helper->SetMaxDuration(std::max(helper->GetMaxDuration(), barrier->GetDuration()));
