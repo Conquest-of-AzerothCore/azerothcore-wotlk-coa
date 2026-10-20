@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Fury of Anub'Rekhan raises max Energy in Spider Form and max Rage in Beetle Form (#7525)",
+  "contract": "#7525: Fury of Anub'Rekhan 800894 (CharacterAdvancement 6098) reads 'Increases your maximum mana, Energy, and Rage by 10%.' It has three SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT (132) effects, misc 0/1/3, each +10. Spider Form 800841 switches the Venomancer to Energy and Beetle Form 803183 to Rage; Unit::setPowerType resets the max power to GetCreatePowers, which dropped the talent's TOTAL_PCT modifier. Expected: max Energy 100 * 1.10 = 110 in Spider Form and max Rage 1000 * 1.10 = 1100 in Beetle Form, each read after the form is active.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn settle", "ms": 3000 },
+    { "action": "learn", "actor": "v", "spell": 800894 },
+    { "action": "assert", "label": "SETUP: Fury of Anub'Rekhan is applied", "actor": "v", "metric": "aura",
+      "spell": 800894, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: the energy effect is +10", "actor": "v", "metric": "aura_amount",
+      "spell": 800894, "effect": 2, "equals": 10 },
+    { "action": "learn", "actor": "v", "spell": 800841 },
+    { "action": "learn", "actor": "v", "spell": 803183 },
+    { "action": "cast", "label": "Enter Spider Form", "actor": "v", "spell": 800841 },
+    { "action": "assert", "label": "SETUP: Spider Form is active", "actor": "v", "metric": "aura", "spell": 800841,
+      "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: max Energy in Spider Form is 110", "actor": "v",
+      "metric": "max_power", "power": 3, "equals": 110, "within_ms": 1000 },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1500 },
+    { "action": "cast", "label": "Enter Beetle Form", "actor": "v", "spell": 803183 },
+    { "action": "assert", "label": "SETUP: Beetle Form is active", "actor": "v", "metric": "aura", "spell": 803183,
+      "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: max Rage in Beetle Form is 1100", "actor": "v",
+      "metric": "max_power", "power": 1, "equals": 1100, "within_ms": 1000 }
+  ]
+}

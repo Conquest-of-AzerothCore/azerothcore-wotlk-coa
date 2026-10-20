@@ -2211,6 +2211,8 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
             if (target->getPowerType() != PowerType)
             {
                 target->setPowerType(PowerType);
+                if (Player* player = target->ToPlayer())
+                    player->UpdateMaxPower(PowerType);
                 if (powerAlreadyActive)
                     target->SetPower(PowerType, oldPower);
             }
