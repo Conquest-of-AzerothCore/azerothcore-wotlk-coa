@@ -142,6 +142,7 @@ namespace PathToAscension
     void Claim(Player* player, uint32 tutorialId);
     bool QueueClientRequest(WorldSession* session, WorldPacket const& packet);
     void LoginRewards(Player* player);
+    void PrestigeRewards(Player* player);
     void LogoutRewards(Player* player);
     void UpdateRewards(Player* player);
 }
