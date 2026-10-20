@@ -47,13 +47,15 @@ assignment, evidence, verification, review and publication requirements still ap
 3. **Fix and write regression tests.** Implement the smallest complete fix for each confirmed defect in the
    batch. Write a gameplay regression for every gameplay fix, exercising the affected mechanic with independent
    expected results through the native worldserver harness. For failures outside gameplay, add an appropriate
-   regression for the failing path; do not claim a source check or server startup as gameplay coverage. Seek a
-   regression that fails before the fix and passes after it through `tools/verify_all.py`. Keep separable fixes
+   regression for the failing path; do not claim a source check or server startup as gameplay coverage. Verify
+   that the regression passes through `tools/verify_all.py`; do not rebuild or run the pre-fix tree or `main` to
+   show it failing. Keep separable fixes
    in issue-scoped commits on the batch branch. In manual mode, obtain the existing per-fix approval first.
 4. **Launch verification after the batch's fixes are ready.** Run the batch's gameplay regressions through
-   `tools/verify_all.py`, including `build` whenever sources changed, then run every stage with
-   `--base origin/main` before publication. Follow the full-run failure classification in the verification guide;
-   report missing prerequisites and pre-existing failures accurately. Use the default accelerated-only
+   `tools/verify_all.py`, including `build` whenever sources changed, then run `--stages source
+   --base origin/main` before publication; run every stage only when full verification is explicitly requested.
+   Report missing prerequisites accurately, and follow the full-run failure classification in the verification
+   guide when a full run was requested. Use the default accelerated-only
    gameplay path for normal batches: repair fast failures rather than accepting a slower retry. A retry with a
    different random outcome is not proof of timing sensitivity. Reserve slower diagnostics and real-clock
    reference runs for a controlled investigation of an actual clock dependency. Every fix needs its own
@@ -209,11 +211,12 @@ Complete this loop for the issue or justified group before beginning the next in
 
 1. Apply the smallest complete fix using the repository's C++/script/SQL/subsystem guides. New SQL belongs in
    `data/sql/updates/pending_db_*/`; historical SQL remains immutable unless explicitly requested otherwise.
-   Include a meaningful regression test when warranted, ideally failing before and passing after the fix;
-   show both outcomes with the same focused `verify_all.py` selection.
+   Include a meaningful regression test when warranted and show it passing with a focused `verify_all.py`
+   selection; do not rebuild or run the pre-fix tree or `main` to show it failing.
 2. Verify only with `tools/verify_all.py`: focused selections while iterating (`--stages build,gameplay
-   --scenario <id>`, `--stages harness --harness <name>`), then `python -B tools/verify_all.py --base origin/main`
-   before the initial commit and after later changes. Documentation-only changes need
+   --scenario <id>`, `--stages harness --harness <name>`), then `python -B tools/verify_all.py --stages source
+   --base origin/main` before the initial commit and after later changes; run every stage only when full
+   verification is explicitly requested. Documentation-only changes need
    `--stages source --base origin/main`, not invented behavior tests; do not describe source checks as functional
    tests. Lint changed C++/SQL with the codestyle linters. Classify full-run failures as the verification guide's
    Full runs section describes and do not publish while a new failure remains. Record the `VERIFY ALL` status,

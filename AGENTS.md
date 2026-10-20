@@ -34,9 +34,10 @@ Follow this sequence within the task's authorized scope:
 - Before changing gameplay, classify the finding as **confirmed defect**, **already works**, **incorrect test**,
   or **uncertain expectation**. Correct a faulty test; preserve evidence of working behavior; keep unresolved
   expectations explicit. Apply a gameplay fix only to an established defect.
-- Seek a focused reproduction and a regression that fails before the fix and passes after it, both run through
-  `tools/verify_all.py`. State when runtime reproduction is unavailable (an `unavailable` gameplay stage);
-  explain the missing prerequisites and complete the remaining stages. Report their actual scope.
+- Add a focused regression for the fix and verify that it passes through `tools/verify_all.py`. Do not rebuild
+  or run the pre-fix tree or `main` to show the regression failing, or to rerun tests the change did not add or
+  touch. State when runtime verification is unavailable (an `unavailable` gameplay stage); explain the missing
+  prerequisites and complete the remaining stages. Report their actual scope.
 - Review the final diff. Continue to a PR when publication is part of the requested workflow; a local edit alone
   does not authorize a push or PR. Use the issue-to-PR skill for an explicitly requested issue queue workflow.
 - In existing task/PR results, summarize available time from investigation start to verified outcome, observed
@@ -60,17 +61,19 @@ Follow this sequence within the task's authorized scope:
   source checks, build, unit tests, Python test scripts, `apps/coa-tests` harnesses and gameplay scenarios. Do not
   run `check_source.py`, `ctest`, test scripts, harnesses, `run.py run` or `batch.py` yourself; where a guide
   names one, use the matching selection (`--stages harness --harness <name>`, `--stages source`).
-- While iterating, pair `--stages` with a focus filter (`--scenario`/`--spell`/`--quest`/`--query`, `--harness`)
-  and include `build` whenever sources changed. Before a PR, or when full verification is requested, run every
-  stage with the PR base: `python -B tools/verify_all.py --base origin/main`.
+- Verify the tests the change adds or modifies: pair `--stages` with a focus filter
+  (`--scenario`/`--spell`/`--quest`/`--query`, `--harness`) and include `build` whenever sources changed. Before a
+  PR, also run `python -B tools/verify_all.py --stages source --base origin/main`. Run every stage
+  (`python -B tools/verify_all.py --base origin/main`) only when full verification is explicitly requested.
 - Leave `--jobs` unset: the default is the CPU count, and fewer jobs only slow the build (a measured replay of
   1,416 compiles took 700 s at `--jobs 6` against 549 s at 10 or 14).
 - The `codestyle-cpp.py`/`codestyle-sql.py --files` linters are separate; still run them on changed C++ and SQL.
 - Report the final `VERIFY ALL: PASSED|FAILED|INCOMPLETE` line with its `report.json`, the stages that ran,
   unavailable or blocked scope with reasons, and any `batch_sensitive` scenarios. Only `PASSED` is a pass, and
-  only for what ran. A full run is not yet all green on any setup; classify each failure or unavailable item as a
-  documented prerequisite, pre-existing on the base, acceleration-specific (a real-clock reference run passes it)
-  or new ([full runs](docs/coa/verification.md#full-runs)). A new failure blocks a PR.
+  only for what ran. A failure in the verified tests blocks a PR. A requested full run is not yet all green on
+  any setup; classify each failure or unavailable item as a documented prerequisite, pre-existing on the base,
+  acceleration-specific (a real-clock reference run passes it) or new
+  ([full runs](docs/coa/verification.md#full-runs)).
 - Gameplay verification runs accelerated only by default: fix fast failures before accepting a batch.
   Slower same-server retries require `--gameplay-real-pace-rerun`; report their `acceleration_sensitive` ids as
   diagnostic-only passes. A passing retry alone does not prove a clock dependency. Confirm a repeatable timing
