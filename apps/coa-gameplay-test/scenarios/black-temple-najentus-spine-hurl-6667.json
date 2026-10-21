@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "name": "Black Temple: a Naj'entus Spine hurls Hurl Spine when used (COA-6667)",
+  "contract": "Naj'entus Spine 32408 is the only way to break High Warlord Naj'entus' Tidal Shield: using it casts Hurl Spine 39948, whose spell_najentus_hurl_spine script removes the shield. The CoA world package shipped the item with spellid_1 0, so using it cast nothing. Inside Black Temple (the spine is map-bound to 564), using a spine must cast Hurl Spine at Naj'entus (its only valid target, condition 31) and consume the spine.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 70
+    }
+  ],
+  "creatures": [
+    {
+      "id": "najentus",
+      "owner": "p",
+      "entry": 22887,
+      "health": 10000000,
+      "distance": 5,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 32408,
+      "count": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one spine",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 32408,
+      "equals": 1
+    },
+    {
+      "action": "use_item",
+      "label": "Hurl the spine",
+      "actor": "p",
+      "item": 32408,
+      "spell": 39948,
+      "target": "najentus"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Hurl Spine is cast",
+      "actor": "p",
+      "metric": "spell_cast_count",
+      "spell": 39948,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The spine is used up",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 32408,
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ],
+  "location": {
+    "map": 564,
+    "x": 434.9,
+    "y": 725.0,
+    "z": 15.07,
+    "o": 1.57
+  }
+}
