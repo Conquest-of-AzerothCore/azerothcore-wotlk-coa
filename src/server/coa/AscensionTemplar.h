@@ -52,7 +52,6 @@ void Delay(Player* player, uint32 amount);
 void ReduceDebt(Player* player, uint32 percent, bool oneTick = false);
 void Zealotry(Player* player, Unit* target, bool repeat = false);
 void SpreadCondemn(Player* player, Unit* target);
-uint32 HopeCount(Player* player);
 bool DivineSteed(Unit const* unit);
 void ApplyContracts(SpellInfo* info);
 }
