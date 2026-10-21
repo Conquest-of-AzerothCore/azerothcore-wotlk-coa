@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Houndmaster's Whistle refuses a dead Shadowhound, which comes back through Call From The Shadows (#7443)",
+  "contract": [
+    "Houndmaster's Whistle 801343 summons the Shadowhound 50124 and teaches Call From The Shadows 578118, which",
+    "resurrects it ('bringing back your Shadow Hound from the dead'). A hound that dies is removed and saved with 0",
+    "health, and the Whistle loaded it at full health, so a dead hound was whistled back at once. Like a stock hunter's",
+    "Call Pet, the Whistle now refuses while the hound is dead (SPELL_FAILED_DONT_REPORT 27 after the native 'Your pet",
+    "is dead' message) and summons nothing. Expected: the hound dies and is removed; the Whistle then fails with 27 and",
+    "no hound appears; Call From The Shadows brings the hound back."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "wh", "race": 1, "class": 15, "level": 60}
+  ],
+  "creatures": [
+    {"id": "golem", "owner": "wh", "entry": 36, "level": 60, "distance": 3, "health": 1000000}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "wh", "spell": 801343},
+    {"action": "learn", "actor": "wh", "spell": 578118},
+    {"action": "cast", "label": "Whistle the hound", "actor": "wh", "spell": 801343},
+    {"action": "assert", "label": "SETUP: the Shadowhound is out", "actor": "wh", "metric": "pet_entry",
+     "equals": 50124, "within_ms": 4000},
+    {"action": "wait", "label": "The hound settles beside the Witch Hunter", "ms": 2000},
+    {"action": "set_health", "label": "The Witch Hunter can take the blast", "actor": "wh", "value": 100000,
+     "maximum": 100000},
+    {"action": "set_health", "label": "The hound is down to 1 health", "actor": "wh", "pet": true, "value": 1},
+    {"action": "cast", "label": "The golem's blast hits the hound", "actor": "golem", "spell": 53273},
+    {"action": "assert", "label": "SETUP: the hound dies and is removed", "actor": "wh", "metric": "pet_entry",
+     "equals": 0, "within_ms": 3000},
+    {"action": "reset_cooldown", "actor": "wh", "spell": 801343},
+    {"action": "cast", "label": "Whistle for the dead hound", "actor": "wh", "spell": 801343},
+    {"action": "assert", "label": "The Whistle refuses a dead hound", "actor": "wh", "metric": "cast_failure",
+     "spell": 801343, "equals": 27, "within_ms": 2000},
+    {"action": "wait", "ms": 2000},
+    {"action": "assert", "label": "No hound is summoned", "actor": "wh", "metric": "pet_entry", "equals": 0},
+    {"action": "cast", "label": "Call From The Shadows", "actor": "wh", "spell": 578118},
+    {"action": "assert", "label": "Call From The Shadows brings the hound back", "actor": "wh",
+     "metric": "pet_entry", "equals": 50124, "within_ms": 6000}
+  ]
+}
