@@ -633,7 +633,7 @@ namespace
         return creature
             && creature->GetMapId() == 1
             && creature->GetName().find("Kolkar") != std::string::npos
-            && creature->GetDistance2d(VEROG_TENT_X, VEROG_TENT_Y) <= 150.0f;
+            && creature->GetDistance2d(VEROG_TENT_X, VEROG_TENT_Y) <= 350.0f;
     }
 }
 
