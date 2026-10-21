@@ -252,6 +252,22 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'creature_scaling must be boolean'):
                 run.validate(scenario)
 
+    def test_vanity_ownership_needs_unlock_all_and_accepts_starter_item_ids(self):
+        for value in ({'unlock_all': False}, {'unlock_all': True, 'starter_items': []},
+                      {'unlock_all': False, 'starter_items': [98457, 134987]}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['vanity_ownership'] = value
+            self.assertIs(run.validate(scenario), scenario)
+        for value, error in (({}, 'vanity_ownership'), ({'unlock_all': 0}, 'unlock_all must be boolean'),
+                             ({'unlock_all': False, 'starter_items': 98457}, 'starter_items must be a list'),
+                             ({'unlock_all': False, 'starter_items': [0]}, 'vanity_ownership.starter_items'),
+                             ({'unlock_all': False, 'starter_items': ['98457']}, 'vanity_ownership.starter_items'),
+                             ({'unlock_all': False, 'extra': 1}, 'vanity_ownership')):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['vanity_ownership'] = value
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, error):
+                run.validate(scenario)
+
     def test_game_event_needs_an_event_id_and_a_boolean_state(self):
         for step in ({'action': 'game_event', 'event': 12, 'active': True},
                      {'action': 'game_event', 'event': 12, 'active': False}):

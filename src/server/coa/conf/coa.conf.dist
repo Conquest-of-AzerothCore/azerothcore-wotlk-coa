@@ -94,6 +94,14 @@ CoA.AppearanceCatalogPerCategory = 500
 # Custom Ascension-only entries still require matching server item/spell templates to deliver.
 CoA.UnlockAllVanity = 1
 
+# Vanity items every account owns from its first login, as space-separated item ids. They are
+# recorded in the account's collection, so they stay owned with CoA.UnlockAllVanity = 0, and
+# CoA.LearnOwnedCompanions teaches their mount/companion spells. Ids missing from the client's
+# VanityCollection.dbc and consumable entries are skipped.
+# Example: "98457 134987" (Book of Ascension and Book of Artisans).
+# Default: ""
+CoA.StarterVanityItems = ""
+
 # If a vanity item has no server item template but its DBC row names a valid spell,
 # learn that spell directly when delivery is requested.
 CoA.AllowLearnedSpellDelivery = 1

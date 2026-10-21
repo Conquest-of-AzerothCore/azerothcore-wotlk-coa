@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "name": "Starter vanity items are owned and learned without UnlockAllVanity",
+  "contract": "With CoA.UnlockAllVanity = 0 and CoA.StarterVanityItems = \"98457 134987\", a new account owns Book of Ascension and Book of Artisans and learns their spells at login; other vanity companions stay unowned.",
+  "timeout_ms": 30000,
+  "vanity_ownership": { "unlock_all": false, "starter_items": [98457, 134987] },
+  "players": [{ "id": "p", "race": 1, "class": 1, "level": 20 }],
+  "steps": [
+    { "action": "assert", "actor": "p", "metric": "knows_spell", "spell": 979602, "equals": 1, "within_ms": 15000 },
+    { "action": "assert", "actor": "p", "metric": "knows_spell", "spell": 750750, "equals": 1, "within_ms": 15000 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "actor": "p", "metric": "knows_spell", "spell": 83050, "equals": 0 },
+    { "action": "assert", "actor": "p", "metric": "knows_spell", "spell": 92981, "equals": 0 }
+  ]
+}
