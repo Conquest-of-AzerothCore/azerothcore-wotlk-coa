@@ -216,7 +216,12 @@ void Extend(Player* player, uint32 id, int32 milliseconds)
     Aura* aura = player->GetAura(id);
     if (!aura)
     {
+        // Applying the buff must not start the spell's own cooldown: Radiance (800054, 2 min) went on cooldown
+        // whenever Hegemony or Gateway to Heaven applied it from Dawn while it was ready.
+        bool const wasOnCooldown = player->HasSpellCooldown(id);
         Cast(player, player, id);
+        if (!wasOnCooldown && player->HasSpellCooldown(id))
+            player->RemoveSpellCooldown(id, true);
         aura = player->GetAura(id);
         if (aura)
             aura->SetDuration(milliseconds);
