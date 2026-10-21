@@ -12,8 +12,10 @@ using ItemPosCountVec = std::vector<int>;
 enum
 {
     CLASS_WARRIOR = 1,
+    CLASS_HERO = 10,
     CLASS_DEMON_HUNTER = 14,
     CLASS_GUARDIAN = 18,
+    CLASS_SUN_CLERIC = 27,
     ITEM_CLASS_WEAPON = 2,
     ITEM_CLASS_ARMOR = 4,
     ITEM_SUBCLASS_WEAPON_AXE2 = 1,
@@ -25,10 +27,16 @@ enum
     INVTYPE_2HWEAPON = 17,
     INVTYPE_WEAPON = 13,
     INVTYPE_WEAPONOFFHAND = 22,
+    INVTYPE_WEAPONMAINHAND = 21,
     INVTYPE_SHIELD = 14,
-    INVENTORY_SLOT_BAG_0 = 255,
+    INVTYPE_HOLDABLE = 23,
+    INVTYPE_RANGED = 15,
+    INVTYPE_RANGEDRIGHT = 26,
+    INVTYPE_THROWN = 25,
     EQUIPMENT_SLOT_MAINHAND = 15,
     EQUIPMENT_SLOT_OFFHAND = 16,
+    EQUIPMENT_SLOT_RANGED = 17,
+    INVENTORY_SLOT_BAG_0 = 255,
     NULL_BAG = 0,
     NULL_SLOT = 255,
     EQUIP_ERR_OK = 0,
@@ -37,7 +45,10 @@ enum
     EQUIP_ERR_CANT_EQUIP_WITH_TWOHANDED = 3,
     EQUIP_ERR_ITEM_CANT_BE_EQUIPPED = 4,
     EQUIP_ERR_ITEMS_CANT_BE_SWAPPED = 5,
-    EQUIP_ERR_INVENTORY_FULL = 6
+    EQUIP_ERR_INVENTORY_FULL = 6,
+    BASE_ATTACK = 0,
+    OFF_ATTACK = 1,
+    TRIGGERED_FULL_MASK = 0x0007FFFF
 };
 struct ItemTemplate
 {
@@ -88,10 +99,12 @@ struct Player
         return dual;
     }
     bool HasBurningCommander() const;
+    bool HasValkyrGrip() const;
     bool CanTitanGrip(ItemTemplate const *weapon = nullptr) const;
     bool CanUseTwoHandWithShield(ItemTemplate const *, ItemTemplate const *) const;
     bool IsTwoHandUsed() const;
     bool FindTwoHandSlot(ItemTemplate const *) const;
+    uint8 FindSwapSlot(ItemTemplate const *) const;
     InventoryResult CheckEquip(ItemTemplate const *, uint8, bool = true, bool = true);
     void AutoUnequipOffhandIfNeed(bool force = false);
     void UpdateTitansGrip();
@@ -100,6 +113,15 @@ struct Player
         return slot == 15 ? (hasMain ? const_cast<Item *>(&fixtureMain) : nullptr)
                           : (hasOff ? const_cast<Item *>(&fixtureOff) : nullptr);
     }
+    Item const *GetWeaponForAttack(int) const
+    {
+        return hasMain ? &fixtureMain : nullptr;
+    }
+    bool HasAura(uint32) const
+    {
+        return false;
+    }
+    void CastSpell(Player *, uint32, uint32) {}
     InventoryResult CanUnequipItem(uint16, bool) const
     {
         return EQUIP_ERR_OK;
@@ -115,7 +137,7 @@ struct Player
     }
     void RemoveAurasDueToSpell(uint32 id)
     {
-        assert(id == 49152);
-        penalty = false;
+        if (id == 49152)
+            penalty = false;
     }
 };

@@ -267,6 +267,21 @@ uint8 Player::FindEquipSlot(ItemTemplate const* proto, uint32 slot, bool swap) c
                      CanUseTwoHandWithShield(GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND)->GetTemplate(), proto)))
                     return slots[i];
 
+        // CoA dual two-handed builds (Burning Commander / Valkyr Grip) work the second slot through right-click
+        // while the main hand holds a gripped two-hander: a two-hander joins an offhand that does not hold one
+        // yet, and any other fitting weapon takes the offhand without disturbing the main hand.
+        if (swap && slots[1] == EQUIPMENT_SLOT_OFFHAND && (HasBurningCommander() || HasValkyrGrip()))
+            if (Item* mhWeapon = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+                if (ItemTemplate const* mhWeaponProto = mhWeapon->GetTemplate())
+                    if (mhWeaponProto->InventoryType == INVTYPE_2HWEAPON && CanTitanGrip(mhWeaponProto))
+                        if (Item* offWeapon = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+                            if ((proto->InventoryType == INVTYPE_2HWEAPON &&
+                                 offWeapon->GetTemplate()->InventoryType != INVTYPE_2HWEAPON) ||
+                                (proto->InventoryType == INVTYPE_WEAPON &&
+                                 proto->SubClass != ITEM_SUBCLASS_WEAPON_POLEARM &&
+                                 proto->SubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE))
+                                return EQUIPMENT_SLOT_OFFHAND;
+
         // if not found free and can swap return first appropriate from used
         for (uint8 i = 0; i < 4; ++i)
             if (slots[i] != NULL_SLOT && swap)
