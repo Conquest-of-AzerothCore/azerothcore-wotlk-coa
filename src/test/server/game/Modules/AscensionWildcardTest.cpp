@@ -1151,6 +1151,20 @@ TEST(AscensionWildcardTest, SilasSellsTheDarkmoonPrizesForTicketsByKind)
     EXPECT_EQ(price(998100), DARKMOON_PRIZE_PRICE_MOUNTS_AND_TOYS);
 }
 
+TEST(AscensionWildcardTest, PeteArrSellsTheActiveSpecsScrollAndEveryLockedSpecsTome)
+{
+    std::vector<std::uint32_t> const wares = PeteArrWares(2, [](std::uint32_t spec) { return spec <= 2 || spec == 4; });
+    ASSERT_EQ(wares.size(), 17u);
+    EXPECT_EQ(wares[0], ScrollItem(2, SCROLL_GENERIC));
+    EXPECT_EQ(wares[1], 134981u);
+    EXPECT_EQ(wares[2], 134983u);
+    EXPECT_EQ(wares.back(), 97407u);
+
+    std::vector<std::uint32_t> const unlocked = PeteArrWares(19, [](std::uint32_t) { return true; });
+    EXPECT_EQ(unlocked, std::vector<std::uint32_t>{ SCROLL_OF_FORTUNE_ITEMS[19] });
+    EXPECT_EQ(PeteArrWares(0, [](std::uint32_t) { return false; })[1], 106954u);
+}
+
 TEST(AscensionWildcardTest, CollectedCardsAreNewOrFillTheBonusPackWithAnyOfTheFourPacks)
 {
     Tables tables = CardTables();

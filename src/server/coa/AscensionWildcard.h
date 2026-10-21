@@ -38,6 +38,9 @@ constexpr std::size_t SPECIALIZATION_COUNT = 20;
 constexpr std::array<std::uint32_t, SPECIALIZATION_COUNT> SPECIALIZATION_SWAP_SPELLS = { 979993, 979994, 979995,
     979996, 979997, 979986, 979987, 979988, 84874, 84876, 84878, 84880, 84882, 84884, 84886, 84888, 84890, 84892,
     84894, 84896 };
+constexpr std::array<std::uint32_t, SPECIALIZATION_COUNT> SPECIALIZATION_TOME_ITEMS = { 0, 106954, 134980, 134981,
+    134982, 134983, 106960, 106961, 752030, 752031, 752032, 752033, 97400, 97401, 97402, 97403, 97404, 97405, 97406,
+    97407 };
 constexpr std::array<std::uint32_t, SPECIALIZATION_COUNT> SCROLL_OF_FORTUNE_ITEMS = { 1101244, 1111244, 1121244,
     1131244, 1141244, 1151244, 1161244, 1171244, 752026, 752027, 752028, 752029, 752039, 752040, 752041, 752042,
     752043, 752044, 752045, 752046 };
@@ -499,6 +502,7 @@ CardClaim ClaimPendingCards(Tables const& tables, CardCollection& collection, st
 
 std::vector<StoreCard> SkillCardStore(Tables const& tables, std::uint32_t store);
 std::vector<StoreCard> DarkmoonPrizeStore();
+std::vector<std::uint32_t> PeteArrWares(std::uint32_t spec, std::function<bool(std::uint32_t)> const& unlocked);
 
 std::vector<std::uint8_t> CustomStorePayload(std::uint32_t store, std::vector<StoreCard> const& cards);
 
