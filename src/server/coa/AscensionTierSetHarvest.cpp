@@ -7,7 +7,6 @@
 #include "ScriptMgr.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
-#include "SpellScript.h"
 #include <array>
 #include <list>
 
@@ -52,30 +51,9 @@ public:
         }
     }
 };
-
-class spell_ascension_tier_set_mythical_volley : public SpellScript
-{
-    PrepareSpellScript(spell_ascension_tier_set_mythical_volley);
-
-    void SelectEnemiesInCombat(std::list<WorldObject*>& targets)
-    {
-        targets.remove_if([](WorldObject* target)
-        {
-            Unit* unit = target->ToUnit();
-            return !unit || !unit->IsInCombat();
-        });
-    }
-
-    void Register() override
-    {
-        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(
-            spell_ascension_tier_set_mythical_volley::SelectEnemiesInCombat, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
-    }
-};
 }
 
 void AddSC_AscensionTierSetHarvest()
 {
     new unit_ascension_tier_set_harvest();
-    RegisterSpellScript(spell_ascension_tier_set_mythical_volley);
 }

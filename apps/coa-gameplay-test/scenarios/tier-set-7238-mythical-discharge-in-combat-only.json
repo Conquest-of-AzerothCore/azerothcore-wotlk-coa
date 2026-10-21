@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Tier set: Mythical Discharge hits only enemies in combat (#7238)",
-  "contract": "#7238: The Elements bonus 823730 reads 'Casting damaging spells has a chance to unleash Mythical Discharge, dealing Chaos damage to all enemies in combat.' It procs 823746 (TARGET_UNIT_SRC_AREA_ENEMY, 35 yd), which inherits the bonus's IGNORE_LINE_OF_SIGHT, so idle enemies on other floors were hit and pulled. A Mage with the bonus casts Ice Lance at one dummy until the 25% proc fires (30 casts leave about a 0.02% chance of none). The dummy it attacks is in combat and must take Mythical Discharge damage; an idle dummy 15 yd away must take none and stay out of combat.",
+  "contract": "#7238: The Elements bonus 823730 reads 'Casting damaging spells has a chance to unleash Mythical Discharge, dealing Chaos damage to all enemies in combat.' It procs 823746 (TARGET_UNIT_SRC_AREA_ENEMY, 35 yd), which inherits the bonus's IGNORE_LINE_OF_SIGHT, so idle enemies on other floors were hit and pulled. A Mage with the bonus casts Ice Lance at one dummy until the 25% proc fires (30 casts leave about a 0.02% chance of none). The dummy it attacks is in combat and must take Mythical Discharge damage; an idle dummy 15 yd away must take none and stay out of combat. Mythical Corruption 823751 and Mythical Rot 823752 ('up to 10 enemies in combat') share the targeting and are cast directly, since their bonuses 823714 and 823722 carry no proc data.",
   "timeout_ms": 120000,
   "players": [
     {"id": "m", "race": 1, "class": 8, "level": 80, "spell_hit_rating": 10000}
@@ -90,6 +90,17 @@
     {"action": "assert", "label": "SETUP: the tier bonus procced Mythical Discharge", "actor": "m", "metric": "spell_proc_count", "spell": 823730, "min": 1},
     {"action": "assert", "label": "Mythical Discharge damages the enemy in combat", "actor": "m", "metric": "spell_damage_count", "spell": 823746, "target": "engaged", "min": 1},
     {"action": "assert", "label": "DISCRIMINATING: Mythical Discharge leaves the idle enemy undamaged", "actor": "m", "metric": "spell_damage_count", "spell": 823746, "target": "idle", "equals": 0},
-    {"action": "assert", "label": "DISCRIMINATING: the idle enemy is not pulled into combat", "actor": "idle", "metric": "combat", "equals": 0}
+    {"action": "assert", "label": "DISCRIMINATING: the idle enemy is not pulled into combat", "actor": "idle", "metric": "combat", "equals": 0},
+    {"action": "learn", "actor": "m", "spell": 823751},
+    {"action": "cast", "label": "Mythical Corruption from the Mage", "actor": "m", "spell": 823751, "target": "engaged"},
+    {"action": "wait", "label": "Let Mythical Corruption land", "ms": 1500},
+    {"action": "assert", "label": "Mythical Corruption afflicts the enemy in combat", "actor": "engaged", "metric": "aura", "spell": 823751, "equals": 1},
+    {"action": "assert", "label": "DISCRIMINATING: Mythical Corruption leaves the idle enemy unaffected", "actor": "idle", "metric": "aura", "spell": 823751, "equals": 0},
+    {"action": "learn", "actor": "m", "spell": 823752},
+    {"action": "cast", "label": "Mythical Rot from the Mage", "actor": "m", "spell": 823752, "target": "engaged"},
+    {"action": "wait", "label": "Let Mythical Rot land", "ms": 1500},
+    {"action": "assert", "label": "Mythical Rot afflicts the enemy in combat", "actor": "engaged", "metric": "aura", "spell": 823752, "equals": 1},
+    {"action": "assert", "label": "DISCRIMINATING: Mythical Rot leaves the idle enemy unaffected", "actor": "idle", "metric": "aura", "spell": 823752, "equals": 0},
+    {"action": "assert", "label": "DISCRIMINATING: the idle enemy is still out of combat", "actor": "idle", "metric": "combat", "equals": 0}
   ]
 }
