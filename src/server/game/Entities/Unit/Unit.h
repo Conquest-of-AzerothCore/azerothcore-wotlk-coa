@@ -1517,6 +1517,7 @@ public:
     [[nodiscard]] bool HasAuraTypeWithCaster(AuraType auratype, ObjectGuid caster) const;
     [[nodiscard]] bool HasAuraTypeWithMiscvalue(AuraType auratype, int32 miscvalue) const;
     bool HasAuraTypeWithAffectMask(AuraType auratype, SpellInfo const* affectedSpell) const;
+    [[nodiscard]] bool HasDurationShorteningPeriodicHaste(SpellInfo const* affectedSpell) const;
     [[nodiscard]] bool HasAuraTypeWithValue(AuraType auratype, int32 value) const;
     [[nodiscard]] bool HasAuraTypeWithTriggerSpell(AuraType auratype, uint32 triggerSpell) const;
     bool HasNegativeAuraWithInterruptFlag(uint32 flag, ObjectGuid guid = ObjectGuid::Empty);
