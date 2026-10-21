@@ -18,9 +18,12 @@
 #include "AreaTriggerScript.h"
 #include "CreatureAI.h"
 #include "EventMap.h"
+#include "GameObject.h"
+#include "GameObjectAI.h"
 #include "GameObjectScript.h"
 #include "InstanceMapScript.h"
 #include "InstanceScript.h"
+#include "Map.h"
 #include "Player.h"
 #include "SpellScript.h"
 #include "SpellScriptLoader.h"
@@ -105,6 +108,29 @@ public:
                 _dragonkinList.remove(unit->GetGUID());
             if (unit->IsCreature())
                 OnEranikusWardenDeath(unit->GetEntry());
+            if (unit->GetEntry() == NPC_HAKKARI_BLOODKEEPER && GetData(TYPE_HAKKAR_EVENT) == IN_PROGRESS)
+                ExtinguishNearestEternalFlame(unit);
+        }
+
+        void ExtinguishNearestEternalFlame(Unit* bloodkeeper)
+        {
+            GameObject* nearestFlame = nullptr;
+            for (ObjectGuid const& guid : _eternalFlameGUIDs)
+            {
+                GameObject* flame = instance->GetGameObject(guid);
+                if (!flame || flame->getLootState() != GO_READY)
+                    continue;
+                if (!nearestFlame || bloodkeeper->GetExactDist2d(flame) < bloodkeeper->GetExactDist2d(nearestFlame))
+                    nearestFlame = flame;
+            }
+
+            if (!nearestFlame)
+                return;
+
+            nearestFlame->UseDoorOrButton();
+            Map::PlayerList const& players = instance->GetPlayers();
+            if (!players.IsEmpty())
+                nearestFlame->AI()->GossipHello(players.begin()->GetSource(), false);
         }
 
         bool IsEranikusAwake() const
@@ -197,6 +223,18 @@ public:
                 case GO_FORCEFIELD:
                     _forcefieldGUID = gameobject->GetGUID();
                     gameobject->SetGoState(GO_STATE_ACTIVE);
+                    break;
+                case GO_ETERNAL_FLAME1:
+                case GO_ETERNAL_FLAME2:
+                case GO_ETERNAL_FLAME3:
+                case GO_ETERNAL_FLAME4:
+                    _eternalFlameGUIDs.push_back(gameobject->GetGUID());
+                    break;
+                case GO_HAKKAR_WORSHIP_ALTAR:
+                    _worshipAltarGUID = gameobject->GetGUID();
+                    if (_encounters[TYPE_HAKKAR_EVENT] == DONE)
+                        gameobject->SetGameObjectFlag(GO_FLAG_NOT_SELECTABLE);
+                    break;
             }
         }
 
@@ -228,9 +266,14 @@ public:
                                 creature->SetInCombatWithZone();
                     }
                     break;
+                case TYPE_HAKKAR_EVENT:
+                    _encounters[type] = data;
+                    if (data == DONE)
+                        if (GameObject* altar = instance->GetGameObject(_worshipAltarGUID))
+                            altar->SetGameObjectFlag(GO_FLAG_NOT_SELECTABLE);
+                    break;
                 case TYPE_ATAL_ALARION:
                 case TYPE_JAMMAL_AN:
-                case TYPE_HAKKAR_EVENT:
                     _encounters[type] = data;
                     break;
             }
@@ -306,6 +349,8 @@ public:
         GuidSet _playersToldEranikusSlumbers;
 
         ObjectGuid _forcefieldGUID;
+        ObjectGuid _worshipAltarGUID;
+        GuidVector _eternalFlameGUIDs;
         ObjectGuid _jammalanGUID;
         ObjectGuid _shadeOfEranikusGUID;
         GuidList _dragonkinList;
