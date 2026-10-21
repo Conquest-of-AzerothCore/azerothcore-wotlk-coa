@@ -8509,6 +8509,12 @@ class AscensionCompatPlayerScript : public PlayerScript {
         }
     }
 
+    void RemoveExpiredExperienceAura(Player* player)
+    {
+        if (player->GetLevel() >= sWorld->getIntConfig(CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL))
+            player->RemoveAurasDueToSpell(818059);
+    }
+
 public:
   AscensionCompatPlayerScript()
       : PlayerScript(
@@ -8700,6 +8706,7 @@ public:
       AscensionDisplayPatchService::Instance().OnPlayerLogin(player);
       RefreshScaledQuestQueries(player);
       SendAverageItemLevel(player);
+      RemoveExpiredExperienceAura(player);
     }
   }
 
@@ -8720,6 +8727,7 @@ public:
       AscensionClassService::Instance().SendCharacterAdvancementKnownEntries(player);
 
       RefreshScaledQuestQueries(player);
+      RemoveExpiredExperienceAura(player);
     }
   }
 
