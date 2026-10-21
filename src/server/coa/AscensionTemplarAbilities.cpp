@@ -41,6 +41,7 @@ bool Selected(SpellInfo const* info, uint32 aura)
 }
 constexpr uint32 SPELL_VISUAL_KIT_BENEDICTION_CAST = 4565;
 constexpr uint32 SPELL_VISUAL_KIT_BENEDICTION_IMPACT = 4566;
+constexpr uint32 SPELL_RECENTLY_PARRIED_OR_DODGED = 681170;
 constexpr uint32 selected[] = {806354, 807004, 561156, 681136, 712378, 524766, 806523, 524617};
 void ConsumeSelected(Player* player, Spell* spell)
 {
@@ -215,6 +216,7 @@ class templar_casts : public AllSpellScript
         }
         if (Named(info, 705293))
         {
+            player->RemoveAurasDueToSpell(SPELL_RECENTLY_PARRIED_OR_DODGED);
             talent(705295, 706583);
             talent(712677, 712679);
         }
