@@ -48,9 +48,6 @@ namespace
         "CharacterDatabaseInfo",
     };
 
-    // Modules read their settings in hot paths (once per world tick, per player update). A key missing from the config
-    // files was reported on every one of those reads: two log lines per tick, tens of thousands an hour. Report it once
-    // per configuration load instead.
     std::mutex _missingReportLock;
     std::unordered_set<std::string> _missingReported;
 
