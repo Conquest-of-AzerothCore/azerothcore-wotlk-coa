@@ -402,7 +402,7 @@ class spell_ascension_witch_hunter_ability : public SpellScript
             player->RemoveAurasDueToSpell(680237);
         if (_slinging && Family(info, 0, 65536))
             player->RemoveAurasDueToSpell(500161);
-        if (_dawnKnight && Dawn(info))
+        if (_dawnKnight && Family(info, 0, 1024))
             player->RemoveAurasDueToSpell(681390);
         if (_anguish && Family(info, 0, 2))
             player->RemoveAurasDueToSpell(500566);
