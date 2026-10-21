@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Houndmaster Whistle preserves the captured Shadowhound model (#4962)",
-  "contract": "The original CoA alpha creature cache records main Shadowhound 50124 with display 16049 (DarkHound), matching Lesser Shadowhound. SkillLineAbility grants the Shadowhound Visual passive 500036. Native summoned display and passive ownership establish these server contracts; no authoritative capture specifies template scale reductions.",
+  "contract": "The live client cache (Exiles DB capture, after the Ascension changelog entry 'Shadowhound model has been updated') records main Shadowhound 50124 with display 35355 (Mastiff, #7445); Lesser Shadowhound 50224 keeps 16049 (DarkHound). SkillLineAbility grants the Shadowhound Visual passive 500036. Native summoned display and passive ownership establish these server contracts; no authoritative capture specifies template scale reductions.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -37,7 +37,7 @@
       "action": "assert",
       "actor": "hunter",
       "metric": "pet_display",
-      "equals": 16049
+      "equals": 35355
     },
     {
       "action": "assert",
