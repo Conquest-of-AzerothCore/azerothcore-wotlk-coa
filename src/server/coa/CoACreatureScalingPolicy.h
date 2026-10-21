@@ -285,13 +285,13 @@ struct Multipliers
 };
 
 inline constexpr char WorldDefault[] = "1.17 + 0.013 * level";
-inline constexpr char DungeonDefault[] = "min(3.5, 0.28 + 0.082 * level)";
 
 struct Settings
 {
     bool enabled = false;
-    Multipliers health{ Formula::Of(WorldDefault), Formula::Of(DungeonDefault), 2.2f, { { 469, 5.0f } } };
-    Multipliers damage{ Formula::Of(WorldDefault), Formula::Of(DungeonDefault), 1.0f, {} };
+    Multipliers health{ Formula::Of(WorldDefault), 2.5f, 2.2f,
+        { { 36, 2.2f }, { 43, 2.0f }, { 229, 4.0f }, { 389, 3.0f }, { 469, 5.0f } } };
+    Multipliers damage{ Formula::Of(WorldDefault), 1.5f, 1.0f, {} };
 };
 
 inline Context ContextOf(bool battlegroundOrArena, bool scriptedPrivateInstance, bool regularDifficulty, bool raid,

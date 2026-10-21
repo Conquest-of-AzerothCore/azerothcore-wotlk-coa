@@ -35,23 +35,21 @@ int main()
     assert(Near(Multiplier(settings.health, Context::World, 0, 1), 1.183f));
     assert(Near(Multiplier(settings.health, Context::World, 1, 40), 1.69f));
     assert(Near(Multiplier(settings.health, Context::World, 530, 60), 1.95f));
-    assert(Near(Multiplier(settings.health, Context::Dungeon, 43, 20), 1.92f));
-    assert(Near(Multiplier(settings.health, Context::Dungeon, 34, 25), 2.33f));
-    assert(Near(Multiplier(settings.health, Context::Dungeon, 389, 16), 1.592f));
-    assert(Multiplier(settings.health, Context::Dungeon, 229, 58) == 3.5f);
-    assert(Multiplier(settings.health, Context::Dungeon, 429, 59) == 3.5f);
+    assert(Multiplier(settings.health, Context::Dungeon, 34, 25) == 2.5f);
+    assert(Multiplier(settings.health, Context::Dungeon, 429, 59) == 2.5f);
+    assert(Multiplier(settings.health, Context::Dungeon, 36, 20) == 2.2f);
+    assert(Multiplier(settings.health, Context::Dungeon, 43, 20) == 2.0f);
+    assert(Multiplier(settings.health, Context::Dungeon, 389, 16) == 3.0f);
+    assert(Multiplier(settings.health, Context::Dungeon, 229, 58) == 4.0f);
     assert(Multiplier(settings.health, Context::Raid, 409, 60) == 2.2f);
     assert(Multiplier(settings.health, Context::Raid, 469, 60) == 5.0f);
     assert(Multiplier(settings.health, Context::None, 469, 60) == 1.0f);
     for (std::uint8_t level : { 1, 10, 20, 30, 40, 50, 60 })
-    {
         assert(Multiplier(settings.damage, Context::World, 0, level) == Multiplier(settings.health, Context::World, 0, level));
-        assert(Multiplier(settings.damage, Context::Dungeon, 36, level) ==
-            Multiplier(settings.health, Context::Dungeon, 36, level));
-    }
+    assert(Multiplier(settings.damage, Context::Dungeon, 36, 20) == 1.5f);
     assert(Multiplier(settings.damage, Context::Raid, 469, 60) == 1.0f);
     assert(Multiplier(settings.damage, Context::None, 36, 20) == 1.0f);
-    assert(settings.health.maps.size() == 1 && settings.damage.maps.empty());
+    assert(settings.health.maps.size() == 5 && settings.damage.maps.empty());
     assert(Formula::Of("level +").Text() == "1" && Near(Formula::Of("level +").Evaluate(30), 1.0f));
 
     assert(Scaled(1000, 2.5f) == 2500);

@@ -61,16 +61,16 @@ CoA.EquippedGearLootChance = 5
 # Every value may also be a formula of the creature's level: numbers, level, + - * /, parentheses, min(a, b) and
 # max(a, b), e.g. CoA.CreatureScaling.World.Health = "1.17 + 0.013 * level". In MapHealth/MapDamage write a formula
 # without spaces ("43:0.3+0.08*level"), or separate the entries with ';' ("43: 0.3 + 0.08 * level; 36: 2.2").
-# World and Dungeon are fitted to live creature health seen in videos of live Ascension (open world levels 1-59,
-# dungeons 19-38); damage uses the same values. Raid was not observed: its values are the earlier estimates.
+# World is fitted to live open-world creature health seen in videos of live Ascension (levels 1-59); world damage uses
+# the same formula. Dungeon and Raid keep their earlier estimates.
 # Without this section the server keeps these multipliers but leaves the feature disabled.
 CoA.CreatureScaling.Enable = 1
 CoA.CreatureScaling.World.Health = "1.17 + 0.013 * level"
-CoA.CreatureScaling.Dungeon.Health = "min(3.5, 0.28 + 0.082 * level)"
+CoA.CreatureScaling.Dungeon.Health = 2.5
 CoA.CreatureScaling.Raid.Health = 2.2
-CoA.CreatureScaling.MapHealth = "469:5.0"
+CoA.CreatureScaling.MapHealth = "36:2.2 43:2.0 229:4.0 389:3.0 469:5.0"
 CoA.CreatureScaling.World.Damage = "1.17 + 0.013 * level"
-CoA.CreatureScaling.Dungeon.Damage = "min(3.5, 0.28 + 0.082 * level)"
+CoA.CreatureScaling.Dungeon.Damage = 1.5
 CoA.CreatureScaling.Raid.Damage = 1.0
 CoA.CreatureScaling.MapDamage = ""
 
