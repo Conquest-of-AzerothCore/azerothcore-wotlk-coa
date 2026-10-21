@@ -517,20 +517,6 @@ public:
 
 AscensionCompatConfigData ascensionCompatConfig;
 
-AscensionVanityOwnership::TestOverride::TestOverride(bool unlockAll, std::string const& starterItems)
-    : _unlockAll(ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::UNLOCK_ALL_VANITY)),
-      _starterItems(ascensionCompatConfig.GetConfigValue<std::string>(AscensionCompatConfig::STARTER_VANITY_ITEMS))
-{
-    ascensionCompatConfig.OverwriteConfigValue<bool>(AscensionCompatConfig::UNLOCK_ALL_VANITY, unlockAll);
-    ascensionCompatConfig.OverwriteConfigValue<std::string>(AscensionCompatConfig::STARTER_VANITY_ITEMS, starterItems);
-}
-
-AscensionVanityOwnership::TestOverride::~TestOverride()
-{
-    ascensionCompatConfig.OverwriteConfigValue<bool>(AscensionCompatConfig::UNLOCK_ALL_VANITY, _unlockAll);
-    ascensionCompatConfig.OverwriteConfigValue<std::string>(AscensionCompatConfig::STARTER_VANITY_ITEMS, _starterItems);
-}
-
 uint8 GetRealmTypeMask()
 {
   std::string const types = ascensionCompatConfig.GetConfigValue<std::string>(
@@ -9968,6 +9954,20 @@ class spell_ascension_experience_potion : public SpellScript
     }
 };
 
+}
+
+AscensionVanityOwnership::TestOverride::TestOverride(bool unlockAll, std::string const& starterItems)
+    : _unlockAll(ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::UNLOCK_ALL_VANITY)),
+      _starterItems(ascensionCompatConfig.GetConfigValue<std::string>(AscensionCompatConfig::STARTER_VANITY_ITEMS))
+{
+    ascensionCompatConfig.OverwriteConfigValue<bool>(AscensionCompatConfig::UNLOCK_ALL_VANITY, unlockAll);
+    ascensionCompatConfig.OverwriteConfigValue<std::string>(AscensionCompatConfig::STARTER_VANITY_ITEMS, starterItems);
+}
+
+AscensionVanityOwnership::TestOverride::~TestOverride()
+{
+    ascensionCompatConfig.OverwriteConfigValue<bool>(AscensionCompatConfig::UNLOCK_ALL_VANITY, _unlockAll);
+    ascensionCompatConfig.OverwriteConfigValue<std::string>(AscensionCompatConfig::STARTER_VANITY_ITEMS, _starterItems);
 }
 
 bool IsAscensionPrimalistTameEligible(Player const* player)
