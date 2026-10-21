@@ -16,6 +16,7 @@
 #include <atomic>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <unordered_set>
 
 namespace
@@ -73,7 +74,7 @@ namespace
         CreatureScaling::Context const context = ContextOf(creature);
         if (context == CreatureScaling::Context::None)
             return 1.0f;
-        return CreatureScaling::Multiplier(Active()->damage, context, creature->GetMapId());
+        return CreatureScaling::Multiplier(Active()->damage, context, creature->GetMapId(), creature->GetLevel());
     }
 
     template <typename T>
@@ -85,12 +86,22 @@ namespace
             damage = T(CreatureScaling::Scaled(uint32(damage), multiplier));
     }
 
+    CreatureScaling::Formula ReadFormula(std::string const& key, CreatureScaling::Formula const& fallback)
+    {
+        std::string const text = sConfigMgr->GetOption<std::string>(key, fallback.Text());
+        if (std::optional<CreatureScaling::Formula> formula = CreatureScaling::Formula::Parse(text))
+            return *formula;
+        LOG_ERROR("server.loading", "{} = \"{}\" is neither a number nor a formula of level; using {}", key, text,
+            fallback.Text());
+        return fallback;
+    }
+
     CreatureScaling::Multipliers ReadMultipliers(std::string const& kind, CreatureScaling::Multipliers const& defaults)
     {
         CreatureScaling::Multipliers result;
-        result.world = sConfigMgr->GetOption<float>("CoA.CreatureScaling.World." + kind, defaults.world);
-        result.dungeon = sConfigMgr->GetOption<float>("CoA.CreatureScaling.Dungeon." + kind, defaults.dungeon);
-        result.raid = sConfigMgr->GetOption<float>("CoA.CreatureScaling.Raid." + kind, defaults.raid);
+        result.world = ReadFormula("CoA.CreatureScaling.World." + kind, defaults.world);
+        result.dungeon = ReadFormula("CoA.CreatureScaling.Dungeon." + kind, defaults.dungeon);
+        result.raid = ReadFormula("CoA.CreatureScaling.Raid." + kind, defaults.raid);
         result.maps = CreatureScaling::ParseMapMultipliers(sConfigMgr->GetOption<std::string>(
             "CoA.CreatureScaling.Map" + kind, CreatureScaling::FormatMapMultipliers(defaults.maps), false));
         return result;
@@ -146,9 +157,9 @@ public:
         LOG_INFO("server.loading",
             ">> CoA creature scaling {}: health {}/{}/{}, damage {}/{}/{} (world/dungeon/raid), "
             "{} map health overrides, {} flex health entries kept",
-            settings->enabled ? "enabled" : "disabled", settings->health.world, settings->health.dungeon,
-            settings->health.raid, settings->damage.world, settings->damage.dungeon, settings->damage.raid,
-            settings->health.maps.size(), FlexHealthEntries.size());
+            settings->enabled ? "enabled" : "disabled", settings->health.world.Text(), settings->health.dungeon.Text(),
+            settings->health.raid.Text(), settings->damage.world.Text(), settings->damage.dungeon.Text(),
+            settings->damage.raid.Text(), settings->health.maps.size(), FlexHealthEntries.size());
     }
 };
 
@@ -164,7 +175,8 @@ public:
         CreatureScaling::Context const context = ContextOf(creature);
         if (context == CreatureScaling::Context::None)
             return;
-        float const multiplier = CreatureScaling::Multiplier(Active()->health, context, creature->GetMapId());
+        float const multiplier = CreatureScaling::Multiplier(Active()->health, context, creature->GetMapId(),
+            creature->GetLevel());
         if (multiplier == 1.0f)
             return;
         uint32 const health = CreatureScaling::Scaled(creature->GetCreateHealth(), multiplier);

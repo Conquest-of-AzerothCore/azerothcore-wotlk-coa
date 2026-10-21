@@ -21,7 +21,7 @@ def main():
         exe = Path(directory) / 'policy.exe'
         subprocess.run(command(HERE / 'test_policy.cpp', exe), cwd=directory, check=True, timeout=60)
         subprocess.run([str(exe)], cwd=directory, check=True, timeout=15)
-    print('PASS: contexts, Heroic/Mythic and battleground exclusion, approved multipliers, map overrides and parsing')
+    print('PASS: contexts, Heroic/Mythic and battleground exclusion, approved multipliers, level formulas, map overrides and parsing')
 
 
 if __name__ == '__main__':

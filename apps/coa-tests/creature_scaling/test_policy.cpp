@@ -1,7 +1,23 @@
 #include "../../../src/server/coa/CoACreatureScalingPolicy.h"
 #include <cassert>
+#include <cmath>
 #include <cstdint>
 #include <limits>
+
+namespace
+{
+bool Near(float a, float b)
+{
+    return std::fabs(a - b) < 1e-4f;
+}
+
+float Eval(char const* text, std::uint8_t level)
+{
+    auto const formula = CreatureScaling::Formula::Parse(text);
+    assert(formula);
+    return formula->Evaluate(level);
+}
+}
 
 int main()
 {
@@ -16,20 +32,27 @@ int main()
 
     Settings const settings;
     assert(!settings.enabled);
-    assert(Multiplier(settings.health, Context::World, 0) == 2.5f);
-    assert(Multiplier(settings.health, Context::World, 1) == 2.5f);
-    assert(Multiplier(settings.health, Context::Dungeon, 34) == 2.5f);
-    assert(Multiplier(settings.health, Context::Dungeon, 36) == 2.2f);
-    assert(Multiplier(settings.health, Context::Dungeon, 43) == 2.0f);
-    assert(Multiplier(settings.health, Context::Dungeon, 389) == 3.0f);
-    assert(Multiplier(settings.health, Context::Dungeon, 229) == 4.0f);
-    assert(Multiplier(settings.health, Context::Raid, 409) == 2.2f);
-    assert(Multiplier(settings.health, Context::Raid, 469) == 5.0f);
-    assert(Multiplier(settings.health, Context::None, 469) == 1.0f);
-    assert(Multiplier(settings.damage, Context::World, 0) == 2.0f);
-    assert(Multiplier(settings.damage, Context::Dungeon, 36) == 1.5f);
-    assert(Multiplier(settings.damage, Context::Raid, 469) == 1.0f);
-    assert(Multiplier(settings.damage, Context::None, 36) == 1.0f);
+    assert(Near(Multiplier(settings.health, Context::World, 0, 1), 1.183f));
+    assert(Near(Multiplier(settings.health, Context::World, 1, 40), 1.69f));
+    assert(Near(Multiplier(settings.health, Context::World, 530, 60), 1.95f));
+    assert(Near(Multiplier(settings.health, Context::Dungeon, 43, 20), 1.92f));
+    assert(Near(Multiplier(settings.health, Context::Dungeon, 34, 25), 2.33f));
+    assert(Near(Multiplier(settings.health, Context::Dungeon, 389, 16), 1.592f));
+    assert(Multiplier(settings.health, Context::Dungeon, 229, 58) == 3.5f);
+    assert(Multiplier(settings.health, Context::Dungeon, 429, 59) == 3.5f);
+    assert(Multiplier(settings.health, Context::Raid, 409, 60) == 2.2f);
+    assert(Multiplier(settings.health, Context::Raid, 469, 60) == 5.0f);
+    assert(Multiplier(settings.health, Context::None, 469, 60) == 1.0f);
+    for (std::uint8_t level : { 1, 10, 20, 30, 40, 50, 60 })
+    {
+        assert(Multiplier(settings.damage, Context::World, 0, level) == Multiplier(settings.health, Context::World, 0, level));
+        assert(Multiplier(settings.damage, Context::Dungeon, 36, level) ==
+            Multiplier(settings.health, Context::Dungeon, 36, level));
+    }
+    assert(Multiplier(settings.damage, Context::Raid, 469, 60) == 1.0f);
+    assert(Multiplier(settings.damage, Context::None, 36, 20) == 1.0f);
+    assert(settings.health.maps.size() == 1 && settings.damage.maps.empty());
+    assert(Formula::Of("level +").Text() == "1" && Near(Formula::Of("level +").Evaluate(30), 1.0f));
 
     assert(Scaled(1000, 2.5f) == 2500);
     assert(Scaled(155, 2.2f) == 341);
@@ -38,10 +61,42 @@ int main()
     assert(Scaled(500, 0.0f) == 500);
     assert(Scaled(std::numeric_limits<std::uint32_t>::max() / 2, 5.0f) == std::numeric_limits<std::uint32_t>::max());
 
+    assert(Near(Eval("2.5", 1), 2.5f) && Near(Eval("2.5", 60), 2.5f));
+    assert(Near(Eval("1.17 + 0.013 * level", 1), 1.183f));
+    assert(Near(Eval("1.17 + 0.013 * level", 60), 1.95f));
+    assert(Near(Eval("1.17+0.013*level", 40), 1.69f));
+    assert(Near(Eval("(level + 10) / 20", 30), 2.0f));
+    assert(Near(Eval("2 * level - 3 * 4", 10), 8.0f));
+    assert(Near(Eval("-1 + 3", 0), 2.0f));
+    assert(Near(Eval("max(1.2, min(3.5, 0.3 + 0.08 * level))", 5), 1.2f));
+    assert(Near(Eval("max(1.2, min(3.5, 0.3 + 0.08 * level))", 25), 2.3f));
+    assert(Near(Eval("max(1.2, min(3.5, 0.3 + 0.08 * level))", 60), 3.5f));
+    assert(Eval("1 / 0", 5) == 0.0f);
+    assert(Eval("1 - 2", 5) == 0.0f);
+    assert(Scaled(500, Eval("1 - 2", 5)) == 500);
+    for (char const* bad : { "", "level +", "2..5", "lvl", "levels", "min(1)", "max(1, 2", "(1 + 2", "1 2", "2x", "*3" })
+        assert(!Formula::Parse(bad));
+    assert(Formula::Parse(" 1.17 + 0.013 * level ")->Text() == "1.17+0.013*level");
+    assert(!Formula::Parse("2.5")->UsesLevel() && Formula::Parse("0.5 * level")->UsesLevel());
+
+    Multipliers curved{ *Formula::Parse("1.17 + 0.013 * level"), 2.5f, 2.2f, { { 43, *Formula::Parse("0.3+0.08*level") } } };
+    assert(Near(Multiplier(curved, Context::World, 1, 40), 1.69f));
+    assert(Near(Multiplier(curved, Context::Dungeon, 43, 20), 1.9f));
+    assert(Multiplier(curved, Context::Dungeon, 34, 20) == 2.5f);
+    assert(Multiplier(curved, Context::None, 43, 20) == 1.0f);
+
     auto const parsed = ParseMapMultipliers("36:2.2  43:2.0 bad 7: :3 12:x 13:-1 14:1.5z 229:4");
+    assert(ParseMapMultipliers(FormatMapMultipliers(settings.health.maps)) == settings.health.maps);
     assert(parsed.size() == 3);
-    assert(parsed.at(36) == 2.2f && parsed.at(43) == 2.0f && parsed.at(229) == 4.0f);
+    assert(Near(parsed.at(36).Evaluate(1), 2.2f) && Near(parsed.at(43).Evaluate(1), 2.0f));
+    assert(Near(parsed.at(229).Evaluate(1), 4.0f));
     assert(ParseMapMultipliers("").empty());
     assert(ParseMapMultipliers(FormatMapMultipliers(settings.health.maps)) == settings.health.maps);
     assert(FormatMapMultipliers({}).empty());
+
+    auto const formulas = ParseMapMultipliers("43:0.3+0.08*level 189:max(2.5,0.09*level)");
+    assert(formulas.size() == 2 && Near(formulas.at(43).Evaluate(20), 1.9f) && Near(formulas.at(189).Evaluate(36), 3.24f));
+    auto const separated = ParseMapMultipliers("43: 0.3 + 0.08 * level; 36: 2.2 ;bad; 7:");
+    assert(separated.size() == 2 && Near(separated.at(43).Evaluate(25), 2.3f) && Near(separated.at(36).Evaluate(1), 2.2f));
+    assert(ParseMapMultipliers(FormatMapMultipliers(separated)) == separated);
 }
