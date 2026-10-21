@@ -257,6 +257,12 @@ class templar_casts : public AllSpellScript
             Copy(player, player, 807414, damage);
         if (Named(info, 804929) && spell->GetScriptValue(801832))
             Cast(player, target, 801832);
+        if (info->Id == 801832)
+        {
+            if (hit && player->HasAura(705255) && player->IsValidAttackTarget(target))
+                player->AddAura(803372, target);
+            return;
+        }
         if (!hit || !damage || !player->IsValidAttackTarget(target))
             return;
         if (info->Id == 801450)
@@ -269,12 +275,6 @@ class templar_casts : public AllSpellScript
                 Cast(player, target, 523713);
             if (Chance(player, 504808))
                 Copy(player, player, 505206, 1);
-            return;
-        }
-        if (info->Id == 801832)
-        {
-            if (player->HasAura(705255))
-                player->AddAura(803372, player);
             return;
         }
         if (info->Id == 707111 && player->HasAura(573452) && !spell->GetScriptValue(806106))
