@@ -2856,6 +2856,16 @@ private:
             Require(creature != nullptr, "Creature health metric needs a living nearby creature");
             return creature->GetMaxHealth();
         }
+        if (metric == "nearby_creature_sent_spellclick")
+        {
+            Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 60.0f, true);
+            Require(creature != nullptr, "Sent spell click metric needs a living nearby creature");
+            Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            auto itr = actor.unitValues.find(creature->GetGUID().GetRawValue());
+            if (itr == actor.unitValues.end() || !itr->second.count(UNIT_NPC_FLAGS))
+                return -1;
+            return (itr->second.at(UNIT_NPC_FLAGS) & UNIT_NPC_FLAG_SPELLCLICK) ? 1 : 0;
+        }
         if (metric == "nearby_creature_template")
         {
             std::list<Creature*> creatures;
@@ -4803,6 +4813,15 @@ private:
             packet << objects.front()->GetGUID();
             if (sScriptMgr->CanPacketReceive(player->GetSession(), packet))
                 player->GetSession()->HandleGameObjectUseOpcode(packet);
+        }
+        else if (action == "spell_click_nearby")
+        {
+            Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 20.0f, true);
+            Require(creature != nullptr, "Spell click needs a living creature of that entry within 20 yards");
+            WorldPacket packet(CMSG_SPELLCLICK, 8);
+            packet << creature->GetGUID();
+            if (sScriptMgr->CanPacketReceive(player->GetSession(), packet))
+                player->GetSession()->HandleSpellClick(packet);
         }
         else if (action == "attack_nearby" || action == "loot_nearby")
         {

@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Ideals Are Poison: a clue counts once, stays in place without its sparkle, and resets when the quest is abandoned",
+  "contract": [
+    "Quest 175035 needs 5 credits of Clues found 164511 from the clue objects 2300646-2300650 (type 10 goobers tied",
+    "to the quest). go_coa_ideals_are_poison_clue records each investigated clue per character. Expected: the Blood",
+    "Splatter counts once, then stays in the character's world but is no longer active for the quest, so it neither",
+    "sparkles nor counts again, also after the 15 s it used to respawn in. Abandoning and retaking the quest makes it",
+    "active again. The case joins world phase 1 to use spawn 9992004."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -7607.9, "y": 737.4, "z": 137.95, "o": 0.65},
+  "players": [
+    {"id": "p", "race": 1, "class": 1, "level": 20}
+  ],
+  "steps": [
+    {"action": "set_phase", "label": "Join world phase 1, where the clues are spawned", "actor": "p", "value": 1},
+    {"action": "wait", "label": "Let the clue reach the client", "ms": 2500},
+    {"action": "prepare_quest", "actor": "p", "quest": 175035, "complete": false},
+    {"action": "assert", "label": "SETUP: the Blood Splatter is active for the quest", "actor": "p",
+     "metric": "nearby_gameobject_quest_active", "entry": 2300650, "equals": 1, "within_ms": 3000},
+    {"action": "use_nearby_gameobject", "label": "Investigate the Blood Splatter", "actor": "p", "entry": 2300650},
+    {"action": "assert", "label": "the clue counts once", "actor": "p", "metric": "quest_objective_count",
+     "quest": 175035, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "and is no longer active for the quest", "actor": "p",
+     "metric": "nearby_gameobject_quest_active", "entry": 2300650, "equals": 0},
+    {"action": "wait", "label": "Outlast the old 15 s respawn", "ms": 16000},
+    {"action": "assert", "label": "the clue stays in the character's world", "actor": "p",
+     "metric": "nearby_gameobject_at_client", "entry": 2300650, "equals": 1},
+    {"action": "use_nearby_gameobject", "label": "Try to investigate it again", "actor": "p", "entry": 2300650},
+    {"action": "wait", "ms": 1500},
+    {"action": "assert", "label": "a second use does not count", "actor": "p", "metric": "quest_objective_count",
+     "quest": 175035, "equals": 1},
+    {"action": "client_packet", "label": "Abandon Ideals Are Poison", "actor": "p", "opcode": 404,
+     "fields": [{"u8": 0}], "consumed": false},
+    {"action": "prepare_quest", "label": "Take it again", "actor": "p", "quest": 175035, "complete": false},
+    {"action": "assert", "label": "the clue is active again", "actor": "p",
+     "metric": "nearby_gameobject_quest_active", "entry": 2300650, "equals": 1, "within_ms": 2000},
+    {"action": "use_nearby_gameobject", "label": "Investigate it on the new attempt", "actor": "p", "entry": 2300650},
+    {"action": "assert", "label": "and it counts for the new attempt", "actor": "p",
+     "metric": "quest_objective_count", "quest": 175035, "equals": 1, "within_ms": 2000}
+  ]
+}

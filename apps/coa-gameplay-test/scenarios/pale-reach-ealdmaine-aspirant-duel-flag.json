@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "The Ealdir Trial of Strength: challenging an Ealdmaine Aspirant drops a Duel Flag that clears when it dies",
+  "contract": [
+    "175037 asks the player to challenge Ealdmaine Aspirants (164226-164233) to duels; the gossip option of menu",
+    "1200392, shown while the quest is in progress, turns the Aspirant hostile and it attacks. The challenge now",
+    "also summons the Duel Flag 21680 beside the Aspirant, and the Aspirant despawns the closest flag when it dies",
+    "or resets. Expected: no flag before the challenge, one flag once the duel starts, none after the kill, and",
+    "the kill credits the trial once."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -7480.0, "y": 641.5, "z": 127.95, "o": 5.64},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 40}
+  ],
+  "creatures": [
+    {"id": "aspirant", "owner": "hero", "entry": 164226, "faction": 1374, "level": 19, "health": 2000, "reaction": 2,
+     "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 500},
+    {"action": "prepare_quest", "actor": "hero", "quest": 175035},
+    {"action": "reward_quest", "actor": "hero", "quest": 175035},
+    {"action": "prepare_quest", "actor": "hero", "quest": 175036},
+    {"action": "reward_quest", "actor": "hero", "quest": 175036},
+    {"label": "SETUP: The Ealdir Trial of Strength is in progress", "action": "prepare_quest", "actor": "hero",
+     "quest": 175037, "complete": false},
+    {"label": "SETUP: the hero wears the Ealdir Attire", "action": "set_aura", "actor": "hero", "spell": 365016,
+     "stacks": 1},
+    {"action": "set_aura", "actor": "hero", "spell": 365094, "stacks": 1},
+    {"label": "SETUP: no duel flag stands before the challenge", "action": "assert", "actor": "hero",
+     "metric": "nearby_gameobject_count", "entry": 21680, "equals": 0},
+    {"label": "the hero speaks to the Aspirant", "action": "gossip_hello", "actor": "hero", "target": "aspirant"},
+    {"label": "the Aspirant offers the duel", "action": "assert", "actor": "hero", "metric": "gossip_options",
+     "equals": 1},
+    {"label": "the hero challenges the Aspirant", "action": "gossip_select", "actor": "hero", "option": 0},
+    {"label": "the Aspirant takes up the duel", "action": "assert", "actor": "aspirant", "metric": "combat",
+     "equals": 1, "within_ms": 5000},
+    {"label": "a Duel Flag drops beside the Aspirant", "action": "assert", "actor": "hero",
+     "metric": "nearby_gameobject_count", "entry": 21680, "equals": 1, "within_ms": 2000},
+    {"label": "the hero strikes the Aspirant down", "action": "attack_nearby", "actor": "hero", "entry": 164226,
+     "kill": true},
+    {"label": "the Aspirant falls", "action": "assert", "actor": "aspirant", "metric": "alive", "equals": 0,
+     "within_ms": 15000},
+    {"label": "the Duel Flag clears with it", "action": "assert", "actor": "hero",
+     "metric": "nearby_gameobject_count", "entry": 21680, "equals": 0, "within_ms": 3000},
+    {"label": "the kill credits the trial once", "action": "assert", "actor": "hero",
+     "metric": "quest_objective_count", "quest": 175037, "equals": 1, "within_ms": 3000}
+  ]
+}

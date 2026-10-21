@@ -1929,8 +1929,19 @@ void Player::UpdateForQuestWorldObjects()
                     ConditionList conds = sConditionMgr->GetConditionsForSpellClickEvent(obj->GetEntry(), _itr->second.spellId);
                     bool buildUpdateBlock = false;
                     for (ConditionList::const_iterator jtr = conds.begin(); jtr != conds.end() && !buildUpdateBlock; ++jtr)
-                        if ((*jtr)->ConditionType == CONDITION_QUESTREWARDED || (*jtr)->ConditionType == CONDITION_QUESTTAKEN)
-                            buildUpdateBlock = true;
+                        switch ((*jtr)->ConditionType)
+                        {
+                            case CONDITION_QUESTREWARDED:
+                            case CONDITION_QUESTTAKEN:
+                            case CONDITION_QUEST_NONE:
+                            case CONDITION_QUEST_COMPLETE:
+                            case CONDITION_QUESTSTATE:
+                            case CONDITION_QUEST_OBJECTIVE_PROGRESS:
+                                buildUpdateBlock = true;
+                                break;
+                            default:
+                                break;
+                        }
 
                     if (buildUpdateBlock)
                     {
