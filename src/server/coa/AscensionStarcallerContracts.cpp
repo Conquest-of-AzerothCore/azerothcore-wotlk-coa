@@ -121,9 +121,9 @@ void ApplyContracts(SpellInfo* info)
         info->MaxAffectedTargets = 0;
     if (id == 92133)
         info->Effects[0].BasePoints = 7;
-    if (id == 92132 || id == 574349)
+    if (id == 92132 || id == 574349 || id == 680789)
         dummy(id == 92132 ? 2 : 0);
-    if (id == 100250 || id == 801148 || id == 706436)
+    if (id == 100250 || id == 801148 || id == 706436 || id == 680790)
         info->DurationEntry = sSpellDurationStore.LookupEntry(21);
     if (id == 704787)
     {
