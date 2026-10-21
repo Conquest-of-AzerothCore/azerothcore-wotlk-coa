@@ -257,8 +257,9 @@ void ActivateDawn(Player* player)
 {
     Resource(player, SolarPower, -20);
     Cast(player, player, Dawn);
+    // CalcMaxCharges = Dawn's 10 plus charge mods such as Guiding Glow (300324, +3 per rank).
     if (Aura* aura = player->GetAura(Dawn))
-        aura->SetCharges(10);
+        aura->SetCharges(aura->CalcMaxCharges());
     if (AuraEffect* choice = player->GetAuraEffect(Dawn, EFFECT_0))
         choice->SetAmount(1);
     if (player->HasAura(704586))

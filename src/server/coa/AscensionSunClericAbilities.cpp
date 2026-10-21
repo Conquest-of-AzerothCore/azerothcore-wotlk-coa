@@ -408,7 +408,7 @@ class spell_ascension_sun_cleric_ability : public SpellScript
             done = true;
             if (Aura* aura = player->GetAura(Dawn))
             {
-                aura->SetCharges(10);
+                aura->SetCharges(aura->CalcMaxCharges());
                 aura->SetDuration(aura->GetMaxDuration());
             }
         }
