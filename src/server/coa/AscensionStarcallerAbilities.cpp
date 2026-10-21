@@ -323,12 +323,14 @@ class starcaller_spells : public AllSpellScript
                             break;
                     }
             }
-            if ((Any(info, {801990, 574328}) && (player->HasAura(800504) || player->HasAura(803554))) ||
-                (Any(info, {575030, 801987}) && critical && player->HasAura(704725)))
+            if (Any(info, {801990, 574328}) && (player->HasAura(800504) || player->HasAura(803554)))
                 Cast(player, target, 574154);
             if (Any(info, {801990, 574328}) && player->HasAura(300237))
                 Copy(player, target, 524703, healing / 10);
         }
+        if (spell->GetScriptHealingIncludingOverheal() && critical && Any(info, {575030, 801987}) &&
+            player->HasAura(704725))
+            Cast(player, target, 574154);
         State(player).event = old;
     }
     void OnSpellCast(Spell* spell, Unit* caster, SpellInfo const* info, bool) override
