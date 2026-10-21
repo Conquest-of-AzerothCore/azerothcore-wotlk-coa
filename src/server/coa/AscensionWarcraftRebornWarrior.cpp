@@ -8,8 +8,6 @@
 #include "SpellInfo.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
-#include <algorithm>
-#include <array>
 #include <cmath>
 #include <list>
 
@@ -20,7 +18,6 @@ namespace
 constexpr uint32 SINGLE_MINDED_FURY_DAMAGE = 1988257;
 constexpr uint32 REBORN_SPELL_OFFSET = 1100000;
 constexpr uint32 MORTAL_STRIKE_FLAG = 0x2000000;
-constexpr std::array<uint32, 2> IMPROVED_REVENGE = { 1112797, 1112799 };
 constexpr uint32 PIERCING_HOWL_FLAG = 0x20;
 constexpr uint32 DAZED_FLAG = 0x200000;
 constexpr int32 HEROIC_STRIKE_DAZED_PCT = 35;
@@ -231,11 +228,6 @@ void ApplyAscensionWarcraftRebornWarriorContracts(SpellInfo* spellInfo)
         int32 const bonus = spellInfo->Effects[EFFECT_1].BasePoints + 1;
         spellInfo->Effects[EFFECT_1].BasePoints = int32(std::lround(bonus * 100.0 / percent)) - 1;
     }
-
-    if (std::find(IMPROVED_REVENGE.begin(), IMPROVED_REVENGE.end(), spellInfo->Id) != IMPROVED_REVENGE.end() &&
-        spellInfo->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_ADD_FLAT_MODIFIER &&
-        spellInfo->Effects[EFFECT_0].MiscValue == SPELLMOD_JUMP_TARGETS && spellInfo->Effects[EFFECT_0].BasePoints == 1)
-        spellInfo->Effects[EFFECT_0].BasePoints = 0;
 }
 
 void AddAscensionWarcraftRebornWarriorScripts()
