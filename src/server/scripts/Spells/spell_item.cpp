@@ -507,9 +507,7 @@ class spell_item_with_mount_speed : public AuraScript
     void OnApply(AuraEffect const* aurEff, AuraEffectHandleModes /*mode*/)
     {
         Unit* target = GetTarget();
-        // Local enchantment policy removes level requirements from Mithril Spurs only.
-        // Carrot on a Stick and Riding Crop retain their original item restrictions.
-        if ((target->IsPlayer() && m_scriptSpellId == SPELL_MITHRIL_SPURS) || target->GetLevel() <= 70)
+        if (target->GetLevel() <= 70)
         {
             if (auto spellId = getMountSpellId())
             {
