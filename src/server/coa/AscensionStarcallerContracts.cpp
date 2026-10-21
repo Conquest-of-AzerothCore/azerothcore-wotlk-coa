@@ -271,13 +271,6 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].RadiusEntry = info->Effects[2].RadiusEntry;
         info->Effects[2].Effect = 0;
     }
-    if (id == 807992)
-    {
-        info->Effects[0].Effect = SPELL_EFFECT_APPLY_AURA;
-        info->Effects[0].ApplyAuraName = SPELL_AURA_PERIODIC_DUMMY;
-        info->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
-        info->Effects[0].TargetB = SpellImplicitTargetInfo();
-    }
     for (uint32 sid : {801148, 100250, 680790, 706436})
         if (id == sid)
             info->AttributesEx3 |= SPELL_ATTR3_IGNORE_CASTER_MODIFIERS;

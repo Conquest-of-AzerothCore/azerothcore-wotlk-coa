@@ -132,7 +132,7 @@ class aura_ascension_starcaller_lifecycle : public AuraScript
         if (id == 704171)
             player->RemoveAurasDueToSpell(805436);
     }
-    void Tick(AuraEffect const* effect)
+    void Tick(AuraEffect const*)
     {
         Player* player = Owner(GetCaster());
         if (!player || !player->IsAlive())
@@ -169,24 +169,6 @@ class aura_ascension_starcaller_lifecycle : public AuraScript
             Cast(player, GetTarget(), 680214);
             if (++_ticks == 2)
                 GetAura()->Remove();
-        }
-        if (id == 807992)
-        {
-            uint32 remaining = 5;
-            for (Unit* ally : Nearby(GetTarget(), 10))
-                if (player->IsValidAssistTarget(ally) && (ally == player || player->IsInRaidWith(ally)))
-                {
-                    uint32 amount = player->SpellHealingBonusDone(ally, GetSpellInfo(),
-                                                                  std::max(0, effect->GetAmount()), DOT, EFFECT_0);
-                    amount = ally->SpellHealingBonusTaken(player, GetSpellInfo(), amount, DOT);
-                    HealInfo heal(player, ally, amount, GetSpellInfo(), SPELL_SCHOOL_MASK_ARCANE);
-                    player->HealBySpell(heal);
-                    Unit::ProcSkillsAndAuras(player, ally, PROC_FLAG_DONE_PERIODIC, PROC_FLAG_TAKEN_PERIODIC,
-                                             PROC_EX_NORMAL_HIT | PROC_EX_INTERNAL_HOT, amount, BASE_ATTACK,
-                                             GetSpellInfo(), nullptr, EFFECT_0, nullptr, nullptr, &heal);
-                    if (!--remaining)
-                        break;
-                }
         }
     }
     uint8 _ticks = 0;
