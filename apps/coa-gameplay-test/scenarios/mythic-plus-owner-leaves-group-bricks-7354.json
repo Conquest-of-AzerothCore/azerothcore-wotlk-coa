@@ -11,7 +11,7 @@
   "contract": [
     "#7354: leaving the party during a keystone run used to brick the key, stop the timer and downgrade",
     "it; the run kept going instead. When the keystone's owner leaves the group the run stops (state 2, no more timer",
-    "updates) and the key stays at the level it lost at the start. Another member leaving does not stop it."
+    "updates) and the key stays at the level it lost at the start."
   ],
   "players": [
     {
@@ -157,43 +157,6 @@
       "metric": "item_count",
       "item": 1233263,
       "equals": 1
-    },
-    {
-      "action": "leave_group",
-      "actor": "other"
-    },
-    {
-      "action": "wait",
-      "ms": 1000
-    },
-    {
-      "action": "assert",
-      "label": "CONTROL: another member leaves the group: the run keeps running",
-      "actor": "ally",
-      "metric": "server_packet_u8",
-      "opcode": 2312,
-      "index": 8,
-      "equals": 3
-    },
-    {
-      "action": "snapshot",
-      "actor": "ally",
-      "metric": "server_packets",
-      "opcode": 2314,
-      "save_as": "timer_other"
-    },
-    {
-      "action": "wait",
-      "ms": 2500
-    },
-    {
-      "action": "assert",
-      "label": "CONTROL: another member leaves the group: the timer keeps ticking",
-      "actor": "ally",
-      "metric": "server_packets",
-      "opcode": 2314,
-      "relative_to": "timer_other",
-      "min": 1
     },
     {
       "action": "leave_group",

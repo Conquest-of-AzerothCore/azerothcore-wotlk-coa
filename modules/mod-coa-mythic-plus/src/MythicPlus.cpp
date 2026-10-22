@@ -127,6 +127,13 @@ namespace
         STATE_OVERTIME  = 5,
     };
 
+    enum class BrickCause : uint8
+    {
+        NONE,
+        OWNER_LEFT_INSTANCE,
+        MEMBER_LEFT_GROUP,
+    };
+
     constexpr uint32 COUNTDOWN_MS = 10 * IN_MILLISECONDS;
     constexpr uint32 TIMER_PACKET_MS = IN_MILLISECONDS;
     constexpr uint32 BASE_ENTRY_STEP = 100000;   // E, E+100000 Heroic, E+200000 Mythic, ...
@@ -172,7 +179,7 @@ namespace
         uint32 champions = 0;           // Mythic Champions killed
         uint32 championsPlaced = 0;
         uint32 championsRequired = 0;
-        bool ownerLeft = false;         // the keystone's owner left the group or the instance
+        BrickCause brick = BrickCause::NONE;
 
         bool Active() const { return state == STATE_COUNTDOWN || state == STATE_RUNNING; }
         bool Scaled() const { return state != STATE_NONE && state != STATE_INACTIVE; }
@@ -1028,16 +1035,19 @@ namespace
         Complete(map, run);
     }
 
-    // As on the live server, the key bricks when its owner leaves the group or
+    // The key bricks when anybody leaves the owner's group or the owner leaves
     // the instance during the run: the timer stops, nothing is paid and the key
     // keeps the level it lost at the start.
     void Brick(Map* map, Run& run)
     {
         bool const countdown = run.state == STATE_COUNTDOWN;
+        char const* const message = run.brick == BrickCause::MEMBER_LEFT_GROUP
+            ? "Mythic+: a group member left, the keystone is depleted."
+            : "Mythic+: the keystone's owner left, the keystone is depleted.";
         run.state = STATE_INACTIVE;
         ClearRunSpawns(map);
-        LOG_INFO("module", "Mythic+: instance {} map {} +{} bricked, the keystone's owner left after {} s",
-            run.instanceId, run.mapId, run.level, run.elapsedMs / 1000);
+        LOG_INFO("module", "Mythic+: instance {} map {} +{} bricked after {} s: {}",
+            run.instanceId, run.mapId, run.level, run.elapsedMs / 1000, message);
         ForEachPlayer(map, [&](Player* player)
         {
             if (countdown)
@@ -1047,17 +1057,18 @@ namespace
             }
             RemovePlayerAffixes(player, run);
             SendState(player, run, STATE_INACTIVE);
-            ChatHandler(player->GetSession()).PSendSysMessage(
-                "Mythic+: the keystone's owner left, the keystone is depleted.");
+            ChatHandler(player->GetSession()).SendSysMessage(message);
         });
     }
 
-    void OwnerLeft(ObjectGuid owner)
+    // A run belongs to the group its owner is in: the owner is either the one
+    // leaving or still a member of the group the leaver left (or disbanded).
+    void GroupMemberLeft(Group* group, ObjectGuid leaver)
     {
         std::lock_guard<std::recursive_mutex> guard(g_lock);
         for (auto& [instanceId, run] : g_runs)
-            if (run.owner == owner && run.Active())
-                run.ownerLeft = true;
+            if (run.Active() && run.brick == BrickCause::NONE && (run.owner == leaver || group->IsMember(run.owner)))
+                run.brick = BrickCause::MEMBER_LEFT_GROUP;
     }
 
     // Returns an error for the player, or nullptr when the run started.
@@ -1269,8 +1280,9 @@ public:
         g_socketed.erase(player->GetGUID());
         if (Run* run = RunFor(map))
         {
-            if (run->Active() && run->owner == player->GetGUID() && !player->GetSession()->PlayerLogout())
-                run->ownerLeft = true;
+            if (run->Active() && run->brick == BrickCause::NONE && run->owner == player->GetGUID()
+                && !player->GetSession()->PlayerLogout())
+                run->brick = BrickCause::OWNER_LEFT_INSTANCE;
             if (run->state == STATE_COUNTDOWN)
             {
                 player->SetControlled(false, UNIT_STATE_ROOT);
@@ -1290,7 +1302,7 @@ public:
         if (!run || !run->Active())
             return;
 
-        if (run->ownerLeft)
+        if (run->brick != BrickCause::NONE)
         {
             Brick(map, *run);
             return;
@@ -1332,12 +1344,18 @@ public:
 class coa_mythic_plus_group : public GroupScript
 {
 public:
-    coa_mythic_plus_group() : GroupScript("coa_mythic_plus_group", { GROUPHOOK_ON_REMOVE_MEMBER }) { }
+    coa_mythic_plus_group() : GroupScript("coa_mythic_plus_group", { GROUPHOOK_ON_REMOVE_MEMBER, GROUPHOOK_ON_DISBAND })
+    { }
 
-    void OnRemoveMember(Group* /*group*/, ObjectGuid guid, RemoveMethod /*method*/, ObjectGuid /*kicker*/,
+    void OnRemoveMember(Group* group, ObjectGuid guid, RemoveMethod /*method*/, ObjectGuid /*kicker*/,
         char const* /*reason*/) override
     {
-        OwnerLeft(guid);
+        GroupMemberLeft(group, guid);
+    }
+
+    void OnDisband(Group* group) override
+    {
+        GroupMemberLeft(group, ObjectGuid::Empty);
     }
 };
 
