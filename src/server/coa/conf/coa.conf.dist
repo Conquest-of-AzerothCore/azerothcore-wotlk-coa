@@ -179,7 +179,8 @@ CoA.SendDisplayPatches = 1
 
 # Unpatched copy of the client's CreatureDisplayInfo.dbc, used to stream exactly
 # the rows the client is missing. Empty selects DataDir/dbc_clientset; when the
-# copy is unavailable, every display id at or above 652000 is streamed instead.
+# copy is unavailable, the server's own DataDir/dbc/CreatureDisplayInfo.dbc is used,
+# so only rows added through creaturedisplayinfo_dbc are streamed.
 CoA.ClientDbcDirectory = ""
 
 # Extension range derived from the installed client's opcode dispatch table.

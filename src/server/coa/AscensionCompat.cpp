@@ -5271,8 +5271,19 @@ private:
   BuildDisplayPatchRows(std::filesystem::path const &clientDbcDirectory) const {
     std::filesystem::path const clientDbc =
         clientDbcDirectory / "CreatureDisplayInfo.dbc";
-    std::optional<std::unordered_set<uint32>> const clientDisplayIds =
+    std::optional<std::unordered_set<uint32>> clientDisplayIds =
         LoadDbcIds(clientDbc, 16);
+    if (!clientDisplayIds)
+    {
+      std::filesystem::path const serverDbc =
+          std::filesystem::path(sWorld->GetDataPath()) / "dbc" / "CreatureDisplayInfo.dbc";
+      clientDisplayIds = LoadDbcIds(serverDbc, 16);
+      if (clientDisplayIds)
+        LOG_INFO("coa",
+                 "Client DBC copy {} is unavailable; streaming the display ids "
+                 "missing from the server's own {}",
+                 clientDbc.generic_string(), serverDbc.generic_string());
+    }
     bool const haveClientSet = clientDisplayIds.has_value();
     if (!haveClientSet)
     {
