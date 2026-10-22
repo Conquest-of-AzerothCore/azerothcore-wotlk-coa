@@ -80,7 +80,8 @@ public:
         return true;
     }
 
-    static bool HandleGearUnequipCommand(ChatHandler* handler, Optional<EXACT_SEQUENCE("mail")> mailAll,
+    static bool HandleGearUnequipCommand(ChatHandler* handler,
+        Variant<EXACT_SEQUENCE("all"), ItemTemplate const*> items, Optional<EXACT_SEQUENCE("mail")> mailAll,
         Optional<PlayerIdentifier> target)
     {
         if (!target)
@@ -100,8 +101,7 @@ public:
             return false;
         }
 
-        uint32 storedCount = 0;
-        std::vector<Item*> mailItems;
+        std::vector<uint8> slots;
         for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
         {
             Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
@@ -110,6 +110,32 @@ public:
                 continue;
             }
 
+            if (items.holds_alternative<ItemTemplate const*>())
+            {
+                if (item->GetEntry() != items.get<ItemTemplate const*>()->ItemId)
+                {
+                    continue;
+                }
+
+                slots.push_back(slot);
+                break;
+            }
+
+            slots.push_back(slot);
+        }
+
+        if (items.holds_alternative<ItemTemplate const*>() && slots.empty())
+        {
+            handler->SendErrorMessage("{} does not have item {} equipped.", handler->playerLink(target->GetName()),
+                items.get<ItemTemplate const*>()->ItemId);
+            return false;
+        }
+
+        uint32 storedCount = 0;
+        std::vector<Item*> mailItems;
+        for (uint8 slot : slots)
+        {
+            Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
             ItemPosCountVec dest;
             if (!mailAll && player->CanStoreItem(NULL_BAG, NULL_SLOT, dest, item, false) == EQUIP_ERR_OK)
             {

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": ".gear unequip moves equipped items to the bags or the mailbox",
-  "contract": ".gear unequip [mail] [$player] is a Game Master command. Without mail it moves every equipped item into the bags and mails the items that do not fit, so a player with full bags gets all of them by mail and nothing is lost. With mail every equipped item is mailed and the bags are untouched. An ordinary player cannot run it.",
+  "contract": ".gear unequip all|item [mail] [$player] is a Game Master command. With all it unequips every equipped item; with an item link or id it unequips only that equipped item and leaves the other slots alone, and an item the player does not wear is refused. The items go into the bags and the ones that do not fit are mailed, so a player with full bags gets them by mail and nothing is lost. With mail every unequipped item is mailed and the bags are untouched. An ordinary player cannot run it.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -24,6 +24,12 @@
     },
     {
       "id": "mailed",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "single",
       "race": 1,
       "class": 1,
       "level": 60
@@ -98,7 +104,7 @@
       "action": "command",
       "label": "An ordinary player cannot use the command",
       "actor": "bagged",
-      "command": ".gear unequip",
+      "command": ".gear unequip all",
       "rejected": true
     },
     {
@@ -176,15 +182,15 @@
     },
     {
       "action": "console",
-      "command": "gear unequip Harnessa"
+      "command": "gear unequip all Harnessa"
     },
     {
       "action": "console",
-      "command": "gear unequip Harnessb"
+      "command": "gear unequip all Harnessb"
     },
     {
       "action": "console",
-      "command": "gear unequip mail Harnessc"
+      "command": "gear unequip all mail Harnessc"
     },
     {
       "action": "wait",
@@ -732,6 +738,379 @@
       "relative_to": "mailed_carried",
       "ratio_to": "mailed_mailed",
       "equals": -1
+    },
+    {
+      "action": "add_item",
+      "actor": "single",
+      "item": 12584
+    },
+    {
+      "action": "equip",
+      "label": "single wields Grand Marshal's Longsword",
+      "actor": "single",
+      "item": 12584,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "single has the sword equipped",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 15,
+      "equals": 12584
+    },
+    {
+      "action": "snapshot",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 0,
+      "save_as": "single_slot_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 1,
+      "save_as": "single_slot_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 2,
+      "save_as": "single_slot_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 3,
+      "save_as": "single_slot_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 4,
+      "save_as": "single_slot_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 5,
+      "save_as": "single_slot_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 6,
+      "save_as": "single_slot_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 7,
+      "save_as": "single_slot_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 8,
+      "save_as": "single_slot_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 9,
+      "save_as": "single_slot_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 10,
+      "save_as": "single_slot_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 11,
+      "save_as": "single_slot_11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 12,
+      "save_as": "single_slot_12"
+    },
+    {
+      "action": "snapshot",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 13,
+      "save_as": "single_slot_13"
+    },
+    {
+      "action": "snapshot",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 14,
+      "save_as": "single_slot_14"
+    },
+    {
+      "action": "snapshot",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 16,
+      "save_as": "single_slot_16"
+    },
+    {
+      "action": "snapshot",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 17,
+      "save_as": "single_slot_17"
+    },
+    {
+      "action": "snapshot",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 18,
+      "save_as": "single_slot_18"
+    },
+    {
+      "action": "snapshot",
+      "actor": "single",
+      "metric": "carried_item_count",
+      "save_as": "single_carried"
+    },
+    {
+      "action": "snapshot",
+      "actor": "single",
+      "metric": "mail_item_count",
+      "save_as": "single_mail_items"
+    },
+    {
+      "action": "console",
+      "label": "An item the player does not wear is refused",
+      "command": "gear unequip 2589 Harnessd"
+    },
+    {
+      "action": "assert",
+      "label": "and the refusal leaves the sword equipped",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 15,
+      "equals": 12584
+    },
+    {
+      "action": "console",
+      "command": "gear unequip 12584 Harnessd"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "single's main hand is empty",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 15,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "single has the sword in its bags",
+      "actor": "single",
+      "metric": "item_count",
+      "item": 12584,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "single: equipment slot 0 is unchanged",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 0,
+      "relative_to": "single_slot_0",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "single: equipment slot 1 is unchanged",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 1,
+      "relative_to": "single_slot_1",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "single: equipment slot 2 is unchanged",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 2,
+      "relative_to": "single_slot_2",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "single: equipment slot 3 is unchanged",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 3,
+      "relative_to": "single_slot_3",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "single: equipment slot 4 is unchanged",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 4,
+      "relative_to": "single_slot_4",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "single: equipment slot 5 is unchanged",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 5,
+      "relative_to": "single_slot_5",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "single: equipment slot 6 is unchanged",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 6,
+      "relative_to": "single_slot_6",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "single: equipment slot 7 is unchanged",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 7,
+      "relative_to": "single_slot_7",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "single: equipment slot 8 is unchanged",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 8,
+      "relative_to": "single_slot_8",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "single: equipment slot 9 is unchanged",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 9,
+      "relative_to": "single_slot_9",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "single: equipment slot 10 is unchanged",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 10,
+      "relative_to": "single_slot_10",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "single: equipment slot 11 is unchanged",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 11,
+      "relative_to": "single_slot_11",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "single: equipment slot 12 is unchanged",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 12,
+      "relative_to": "single_slot_12",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "single: equipment slot 13 is unchanged",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 13,
+      "relative_to": "single_slot_13",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "single: equipment slot 14 is unchanged",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 14,
+      "relative_to": "single_slot_14",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "single: equipment slot 16 is unchanged",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 16,
+      "relative_to": "single_slot_16",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "single: equipment slot 17 is unchanged",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 17,
+      "relative_to": "single_slot_17",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "single: equipment slot 18 is unchanged",
+      "actor": "single",
+      "metric": "equipped_item",
+      "slot": 18,
+      "relative_to": "single_slot_18",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "single keeps every item it carried",
+      "actor": "single",
+      "metric": "carried_item_count",
+      "relative_to": "single_carried",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "single is mailed nothing",
+      "actor": "single",
+      "metric": "mail_item_count",
+      "relative_to": "single_mail_items",
+      "equals": 0
     }
   ]
 }
