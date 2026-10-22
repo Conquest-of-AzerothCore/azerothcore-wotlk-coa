@@ -36,6 +36,7 @@
 #include "AscensionRunemasterZenith.h"
 #include "AscensionTemplarLibrams.h"
 #include "AscensionHealingStatSelectors.h"
+#include "AscensionHeroWarrior.h"
 #include "AscensionGuardianResources.h"
 #include "AscensionSpellProgressionData.h"
 #include "AscensionWarcraftRebornDruid.h"
@@ -1098,6 +1099,7 @@ void ApplyAscensionClassMechanics(SpellInfo* spellInfo)
     ApplyAscensionClassMechanics19To25(spellInfo);
     ApplyAscensionBarbarianSpellChanges(spellInfo);
     ApplyAscensionWarcraftRebornWarriorContracts(spellInfo);
+    ApplyAscensionHeroWarriorContracts(spellInfo);
     ApplyAscensionWarcraftRebornPaladinContracts(spellInfo);
     ApplyAscensionWarcraftRebornHunterContracts(spellInfo);
     ApplyAscensionWarcraftRebornRogueContracts(spellInfo);

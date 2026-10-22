@@ -85,6 +85,7 @@ void AddSC_AscensionWildcardPhysical();
 void AddSC_AscensionWildcardBloodbath();
 void AddSC_AscensionWildcardSolarStrike();
 void AddSC_AscensionHeroDarkApotheosis();
+void AddSC_AscensionHeroWarrior();
 void AddSC_AscensionHeroFireFireFireball();
 void AddSC_AscensionHeroMissileBarrage();
 void AddSC_AscensionWildcardCremation();
@@ -693,6 +694,7 @@ void AddCoAScripts()
     AddSC_AscensionWildcardBloodbath();
     AddSC_AscensionWildcardSolarStrike();
     AddSC_AscensionHeroDarkApotheosis();
+    AddSC_AscensionHeroWarrior();
     AddSC_AscensionHeroFireFireFireball();
     AddSC_AscensionHeroMissileBarrage();
     AddSC_AscensionWildcardCremation();
