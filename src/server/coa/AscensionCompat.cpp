@@ -8552,6 +8552,33 @@ class AscensionCompatPlayerScript : public PlayerScript {
             player->RemoveAurasDueToSpell(818059);
     }
 
+    static constexpr uint32 ITEM_AURA_OF_EXPERIENCE = 818059;
+    static constexpr uint8 AURA_OF_EXPERIENCE_REALM_LEVEL = 60;
+
+    static bool AccountHasAuraOfExperienceRealmLevel(Player* player)
+    {
+        if (player->GetLevel() >= AURA_OF_EXPERIENCE_REALM_LEVEL)
+            return true;
+
+        return CharacterDatabase.Query(
+            "SELECT 1 FROM `characters` WHERE `account` = {} AND `guid` <> {} AND `level` >= {} LIMIT 1",
+            player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(),
+            AURA_OF_EXPERIENCE_REALM_LEVEL) != nullptr;
+    }
+
+    static bool CanUseAuraOfExperience(Player* player, Item* item, uint8 castCount)
+    {
+        if (item->GetEntry() != ITEM_AURA_OF_EXPERIENCE || AccountHasAuraOfExperienceRealmLevel(player))
+            return true;
+
+        if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(item->GetTemplate()->Spells[0].SpellId))
+            Spell::SendCastResult(player, spellInfo, castCount, SPELL_FAILED_DONT_REPORT);
+        ChatHandler(player->GetSession()).PSendSysMessage(
+            "This item requires you to have a level {} on this realm to be able to consume.",
+            AURA_OF_EXPERIENCE_REALM_LEVEL);
+        return false;
+    }
+
 public:
   AscensionCompatPlayerScript()
       : PlayerScript(
@@ -8898,9 +8925,11 @@ public:
       ReconcileAscensionPrimalistWeapon(player);
   }
 
-  bool OnPlayerCanCastItemUseSpell(Player *player, Item *item, SpellCastTargets const &, uint8, uint32) override {
+  bool OnPlayerCanCastItemUseSpell(Player *player, Item *item, SpellCastTargets const &, uint8 castCount,
+                                   uint32) override {
     AscensionCollectionService::Instance().OnItemObtained(player, item);
-    return true;
+    return !ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED) ||
+           CanUseAuraOfExperience(player, item, castCount);
   }
 
     void OnPlayerCompleteQuest(Player* player, Quest const* quest) override
