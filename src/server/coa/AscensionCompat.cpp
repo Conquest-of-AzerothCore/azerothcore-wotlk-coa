@@ -10077,7 +10077,7 @@ class spell_ascension_stick_on_a_carrot : public AuraScript
 
     static constexpr uint8 HIGHEST_EFFECTIVE_LEVEL = 70;
 
-    void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
+    void CalculateAmount(AuraEffect const*, int32& amount, bool&)
     {
         if (GetUnitOwner()->GetLevel() > HIGHEST_EFFECTIVE_LEVEL)
             amount = 0;
