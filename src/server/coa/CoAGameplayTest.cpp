@@ -2239,6 +2239,15 @@ private:
             Require(dungeon != nullptr, "LFG disable metric needs a known dungeon");
             return sLFGMgr->IsDungeonDisabled(dungeon->map, Difficulty(dungeon->difficulty)) ? 1 : 0;
         }
+        if (metric == "lfg_lock_status")
+        {
+            Require(unit->IsPlayer(), "LFG lock metric needs a player");
+            lfg::LFGDungeonData const* dungeon = sLFGMgr->GetLFGDungeon(step.get<uint32>("dungeon"));
+            Require(dungeon != nullptr, "LFG lock metric needs a known dungeon");
+            lfg::LfgLockMap const& locks = sLFGMgr->GetLockedDungeons(unit->GetGUID());
+            auto const found = locks.find(dungeon->Entry());
+            return found != locks.end() ? double(found->second) : 0;
+        }
         if (metric == "lfg_state")
         {
             Require(unit->IsPlayer(), "LFG state needs a player");

@@ -2,7 +2,6 @@
 
 #include "AscensionAverageItemLevel.h"
 #include "AscensionItemPower.h"
-#include "GlobalScript.h"
 #include "Group.h"
 #include "LFGMgr.h"
 #include "Player.h"
@@ -44,23 +43,6 @@ constexpr std::array<RandomDungeonRequirement, 4> RandomDungeonRequirements = {{
 {
     return group && group->isLFGGroup() && sLFGMgr->GetState(group->GetGUID()) != lfg::LFG_STATE_FINISHED_DUNGEON;
 }
-
-class lfg_random_dungeon_requirements_lock : public GlobalScript
-{
-public:
-    lfg_random_dungeon_requirements_lock()
-        : GlobalScript("lfg_random_dungeon_requirements_lock", {GLOBALHOOK_ON_INITIALIZE_LOCKED_DUNGEONS}) { }
-
-    void OnInitializeLockedDungeons(Player* player, uint8&, uint32& lockData, lfg::LFGDungeonData const* dungeon) override
-    {
-        if (lockData || !dungeon)
-            return;
-
-        if (RandomDungeonRequirement const* requirement = FindRequirement(dungeon->id))
-            if (MissesRequirement(player, *requirement))
-                lockData = lfg::LFG_LOCKSTATUS_TOO_LOW_GEAR_SCORE;
-    }
-};
 
 class lfg_random_dungeon_requirements_join : public PlayerScript
 {
@@ -106,6 +88,5 @@ public:
 
 void AddSC_AscensionLfgRandomDungeonRequirements()
 {
-    new lfg_random_dungeon_requirements_lock();
     new lfg_random_dungeon_requirements_join();
 }
