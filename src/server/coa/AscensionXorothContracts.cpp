@@ -148,10 +148,20 @@ void ApplyContracts(SpellInfo* info)
                 e.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ALLY);
                 e.TargetB = SpellImplicitTargetInfo();
             }
-    if (id == 807671 || id == 707515 || id == 704988 || id == 560828 || id == 300375)
+    if (id == 807671 || id == 704988 || id == 560828 || id == 300375)
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             if (info->Effects[i].Effect)
                 dummy(i);
+    if (id == 707515)
+    {
+        SpellEffectInfo& cooldown = info->Effects[EFFECT_0];
+        cooldown.ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
+        cooldown.MiscValue = SPELLMOD_COOLDOWN;
+        cooldown.BasePoints = -100;
+        cooldown.DieSides = 0;
+        cooldown.SpellClassMask = flag96(0, 32, 0);
+        dummy(1);
+    }
     if (id == 500003)
         info->Effects[0].MiscValue = ASCENSION_CREATURE_GLOBAL_CRIT, info->Effects[0].MiscValueB = 4;
     if (id == 805697 || id == 807899)
@@ -483,6 +493,41 @@ void ApplyContracts(SpellInfo* info)
 namespace
 {
 using namespace AscensionXoroth;
+constexpr uint32 SPELL_GROTESQUE = 707515;
+constexpr uint32 SPELL_HELLFIRE_FORM = 805696;
+class xoroth_grotesque : public UnitScript
+{
+  public:
+    xoroth_grotesque()
+        : UnitScript("xoroth_grotesque", true,
+                     {UNITHOOK_ON_AURA_APPLY, UNITHOOK_ON_AURA_REMOVE, UNITHOOK_ON_AFTER_AURA_EFFECT_CALCULATE_AMOUNT})
+    {
+    }
+    void OnAfterAuraEffectCalculateAmount(AuraEffect const* effect, Unit*, int32& amount) override
+    {
+        if (effect->GetId() == SPELL_GROTESQUE && effect->GetEffIndex() == EFFECT_0 &&
+            effect->GetBase()->GetType() == UNIT_AURA_TYPE &&
+            !effect->GetBase()->GetUnitOwner()->HasAura(SPELL_HELLFIRE_FORM))
+            amount = 0;
+    }
+    void OnAuraApply(Unit* unit, Aura* aura) override
+    {
+        if (aura && aura->GetId() == SPELL_HELLFIRE_FORM)
+            Synchronize(unit);
+    }
+    void OnAuraRemove(Unit* unit, AuraApplication* application, AuraRemoveMode) override
+    {
+        if (application && application->GetBase()->GetId() == SPELL_HELLFIRE_FORM)
+            Synchronize(unit);
+    }
+
+  private:
+    static void Synchronize(Unit* unit)
+    {
+        if (AuraEffect* cooldown = unit->GetAuraEffect(SPELL_GROTESQUE, EFFECT_0))
+            cooldown->RecalculateAmount(unit);
+    }
+};
 class xoroth_scaling : public UnitScript
 {
   public:
@@ -618,4 +663,5 @@ class xoroth_scaling : public UnitScript
 void AddSC_AscensionXorothContracts()
 {
     new xoroth_scaling();
+    new xoroth_grotesque();
 }

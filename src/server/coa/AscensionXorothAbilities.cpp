@@ -632,8 +632,6 @@ class xoroth_casts : public AllSpellScript
                 Cast(player, target, 807522);
                 Cast(player, player, 808007);
             }
-            if (Named(info, 805671) && player->HasAura(707515) && player->HasAura(805696))
-                Reduce(player, 805671, INT32_MAX);
             ConsumeSelected(player, spell);
         }
         State(player).fire = spell->GetScriptValue(500907);
