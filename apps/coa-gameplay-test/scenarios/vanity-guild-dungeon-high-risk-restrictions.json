@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "name": "Vanity spells refuse what their tooltips exclude",
+  "contract": "Personal Atmospheric Reconfigurator: Firmament (364909) is usable only on continents and in battlegrounds, so it is refused inside The Deadmines and works in Elwynn Forest. Banner of Recruitment (100706) is usable only by a Guild Master or Officer: refused without a guild, accepted once the character leads one. The Gnomish Portable Transpolyporter (979611) cannot be used by High-Risk players (aura 1004019). Endless Manastorm Potion (Rank 2) (992090) is refused with SPELL_FAILED_NOT_HERE outside the Manastorm. Refusals without a client error code answer SPELL_FAILED_DONT_REPORT beside the tooltip text.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    { "id": "banner", "race": 1, "class": 1, "level": 60 },
+    { "id": "recon", "race": 1, "class": 1, "level": 60 },
+    { "id": "porter", "race": 1, "class": 1, "level": 60 },
+    { "id": "potion", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "learn", "actor": "banner", "spell": 100706 },
+    { "action": "learn", "actor": "recon", "spell": 364909 },
+    { "action": "learn", "actor": "porter", "spell": 979611 },
+    { "action": "learn", "actor": "potion", "spell": 992090 },
+
+    { "action": "cast", "actor": "banner", "spell": 100706 },
+    {
+      "action": "assert",
+      "actor": "banner",
+      "metric": "cast_failure",
+      "spell": 100706,
+      "equals": 27,
+      "within_ms": 1000,
+      "label": "Banner of Recruitment is refused without a guild"
+    },
+    { "action": "console", "command": "guild create Harnessa \"Harness Recruiters\"" },
+    { "action": "wait", "ms": 1600 },
+    { "action": "cast", "actor": "banner", "spell": 100706 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert",
+      "actor": "banner",
+      "metric": "cast_failure",
+      "spell": 100706,
+      "equals": 0,
+      "label": "A Guild Master may raise the Banner of Recruitment"
+    },
+
+    { "action": "teleport", "actor": "recon", "map": 36, "x": -16.4, "y": -383.07, "z": 61.78, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "actor": "recon", "metric": "map_id", "equals": 36 },
+    { "action": "cast", "actor": "recon", "spell": 364909 },
+    {
+      "action": "assert",
+      "actor": "recon",
+      "metric": "cast_failure",
+      "spell": 364909,
+      "equals": 27,
+      "within_ms": 1000,
+      "label": "The Reconfigurator is refused inside a dungeon"
+    },
+    { "action": "teleport", "actor": "recon", "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "cast", "actor": "recon", "spell": 364909 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert",
+      "actor": "recon",
+      "metric": "cast_failure",
+      "spell": 364909,
+      "equals": 0,
+      "label": "The Reconfigurator works on a continent"
+    },
+
+    { "action": "set_aura", "actor": "porter", "spell": 1004019, "stacks": 1 },
+    { "action": "cast", "actor": "porter", "spell": 979611 },
+    {
+      "action": "assert",
+      "actor": "porter",
+      "metric": "cast_failure",
+      "spell": 979611,
+      "equals": 27,
+      "within_ms": 1000,
+      "label": "A High-Risk player cannot summon the Transpolyporter"
+    },
+    { "action": "set_aura", "actor": "porter", "spell": 1004019, "stacks": 0 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "cast", "actor": "porter", "spell": 979611 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert",
+      "actor": "porter",
+      "metric": "cast_failure",
+      "spell": 979611,
+      "equals": 0,
+      "label": "Without High-Risk the Transpolyporter is summoned"
+    },
+
+    { "action": "cast", "actor": "potion", "spell": 992090 },
+    {
+      "action": "assert",
+      "actor": "potion",
+      "metric": "cast_failure",
+      "spell": 992090,
+      "equals": 60,
+      "within_ms": 1000,
+      "label": "The Endless Manastorm Potion is refused outside the Manastorm"
+    }
+  ]
+}

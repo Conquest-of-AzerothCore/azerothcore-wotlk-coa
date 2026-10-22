@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Swift Flight Form needs a flying area",
+  "contract": "Swift Flight Form (40120) is refused with SPELL_FAILED_INCORRECT_AREA outside flying areas, so it does nothing in Elwynn Forest, and shapeshifts the druid in Shadowmoon Valley.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    { "id": "druid", "race": 4, "class": 11, "level": 70 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "learn", "actor": "druid", "spell": 40120 },
+    { "action": "cast", "actor": "druid", "spell": 40120 },
+    {
+      "action": "assert",
+      "actor": "druid",
+      "metric": "cast_failure",
+      "spell": 40120,
+      "equals": 39,
+      "within_ms": 1000,
+      "label": "Swift Flight Form is refused in Elwynn Forest"
+    },
+    { "action": "assert", "actor": "druid", "metric": "aura", "spell": 40120, "equals": 0 },
+    { "action": "teleport", "actor": "druid", "map": 530, "x": -3053.96, "y": 828.896, "z": -8.9849, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "actor": "druid", "metric": "map_id", "equals": 530 },
+    { "action": "cast", "actor": "druid", "spell": 40120 },
+    {
+      "action": "assert",
+      "actor": "druid",
+      "metric": "aura",
+      "spell": 40120,
+      "equals": 1,
+      "within_ms": 5000,
+      "label": "Swift Flight Form works in Shadowmoon Valley"
+    }
+  ]
+}

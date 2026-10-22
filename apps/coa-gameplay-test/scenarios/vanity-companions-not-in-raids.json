@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Lootbot 3000 and Kleptomanic Demon are not usable in raids",
+  "contract": "Lootbot 3000 (9930889) and Kleptomanic Demon Leash (83086) are refused with SPELL_FAILED_NOT_IN_RAID_INSTANCE inside a raid instance, as their tooltips state, and Lootbot 3000 is still summoned in the open world.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 409,
+    "x": 1091.89,
+    "y": -466.985,
+    "z": -105.084,
+    "o": 3.14159,
+    "ignore_access": true
+  },
+  "players": [
+    { "id": "raider", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "actor": "raider", "metric": "map_id", "equals": 409 },
+    { "action": "learn", "actor": "raider", "spell": 9930889 },
+    { "action": "learn", "actor": "raider", "spell": 83086 },
+    { "action": "cast", "actor": "raider", "spell": 9930889 },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "metric": "cast_failure",
+      "spell": 9930889,
+      "equals": 167,
+      "within_ms": 1000,
+      "label": "Lootbot 3000 is refused in Molten Core"
+    },
+    { "action": "wait", "ms": 1600 },
+    { "action": "cast", "actor": "raider", "spell": 83086 },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "metric": "cast_failure",
+      "spell": 83086,
+      "equals": 167,
+      "within_ms": 1000,
+      "label": "Kleptomanic Demon is refused in Molten Core"
+    },
+    { "action": "teleport", "actor": "raider", "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6, "o": 0.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "actor": "raider", "metric": "map_id", "equals": 0 },
+    { "action": "cast", "actor": "raider", "spell": 9930889 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "metric": "cast_failure",
+      "spell": 9930889,
+      "equals": 0,
+      "label": "Lootbot 3000 is summoned in the open world"
+    }
+  ]
+}

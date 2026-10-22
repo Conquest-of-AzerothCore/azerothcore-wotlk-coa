@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Stick on a Carrot has no effect above level 70",
+  "contract": "Stick on a Carrot (339075) equips Juicy Carrot on a Stick (991885), a 10% mounted speed bonus. As with the stock Carrot on a Stick, the bonus has no effect above level 70: a level 70 wearer gets 10 and a level 71 wearer 0.",
+  "players": [
+    { "id": "seventy", "race": 1, "class": 1, "level": 70 },
+    { "id": "seventyone", "race": 1, "class": 1, "level": 71 }
+  ],
+  "steps": [
+    { "action": "add_item", "actor": "seventy", "item": 339075 },
+    { "action": "add_item", "actor": "seventyone", "item": 339075 },
+    { "action": "equip", "actor": "seventy", "item": 339075, "slot": 12 },
+    { "action": "equip", "actor": "seventyone", "item": 339075, "slot": 12 },
+    {
+      "action": "assert",
+      "actor": "seventy",
+      "metric": "aura_amount",
+      "spell": 991885,
+      "effect": 0,
+      "equals": 10,
+      "within_ms": 1000,
+      "label": "A level 70 wearer gets the mounted speed bonus"
+    },
+    { "action": "assert", "actor": "seventyone", "metric": "aura", "spell": 991885, "equals": 1 },
+    {
+      "action": "assert",
+      "actor": "seventyone",
+      "metric": "aura_amount",
+      "spell": 991885,
+      "effect": 0,
+      "equals": 0,
+      "label": "A level 71 wearer gets no mounted speed bonus"
+    },
+    { "action": "assert", "actor": "seventyone", "metric": "aura_amount", "spell": 991885, "effect": 1, "equals": 0 }
+  ]
+}
