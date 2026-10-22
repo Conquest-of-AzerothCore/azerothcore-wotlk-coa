@@ -1,0 +1,737 @@
+{
+  "schema": 1,
+  "name": ".gear unequip moves equipped items to the bags or the mailbox",
+  "contract": ".gear unequip [mail] [$player] is a Game Master command. Without mail it moves every equipped item into the bags and mails the items that do not fit, so a player with full bags gets all of them by mail and nothing is lost. With mail every equipped item is mailed and the bags are untouched. An ordinary player cannot run it.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "bagged",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "stuffed",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mailed",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "bagged",
+      "item": 12584
+    },
+    {
+      "action": "equip",
+      "label": "bagged wields Grand Marshal's Longsword",
+      "actor": "bagged",
+      "item": 12584,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "bagged has the sword equipped",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 15,
+      "equals": 12584
+    },
+    {
+      "action": "add_item",
+      "actor": "stuffed",
+      "item": 12584
+    },
+    {
+      "action": "equip",
+      "label": "stuffed wields Grand Marshal's Longsword",
+      "actor": "stuffed",
+      "item": 12584,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "stuffed has the sword equipped",
+      "actor": "stuffed",
+      "metric": "equipped_item",
+      "slot": 15,
+      "equals": 12584
+    },
+    {
+      "action": "add_item",
+      "actor": "mailed",
+      "item": 12584
+    },
+    {
+      "action": "equip",
+      "label": "mailed wields Grand Marshal's Longsword",
+      "actor": "mailed",
+      "item": 12584,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "mailed has the sword equipped",
+      "actor": "mailed",
+      "metric": "equipped_item",
+      "slot": 15,
+      "equals": 12584
+    },
+    {
+      "action": "command",
+      "label": "An ordinary player cannot use the command",
+      "actor": "bagged",
+      "command": ".gear unequip",
+      "rejected": true
+    },
+    {
+      "action": "assert",
+      "label": "and the refused command leaves the sword equipped",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 15,
+      "equals": 12584
+    },
+    {
+      "action": "fill_bags",
+      "actor": "stuffed"
+    },
+    {
+      "action": "assert",
+      "label": "stuffed has no free bag slot",
+      "actor": "stuffed",
+      "metric": "free_inventory_slots",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "bagged",
+      "metric": "carried_item_count",
+      "save_as": "bagged_carried"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bagged",
+      "metric": "mail_item_count",
+      "save_as": "bagged_mail_items"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bagged",
+      "metric": "free_inventory_slots",
+      "save_as": "bagged_free"
+    },
+    {
+      "action": "snapshot",
+      "actor": "stuffed",
+      "metric": "carried_item_count",
+      "save_as": "stuffed_carried"
+    },
+    {
+      "action": "snapshot",
+      "actor": "stuffed",
+      "metric": "mail_item_count",
+      "save_as": "stuffed_mail_items"
+    },
+    {
+      "action": "snapshot",
+      "actor": "stuffed",
+      "metric": "free_inventory_slots",
+      "save_as": "stuffed_free"
+    },
+    {
+      "action": "snapshot",
+      "actor": "mailed",
+      "metric": "carried_item_count",
+      "save_as": "mailed_carried"
+    },
+    {
+      "action": "snapshot",
+      "actor": "mailed",
+      "metric": "mail_item_count",
+      "save_as": "mailed_mail_items"
+    },
+    {
+      "action": "snapshot",
+      "actor": "mailed",
+      "metric": "free_inventory_slots",
+      "save_as": "mailed_free"
+    },
+    {
+      "action": "console",
+      "command": "gear unequip Harnessa"
+    },
+    {
+      "action": "console",
+      "command": "gear unequip Harnessb"
+    },
+    {
+      "action": "console",
+      "command": "gear unequip mail Harnessc"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "bagged: equipment slot 0 is empty",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged: equipment slot 1 is empty",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged: equipment slot 2 is empty",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged: equipment slot 3 is empty",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 3,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged: equipment slot 4 is empty",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged: equipment slot 5 is empty",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 5,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged: equipment slot 6 is empty",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 6,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged: equipment slot 7 is empty",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 7,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged: equipment slot 8 is empty",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 8,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged: equipment slot 9 is empty",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 9,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged: equipment slot 10 is empty",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 10,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged: equipment slot 11 is empty",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 11,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged: equipment slot 12 is empty",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 12,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged: equipment slot 13 is empty",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 13,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged: equipment slot 14 is empty",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 14,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged: equipment slot 15 is empty",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 15,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged: equipment slot 16 is empty",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 16,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged: equipment slot 17 is empty",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 17,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged: equipment slot 18 is empty",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 18,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged keeps every item it carried",
+      "actor": "bagged",
+      "metric": "carried_item_count",
+      "relative_to": "bagged_carried",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged is mailed nothing",
+      "actor": "bagged",
+      "metric": "mail_item_count",
+      "relative_to": "bagged_mail_items",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "bagged has the sword in its bags",
+      "actor": "bagged",
+      "metric": "item_count",
+      "item": 12584,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "stuffed: equipment slot 0 is empty",
+      "actor": "stuffed",
+      "metric": "equipped_item",
+      "slot": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "stuffed: equipment slot 1 is empty",
+      "actor": "stuffed",
+      "metric": "equipped_item",
+      "slot": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "stuffed: equipment slot 2 is empty",
+      "actor": "stuffed",
+      "metric": "equipped_item",
+      "slot": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "stuffed: equipment slot 3 is empty",
+      "actor": "stuffed",
+      "metric": "equipped_item",
+      "slot": 3,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "stuffed: equipment slot 4 is empty",
+      "actor": "stuffed",
+      "metric": "equipped_item",
+      "slot": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "stuffed: equipment slot 5 is empty",
+      "actor": "stuffed",
+      "metric": "equipped_item",
+      "slot": 5,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "stuffed: equipment slot 6 is empty",
+      "actor": "stuffed",
+      "metric": "equipped_item",
+      "slot": 6,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "stuffed: equipment slot 7 is empty",
+      "actor": "stuffed",
+      "metric": "equipped_item",
+      "slot": 7,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "stuffed: equipment slot 8 is empty",
+      "actor": "stuffed",
+      "metric": "equipped_item",
+      "slot": 8,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "stuffed: equipment slot 9 is empty",
+      "actor": "stuffed",
+      "metric": "equipped_item",
+      "slot": 9,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "stuffed: equipment slot 10 is empty",
+      "actor": "stuffed",
+      "metric": "equipped_item",
+      "slot": 10,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "stuffed: equipment slot 11 is empty",
+      "actor": "stuffed",
+      "metric": "equipped_item",
+      "slot": 11,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "stuffed: equipment slot 12 is empty",
+      "actor": "stuffed",
+      "metric": "equipped_item",
+      "slot": 12,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "stuffed: equipment slot 13 is empty",
+      "actor": "stuffed",
+      "metric": "equipped_item",
+      "slot": 13,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "stuffed: equipment slot 14 is empty",
+      "actor": "stuffed",
+      "metric": "equipped_item",
+      "slot": 14,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "stuffed: equipment slot 15 is empty",
+      "actor": "stuffed",
+      "metric": "equipped_item",
+      "slot": 15,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "stuffed: equipment slot 16 is empty",
+      "actor": "stuffed",
+      "metric": "equipped_item",
+      "slot": 16,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "stuffed: equipment slot 17 is empty",
+      "actor": "stuffed",
+      "metric": "equipped_item",
+      "slot": 17,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "stuffed: equipment slot 18 is empty",
+      "actor": "stuffed",
+      "metric": "equipped_item",
+      "slot": 18,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "stuffed is mailed the sword",
+      "actor": "stuffed",
+      "metric": "mail_has_item",
+      "item": 12584,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "stuffed's bags stay full",
+      "actor": "stuffed",
+      "metric": "free_inventory_slots",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "stuffed",
+      "metric": "mail_item_count",
+      "relative_to": "stuffed_mail_items",
+      "save_as": "stuffed_mailed"
+    },
+    {
+      "action": "assert",
+      "label": "every item stuffed stops carrying is in its mailbox",
+      "actor": "stuffed",
+      "metric": "carried_item_count",
+      "relative_to": "stuffed_carried",
+      "ratio_to": "stuffed_mailed",
+      "equals": -1
+    },
+    {
+      "action": "assert",
+      "label": "mailed: equipment slot 0 is empty",
+      "actor": "mailed",
+      "metric": "equipped_item",
+      "slot": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "mailed: equipment slot 1 is empty",
+      "actor": "mailed",
+      "metric": "equipped_item",
+      "slot": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "mailed: equipment slot 2 is empty",
+      "actor": "mailed",
+      "metric": "equipped_item",
+      "slot": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "mailed: equipment slot 3 is empty",
+      "actor": "mailed",
+      "metric": "equipped_item",
+      "slot": 3,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "mailed: equipment slot 4 is empty",
+      "actor": "mailed",
+      "metric": "equipped_item",
+      "slot": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "mailed: equipment slot 5 is empty",
+      "actor": "mailed",
+      "metric": "equipped_item",
+      "slot": 5,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "mailed: equipment slot 6 is empty",
+      "actor": "mailed",
+      "metric": "equipped_item",
+      "slot": 6,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "mailed: equipment slot 7 is empty",
+      "actor": "mailed",
+      "metric": "equipped_item",
+      "slot": 7,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "mailed: equipment slot 8 is empty",
+      "actor": "mailed",
+      "metric": "equipped_item",
+      "slot": 8,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "mailed: equipment slot 9 is empty",
+      "actor": "mailed",
+      "metric": "equipped_item",
+      "slot": 9,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "mailed: equipment slot 10 is empty",
+      "actor": "mailed",
+      "metric": "equipped_item",
+      "slot": 10,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "mailed: equipment slot 11 is empty",
+      "actor": "mailed",
+      "metric": "equipped_item",
+      "slot": 11,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "mailed: equipment slot 12 is empty",
+      "actor": "mailed",
+      "metric": "equipped_item",
+      "slot": 12,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "mailed: equipment slot 13 is empty",
+      "actor": "mailed",
+      "metric": "equipped_item",
+      "slot": 13,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "mailed: equipment slot 14 is empty",
+      "actor": "mailed",
+      "metric": "equipped_item",
+      "slot": 14,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "mailed: equipment slot 15 is empty",
+      "actor": "mailed",
+      "metric": "equipped_item",
+      "slot": 15,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "mailed: equipment slot 16 is empty",
+      "actor": "mailed",
+      "metric": "equipped_item",
+      "slot": 16,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "mailed: equipment slot 17 is empty",
+      "actor": "mailed",
+      "metric": "equipped_item",
+      "slot": 17,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "mailed: equipment slot 18 is empty",
+      "actor": "mailed",
+      "metric": "equipped_item",
+      "slot": 18,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "mailed is mailed the sword",
+      "actor": "mailed",
+      "metric": "mail_has_item",
+      "item": 12584,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "mailed's bags take nothing",
+      "actor": "mailed",
+      "metric": "free_inventory_slots",
+      "relative_to": "mailed_free",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "mailed",
+      "metric": "mail_item_count",
+      "relative_to": "mailed_mail_items",
+      "save_as": "mailed_mailed"
+    },
+    {
+      "action": "assert",
+      "label": "every item mailed stops carrying is in its mailbox",
+      "actor": "mailed",
+      "metric": "carried_item_count",
+      "relative_to": "mailed_carried",
+      "ratio_to": "mailed_mailed",
+      "equals": -1
+    }
+  ]
+}
