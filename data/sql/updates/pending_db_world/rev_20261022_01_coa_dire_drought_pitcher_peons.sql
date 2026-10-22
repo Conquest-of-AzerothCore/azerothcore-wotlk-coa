@@ -25,19 +25,24 @@ VALUES
 (162836, 1, 2901, 0, 0, 0);
 
 UPDATE `creature` SET `equipment_id` = 1 WHERE `id` = 162836;
-UPDATE `creature` SET `position_x` = 403.25, `position_y` = -4649.37, `position_z` = 17.41, `orientation` = 5.6054 WHERE `guid` = 9012310;
-UPDATE `creature` SET `position_x` = 401.69, `position_y` = -4637.55, `position_z` = 18.68, `orientation` = 2.6126 WHERE `guid` = 9012311;
+UPDATE `creature` SET `position_x` = 402.739, `position_y` = -4648.78, `position_z` = 17.0528, `orientation` = 5.52455 WHERE `guid` = 9012310;
+UPDATE `creature` SET `position_x` = 402.813, `position_y` = -4638.06, `position_z` = 18.534, `orientation` = 2.70497 WHERE `guid` = 9012311;
 UPDATE `creature` SET `position_x` = 413.27, `position_y` = -4641.71, `position_z` = 19.056, `orientation` = 4.9247 WHERE `guid` = 9012312;
-UPDATE `creature` SET `position_x` = 419.41, `position_y` = -4643.75, `position_z` = 18.744, `orientation` = 4.5403 WHERE `guid` = 9012313;
-UPDATE `creature` SET `position_x` = 423.32, `position_y` = -4637.14, `position_z` = 18.389, `orientation` = 1.1742 WHERE `guid` = 9012314;
-UPDATE `creature` SET `position_x` = 430.94, `position_y` = -4643.87, `position_z` = 16.811, `orientation` = 5.4786 WHERE `guid` = 9012315;
-UPDATE `creature` SET `position_x` = 432.93, `position_y` = -4632.12, `position_z` = 18.563, `orientation` = 2.7161 WHERE `guid` = 9012316;
-UPDATE `creature` SET `position_x` = 443.48, `position_y` = -4627.73, `position_z` = 19.292, `orientation` = 1.7975 WHERE `guid` = 9012317;
-UPDATE `creature` SET `position_x` = 448.78, `position_y` = -4633.86, `position_z` = 19.966, `orientation` = 5.3442 WHERE `guid` = 9012318;
+UPDATE `creature` SET `position_x` = 419.152, `position_y` = -4642.54, `position_z` = 18.4448, `orientation` = 5.00964 WHERE `guid` = 9012313;
+UPDATE `creature` SET `position_x` = 423.041, `position_y` = -4637.86, `position_z` = 18.2155, `orientation` = 1.10226 WHERE `guid` = 9012314;
+UPDATE `creature` SET `position_x` = 430.245, `position_y` = -4643.78, `position_z` = 16.4222, `orientation` = 5.18242 WHERE `guid` = 9012315;
+UPDATE `creature` SET `position_x` = 433.628, `position_y` = -4632.71, `position_z` = 17.6867, `orientation` = 2.62988 WHERE `guid` = 9012316;
+UPDATE `creature` SET `position_x` = 443.868, `position_y` = -4628.45, `position_z` = 19.0962, `orientation` = 2.07617 WHERE `guid` = 9012317;
+UPDATE `creature` SET `position_x` = 448.564, `position_y` = -4633.14, `position_z` = 19.5572, `orientation` = 5.40561 WHERE `guid` = 9012318;
 UPDATE `creature` SET `position_x` = 446.62, `position_y` = -4621.81, `position_z` = 20.931, `orientation` = 3.0977 WHERE `guid` = 9012319;
-UPDATE `creature` SET `position_x` = 459.19, `position_y` = -4628.24, `position_z` = 20.13, `orientation` = 5.3952 WHERE `guid` = 9012320;
-UPDATE `creature` SET `position_x` = 466.25, `position_y` = -4621.95, `position_z` = 18.706, `orientation` = 6.1851 WHERE `guid` = 9012321;
+UPDATE `creature` SET `position_x` = 458.643, `position_y` = -4627.39, `position_z` = 19.0097, `orientation` = 5.35454 WHERE `guid` = 9012320;
+UPDATE `creature` SET `position_x` = 465.402, `position_y` = -4621.38, `position_z` = 18.4323, `orientation` = 6.13601 WHERE `guid` = 9012321;
 UPDATE `creature` SET `position_x` = 467.39, `position_y` = -4616.07, `position_z` = 19.11, `orientation` = 0.2459 WHERE `guid` = 9012322;
 UPDATE `creature` SET `position_x` = 450.76, `position_y` = -4605.91, `position_z` = 19.504, `orientation` = 0.1244 WHERE `guid` = 9012323;
-UPDATE `creature` SET `position_x` = 447.19, `position_y` = -4603.16, `position_z` = 18.92, `orientation` = 5.5834 WHERE `guid` = 9012324;
+UPDATE `creature` SET `position_x` = 448.288, `position_y` = -4602.73, `position_z` = 18.6955, `orientation` = 3.70913 WHERE `guid` = 9012324;
 UPDATE `creature` SET `position_x` = 443.98, `position_y` = -4611.78, `position_z` = 19.577, `orientation` = 4.2827 WHERE `guid` = 9012325;
+
+-- 3. The pool outside the Razor Hill inn had no water trigger, so Collect Water answered "You can't do this here" there.
+DELETE FROM `creature` WHERE `guid` = 9012308;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`, `CreateObject`, `Comment`) VALUES
+(9012308, 162949, 1, 0, 0, 1, 1, 0, 334.5207, -4715.389, 13.729, 3.283, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'CoA Razor Hill: the pool outside the inn; invisible, Collect Water reaches 6 yd');

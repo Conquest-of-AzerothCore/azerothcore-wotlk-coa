@@ -40,6 +40,13 @@
     { "action": "use_item", "label": "orc uses the empty pitcher in the west pool", "actor": "orc", "item": 558973, "spell": 267033 },
     { "action": "assert", "label": "The west pool still fills the pitcher", "actor": "orc", "metric": "item_count", "item": 558974, "equals": 1, "within_ms": 5000 },
     { "action": "assert", "label": "Filling used up the empty pitcher", "actor": "orc", "metric": "item_count", "item": 558973, "equals": 0 },
+    { "action": "destroy_item", "label": "Empty the hands for the inn pool", "actor": "orc", "item": 558974 },
+    { "action": "add_item", "label": "Fixture: hand the empty pitcher back for the next fill", "actor": "orc", "item": 558973 },
+    { "action": "teleport", "label": "orc stands at the pool outside the Razor Hill inn (#8507)", "actor": "orc", "map": 1, "x": 334.521, "y": -4715.389, "z": 13.729 },
+    { "action": "wait", "label": "Let the grid load and the pitcher's 5 s cooldown pass", "ms": 6000 },
+    { "action": "use_item", "label": "orc uses the empty pitcher at the inn pool", "actor": "orc", "item": 558973, "spell": 267033 },
+    { "action": "assert", "label": "The inn pool fills the pitcher", "actor": "orc", "metric": "item_count", "item": 558974, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "Filling used up the empty pitcher", "actor": "orc", "metric": "item_count", "item": 558973, "equals": 0 },
     { "action": "destroy_item", "label": "Empty the hands for the dry check", "actor": "orc", "item": 558974 },
     { "action": "add_item", "label": "Fixture: hand the empty pitcher back for the next fill", "actor": "orc", "item": 558973 },
 
