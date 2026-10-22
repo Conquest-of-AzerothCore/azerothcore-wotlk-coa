@@ -408,6 +408,8 @@ constexpr uint32 VANITY_CATEGORY_MOUNTS = 0x04000000;
 constexpr uint32 SPELL_TALENT_LEARNING_CUE = 47292;
 constexpr uint32 VANITY_CATEGORY_COMPANIONS = 0x08000000;
 constexpr uint32 VANITY_CATEGORY_CONSUMABLE = 0x40000000;
+constexpr uint32 ITEM_AURA_OF_EXPERIENCE = 818059;
+constexpr uint8 VANITY_REALM_LEVEL = 60;
 constexpr uint32 ITEM_WONDROUS_WISDOMBALL = 101169;
 constexpr uint32 ITEM_FIX_O_TRON_5000 = 97330;
 constexpr std::size_t COMPANION_SPELLS_PER_BATCH = 4;
@@ -6283,8 +6285,11 @@ public:
         return;
     }
 
-    if (sObjectMgr->GetItemTemplate(itemId))
+    if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId))
     {
+      if (RefuseWithoutVanityRealmLevel(player, proto))
+        return;
+
       ItemPosCountVec destinations;
       InventoryResult result =
           player->CanStoreNewItem(NULL_BAG, NULL_SLOT, destinations, itemId, 1);
@@ -6357,6 +6362,33 @@ public:
              state->OwnedVanityItems.size() - vanityBefore);
     return true;
   }
+
+    [[nodiscard]] bool RequiresVanityRealmLevel(ItemTemplate const* proto) const
+    {
+        return proto->ItemId == ITEM_AURA_OF_EXPERIENCE ||
+            (proto->Quality == ITEM_QUALITY_HEIRLOOM && _vanityItems.contains(proto->ItemId));
+    }
+
+    static bool AccountHasVanityRealmLevel(Player* player)
+    {
+        if (player->GetLevel() >= VANITY_REALM_LEVEL)
+            return true;
+
+        return CharacterDatabase.Query(
+            "SELECT 1 FROM `characters` WHERE `account` = {} AND `guid` <> {} AND `level` >= {} LIMIT 1",
+            player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), VANITY_REALM_LEVEL) != nullptr;
+    }
+
+    bool RefuseWithoutVanityRealmLevel(Player* player, ItemTemplate const* proto) const
+    {
+        if (!RequiresVanityRealmLevel(proto) || AccountHasVanityRealmLevel(player))
+            return false;
+
+        ChatHandler(player->GetSession()).PSendSysMessage(
+            "This item requires you to have a level {} on this realm to be able to {}.", VANITY_REALM_LEVEL,
+            proto->Class == ITEM_CLASS_CONSUMABLE ? "consume" : "use");
+        return true;
+    }
 
   bool GrantMysticAltarVanityItems(Player *player) {
     std::shared_ptr<PlayerCollectionState> state = GetState(player);
@@ -8554,30 +8586,13 @@ class AscensionCompatPlayerScript : public PlayerScript {
             player->RemoveAurasDueToSpell(818059);
     }
 
-    static constexpr uint32 ITEM_AURA_OF_EXPERIENCE = 818059;
-    static constexpr uint8 AURA_OF_EXPERIENCE_REALM_LEVEL = 60;
-
-    static bool AccountHasAuraOfExperienceRealmLevel(Player* player)
+    static bool CanUseVanityRealmLevelItem(Player* player, Item* item, uint8 castCount)
     {
-        if (player->GetLevel() >= AURA_OF_EXPERIENCE_REALM_LEVEL)
-            return true;
-
-        return CharacterDatabase.Query(
-            "SELECT 1 FROM `characters` WHERE `account` = {} AND `guid` <> {} AND `level` >= {} LIMIT 1",
-            player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(),
-            AURA_OF_EXPERIENCE_REALM_LEVEL) != nullptr;
-    }
-
-    static bool CanUseAuraOfExperience(Player* player, Item* item, uint8 castCount)
-    {
-        if (item->GetEntry() != ITEM_AURA_OF_EXPERIENCE || AccountHasAuraOfExperienceRealmLevel(player))
+        if (!AscensionCollectionService::Instance().RefuseWithoutVanityRealmLevel(player, item->GetTemplate()))
             return true;
 
         if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(item->GetTemplate()->Spells[0].SpellId))
             Spell::SendCastResult(player, spellInfo, castCount, SPELL_FAILED_DONT_REPORT);
-        ChatHandler(player->GetSession()).PSendSysMessage(
-            "This item requires you to have a level {} on this realm to be able to consume.",
-            AURA_OF_EXPERIENCE_REALM_LEVEL);
         return false;
     }
 
@@ -8587,7 +8602,7 @@ public:
             "AscensionCompatPlayerScript",
             {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_SAVE,
              PLAYERHOOK_ON_AFTER_SET_VISIBLE_ITEM_SLOT, PLAYERHOOK_ON_EQUIP, PLAYERHOOK_ON_DELETE,
-             PLAYERHOOK_ON_TAKE_MAIL_ITEM, PLAYERHOOK_CAN_CAST_ITEM_USE_SPELL,
+             PLAYERHOOK_ON_TAKE_MAIL_ITEM, PLAYERHOOK_CAN_CAST_ITEM_USE_SPELL, PLAYERHOOK_CAN_EQUIP_ITEM,
              PLAYERHOOK_ON_STORE_NEW_ITEM, PLAYERHOOK_ON_CREATE_ITEM,
              PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST,
              PLAYERHOOK_ON_PLAYER_IS_CLASS, PLAYERHOOK_ON_LEVEL_CHANGED, PLAYERHOOK_ON_MAP_CHANGED,
@@ -8931,7 +8946,13 @@ public:
                                    uint32) override {
     AscensionCollectionService::Instance().OnItemObtained(player, item);
     return !ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED) ||
-           CanUseAuraOfExperience(player, item, castCount);
+           CanUseVanityRealmLevelItem(player, item, castCount);
+  }
+
+  bool OnPlayerCanEquipItem(Player* player, uint8, uint16&, Item* item, bool, bool notLoading) override
+  {
+      return !notLoading || !ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED) ||
+          !AscensionCollectionService::Instance().RefuseWithoutVanityRealmLevel(player, item->GetTemplate());
   }
 
     void OnPlayerCompleteQuest(Player* player, Quest const* quest) override
