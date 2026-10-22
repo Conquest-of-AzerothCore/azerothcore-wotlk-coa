@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": ".gear unequip moves equipped items to the bags or the mailbox",
-  "contract": ".gear unequip all|item [mail] [$player] is a Game Master command. With all it unequips every equipped item; with an item link or id it unequips only that equipped item and leaves the other slots alone, and an item the player does not wear is refused. The items go into the bags and the ones that do not fit are mailed, so a player with full bags gets them by mail and nothing is lost. With mail every unequipped item is mailed and the bags are untouched. An ordinary player cannot run it.",
+  "contract": ".gear unequip all|item 0|1 [$player] is a Game Master command. With all it unequips every equipped item; with an item link or id it unequips only that equipped item and leaves the other slots alone, and an item the player does not wear is refused. With 0 the items go into the bags and the ones that do not fit are mailed, so a player with full bags gets them by mail and nothing is lost; with 1 every unequipped item is mailed and the bags are untouched; any other value is refused. The mail flag is required, so a player named Mail is addressed by name. An ordinary player cannot run it.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -30,6 +30,13 @@
     },
     {
       "id": "single",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "named",
+      "name": "Mail",
       "race": 1,
       "class": 1,
       "level": 60
@@ -104,7 +111,7 @@
       "action": "command",
       "label": "An ordinary player cannot use the command",
       "actor": "bagged",
-      "command": ".gear unequip all",
+      "command": ".gear unequip all 0",
       "rejected": true
     },
     {
@@ -182,15 +189,28 @@
     },
     {
       "action": "console",
-      "command": "gear unequip all Harnessa"
+      "label": "A mail flag other than 0 or 1 is refused",
+      "command": "gear unequip all 2 Harnessa"
+    },
+    {
+      "action": "assert",
+      "label": "and the refusal leaves bagged's sword equipped",
+      "actor": "bagged",
+      "metric": "equipped_item",
+      "slot": 15,
+      "equals": 12584
     },
     {
       "action": "console",
-      "command": "gear unequip all Harnessb"
+      "command": "gear unequip all 0 Harnessa"
     },
     {
       "action": "console",
-      "command": "gear unequip all mail Harnessc"
+      "command": "gear unequip all 0 Harnessb"
+    },
+    {
+      "action": "console",
+      "command": "gear unequip all 1 Harnessc"
     },
     {
       "action": "wait",
@@ -900,7 +920,7 @@
     {
       "action": "console",
       "label": "An item the player does not wear is refused",
-      "command": "gear unequip 2589 Harnessd"
+      "command": "gear unequip 2589 0 Harnessd"
     },
     {
       "action": "assert",
@@ -912,7 +932,7 @@
     },
     {
       "action": "console",
-      "command": "gear unequip 12584 Harnessd"
+      "command": "gear unequip 12584 0 Harnessd"
     },
     {
       "action": "wait",
@@ -1110,6 +1130,207 @@
       "actor": "single",
       "metric": "mail_item_count",
       "relative_to": "single_mail_items",
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "named",
+      "item": 12584
+    },
+    {
+      "action": "equip",
+      "label": "the player named Mail wields Grand Marshal's Longsword",
+      "actor": "named",
+      "item": 12584,
+      "slot": 15
+    },
+    {
+      "action": "snapshot",
+      "actor": "named",
+      "metric": "carried_item_count",
+      "save_as": "named_carried"
+    },
+    {
+      "action": "snapshot",
+      "actor": "named",
+      "metric": "mail_item_count",
+      "save_as": "named_mail_items"
+    },
+    {
+      "action": "console",
+      "label": "A player named Mail is addressed by name",
+      "command": "gear unequip all 0 Mail"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Mail: equipment slot 0 is empty",
+      "actor": "named",
+      "metric": "equipped_item",
+      "slot": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail: equipment slot 1 is empty",
+      "actor": "named",
+      "metric": "equipped_item",
+      "slot": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail: equipment slot 2 is empty",
+      "actor": "named",
+      "metric": "equipped_item",
+      "slot": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail: equipment slot 3 is empty",
+      "actor": "named",
+      "metric": "equipped_item",
+      "slot": 3,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail: equipment slot 4 is empty",
+      "actor": "named",
+      "metric": "equipped_item",
+      "slot": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail: equipment slot 5 is empty",
+      "actor": "named",
+      "metric": "equipped_item",
+      "slot": 5,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail: equipment slot 6 is empty",
+      "actor": "named",
+      "metric": "equipped_item",
+      "slot": 6,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail: equipment slot 7 is empty",
+      "actor": "named",
+      "metric": "equipped_item",
+      "slot": 7,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail: equipment slot 8 is empty",
+      "actor": "named",
+      "metric": "equipped_item",
+      "slot": 8,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail: equipment slot 9 is empty",
+      "actor": "named",
+      "metric": "equipped_item",
+      "slot": 9,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail: equipment slot 10 is empty",
+      "actor": "named",
+      "metric": "equipped_item",
+      "slot": 10,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail: equipment slot 11 is empty",
+      "actor": "named",
+      "metric": "equipped_item",
+      "slot": 11,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail: equipment slot 12 is empty",
+      "actor": "named",
+      "metric": "equipped_item",
+      "slot": 12,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail: equipment slot 13 is empty",
+      "actor": "named",
+      "metric": "equipped_item",
+      "slot": 13,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail: equipment slot 14 is empty",
+      "actor": "named",
+      "metric": "equipped_item",
+      "slot": 14,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail: equipment slot 15 is empty",
+      "actor": "named",
+      "metric": "equipped_item",
+      "slot": 15,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail: equipment slot 16 is empty",
+      "actor": "named",
+      "metric": "equipped_item",
+      "slot": 16,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail: equipment slot 17 is empty",
+      "actor": "named",
+      "metric": "equipped_item",
+      "slot": 17,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail: equipment slot 18 is empty",
+      "actor": "named",
+      "metric": "equipped_item",
+      "slot": 18,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail keeps every item it carried",
+      "actor": "named",
+      "metric": "carried_item_count",
+      "relative_to": "named_carried",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail is mailed nothing",
+      "actor": "named",
+      "metric": "mail_item_count",
+      "relative_to": "named_mail_items",
       "equals": 0
     }
   ]

@@ -81,9 +81,14 @@ public:
     }
 
     static bool HandleGearUnequipCommand(ChatHandler* handler,
-        Variant<EXACT_SEQUENCE("all"), ItemTemplate const*> items, Optional<EXACT_SEQUENCE("mail")> mailAll,
-        Optional<PlayerIdentifier> target)
+        Variant<EXACT_SEQUENCE("all"), ItemTemplate const*> items, uint8 mailAll, Optional<PlayerIdentifier> target)
     {
+        if (mailAll > 1)
+        {
+            handler->SendErrorMessage("Use 0 to move the items into the bags, or 1 to mail them.");
+            return false;
+        }
+
         if (!target)
         {
             target = PlayerIdentifier::FromTargetOrSelf(handler);
