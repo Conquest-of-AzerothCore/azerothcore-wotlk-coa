@@ -270,7 +270,9 @@ With `CoA.ItemScaling.Native.LevelKeys` the stored level is the client's own ite
 (level + 2 up to 20, + 3 up to 30, + 4 up to 50, + 5 up to 60, the client's table above 60), and a quest
 reward takes the level the quest's `QuestTemplateScaling.dbc` row puts it at, or the key of the
 character's level for a quest without one. Levels stored while LevelKeys was off are converted to keys
-once at startup (`character_item_scaling.client_key` marks converted rows). `CoA.ItemScaling.Native.Preview`
+once at startup (`character_item_scaling.client_key` marks converted rows). A realm whose configuration sets
+`LevelKeys = 1` explicitly already stored keys, so its unmarked rows are only marked, not shifted; with the
+option absent they are shifted, and the log says which case applied. `CoA.ItemScaling.Native.Preview`
 (needs LevelKeys; both on by default and read at startup) lets each character see the version they would
 receive before it is theirs:
 

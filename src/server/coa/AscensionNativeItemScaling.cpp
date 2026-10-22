@@ -47,6 +47,7 @@ std::atomic<bool> enabled{false};
 std::atomic<int32> lootLevelOffset{0};
 std::atomic<bool> questRewards{true};
 std::atomic<bool> levelKeys{true};
+std::atomic<int32> configuredLevelKeys{-1};
 std::atomic<bool> preview{false};
 std::atomic<bool> rebornArmor{false};
 
@@ -255,7 +256,7 @@ ItemTemplate const* InstanceTemplate(Item const* item)
 
     uint8 const level = StoredLevel(item);
     ItemTemplate const* base = level ? item->GetTemplate() : nullptr;
-    if (!base || (PreviewOn() && level == base->ItemLevel))
+    if (!base)
         return nullptr;
 
     ItemLadder::Row const* row = LadderStore::Instance().Row(base->ItemId, level);
@@ -295,23 +296,44 @@ void SendLevel(Player* player, Item const* item)
     }
 }
 
-void SendAllLevels(Player* player)
+template <typename Visitor>
+void ForEachCarriedItem(Player const* player, Visitor&& visit)
 {
     for (uint8 slot = EQUIPMENT_SLOT_START; slot < PLAYER_SLOT_END; ++slot)
         if (Item const* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
-            SendLevel(player, item);
+            visit(item);
 
-    auto sendBag = [player](uint8 slot)
+    auto visitBag = [&](uint8 slot)
     {
         if (Bag const* bag = player->GetBagByPos(slot))
             for (uint32 index = 0; index < bag->GetBagSize(); ++index)
                 if (Item const* item = bag->GetItemByPos(uint8(index)))
-                    SendLevel(player, item);
+                    visit(item);
     };
     for (uint8 slot = INVENTORY_SLOT_BAG_START; slot < INVENTORY_SLOT_BAG_END; ++slot)
-        sendBag(slot);
+        visitBag(slot);
     for (uint8 slot = BANK_SLOT_BAG_START; slot < BANK_SLOT_BAG_END; ++slot)
-        sendBag(slot);
+        visitBag(slot);
+}
+
+void SendAllLevels(Player* player)
+{
+    ForEachCarriedItem(player, [player](Item const* item) { SendLevel(player, item); });
+}
+
+bool OwnsStoredKey(Player* player, uint32 itemId, uint32 key)
+{
+    bool owns = false;
+    auto check = [&](Item const* item)
+    {
+        owns = owns || (item->GetEntry() == itemId && StoredLevel(item) == key);
+    };
+    ForEachCarriedItem(player, check);
+    for (Mail const* mail : player->GetMails())
+        for (MailItemInfo const& info : mail->items)
+            if (Item const* item = player->GetMItem(info.item_guid))
+                check(item);
+    return owns;
 }
 
 void ItemArrived(Player* player, Item* item)
@@ -457,7 +479,7 @@ bool HandleItemStatQuery(WorldSession* session, WorldPacket const& packet)
         return true;
 
     bool const reborn = rebornArmor.load(std::memory_order_relaxed);
-    if (PreviewOn() && level == proto->ItemLevel)
+    if (PreviewOn() && level == proto->ItemLevel && !OwnsStoredKey(session->GetPlayer(), itemId, level))
     {
         ItemLadder::Row const stockRow =
             ItemLadder::StockRow(*proto, reborn ? AuthoredRebornArmor(*proto) : proto->Armor);
@@ -485,19 +507,28 @@ void ConvertStoredLevelsToClientKeys()
     if (!result)
         return;
 
-    uint64 converted = 0;
+    bool const alreadyKeys = configuredLevelKeys.load(std::memory_order_relaxed) == 1;
+    uint64 rows = 0;
     CharacterDatabaseTransaction transaction = CharacterDatabase.BeginTransaction();
     do
     {
         Field const* fields = result->Fetch();
         uint8 const level = fields[0].Get<uint8>();
-        transaction->Append("UPDATE `character_item_scaling` SET `scaling_level` = {}, `client_key` = 1 "
-            "WHERE `client_key` = 0 AND `scaling_level` = {}", ItemLadder::ClampLevel(ItemLadder::ClientKey(level)),
-            level);
-        converted += fields[1].Get<uint64>();
+        if (alreadyKeys)
+            transaction->Append("UPDATE `character_item_scaling` SET `client_key` = 1 "
+                "WHERE `client_key` = 0 AND `scaling_level` = {}", level);
+        else
+            transaction->Append("UPDATE `character_item_scaling` SET `scaling_level` = {}, `client_key` = 1 "
+                "WHERE `client_key` = 0 AND `scaling_level` = {}",
+                ItemLadder::ClampLevel(ItemLadder::ClientKey(level)), level);
+        rows += fields[1].Get<uint64>();
     } while (result->NextRow());
     CharacterDatabase.DirectCommitTransaction(transaction);
-    LOG_INFO("server.loading", ">> Converted {} stored native item scaling levels to client keys", converted);
+    if (alreadyKeys)
+        LOG_INFO("server.loading", ">> {} stored native item scaling rows were written while LevelKeys was on; "
+            "kept as client keys", rows);
+    else
+        LOG_INFO("server.loading", ">> Converted {} stored native item scaling levels to client keys", rows);
 }
 
 void LoadInstanceLevels()
@@ -542,8 +573,9 @@ public:
         if (reload)
             return;
 
-        levelKeys.store(sConfigMgr->GetOption<bool>("CoA.ItemScaling.Native.LevelKeys", true),
-            std::memory_order_relaxed);
+        int32 const configured = sConfigMgr->GetOption<int32>("CoA.ItemScaling.Native.LevelKeys", -1, false);
+        configuredLevelKeys.store(configured, std::memory_order_relaxed);
+        levelKeys.store(configured != 0, std::memory_order_relaxed);
         _previewRequested = sConfigMgr->GetOption<bool>("CoA.ItemScaling.Native.Preview", true);
         _rebornArmorRequested = sConfigMgr->GetOption<bool>("CoA.ItemScaling.Native.RebornArmor", true);
         if (_previewRequested && !levelKeys.load(std::memory_order_relaxed))
