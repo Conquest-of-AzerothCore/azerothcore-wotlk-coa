@@ -47,7 +47,6 @@ std::atomic<bool> enabled{false};
 std::atomic<int32> lootLevelOffset{0};
 std::atomic<bool> questRewards{true};
 std::atomic<bool> levelKeys{true};
-std::atomic<int32> configuredLevelKeys{-1};
 std::atomic<bool> preview{false};
 std::atomic<bool> rebornArmor{false};
 
@@ -368,9 +367,9 @@ void AssignLevel(Player* owner, Item* item, uint32 key)
         std::unique_lock lock(levelsMutex);
         instanceLevels[item->GetGUID().GetCounter()] = level;
     }
-    CharacterDatabase.Execute("REPLACE INTO `character_item_scaling` (`item_guid`, `item_entry`, `scaling_level`, "
-        "`client_key`) VALUES ({}, {}, {}, {})", item->GetGUID().GetCounter(), proto->ItemId, level,
-        uint32(levelKeys.load(std::memory_order_relaxed)));
+    CharacterDatabase.Execute(
+        "REPLACE INTO `character_item_scaling` (`item_guid`, `item_entry`, `scaling_level`) VALUES ({}, {}, {})",
+        item->GetGUID().GetCounter(), proto->ItemId, level);
     SendLevel(owner, item);
 }
 
@@ -500,43 +499,10 @@ bool HandleItemStatQuery(WorldSession* session, WorldPacket const& packet)
     return true;
 }
 
-void ConvertStoredLevelsToClientKeys()
-{
-    QueryResult result = CharacterDatabase.Query("SELECT `scaling_level`, COUNT(*) FROM `character_item_scaling` "
-        "WHERE `client_key` = 0 GROUP BY `scaling_level`");
-    if (!result)
-        return;
-
-    bool const alreadyKeys = configuredLevelKeys.load(std::memory_order_relaxed) == 1;
-    uint64 rows = 0;
-    CharacterDatabaseTransaction transaction = CharacterDatabase.BeginTransaction();
-    do
-    {
-        Field const* fields = result->Fetch();
-        uint8 const level = fields[0].Get<uint8>();
-        if (alreadyKeys)
-            transaction->Append("UPDATE `character_item_scaling` SET `client_key` = 1 "
-                "WHERE `client_key` = 0 AND `scaling_level` = {}", level);
-        else
-            transaction->Append("UPDATE `character_item_scaling` SET `scaling_level` = {}, `client_key` = 1 "
-                "WHERE `client_key` = 0 AND `scaling_level` = {}",
-                ItemLadder::ClampLevel(ItemLadder::ClientKey(level)), level);
-        rows += fields[1].Get<uint64>();
-    } while (result->NextRow());
-    CharacterDatabase.DirectCommitTransaction(transaction);
-    if (alreadyKeys)
-        LOG_INFO("server.loading", ">> {} stored native item scaling rows were written while LevelKeys was on; "
-            "kept as client keys", rows);
-    else
-        LOG_INFO("server.loading", ">> Converted {} stored native item scaling levels to client keys", rows);
-}
-
 void LoadInstanceLevels()
 {
     CharacterDatabase.DirectExecute("DELETE `s` FROM `character_item_scaling` `s` LEFT JOIN `item_instance` `i` "
         "ON `i`.`guid` = `s`.`item_guid` WHERE `i`.`guid` IS NULL");
-    if (levelKeys.load(std::memory_order_relaxed))
-        ConvertStoredLevelsToClientKeys();
 
     std::unordered_map<ObjectGuid::LowType, uint8> levels;
     if (QueryResult result = CharacterDatabase.Query("SELECT `item_guid`, `scaling_level` FROM `character_item_scaling`"))
@@ -573,9 +539,8 @@ public:
         if (reload)
             return;
 
-        int32 const configured = sConfigMgr->GetOption<int32>("CoA.ItemScaling.Native.LevelKeys", -1, false);
-        configuredLevelKeys.store(configured, std::memory_order_relaxed);
-        levelKeys.store(configured != 0, std::memory_order_relaxed);
+        levelKeys.store(sConfigMgr->GetOption<bool>("CoA.ItemScaling.Native.LevelKeys", true),
+            std::memory_order_relaxed);
         _previewRequested = sConfigMgr->GetOption<bool>("CoA.ItemScaling.Native.Preview", true);
         _rebornArmorRequested = sConfigMgr->GetOption<bool>("CoA.ItemScaling.Native.RebornArmor", true);
         if (_previewRequested && !levelKeys.load(std::memory_order_relaxed))

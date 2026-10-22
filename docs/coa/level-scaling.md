@@ -269,10 +269,9 @@ authored world); everyone else receives the authored item, and their corpse and 
 With `CoA.ItemScaling.Native.LevelKeys` the stored level is the client's own item key for that level
 (level + 2 up to 20, + 3 up to 30, + 4 up to 50, + 5 up to 60, the client's table above 60), and a quest
 reward takes the level the quest's `QuestTemplateScaling.dbc` row puts it at, or the key of the
-character's level for a quest without one. Levels stored while LevelKeys was off are converted to keys
-once at startup (`character_item_scaling.client_key` marks converted rows). A realm whose configuration sets
-`LevelKeys = 1` explicitly already stored keys, so its unmarked rows are only marked, not shifted; with the
-option absent they are shifted, and the log says which case applied. `CoA.ItemScaling.Native.Preview`
+character's level for a quest without one. Items stored while LevelKeys was off keep their plain level, which
+the client reads as a key three to five levels low; only items acquired afterwards store keys.
+`CoA.ItemScaling.Native.Preview`
 (needs LevelKeys; both on by default and read at startup) lets each character see the version they would
 receive before it is theirs:
 
