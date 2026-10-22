@@ -46,3 +46,12 @@ UPDATE `creature` SET `position_x` = 443.98, `position_y` = -4611.78, `position_
 DELETE FROM `creature` WHERE `guid` = 9012308;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`, `CreateObject`, `Comment`) VALUES
 (9012308, 162949, 1, 0, 0, 1, 1, 0, 334.5207, -4715.389, 13.729, 3.283, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'CoA Razor Hill: the pool outside the inn; invisible, Collect Water reaches 6 yd');
+
+-- 4. Razor Hill Grunts (5953) placed in game.
+UPDATE `creature` SET `position_x` = 421.383, `position_y` = -4725.49, `position_z` = 8.96318, `orientation` = 5.62643 WHERE `guid` = 6382;
+UPDATE `creature` SET `position_x` = 255.508, `position_y` = -4624.15, `position_z` = 12.2541, `orientation` = 2.21103 WHERE `guid` = 7292;
+UPDATE `creature` SET `position_x` = 418.458, `position_y` = -4731.54, `position_z` = 9.10691, `orientation` = 0.156122 WHERE `guid` = 7296;
+UPDATE `creature` SET `position_x` = 233.098, `position_y` = -4744.11, `position_z` = 10.1022, `orientation` = 3.08912 WHERE `guid` = 8418;
+UPDATE `creature` SET `position_x` = 361.486, `position_y` = -4664.19, `position_z` = 16.2253, `orientation` = 0.375313 WHERE `guid` = 10271;
+UPDATE `creature` SET `position_x` = 231.053, `position_y` = -4734.69, `position_z` = 10.1022, `orientation` = 3.69265 WHERE `guid` = 10428;
+UPDATE `creature` SET `position_x` = 247.163, `position_y` = -4631.91, `position_z` = 12.0289, `orientation` = 1.88193 WHERE `guid` = 10430;
