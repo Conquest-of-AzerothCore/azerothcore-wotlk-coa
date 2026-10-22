@@ -25,6 +25,13 @@
 #include "SpellAuraDefines.h"
 #include "SpellAuraEffects.h"
 
+namespace
+{
+// CoA's SPELL_AURA_MOD_XP_PCT MiscValue is a mask of XP sources: 1 kills, 2 quests, 4 professions, 8 battlegrounds.
+constexpr int32 XP_SOURCE_MASK_KILL = 1;
+constexpr int32 XP_SOURCE_MASK_BATTLEGROUND = 8;
+}
+
 // KillRewarder incapsulates logic of rewarding player upon kill with:
 // * XP;
 // * honor;
@@ -185,8 +192,11 @@ void KillRewarder::_RewardXP(Player* player, float rate)
         // (XP Lock, challenge drawbacks).
         bool const recruitAFriend = player->GetsRecruitAFriendBonus(true);
         bool const noBonusExperience = sScriptMgr->OnPlayerHasNoBonusExperience(player);
-        xp *= player->GetTotalAuraMultiplier(SPELL_AURA_MOD_XP_PCT, [recruitAFriend, noBonusExperience](AuraEffect const* effect)
+        int32 const sourceMask = _victim->IsPlayer() ? XP_SOURCE_MASK_KILL | XP_SOURCE_MASK_BATTLEGROUND : XP_SOURCE_MASK_KILL;
+        xp *= player->GetTotalAuraMultiplier(SPELL_AURA_MOD_XP_PCT, [recruitAFriend, noBonusExperience, sourceMask](AuraEffect const* effect)
         {
+            if ((effect->GetMiscValue() & sourceMask) == 0)
+                return false;
             // CoA's party Aura of Experience explicitly excludes the recruit-a-friend bonus.
             if (effect->GetId() == 818059 && recruitAFriend)
                 return false;
