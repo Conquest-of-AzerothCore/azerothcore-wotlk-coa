@@ -60,16 +60,24 @@ enum ReaperTalentSpells : uint32
     SPELL_LIFE_TAP = 706788,
     SPELL_DOMINION = 803999,
     SPELL_DOMINION_ARMOR = 804000,
-    SPELL_DARK_SOUL_STAMINA = 707091
+    SPELL_DARK_SOUL_STAMINA = 707091,
+    SPELL_CLONE_ME = 45204,
+    SPELL_DIRGE = 801328,
+    SPELL_MURDER = 500376,
+    SPELL_SPECTRAL_DIRGE = 573029,
+    SPELL_SPECTRAL_MURDER = 573030
 };
 
 enum ReaperGuardians : uint32
 {
     NPC_SPECTRAL_WARDEN = 100481,
-    NPC_SPECTRAL_SCYTHE = 250305
+    NPC_SPECTRAL_SCYTHE = 250305,
+    NPC_SPECTRAL_REAPER = 850000
 };
 
 constexpr float SpectralGuardianDamageScale = 1.3f;
+constexpr uint32 SpectralReaperCastInterval = 1250;
+constexpr float SpectralReaperSearchRange = 30.0f;
 
 Unit* HostileTargetInRange(Player* player, uint32 spellId)
 {
@@ -481,6 +489,78 @@ struct npc_ascension_reaper_spectral_warden : public ScriptedAI
     }
 };
 
+struct npc_ascension_reaper_spectral_reaper : public ScriptedAI
+{
+    explicit npc_ascension_reaper_spectral_reaper(Creature* creature) : ScriptedAI(creature) { }
+
+    void IsSummonedBy(WorldObject* summoner) override
+    {
+        Player* owner = summoner ? summoner->ToPlayer() : nullptr;
+        if (!owner || owner->getClass() != CLASS_REAPER)
+            return;
+
+        _owner = owner->GetGUID();
+        owner->CastSpell(me, SPELL_CLONE_ME, true);
+        me->SetReactState(REACT_AGGRESSIVE);
+        if (Unit* target = OwnerTarget(owner))
+            AttackStart(target);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        Player* owner = ObjectAccessor::GetPlayer(*me, _owner);
+        if (!owner)
+            return;
+
+        if (Unit* target = OwnerTarget(owner); target && me->GetVictim() != target)
+            AttackStart(target);
+
+        Unit* victim = me->GetVictim();
+        if (!victim || me->HasUnitState(UNIT_STATE_CASTING))
+            return;
+
+        if (_castTimer <= diff)
+        {
+            me->CastSpell(victim, _murderNext ? HighestRank(owner, SPELL_MURDER, SPELL_SPECTRAL_MURDER) :
+                HighestRank(owner, SPELL_DIRGE, SPELL_SPECTRAL_DIRGE), true);
+            _murderNext = !_murderNext;
+            _castTimer = SpectralReaperCastInterval;
+        }
+        else
+            _castTimer -= diff;
+
+        DoMeleeAttackIfReady();
+    }
+
+private:
+    Unit* OwnerTarget(Player* owner) const
+    {
+        Unit* target = owner->GetVictim();
+        if (!target)
+            target = owner->GetSelectedUnit();
+        if (!target || !me->IsValidAttackTarget(target))
+        {
+            Unit* nearest = me->SelectNearestTarget(SpectralReaperSearchRange);
+            if (nearest && owner->IsInCombatWith(nearest))
+                target = nearest;
+        }
+        return target && me->IsValidAttackTarget(target) ? target : nullptr;
+    }
+
+    static uint32 HighestRank(Player* owner, uint32 firstRank, uint32 fallback)
+    {
+        uint32 known = fallback;
+        for (SpellInfo const* rank = sSpellMgr->GetSpellInfo(firstRank); rank; rank = rank->GetNextRankSpell())
+            if (owner->HasSpell(rank->Id))
+                known = rank->Id;
+        return known;
+    }
+
+    ObjectGuid _owner;
+    uint32 _castTimer = 0;
+    bool _murderNext = false;
+};
+
 class reaper_spectral_guardian_stats : public PlayerScript
 {
 public:
@@ -490,7 +570,8 @@ public:
     void OnPlayerAfterGuardianInitStatsForLevel(Player* player, Guardian* guardian) override
     {
         if (!player || player->getClass() != CLASS_REAPER || !guardian ||
-            (guardian->GetEntry() != NPC_SPECTRAL_WARDEN && guardian->GetEntry() != NPC_SPECTRAL_SCYTHE))
+            (guardian->GetEntry() != NPC_SPECTRAL_WARDEN && guardian->GetEntry() != NPC_SPECTRAL_SCYTHE &&
+                guardian->GetEntry() != NPC_SPECTRAL_REAPER))
             return;
 
         CreatureTemplate const* info = guardian->GetCreatureTemplate();
@@ -611,6 +692,7 @@ void AddSC_AscensionReaperTalents()
     RegisterSpellScript(aura_ascension_reaper_ghastly_form);
     RegisterSpellScript(spell_ascension_reaper_weakened_souls);
     RegisterCreatureAI(npc_ascension_reaper_spectral_warden);
+    RegisterCreatureAI(npc_ascension_reaper_spectral_reaper);
     new reaper_spectral_guardian_stats();
     new reaper_talent_events();
 }
