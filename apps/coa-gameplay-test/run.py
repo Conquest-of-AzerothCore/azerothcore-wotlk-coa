@@ -31,7 +31,7 @@ HOURS_PER_DAY = 24
 MINUTES_PER_HOUR = 60
 MINUTES_PER_DAY = HOURS_PER_DAY * MINUTES_PER_HOUR
 METRICS = {
-    'item_random_property', 'item_suffix_factor', 'item_enchantment', 'item_guid', 'item_soulbound',
+    'item_random_property', 'item_suffix_factor', 'item_enchantment', 'item_guid', 'item_soulbound', 'item_duration',
     'mana_regen', 'mana_regen_interrupted', 'resting',
     'sent_mana_regen', 'sent_mana_regen_interrupted',
     'moving', 'spline_remaining_ms', 'spline_speed', 'water_walk', 'in_water', 'terrain_in_water', 'ground_height',
@@ -239,7 +239,7 @@ ACTIONS = {
     'reward_quest': ({'actor', 'quest'}, {'actor', 'quest', 'choice'}),
     'restore_quest_spells': ({'actor'}, {'actor'}),
     'login_hooks': ({'actor'}, {'actor'}),
-    'relog': ({'actor'}, {'actor', 'race'}),
+    'relog': ({'actor'}, {'actor', 'race', 'offline_seconds'}),
     'talent': ({'actor', 'talent', 'rank'}, {'actor', 'talent', 'rank', 'command'}),
     'reset_talents': ({'actor'}, {'actor'}),
     'add_item': ({'actor', 'item'}, {'actor', 'item', 'count'}),
@@ -545,6 +545,8 @@ def validate(scenario):
             require(step['actor'] in player_ids, f'{where}: relog needs a player')
             if 'race' in step:
                 number(step['race'], f'{where}.race', 1, 255, True)
+            if 'offline_seconds' in step:
+                number(step['offline_seconds'], f'{where}.offline_seconds', 1, 2**31 - 1, True)
         if action == 'specialization':
             require(step['actor'] in player_ids, f'{where}: specialization needs a player')
             number(step['id'], f'{where}.id', 1, 0xFFFF, True)
@@ -799,7 +801,7 @@ def validate(scenario):
                           'carried_item_scaling_level'}:
                 require('item' in step, f'{where}: metric needs item')
             if metric in {'item_random_property', 'item_suffix_factor', 'item_enchantment',
-                          'item_guid', 'item_soulbound'}:
+                          'item_guid', 'item_soulbound', 'item_duration'}:
                 require(step['actor'] in player_ids, f'{where}: item observation needs a player')
                 number(step.get('item'), f'{where}.item', 1, 2**32 - 1, True)
                 if metric == 'item_enchantment':

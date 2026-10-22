@@ -3661,12 +3661,14 @@ private:
             return item ? item->GetEntry() : 0;
         }
         if (metric == "item_random_property" || metric == "item_suffix_factor" || metric == "item_enchantment" ||
-            metric == "item_guid" || metric == "item_soulbound")
+            metric == "item_guid" || metric == "item_soulbound" || metric == "item_duration")
         {
             Item* item = player->GetItemByEntry(step.get<uint32>("item"));
             Require(item != nullptr, "Item observation requires a carried item");
             if (metric == "item_guid")
                 return double(item->GetGUID().GetCounter());
+            if (metric == "item_duration")
+                return item->GetUInt32Value(ITEM_FIELD_DURATION);
             if (metric == "item_soulbound")
                 return item->IsSoulBound();
             if (metric == "item_random_property")
@@ -4448,6 +4450,9 @@ private:
                     change->SetData(1, player->GetGUID().GetCounter());
                     transaction->Append(change);
                 }
+                if (auto offline = step.get_optional<uint32>("offline_seconds"))
+                    transaction->Append("UPDATE characters SET logout_time = logout_time - {} WHERE guid = {}",
+                        *offline, player->GetGUID().GetCounter());
                 _relogSave.emplace(CharacterDatabase.AsyncCommitTransaction(transaction));
                 _relogging = true;
                 return;
