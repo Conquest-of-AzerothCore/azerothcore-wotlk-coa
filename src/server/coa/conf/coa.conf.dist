@@ -154,8 +154,9 @@ CoA.ItemScaling.Native.QuestRewards = 1
 # a quest reward then takes the quest's own scaled level, or the key of the player's level.
 # Preview (needs LevelKeys) shows each character the version of an item they would receive: the
 # loot window and corpse level, roll frames, inspect, mail and auctions. Both are read at startup only.
-CoA.ItemScaling.Native.LevelKeys = 0
-CoA.ItemScaling.Native.Preview = 0
+# With LevelKeys, levels stored while it was off are converted to the client's keys once at startup.
+CoA.ItemScaling.Native.LevelKeys = 1
+CoA.ItemScaling.Native.Preview = 1
 
 # Automatic progression: hand out the class abilities and rank upgrades for the
 # character's class and level as they level up. Set to 0 to stop that

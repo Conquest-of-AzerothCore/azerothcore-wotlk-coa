@@ -41,7 +41,7 @@ constexpr uint32 ScanChunkRecords = 8192;
 std::atomic<bool> enabled{false};
 std::atomic<int32> lootLevelOffset{0};
 std::atomic<bool> questRewards{true};
-std::atomic<bool> levelKeys{false};
+std::atomic<bool> levelKeys{true};
 std::atomic<bool> preview{false};
 
 class LadderStore
@@ -279,9 +279,9 @@ void AssignLevel(Player* owner, Item* item, uint32 key)
         std::unique_lock lock(levelsMutex);
         instanceLevels[item->GetGUID().GetCounter()] = level;
     }
-    CharacterDatabase.Execute(
-        "REPLACE INTO `character_item_scaling` (`item_guid`, `item_entry`, `scaling_level`) VALUES ({}, {}, {})",
-        item->GetGUID().GetCounter(), proto->ItemId, level);
+    CharacterDatabase.Execute("REPLACE INTO `character_item_scaling` (`item_guid`, `item_entry`, `scaling_level`, "
+        "`client_key`) VALUES ({}, {}, {}, {})", item->GetGUID().GetCounter(), proto->ItemId, level,
+        uint32(levelKeys.load(std::memory_order_relaxed)));
     SendLevel(owner, item);
 }
 
@@ -405,10 +405,34 @@ bool HandleItemStatQuery(WorldSession* session, WorldPacket const& packet)
     return true;
 }
 
+void ConvertStoredLevelsToClientKeys()
+{
+    QueryResult result = CharacterDatabase.Query("SELECT `scaling_level`, COUNT(*) FROM `character_item_scaling` "
+        "WHERE `client_key` = 0 GROUP BY `scaling_level`");
+    if (!result)
+        return;
+
+    uint64 converted = 0;
+    CharacterDatabaseTransaction transaction = CharacterDatabase.BeginTransaction();
+    do
+    {
+        Field const* fields = result->Fetch();
+        uint8 const level = fields[0].Get<uint8>();
+        transaction->Append("UPDATE `character_item_scaling` SET `scaling_level` = {}, `client_key` = 1 "
+            "WHERE `client_key` = 0 AND `scaling_level` = {}", ItemLadder::ClampLevel(ItemLadder::ClientKey(level)),
+            level);
+        converted += fields[1].Get<uint64>();
+    } while (result->NextRow());
+    CharacterDatabase.DirectCommitTransaction(transaction);
+    LOG_INFO("server.loading", ">> Converted {} stored native item scaling levels to client keys", converted);
+}
+
 void LoadInstanceLevels()
 {
     CharacterDatabase.DirectExecute("DELETE `s` FROM `character_item_scaling` `s` LEFT JOIN `item_instance` `i` "
         "ON `i`.`guid` = `s`.`item_guid` WHERE `i`.`guid` IS NULL");
+    if (levelKeys.load(std::memory_order_relaxed))
+        ConvertStoredLevelsToClientKeys();
 
     std::unordered_map<ObjectGuid::LowType, uint8> levels;
     if (QueryResult result = CharacterDatabase.Query("SELECT `item_guid`, `scaling_level` FROM `character_item_scaling`"))
@@ -445,9 +469,9 @@ public:
         if (reload)
             return;
 
-        levelKeys.store(sConfigMgr->GetOption<bool>("CoA.ItemScaling.Native.LevelKeys", false),
+        levelKeys.store(sConfigMgr->GetOption<bool>("CoA.ItemScaling.Native.LevelKeys", true),
             std::memory_order_relaxed);
-        _previewRequested = sConfigMgr->GetOption<bool>("CoA.ItemScaling.Native.Preview", false);
+        _previewRequested = sConfigMgr->GetOption<bool>("CoA.ItemScaling.Native.Preview", true);
         if (_previewRequested && !levelKeys.load(std::memory_order_relaxed))
         {
             LOG_ERROR("server.loading", "CoA.ItemScaling.Native.Preview needs CoA.ItemScaling.Native.LevelKeys; "
