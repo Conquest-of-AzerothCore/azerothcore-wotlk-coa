@@ -118,7 +118,7 @@ public:
             for (ObjectGuid const& guid : _eternalFlameGUIDs)
             {
                 GameObject* flame = instance->GetGameObject(guid);
-                if (!flame || flame->getLootState() != GO_READY)
+                if (!flame || flame->GetGoState() != GO_STATE_READY)
                     continue;
                 if (!nearestFlame || bloodkeeper->GetExactDist2d(flame) < bloodkeeper->GetExactDist2d(nearestFlame))
                     nearestFlame = flame;
@@ -127,6 +127,7 @@ public:
             if (!nearestFlame)
                 return;
 
+            nearestFlame->SetLootState(GO_READY);
             nearestFlame->UseDoorOrButton();
             Map::PlayerList const& players = instance->GetPlayers();
             if (!players.IsEmpty())
