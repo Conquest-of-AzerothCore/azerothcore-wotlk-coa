@@ -3813,6 +3813,7 @@ void Spell::EffectSummonPet(SpellEffIndex effIndex)
                 else
                     ++i;
             }
+            owner->PetSpellInitialize();
             return;
         }
 

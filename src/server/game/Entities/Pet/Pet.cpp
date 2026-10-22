@@ -2291,7 +2291,7 @@ bool Pet::IsPermanentPetFor(Player* owner) const
             else if (owner->IsClass(CLASS_MAGE, CLASS_CONTEXT_PET))
                 return GetEntry() == 37994;
             else
-                return false;
+                return IsAscensionClass(owner->getClass());
         case HUNTER_PET:
             return true;
         default:
