@@ -929,7 +929,9 @@ query response for that quest, or -1 before one arrives.
 selection packet through the packet hook and typed session handler, and does not bypass its group or
 in-instance restrictions. `map_id` and `map_difficulty` observe the current map after a normal teleport.
 `nearby_creature_template` requires `entry` and exactly one creature within 60 yards, then returns its
-selected difficulty template. `loot_gear_item_level` returns the first unlooted weapon/armor item's level in
+selected difficulty template. `spawn_respawn_remaining` requires a player and a creature `spawn` (its database
+guid) and returns the seconds until the actor's map respawns that spawn, from the map's saved respawn times
+(zero when none is saved). `loot_gear_item_level` returns the first unlooted weapon/armor item's level in
 the current loot window (zero if absent). The three `vanilla-dungeons-*` scenarios use these to check
 all 19 map/mode pairs per tier and a real VanCleef killing blow, without a GM access bypass.
 `nearby_creature_count` requires a player and `entry`, and counts living creatures in the same phase within

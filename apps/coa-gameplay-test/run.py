@@ -43,6 +43,7 @@ METRICS = {
     'map_id',
     'in_arena', 'arena_team_members', 'arena_team_season_games', 'arena_team_season_wins',
     'map_difficulty', 'nearby_creature_template', 'nearby_creature_max_health', 'nearby_creature_sent_spellclick',
+    'spawn_respawn_remaining',
     'loot_gear_item_level',
     'position_x', 'position_y', 'position_z',
     'view_level', 'sent_level', 'sent_max_health', 'sent_average_item_level', 'sent_average_item_level_count',
@@ -159,7 +160,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'phase_mask', 'trigger_spell', 'trials', 'incoming', 'heal', 'quality',
                  'row', 'offset', 'skip_strings', 'from_end', 'x', 'y', 'min_required_level', 'max_required_level',
                  'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'spells',
-                 'min_level', 'max_level', 'min_home_distance'}
+                 'min_level', 'max_level', 'min_home_distance', 'spawn'}
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
     'set_moving': ({'actor', 'enabled'}, {'actor', 'enabled', 'flag'}),
@@ -673,6 +674,9 @@ def validate(scenario):
                 require(step['actor'] in player_ids, f'{where}: dungeon/loot metric needs a player')
             if metric in {'nearby_creature_template', 'nearby_creature_max_health', 'nearby_creature_sent_spellclick'}:
                 number(step.get('entry'), f'{where}.entry', 1, 2**32 - 1, True)
+            if metric == 'spawn_respawn_remaining':
+                require(step['actor'] in player_ids, f'{where}: spawn respawn metric needs a player')
+                number(step.get('spawn'), f'{where}.spawn', 1, 2**32 - 1, True)
             if metric == 'map_creature_count':
                 require(step['actor'] in player_ids, f'{where}: creature count needs a player')
                 number(step.get('entry'), f'{where}.entry', 1, 2**32 - 1, True)

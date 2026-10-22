@@ -2902,6 +2902,11 @@ private:
             Require(creatures.size() == 1, "Creature template metric needs exactly one nearby creature");
             return creatures.front()->GetCreatureTemplate()->Entry;
         }
+        if (metric == "spawn_respawn_remaining")
+        {
+            time_t const respawn = player->GetMap()->GetCreatureRespawnTime(step.get<uint32>("spawn"));
+            return std::max<time_t>(0, respawn - GameTime::GetGameTime().count());
+        }
         if (metric == "nearby_creature_count")
         {
             std::list<Creature*> creatures;

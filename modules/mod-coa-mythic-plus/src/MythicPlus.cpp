@@ -44,6 +44,7 @@
 #include "Field.h"
 #include "GameTime.h"
 #include "GlobalScript.h"
+#include "GroupScript.h"
 #include "DungeonHealth.h"
 #include "ItemScript.h"
 #include "ScriptedGossip.h"
@@ -171,6 +172,7 @@ namespace
         uint32 champions = 0;           // Mythic Champions killed
         uint32 championsPlaced = 0;
         uint32 championsRequired = 0;
+        bool ownerLeft = false;         // the keystone's owner left the group or the instance
 
         bool Active() const { return state == STATE_COUNTDOWN || state == STATE_RUNNING; }
         bool Scaled() const { return state != STATE_NONE && state != STATE_INACTIVE; }
@@ -934,6 +936,23 @@ namespace
 
     // ---------------------------------------------------------------- run flow
 
+    void ClearRunSpawns(Map* map)
+    {
+        for (auto const& [spawnId, creature] : map->GetCreatureBySpawnIdStore())
+            if (creature->GetEntry() == 80215)
+                creature->SetVisible(false);
+        std::vector<Creature*> champions;
+        for (auto const& [guid, path] : g_championPaths)
+            if (Creature* champion = map->GetCreature(guid))
+                champions.push_back(champion);
+        for (Creature* champion : champions)
+        {
+            g_championPaths.erase(champion->GetGUID());
+            if (champion->IsAlive())
+                champion->DespawnOrUnsummon();
+        }
+    }
+
     void Complete(Map* map, Run& run)
     {
         uint32 limit = run.dungeon.timeLimitMs;
@@ -961,19 +980,7 @@ namespace
             run.instanceId, run.mapId, run.level, run.elapsedMs / 1000, limit / 1000, upgrade);
 
         CoAResurrectDeadPlayers(map);
-        for (auto const& [spawnId, creature] : map->GetCreatureBySpawnIdStore())
-            if (creature->GetEntry() == 80215)
-                creature->SetVisible(false);
-        std::vector<Creature*> champions;
-        for (auto const& [guid, path] : g_championPaths)
-            if (Creature* champion = map->GetCreature(guid))
-                champions.push_back(champion);
-        for (Creature* champion : champions)
-        {
-            g_championPaths.erase(champion->GetGUID());
-            if (champion->IsAlive())
-                champion->DespawnOrUnsummon();
-        }
+        ClearRunSpawns(map);
 
         ForEachPlayer(map, [&](Player* player)
         {
@@ -1019,6 +1026,38 @@ namespace
         if (run.champions < run.championsRequired)
             return;
         Complete(map, run);
+    }
+
+    // As on the live server, the key bricks when its owner leaves the group or
+    // the instance during the run: the timer stops, nothing is paid and the key
+    // keeps the level it lost at the start.
+    void Brick(Map* map, Run& run)
+    {
+        bool const countdown = run.state == STATE_COUNTDOWN;
+        run.state = STATE_INACTIVE;
+        ClearRunSpawns(map);
+        LOG_INFO("module", "Mythic+: instance {} map {} +{} bricked, the keystone's owner left after {} s",
+            run.instanceId, run.mapId, run.level, run.elapsedMs / 1000);
+        ForEachPlayer(map, [&](Player* player)
+        {
+            if (countdown)
+            {
+                player->SetControlled(false, UNIT_STATE_ROOT);
+                player->RemoveAurasDueToSpell(SPELL_MYTHIC_PLUS_PREPARATION);
+            }
+            RemovePlayerAffixes(player, run);
+            SendState(player, run, STATE_INACTIVE);
+            ChatHandler(player->GetSession()).PSendSysMessage(
+                "Mythic+: the keystone's owner left, the keystone is depleted.");
+        });
+    }
+
+    void OwnerLeft(ObjectGuid owner)
+    {
+        std::lock_guard<std::recursive_mutex> guard(g_lock);
+        for (auto& [instanceId, run] : g_runs)
+            if (run.owner == owner && run.Active())
+                run.ownerLeft = true;
     }
 
     // Returns an error for the player, or nullptr when the run started.
@@ -1230,6 +1269,8 @@ public:
         g_socketed.erase(player->GetGUID());
         if (Run* run = RunFor(map))
         {
+            if (run->Active() && run->owner == player->GetGUID() && !player->GetSession()->PlayerLogout())
+                run->ownerLeft = true;
             if (run->state == STATE_COUNTDOWN)
             {
                 player->SetControlled(false, UNIT_STATE_ROOT);
@@ -1248,6 +1289,12 @@ public:
         Run* run = RunFor(map);
         if (!run || !run->Active())
             return;
+
+        if (run->ownerLeft)
+        {
+            Brick(map, *run);
+            return;
+        }
 
         if (run->state == STATE_COUNTDOWN)
         {
@@ -1280,6 +1327,18 @@ public:
     {
         std::lock_guard<std::recursive_mutex> guard(g_lock);
         g_runs.erase(map->GetInstanceId());    }
+};
+
+class coa_mythic_plus_group : public GroupScript
+{
+public:
+    coa_mythic_plus_group() : GroupScript("coa_mythic_plus_group", { GROUPHOOK_ON_REMOVE_MEMBER }) { }
+
+    void OnRemoveMember(Group* /*group*/, ObjectGuid guid, RemoveMethod /*method*/, ObjectGuid /*kicker*/,
+        char const* /*reason*/) override
+    {
+        OwnerLeft(guid);
+    }
 };
 
 // Death takes the player affixes; a resurrection inside a running key brings them back.
@@ -1437,6 +1496,7 @@ public:
             run->encounters.insert(boss->id);
             if (boss->final)
                 run->finalKilled = true;
+            StayDead(creature);
         }
         else if (!encounter)
         {
@@ -1449,6 +1509,15 @@ public:
     }
 
 private:
+    // A wing boss stays dead for the rest of the keystone's instance: rare
+    // bosses such as Ironspine keep their open-world respawn timer otherwise.
+    static void StayDead(Creature* creature)
+    {
+        creature->SetRespawnDelay(WEEK);
+        creature->SetRespawnTime(WEEK);
+        creature->SaveRespawnTime();
+    }
+
     static bool IsPhysical(SpellInfo const* spellInfo)
     {
         return !spellInfo || (spellInfo->GetSchoolMask() & SPELL_SCHOOL_MASK_NORMAL);
@@ -2959,6 +3028,7 @@ void AddCoaMythicPlusScripts()
 {
     new coa_mythic_plus_world();
     new coa_mythic_plus_map();
+    new coa_mythic_plus_group();
     new coa_mythic_plus_creature();
     new coa_mythic_plus_player();
     new coa_mythic_plus_unit();
