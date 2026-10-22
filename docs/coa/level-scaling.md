@@ -266,14 +266,12 @@ quest reward scales only for a character whose scaling is on, by the same answer
 (their choice, or their leader's in a group, and no challenge or open-world ruleset holding them to the
 authored world); everyone else receives the authored item, and their corpse and roll frame preview none.
 
-With `CoA.ItemScaling.Native.LevelKeys` the stored level is the client's own item key for that level
+The stored level is the client's own item key for that level
 (level + 2 up to 20, + 3 up to 30, + 4 up to 50, + 5 up to 60, the client's table above 60), and a quest
 reward takes the level the quest's `QuestTemplateScaling.dbc` row puts it at, or the key of the
-character's level for a quest without one. Items stored while LevelKeys was off keep their plain level, which
+character's level for a quest without one. Items stored before keys were used keep their plain level, which
 the client reads as a key three to five levels low; only items acquired afterwards store keys.
-`CoA.ItemScaling.Native.Preview`
-(needs LevelKeys; both on by default and read at startup) lets each character see the version they would
-receive before it is theirs:
+The preview lets each character see the version they would receive before it is theirs:
 
 | Where | What the server sends |
 |---|---|

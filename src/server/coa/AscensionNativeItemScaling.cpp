@@ -46,7 +46,6 @@ constexpr uint32 AddonRebornArmorField = 43;
 std::atomic<bool> enabled{false};
 std::atomic<int32> lootLevelOffset{0};
 std::atomic<bool> questRewards{true};
-std::atomic<bool> levelKeys{true};
 std::atomic<bool> preview{false};
 std::atomic<bool> rebornArmor{false};
 
@@ -380,7 +379,7 @@ void AssignDropLevel(Player* looter, Item* item, uint32 base = 0)
 
     if (!base)
         base = DropBase(looter);
-    AssignLevel(looter, item, levelKeys.load(std::memory_order_relaxed) ? ItemLadder::ClientKey(base) : base);
+    AssignLevel(looter, item, ItemLadder::ClientKey(base));
 }
 
 void MasterLooted(Player* receiver, Item* item)
@@ -390,7 +389,7 @@ void MasterLooted(Player* receiver, Item* item)
 
 void QuestRewardStored(Player* player, Item* item, Quest const* quest)
 {
-    if (!levelKeys.load(std::memory_order_relaxed) || !questRewards.load(std::memory_order_relaxed))
+    if (!questRewards.load(std::memory_order_relaxed))
         return;
 
     LocalLevelScaling::QuestCurve const* curve = LocalLevelScaling::QuestCurveFor(quest->GetQuestId());
@@ -539,16 +538,7 @@ public:
         if (reload)
             return;
 
-        levelKeys.store(sConfigMgr->GetOption<bool>("CoA.ItemScaling.Native.LevelKeys", true),
-            std::memory_order_relaxed);
-        _previewRequested = sConfigMgr->GetOption<bool>("CoA.ItemScaling.Native.Preview", true);
         _rebornArmorRequested = sConfigMgr->GetOption<bool>("CoA.ItemScaling.Native.RebornArmor", true);
-        if (_previewRequested && !levelKeys.load(std::memory_order_relaxed))
-        {
-            LOG_ERROR("server.loading", "CoA.ItemScaling.Native.Preview needs CoA.ItemScaling.Native.LevelKeys; "
-                "the loot preview stays off");
-            _previewRequested = false;
-        }
     }
 
     void OnStartup() override
@@ -567,11 +557,8 @@ public:
 
         LoadInstanceLevels();
         enabled.store(true, std::memory_order_relaxed);
-        if (_previewRequested)
-        {
-            preview.store(true, std::memory_order_relaxed);
-            LocalLevelScaling::ItemPreviewOwner.store(&PreviewHooks, std::memory_order_relaxed);
-        }
+        preview.store(true, std::memory_order_relaxed);
+        LocalLevelScaling::ItemPreviewOwner.store(&PreviewHooks, std::memory_order_relaxed);
         if (_rebornArmorRequested)
             LoadRebornArmor();
         LOG_INFO("server.loading", ">> Indexed {} native item scaling ladders in {} ms",
@@ -595,7 +582,6 @@ private:
     }
 
     bool _requested = false;
-    bool _previewRequested = false;
     bool _rebornArmorRequested = true;
 };
 
