@@ -68,6 +68,7 @@
 #include "AscensionDungeonRelease.h"
 #include "AscensionSpecLoot.h"
 #include "CoADungeonCompletion.h"
+#include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include "TemporarySummon.h"
@@ -130,6 +131,7 @@ namespace
     constexpr uint32 BASE_ENTRY_STEP = 100000;   // E, E+100000 Heroic, E+200000 Mythic, ...
     constexpr uint32 MYTHIC_DIFFICULTY = 2;      // DungeonEncounter.dbc difficulty of Mythic
     constexpr uint32 SPELL_ACTIVATE_KEYSTONE = 161;
+    constexpr uint32 SPELL_MYTHIC_PLUS_PREPARATION = 9931349;
 
     // Affix spells as MythicAffixes.dbc names them. Most go on the enemies as
     // they are. Pack Tactics is a player affix (its tooltip says so). Avenger
@@ -1089,12 +1091,12 @@ namespace
             CoASetDungeonReleaseStart(map, *wingStart);
         ForEachPlayer(map, [&](Player* p)
         {
-            SendWindow(p, false);
             if (wingStart)
                 p->NearTeleportTo(wingStart->GetPositionX(), wingStart->GetPositionY(), wingStart->GetPositionZ(),
                     wingStart->GetOrientation());
             ApplyPlayerAffixes(p, run);
             p->SetControlled(true, UNIT_STATE_ROOT);
+            p->AddAura(SPELL_MYTHIC_PLUS_PREPARATION, p);
             SendInstanceInfo(p, run.instanceId);
             SendState(p, run, STATE_COUNTDOWN);
             SendProgress(p, run);
@@ -1210,7 +1212,11 @@ public:
         if (run->Active())
             ApplyPlayerAffixes(player, *run);
         if (run->state == STATE_COUNTDOWN)
+        {
             player->SetControlled(true, UNIT_STATE_ROOT);
+            if (Aura* preparation = player->AddAura(SPELL_MYTHIC_PLUS_PREPARATION, player))
+                preparation->SetDuration(int32(run->countdownMs));
+        }
     }
 
     void OnPlayerLeaveAll(Map* map, Player* player) override
@@ -1222,7 +1228,10 @@ public:
         if (Run* run = RunFor(map))
         {
             if (run->state == STATE_COUNTDOWN)
+            {
                 player->SetControlled(false, UNIT_STATE_ROOT);
+                player->RemoveAurasDueToSpell(SPELL_MYTHIC_PLUS_PREPARATION);
+            }
             RemovePlayerAffixes(player, *run);
             SendState(player, *run, STATE_INACTIVE);
         }
@@ -1248,6 +1257,7 @@ public:
             ForEachPlayer(map, [run](Player* p)
             {
                 p->SetControlled(false, UNIT_STATE_ROOT);
+                p->RemoveAurasDueToSpell(SPELL_MYTHIC_PLUS_PREPARATION);
                 SendState(p, *run, STATE_RUNNING);
                 SendTimer(p, *run);
             });
