@@ -43,6 +43,9 @@ namespace ManastormBaseline
     // Periodic energy/rage regeneration triggered by the Potion.
     constexpr uint32 SpellPotionResourceRegen = 254462;
 
+    // Endless Manastorm Potion (Rank 2) learned spell, usable only in the Manastorm.
+    constexpr uint32 SpellPotionChargeSystem = 992090;
+
     // Recovered Manastorm Potion Charge System behavior.
     constexpr uint8 PotionMaxCharges = 3;
     constexpr uint32 PotionRechargeMs = 10000;

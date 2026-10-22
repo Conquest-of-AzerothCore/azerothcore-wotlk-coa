@@ -1079,6 +1079,19 @@ public:
         if (!player)
             return;
 
+        if (spell->GetSpellInfo()->Id ==
+            ManastormBaseline::SpellPotionChargeSystem)
+        {
+            if (!ManastormMgr::Instance()
+                    .IsPlayerInUsableEndlessStage(player))
+            {
+                result =
+                    SPELL_FAILED_NOT_HERE;
+            }
+
+            return;
+        }
+
         Ascension::Manastorm::Gadget const* gadget =
             nullptr;
 
