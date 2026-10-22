@@ -50,6 +50,7 @@ METRICS = {
     'quest_log_sent_level', 'quest_log_sent_xp', 'quest_offer_sent_xp', 'quest_query_scaled', 'quest_query_reward_choice',
     'health', 'health_pct', 'max_health', 'creature_type', 'respawn_remaining', 'power', 'max_power', 'alive', 'combat', 'victim', 'casting', 'level',
     'aura', 'aura_stacks', 'aura_charges', 'aura_duration_ms', 'aura_amount', 'aura_positive', 'aura_visible',
+    'carried_aura_count',
     'knows_spell', 'spell_active', 'has_talent', 'talent_points', 'active_talent_spec', 'cooldown_ms', 'global_cooldown_ms', 'spell_charges',
     'action_button', 'action_button_packed', 'persisted_action_button', 'item_count', 'carried_item_count',
     'carried_pool_item_count', 'carried_variant_item_count', 'client_knows_spell', 'client_spellbook_copies',
@@ -157,7 +158,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'type_mask', 'hit_mask', 'spell_type_mask',
                  'phase_mask', 'trigger_spell', 'trials', 'incoming', 'heal', 'quality',
                  'row', 'offset', 'skip_strings', 'from_end', 'x', 'y', 'min_required_level', 'max_required_level',
-                 'flat_coefficient_modifier', 'dominant_stat', 'off_stat',
+                 'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'spells',
                  'min_level', 'max_level', 'min_home_distance'}
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
@@ -640,6 +641,13 @@ def validate(scenario):
                 require(step['actor'] in player_ids, f'{where}: metric needs a player')
             if metric == 'victim':
                 require('target' in step, f'{where}: victim metric requires a target')
+            if metric == 'carried_aura_count':
+                require(type(step.get('spells')) is list and 0 < len(step['spells']) <= 50,
+                        f'{where}: carried_aura_count must list 1-50 spells')
+                for index, spell in enumerate(step['spells']):
+                    number(spell, f'{where}.spells[{index}]', 1, 2**32 - 1, True)
+            elif 'spells' in step:
+                require(False, f'{where}: spells only applies to carried_aura_count')
             if 'periodic' in step:
                 require(metric in {'spell_damage_done', 'spell_healing_done', 'spell_healing_taken'}
                         and type(step['periodic']) is bool,

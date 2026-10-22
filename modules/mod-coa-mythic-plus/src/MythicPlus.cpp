@@ -2213,15 +2213,19 @@ public:
     }
 };
 
-// Mythical Boon (80215): right-click gives a random Mythical Boon and the boon vanishes. It shows only during a
-// running keystone; the boon items work only there too.
+// Mythical Boon (80215): right-click grants a random Mythical Boon to every player within 50 yards in line of sight
+// of the clicker, with Mythical Blessing's Holy Nova visual, and the boon vanishes. It shows only during a running
+// keystone; boon items still in bags work only there too.
 constexpr uint32 NPC_MYTHICAL_BOON = 80215;
+constexpr uint32 SPELL_MYTHICAL_BLESSING = 2104919;
 
 bool InRunningKey(Map* map)
 {
     Run* run = RunFor(map);
     return run && run->state == STATE_RUNNING;
 }
+
+void ApplyBoon(Player* user, uint32 spellId);
 
 class npc_coa_mythic_boon : public CreatureScript
 {
@@ -2236,7 +2240,8 @@ public:
         std::lock_guard<std::recursive_mutex> guard(g_lock);
         if (!InRunningKey(creature->GetMap()))
             return true;
-        Give(player, BOONS[urand(0, BOONS.size() - 1)], 1);
+        player->CastSpell(player, SPELL_MYTHICAL_BLESSING, true);
+        ApplyBoon(player, BOONS[urand(0, BOONS.size() - 1)]);
         creature->DespawnOrUnsummon(0ms, 7 * 24h);
         return true;
     }

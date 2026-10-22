@@ -2494,6 +2494,17 @@ private:
             Require(info != nullptr, "Incoming spell damage needs a spell");
             return unit->SpellDamageBonusTaken(attacker, info, 1000, SPELL_DIRECT_DAMAGE);
         }
+        if (metric == "carried_aura_count")
+        {
+            ObjectGuid caster;
+            if (auto id = step.get_optional<std::string>("caster"))
+                caster = GetUnit(*id)->GetGUID();
+            uint32 count = 0;
+            for (auto const& [unused, listed] : step.get_child("spells"))
+                if (unit->HasAura(listed.get_value<uint32>(), caster))
+                    ++count;
+            return count;
+        }
         if (metric.rfind("aura", 0) == 0)
         {
             Require(metric == "aura" || metric == "aura_stacks" || metric == "aura_charges"
