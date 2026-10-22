@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-CLI_DESCRIPTION = """Check Unyielding Form against the ordinary, non-scaling armor items in its fixture."""
+CLI_DESCRIPTION = """Check Unyielding Form against the reborn armor (ItemAddon.dbc) of the non-scaling items in its fixture."""
 
 import argparse
 import json
@@ -12,7 +12,7 @@ def check(directory):
     if summary['status'] != 'passed' or result['status'] != 'passed':
         raise ValueError('A completed native scenario pass is required')
     values = {step['label']: float(step['actual']) for step in result['steps'] if 'actual' in step}
-    for armor, item_armor in (('cloth', 103), ('leather', 150), ('mail', 178), ('plate', 359)):
+    for armor, item_armor in (('cloth', 30), ('leather', 68), ('mail', 145), ('plate', 401)):
         contribution = values[f'{armor}_armor'] - values[f'{armor}_bare']
         if contribution <= 0:
             raise ValueError(f'{armor}: equipment must contribute armor')
