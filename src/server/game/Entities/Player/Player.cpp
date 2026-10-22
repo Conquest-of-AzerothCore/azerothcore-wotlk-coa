@@ -9594,9 +9594,10 @@ Pet* Player::SummonPet(uint32 entry, float x, float y, float z, float ang, PetTy
 
     if (petType == SUMMON_PET)
     {
-        if (pet->GetCreatureTemplate()->type == CREATURE_TYPE_DEMON || pet->GetCreatureTemplate()->type == CREATURE_TYPE_UNDEAD)
+        if (pet->GetCreatureTemplate()->type == CREATURE_TYPE_DEMON ||
+            pet->GetCreatureTemplate()->type == CREATURE_TYPE_UNDEAD || IsAscensionClass(getClass()))
         {
-            pet->GetCharmInfo()->SetPetNumber(pet_number, true); // Show pet details tab (Shift+P) only for demons & undead
+            pet->GetCharmInfo()->SetPetNumber(pet_number, true); // Show pet details tab (Shift+P) for permanent pets
         }
         else
         {

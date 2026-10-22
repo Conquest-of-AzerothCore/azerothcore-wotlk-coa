@@ -25,6 +25,7 @@
 #include "QueryHolder.h"
 #include "SharedDefines.h"
 #include "WorldConfig.h"
+#include <memory>
 #include <unordered_map>
 
 class WorldPacket;
@@ -41,6 +42,7 @@ struct AC_GAME_API CliCommandHolder
     char* m_command;
     Print m_print;
     CommandFinished m_commandFinished;
+    std::shared_ptr<void> m_callbackLifetime;
 
     CliCommandHolder(void* callbackArg, char const* command, Print zprint, CommandFinished commandFinished);
     ~CliCommandHolder();

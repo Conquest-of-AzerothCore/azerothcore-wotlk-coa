@@ -301,6 +301,8 @@ void ApplyContracts(SpellInfo* info)
                 effect.Effect = SPELL_EFFECT_DUMMY;
     if (id == 800848)
         info->StackAmount = 3;
+    if (id == 805777 || id == 805778)
+        info->StackAmount = 1;
     if (id == 706014)
         for (uint8 slot = 0; slot < MAX_SPELL_EFFECTS; ++slot)
             dummy(slot);

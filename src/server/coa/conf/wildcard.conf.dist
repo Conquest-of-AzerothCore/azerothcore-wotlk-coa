@@ -99,3 +99,14 @@ Wildcard.Synergy.TalentsNeedTarget = 1
 #                     0 - (Disabled)
 
 Wildcard.Synergy.LogRolls = 1
+
+#    Wildcard.FreeScrolls
+#        Description: Spawn Pete Arr <Plunder Trade Representative (PTR)> beside Silas Darkmoon in
+#                     Stormwind and Orgrimmar. He gives Wildcard Heroes 10 Scrolls of Fortune of
+#                     their active specialization and the Tome of Specialization of their first
+#                     locked specialization for free. For test realms (PTR); keep it off on a live
+#                     realm.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+Wildcard.FreeScrolls = 0

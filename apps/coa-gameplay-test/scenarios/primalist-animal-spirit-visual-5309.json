@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Wildwalker's tamed animal spirit wears the Animal Spirit Visual Aura (#5309)",
+  "contract": [
+    "Animal Spirit Visual Aura 574306 (Primalist family 37, passive) applies its ghostly state visual (SpellVisual",
+    "87401, 8fx_generic_ghostly_state) to the caster's summons through effect 190. Nothing taught it, and its",
+    "TargetCreatureType 1 made the learning self-cast fail on a humanoid player. Spirit Beast Master 92148 now teaches",
+    "it with the spec's other spells, the creature-type gate moves to the aura's area-target check (beasts only), and",
+    "the tamed beast carries the aura. Expected: after choosing spec 59 the Primalist knows 574306, and the beast",
+    "tamed through Harness Animal Spirit has 574306 from the Primalist. Client rendering is not observable here."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "p", "race": 1, "class": 31, "level": 20}
+  ],
+  "creatures": [
+    {"id": "beast", "owner": "p", "entry": 1188, "level": 19, "health": 100000, "distance": 5}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "specialization", "actor": "p", "id": 59},
+    {"action": "assert", "label": "SETUP: Spirit Beast Master is known", "actor": "p", "metric": "knows_spell",
+     "spell": 92148, "equals": 1},
+    {"action": "assert", "label": "Choosing the spec teaches the Animal Spirit Visual Aura", "actor": "p",
+     "metric": "knows_spell", "spell": 574306, "equals": 1},
+    {"action": "cast", "label": "Harness the beast's spirit", "actor": "p", "spell": 574301, "target": "beast"},
+    {"action": "assert", "label": "SETUP: the beast is tamed", "actor": "p", "metric": "pet_entry", "equals": 1188,
+     "within_ms": 24000},
+    {"action": "assert", "label": "The tamed beast wears the visual aura", "actor": "p", "metric": "pet_aura_stacks",
+     "spell": 574306, "caster": "p", "min": 1, "within_ms": 5000}
+  ]
+}

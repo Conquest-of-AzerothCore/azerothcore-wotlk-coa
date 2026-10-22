@@ -280,7 +280,7 @@ void AscensionGuardian::ApplyContracts(SpellInfo* info)
     if (id == 707662)
         info->Effects[EFFECT_0].SpellClassMask = flag96(4, 0, 0);
     if (id == 807794)
-        info->Effects[EFFECT_0].SpellClassMask = flag96(0, 4194320, 0);
+        info->Effects[EFFECT_0].SpellClassMask = flag96(0, 4194320, 8192);
     if (id == 525043)
         for (uint8 i = 0; i < 2; ++i)
             info->Effects[i].BasePoints = 19;

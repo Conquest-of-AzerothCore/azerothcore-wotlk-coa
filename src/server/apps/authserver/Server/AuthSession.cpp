@@ -816,6 +816,11 @@ void AuthSession::RealmListCallback(PreparedQueryResult result)
     std::vector<std::pair<uint32, std::string>> listedRealms;
     for (auto const& [realmHandle, realm] : sRealmList->GetRealms())
     {
+        // Leave out realms the account cannot enter. Listed, the client keeps auto-connecting to one it
+        // remembers (realmName) and is refused every login; unlisted, it opens the realm list instead.
+        if (!realm.IsOpenTo(_accountInfo.SecurityLevel))
+            continue;
+
         // don't work with realms which not compatible with the client
         bool okBuild = ((_expversion & POST_BC_EXP_FLAG) && realm.Build == _build) || ((_expversion & PRE_BC_EXP_FLAG) && !AuthHelper::IsPreBCAcceptedClientBuild(realm.Build));
 
@@ -841,11 +846,9 @@ void AuthSession::RealmListCallback(PreparedQueryResult result)
             name = ss.str();
         }
 
-        uint8 lock = (realm.AllowedSecurityLevel > _accountInfo.SecurityLevel) ? 1 : 0;
-
         pkt << uint8(realm.Type);                           // realm type
         if (_expversion & POST_BC_EXP_FLAG)                 // only 2.x and 3.x clients
-            pkt << uint8(lock);                             // if 1, then realm locked
+            pkt << uint8(0);                                // if 1, then realm locked
 
         pkt << uint8(flag);                                 // RealmFlags
         pkt << name;

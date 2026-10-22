@@ -2290,8 +2290,10 @@ bool Pet::IsPermanentPetFor(Player* owner) const
                 return GetCreatureTemplate()->type == CREATURE_TYPE_UNDEAD;
             else if (owner->IsClass(CLASS_MAGE, CLASS_CONTEXT_PET))
                 return GetEntry() == 37994;
+            else if (owner->IsClass(CLASS_TINKER, CLASS_CONTEXT_PET))
+                return GetCreatureTemplate()->type == CREATURE_TYPE_MECHANICAL;
             else
-                return false;
+                return IsAscensionClass(owner->getClass());
         case HUNTER_PET:
             return true;
         default:

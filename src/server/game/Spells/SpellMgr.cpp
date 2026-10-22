@@ -675,7 +675,12 @@ uint32 SpellMgr::GetSpellWithRank(uint32 spell_id, uint32 rank, bool strict) con
     if (SpellChainNode const* node = GetSpellChainNode(spell_id))
     {
         if (rank != node->rank)
-            return GetSpellWithRank(node->rank < rank ? node->next->Id : node->prev->Id, rank, strict);
+        {
+            SpellInfo const* step = node->rank < rank ? node->next : node->prev;
+            if (!step)
+                return strict ? 0 : spell_id;
+            return GetSpellWithRank(step->Id, rank, strict);
+        }
     }
     else if (strict && rank > 1)
         return 0;

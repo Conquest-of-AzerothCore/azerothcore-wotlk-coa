@@ -89,7 +89,6 @@ namespace CoAPrestige
     {
         None,
         Disabled,
-        NotCustomClass,
         BelowLevel,
         InProgress,
         NoSpecialization,
@@ -99,12 +98,16 @@ namespace CoAPrestige
         NotInOpenWorld
     };
 
+    inline uint32_t ResolveRequiredLevel(uint32_t realmCap)
+    {
+        return std::max(2u, realmCap);
+    }
+
     struct ActivationFacts
     {
         bool enabled = true;
-        bool customClass = true;
         uint32_t level = 0;
-        uint32_t requiredLevel = 60;
+        uint32_t requiredLevel = 0;
         bool active = false;
         uint32_t specialization = 0;
         bool alive = true;
@@ -117,8 +120,6 @@ namespace CoAPrestige
     {
         if (!facts.enabled)
             return Refusal::Disabled;
-        if (!facts.customClass)
-            return Refusal::NotCustomClass;
         if (facts.level < facts.requiredLevel)
             return Refusal::BelowLevel;
         if (facts.active)
@@ -144,8 +145,6 @@ namespace CoAPrestige
                 return {};
             case Refusal::Disabled:
                 return "Chromie cannot wind back time right now.";
-            case Refusal::NotCustomClass:
-                return "Prestige Mode is only available to Conquest of Azeroth and Warcraft Reborn classes.";
             case Refusal::BelowLevel:
                 return "You must be level " + std::to_string(requiredLevel) +
                     " or higher to participate in Prestige Mode";

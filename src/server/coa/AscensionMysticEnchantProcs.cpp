@@ -24,6 +24,7 @@
 #include "WorldScript.h"
 #include <algorithm>
 #include <array>
+#include <mutex>
 #include <string_view>
 #include <unordered_map>
 #include <unordered_set>
@@ -108,6 +109,7 @@ struct LastHit
     uint32 SchoolMask = 0;
 };
 std::unordered_map<ObjectGuid, LastHit> LastHits;
+std::mutex LastHitsLock;
 
 std::string_view const OPS[] = {">=", "<=", "!=", ">", "<", "="};
 
@@ -268,6 +270,7 @@ bool KillingBlowMatches(EffectRule const& rule, ProcEventInfo& eventInfo)
         return true;
     Unit* actor = eventInfo.GetActor();
     Unit* victim = eventInfo.GetActionTarget();
+    std::lock_guard<std::mutex> lock(LastHitsLock);
     auto const itr = victim ? LastHits.find(victim->GetGUID()) : LastHits.end();
     if (!actor || itr == LastHits.end() || itr->second.Attacker != actor->GetGUID())
         return false;
@@ -454,6 +457,7 @@ private:
     {
         if (!target || !attacker || !attacker->IsPlayer() || target->IsPlayer())
             return;
+        std::lock_guard<std::mutex> lock(LastHitsLock);
         LastHit& hit = LastHits[target->GetGUID()];
         hit.Attacker = attacker->GetGUID();
         hit.Spell = spellInfo ? spellInfo->Id : 0;

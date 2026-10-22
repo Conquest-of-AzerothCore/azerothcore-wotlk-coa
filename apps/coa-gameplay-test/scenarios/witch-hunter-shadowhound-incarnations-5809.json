@@ -43,7 +43,7 @@
       "label": "SETUP: default captured display",
       "actor": "hunter",
       "metric": "pet_display",
-      "equals": 16049
+      "equals": 35355
     },
     {
       "action": "snapshot",
@@ -228,7 +228,7 @@
       "label": "Hiding spell appearances restores the native hound",
       "actor": "hunter",
       "metric": "pet_display",
-      "equals": 16049,
+      "equals": 35355,
       "within_ms": 2500
     },
     {
@@ -363,7 +363,7 @@
       "label": "Clearing the selection restores the main pet native model",
       "actor": "hunter",
       "metric": "pet_display",
-      "equals": 16049,
+      "equals": 35355,
       "within_ms": 2500
     },
     {

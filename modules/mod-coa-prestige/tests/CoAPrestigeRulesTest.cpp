@@ -42,10 +42,11 @@ TEST(CoAPrestige, StateRoundTripsThroughTheSetting)
     EXPECT_EQ(DecodeState({ 2, 0, 31 }), (State{ 2, false, 31 }));
 }
 
-TEST(CoAPrestige, ActivationNeedsTheLevelAClassAndASpecialization)
+TEST(CoAPrestige, ActivationNeedsTheLevelAndASpecialization)
 {
     ActivationFacts ready;
     ready.level = 60;
+    ready.requiredLevel = 60;
     ready.specialization = 25;
     EXPECT_EQ(CheckActivation(ready), Refusal::None);
 
@@ -62,10 +63,6 @@ TEST(CoAPrestige, ActivationNeedsTheLevelAClassAndASpecialization)
     EXPECT_EQ(CheckActivation(facts), Refusal::Disabled);
 
     facts = ready;
-    facts.customClass = false;
-    EXPECT_EQ(CheckActivation(facts), Refusal::NotCustomClass);
-
-    facts = ready;
     facts.active = true;
     EXPECT_EQ(CheckActivation(facts), Refusal::InProgress);
 
@@ -78,6 +75,7 @@ TEST(CoAPrestige, ActivationNeedsAQuietMomentInTheOpenWorld)
 {
     ActivationFacts ready;
     ready.level = 60;
+    ready.requiredLevel = 60;
     ready.specialization = 25;
 
     ActivationFacts facts = ready;
@@ -103,7 +101,7 @@ TEST(CoAPrestige, RefusalsExplainThemselves)
     EXPECT_EQ(RefusalMessage(Refusal::BelowLevel, 60),
         "You must be level 60 or higher to participate in Prestige Mode");
     EXPECT_TRUE(RefusalMessage(Refusal::None, 60).empty());
-    for (Refusal refusal : { Refusal::Disabled, Refusal::NotCustomClass, Refusal::InProgress, Refusal::NoSpecialization,
+    for (Refusal refusal : { Refusal::Disabled, Refusal::InProgress, Refusal::NoSpecialization,
              Refusal::Dead, Refusal::InCombat, Refusal::Travelling, Refusal::NotInOpenWorld })
         EXPECT_FALSE(RefusalMessage(refusal, 60).empty());
 }
@@ -251,4 +249,22 @@ TEST(CoAPrestige, ThePrestigeDailiesAreExemptFromTheQuestReset)
     EXPECT_FALSE(IsPrestigeDaily(0));
     EXPECT_FALSE(IsPrestigeDaily(1));
     EXPECT_FALSE(IsPrestigeDaily(900001));
+}
+
+TEST(CoAPrestige, RealmCapControlsActivationAndCompletionThreshold)
+{
+    for (uint32_t cap : { 60u, 70u, 80u })
+    {
+        uint32_t const level = ResolveRequiredLevel(cap);
+        EXPECT_EQ(level, cap);
+        ActivationFacts facts;
+        facts.requiredLevel = level;
+        facts.specialization = 1;
+        facts.level = cap - 1;
+        EXPECT_EQ(CheckActivation(facts), Refusal::BelowLevel);
+        facts.level = cap;
+        EXPECT_EQ(CheckActivation(facts), Refusal::None);
+        EXPECT_NE(SpecializationLockedMessage(level).find(std::to_string(cap)), std::string::npos);
+    }
+    EXPECT_EQ(ResolveRequiredLevel(1), 2u);
 }

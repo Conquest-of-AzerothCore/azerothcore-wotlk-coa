@@ -217,16 +217,6 @@ void Zealotry(Player* player, Unit* target, bool repeat)
     if (!repeat && info && roll_chance_i(info->ProcChance))
         Zealotry(player, target, true);
 }
-uint32 HopeCount(Player* player)
-{
-    uint32 count = 0;
-    for (ObjectGuid guid : State(player).copies)
-        if (Creature* unit = ObjectAccessor::GetCreature(*player, guid))
-            if (unit->IsAlive() && unit->GetOwnerGUID() == player->GetGUID() && player->InSamePhase(unit) &&
-                player->IsWithinDistInMap(unit, 15.0f))
-                ++count;
-    return count;
-}
 void SpreadCondemn(Player* player, Unit* target)
 {
     Aura* source = nullptr;

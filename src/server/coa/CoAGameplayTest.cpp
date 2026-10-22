@@ -12,6 +12,7 @@
 #include "AscensionNativeItemScaling.h"
 #include "AscensionQuestLog.h"
 #include "AscensionSpecialization.h"
+#include "AscensionVanityOwnership.h"
 #include "AscensionWisdomball.h"
 #include "AscensionWildcard.h"
 #include "AscensionWildcardStarterData.h"
@@ -694,7 +695,7 @@ void ObserveExtensionPacket(Actor& actor, WorldPacket const& packet)
         packet.GetOpcode() != SMSG_DUEL_REQUESTED && packet.GetOpcode() != SMSG_DUEL_COUNTDOWN &&
         packet.GetOpcode() != SMSG_DUEL_COMPLETE && packet.GetOpcode() != SMSG_FRIEND_STATUS &&
         packet.GetOpcode() != SMSG_SEND_MAIL_RESULT && packet.GetOpcode() != SMSG_GOSSIP_MESSAGE &&
-        packet.GetOpcode() != SMSG_BINDPOINTUPDATE)
+        packet.GetOpcode() != SMSG_BINDPOINTUPDATE && packet.GetOpcode() != SMSG_PET_SPELLS)
         return;
 
     ++actor.extensionPackets[packet.GetOpcode()];
@@ -1251,6 +1252,14 @@ public:
         Require(_timeout > 0 && _timeout <= 600000, "Invalid scenario timeout");
         if (_scenario.get<bool>("creature_scaling", false))
             _creatureScaling.emplace();
+        if (auto ownership = _scenario.get_child_optional("vanity_ownership"))
+        {
+            std::string starterItems;
+            if (auto items = ownership->get_child_optional("starter_items"))
+                for (auto const& item : *items)
+                    starterItems += (starterItems.empty() ? "" : " ") + item.second.get_value<std::string>();
+            _vanityOwnership.emplace(ownership->get<bool>("unlock_all"), starterItems);
+        }
         _report.put("schema", 1);
         _report.put("run_id", _runId);
         _report.put("scenario", _scenario.get<std::string>("name"));
@@ -5713,6 +5722,7 @@ private:
     std::map<std::string, double> _snapshots;
     QueryCallbackProcessor _queries;
     std::optional<CreatureScaling::TestOverride> _creatureScaling;
+    std::optional<AscensionVanityOwnership::TestOverride> _vanityOwnership;
     GameEventStates _gameEvents;
 };
 

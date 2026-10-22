@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Tentacle of Y'Shaarj is summoned at Old God tentacle size (#5319)",
+  "contract": [
+    "Tentacle of Y'shaarj 802044 summons creature 50096 on display 28814 (YoggSaronTentacleMace, about 29.6 yd at scale",
+    "1). Its 0.5 template scale made a 15 yd tentacle, which the report calls enormous. The other Old God tentacles",
+    "stand about 4-5 yd (N'Zoth 4.1 yd on its live display), so the template scale is now 0.15 (about 4.5 yd). Expected:",
+    "the tentacle appears on display 28814 at a scale between 0.14 and 0.16."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "p", "race": 1, "class": 25, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "learn", "actor": "p", "spell": 802044},
+    {"action": "cast", "label": "Summon the tentacle", "actor": "p", "spell": 802044},
+    {"action": "assert", "label": "SETUP: the tentacle is summoned", "actor": "p", "metric": "owned_creature_count",
+     "entry": 50096, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "SETUP: it uses display 28814", "actor": "p", "metric": "owned_creature_display",
+     "entry": 50096, "equals": 28814},
+    {"action": "assert", "label": "The tentacle stands at Old God tentacle size", "actor": "p",
+     "metric": "owned_creature_scale", "entry": 50096, "min": 0.14, "max": 0.16}
+  ]
+}

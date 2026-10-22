@@ -1,0 +1,725 @@
+{
+  "schema": 1,
+  "name": "venomancer-4247-venom-recast-no-stack",
+  "contract": [
+    "#4247 and #7566: Weakening Venom (805778) and Nullifying Venom (805777) ship StackAmount 2, so a recast while",
+    "active added a second stack that the client tooltip renders as a larger value. The maintainer decided they must",
+    "not stack: a recast refreshes the venom and leaves one stack, like the other four venoms. The recast stays",
+    "allowed at the two-unique-venom cap, a third unique venom is still refused (SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW",
+    "173), Venomizer still adds 10 to their proc chance and both still proc their payloads (706000, 805897) from",
+    "Venom Bolt. Sixteen bolts at 45% and 40% leave under 0.03% chance of a false missing proc."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 29,
+      "level": 5,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "v",
+      "entry": 36,
+      "level": 5,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000,
+      "label": "Let spawn AI settle"
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 680794,
+      "label": "Learn Venomizer"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Venomizer is applied",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 680794,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 805778,
+      "label": "Learn Weakening Venom"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 805778,
+      "label": "Activate Weakening Venom"
+    },
+    {
+      "action": "assert",
+      "label": "Weakening Venom activation completes",
+      "actor": "v",
+      "metric": "spell_cast_count",
+      "spell": 805778,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Weakening Venom is active with one stack",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "spell": 805778,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 805778,
+      "label": "Recast Weakening Venom while it is active"
+    },
+    {
+      "action": "assert",
+      "label": "The Weakening Venom recast completes",
+      "actor": "v",
+      "metric": "spell_cast_count",
+      "spell": 805778,
+      "within_ms": 3000,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Weakening Venom is still active after the recast",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 805778,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "A Weakening Venom recast does not add a second stack (#4247/#7566)",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "spell": 805778,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Venomizer still raises Weakening Venom's proc chance (35 -> 45)",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 805778,
+      "op": 18,
+      "base": 35,
+      "equals": 45
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 805777,
+      "label": "Learn Nullifying Venom"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 805777,
+      "label": "Activate Nullifying Venom"
+    },
+    {
+      "action": "assert",
+      "label": "Nullifying Venom activation completes",
+      "actor": "v",
+      "metric": "spell_cast_count",
+      "spell": 805777,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Nullifying Venom is active with one stack",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "spell": 805777,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 805777,
+      "label": "Recast Nullifying Venom while it is active"
+    },
+    {
+      "action": "assert",
+      "label": "The Nullifying Venom recast completes",
+      "actor": "v",
+      "metric": "spell_cast_count",
+      "spell": 805777,
+      "within_ms": 3000,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Nullifying Venom is still active after the recast",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 805777,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "A Nullifying Venom recast does not add a second stack (#4247/#7566)",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "spell": 805777,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Venomizer still raises Nullifying Venom's proc chance (30 -> 40)",
+      "actor": "v",
+      "metric": "spell_modifier",
+      "spell": 805777,
+      "op": 18,
+      "base": 30,
+      "equals": 40
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 805776,
+      "label": "Learn Blight Venom"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 805776,
+      "label": "Try a third unique venom while two are active"
+    },
+    {
+      "action": "wait",
+      "ms": 2500,
+      "label": "Let a successful cast finish"
+    },
+    {
+      "action": "assert",
+      "label": "The two-unique-venom cap refuses Blight Venom",
+      "actor": "v",
+      "metric": "cast_failure",
+      "spell": 805776,
+      "equals": 173
+    },
+    {
+      "action": "assert",
+      "label": "Blight Venom does not become active",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 805776,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Weakening Venom stays active under the cap",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 805778,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Nullifying Venom stays active under the cap",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 805777,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 805778,
+      "label": "Recast an active venom at the cap"
+    },
+    {
+      "action": "assert",
+      "label": "Recasting an active venom at the cap is allowed",
+      "actor": "v",
+      "metric": "spell_cast_count",
+      "spell": 805778,
+      "within_ms": 3000,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Weakening Venom still has one stack after a recast at the cap",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "spell": 805778,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Blight Venom is still refused after the recast",
+      "actor": "v",
+      "metric": "aura",
+      "spell": 805776,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "value": 240,
+      "label": "Refill mana"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "label": "Venom Bolt 1",
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 1 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 200,
+      "label": "Let the global cooldown end"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "label": "Venom Bolt 2",
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 2 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 2
+    },
+    {
+      "action": "wait",
+      "ms": 200,
+      "label": "Let the global cooldown end"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "label": "Venom Bolt 3",
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 3 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 3
+    },
+    {
+      "action": "wait",
+      "ms": 200,
+      "label": "Let the global cooldown end"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "label": "Venom Bolt 4",
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 4 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 4
+    },
+    {
+      "action": "wait",
+      "ms": 200,
+      "label": "Let the global cooldown end"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "label": "Venom Bolt 5",
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 5 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 5
+    },
+    {
+      "action": "wait",
+      "ms": 200,
+      "label": "Let the global cooldown end"
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "value": 240,
+      "label": "Refill mana"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "label": "Venom Bolt 6",
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 6 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 6
+    },
+    {
+      "action": "wait",
+      "ms": 200,
+      "label": "Let the global cooldown end"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "label": "Venom Bolt 7",
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 7 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 7
+    },
+    {
+      "action": "wait",
+      "ms": 200,
+      "label": "Let the global cooldown end"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "label": "Venom Bolt 8",
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 8 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 8
+    },
+    {
+      "action": "wait",
+      "ms": 200,
+      "label": "Let the global cooldown end"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "label": "Venom Bolt 9",
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 9 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 9
+    },
+    {
+      "action": "wait",
+      "ms": 200,
+      "label": "Let the global cooldown end"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "label": "Venom Bolt 10",
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 10 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 10
+    },
+    {
+      "action": "wait",
+      "ms": 200,
+      "label": "Let the global cooldown end"
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "value": 240,
+      "label": "Refill mana"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "label": "Venom Bolt 11",
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 11 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 11
+    },
+    {
+      "action": "wait",
+      "ms": 200,
+      "label": "Let the global cooldown end"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "label": "Venom Bolt 12",
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 12 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 12
+    },
+    {
+      "action": "wait",
+      "ms": 200,
+      "label": "Let the global cooldown end"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "label": "Venom Bolt 13",
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 13 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 13
+    },
+    {
+      "action": "wait",
+      "ms": 200,
+      "label": "Let the global cooldown end"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "label": "Venom Bolt 14",
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 14 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 14
+    },
+    {
+      "action": "wait",
+      "ms": 200,
+      "label": "Let the global cooldown end"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "label": "Venom Bolt 15",
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 15 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 15
+    },
+    {
+      "action": "wait",
+      "ms": 200,
+      "label": "Let the global cooldown end"
+    },
+    {
+      "action": "set_power",
+      "actor": "v",
+      "value": 240,
+      "label": "Refill mana"
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 800869,
+      "label": "Venom Bolt 16",
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt 16 hits",
+      "actor": "v",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "d",
+      "within_ms": 5000,
+      "equals": 16
+    },
+    {
+      "action": "wait",
+      "ms": 200,
+      "label": "Let the global cooldown end"
+    },
+    {
+      "action": "assert",
+      "label": "Weakening Venom still procs from Venom Bolt",
+      "actor": "v",
+      "metric": "spell_proc_count",
+      "spell": 805778,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Weakening Venom's payload 706000 still lands",
+      "actor": "v",
+      "metric": "spell_cast_count",
+      "spell": 706000,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Nullifying Venom still procs from Venom Bolt",
+      "actor": "v",
+      "metric": "spell_proc_count",
+      "spell": 805777,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Nullifying Venom's payload 805897 still lands",
+      "actor": "v",
+      "metric": "spell_cast_count",
+      "spell": 805897,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Weakening Venom keeps one stack after its procs",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "spell": 805778,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Nullifying Venom keeps one stack after its procs",
+      "actor": "v",
+      "metric": "aura_stacks",
+      "spell": 805777,
+      "equals": 1
+    }
+  ]
+}

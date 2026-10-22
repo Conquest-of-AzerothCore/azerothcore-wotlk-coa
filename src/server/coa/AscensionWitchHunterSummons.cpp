@@ -9,6 +9,7 @@
 #include "Map.h"
 #include "MotionMaster.h"
 #include "ObjectAccessor.h"
+#include "Pet.h"
 #include "PetAI.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -485,6 +486,36 @@ class spell_ascension_witch_hunter_smoke : public SpellScript
                                     SPELL_EFFECT_PERSISTENT_AREA_AURA);
     }
 };
+
+class spell_ascension_witch_hunter_whistle : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_witch_hunter_whistle);
+
+    static bool HoundDead(Player* player)
+    {
+        if (Pet* pet = player->GetPet())
+            return pet->GetEntry() == 50124 && !pet->IsAlive();
+        PetStable const* stable = player->GetPetStable();
+        if (!stable)
+            return false;
+        PetStable::PetInfo const* hound = Pet::GetLoadPetInfo(*stable, 50124, 0, false).first;
+        return hound && !hound->Health;
+    }
+
+    SpellCastResult CheckCast()
+    {
+        Player* player = GetCaster()->ToPlayer();
+        if (!player || !HoundDead(player))
+            return SPELL_CAST_OK;
+        player->SendTameFailure(PET_TAME_DEAD);
+        return SPELL_FAILED_DONT_REPORT;
+    }
+
+    void Register() override
+    {
+        OnCheckCast += SpellCheckCastFn(spell_ascension_witch_hunter_whistle::CheckCast);
+    }
+};
 }
 
 void AddAscensionWitchHunterSummonScripts()
@@ -495,4 +526,5 @@ void AddAscensionWitchHunterSummonScripts()
     RegisterSpellScript(spell_ascension_witch_hunter_summon);
     RegisterSpellScript(aura_ascension_witch_hunter_trap_launcher);
     RegisterSpellScript(spell_ascension_witch_hunter_smoke);
+    RegisterSpellScript(spell_ascension_witch_hunter_whistle);
 }

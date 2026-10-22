@@ -1557,13 +1557,15 @@ class spell_dk_death_grip : public SpellScript
                     target->InterruptNonMeleeSpells(true);
             }
         }
-        else
+        else if (baseTarget)
             baseTarget->CastSpell(caster, 49560, true);
     }
 
     void HandleDummy(SpellEffIndex /*effIndex*/)
     {
         float casterZ = GetCaster()->GetPositionZ(); // for Ring of Valor
+        if (!GetExplTargetDest())
+            return;
         WorldLocation gripPos = *GetExplTargetDest();
         if (Unit* target = GetHitUnit())
             if (!target->HasDetectSpellsAura() || target->HasUnitState(UNIT_STATE_STUNNED)) // Deterrence

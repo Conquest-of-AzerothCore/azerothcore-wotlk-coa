@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Herald of the Depths transforms at its final size without a scale change (#5707)",
+  "contract": [
+    "Herald of the Depths 520326 transforms into creature 250042. Its display 28844 (FacelessOne at display scale 4)",
+    "was shrunk with a 0.25 object scale after the transform, so the client drew the full-size model and then shrank",
+    "it. Display 280071 is the same FacelessOne model and FacelessOneSkinBlue texture at display scale 1, the same",
+    "final size. Expected: the Cultist shows display 280071 at object scale 1 while Herald is up. Client animation is",
+    "not observable here."
+  ],
+  "timeout_ms": 30000,
+  "location": {"map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0},
+  "players": [
+    {"id": "cultist", "race": 1, "class": 25, "level": 22, "allow_regeneration": false}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "learn", "actor": "cultist", "spell": 520326},
+    {"action": "set_aura", "label": "Insanity meets Herald's caster requirement", "actor": "cultist", "spell": 500706,
+     "stacks": 90},
+    {"action": "wait", "ms": 2000},
+    {"action": "cast", "label": "Herald of the Depths", "actor": "cultist", "spell": 520326, "target": "cultist"},
+    {"action": "assert", "label": "SETUP: Herald is active", "actor": "cultist", "metric": "aura", "spell": 520326,
+     "equals": 1, "within_ms": 5000},
+    {"action": "assert", "label": "The Cultist shows the scale-1 Herald display", "actor": "cultist",
+     "metric": "display_id", "equals": 280071},
+    {"action": "assert", "label": "No object scale change follows the transform", "actor": "cultist",
+     "metric": "unit_scale", "min": 0.99, "max": 1.01}
+  ]
+}

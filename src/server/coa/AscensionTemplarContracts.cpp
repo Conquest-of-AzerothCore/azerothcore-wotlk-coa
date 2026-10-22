@@ -205,6 +205,8 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].BasePoints = 64;
     if (id == 1397742)
         info->Effects[1].Effect = 0;
+    if (id == 704409)
+        info->Effects[0].Effect = 0;
     if (id == 524740 && info->Effects[1].TriggerSpell == 520842 &&
         info->Effects[0].TargetB.GetTarget() == TARGET_UNIT_DEST_AREA_ENEMY)
     {
@@ -246,8 +248,6 @@ float Mitigation(Player* player, Unit* attacker, uint32 school)
     if ((school & SPELL_SCHOOL_MASK_MAGIC) && player->HasAura(801202) &&
         (player->HealthAbovePct(80) || player->HealthBelowPct(20)))
         factor *= .8f;
-    uint32 copies = HopeCount(player);
-    factor *= std::max(0.0f, 1.0f - float(copies) * (player->HasAura(803219) ? .15f : .1f));
     return factor;
 }
 constexpr uint32 SPELL_TRANQUIL_STATE = 850010;
@@ -273,6 +273,9 @@ class templar_scaling : public UnitScript
     }
     void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* info, uint8 index, float& value) override
     {
+        if (info && info->Id == 704409 && index == 1 && caster)
+            if (Player* owner = Owner(caster->GetCharmerOrOwner()); owner && owner->HasAura(803219))
+                value = -15.0f;
         Player* player = Owner(caster);
         if (!player || !info)
             return;
