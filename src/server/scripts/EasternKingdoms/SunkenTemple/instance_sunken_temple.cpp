@@ -229,6 +229,7 @@ public:
                 case GO_ETERNAL_FLAME3:
                 case GO_ETERNAL_FLAME4:
                     _eternalFlameGUIDs.push_back(gameobject->GetGUID());
+                    gameobject->SetGameObjectFlag(GO_FLAG_NOT_SELECTABLE);
                     break;
                 case GO_HAKKAR_WORSHIP_ALTAR:
                     _worshipAltarGUID = gameobject->GetGUID();

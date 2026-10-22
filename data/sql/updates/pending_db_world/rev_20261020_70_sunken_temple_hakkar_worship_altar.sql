@@ -5,4 +5,4 @@ INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconNa
 
 DELETE FROM `gameobject` WHERE `guid` = 4100001;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `ScriptName`, `Comment`) VALUES
-(4100001, 2310500, 109, 0, 0, 7, 1, -501.0332, 268.44318, -90.8275, 0.197752, 0, 0, 0.098715, 0.995116, 86400, 100, 1, '', 'Hakkar Worship Altar');
+(4100001, 2310500, 109, 0, 0, 7, 1, -474.5684, 272.73218, -90.41286, 0.016979, 0, 0, 0.008489, 0.999964, 86400, 100, 1, '', 'Hakkar Worship Altar');
