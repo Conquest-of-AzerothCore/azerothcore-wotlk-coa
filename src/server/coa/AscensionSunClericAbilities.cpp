@@ -293,9 +293,7 @@ public:
                 }
             }
         }
-        // Glorious Execution returns 807451's 5% of its damage as mana; nothing applies 807451 as an aura,
-        // so the return must not depend on having it.
-        if ((info->Id == 800691 || info->Id == 802566) && damage)
+        if ((info->Id == 800691 || info->Id == 802566) && damage && player->HasAura(807451))
             Mana(player, CalculatePct(damage, Amount(807451)));
         if (healing && player->HasAura(300344) && target->HasAura(Bless, player->GetGUID()) &&
             !spell->IsTriggered() && !spell->GetScriptValue(300344))
