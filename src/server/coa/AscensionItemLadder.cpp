@@ -131,6 +131,11 @@ bool WearsRebornArmor(uint8 playerClass)
     return playerClass >= CLASS_WARRIOR && playerClass <= CLASS_SPIRIT_MAGE && playerClass != CLASS_HERO;
 }
 
+uint32 AuthoredRebornArmor(uint32 itemAddonReborn, uint32 ownArmor)
+{
+    return itemAddonReborn ? itemAddonReborn : ownArmor;
+}
+
 Row StockRow(ItemTemplate const& proto, uint32 armorReborn)
 {
     Row row;

@@ -92,7 +92,8 @@ uint32 AuthoredRebornArmor(ItemTemplate const& proto)
 {
     auto const found = std::lower_bound(authoredRebornArmor.begin(), authoredRebornArmor.end(),
         std::pair<uint32, uint32>(proto.ItemId, 0));
-    return found != authoredRebornArmor.end() && found->first == proto.ItemId ? found->second : proto.Armor;
+    bool const listed = found != authoredRebornArmor.end() && found->first == proto.ItemId;
+    return ItemLadder::AuthoredRebornArmor(listed ? found->second : 0, proto.Armor);
 }
 
 class LadderStore

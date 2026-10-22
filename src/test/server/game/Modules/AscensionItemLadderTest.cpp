@@ -301,6 +301,13 @@ TEST(AscensionItemLadder, EveryClassButHeroWearsRebornArmor)
     EXPECT_FALSE(ItemLadder::WearsRebornArmor(MAX_CLASSES));
 }
 
+TEST(AscensionItemLadder, AuthoredItemWithoutRebornArmorKeepsItsOwnArmor)
+{
+    EXPECT_EQ(ItemLadder::AuthoredRebornArmor(57, 130), 57u);
+    EXPECT_EQ(ItemLadder::AuthoredRebornArmor(0, 130), 130u);
+    EXPECT_EQ(ItemLadder::AuthoredRebornArmor(0, 0), 0u);
+}
+
 TEST(AscensionItemLadder, ClientKeysFollowTheClientBands)
 {
     EXPECT_EQ(ItemLadder::ClientKey(1), 3u);
