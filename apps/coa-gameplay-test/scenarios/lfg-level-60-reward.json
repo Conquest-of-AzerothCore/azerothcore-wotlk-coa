@@ -134,9 +134,9 @@
     },
     {
       "action": "encounter_credit",
-      "label": "High Interrogator Gerstahn, final boss of Blackrock Depths - Prison, is credited",
+      "label": "The Ring of Law (High Justice Grimstone), final encounter of Blackrock Depths - Prison, is credited",
       "actor": "p1",
-      "entry": 9018
+      "entry": 10096
     },
     {
       "action": "assert",
