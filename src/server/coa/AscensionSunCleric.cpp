@@ -216,8 +216,6 @@ void Extend(Player* player, uint32 id, int32 milliseconds)
     Aura* aura = player->GetAura(id);
     if (!aura)
     {
-        // Applying the buff must not start the spell's own cooldown: Radiance (800054, 2 min) went on cooldown
-        // whenever Hegemony or Gateway to Heaven applied it from Dawn while it was ready.
         bool const wasOnCooldown = player->HasSpellCooldown(id);
         Cast(player, player, id);
         if (!wasOnCooldown && player->HasSpellCooldown(id))
@@ -262,7 +260,6 @@ void ActivateDawn(Player* player)
 {
     Resource(player, SolarPower, -20);
     Cast(player, player, Dawn);
-    // CalcMaxCharges = Dawn's 10 plus charge mods such as Guiding Glow (300324, +3 per rank).
     if (Aura* aura = player->GetAura(Dawn))
         aura->SetCharges(aura->CalcMaxCharges());
     if (AuraEffect* choice = player->GetAuraEffect(Dawn, EFFECT_0))
