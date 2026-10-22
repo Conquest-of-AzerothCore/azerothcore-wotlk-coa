@@ -456,6 +456,7 @@ void WorldConfig::BuildConfigCache()
     SetConfigValue<uint32>(CONFIG_CREATURE_FAMILY_ASSISTANCE_DELAY, "CreatureFamilyAssistanceDelay", 2000);
     SetConfigValue<uint32>(CONFIG_CREATURE_FAMILY_ASSISTANCE_PERIOD, "CreatureFamilyAssistancePeriod", 3000);
     SetConfigValue<uint32>(CONFIG_CREATURE_FAMILY_FLEE_DELAY, "CreatureFamilyFleeDelay", 7000);
+    SetConfigValue<bool>(CONFIG_CREATURE_FAMILY_FLEE_WALK, "CreatureFamilyFleeWalk", false);
 
     SetConfigValue<uint32>(CONFIG_WORLD_BOSS_LEVEL_DIFF, "WorldBossLevelDiff", 3);
 

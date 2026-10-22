@@ -25,6 +25,7 @@
 #include "CreatureGroups.h"
 #include "MoveSpline.h"
 #include "DatabaseEnv.h"
+#include "FleeingMovementGenerator.h"
 #include "Formulas.h"
 #include "GameEventMgr.h"
 #include "GameTime.h"
@@ -1135,12 +1136,19 @@ void Creature::DoFleeToGetAssistance()
         SetNoSearchAssistance(true);
         UpdateSpeed(MOVE_RUN, false);
 
+        bool const walk = sWorld->getBoolConfig(CONFIG_CREATURE_FAMILY_FLEE_WALK);
         if (!creature)
+        {
             //SetFeared(true, GetVictim()->GetGUID(), 0, sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY));
             //TODO: use 31365
             SetControlled(true, UNIT_STATE_FLEEING, GetVictim());
+            MovementGenerator* controlled = GetMotionMaster()->GetMotionSlot(MOTION_SLOT_CONTROLLED);
+            if (auto* flee = dynamic_cast<FleeingMovementGenerator<Creature>*>(controlled); flee && walk)
+                flee->SetWalk(true);
+        }
         else
-            GetMotionMaster()->MoveSeekAssistance(creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ());
+            GetMotionMaster()->MoveSeekAssistance(creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(),
+                walk ? FORCED_MOVEMENT_WALK : FORCED_MOVEMENT_NONE);
     }
 }
 

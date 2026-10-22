@@ -3164,6 +3164,15 @@ CreatureFamilyAssistancePeriod = 3000
 CreatureFamilyFleeDelay = 7000
 
 #
+#    CreatureFamilyFleeWalk
+#        Description: Creatures that flee at low health walk instead of running, both while
+#                     seeking assistance and while fleeing without it. Fear effects are unchanged.
+#        Default:     0 - (Disabled, creatures run)
+#                     1 - (Enabled, creatures walk)
+
+CreatureFamilyFleeWalk = 0
+
+#
 #    WorldBossLevelDiff
 #        Description: World boss level difference.
 #        Default:     3

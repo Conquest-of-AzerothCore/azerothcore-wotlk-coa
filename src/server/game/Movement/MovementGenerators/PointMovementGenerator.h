@@ -74,8 +74,8 @@ private:
 class AssistanceMovementGenerator : public PointMovementGenerator<Creature>
 {
 public:
-    AssistanceMovementGenerator(float _x, float _y, float _z) :
-        PointMovementGenerator<Creature>(0, _x, _y, _z, FORCED_MOVEMENT_NONE) {}
+    AssistanceMovementGenerator(float _x, float _y, float _z, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE) :
+        PointMovementGenerator<Creature>(0, _x, _y, _z, forcedMovement) {}
 
     MovementGeneratorType GetMovementGeneratorType() override { return ASSISTANCE_MOTION_TYPE; }
     void Finalize(Unit*) override;

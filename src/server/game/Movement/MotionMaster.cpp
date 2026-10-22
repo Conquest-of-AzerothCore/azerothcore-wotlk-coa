@@ -799,7 +799,7 @@ void MotionMaster::MoveCharge(PathGenerator const& path, float speed /*= SPEED_C
     init.Launch();
 }
 
-void MotionMaster::MoveSeekAssistance(float x, float y, float z)
+void MotionMaster::MoveSeekAssistance(float x, float y, float z, ForcedMovement forcedMovement)
 {
     // Xinef: do not allow to move with UNIT_FLAG_DISABLE_MOVE
     if (_owner->HasUnitFlag(UNIT_FLAG_DISABLE_MOVE))
@@ -815,7 +815,7 @@ void MotionMaster::MoveSeekAssistance(float x, float y, float z)
         _owner->AttackStop();
         _owner->CastStop(0, false);
         _owner->ToCreature()->SetReactState(REACT_PASSIVE);
-        Mutate(new AssistanceMovementGenerator(x, y, z), MOTION_SLOT_ACTIVE);
+        Mutate(new AssistanceMovementGenerator(x, y, z, forcedMovement), MOTION_SLOT_ACTIVE);
     }
 }
 
