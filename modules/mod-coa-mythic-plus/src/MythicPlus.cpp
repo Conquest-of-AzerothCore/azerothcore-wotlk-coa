@@ -948,8 +948,8 @@ namespace
         }
 
         run.state = timed ? STATE_TIMED : STATE_OVERTIME;
-        // Out of time: still one cache, but no coins.
-        uint32 caches = timed ? upgrade : sConfigMgr->GetOption<uint32>("MythicPlus.OvertimeCaches", 1);
+        // Out of time: no cache and no coins.
+        uint32 caches = upgrade;
         uint32 newLevel = run.level + upgrade;
         float const timeLeft = limit && timed ? float(limit - run.elapsedMs) / limit : 0.0f;
         bool const firstTime = timed && run.level > GetBestLevel(run.owner);
@@ -2665,6 +2665,7 @@ public:
             { "reload",   HandleReload,   SEC_ADMINISTRATOR, Console::Yes },
             { "wings",    HandleWings,    SEC_ADMINISTRATOR, Console::Yes },
             { "setbest",  HandleSetBest,  SEC_ADMINISTRATOR, Console::Yes },
+            { "elapsed",  HandleElapsed,  SEC_ADMINISTRATOR, Console::Yes },
         };
         static ChatCommandTable commandTable =
         {
@@ -2804,6 +2805,25 @@ public:
             return false;
         CharacterDatabase.DirectExecute("REPLACE INTO coa_mythic_best (guid, level) VALUES ({}, {})", target->GetGUID().GetCounter(), level);
         handler->PSendSysMessage("Highest Mythic Level Completed of {}: {}", target->GetName(), level);
+        return true;
+    }
+
+    // .mythic elapsed <seconds> [name]: how long the running key in the player's instance has been going, e.g. to
+    // finish a run out of time. Without a name the selected player or yourself.
+    static bool HandleElapsed(ChatHandler* handler, uint32 seconds, Optional<PlayerIdentifier> name)
+    {
+        Player* target = name ? name->GetConnectedPlayer() : handler->getSelectedPlayerOrSelf();
+        if (!target)
+            return false;
+        std::lock_guard<std::recursive_mutex> guard(g_lock);
+        Run* run = RunFor(target->GetMap());
+        if (!run || run->state != STATE_RUNNING)
+        {
+            handler->SendSysMessage("No Mythic+ run is under way there.");
+            return true;
+        }
+        run->elapsedMs = seconds * IN_MILLISECONDS;
+        handler->PSendSysMessage("Mythic+: {} s of {} s elapsed.", seconds, run->dungeon.timeLimitMs / IN_MILLISECONDS);
         return true;
     }
 

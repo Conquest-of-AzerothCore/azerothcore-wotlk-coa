@@ -89,12 +89,6 @@ MythicPlus.DefaultForces.Elite = 2
 
 MythicPlus.NoCreatureLoot = 1
 
-#    MythicPlus.OvertimeCaches
-#        Description: Caches for a run finished after the time limit (in time: 1 to 3).
-#        Default:     1
-
-MythicPlus.OvertimeCaches = 1
-
 #    MythicPlus.CoinItem
 #    MythicPlus.CoinItem.TBC
 #    MythicPlus.CoinItem.WotLK
