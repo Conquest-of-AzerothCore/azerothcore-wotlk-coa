@@ -988,7 +988,10 @@ namespace
             if (caches)
                 Give(player, CacheForLevel(run.level), caches);
             if (timed)
+            {
+                SetBestLevel(player->GetGUID(), run.level);
                 GiveCoins(player, run.level, bonusPercent, run.dungeon.expansion);
+            }
 
             if (player->GetGUID() == run.owner)
             {
