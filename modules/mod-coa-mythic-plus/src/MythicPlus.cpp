@@ -2295,7 +2295,8 @@ public:
         return true;
     }
 };
-// Selling a Mythic item to Edrim recycles it instead (45 + level Mythic Coins).
+// Selling a Mythic 1 or higher item to Edrim recycles it instead (45 + level Mythic Coins); any other item,
+// a plain Mythic Dungeon item included, sells for gold as at any vendor.
 class coa_mythic_plus_recycle : public PlayerScript
 {
 public:
@@ -2306,11 +2307,9 @@ public:
         if (!creature || creature->GetEntry() != NPC_EDRIM)
             return true;
         std::lock_guard<std::recursive_mutex> guard(g_lock);
-        if (!g_chainOf.count(item->GetEntry()))
-        {
-            ChatHandler(player->GetSession()).SendSysMessage("Edrim Skysong only takes Mythic items.");
-            return false;
-        }
+        auto itr = g_chainOf.find(item->GetEntry());
+        if (itr == g_chainOf.end() || !itr->second.second)
+            return true;
         Recycle(player, item);
         return false;
     }
