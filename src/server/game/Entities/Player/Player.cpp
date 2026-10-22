@@ -7243,7 +7243,7 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
             ApplySpellPowerBonus(spellbonus, apply);
 
     // If set ScalingStatValue armor get it or use item armor
-    uint32 armor = proto->Armor;
+    uint32 armor = LocalLevelScaling::WornArmorFor(this, proto, proto->Armor);
     if (ssv)
     {
         if (uint32 ssvarmor = ssv->getArmorMod(ScalingStatValue))

@@ -327,6 +327,18 @@ inline ItemTemplate const* InstanceTemplateFor(Item const* item, ItemTemplate co
     return scaled ? scaled : authored;
 }
 
+/// The armor one character gets from wearing an item built from this template. The client shows the
+/// reborn armor column to every class but the classless Hero, so the owner of item ladders answers
+/// with that column for those classes; without an owner the template's own armor applies.
+using WornArmorResolver = std::uint32_t (*)(Player const*, ItemTemplate const*, std::uint32_t armor);
+inline std::atomic<WornArmorResolver> WornArmorOwner{nullptr};
+
+inline std::uint32_t WornArmorFor(Player const* player, ItemTemplate const* proto, std::uint32_t armor)
+{
+    WornArmorResolver const owner = WornArmorOwner.load(std::memory_order_relaxed);
+    return owner && player && proto ? owner(player, proto, armor) : armor;
+}
+
 /// An item instance moved into a character's inventory from somewhere the character's login did not
 /// cover: a trade, a mail. The owner of instance levels tells the client the level of such an item.
 using ItemArrivalResolver = void (*)(Player*, Item*);

@@ -158,6 +158,12 @@ CoA.ItemScaling.Native.QuestRewards = 1
 CoA.ItemScaling.Native.LevelKeys = 1
 CoA.ItemScaling.Native.Preview = 1
 
+# RebornArmor gives every class but the classless Hero the reborn armor the client shows them: the
+# ladder row's second armor column for a scaled item, ItemAddon.dbc's reborn armor for an authored one
+# (items without that value keep their own armor). The stat reply then carries both columns. With 0,
+# items give their full armor to everyone and the reply repeats it. Needs Native; read at startup only.
+CoA.ItemScaling.Native.RebornArmor = 1
+
 # Automatic progression: hand out the class abilities and rank upgrades for the
 # character's class and level as they level up. Set to 0 to stop that
 # and let the player ask instead - a Book of Ascension grants them, so a realm that
