@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "The Wondrous Wisdomball offers a dungeon's quests to either faction (#6443), and never a quest that would complete before the player does anything",
-  "contract": "AscensionWisdomball.cpp lists a dungeon's quests by map alone and accepts them through Player::CanAddQuest (log space and source item only). Issue #6443, decided by the user: the ball ignores a quest's AllowableRaces, so PR #5578's Player::SatisfyQuestRace check in CanOffer is gone. Blackfathom Deeps quests 1200 (AllowableRaces 1101, Alliance) and 6561 (AllowableRaces 690, Horde) are both 'Blackfathom Villainy'; neither has an ExclusiveGroup, so a Horde character is offered and granted both, the duplicate #5486 reported. Ragefire Chasm quests 5722 ('Searching for the Lost Satchel', starter Rahauro 11833, ender Maur Grimtotem 11834) and 5724 ('Returning the Lost Satchel', starter 11834, StartItem 14381, ender 11833) have no RequiredNpcOrGo/RequiredItemId/RequiredPlayerKills objective at all: granting either through the ball leaves it satisfied on the spot, without the player doing anything. Until a real per-quest fix exists, the ball must stop offering exactly these two quest IDs; quest 5723, a real Ragefire Chasm quest with an objective, stays offered as a control.",
+  "contract": "AscensionWisdomball.cpp lists a dungeon's quests by map alone and accepts them through Player::CanAddQuest (log space and source item only). Issue #6443, decided by the user: the ball ignores a quest's AllowableRaces, so PR #5578's Player::SatisfyQuestRace check in CanOffer is gone. Blackfathom Deeps quests 1200 (AllowableRaces 1101, Alliance) and 6561 (AllowableRaces 690, Horde) are both 'Blackfathom Villainy'; neither has an ExclusiveGroup, so a Horde character is offered and granted both, the duplicate #5486 reported. Ragefire Chasm quests 5722 ('Searching for the Lost Satchel', starter Rahauro 11833, ender Maur Grimtotem 11834) and 5724 ('Returning the Lost Satchel', starter 11834, StartItem 14381, ender 11833) have no RequiredNpcOrGo/RequiredItemId/RequiredPlayerKills objective at all: granting either through the ball leaves it satisfied on the spot, without the player doing anything. The ball must not offer them. Blackfathom Deeps has three more such quests that no hand-kept list named: 1198 In Search of Thaelrid and 6562 Trouble in the Deeps are talk-to steps with no objective, and 6564 Allegiance to the Old Gods requires only its own StartItem 16790, so each was handed out complete and paid straight back at the ball. The ball withholds every quest without a player objective (kill, cast, speak-to, player kill, exploration or event, money or reputation, or a required item other than its StartItem), plus the hand-kept IDs. Quest 5723, a real Ragefire Chasm quest with an objective, stays offered as a control.",
   "timeout_ms": 180000,
   "players": [
     { "id": "raider", "race": 10, "class": 13, "level": 80 }
@@ -39,6 +39,27 @@
       "action": "assert",
       "label": "The ball still offers this Blood Elf the Horde Blackfathom Villainy",
       "actor": "raider", "metric": "ball_offers_quest", "quest": 6561, "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The ball never offers In Search of Thaelrid, a talk-to quest with no objective",
+      "actor": "raider", "metric": "ball_offers_quest", "quest": 1198, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Nor Trouble in the Deeps, another talk-to quest",
+      "actor": "raider", "metric": "ball_offers_quest", "quest": 6562, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Nor the Damp Note delivery, whose StartItem is its only required item",
+      "actor": "raider", "metric": "ball_offers_quest", "quest": 6564, "equals": 0
+    },
+    { "action": "quest_accept", "label": "Try to take In Search of Thaelrid anyway, as a hostile client would", "actor": "raider", "quest": 1198, "entry": 79025 },
+    {
+      "action": "assert",
+      "label": "The ball refuses it - it never enters the log",
+      "actor": "raider", "metric": "quest_status", "quest": 1198, "equals": 0
     },
     { "action": "quest_accept", "label": "Take the Alliance version at the ball", "actor": "raider", "quest": 1200, "entry": 79025 },
     {
