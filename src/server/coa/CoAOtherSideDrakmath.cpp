@@ -39,7 +39,6 @@ enum DrakmathData : uint32
     SPELL_SUBMERGED = 256850,
     SPELL_PILLAR_VISUAL = 256854,
     SPELL_NECROTIC_EMERGE = 256021,
-    SPELL_NECROTIC_EMERGE_HIGH = 256497,
     SPELL_ORB_VISUAL = 256853,
     SPELL_ORB_CIRCLE = 256865,
     SPELL_NECROTIC_EXPLOSION = 256857,
@@ -78,12 +77,10 @@ constexpr float SidePillarDistance = 10.0f;
 constexpr float OrbSpeed = 2.0f;
 constexpr float OrbTravel = 25.0f;
 constexpr float OrbTouch = 2.0f;
-constexpr float PillarBurstRadius = 5.0f;
 constexpr float BeamLength = 45.0f;
 constexpr float BeamConeHalfAngle = 15.0f * float(M_PI) / 180.0f;
 constexpr float BeamMinHalfWidth = 2.0f;
 constexpr uint32 BeamPillars = 10;
-constexpr float BeamPctMaxHealth = 20.0f;
 constexpr uint32 BeamChannelMs = 30000;
 constexpr uint32 BeamTickMs = 500;
 constexpr float LevitateHeight = 3.0f;
@@ -99,6 +96,7 @@ Position const BeamWalkerStart = { 273.317f, 156.766f, 248.961f, 0.0f };
 
 using CoAOtherSide::Damage3;
 using CoAOtherSide::Rolled;
+using CoAOtherSide::Unscaled;
 constexpr Damage3 ParasitismHit = { 366, 1118 };
 constexpr Damage3 ParasitismTick = { 56, 371 };
 constexpr Damage3 NecroticEmerge = { 260, 660 };
@@ -178,10 +176,23 @@ struct boss_coa_drakmath : public ScriptedAI
         _summons.Summon(summon);
     }
 
+    void DamageTaken(Unit* , uint32& damage, DamageEffectType , SpellSchoolMask ) override
+    {
+        if (_phase == Phase::Sunk)
+            damage = 0;
+    }
+
     void JustDied(Unit* ) override
     {
         Talk(SAY_DEATH);
         _summons.DespawnAll();
+        _beaming = false;
+        me->RemoveAurasDueToSpell(SPELL_SUBMERGED);
+        me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+        me->SetControlled(false, UNIT_STATE_ROOT);
+        me->SetHover(false);
+        me->SetDisableGravity(false);
+        me->RestoreDisplayId();
     }
 
     void UpdateAI(uint32 diff) override
@@ -360,7 +371,7 @@ private:
 
     void BurstPillar(Creature* pillar)
     {
-        pillar->CastSpell(pillar, ByDifficulty(me, SPELL_NECROTIC_EMERGE, SPELL_NECROTIC_EMERGE_HIGH, SPELL_NECROTIC_EMERGE_HIGH), true);
+        pillar->CastSpell(pillar, SPELL_NECROTIC_EMERGE, true);
         ReleaseOrbs(pillar->GetPosition());
         pillar->DespawnOrUnsummon(200ms);
     }
@@ -637,6 +648,8 @@ class spell_coa_drakmath_spiritual_parasitism : public SpellScript
 
     void HandleHit()
     {
+        if (!GetHitDamage())
+            return;
         SetHitDamage(Rolled(GetCaster(), GetHitUnit(), ParasitismHit));
     }
 
@@ -717,7 +730,7 @@ class spell_coa_volzeen_colossal_smash : public SpellScript
         Unit* target = GetHitUnit();
         Unit* caster = GetCaster();
         if (target && caster && caster->GetEntry() == NPC_VOLZEEN)
-            SetHitDamage(target->CountPctFromMaxHealth(12.0f));
+            SetHitDamage(int32(Unscaled(caster, target, float(target->CountPctFromMaxHealth(12.0f)))));
     }
 
     void Register() override
@@ -749,7 +762,7 @@ class spell_coa_drakmath_death_beam : public SpellScript
     void HandleHit()
     {
         if (Unit* target = GetHitUnit())
-            SetHitDamage(int32(target->CountPctFromMaxHealth(BeamPctMaxHealth)));
+            SetHitDamage(int32(Unscaled(GetCaster(), target, float(target->CountPctFromMaxHealth(float(GetSpellInfo()->Effects[EFFECT_0].CalcValue()))))));
     }
 
     void Register() override

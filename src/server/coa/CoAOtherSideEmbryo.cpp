@@ -131,6 +131,7 @@ constexpr float WebTouch = 1.5f;
 Position const ArenaMiddle = { 304.429f, -206.081f, 341.841f, 0.0f };
 constexpr float WebSpeed = 25.0f;
 
+using CoAOtherSide::BaseSpellId;
 using CoAOtherSide::Damage3;
 using CoAOtherSide::Rolled;
 constexpr Damage3 SpikeHit = { 400, 1200 };
@@ -148,11 +149,6 @@ uint32 ByDifficulty(WorldObject const* source, uint32 normal, uint32 heroic, uin
         default:
             return normal;
     }
-}
-
-float RankFactor(WorldObject const* source, float heroic, float mythic)
-{
-    return float(ByDifficulty(source, 1000, uint32(heroic * 1000.0f), uint32(mythic * 1000.0f))) / 1000.0f;
 }
 
 struct boss_coa_chimeric_embryo : public ScriptedAI
@@ -858,15 +854,16 @@ class spell_coa_embryo_runover : public SpellScript
         if (!caster)
             return;
         uint32 const spellId = GetSpellInfo()->Id;
+        bool const wave = BaseSpellId(spellId) == SPELL_POISON_WAVE;
         for (auto const& ref : caster->GetMap()->GetPlayers())
-            if (Player* player = ref.GetSource(); player && player->IsAlive() && !player->IsGameMaster() && (spellId == SPELL_POISON_WAVE ? OnBlob(caster, player) : caster->GetExactDist2d(player) <= WebTouch)
+            if (Player* player = ref.GetSource(); player && player->IsAlive() && !player->IsGameMaster() && (wave ? OnBlob(caster, player) : caster->GetExactDist2d(player) <= WebTouch)
                 && std::fabs(caster->GetPositionZ() - player->GetPositionZ()) < 4.0f && !player->HasAura(spellId))
                 targets.push_back(player);
     }
 
     void HandleKnockBack(SpellEffIndex effIndex)
     {
-        if (GetSpellInfo()->Id != SPELL_POISON_WAVE)
+        if (BaseSpellId(GetSpellInfo()->Id) != SPELL_POISON_WAVE)
             return;
         PreventHitDefaultEffect(effIndex);
         if (Unit* caster = GetCaster())
@@ -874,18 +871,11 @@ class spell_coa_embryo_runover : public SpellScript
                 target->KnockbackFrom(caster->GetPositionX(), caster->GetPositionY(), BlobKnockSpeedXY, BlobKnockSpeedZ);
     }
 
-    void HandleHit()
-    {
-        if (Unit* caster = GetCaster())
-            SetHitDamage(int32(GetHitDamage() * RankFactor(caster, 147.0f / 74.0f, 184.0f / 74.0f)));
-    }
-
     void Register() override
     {
         OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_coa_embryo_runover::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
         OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_coa_embryo_runover::FilterTargets, EFFECT_1, TARGET_UNIT_SRC_AREA_ENEMY);
         OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_coa_embryo_runover::FilterTargets, EFFECT_2, TARGET_UNIT_SRC_AREA_ENEMY);
-        OnHit += SpellHitFn(spell_coa_embryo_runover::HandleHit);
         OnEffectHitTarget += SpellEffectFn(spell_coa_embryo_runover::HandleKnockBack, EFFECT_0, SPELL_EFFECT_KNOCK_BACK);
     }
 };
@@ -896,6 +886,8 @@ class spell_coa_embryo_poison_bolt : public SpellScript
 
     void HandleHit()
     {
+        if (!GetHitDamage())
+            return;
         SetHitDamage(Rolled(GetCaster(), GetHitUnit(), PoisonBoltHit));
     }
 

@@ -109,6 +109,7 @@ constexpr float BatCrashRadius = 3.0f;
 using CoAOtherSide::Damage3;
 using CoAOtherSide::Logged;
 using CoAOtherSide::Rolled;
+using CoAOtherSide::Unscaled;
 constexpr Damage3 GlaiveHit = { 151, 394 };
 constexpr Damage3 GlaiveBleedPerStack = { 40, 110 };
 constexpr Damage3 CobraPrimary = { 200, 850 };
@@ -146,11 +147,12 @@ uint32 WebSpell(WorldObject const* source)
 void DealSpellValue(Unit* attacker, Unit* target, uint32 spellId, int32 value)
 {
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
-    if (!spellInfo || !target->IsAlive() || value <= 0)
+    if (!spellInfo || !target->IsAlive() || value <= 0 || target->IsImmunedToDamage(attacker, spellInfo))
         return;
+    uint32 amount = attacker->SpellDamageBonusDone(target, spellInfo, uint32(value), SPELL_DIRECT_DAMAGE, EFFECT_0);
+    amount = target->SpellDamageBonusTaken(attacker, spellInfo, amount, SPELL_DIRECT_DAMAGE);
     SpellNonMeleeDamage damage(attacker, target, spellInfo, spellInfo->GetSchoolMask());
-    damage.damage = attacker->SpellDamageBonusDone(target, spellInfo, uint32(value), SPELL_DIRECT_DAMAGE, EFFECT_0);
-    damage.damage = target->SpellDamageBonusTaken(attacker, spellInfo, damage.damage, SPELL_DIRECT_DAMAGE);
+    attacker->CalculateSpellDamageTaken(&damage, int32(amount), spellInfo);
     Unit::DealDamageMods(target, damage.damage, &damage.absorb);
     attacker->SendSpellNonMeleeDamageLog(&damage);
     attacker->DealSpellDamage(&damage, false);
@@ -581,7 +583,7 @@ private:
         SelectTargetList(players, 40, SelectTargetMethod::Random, 0, 150.0f, true);
         for (Unit* player : players)
             if (player->HasAura(spellId, me->GetGUID()))
-                DealSpellValue(me, player, spellId, int32(player->CountPctFromMaxHealth(pct)));
+                DealSpellValue(me, player, spellId, int32(Unscaled(me, player, float(player->CountPctFromMaxHealth(pct)))));
     }
 
     struct FallingBat
@@ -718,7 +720,7 @@ class spell_coa_muzah_ripped_by_the_glaives_aura : public AuraScript
     {
         canBeRecalculated = true;
         if (Unit* owner = GetUnitOwner())
-            amount = int32(Logged(owner, owner, GlaiveBleedPerStack));
+            amount = int32(Logged(GetCaster() ? GetCaster() : owner, owner, GlaiveBleedPerStack));
     }
 
     void Register() override
@@ -792,7 +794,7 @@ class spell_coa_muzah_entangling_web : public SpellScript
     void HandleHit()
     {
         if (Unit* target = GetHitUnit())
-            SetHitDamage(target->CountPctFromMaxHealth(WebHitPct(target)));
+            SetHitDamage(int32(Unscaled(GetCaster(), target, float(target->CountPctFromMaxHealth(WebHitPct(target))))));
     }
 
     void Register() override

@@ -101,7 +101,11 @@ namespace
     /// The dungeon finder entries whose dungeons scale: the classic five-player dungeons the client's own
     /// scaling list names, plus Blackrock Depths, Lower and Upper Blackrock Spire, Dire Maul, Stratholme
     /// and Scholomance, the classic dungeons the client list leaves out.
-    constexpr char DEFAULT_SCALING_DUNGEONS[] = "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601";
+    constexpr char DEFAULT_SCALING_DUNGEONS[] = "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601 402";
+
+    /// Finder entries whose band is set here instead of read from LFGDungeons.dbc, as `entry:low-high`:
+    /// Road to De Other Side is a low-level dungeon, while its finder row admits 10-59.
+    constexpr char DEFAULT_SCALING_BANDS[] = "402:15-20";
 
     /// Where a view can exist at all: the open-world maps, and the classic dungeons with the band their
     /// creatures are held inside. Built on every config load and at startup, and published whole, so a
@@ -131,7 +135,29 @@ namespace
         return ids;
     }
 
-    /// The bands come from LFGDungeons.dbc. The first config load runs before the store is filled, so
+    std::unordered_map<uint32, LocalLevelScaling::LevelBand> ConfigBands()
+    {
+        std::unordered_map<uint32, LocalLevelScaling::LevelBand> bands;
+        std::string const value = sConfigMgr->GetOption<std::string>("DestinyWeaver.Scaling.DungeonBands",
+                                                                     DEFAULT_SCALING_BANDS);
+        for (std::string_view token : Acore::Tokenize(value, ' ', false))
+        {
+            std::vector<std::string_view> entry = Acore::Tokenize(token, ':', false);
+            if (entry.size() != 2)
+                continue;
+            std::vector<std::string_view> levels = Acore::Tokenize(entry[1], '-', false);
+            if (levels.size() != 2)
+                continue;
+            Optional<uint32> dungeonId = Acore::StringTo<uint32>(entry[0]);
+            Optional<uint32> low = Acore::StringTo<uint32>(levels[0]);
+            Optional<uint32> high = Acore::StringTo<uint32>(levels[1]);
+            if (dungeonId && low && high)
+                bands[*dungeonId] = LocalLevelScaling::DungeonBandFromFinder(*low, *high);
+        }
+        return bands;
+    }
+
+    /// The bands come from LFGDungeons.dbc unless DestinyWeaver.Scaling.DungeonBands sets one. The first config load runs before the store is filled, so
     /// it publishes a scope without dungeons; startup publishes the complete one.
     void PublishScope()
     {
@@ -139,14 +165,16 @@ namespace
         for (uint32 mapId : ConfigIds("DestinyWeaver.Scaling.WorldMaps", "0 1"))
             scope->WorldMaps.insert(mapId);
 
+        std::unordered_map<uint32, LocalLevelScaling::LevelBand> const configured = ConfigBands();
         for (uint32 dungeonId : ConfigIds("DestinyWeaver.Scaling.DungeonIds", DEFAULT_SCALING_DUNGEONS))
         {
             LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(dungeonId);
             if (!dungeon)
                 continue;
 
-            LocalLevelScaling::LevelBand const band =
-                LocalLevelScaling::DungeonBandFromFinder(dungeon->TargetLevelMin, dungeon->MaxLevel);
+            auto const fixed = configured.find(dungeonId);
+            LocalLevelScaling::LevelBand const band = fixed != configured.end() ? fixed->second
+                : LocalLevelScaling::DungeonBandFromFinder(dungeon->TargetLevelMin, dungeon->MaxLevel);
             auto [itr, inserted] = scope->DungeonBands.try_emplace(dungeon->MapID, band);
             if (!inserted)
                 itr->second = LocalLevelScaling::MergeBands(itr->second, band);

@@ -5,8 +5,11 @@
 #ifndef COA_OTHER_SIDE_DAMAGE_H
 #define COA_OTHER_SIDE_DAMAGE_H
 
+#include "CoACreatureScaling.h"
+#include "DBCStores.h"
 #include "Map.h"
 #include "Random.h"
+#include "SpellMgr.h"
 #include "Unit.h"
 #include <algorithm>
 
@@ -22,11 +25,17 @@ namespace CoAOtherSide
     constexpr float LogNormalLevel = 25.0f;
     constexpr float MaxLevel = 60.0f;
 
-    inline float Logged(WorldObject const* source, Unit const* target, Damage3 const& damage)
+    inline float Unscaled(Unit const* attacker, Unit const* target, float value)
+    {
+        float const multiplier = CreatureScaling::DamageMultiplier(target, attacker);
+        return multiplier > 0.0f ? value / multiplier : value;
+    }
+
+    inline float Logged(Unit const* attacker, Unit const* target, Damage3 const& damage)
     {
         float const mythic = float(damage.mythic);
         float const heroic = mythic * HeroicShareOfMythic;
-        switch (source->GetMap()->GetDifficulty())
+        switch (attacker->GetMap()->GetDifficulty())
         {
             case DUNGEON_DIFFICULTY_EPIC:
                 return mythic;
@@ -36,18 +45,27 @@ namespace CoAOtherSide
                 break;
         }
         float const normal25 = float(damage.normal25);
-        float const normal60 = heroic * NormalShareOfHeroic;
+        float const normal60 = std::max(normal25, heroic * NormalShareOfHeroic);
         float const level = target ? float(target->GetLevel()) : MaxLevel;
-        if (level >= MaxLevel)
-            return normal60;
-        if (level >= LogNormalLevel)
-            return normal25 + (normal60 - normal25) * (level - LogNormalLevel) / (MaxLevel - LogNormalLevel);
-        return normal25 * std::max(1.0f, level) / LogNormalLevel;
+        float normal = normal60;
+        if (level < LogNormalLevel)
+            normal = normal25 * std::max(1.0f, level) / LogNormalLevel;
+        else if (level < MaxLevel)
+            normal = normal25 + (normal60 - normal25) * (level - LogNormalLevel) / (MaxLevel - LogNormalLevel);
+        return Unscaled(attacker, target, normal);
     }
 
-    inline int32 Rolled(WorldObject const* source, Unit const* target, Damage3 const& damage)
+    inline int32 Rolled(Unit const* attacker, Unit const* target, Damage3 const& damage)
     {
-        return std::max(1, int32(Logged(source, target, damage) * frand(0.9f, 1.1f)));
+        return std::max(1, int32(Logged(attacker, target, damage) * frand(0.9f, 1.1f)));
+    }
+
+    inline uint32 BaseSpellId(uint32 spellId)
+    {
+        if (SpellDifficultyEntry const* entry = sSpellDifficultyStore.LookupEntry(sSpellMgr->GetSpellDifficultyId(spellId)))
+            if (entry->SpellID[0] > 0)
+                return uint32(entry->SpellID[0]);
+        return spellId;
     }
 }
 

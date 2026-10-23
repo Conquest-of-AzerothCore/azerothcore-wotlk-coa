@@ -66,10 +66,18 @@ DestinyWeaver.Scaling.WorldMaps = "0 1"
 #                     inside the entry's TargetLevelMin-MaxLevel band; an entry whose levels lie outside
 #                     1-60 uses 15-59, and a map listed by several entries covers all of them. A
 #                     dungeon that is not listed keeps its authored levels.
-#        Default:     "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601"
+#        Default:     "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601 402"
 #        Reloadable:  yes (.reload config)
 
-DestinyWeaver.Scaling.DungeonIds = "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601"
+DestinyWeaver.Scaling.DungeonIds = "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601 402"
+
+#    DestinyWeaver.Scaling.DungeonBands
+#        Description: Bands that replace the LFGDungeons.dbc band of a listed dungeon finder entry, as
+#                     space-separated entry:low-high pairs.
+#        Default:     "402:15-20" - (Road to De Other Side)
+#        Reloadable:  yes (.reload config)
+
+DestinyWeaver.Scaling.DungeonBands = "402:15-20"
 
 #    DestinyWeaver.ExperienceBonusControl
 #        Description: Whether the Experience Bonus Control service exists at all. A character who

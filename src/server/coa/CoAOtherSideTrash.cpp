@@ -19,6 +19,7 @@
 
 namespace
 {
+using CoAOtherSide::BaseSpellId;
 using CoAOtherSide::Damage3;
 using CoAOtherSide::Rolled;
 
@@ -233,7 +234,7 @@ class spell_coa_other_side_trash_damage : public SpellScript
 
     void HandleHit()
     {
-        auto itr = Damages.find(GetSpellInfo()->Id);
+        auto itr = Damages.find(BaseSpellId(GetSpellInfo()->Id));
         if (itr == Damages.end() || !itr->second.hit.mythic || !GetHitDamage())
             return;
         SetHitDamage(Rolled(GetCaster(), GetHitUnit(), itr->second.hit));
@@ -251,7 +252,7 @@ class spell_coa_other_side_trash_damage_aura : public AuraScript
 
     void CalcTick(AuraEffect const* , int32& amount, bool& )
     {
-        auto itr = Damages.find(GetSpellInfo()->Id);
+        auto itr = Damages.find(BaseSpellId(GetSpellInfo()->Id));
         if (itr == Damages.end() || !itr->second.tick.mythic)
             return;
         if (Unit* caster = GetCaster())
@@ -279,7 +280,8 @@ class spell_coa_other_side_fissure_strike : public SpellScript
         for (auto const& ref : caster->GetMap()->GetPlayers())
         {
             Player* player = ref.GetSource();
-            if (!player || !player->IsAlive() || player->IsGameMaster() || std::fabs(player->GetPositionZ() - caster->GetPositionZ()) > 5.0f)
+            if (!player || !player->IsAlive() || player->IsGameMaster() || std::fabs(player->GetPositionZ() - caster->GetPositionZ()) > 5.0f
+                || player->IsImmunedToDamage(caster, strike))
                 continue;
             float const dist = caster->GetExactDist2d(player);
             float const off = caster->GetRelativeAngle(player);
@@ -287,8 +289,10 @@ class spell_coa_other_side_fissure_strike : public SpellScript
             float const across = std::fabs(dist * std::sin(off));
             if (along < 0.0f || along > FissureLength || across > FissureHalfWidth)
                 continue;
+            uint32 const value = player->SpellDamageBonusTaken(caster, strike, uint32(Rolled(caster, player, Damages.at(SPELL_FISSURE_STRIKE).hit)), SPELL_DIRECT_DAMAGE);
             SpellNonMeleeDamage damage(caster, player, strike, strike->GetSchoolMask());
-            damage.damage = Rolled(caster, player, Damages.at(SPELL_FISSURE_STRIKE).hit);
+            caster->CalculateSpellDamageTaken(&damage, int32(value), strike);
+            Unit::DealDamageMods(player, damage.damage, &damage.absorb);
             caster->DealSpellDamage(&damage, true);
             caster->SendSpellNonMeleeDamageLog(&damage);
         }
