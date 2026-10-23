@@ -88,7 +88,7 @@ public:
     FlightConfiguration() : WorldScript("AscensionMountFlightConfiguration",
         { WORLDHOOK_ON_AFTER_CONFIG_LOAD, WORLDHOOK_ON_STARTUP }) { }
 
-    void OnAfterConfigLoad(bool /*reload*/) override { Load(); }
+    void OnAfterConfigLoad(bool) override { Load(); }
 
     void OnStartup() override { Load(); }
 
@@ -104,7 +104,7 @@ class MountFlightArea : public PlayerScript
 public:
     MountFlightArea() : PlayerScript("AscensionMountFlightArea", { PLAYERHOOK_ON_UPDATE_AREA }) { }
 
-    void OnPlayerUpdateArea(Player* player, uint32 /*oldArea*/, uint32 /*newArea*/) override
+    void OnPlayerUpdateArea(Player* player, uint32, uint32) override
     {
         if (legacyFlight.load())
             return;

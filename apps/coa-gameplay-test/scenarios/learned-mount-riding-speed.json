@@ -7,7 +7,8 @@
     "Every mount follows the rider's riding skill: Novice 50 gives 40% ground speed, Apprentice 75 gives 60%, and",
     "Journeyman 150 and above give 100%. Flying needs Expert 225 (150%) or Artisan 300 (280%) and an area where",
     "flying is allowed, such as Outland; Orgrimmar allows none at any skill.",
-    "The test observes native speed rates and flight permission, not rendered tooltips."
+    "Socketless sessions never acknowledge flight, so the test counts the server's SMSG_MOVE_SET_CAN_FLY and",
+    "SMSG_MOVE_UNSET_CAN_FLY packets, not client flight or rendered tooltips."
   ],
   "timeout_ms": 90000,
   "location": {
@@ -51,6 +52,13 @@
       "maximum": 300
     },
     {
+      "action": "snapshot",
+      "actor": "rider",
+      "metric": "server_packets",
+      "opcode": 835,
+      "save_as": "flight_grants_before_cast_1"
+    },
+    {
       "action": "cast",
       "actor": "rider",
       "spell": 900055
@@ -72,10 +80,16 @@
       "max": 1.4009999999999998
     },
     {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
       "action": "assert",
       "label": "Novice riding does not allow flying here",
       "actor": "rider",
-      "metric": "can_fly",
+      "metric": "server_packets",
+      "opcode": 835,
+      "relative_to": "flight_grants_before_cast_1",
       "equals": 0
     },
     {
@@ -96,6 +110,13 @@
       "skill": 762,
       "value": 75,
       "maximum": 300
+    },
+    {
+      "action": "snapshot",
+      "actor": "rider",
+      "metric": "server_packets",
+      "opcode": 835,
+      "save_as": "flight_grants_before_cast_2"
     },
     {
       "action": "cast",
@@ -119,10 +140,16 @@
       "max": 1.601
     },
     {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
       "action": "assert",
       "label": "Apprentice riding does not allow flying here",
       "actor": "rider",
-      "metric": "can_fly",
+      "metric": "server_packets",
+      "opcode": 835,
+      "relative_to": "flight_grants_before_cast_2",
       "equals": 0
     },
     {
@@ -143,6 +170,13 @@
       "skill": 762,
       "value": 150,
       "maximum": 300
+    },
+    {
+      "action": "snapshot",
+      "actor": "rider",
+      "metric": "server_packets",
+      "opcode": 835,
+      "save_as": "flight_grants_before_cast_3"
     },
     {
       "action": "cast",
@@ -166,10 +200,16 @@
       "max": 2.001
     },
     {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
       "action": "assert",
       "label": "Journeyman riding does not allow flying here",
       "actor": "rider",
-      "metric": "can_fly",
+      "metric": "server_packets",
+      "opcode": 835,
+      "relative_to": "flight_grants_before_cast_3",
       "equals": 0
     },
     {
@@ -190,6 +230,13 @@
       "skill": 762,
       "value": 300,
       "maximum": 300
+    },
+    {
+      "action": "snapshot",
+      "actor": "rider",
+      "metric": "server_packets",
+      "opcode": 835,
+      "save_as": "flight_grants_before_cast_4"
     },
     {
       "action": "cast",
@@ -213,10 +260,16 @@
       "max": 2.001
     },
     {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
       "action": "assert",
       "label": "Artisan in Orgrimmar riding does not allow flying here",
       "actor": "rider",
-      "metric": "can_fly",
+      "metric": "server_packets",
+      "opcode": 835,
+      "relative_to": "flight_grants_before_cast_4",
       "equals": 0
     },
     {
@@ -252,6 +305,13 @@
       "maximum": 300
     },
     {
+      "action": "snapshot",
+      "actor": "rider",
+      "metric": "server_packets",
+      "opcode": 835,
+      "save_as": "flight_grants_before_cast_5"
+    },
+    {
       "action": "cast",
       "actor": "rider",
       "spell": 900055
@@ -276,8 +336,11 @@
       "action": "assert",
       "label": "Expert in Hellfire Peninsula riding allows flying here",
       "actor": "rider",
-      "metric": "can_fly",
-      "equals": 1
+      "metric": "server_packets",
+      "opcode": 835,
+      "relative_to": "flight_grants_before_cast_5",
+      "min": 1,
+      "within_ms": 1000
     },
     {
       "action": "assert",
@@ -307,6 +370,13 @@
       "maximum": 300
     },
     {
+      "action": "snapshot",
+      "actor": "rider",
+      "metric": "server_packets",
+      "opcode": 835,
+      "save_as": "flight_grants_before_cast_6"
+    },
+    {
       "action": "cast",
       "actor": "rider",
       "spell": 900055
@@ -331,8 +401,11 @@
       "action": "assert",
       "label": "Artisan in Hellfire Peninsula riding allows flying here",
       "actor": "rider",
-      "metric": "can_fly",
-      "equals": 1
+      "metric": "server_packets",
+      "opcode": 835,
+      "relative_to": "flight_grants_before_cast_6",
+      "min": 1,
+      "within_ms": 1000
     },
     {
       "action": "assert",

@@ -5,9 +5,11 @@
     "Ash'adar, Harbinger of Dusk 917000 carries a 100% ground aura and a 280% mounted flight aura without the",
     "flying-area attribute, so the client spell alone lets it fly anywhere.",
     "Players fly with Expert riding or better in Outland, and in Northrend once they know Cold Weather Flying 54197.",
+    "CoA.MaxRidingFromStart grants 54197 at login, so the rider unlearns it before the Northrend checks.",
     "Stormwind and the rest of Azeroth allow no flying at any riding skill, and a rider who leaves Outland stops",
     "flying.",
-    "The test observes native flight permission, not rendered tooltips."
+    "Socketless sessions never acknowledge flight, so the test counts the server's SMSG_MOVE_SET_CAN_FLY and",
+    "SMSG_MOVE_UNSET_CAN_FLY packets, not client flight or rendered tooltips."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -36,11 +38,31 @@
       "spell": 917000
     },
     {
+      "action": "unlearn",
+      "actor": "rider",
+      "spell": 54197
+    },
+    {
+      "action": "assert",
+      "label": "The rider starts without Cold Weather Flying",
+      "actor": "rider",
+      "metric": "knows_spell",
+      "spell": 54197,
+      "equals": 0
+    },
+    {
       "action": "set_skill",
       "actor": "rider",
       "skill": 762,
       "value": 300,
       "maximum": 300
+    },
+    {
+      "action": "snapshot",
+      "actor": "rider",
+      "metric": "server_packets",
+      "opcode": 835,
+      "save_as": "flight_grants_before_cast_1"
     },
     {
       "action": "cast",
@@ -64,10 +86,16 @@
       "max": 2.001
     },
     {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
       "action": "assert",
       "label": "Artisan riding does not allow flying in Stormwind",
       "actor": "rider",
-      "metric": "can_fly",
+      "metric": "server_packets",
+      "opcode": 835,
+      "relative_to": "flight_grants_before_cast_1",
       "equals": 0
     },
     {
@@ -96,6 +124,13 @@
       "ms": 3000
     },
     {
+      "action": "snapshot",
+      "actor": "rider",
+      "metric": "server_packets",
+      "opcode": 835,
+      "save_as": "flight_grants_before_cast_2"
+    },
+    {
       "action": "cast",
       "actor": "rider",
       "spell": 917000
@@ -112,8 +147,11 @@
       "action": "assert",
       "label": "Artisan riding allows flying in Hellfire Peninsula",
       "actor": "rider",
-      "metric": "can_fly",
-      "equals": 1
+      "metric": "server_packets",
+      "opcode": 835,
+      "relative_to": "flight_grants_before_cast_2",
+      "min": 1,
+      "within_ms": 1000
     },
     {
       "action": "assert",
@@ -122,6 +160,13 @@
       "metric": "flight_speed_rate",
       "min": 3.799,
       "max": 3.801
+    },
+    {
+      "action": "snapshot",
+      "actor": "rider",
+      "metric": "server_packets",
+      "opcode": 836,
+      "save_as": "flight_removals_before_portal"
     },
     {
       "action": "teleport",
@@ -136,8 +181,10 @@
       "action": "assert",
       "label": "Leaving Outland through the Dark Portal stops the flight",
       "actor": "rider",
-      "metric": "can_fly",
-      "equals": 0,
+      "metric": "server_packets",
+      "opcode": 836,
+      "relative_to": "flight_removals_before_portal",
+      "min": 1,
       "within_ms": 5000
     },
     {
@@ -166,6 +213,13 @@
       "ms": 3000
     },
     {
+      "action": "snapshot",
+      "actor": "rider",
+      "metric": "server_packets",
+      "opcode": 835,
+      "save_as": "flight_grants_before_cast_3"
+    },
+    {
       "action": "cast",
       "actor": "rider",
       "spell": 917000
@@ -179,10 +233,16 @@
       "within_ms": 5000
     },
     {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
       "action": "assert",
       "label": "Without Cold Weather Flying the rider does not fly in Northrend",
       "actor": "rider",
-      "metric": "can_fly",
+      "metric": "server_packets",
+      "opcode": 835,
+      "relative_to": "flight_grants_before_cast_3",
       "equals": 0
     },
     {
@@ -203,6 +263,13 @@
       "spell": 54197
     },
     {
+      "action": "snapshot",
+      "actor": "rider",
+      "metric": "server_packets",
+      "opcode": 835,
+      "save_as": "flight_grants_before_cast_4"
+    },
+    {
       "action": "cast",
       "actor": "rider",
       "spell": 917000
@@ -219,8 +286,11 @@
       "action": "assert",
       "label": "Cold Weather Flying allows flying in Northrend",
       "actor": "rider",
-      "metric": "can_fly",
-      "equals": 1
+      "metric": "server_packets",
+      "opcode": 835,
+      "relative_to": "flight_grants_before_cast_4",
+      "min": 1,
+      "within_ms": 1000
     },
     {
       "action": "cancel_mount",
