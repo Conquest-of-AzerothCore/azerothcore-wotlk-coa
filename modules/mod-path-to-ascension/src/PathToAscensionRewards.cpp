@@ -253,8 +253,23 @@ namespace PathToAscension
             player->AreaExploredOrEventHappens(questId);
     }
 
+    void StartStarterMountQuest(Player* player, uint32 questId)
+    {
+        Quest const* quest = sObjectMgr->GetQuestTemplate(questId);
+        if (!quest || player->IsBeingTeleportedFar() || player->GetTradeData()
+            || player->GetQuestStatus(questId) != QUEST_STATUS_NONE || !player->CanTakeQuest(quest, true)
+            || !player->CanAddQuest(quest, true))
+            return;
+
+        player->AddQuestAndCheckCompletion(quest, nullptr);
+        player->SaveToDB(false, false);
+    }
+
     void StartTrackedQuest(Player* player, uint32 questId)
     {
+        if (IsStarterMountQuest(questId))
+            return StartStarterMountQuest(player, questId);
+
         auto const found = trackingQuests.find(questId);
         if (!GetSettings().tracking || found == trackingQuests.end() || player->IsBeingTeleportedFar()
             || player->GetTradeData())
@@ -406,7 +421,11 @@ namespace PathToAscension
         if (startQuest)
         {
             // C_Tutorial.StartQuest sends a zero quest giver GUID in a 16-byte accept packet.
-            if (packet.size() != 16 || packet.read<uint64>(0) != 0 || !IsTrackingQuest(packet.read<uint32>(8)))
+            if (packet.size() != 16 || packet.read<uint64>(0) != 0)
+                return false;
+
+            uint32 const questId = packet.read<uint32>(8);
+            if (!IsTrackingQuest(questId) && !IsStarterMountQuest(questId))
                 return false;
         }
         else if (packet.GetOpcode() != CMSG_CLAIM_TUTORIAL_REWARD)

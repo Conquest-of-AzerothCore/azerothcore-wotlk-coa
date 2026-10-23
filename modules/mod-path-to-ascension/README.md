@@ -20,8 +20,8 @@
 - **Tracking views.** A tutorial with an event-completed quest in `data/sql` can be started from the book or from a
   quest giver (Gorn Axefist offers the riding one). The quest completes with the tutorial, cannot be rewarded by the
   ordinary quest path and leaves the log when the reward is claimed.
-- **Novice Rider.** Its race quests (4420430-4420439) are ordinary quests: the racial riding trainers offer them,
-  learning Novice Riding completes them and the turn-in gives the race's starter mount. The tutorial completes once
+- **Novice Rider.** Its race quests (4420430-4420439) are ordinary quests: the book and the riding trainers of the
+  race's faction offer them, learning Novice Riding completes them and the turn-in gives the race's starter mount. The tutorial completes once
   that quest is rewarded and the mount is learned; its Path to Ascension reward is claimed separately.
 
 Progress lives in the character's `core.ascension.tutorial_*` settings, which the core saves with the character.
