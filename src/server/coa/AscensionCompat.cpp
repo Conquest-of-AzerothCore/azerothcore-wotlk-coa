@@ -412,8 +412,6 @@ constexpr uint32 ITEM_AURA_OF_EXPERIENCE = 818059;
 constexpr uint8 VANITY_REALM_LEVEL = 60;
 constexpr uint32 ITEM_WONDROUS_WISDOMBALL = 101169;
 constexpr uint32 ITEM_FIX_O_TRON_5000 = 97330;
-// Sigil companions whose creature has no data anywhere: they can't be summoned and show as blank
-// entries in the pet window, so .localvanityall leaves them out. Sorted for binary_search.
 constexpr std::array<uint32, 18> BROKEN_COMPANION_SPELLS = {
     83896, 84120, 84124, 84195, 84217, 84218, 84226, 84236, 84245,
     84247, 84254, 84262, 84265, 84304, 84306, 84326, 103844, 354550};
