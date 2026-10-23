@@ -4,7 +4,7 @@
 CoALegendaryItems.Enable = 0
 
 # Percent chance per eligible creature kill. At most one legendary drops per corpse.
-CoALegendaryItems.DropChance = 0.5
+CoALegendaryItems.DropChance = 0.05
 
 # Players at this level or higher receive no new drops.
 CoALegendaryItems.StopDropLevel = 45

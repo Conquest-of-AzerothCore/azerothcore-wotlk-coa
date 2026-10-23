@@ -15,7 +15,7 @@ namespace CoALegendary
     constexpr uint32_t MaximumCreatureLevel = 60;
     constexpr uint32_t ItemLevelBonus = 12;
     constexpr uint32_t KillPowerDurationMs = 8000;
-    constexpr float DefaultDropChance = 0.5f;
+    constexpr float DefaultDropChance = 0.05f;
     constexpr uint32_t DefaultStopDropLevel = 45;
     constexpr uint32_t DefaultStopPowerLevel = 60;
 

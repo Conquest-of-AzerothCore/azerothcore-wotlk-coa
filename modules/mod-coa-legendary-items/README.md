@@ -3,7 +3,7 @@
 64 original non-set leveling legendaries: three per custom class (IDs 12–32), plus a shared cloak.
 See the [interactive preview](preview.html) or the [complete catalog](CATALOG.md).
 
-Eligible creature kills have a configurable 0.5% chance to add one legendary to normal corpse loot.
+Eligible creature kills have a configurable 0.05% chance to add one legendary to normal corpse loot.
 The loot owner determines the class pool. Normal group loot rules apply. Pets can earn a drop for their owner;
 player-owned creatures, critters, totems, creatures without XP eligibility and gray creatures cannot drop one.
 By default, players at level 45 or above receive no new drops, and equipped legendaries grant no powers from

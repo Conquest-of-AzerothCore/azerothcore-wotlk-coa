@@ -76,9 +76,9 @@ TEST(CoALegendaryDrops, ExcludesGrayTargetsAndThePlayerLevelCutoff)
     EXPECT_TRUE(CanDrop(12, 60, 60, 70, true));
 }
 
-TEST(CoALegendaryDrops, DefaultToAHalfPercentChanceThatEndsAtLevelFortyFive)
+TEST(CoALegendaryDrops, DefaultToATwentiethOfAPercentThatEndsAtLevelFortyFive)
 {
-    EXPECT_FLOAT_EQ(DefaultDropChance, 0.5f);
+    EXPECT_FLOAT_EQ(DefaultDropChance, 0.05f);
     EXPECT_TRUE(CanDrop(12, 44, 44, DefaultStopDropLevel, true));
     EXPECT_TRUE(CanDrop(12, 44, 49, DefaultStopDropLevel, true));
     EXPECT_FALSE(CanDrop(12, 45, 45, DefaultStopDropLevel, true));
