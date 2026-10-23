@@ -498,7 +498,7 @@ bool WritePlayer(std::ostream& output, Player& player, AscensionFreshCharacterEx
         else
         {
             extraSkills.insert(id);
-            bool const guardianRanged = expected.ClassId == 18 && (id == 45 || id == 46 || id == 176 || id == 226 || id == 228);
+            bool const guardianRanged = expected.ClassId == 18 && (id == 45 || id == 46 || id == 176 || id == 226);
             skillsPolicyMatch = skillsPolicyMatch && guardianRanged;
             skillsCaptureMatch = false;
             output << ",\"prior_guardian_ranged_customization\":" << guardianRanged;
