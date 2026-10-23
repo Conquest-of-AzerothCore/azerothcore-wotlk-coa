@@ -12,6 +12,22 @@ VALUES
 (9707008, 12, 0, 'Salvage License Application', 24417, 1, 0, 0, 0, 0, 1, 0, 1, 1, 4, 0, 0, 0, 0, -1, -1, 'Signed in triplicate. Needs one more stamp.')
 ON DUPLICATE KEY UPDATE `class` = VALUES(`class`), `subclass` = VALUES(`subclass`), `name` = VALUES(`name`), `displayid` = VALUES(`displayid`), `Quality` = VALUES(`Quality`), `Flags` = VALUES(`Flags`), `BuyPrice` = VALUES(`BuyPrice`), `SellPrice` = VALUES(`SellPrice`), `InventoryType` = VALUES(`InventoryType`), `ItemLevel` = VALUES(`ItemLevel`), `RequiredLevel` = VALUES(`RequiredLevel`), `maxcount` = VALUES(`maxcount`), `stackable` = VALUES(`stackable`), `bonding` = VALUES(`bonding`), `startquest` = VALUES(`startquest`), `spellid_1` = VALUES(`spellid_1`), `spelltrigger_1` = VALUES(`spelltrigger_1`), `spellcharges_1` = VALUES(`spellcharges_1`), `spellcooldown_1` = VALUES(`spellcooldown_1`), `spellcategorycooldown_1` = VALUES(`spellcategorycooldown_1`), `description` = VALUES(`description`);
 
+-- The client has no Item.dbc row for 9707001-9707008, and it draws a bag icon from that row: without one the
+-- items showed a question mark. These rows match item_template and reach the client through the item patch
+-- stream (the core registers the ids); their displays are ItemDisplayInfo rows the client already has.
+DELETE FROM `item_dbc` WHERE `ID` BETWEEN 9707001 AND 9707008;
+
+INSERT INTO `item_dbc` (`ID`, `ClassID`, `SubclassID`, `Sound_Override_Subclassid`, `Material`, `DisplayInfoID`, `InventoryType`, `SheatheType`)
+VALUES
+(9707001, 12, 0, -1, 0, 4486, 0, 0),
+(9707002, 12, 0, -1, 0, 5199, 0, 0),
+(9707003, 12, 0, -1, 0, 13706, 0, 0),
+(9707004, 12, 0, -1, 0, 5272, 0, 0),
+(9707005, 12, 0, -1, 0, 4754, 0, 0),
+(9707006, 12, 0, -1, 0, 11823, 0, 0),
+(9707007, 12, 0, -1, 0, 7758, 0, 0),
+(9707008, 12, 0, -1, 0, 24417, 0, 0);
+
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_flight`, `detection_range`, `rank`, `dmgschool`, `DamageModifier`, `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`, `RegenHealth`, `CreatureImmunitiesId`, `flags_extra`, `ScriptName`, `VerifiedBuild`)
 VALUES
 (9312001, 0, 0, 0, 0, 0, 'Fizzlebolt Gearwhistle', 'Gnomeregan Salvage Engineer', NULL, 0, 40, 40, 0, 12, 3, 1, 1.14286, 1, 1, 20, 0, 0, 1, 2000, 2000, 1, 1, 1, 0, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 2, '', 0),

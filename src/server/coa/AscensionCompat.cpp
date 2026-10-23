@@ -427,6 +427,11 @@ constexpr std::array<uint32, 9> BUSHCRAFT_CRAFTED_ITEMS =
     10521, 10522, 10523, 10524, 10525, 10526, 10527, 10528, 1041704
 };
 
+constexpr std::array<uint32, 8> GOBLIN_SALVAGE_QUEST_ITEMS =
+{
+    9707001, 9707002, 9707003, 9707004, 9707005, 9707006, 9707007, 9707008
+};
+
 enum AscensionRidingSpells : uint32
 {
     SPELL_RIDING_APPRENTICE = 33388,
@@ -10448,6 +10453,8 @@ void AddAscensionCompatScripts() {
   Ascension::ClientItemPatches::Instance().Register(ITEM_CUIRBOULLI_BOOTS);
   Ascension::ClientItemPatches::Instance().Register(ITEM_RED_RIBBONED_WRAPPING_PAPER);
   for (uint32 itemId : BUSHCRAFT_CRAFTED_ITEMS)
+    Ascension::ClientItemPatches::Instance().Register(itemId);
+  for (uint32 itemId : GOBLIN_SALVAGE_QUEST_ITEMS)
     Ascension::ClientItemPatches::Instance().Register(itemId);
   RegisterAscensionClientConfig([](AscensionClientConfig& config) {
     config.Booleans.emplace_back("CONFIG_CHARACTER_ADVANCEMENT_BUILD_INSPECT_ENABLED", true);
