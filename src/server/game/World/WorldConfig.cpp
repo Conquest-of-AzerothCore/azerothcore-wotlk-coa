@@ -56,7 +56,7 @@ void WorldConfig::BuildConfigCache()
     auto const validXPRate = [](float const& value) { return std::isfinite(value) && value >= 0.0f; };
     SetConfigValue<float>(RATE_XP_GLOBAL, "Rate.XP.Global", 0.9295f,
         ConfigValueCache::Reloadable::Yes, validXPRate, "finite and >= 0");
-    SetConfigValue<float>(RATE_XP_PROFESSION, "Rate.XP.Profession", 0.4f,
+    SetConfigValue<float>(RATE_XP_PROFESSION, "Rate.XP.Profession", 0.2f,
         ConfigValueCache::Reloadable::Yes, validXPRate, "finite and >= 0");
     SetConfigValue<float>(RATE_XP_PROFESSION_BASE_FRACTION, "Rate.XP.Profession.BaseFraction", 0.02f,
         ConfigValueCache::Reloadable::Yes, validXPRate, "finite and >= 0");

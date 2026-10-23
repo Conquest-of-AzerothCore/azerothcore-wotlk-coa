@@ -2582,7 +2582,7 @@ Rate.XP.Global = 0.9295
 #        Set Profession to 0 to disable ordinary profession awards. All rates reload with .reload config.
 #        Profession-only challenges retain their separate per-skill-up formula and group sharing;
 #        those awards also use Global and dynamic XP. Woodcutting/woodworking have no core action path here.
-Rate.XP.Profession = 0.4
+Rate.XP.Profession = 0.2
 Rate.XP.Profession.BaseFraction = 0.02
 Rate.XP.Profession.Gray = 0
 Rate.XP.Profession.Green = 0.95
