@@ -157,7 +157,9 @@ namespace
         return bands;
     }
 
-    /// The bands come from LFGDungeons.dbc unless DestinyWeaver.Scaling.DungeonBands sets one. The first config load runs before the store is filled, so
+    /// The bands come from LFGDungeons.dbc unless DestinyWeaver.Scaling.DungeonBands sets one. An entry with a band
+    /// of its own scales even when DestinyWeaver.Scaling.DungeonIds leaves it out: a config written before the entry
+    /// joined the default list still has the old list. The first config load runs before the store is filled, so
     /// it publishes a scope without dungeons; startup publishes the complete one.
     void PublishScope()
     {
@@ -166,7 +168,12 @@ namespace
             scope->WorldMaps.insert(mapId);
 
         std::unordered_map<uint32, LocalLevelScaling::LevelBand> const configured = ConfigBands();
-        for (uint32 dungeonId : ConfigIds("DestinyWeaver.Scaling.DungeonIds", DEFAULT_SCALING_DUNGEONS))
+        std::vector<uint32> dungeonIds = ConfigIds("DestinyWeaver.Scaling.DungeonIds", DEFAULT_SCALING_DUNGEONS);
+        for (auto const& [dungeonId, band] : configured)
+            if (std::find(dungeonIds.begin(), dungeonIds.end(), dungeonId) == dungeonIds.end())
+                dungeonIds.push_back(dungeonId);
+
+        for (uint32 dungeonId : dungeonIds)
         {
             LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(dungeonId);
             if (!dungeon)

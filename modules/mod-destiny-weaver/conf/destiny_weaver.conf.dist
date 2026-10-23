@@ -72,8 +72,9 @@ DestinyWeaver.Scaling.WorldMaps = "0 1"
 DestinyWeaver.Scaling.DungeonIds = "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601 402"
 
 #    DestinyWeaver.Scaling.DungeonBands
-#        Description: Bands that replace the LFGDungeons.dbc band of a listed dungeon finder entry, as
-#                     space-separated entry:low-high pairs.
+#        Description: Bands that replace the LFGDungeons.dbc band of a dungeon finder entry, as
+#                     space-separated entry:low-high pairs. An entry listed here scales even when
+#                     DestinyWeaver.Scaling.DungeonIds leaves it out.
 #        Default:     "402:15-20" - (Road to De Other Side)
 #        Reloadable:  yes (.reload config)
 
