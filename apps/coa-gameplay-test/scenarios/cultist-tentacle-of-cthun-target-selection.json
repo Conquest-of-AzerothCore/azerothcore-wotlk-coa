@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "name": "Cultist: Tentacle of C'Thun seeks out an idle hostile enemy but leaves a neutral creature the owner is not fighting alone (#420)",
-  "contract": "Tentacle of C'Thun 801153 (Spell.dbc, class 25 grant at level 4): 'Summon a Tentacle of the Old Gods near you for 30 sec. It will seek an enemy out, dealing ... Shadow Damage every 1.5 sec'. Effect 0 summons creature 50272 with SummonProperties 63, which SummonProperties.dbc gives Category 1 (ally), Type 4 (totem), Slot 1: the tentacle is an attacking totem. The stock attacking-totem rule (TotemAI with Acore::NearestAttackableUnitInObjectRangeCheck, as used by e.g. Searing Totem) attacks any unit in range that is in combat with it or hostile to it, whether or not the owner has engaged that unit, and never a neutral unit nobody is fighting. Expected, independent of the owner's own combat: with the owner out of combat, the tentacle damages an idle hostile creature (faction template 14, hostile to players) within range; once that creature is dead, it leaves a neutral creature (faction template 7, whose Faction 7 has no reputation index and whose template has no hostile mask) untouched for six 1.5 sec pulses while it is still summoned. The reported attacks on mobs that never engaged the player are the tooltip's 'seek an enemy out'; the neutral-creature leg is what 'peaceful mobs' would be.",
+  "name": "Cultist: Tentacle of C'Thun attacks only what its owner is fighting (#420, #8637)",
+  "contract": "Tentacle of C'Thun 801153 (Spell.dbc, class 25 grant at level 4): 'Summon a Tentacle of the Old Gods near you for 30 sec. It will seek an enemy out, dealing ... Shadow Damage every 1.5 sec'. Effect 0 summons creature 50272 with SummonProperties 63, which SummonProperties.dbc gives Category 1 (ally), Type 4 (totem), Slot 1: the tentacle is an attacking totem whose pulse casts Mental Assault 801151 (PERIODIC_TRIGGER_SPELL, 1.5 sec, triggering 804999). The summon must not pull aggro on its own: with the owner out of combat it leaves an idle hostile creature (faction template 14, hostile to players) and a neutral creature (faction template 7, no reputation index, no hostile mask) untouched for four 1.5 sec pulses. Once the owner attacks the hostile creature, the tentacle joins on that target (801151 lands) while the neutral bystander stays untouched.",
   "timeout_ms": 60000,
   "players": [
     { "id": "cultist", "race": 1, "class": 25, "level": 9 }
   ],
   "creatures": [
-    { "id": "enemy", "owner": "cultist", "entry": 36, "faction": 14, "level": 9, "health": 100000, "distance": 8 },
+    { "id": "enemy", "owner": "cultist", "entry": 36, "faction": 14, "level": 9, "health": 100000, "distance": 4 },
     { "id": "bystander", "owner": "cultist", "entry": 36, "faction": 7, "level": 9, "health": 100000, "distance": 12 }
   ],
   "steps": [
@@ -22,24 +22,28 @@
       "action": "assert", "label": "SETUP: the Tentacle of C'Thun is summoned",
       "actor": "cultist", "metric": "owned_creature_count", "entry": 50272, "min": 1, "within_ms": 3000
     },
+    { "action": "wait", "label": "Four tentacle pulses with the owner out of combat", "ms": 6000 },
     {
-      "action": "assert", "label": "The tentacle seeks out the idle hostile enemy the owner never engaged",
-      "actor": "enemy", "metric": "health", "max": 99999, "within_ms": 8000
-    },
-    { "action": "set_health", "label": "Let the next pulse finish the hostile enemy", "actor": "enemy", "value": 1 },
-    {
-      "action": "assert", "label": "SETUP: the hostile enemy dies",
-      "actor": "enemy", "metric": "alive", "equals": 0, "within_ms": 6000
-    },
-    { "action": "snapshot", "actor": "bystander", "metric": "health", "save_as": "bystander_start" },
-    { "action": "wait", "label": "Six tentacle pulses with only the neutral creature in range", "ms": 9000 },
-    {
-      "action": "assert", "label": "SETUP: the tentacle was still summoned through the window",
-      "actor": "cultist", "metric": "owned_creature_count", "entry": 50272, "min": 1
+      "action": "assert", "label": "DISCRIMINATING: the tentacle leaves the idle hostile creature alone",
+      "actor": "enemy", "metric": "aura", "spell": 801151, "equals": 0
     },
     {
-      "action": "assert", "label": "DISCRIMINATING: the tentacle leaves a neutral creature the owner is not fighting alone",
-      "actor": "bystander", "metric": "health", "relative_to": "bystander_start", "equals": 0
+      "action": "assert", "label": "The idle hostile creature took no damage",
+      "actor": "enemy", "metric": "health", "equals": 100000
+    },
+    {
+      "action": "assert", "label": "The neutral creature is untouched",
+      "actor": "bystander", "metric": "health", "equals": 100000
+    },
+    { "action": "attack", "label": "The owner engages the hostile creature", "actor": "cultist", "target": "enemy" },
+    {
+      "action": "assert", "label": "The tentacle joins the fight the owner started",
+      "actor": "enemy", "metric": "aura", "spell": 801151, "equals": 1, "within_ms": 4000
+    },
+    { "action": "stop_attack", "actor": "cultist" },
+    {
+      "action": "assert", "label": "The neutral creature is still untouched",
+      "actor": "bystander", "metric": "aura", "spell": 801151, "equals": 0
     },
     {
       "action": "assert", "label": "The neutral creature took no damage at any point",
