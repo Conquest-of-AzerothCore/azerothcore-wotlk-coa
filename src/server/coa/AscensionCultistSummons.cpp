@@ -18,6 +18,7 @@ namespace AscensionCultist
 namespace
 {
 constexpr uint32 HallucinationEntry = 840025;
+constexpr uint32 PresenceOfNzoth = 803037;
 enum SummonEvent : uint32 { Pulse = 1 };
 bool Tentacle(uint32 entry)
 {
@@ -145,10 +146,6 @@ struct npc_ascension_cultist_summon : public ScriptedAI
         }
         if (me->GetEntry() == 50298)
             me->SetNpcFlag(UNIT_NPC_FLAG_GOSSIP);
-        // The client caches the reaction it colours the plate from when the creature is created, and a
-        // create block alone never produces the change event that refreshes it. Start on the template's
-        // friendly-to-all faction; the per-tick sync then settles the owner's faction, which the client
-        // sees as a faction change and recomputes the plate colour from.
         me->SetFaction(35);
         timers.ScheduleEvent(Pulse, 100ms);
     }
@@ -250,8 +247,9 @@ struct npc_ascension_cultist_summon : public ScriptedAI
             me->DespawnOrUnsummon();
             return;
         }
-        // Keep the reaction inputs the client colours the plate from in step with the owner: a summon that kept a
-        // stale faction or PvP byte reads as unfriendly after the owner's state changes.
+        if (me->GetEntry() == 500464 && me->GetUInt32Value(UNIT_CREATED_BY_SPELL) == PresenceOfNzoth &&
+            me->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
+            me->GetMotionMaster()->MoveFollow(player, 0, 0);
         if (me->GetFaction() != player->GetFaction())
             me->SetFaction(player->GetFaction());
         uint8 pvp = player->GetByteValue(UNIT_FIELD_BYTES_2, 1);
