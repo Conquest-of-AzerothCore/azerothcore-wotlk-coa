@@ -268,7 +268,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectNULL,                                     //194 unknown Ascension effect
     &Spell::EffectAscensionResetCooldown,                   //195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN
     &Spell::EffectNULL,                                     //196 unknown Ascension effect
-    &Spell::EffectNULL,                                     //197 unknown Ascension effect
+    &Spell::EffectAscensionModifyFamilyCooldown,            //197 SPELL_EFFECT_ASCENSION_MODIFY_FAMILY_COOLDOWN
     &Spell::EffectNULL,                                     //198 unknown Ascension effect
 };
 
@@ -741,6 +741,29 @@ void Spell::EffectAscensionResetCooldown(SpellEffIndex effIndex)
     Player* player = target ? target->ToPlayer() : nullptr;
     SpellEffectInfo const& effect = m_spellInfo->Effects[effIndex];
     ResetAscensionCooldown(player, effect.MiscValue, effect.MiscValueB != 0);
+}
+
+// Effect 197: the 165 cooldown change applied to every cooling spell of the caster's family that the effect's class
+// mask names ("Mongoose Bite CDR 1 Second": -1001 on Mongoose Bite's flag). MiscValueB resets them instead.
+void Spell::EffectAscensionModifyFamilyCooldown(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
+        return;
+
+    Unit* target = unitTarget ? unitTarget : m_caster;
+    Player* player = target ? target->ToPlayer() : nullptr;
+    SpellEffectInfo const& effect = m_spellInfo->Effects[effIndex];
+    if (!player || !effect.SpellClassMask)
+        return;
+
+    std::vector<uint32> affected;
+    for (auto const& [spellId, cooldown] : player->GetSpellCooldownMap())
+        if (SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId))
+            if (info->SpellFamilyName == m_spellInfo->SpellFamilyName && (info->SpellFamilyFlags & effect.SpellClassMask))
+                affected.push_back(spellId);
+
+    for (uint32 spellId : affected)
+        ModifyAscensionCooldown(player, spellId, effect.MiscValueB ? 0 : damage, false);
 }
 
 void Spell::EffectAscensionRestoreSpellCharges(SpellEffIndex effIndex)
