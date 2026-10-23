@@ -293,8 +293,9 @@ public:
                 }
             }
         }
-        if ((info->Id == 800691 || info->Id == 802566) && damage && player->HasAura(807451))
-            Mana(player, CalculatePct(damage, Amount(807451)));
+        if (info->Id == 800691 || info->Id == 802566)
+            if (uint32 const dealt = spell->GetScriptHealthLeechDamage())
+                Mana(player, CalculatePct(dealt, Amount(807451)));
         if (healing && player->HasAura(300344) && target->HasAura(Bless, player->GetGUID()) &&
             !spell->IsTriggered() && !spell->GetScriptValue(300344))
         {
