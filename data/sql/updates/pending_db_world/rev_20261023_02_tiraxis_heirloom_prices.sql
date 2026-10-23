@@ -1,6 +1,6 @@
 -- Tiraxis' heirloom list (900011): new Bazaar Token prices. Amounts are ItemExtendedCost.dbc rows
 -- (item 975001 x count); the DBC has no 1750 row, so the
--- Experience Heirloom Caches use 1800. Trinkets and the off-hand stay at 500 (3016).
+-- Experience Heirloom Caches use 1800.
 
 -- Heirloom Caches: 1500 tokens
 UPDATE `npc_vendor` SET `ExtendedCost` = 10344 WHERE `entry` = 900011 AND `item` IN (
@@ -10,7 +10,7 @@ UPDATE `npc_vendor` SET `ExtendedCost` = 10344 WHERE `entry` = 900011 AND `item`
 UPDATE `npc_vendor` SET `ExtendedCost` = 10347 WHERE `entry` = 900011 AND `item` IN (
   1339051, 1339052, 1339053, 1339054, 1339055, 1339056, 1339057);
 
--- One-handed weapons and the shield: 900 tokens (half a two-hander)
+-- One-handed weapons, the shield, the off-hand and the trinkets: 900 tokens (half a two-hander)
 UPDATE `npc_vendor` SET `ExtendedCost` = 10338 WHERE `entry` = 900011 AND `item` IN (
   1642944,  -- Balanced Heartseeker
   1644096,  -- Battleworn Thrash Blade
@@ -21,7 +21,12 @@ UPDATE `npc_vendor` SET `ExtendedCost` = 10338 WHERE `entry` = 900011 AND `item`
   1644094,  -- The Blessed Hammer of Grace
   1642945,  -- Venerable Dal'Rend's Sacred Charge
   1648716,  -- Venerable Mass of McGowan
-  3148335   -- Polished Observer's Shield
+  3148335,  -- Polished Observer's Shield
+  1642992,  -- Discerning Eye of the Beast
+  1644098,  -- Inherited Insignia of the Alliance
+  1644097,  -- Inherited Insignia of the Horde
+  1642991,  -- Swift Hand of Justice
+  3140350   -- Urn of Aspiring Light
 );
 
 -- Two-handed weapons: 1800 tokens
