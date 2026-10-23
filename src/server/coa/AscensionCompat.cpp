@@ -5875,8 +5875,6 @@ public:
             std::find(MysticAltarVanityItems.begin(), MysticAltarVanityItems.end(), itemId) != MysticAltarVanityItems.end();
     }
 
-    // A companion whose creature has no template can't be summoned, and granting it only adds a blank
-    // entry to the pet window.
     [[nodiscard]] bool IsUnsummonableCompanion(uint32 itemId) const
     {
         auto const vanity = _vanityItems.find(itemId);
