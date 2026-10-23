@@ -15,7 +15,7 @@
       "id": "hunter",
       "race": 1,
       "class": 15,
-      "level": 80,
+      "level": 59,
       "melee_hit_rating": 10000,
       "expertise_rating": 10000
     }
@@ -25,7 +25,7 @@
       "id": "dummy",
       "owner": "hunter",
       "entry": 1501,
-      "level": 80,
+      "level": 59,
       "health": 1000000,
       "distance": 3
     }

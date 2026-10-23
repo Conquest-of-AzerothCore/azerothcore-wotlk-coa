@@ -15,6 +15,9 @@ namespace CoALegendary
     constexpr uint32_t MaximumCreatureLevel = 60;
     constexpr uint32_t ItemLevelBonus = 12;
     constexpr uint32_t KillPowerDurationMs = 8000;
+    constexpr float DefaultDropChance = 0.5f;
+    constexpr uint32_t DefaultStopDropLevel = 45;
+    constexpr uint32_t DefaultStopPowerLevel = 60;
 
     enum class Power : uint8_t
     {
@@ -106,6 +109,11 @@ namespace CoALegendary
     {
         return IsCustomClass(classId) && playerLevel > 0 && playerLevel < stopDropLevel &&
             creatureLevel > 0 && creatureLevel <= MaximumCreatureLevel && grantsKillReward;
+    }
+
+    constexpr bool GrantsPower(uint32_t requiredLevel, uint32_t playerLevel, uint32_t stopPowerLevel)
+    {
+        return requiredLevel <= playerLevel && playerLevel < stopPowerLevel;
     }
 
     constexpr bool ConditionActive(Condition condition, float healthPct, bool inCombat, uint32_t killPowerMs)

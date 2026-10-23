@@ -76,6 +76,27 @@ TEST(CoALegendaryDrops, ExcludesGrayTargetsAndThePlayerLevelCutoff)
     EXPECT_TRUE(CanDrop(12, 60, 60, 70, true));
 }
 
+TEST(CoALegendaryDrops, DefaultToAHalfPercentChanceThatEndsAtLevelFortyFive)
+{
+    EXPECT_FLOAT_EQ(DefaultDropChance, 0.5f);
+    EXPECT_TRUE(CanDrop(12, 44, 44, DefaultStopDropLevel, true));
+    EXPECT_TRUE(CanDrop(12, 44, 49, DefaultStopDropLevel, true));
+    EXPECT_FALSE(CanDrop(12, 45, 45, DefaultStopDropLevel, true));
+    EXPECT_FALSE(CanDrop(12, 59, 59, DefaultStopDropLevel, true));
+}
+
+TEST(CoALegendaryPowers, RequireTheItemLevelAndStopAtLevelSixtyByDefault)
+{
+    EXPECT_TRUE(GrantsPower(29, 29, DefaultStopPowerLevel));
+    EXPECT_FALSE(GrantsPower(30, 29, DefaultStopPowerLevel));
+    EXPECT_TRUE(GrantsPower(44, 59, DefaultStopPowerLevel));
+    EXPECT_TRUE(GrantsPower(59, 59, DefaultStopPowerLevel));
+    EXPECT_FALSE(GrantsPower(44, 60, DefaultStopPowerLevel));
+    EXPECT_FALSE(GrantsPower(60, 60, DefaultStopPowerLevel));
+    EXPECT_FALSE(GrantsPower(29, 80, DefaultStopPowerLevel));
+    EXPECT_TRUE(GrantsPower(29, 80, 81));
+}
+
 TEST(CoALegendaryPowers, ConditionsHaveInclusiveHealthBoundariesAndExpire)
 {
     EXPECT_TRUE(ConditionActive(Condition::Healthy, 80.0f, true, 0));

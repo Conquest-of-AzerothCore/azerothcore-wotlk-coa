@@ -30,8 +30,9 @@ namespace
 
     std::atomic<bool> enabled{ false };
     std::atomic<bool> dataReady{ false };
-    std::atomic<float> dropChance{ 0.5f };
-    std::atomic<uint32> stopDropLevel{ 60 };
+    std::atomic<float> dropChance{ DefaultDropChance };
+    std::atomic<uint32> stopDropLevel{ DefaultStopDropLevel };
+    std::atomic<uint32> stopPowerLevel{ DefaultStopPowerLevel };
     std::atomic<uint32> configVersion{ 0 };
 
     struct PlayerState : DataMap::Base
@@ -74,7 +75,7 @@ namespace
         for (uint32 entry : state.equippedEntries)
             if (auto variant = DecodeEntry(entry))
                 if (FitsClass(Catalog[variant->design], player->getClass()) &&
-                    variant->requiredLevel <= player->GetLevel())
+                    GrantsPower(variant->requiredLevel, player->GetLevel(), stopPowerLevel.load()))
                     levels[variant->design] = std::max(levels[variant->design], uint8(variant->requiredLevel));
         return levels;
     }
@@ -230,10 +231,13 @@ namespace
         void OnAfterConfigLoad(bool) override
         {
             enabled.store(sConfigMgr->GetOption<bool>("CoALegendaryItems.Enable", false));
-            float const configuredChance = sConfigMgr->GetOption<float>("CoALegendaryItems.DropChance", 0.5f);
+            float const configuredChance = sConfigMgr->GetOption<float>("CoALegendaryItems.DropChance",
+                DefaultDropChance);
             dropChance.store(std::isfinite(configuredChance) ? std::clamp(configuredChance, 0.0f, 100.0f) : 0.0f);
-            stopDropLevel.store(std::clamp(
-                sConfigMgr->GetOption<uint32>("CoALegendaryItems.StopDropLevel", 60), 1u, MaximumCreatureLevel + 1));
+            stopDropLevel.store(std::clamp(sConfigMgr->GetOption<uint32>("CoALegendaryItems.StopDropLevel",
+                DefaultStopDropLevel), 1u, MaximumCreatureLevel + 1));
+            stopPowerLevel.store(sConfigMgr->GetOption<uint32>("CoALegendaryItems.StopPowerLevel",
+                DefaultStopPowerLevel));
             ++configVersion;
         }
 
@@ -326,8 +330,9 @@ namespace
                 LOG_ERROR("module", "CoA Legendary Items: {} missing or invalid records; apply the module world "
                     "migration. Drops and powers are disabled until the data is available.", invalid);
             else
-                LOG_INFO("module", "CoA Legendary Items: {} designs, {} level variants; drop chance {}%, cutoff {}.",
-                    DesignCount, DesignCount * MaximumCreatureLevel, dropChance.load(), stopDropLevel.load());
+                LOG_INFO("module", "CoA Legendary Items: {} designs, {} level variants; drop chance {}%, "
+                    "drop cutoff {}, power cutoff {}.", DesignCount, DesignCount * MaximumCreatureLevel,
+                    dropChance.load(), stopDropLevel.load(), stopPowerLevel.load());
         }
     };
 

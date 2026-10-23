@@ -6,7 +6,8 @@ See the [interactive preview](preview.html) or the [complete catalog](CATALOG.md
 Eligible creature kills have a configurable 0.5% chance to add one legendary to normal corpse loot.
 The loot owner determines the class pool. Normal group loot rules apply. Pets can earn a drop for their owner;
 player-owned creatures, critters, totems, creatures without XP eligibility and gray creatures cannot drop one.
-Players at level 60 or above receive no new drops by default. Previously earned equipment keeps working.
+By default, players at level 45 or above receive no new drops, and equipped legendaries grant no powers from
+level 60 (`CoALegendaryItems.StopDropLevel`, `CoALegendaryItems.StopPowerLevel`). Their native item stats remain.
 
 Required level is `creature->getLevelForTarget(lootOwner)`, the same per-player level used by Destiny Weaver.
 Item level is always required level + 12. A level-32 player killing a wolf scaled from 10 to 29 receives a
@@ -17,7 +18,7 @@ equipping one does not increase its level.
 Movement powers are exclusive to boots. Boots use cloth armor and class-specific stats, allowing their intended
 class to equip even the earliest variants. Equipment, durability, combat and committed health changes update
 powers immediately. Login and resurrection restore eligible equipped powers; unequipping, breaking an item,
-death or disabling an active module removes them. Configuration changes are reconciled on the next player update.
+death, reaching the power cutoff level or disabling an active module removes them. Configuration changes are reconciled on the next player update.
 After-kill powers require a non-gray creature kill and use visible native eight-second buffs with normal
 duration refresh and expiry. Other powers remain hidden passives. No periodic condition or equipment scan runs.
 Only the strongest equipped copy of a design grants its power. Movement uses native aura speed stacking rules.

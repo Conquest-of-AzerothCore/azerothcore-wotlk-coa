@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "CoA Legendary Items: timed buffs and saved equipment lifecycle",
-  "contract": "Requires CoALegendaryItems.Enable=1, DestinyWeaver.Enable=1, LevelScaling=1 and CoA.SendDisplayPatches=1. A non-gray kill grants a visible native eight-second item buff; another kill refreshes its duration and it expires normally. Continuous passives stay hidden. Equipped powers are reconstructed after a real save/logout/login, removed below required level or on death, and reactivated after leveling back.",
+  "contract": "Requires CoALegendaryItems.Enable=1, DestinyWeaver.Enable=1, LevelScaling=1 and CoA.SendDisplayPatches=1. A non-gray kill grants a visible native eight-second item buff; another kill refreshes its duration and it expires normally. Continuous passives stay hidden. Equipped powers are reconstructed after a real save/logout/login, removed below required level, at the default level-60 power cutoff or on death, and reactivated after leveling back.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -201,6 +201,48 @@
       "action": "set_level",
       "actor": "viewer",
       "value": 32
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "aura",
+      "spell": 9710001,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "spell_modifier",
+      "spell": 805808,
+      "op": 0,
+      "base": 1000,
+      "equals": 1120
+    },
+    {
+      "action": "set_level",
+      "actor": "viewer",
+      "value": 60
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "aura",
+      "spell": 9710001,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "spell_modifier",
+      "spell": 805808,
+      "op": 0,
+      "base": 1000,
+      "equals": 1000
+    },
+    {
+      "action": "set_level",
+      "actor": "viewer",
+      "value": 59
     },
     {
       "action": "assert",
