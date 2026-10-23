@@ -217,7 +217,9 @@ struct boss_coa_muzah : public ScriptedAI
         Talk(SAY_DEATH);
         _summons.DespawnAll();
         SetGates(GO_STATE_ACTIVE);
-        RespawnBats(0);
+        for (bool visible : { true, false })
+            for (Creature* bat : CirclingBats(visible))
+                bat->DespawnOrUnsummon(0ms, Seconds(WEEK));
     }
 
     void JustSummoned(Creature* summon) override

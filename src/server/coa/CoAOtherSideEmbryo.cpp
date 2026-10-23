@@ -129,7 +129,7 @@ constexpr float BlobAhead = 6.5f;
 constexpr float BlobSide = 4.5f;
 constexpr float WebTouch = 1.5f;
 Position const ArenaMiddle = { 304.429f, -206.081f, 341.841f, 0.0f };
-constexpr float WebSpeed = 20.0f;
+constexpr float WebSpeed = 25.0f;
 
 using CoAOtherSide::Damage3;
 using CoAOtherSide::Rolled;
@@ -532,10 +532,11 @@ private:
                 ++itr;
                 continue;
             }
-            Position const end = WallFrom(blade->GetPosition(), itr->dir);
-            float const length = blade->GetExactDist2d(&end);
-            Position const to = GroundAt(blade->GetPositionX() + std::max(1.0f, length - 1.0f) * std::cos(itr->dir),
-                blade->GetPositionY() + std::max(1.0f, length - 1.0f) * std::sin(itr->dir));
+            float const dx = blade->GetPositionX() - _center.GetPositionX();
+            float const dy = blade->GetPositionY() - _center.GetPositionY();
+            float const length = std::max(1.0f, -2.0f * (dx * std::cos(itr->dir) + dy * std::sin(itr->dir)));
+            Position const to = GroundAt(blade->GetPositionX() + length * std::cos(itr->dir),
+                blade->GetPositionY() + length * std::sin(itr->dir));
             LOG_DEBUG("module", "Embryo: web line shoots {:.1f} yards", length);
             blade->CastSpell(blade, SPELL_WEB_ACTIVE, true);
             blade->GetMotionMaster()->MovePoint(1, to, FORCED_MOVEMENT_NONE, WebSpeed, false);
