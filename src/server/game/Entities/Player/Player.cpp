@@ -16400,12 +16400,13 @@ void Player::ActivateSpec(uint8 spec)
     sScriptMgr->OnPlayerAfterSpecSlotChanged(this, GetActiveSpec());
 }
 
-void Player::LoadActions(PreparedQueryResult result)
+void Player::LoadActions(PreparedQueryResult result, bool send)
 {
     if (result)
         _LoadActions(result);
 
-    SendActionButtons(1);
+    if (send)
+        SendActionButtons(1);
 }
 
 void Player::GetTalentTreePoints(uint8 (&specPoints)[3]) const

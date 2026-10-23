@@ -1525,7 +1525,7 @@ public:
         {
             if (Player* owner = session->GetPlayer(); owner && ActiveSlot(owner) == slot)
             {
-                owner->LoadActions(result);
+                owner->LoadActions(result, false);
                 SynchronizeTalentReplacements(owner);
                 owner->SendInitialActionButtons();
             }
