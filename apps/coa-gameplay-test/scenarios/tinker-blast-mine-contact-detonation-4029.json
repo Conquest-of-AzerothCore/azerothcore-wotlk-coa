@@ -6,12 +6,29 @@
     "Casting the mine near the hostile golem detonates it on contact: the mine must disappear well before its 60 s timeout, the golem must take explosion damage, and Remote Detonation 801798 must remain known."
   ],
   "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
   "players": [
     {
       "id": "tinker",
       "race": 1,
       "class": 28,
       "level": 10
+    }
+  ],
+  "creatures": [
+    {
+      "id": "golem",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 6,
+      "distance": 4,
+      "health": 1000000
     }
   ],
   "steps": [
