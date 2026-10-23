@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": ".gear unequip moves equipped items to the bags or the mailbox",
-  "contract": ".gear unequip all|item 0|1 [$player] is a Game Master command. With all it unequips every equipped item; with an item link or id it unequips only that equipped item and leaves the other slots alone,. With 0 the items go into the bags and the ones that do not fit are mailed, so a player with full bags gets them by mail and nothing is lost; with 1 every unequipped item is mailed and the bags are untouched. The mail flag is required, so a player named Mail is addressed by name. An ordinary player cannot run it.",
+  "contract": ".gear unequip all|item 0|1 [$player] is a Game Master command. With all it unequips every equipped item; with an item link or id it unequips only that equipped item and leaves the other slots alone. With 0 the items go into the bags and the ones that do not fit are mailed, so a player with full bags gets them by mail and nothing is lost; with 1 every unequipped item is mailed and the bags are untouched. The mail flag is required, so a player named Mail is addressed by name. An ordinary player cannot run it.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
