@@ -9298,6 +9298,12 @@ public:
                 case 40120:
                     spellInfo->AttributesEx4 |= SPELL_ATTR4_ONLY_FLYING_AREAS;
                     break;
+                case 287665:
+                case 917000:
+                    for (SpellEffectInfo& effect : spellInfo->Effects)
+                        if (effect.IsAura(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED))
+                            effect.Effect = 0;
+                    break;
                 case 83086:
                 case 9930889:
                     spellInfo->AttributesEx6 |= SPELL_ATTR6_NOT_IN_RAID_INSTANCES;
