@@ -1,6 +1,6 @@
 -- Tiraxis' heirloom list (900011): new Bazaar Token prices. Amounts are ItemExtendedCost.dbc rows
--- (item 975001 x count); the DBC has no 1250 or 1750 row, so one-handers use 1300 and the
--- Experience Heirloom Caches 1800. Trinkets, the shield and the off-hand stay at 500 (3016).
+-- (item 975001 x count); the DBC has no 1750 row, so the
+-- Experience Heirloom Caches use 1800. Trinkets, the shield and the off-hand stay at 500 (3016).
 
 -- Heirloom Caches: 1500 tokens
 UPDATE `npc_vendor` SET `ExtendedCost` = 10344 WHERE `entry` = 900011 AND `item` IN (
@@ -10,8 +10,8 @@ UPDATE `npc_vendor` SET `ExtendedCost` = 10344 WHERE `entry` = 900011 AND `item`
 UPDATE `npc_vendor` SET `ExtendedCost` = 10347 WHERE `entry` = 900011 AND `item` IN (
   1339051, 1339052, 1339053, 1339054, 1339055, 1339056, 1339057);
 
--- One-handed weapons: 1300 tokens
-UPDATE `npc_vendor` SET `ExtendedCost` = 10342 WHERE `entry` = 900011 AND `item` IN (
+-- One-handed weapons: 900 tokens (half a two-hander)
+UPDATE `npc_vendor` SET `ExtendedCost` = 10338 WHERE `entry` = 900011 AND `item` IN (
   1642944,  -- Balanced Heartseeker
   1644096,  -- Battleworn Thrash Blade
   1642948,  -- Devout Aurastone Hammer
@@ -23,8 +23,8 @@ UPDATE `npc_vendor` SET `ExtendedCost` = 10342 WHERE `entry` = 900011 AND `item`
   1648716   -- Venerable Mass of McGowan
 );
 
--- Two-handed weapons: 2500 tokens
-UPDATE `npc_vendor` SET `ExtendedCost` = 10354 WHERE `entry` = 900011 AND `item` IN (
+-- Two-handed weapons: 1800 tokens
+UPDATE `npc_vendor` SET `ExtendedCost` = 10347 WHERE `entry` = 900011 AND `item` IN (
   1642943,  -- Bloodied Arcanite Reaper
   1642947,  -- Dignified Headmaster's Charge
   1644095,  -- Grand Staff of Jordan
