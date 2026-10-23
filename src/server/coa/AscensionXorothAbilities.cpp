@@ -431,7 +431,7 @@ class xoroth_casts : public AllSpellScript
         }
         if (Sever(info) && player->HasAura(300375))
             Cast(player, target, 681268);
-        if (player->HasAura(300388) && (Named(info, 800340) || id == 804353))
+        if (player->HasAura(300388) && (Named(info, 800340) || Named(info, 804353)))
             Cast(player, target, 800341);
         if (Named(info, 800340) && player->HasAura(704952))
             Cast(player, player, 553279);
