@@ -132,6 +132,7 @@ void WorldDatabaseConnection::DoPrepareStatements()
     PrepareStatement(WORLD_SEL_MANASTORM_FLOOR_XP,
         "SELECT enabled, rdf_dungeon_id, multiplier FROM manastorm_floor_experience WHERE id = 1", CONNECTION_SYNCH);
 #endif
+    PrepareStatement(WORLD_SEL_COA_NAME_FILTER, "SELECT term FROM coa_name_filter", CONNECTION_SYNCH);
     PrepareStatement(WORLD_SEL_CLIENT_SPELL_PATCHES, "SELECT * FROM spell_dbc WHERE ID = ?", CONNECTION_SYNCH);
     PrepareStatement(WORLD_SEL_CLIENT_SPELL_DESCRIPTIONS,
         "SELECT ID, Description, ToolTip FROM coa_client_spell_description", CONNECTION_SYNCH);

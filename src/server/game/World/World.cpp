@@ -774,6 +774,7 @@ void World::SetInitialWorldSettings()
     LOG_INFO("server.loading", "Loading Profanity Names...");
     sObjectMgr->LoadProfanityNamesFromDB();
     sObjectMgr->LoadProfanityNamesFromDBC(); // Needs to be after LoadProfanityNamesFromDB()
+    sObjectMgr->LoadCoANameFilter();
 
     LOG_INFO("server.loading", "Loading Chat Filter...");
     sObjectMgr->LoadChatFilter();

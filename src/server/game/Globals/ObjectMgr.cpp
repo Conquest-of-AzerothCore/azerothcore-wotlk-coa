@@ -20,6 +20,7 @@
 #include "ArenaTeamMgr.h"
 #include "CharacterCache.h"
 #include "Chat.h"
+#include "CoANameFilter.h"
 #include "Common.h"
 #include "Config.h"
 #include "Containers.h"
@@ -9183,12 +9184,44 @@ void ObjectMgr::LoadProfanityNamesFromDBC()
         boost::algorithm::replace_all(wstr, "\\<", "");
         boost::algorithm::replace_all(wstr, "\\>", "");
 
+        if (wstr == L"damn" || wstr == L"crap" || wstr == L"butt" || wstr == L"poop")
+            continue;
+
         _profanityNamesStore.insert(wstr);
         count++;
     }
 
     LOG_INFO("server.loading", ">> Loaded {} profanity names from DBC in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
     LOG_INFO("server.loading", " ");
+}
+
+void ObjectMgr::LoadCoANameFilter()
+{
+    uint32 oldMSTime = getMSTime();
+    _coaNameFilterStore.clear();
+
+    WorldDatabasePreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_SEL_COA_NAME_FILTER);
+    PreparedQueryResult result = WorldDatabase.Query(stmt);
+    if (!result)
+    {
+        LOG_WARN("server.loading", ">> Loaded 0 CoA name filter terms. DB table `coa_name_filter` is empty!");
+        return;
+    }
+
+    do
+    {
+        std::string term = CoANameFilter::Normalize(result->Fetch()[0].Get<std::string>());
+        if (term.empty())
+        {
+            LOG_ERROR("sql.sql", "Table `coa_name_filter` contains a term with no normalized letters");
+            continue;
+        }
+
+        _coaNameFilterStore.insert(term);
+    } while (result->NextRow());
+
+    LOG_INFO("server.loading", ">> Loaded {} CoA name filter terms in {} ms",
+        _coaNameFilterStore.size(), GetMSTimeDiffToNow(oldMSTime));
 }
 
 bool ObjectMgr::IsProfanityName(std::string_view name) const
@@ -9203,7 +9236,12 @@ bool ObjectMgr::IsProfanityName(std::string_view name) const
 
     wstrToLower(wstr);
 
-    return _profanityNamesStore.find(wstr) != _profanityNamesStore.end();
+    if (_profanityNamesStore.find(wstr) != _profanityNamesStore.end())
+        return true;
+
+    std::string normalized = CoANameFilter::Normalize(name);
+    return std::any_of(_coaNameFilterStore.begin(), _coaNameFilterStore.end(),
+        [&normalized](std::string const& term) { return normalized.find(term) != std::string::npos; });
 }
 
 void ObjectMgr::AddProfanityPlayerName(std::string const& name)
