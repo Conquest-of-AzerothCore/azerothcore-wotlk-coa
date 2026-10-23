@@ -4,6 +4,7 @@
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
+#include "Map.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "Random.h"
@@ -11,6 +12,8 @@
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 #include <algorithm>
 #include <memory>
 #include <mutex>
@@ -75,6 +78,19 @@ void Cast(Unit* caster, Unit* target, uint32 id)
 {
     if (caster && target && target->IsAlive() && caster->IsInWorld())
         caster->CastSpell(target, id, true);
+}
+void OverrideSpellVisual(Unit* unit, uint32 spell, uint32 visual)
+{
+    if (!unit || !unit->IsInWorld())
+        return;
+    WorldPacket packet(0x662, 16);
+    packet << unit->GetGUID().GetRawValue() << spell << visual;
+    Map* map = unit->GetMap();
+    for (auto itr = map->GetPlayers().begin(); itr != map->GetPlayers().end(); ++itr)
+        if (Player* observer = itr->GetSource();
+            observer == unit || (observer->IsInMap(unit) &&
+                observer->IsWithinDistInMap(unit, map->GetVisibilityRange())))
+            observer->GetSession()->SendPacket(&packet);
 }
 void Copy(Unit* caster, Unit* target, uint32 id, uint32 amount)
 {

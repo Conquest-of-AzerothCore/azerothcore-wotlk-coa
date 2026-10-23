@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionCultist.h"
 #include "AscensionCultistData.h"
+#include "Map.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "Random.h"
@@ -9,6 +10,8 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 #include <algorithm>
 namespace
 {
@@ -94,7 +97,7 @@ class aura_ascension_cultist_event : public AuraScript
             case 706911: return dealt && Named(info, 520332) && Chance(player, id);
             case 707640: return dealt && Named(info, 500720) && Chance(player, id);
             case 803035: case 803037: case 803082: case 803339: case 805606:
-                return dealt && event.GetActor() == player && Chance(player, id);
+                return dealt && event.GetActor() == player && (!info || info->Id != Thoughtseize) && Chance(player, id);
             case 805110: return dealt && !periodic && Chance(player, id);
             case 807307: return dealt && melee && ability;
             case 255283: return dealt && critical;
@@ -232,7 +235,10 @@ class aura_ascension_cultist_event : public AuraScript
                         ModifiedDuration(player, YshaarjCurse), target, true);
                 break;
             case 803037:
-                Summon(player, 500464, player->GetNearPosition(1, 0),
+                OverrideSpellVisual(player, NzothTentacleSummon, PresenceTentacleVisual);
+                if (Aura* tentacles = player->AddAura(NzothTentacleSummon, player))
+                    tentacles->SetDuration(ModifiedDuration(player, NzothTentacleSummon));
+                Summon(player, 500464, player->GetPosition(),
                     ModifiedDuration(player, NzothTentacleSummon), target, id);
                 break;
             case 803082: Cast(player, target, 803083); break;

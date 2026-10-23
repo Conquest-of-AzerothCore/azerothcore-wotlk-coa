@@ -13,12 +13,12 @@
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
 #include <algorithm>
+#include <cmath>
 namespace AscensionCultist
 {
 namespace
 {
 constexpr uint32 HallucinationEntry = 840025;
-constexpr uint32 PresenceOfNzoth = 803037;
 enum SummonEvent : uint32 { Pulse = 1 };
 bool Tentacle(uint32 entry)
 {
@@ -146,6 +146,12 @@ struct npc_ascension_cultist_summon : public ScriptedAI
         }
         if (me->GetEntry() == 50298)
             me->SetNpcFlag(UNIT_NPC_FLAG_GOSSIP);
+        if (me->GetEntry() == 500464 && me->GetUInt32Value(UNIT_CREATED_BY_SPELL) == PresenceOfNzoth)
+        {
+            me->SetDisplayId(11686);
+            me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+            me->SetVisible(false);
+        }
         me->SetFaction(35);
         timers.ScheduleEvent(Pulse, 100ms);
     }
@@ -154,7 +160,7 @@ struct npc_ascension_cultist_summon : public ScriptedAI
     {
         for (ObjectGuid guid : afflicted)
             if (Unit* target = ObjectAccessor::GetUnit(*me, guid))
-                target->RemoveAurasDueToSpell(806596, me->GetGUID());
+                target->RemoveAurasDueToSpell(Thoughtseize, owner);
         afflicted.clear();
     }
     void JustDied(Unit*) override
@@ -247,9 +253,6 @@ struct npc_ascension_cultist_summon : public ScriptedAI
             me->DespawnOrUnsummon();
             return;
         }
-        if (me->GetEntry() == 500464 && me->GetUInt32Value(UNIT_CREATED_BY_SPELL) == PresenceOfNzoth &&
-            me->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
-            me->GetMotionMaster()->MoveFollow(player, 0, 0);
         if (me->GetFaction() != player->GetFaction())
             me->SetFaction(player->GetFaction());
         uint8 pvp = player->GetByteValue(UNIT_FIELD_BYTES_2, 1);
@@ -259,8 +262,9 @@ struct npc_ascension_cultist_summon : public ScriptedAI
         if (!timers.ExecuteEvent())
             return;
         uint32 entry = me->GetEntry();
+        bool presence = entry == 500464 && me->GetUInt32Value(UNIT_CREATED_BY_SPELL) == PresenceOfNzoth;
         timers.ScheduleEvent(Pulse, entry == CthunTentacle ? 1500ms :
-            (entry == 501464 || entry == 500464) ? 6000ms : 1000ms);
+            presence ? 2000ms : (entry == 501464 || entry == 500464) ? 6000ms : 1000ms);
         if (entry == 50298)
         {
             Ritual(player);
@@ -290,8 +294,12 @@ struct npc_ascension_cultist_summon : public ScriptedAI
             me->CastSpell(target, MentalAssault, false);
         else if (entry == 501464 || entry == 500464)
         {
-            Cast(me, target, 806596);
-            afflicted.insert(target->GetGUID());
+            if (!target->HasAura(Thoughtseize, owner))
+            {
+                OverrideSpellVisual(target, Thoughtseize, PresenceTentacleVisual);
+                player->AddAura(Thoughtseize, target);
+                afflicted.insert(target->GetGUID());
+            }
         }
         else if (entry == 397771)
         {
