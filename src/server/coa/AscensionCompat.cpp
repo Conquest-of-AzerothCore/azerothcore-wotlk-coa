@@ -412,6 +412,11 @@ constexpr uint32 ITEM_AURA_OF_EXPERIENCE = 818059;
 constexpr uint8 VANITY_REALM_LEVEL = 60;
 constexpr uint32 ITEM_WONDROUS_WISDOMBALL = 101169;
 constexpr uint32 ITEM_FIX_O_TRON_5000 = 97330;
+// Sigil companions whose creature has no data anywhere: they can't be summoned and show as blank
+// entries in the pet window, so .localvanityall leaves them out. Sorted for binary_search.
+constexpr std::array<uint32, 18> BROKEN_COMPANION_SPELLS = {
+    83896, 84120, 84124, 84195, 84217, 84218, 84226, 84236, 84245,
+    84247, 84254, 84262, 84265, 84304, 84306, 84326, 103844, 354550};
 constexpr std::size_t COMPANION_SPELLS_PER_BATCH = 4;
 constexpr uint32 COMPANION_SPELL_BATCH_INTERVAL_MS = 200;
 
@@ -5884,9 +5889,16 @@ public:
             std::find(MysticAltarVanityItems.begin(), MysticAltarVanityItems.end(), itemId) != MysticAltarVanityItems.end();
     }
 
+    [[nodiscard]] static bool IsBrokenCompanionSpell(uint32 spellId)
+    {
+        return std::binary_search(BROKEN_COMPANION_SPELLS.begin(), BROKEN_COMPANION_SPELLS.end(), spellId);
+    }
+
     [[nodiscard]] bool IsUnsummonableCompanion(uint32 itemId) const
     {
         auto const vanity = _vanityItems.find(itemId);
+        if (vanity != _vanityItems.end() && IsBrokenCompanionSpell(vanity->second.LearnedSpell))
+            return true;
         if (vanity == _vanityItems.end() || !vanity->second.LearnedSpell ||
             !(vanity->second.CategoryMask & VANITY_CATEGORY_COMPANIONS))
             return false;
@@ -5993,6 +6005,7 @@ public:
                     AscensionCollectibles::SigilSpells.end(), vanity.LearnedSpell) &&
                     !state.OwnedVanityItems.contains(itemId)) ||
                 !vanity.LearnedSpell || player->HasSpell(vanity.LearnedSpell) ||
+                IsBrokenCompanionSpell(vanity.LearnedSpell) ||
                 !sSpellMgr->GetSpellInfo(vanity.LearnedSpell))
                 continue;
 
