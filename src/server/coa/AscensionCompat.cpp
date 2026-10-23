@@ -432,6 +432,9 @@ constexpr std::array<uint32, 8> GOBLIN_SALVAGE_QUEST_ITEMS =
     9707001, 9707002, 9707003, 9707004, 9707005, 9707006, 9707007, 9707008
 };
 
+constexpr std::array<uint32, 2> GOBLIN_SALVAGE_FIELD_TESTING_QUESTS = { 176003, 176013 };
+constexpr float GOBLIN_SALVAGE_FIELD_TESTING_LOOT_REACH = 10.0f;
+
 enum AscensionRidingSpells : uint32
 {
     SPELL_RIDING_APPRENTICE = 33388,
@@ -5826,10 +5829,18 @@ public:
         float const radius = spell->Effects[EFFECT_0].CalcRadius(player);
         if (radius <= 0.0f)
             return;
+        bool const fieldTesting = !skin && IsGoblinSalvageFieldTesting(player);
         std::list<Creature*> corpses;
         companion->GetDeadCreatureListInGrid(corpses, radius, true);
         for (Creature* creature : corpses)
-            player->LootCreatureWithCompanion(creature, radius, skin);
+            if (!fieldTesting || player->IsWithinDistInMap(creature, GOBLIN_SALVAGE_FIELD_TESTING_LOOT_REACH))
+                player->LootCreatureWithCompanion(creature, radius, skin);
+    }
+
+    [[nodiscard]] static bool IsGoblinSalvageFieldTesting(Player const* player)
+    {
+        return std::any_of(GOBLIN_SALVAGE_FIELD_TESTING_QUESTS.begin(), GOBLIN_SALVAGE_FIELD_TESTING_QUESTS.end(),
+            [player](uint32 questId) { return player->FindQuestSlot(questId) < MAX_QUEST_LOG_SIZE; });
     }
 
     void InitializeRiding(Player* player) const

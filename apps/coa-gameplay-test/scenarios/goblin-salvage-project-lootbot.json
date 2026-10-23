@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "The Goblin Salvage Project field test lends a Lootbot and its last step awards Lootbot 3000",
-  "contract": "Lootbot 3000 (57000) leaves the Bazaar and becomes the reward of the Goblin Salvage Project. Field Testing (176003) hands out the Lootbot Field Remote (9707006), which summons the real Lootbot 3000 (44022) through 9930889 without teaching the companion. With it out, a Venture Co. Geologist the player kills yields its Field Test Sample (9707007) without a loot window. Turning in Field Testing takes the remote back, and Licensed Salvage Assistant (176004) rewards the Lootbot 3000 item. The case runs with CoA.UnlockAllVanity off, as on a realm where Lootbot 3000 is earned, so the companion timer that teaches every unlocked companion cannot mask a remote that teaches it.",
+  "contract": "Lootbot 3000 (57000) leaves the Bazaar and becomes the reward of the Goblin Salvage Project. Field Testing (176003) hands out the Lootbot Field Remote (9707006), which summons the real Lootbot 3000 (44022) through 9930889 without teaching the companion. With it out, a Venture Co. Geologist the player kills yields its Field Test Sample (9707007) without a loot window, but only when the player stands within 10 yd of the corpse: the Lootbot's own 40 yd sweep (84419) would otherwise loot corpses the player never walked up to. Exactly one sample afterwards also shows the distant corpse stayed unlooted. Turning in Field Testing takes the remote back, and Licensed Salvage Assistant (176004) rewards the Lootbot 3000 item. The case runs with CoA.UnlockAllVanity off, as on a realm where Lootbot 3000 is earned, so the companion timer that teaches every unlocked companion cannot mask a remote that teaches it.",
   "timeout_ms": 90000,
   "vanity_ownership": {
     "unlock_all": false,
@@ -96,6 +96,47 @@
       "action": "summon",
       "actor": "salvager",
       "entry": 1096,
+      "as": "distant_geologist",
+      "distance": 18
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "salvager",
+      "entry": 1096,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "distant_geologist",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the distant corpse lies beyond the 10 yd field-test reach but inside the Lootbot's 40 yd sweep",
+      "actor": "salvager",
+      "metric": "distance",
+      "target": "distant_geologist",
+      "min": 14,
+      "max": 30
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: during Field Testing the Lootbot leaves a corpse the player stands 14+ yd from",
+      "actor": "salvager",
+      "metric": "item_count",
+      "item": 9707007,
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "salvager",
+      "entry": 1096,
       "as": "geologist",
       "distance": 4
     },
@@ -118,7 +159,7 @@
     },
     {
       "action": "assert",
-      "label": "the Lootbot collects the Field Test Sample from the Geologist without a loot window",
+      "label": "the Lootbot collects the Field Test Sample from the Geologist at the player's side without a loot window",
       "actor": "salvager",
       "metric": "item_count",
       "item": 9707007,
