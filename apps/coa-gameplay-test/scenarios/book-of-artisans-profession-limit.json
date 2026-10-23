@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Book of Artisans: a new profession is not offered once the character has no free profession slot",
+  "contract": "Trainer::GetSpellState marked the entry rank of every profession available even when the character had no free primary profession point, while Trainer::CanTeachSpell refused the purchase. The book filters its window to trainable rows, so a character with two professions (MaxPrimaryTradeSkill = 2) still saw every other Apprentice row in green and the window opened on them instead of the recipes it could learn. Expected: with no profession, Apprentice Engineer (4039) is available (0); after learning Alchemy (2259) and Tailoring (3908) it is not a row (-1), while Journeyman Tailor (3912) is still available.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "a", "race": 1, "class": 1, "level": 60 } ],
+  "creatures": [ { "id": "book", "owner": "a", "entry": 57500, "distance": 2, "faction": 35 } ],
+  "steps": [
+    { "action": "gossip_hello", "actor": "a", "target": "book" },
+    { "action": "gossip_select", "actor": "a", "option": 0 },
+    { "action": "assert", "label": "Control: with free slots Apprentice Engineer is available", "actor": "a", "metric": "trainer_window_state", "spell": 4039, "equals": 0, "within_ms": 3000 },
+    { "action": "learn", "actor": "a", "spell": 2259 },
+    { "action": "learn", "actor": "a", "spell": 3908 },
+    { "action": "set_skill", "actor": "a", "skill": 197, "value": 75, "maximum": 75 },
+    { "action": "gossip_hello", "actor": "a", "target": "book" },
+    { "action": "gossip_select", "actor": "a", "option": 0 },
+    { "action": "assert", "label": "Control: Journeyman Tailor is still available", "actor": "a", "metric": "trainer_window_state", "spell": 3912, "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: with both slots used Apprentice Engineer is not a row", "actor": "a", "metric": "trainer_window_state", "spell": 4039, "equals": -1 }
+  ]
+}
