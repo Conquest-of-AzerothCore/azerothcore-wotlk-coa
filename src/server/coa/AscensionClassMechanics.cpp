@@ -41,6 +41,7 @@
 #include "AscensionSpellProgressionData.h"
 #include "AscensionHeroHunter.h"
 #include "AscensionHeroRogue.h"
+#include "AscensionHeroPriest.h"
 #include "AscensionWarcraftRebornDruid.h"
 #include "AscensionWarcraftRebornHunter.h"
 #include "AscensionWarcraftRebornMage.h"
@@ -1110,7 +1111,7 @@ void ApplyAscensionClassMechanics(SpellInfo* spellInfo)
     ApplyAscensionWarcraftRebornWarlockContracts(spellInfo);
     ApplyAscensionWarcraftRebornDruidContracts(spellInfo);
     ApplyAscensionHeroHunterContracts(spellInfo);
-    ApplyAscensionHeroRogueContracts(spellInfo);
+    ApplyAscensionHeroRogueContracts(spellInfo); ApplyAscensionHeroPriestContracts(spellInfo);
     ApplyTinkerScrapResourceContract(spellInfo);
     ApplyTinkerScrapperContract(spellInfo);
     ApplyRangerFixedDurationContract(spellInfo);

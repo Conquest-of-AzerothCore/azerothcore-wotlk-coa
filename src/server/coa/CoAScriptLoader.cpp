@@ -89,6 +89,7 @@ void AddSC_AscensionHeroWarrior();
 void AddSC_AscensionHeroHunter();
 void AddSC_AscensionHeroRogue();
 void AddSC_AscensionHeroMage();
+void AddSC_AscensionHeroPriest();
 void AddSC_AscensionHeroFireFireFireball();
 void AddSC_AscensionHeroMissileBarrage();
 void AddSC_AscensionWildcardCremation();
@@ -701,6 +702,7 @@ void AddCoAScripts()
     AddSC_AscensionHeroHunter();
     AddSC_AscensionHeroRogue();
     AddSC_AscensionHeroMage();
+    AddSC_AscensionHeroPriest();
     AddSC_AscensionHeroFireFireFireball();
     AddSC_AscensionHeroMissileBarrage();
     AddSC_AscensionWildcardCremation();
