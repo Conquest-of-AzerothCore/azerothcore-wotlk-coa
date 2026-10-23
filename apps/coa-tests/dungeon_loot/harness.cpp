@@ -147,7 +147,7 @@ int main()
     normal.AddItem(row);
     Require(normal.items.size() == 1 && normal.items[0].itemid == 5193 && normal.items[0].count == 6);
     for (uint32 map : {33u, 34u, 36u, 43u, 47u, 48u, 70u, 90u, 109u, 129u, 189u,
-                      209u, 229u, 230u, 289u, 329u, 349u, 389u, 429u})
+                      209u, 229u, 230u, 289u, 329u, 349u, 389u, 429u, 937u})
     {
         Require(DungeonLoot::Difficulty(map, 1, true) == 1);
         Require(DungeonLoot::Difficulty(map, 2, true) == 2);
