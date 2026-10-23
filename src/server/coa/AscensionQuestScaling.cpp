@@ -50,6 +50,22 @@ LocalLevelScaling::QuestCurve const* CurveFor(std::uint32_t questId)
     return itr == curves.end() ? nullptr : &itr->second;
 }
 
+/// Client rows that cannot be used as they are. Quest 45 "Discover Rolf's Fate" is an Elwynn
+/// Forest quest (zone 12), but its row caps it at 20 while the other 61 quests of that zone and
+/// every quest in its own chain (35, 37, 40, 71, 59) cap at 60. Elwynn proper scales to 60; only
+/// the starting hubs stop at 20, and this quest is not in one. The client keeps its own row and
+/// uses it only to scale reward-item stats (FUN_10213cd0); the level the server sends drives the
+/// quest log, the quest giver window and the reward, so the cap is corrected here.
+void CorrectKnownRows()
+{
+    constexpr std::uint32_t DiscoverRolfsFate = 45;
+    constexpr std::int32_t ElwynnScalingCap = 60;
+
+    auto itr = curves.find(DiscoverRolfsFate);
+    if (itr != curves.end() && itr->second.MaxLevel < ElwynnScalingCap)
+        itr->second.MaxLevel = ElwynnScalingCap;
+}
+
 class Configuration : public WorldScript
 {
 public:
@@ -78,6 +94,7 @@ public:
             return;
         }
 
+        CorrectKnownRows();
         loaded.store(true, std::memory_order_release);
         LOG_INFO("server.loading", ">> Loaded {} quest scaling curves in {} ms", curves.size(),
             GetMSTimeDiffToNow(started));

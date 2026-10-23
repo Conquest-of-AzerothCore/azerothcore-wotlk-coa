@@ -340,6 +340,13 @@ trails the character by that point's offset, held between the row's minimum and 
 `Player::GetQuestLevel` answers with `EffectiveQuestLevel`, so the level never goes below the authored
 one, and a character with scaling off (or blocked) plays every quest at its authored level.
 
+One client row is corrected after loading (`CorrectKnownRows`): quest 45 "Discover Rolf's Fate" is an
+Elwynn Forest quest whose row caps it at 20, while the other 61 quests of the zone and every quest in
+its chain (35, 37, 40, 71, 59) cap at 60. Elwynn proper scales to 60; only the starting hubs stop at
+20, and this quest is not in one, so its maximum is raised to 60. The client keeps its own row, which
+it uses only to scale a reward item's stats (`FUN_10213cd0`); the level the server sends is what the
+quest log, the quest giver window and the reward use.
+
 ## 3. Quest experience
 
 `Quest::XPValue(playerLevel, levelScaling)`
