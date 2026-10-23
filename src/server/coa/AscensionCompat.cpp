@@ -4050,6 +4050,9 @@ public:
              rows.Items.size(), sentSpells, rows.SuperTracks.size(), rows.QuestSuperTracks.size(),
              rows.SkillLineAbilities.size(), rows.ShapeshiftForms.size(), rows.VanityCollections.size(), bytes,
              player->GetName(), GetMSTimeDiffToNow(startTime));
+
+    if (!rows.ShapeshiftForms.empty() && player->GetShapeshiftForm() != FORM_NONE)
+      player->ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
   }
 
 private:
