@@ -1,0 +1,238 @@
+{
+  "schema": 1,
+  "name": "Mounts with a flying aura fly only in Outland, or in Northrend with Cold Weather Flying",
+  "contract": [
+    "Ash'adar, Harbinger of Dusk 917000 carries a 100% ground aura and a 280% mounted flight aura without the",
+    "flying-area attribute, so the client spell alone lets it fly anywhere.",
+    "Players fly with Expert riding or better in Outland, and in Northrend once they know Cold Weather Flying 54197.",
+    "Stormwind and the rest of Azeroth allow no flying at any riding skill, and a rider who leaves Outland stops",
+    "flying.",
+    "The test observes native flight permission, not rendered tooltips."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8833.38,
+    "y": 628.628,
+    "z": 94.0066,
+    "o": 1.06535
+  },
+  "players": [
+    {
+      "id": "rider",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 917000
+    },
+    {
+      "action": "set_skill",
+      "actor": "rider",
+      "skill": 762,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 917000
+    },
+    {
+      "action": "assert",
+      "label": "Ash'adar mounts the rider in Stormwind",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Ash'adar keeps its 100% ground speed in Stormwind",
+      "actor": "rider",
+      "metric": "run_speed_rate",
+      "min": 1.999,
+      "max": 2.001
+    },
+    {
+      "action": "assert",
+      "label": "Artisan riding does not allow flying in Stormwind",
+      "actor": "rider",
+      "metric": "can_fly",
+      "equals": 0
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "label": "Dismounting in Stormwind removes the mount",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "rider",
+      "map": 530,
+      "x": -211.237,
+      "y": 4278.54,
+      "z": 86.5678,
+      "o": 4.59776
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 917000
+    },
+    {
+      "action": "assert",
+      "label": "Ash'adar mounts the rider in Hellfire Peninsula",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Artisan riding allows flying in Hellfire Peninsula",
+      "actor": "rider",
+      "metric": "can_fly",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Artisan riding gives 280% flying speed in Hellfire Peninsula",
+      "actor": "rider",
+      "metric": "flight_speed_rate",
+      "min": 3.799,
+      "max": 3.801
+    },
+    {
+      "action": "teleport",
+      "actor": "rider",
+      "map": 0,
+      "x": -11840.1,
+      "y": -3196.63,
+      "z": -29.6059,
+      "o": 3.3391
+    },
+    {
+      "action": "assert",
+      "label": "Leaving Outland through the Dark Portal stops the flight",
+      "actor": "rider",
+      "metric": "can_fly",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "label": "The rider is on foot in the Blasted Lands",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "rider",
+      "map": 571,
+      "x": 2213.95,
+      "y": 5273.15,
+      "z": 11.2565,
+      "o": 5.89294
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 917000
+    },
+    {
+      "action": "assert",
+      "label": "Ash'adar mounts the rider in Borean Tundra",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Without Cold Weather Flying the rider does not fly in Northrend",
+      "actor": "rider",
+      "metric": "can_fly",
+      "equals": 0
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "label": "Dismounting in Borean Tundra removes the mount",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "rider",
+      "spell": 54197
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 917000
+    },
+    {
+      "action": "assert",
+      "label": "Ash'adar mounts the rider again in Borean Tundra",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Cold Weather Flying allows flying in Northrend",
+      "actor": "rider",
+      "metric": "can_fly",
+      "equals": 1
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "label": "Dismounting in Borean Tundra removes the mount again",
+      "actor": "rider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 5000
+    }
+  ]
+}

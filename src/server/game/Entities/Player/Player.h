@@ -2719,7 +2719,7 @@ public:
 
     [[nodiscard]] bool CanFly() const override { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_CAN_FLY); }
     [[nodiscard]] bool CanEnterWater() const override { return true; }
-    bool IsFreeFlying() const { return HasIncreaseMountedFlightSpeedAura() || HasFlyAura(); }
+    bool IsFreeFlying() const { return HasAuraType(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED) || HasAuraType(SPELL_AURA_FLY); }
 
     // saving
     void AdditionalSavingAddMask(uint8 mask);

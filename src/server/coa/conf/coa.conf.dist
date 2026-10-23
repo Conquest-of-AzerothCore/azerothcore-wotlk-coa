@@ -114,6 +114,18 @@ CoA.LearnOwnedCompanions = 1
 # from the first login, including level-one characters. No profession grants.
 CoA.MaxRidingFromStart = 1
 
+# Mount flight rules.
+# 0 - Players fly with Expert Riding or better in Outland, and in Northrend once they know Cold
+#     Weather Flying; never in Azeroth, battlegrounds, battlefields or no-fly areas. Every mount
+#     follows this rule, Ascension's own mounts such as Ash'adar included, and a rider who leaves
+#     a flying area is dismounted.
+# 1 - Flight as before PR #8631: the rule above applies only to mounts in the spellbook, Ash'adar
+#     never flies, other mounts fly wherever their own spell allows, and nobody is dismounted
+#     when leaving a flying area.
+# Applies on startup and config reload.
+# Default: 0
+CoA.LegacyMountFlight = 0
+
 # Give a character that carries none of the three PvP ruleset auras the PvE set at login,
 # because character creation grants no ruleset and the client's selection frame is level- and
 # rested-area gated. The PvE set is the PvE Mode aura 9931032 alone, exactly what pressing
