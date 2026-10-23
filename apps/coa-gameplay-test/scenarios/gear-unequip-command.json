@@ -127,6 +127,15 @@
       "actor": "stuffed"
     },
     {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "fill_bags",
+      "label": "refill a slot freed by a filler item that vanished",
+      "actor": "stuffed"
+    },
+    {
       "action": "assert",
       "label": "stuffed has no free bag slot",
       "actor": "stuffed",
