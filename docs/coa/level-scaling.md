@@ -12,9 +12,9 @@ Destiny Weaver (`mod-destiny-weaver`), which the character-creation screen offer
   own choice decides). A quest follows its own row in the client's `QuestTemplateScaling.dbc`, so it
   trails the character inside the bounds its row sets; the level is sent to that one client, so it can
   genuinely differ per character.
-* **challenge rules** and the open-world **War Mode / High-Risk** rulesets hold a character to the
-  authored world whatever their own choice says (section 1, *What holds a character to the authored
-  world*).
+* **challenge rules** hold a character to the authored world whatever their own choice says
+  (section 1, *What holds a character to the authored world*). War Mode and High-Risk do not: Ascension
+  keeps scaling on under both, whatever their tooltips say.
 
 ## 1. The shared header
 
@@ -73,7 +73,7 @@ puts the field in every create block. `OnPatchValuesUpdate` leaves the bit set f
 shown their own version and clears it for everyone else; the client's `UnitIsLevelScaling` reads it.
 
 `QuestScalingEnabled(player)` is the per-character gate for **quests**. The realm switch
-`CoA.QuestLevelScaling` must be on for it to be consulted at all; a challenge rule or a ruleset that
+`CoA.QuestLevelScaling` must be on for it to be consulted at all; a challenge rule that
 blocks quest scaling answers no next, and the resolver then answers for one character. No resolver, or no opinion, means "take the realm default".
 `mod-destiny-weaver` installs the resolver and stores the choice in `character_settings` under
 `core.destiny_weaver` (index 0 = the choice, 2 = off). `ScalingChoiceEnabled(player)` is the same
@@ -83,23 +83,18 @@ choice with no realm switch in front of it, and it is what the per-viewer creatu
 
 `LocalLevelScaling::ScalingBlocksFor(player)` returns the scaling a character may not have, whatever
 their own or their group's choice: bit `0x1` (creatures) and bit `0x2` (quests). The creature view
-(`ViewFor` in `mod-destiny-weaver`), the chest item lift and `QuestScalingEnabled` all ask it. Two
-owners feed it.
-
-| owner | what it blocks | where |
-|---|---|---|
-| challenge rules (`ChallengeBlocksOwner`, `mod-coa-challenges`) | `NO_CREATURE_LEVEL_SCALING` → creatures, `NO_QUEST_LEVEL_SCALING` → quests, read from `ChallengeRuleTypes.dbc` for the character's active challenges | any map |
-| rulesets (`RulesetBlocksOwner`, `AscensionRulesets.cpp`) | both, while the character carries High-Risk (1004019), or War Mode (1004119) without PvE Mode (9931032) | the open world only (not an instanceable map) |
+(`ViewFor` in `mod-destiny-weaver`), the chest item lift and `QuestScalingEnabled` all ask it. One
+owner feeds it: the challenge rules (`ChallengeBlocksOwner`, `mod-coa-challenges`), where
+`NO_CREATURE_LEVEL_SCALING` blocks creatures and `NO_QUEST_LEVEL_SCALING` quests, read from
+`ChallengeRuleTypes.dbc` for the character's active challenges, on any map.
 
 Ironman - Overwhelming Odds (71) and its twin (285) carry only the creature rule; Hardcore - Inn-Sane
 (76, 290) carries both, and also `NO_PLAYER_LEVEL_SCALING`, which has nothing to block here because
-this realm has no player level sync. The ruleset block is what the live tooltips of the two auras
-say: "Level scaling is disabled while in High-Risk." and "Level scaling is disabled while in War
-Mode."; PvE Mode's tooltip has no such line. `CoA.Ruleset.DisableLevelScaling` (default 1) turns the
-ruleset block off.
+this realm has no player level sync. The tooltips of the High-Risk and War Mode auras say "Level
+scaling is disabled while in High-Risk / War Mode.", but live Ascension keeps scaling on under both
+(recorded gameplay, issue #8684), so those rulesets block nothing here.
 
-Starting or stopping a challenge, switching ruleset and entering or leaving the open world change the
-answer without a relog: each calls `NotifyScalingChanged(player)`, which `mod-destiny-weaver` serves
+Starting or stopping a challenge changes the answer without a relog: each calls `NotifyScalingChanged(player)`, which `mod-destiny-weaver` serves
 with `DestinyWeaver::RefreshClient` (creatures and quest log); without the module the quest log is
 re-sent through `RefreshQuestLogQueries`.
 
@@ -263,7 +258,7 @@ Not scaled, deliberately, and matching the reference implementation: the creatur
 tables**, which are one corpse shared by everyone who tagged it. Scaling gear on that corpse takes the level
 of whoever loots it or wins the roll, a master looter's pick the receiver's. Scaling gear from loot or a
 quest reward scales only for a character whose scaling is on, by the same answer the creature view asks
-(their choice, or their leader's in a group, and no challenge or open-world ruleset holding them to the
+(their choice, or their leader's in a group, and no challenge holding them to the
 authored world); everyone else receives the authored item, and their corpse and roll frame preview none.
 
 With `CoA.ItemScaling.Native.LevelKeys` the stored level is the client's own item key for that level
@@ -369,7 +364,7 @@ RefreshQuestLogQueries()` re-sends the query response for every quest in the log
   character with scaling off needs the resend just as much — the client is holding the scaled copy);
 * on **accept** (`Player::AddQuest`), since the copy may have come from another character;
 * whenever the character **changes the choice** (`DestinyWeaver::SetLevelScaling`), and whenever a
-  challenge or ruleset block starts or ends (section 1).
+  challenge block starts or ends (section 1).
 
 The query response is not what the Ascension quest log shows, though. Its `Extensions.dll` answers
 `GetQuestLogTitle`'s level and the log's reward experience for a quest in the log from the player's

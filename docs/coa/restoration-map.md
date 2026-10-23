@@ -26,7 +26,7 @@ per-character system adds, and of what a port has to carry.
 
 | file | what was changed |
 |---|---|
-| `src/server/game/Miscellaneous/LocalLevelScaling.h` | the shared rules header: `CreatureOffset`, `ScaleCreatureLevelForViewer`, the quest curve (`CurveLevel`, `OnCurve`, `EffectiveQuestLevel`), `ScalingBlocksFor`, and the resolver slots an owner installs (`QuestScalingOwner`, `QuestCurveOwner`, `ChallengeBlocksOwner`, `RulesetBlocksOwner`, `ScalingChangedOwner`, `CreatureViewArmorOwner`, `CreatureViewLevelOwner`) with their accessors |
+| `src/server/game/Miscellaneous/LocalLevelScaling.h` | the shared rules header: `CreatureOffset`, `ScaleCreatureLevelForViewer`, the quest curve (`CurveLevel`, `OnCurve`, `EffectiveQuestLevel`), `ScalingBlocksFor`, and the resolver slots an owner installs (`QuestScalingOwner`, `QuestCurveOwner`, `ChallengeBlocksOwner`, `ScalingChangedOwner`, `CreatureViewArmorOwner`, `CreatureViewLevelOwner`) with their accessors |
 | `src/server/game/Entities/Unit/Unit.cpp` | `CalcArmorReducedDamage` asks the viewer's armor resolver; `getLevelForTarget` returns the view level for a creature, which is the single lever every level-derived roll hangs off |
 | `src/server/game/Entities/Player/Player.cpp` / `.h` | `Player::RefreshQuestLogQueries()`; `isHonorOrXPTarget` and `RewardReputation` read the view level |
 | `src/server/game/Entities/Player/PlayerQuest.cpp` | `Player::GetQuestLevel` asks the per-character resolver |
@@ -81,7 +81,7 @@ Ascension-client code that the module drives over the wire:
   `src/server/database/Database/Implementation/CharacterDatabase.cpp`.
 * Quest rewards are read from the stock `quest_template` rows; scaling changes the level they are
   priced at, never the rows. Challenge rules come from `ChallengeRuleTypes.dbc` through
-  `mod-coa-challenges`; the War Mode / High-Risk block is `CoA.Ruleset.DisableLevelScaling`.
+  `mod-coa-challenges`.
 
 ---
 

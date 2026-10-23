@@ -92,7 +92,6 @@ public:
     ~ScalingOwnersReset()
     {
         LocalLevelScaling::ChallengeBlocksOwner.store(nullptr);
-        LocalLevelScaling::RulesetBlocksOwner.store(nullptr);
     }
 };
 }
@@ -134,18 +133,13 @@ TEST(LocalLevelScalingTest, ScalingNeverLowersAQuest)
     EXPECT_EQ(EffectiveQuestLevel(0, 32, nullptr), 32);
 }
 
-TEST(LocalLevelScalingTest, PvPRulesetBlocksCreatureAndQuestScaling)
+TEST(LocalLevelScalingTest, ChallengeRulesAreTheOnlyScalingBlock)
 {
     ScalingOwnersReset const reset;
+    EXPECT_EQ(LocalLevelScaling::ScalingBlocksFor(AnyPlayer()), 0);
+
     LocalLevelScaling::ChallengeBlocksOwner.store(
         [](Player const*) -> std::uint8_t { return LocalLevelScaling::ChallengeBlocksCreatureScaling; });
-    EXPECT_EQ(LocalLevelScaling::ScalingBlocksFor(AnyPlayer()), LocalLevelScaling::ChallengeBlocksCreatureScaling);
-
-    LocalLevelScaling::RulesetBlocksOwner.store([](Player const*) { return true; });
-    EXPECT_EQ(LocalLevelScaling::ScalingBlocksFor(AnyPlayer()),
-        LocalLevelScaling::ChallengeBlocksCreatureScaling | LocalLevelScaling::ChallengeBlocksQuestScaling);
-
-    LocalLevelScaling::RulesetBlocksOwner.store([](Player const*) { return false; });
     EXPECT_EQ(LocalLevelScaling::ScalingBlocksFor(AnyPlayer()), LocalLevelScaling::ChallengeBlocksCreatureScaling);
     EXPECT_EQ(LocalLevelScaling::ScalingBlocksFor(nullptr), 0);
 }

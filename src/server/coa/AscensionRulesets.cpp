@@ -2,12 +2,9 @@
 
 #include "AscensionRulesets.h"
 #include "Config.h"
-#include "LocalLevelScaling.h"
-#include "Map.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "SpellScript.h"
-#include <atomic>
 
 namespace
 {
@@ -22,25 +19,8 @@ enum RulesetSpells : uint32
     SPELL_MERCENARY = 9930874
 };
 
-std::atomic<bool> pvpRulesetsDisableLevelScaling{true};
-
-bool InPvPRuleset(Player const* player)
-{
-    return player->HasAura(SPELL_HIGH_RISK) || (player->HasAura(SPELL_WAR_MODE) && !player->HasAura(SPELL_PVE));
-}
-
-bool RulesetBlocksLevelScaling(Player const* player)
-{
-    if (!pvpRulesetsDisableLevelScaling.load(std::memory_order_relaxed))
-        return false;
-
-    Map const* map = player->FindMap();
-    return map && !map->Instanceable() && InPvPRuleset(player);
-}
-
 void ApplyRuleset(Player* player, uint32 selectionId)
 {
-    bool const blockedBefore = RulesetBlocksLevelScaling(player);
     player->RemoveAurasDueToSpell(SPELL_HIGH_RISK);
     player->RemoveAurasDueToSpell(SPELL_WAR_MODE);
     player->RemoveAurasDueToSpell(SPELL_PVE);
@@ -51,10 +31,6 @@ void ApplyRuleset(Player* player, uint32 selectionId)
         player->CastSpell(player, SPELL_PVE, true);
     else
         player->CastSpell(player, SPELL_WAR_MODE, true);
-
-    if (player->IsInWorld() && RulesetBlocksLevelScaling(player) != blockedBefore &&
-        !LocalLevelScaling::NotifyScalingChanged(player))
-        player->RefreshQuestLogQueries();
 }
 
 uint32 SelectionSpell(AscensionRulesets::Ruleset ruleset)
@@ -129,30 +105,11 @@ public:
     }
 };
 
-class ruleset_level_scaling_configuration : public WorldScript
-{
-public:
-    ruleset_level_scaling_configuration()
-        : WorldScript("ruleset_level_scaling_configuration", {WORLDHOOK_ON_AFTER_CONFIG_LOAD}) { }
-
-    void OnAfterConfigLoad(bool) override
-    {
-        pvpRulesetsDisableLevelScaling.store(
-            sConfigMgr->GetOption<bool>("CoA.Ruleset.DisableLevelScaling", true), std::memory_order_relaxed);
-    }
-};
-
 class ruleset_player_spells : public PlayerScript
 {
 public:
     ruleset_player_spells()
-        : PlayerScript("ruleset_player_spells", {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_MAP_CHANGED}) { }
-
-    void OnPlayerMapChanged(Player* player) override
-    {
-        if (pvpRulesetsDisableLevelScaling.load(std::memory_order_relaxed) && InPvPRuleset(player))
-            player->RefreshQuestLogQueries();
-    }
+        : PlayerScript("ruleset_player_spells", {PLAYERHOOK_ON_LOGIN}) { }
 
     void OnPlayerLogin(Player* player) override
     {
@@ -189,9 +146,7 @@ bool AscensionRulesets::Has(Player* player, Ruleset ruleset)
 
 void AddSC_AscensionRulesets()
 {
-    LocalLevelScaling::RulesetBlocksOwner.store(&RulesetBlocksLevelScaling, std::memory_order_relaxed);
     RegisterSpellScript(spell_ascension_ruleset_select);
     new ruleset_aura_metadata();
-    new ruleset_level_scaling_configuration();
     new ruleset_player_spells();
 }

@@ -134,11 +134,6 @@ CoA.LegacyMountFlight = 0
 # Set to 0 to leave such characters on Ruleset.None instead.
 CoA.RulesetLoginDefault = 1
 
-# War Mode (1004119 without PvE Mode) and High-Risk (1004019) switch creature, chest and quest level
-# scaling off in the open world, as their tooltips state: "Level scaling is disabled while in War
-# Mode / High-Risk". Instances keep the character's own choice. Set to 0 to let the rulesets scale.
-CoA.Ruleset.DisableLevelScaling = 1
-
 # Quests with a row in the client's QuestTemplateScaling.dbc trail the character: the row's highest
 # point at or below the character's level sets the quest to that level plus its offset (the shipped
 # rows trail by 4 to 1 levels), held within the row's minimum and maximum level and never below the

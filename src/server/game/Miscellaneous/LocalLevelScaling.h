@@ -61,23 +61,15 @@ inline std::uint8_t ChallengeBlocksFor(Player const* player)
     return owner && player ? owner(player) : 0;
 }
 
-/// War Mode and High-Risk switch all level scaling off in the open world; their own tooltips say
-/// "Level scaling is disabled while in War Mode / High-Risk". The ruleset owner installs the resolver.
-using RulesetBlocksResolver = bool (*)(Player const*);
-inline std::atomic<RulesetBlocksResolver> RulesetBlocksOwner{nullptr};
-
 /// Everything that holds this character to the authored world, whatever their own choice: the
-/// active challenge's rules and the open-world ruleset, as a mask of the ChallengeBlocks* bits.
+/// active challenge's rules, as a mask of the ChallengeBlocks* bits.
 inline std::uint8_t ScalingBlocksFor(Player const* player)
 {
-    RulesetBlocksResolver const ruleset = RulesetBlocksOwner.load(std::memory_order_relaxed);
-    if (ruleset && player && ruleset(player))
-        return ChallengeBlocksCreatureScaling | ChallengeBlocksQuestScaling;
     return ChallengeBlocksFor(player);
 }
 
 /// Something other than the character's own choice changed whether they see scaled content: a
-/// challenge started or stopped, or the open-world ruleset changed. The module that owns the creature
+/// challenge started or stopped. The module that owns the creature
 /// view installs the resolver and re-sends what the client is holding; false means nobody did, so the
 /// caller refreshes what it can.
 using ScalingChangedResolver = void (*)(Player*);
