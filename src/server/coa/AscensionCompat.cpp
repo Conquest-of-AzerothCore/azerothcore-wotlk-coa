@@ -2049,13 +2049,6 @@ public:
       }
       if (entry->AECost || entry->TECost || GetSelectableFreeGroup(entry->EntryId))
         wanted[entry->EntryId] = item.Rank;
-      if (item.Rank && !entry->AECost && !entry->TECost && !GetSelectableFreeGroup(entry->EntryId) &&
-          !CanGrantAutomaticEntry(player, *entry, targetSpec))
-      {
-        refusal = { "CA_UPDATE_ENTRIES_BAD_ENTRY", "CA_LEARN_BAD_ABILITY", item.EntryId, item.Rank,
-                    Acore::StringFormat("Talent entry {} is not purchasable and cannot be granted automatically.", item.EntryId) };
-        return false;
-      }
     }
 
     std::vector<AscensionCoATalentState::KnownEntry> priced;
@@ -2078,6 +2071,21 @@ public:
             proposed.Entries.push_back({ entryId, rank });
     std::vector<AscensionCoATalentState::KnownEntry> const proposedKnown =
         AscensionCoATalentState::SlotKnownEntries(proposed, player->GetLevel(), CarriedSpells(player));
+    for (AscensionCoATalentState::KnownEntry const& item : upload)
+    {
+        AscensionCompatData::CoATalentEntry const* entry = FindTalentEntry(item.EntryId);
+        if (!item.Rank || entry->AECost || entry->TECost || GetSelectableFreeGroup(entry->EntryId) ||
+            CanGrantAutomaticEntry(player, *entry, targetSpec) ||
+            std::any_of(proposedKnown.begin(), proposedKnown.end(),
+                [&item](AscensionCoATalentState::KnownEntry const& known)
+                {
+                    return known.EntryId == item.EntryId && known.Rank;
+                }))
+            continue;
+        refusal = { "CA_UPDATE_ENTRIES_BAD_ENTRY", "CA_LEARN_BAD_ABILITY", item.EntryId, item.Rank,
+                    Acore::StringFormat("Talent entry {} is not purchasable and cannot be granted automatically.", item.EntryId) };
+        return false;
+    }
     for (AscensionCoATalentState::KnownEntry const& item : priced)
     {
         AscensionCompatData::CoATalentEntry const* entry = FindTalentEntry(item.EntryId);
