@@ -1424,6 +1424,16 @@ bool SpellInfo::IsBreakingStealth() const
     return !(AttributesEx & SPELL_ATTR1_ALLOW_WHILE_STEALTHED);
 }
 
+int32 SpellInfo::GetComboPointPowerBonus(Unit* caster, uint8 effIndex, uint32 comboPoints) const
+{
+    if (!caster || !HasComboPointPowerBonus(effIndex))
+        return 0;
+
+    float const power = caster->GetTotalAttackPowerValue(BASE_ATTACK) + caster->SpellBaseDamageBonusDone(GetSchoolMask());
+    float const cp = float(comboPoints);
+    return int32(power * (ComboPointPowerSquare[effIndex] * cp * cp + ComboPointPowerFlat[effIndex]));
+}
+
 bool SpellInfo::IsRangedWeaponSpell() const
 {
     return (SpellFamilyName == SPELLFAMILY_HUNTER && !(SpellFamilyFlags[1] & 0x10000000)) // for 53352, cannot find better way

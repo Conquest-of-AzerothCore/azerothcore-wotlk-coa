@@ -1061,7 +1061,10 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                                             unitTarget->RemoveAuraFromStack(spellId, m_caster->GetGUID());
 
                                     damage *= doses;
-                                    damage += int32(player->GetTotalAttackPowerValue(BASE_ATTACK) * 0.09f * combo);
+                                    if (m_spellInfo->HasComboPointPowerBonus(effIndex))
+                                        damage += m_spellInfo->GetComboPointPowerBonus(m_caster, effIndex, combo);
+                                    else
+                                        damage += int32(player->GetTotalAttackPowerValue(BASE_ATTACK) * 0.09f * combo);
                                 }
 
                                 // Eviscerate and Envenom Bonus Damage (item set effect)
@@ -1077,14 +1080,22 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         {
                             if (uint32 combo = m_caster->ToPlayer()->GetComboPoints())
                             {
-                                float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                                damage += int32(ap * combo * 0.07f);
+                                if (m_spellInfo->HasComboPointPowerBonus(effIndex))
+                                    damage += m_spellInfo->GetComboPointPowerBonus(m_caster, effIndex, combo);
+                                else
+                                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * combo * 0.07f);
 
                                 // Eviscerate and Envenom Bonus Damage (item set effect)
                                 if (m_caster->HasAura(37169))
                                     damage += combo * 40;
                             }
                         }
+                    }
+                    // Ascension finishers with no stock damage code (Crimson Tempest)
+                    else if (m_spellInfo->HasComboPointPowerBonus(effIndex))
+                    {
+                        if (Player* player = m_caster->ToPlayer())
+                            damage += m_spellInfo->GetComboPointPowerBonus(m_caster, effIndex, player->GetComboPoints());
                     }
                     break;
                 }
