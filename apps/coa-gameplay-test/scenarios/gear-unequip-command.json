@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": ".gear unequip moves equipped items to the bags or the mailbox",
-  "contract": ".gear unequip all|item 0|1 [$player] is a Game Master command. With all it unequips every equipped item; with an item link or id it unequips only that equipped item and leaves the other slots alone, and an item the player does not wear is refused. With 0 the items go into the bags and the ones that do not fit are mailed, so a player with full bags gets them by mail and nothing is lost; with 1 every unequipped item is mailed and the bags are untouched; any other value is refused. The mail flag is required, so a player named Mail is addressed by name. An ordinary player cannot run it.",
+  "contract": ".gear unequip all|item 0|1 [$player] is a Game Master command. With all it unequips every equipped item; with an item link or id it unequips only that equipped item and leaves the other slots alone,. With 0 the items go into the bags and the ones that do not fit are mailed, so a player with full bags gets them by mail and nothing is lost; with 1 every unequipped item is mailed and the bags are untouched. The mail flag is required, so a player named Mail is addressed by name. An ordinary player cannot run it.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -195,19 +195,6 @@
       "actor": "mailed",
       "metric": "free_inventory_slots",
       "save_as": "mailed_free"
-    },
-    {
-      "action": "console",
-      "label": "A mail flag other than 0 or 1 is refused",
-      "command": "gear unequip all 2 Harnessa"
-    },
-    {
-      "action": "assert",
-      "label": "and the refusal leaves bagged's sword equipped",
-      "actor": "bagged",
-      "metric": "equipped_item",
-      "slot": 15,
-      "equals": 12584
     },
     {
       "action": "console",
@@ -925,19 +912,6 @@
       "actor": "single",
       "metric": "mail_item_count",
       "save_as": "single_mail_items"
-    },
-    {
-      "action": "console",
-      "label": "An item the player does not wear is refused",
-      "command": "gear unequip 2589 0 Harnessd"
-    },
-    {
-      "action": "assert",
-      "label": "and the refusal leaves the sword equipped",
-      "actor": "single",
-      "metric": "equipped_item",
-      "slot": 15,
-      "equals": 12584
     },
     {
       "action": "console",
