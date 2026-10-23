@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "Summon Entropius creates the phase-two boss (#8683)",
+  "contract": [
+    "Muru phase transition casts 46217; the destination effect must summon creature25840 using authored properties64.",
+    "This exercises the summon spell, not the full Muru kill/door sequence."
+  ],
+  "timeout_ms": 30000,
+  "location": {
+    "map": 580,
+    "x": 1816.25,
+    "y": 625.484,
+    "z": 69.6036,
+    "o": 0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 425,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 46217
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "owned_creature_count",
+      "entry": 25840,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 46217
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "owned_creature_count",
+      "entry": 25840,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

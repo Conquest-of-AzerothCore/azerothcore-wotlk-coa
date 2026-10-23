@@ -107,6 +107,17 @@ int main(int, char** argv)
         "every dead catalog slot names a spell and slot in Spell.dbc",
         "every dead catalog slot is still dead in Spell.dbc");
 
+    bool entropiusRestored = false;
+    for (Restore const& restore : RESTORES)
+        if (restore.SpellId == 46217 && restore.EffectIndex == 0)
+            entropiusRestored = restore.Stock.Effect == EFFECT_SUMMON &&
+                restore.Stock.MiscValue == KEEP && restore.Stock.MiscValueB == KEEP &&
+                restore.Stock.TargetA == KEEP && restore.Stock.TargetB == KEEP &&
+                !Matches(restore.Broken, EFFECT_SUMMON, AURA_NONE, TARGET_DEST_CASTER);
+    auto const entropius = rows.find(46217);
+    Check(entropiusRestored && entropius != rows.end() && field(entropius->second, 110) == 25840 &&
+        field(entropius->second, 113) == 64, "Entropius restore summons the authored creature without changing its properties");
+
     std::map<std::uint32_t, int> drainSoul;
     for (Restore const& restore : RESTORES)
         if (restore.Stock.Aura == AURA_CHANNEL_DEATH_ITEM)
