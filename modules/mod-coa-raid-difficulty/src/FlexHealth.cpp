@@ -38,6 +38,7 @@
 #include "Player.h"
 #include "QueryResult.h"
 #include "ScriptMgr.h"
+#include "World.h"
 
 #include <algorithm>
 #include <limits>
@@ -111,6 +112,23 @@ namespace
     // later OnUnitEnterCombat call doesn't silently undo that with Basalthane's values.
     constexpr uint32 ENTRY_BASALTHANE_MOLTEN_BLOOD_OOZE = 310189;
 
+    float HealthRate(uint32 rank)
+    {
+        switch (rank)
+        {
+            case CREATURE_ELITE_NORMAL:
+                return sWorld->getRate(RATE_CREATURE_NORMAL_HP);
+            case CREATURE_ELITE_RAREELITE:
+                return sWorld->getRate(RATE_CREATURE_ELITE_RAREELITE_HP);
+            case CREATURE_ELITE_WORLDBOSS:
+                return sWorld->getRate(RATE_CREATURE_ELITE_WORLDBOSS_HP);
+            case CREATURE_ELITE_RARE:
+                return sWorld->getRate(RATE_CREATURE_ELITE_RARE_HP);
+            default:
+                return sWorld->getRate(RATE_CREATURE_ELITE_ELITE_HP);
+        }
+    }
+
     void ApplyFlex(Creature* creature)
     {
         if (!creature || !creature->GetMap() || !creature->GetMap()->IsRaid())
@@ -129,7 +147,8 @@ namespace
 
         int32 const configured = it->second.perPlayer[mode];
         uint32 const players = configured < 0 ? FLEX_MAX_PLAYERS : coa_flex::CountPlayers(creature->GetMap());
-        uint64 const wanted = uint64(configured < 0 ? uint32(-configured) : uint32(configured)) * players;
+        uint64 const measured = uint64(configured < 0 ? uint32(-configured) : uint32(configured)) * players;
+        uint64 const wanted = std::max<uint64>(1, uint64(double(measured) * HealthRate(creature->GetCreatureTemplate()->rank)));
         uint32 const health = uint32(std::min<uint64>(wanted, std::numeric_limits<uint32>::max()));
 
         float const pct = creature->GetMaxHealth() ? creature->GetHealthPct() : 100.0f;
