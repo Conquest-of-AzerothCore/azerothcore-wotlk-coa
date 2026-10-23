@@ -133,7 +133,7 @@ class spell_ascension_closest_resurrection : public SpellScript
         if (player->IsAlive() || !destination)
             return;
 
-        player->ResurrectPlayer(RESURRECT_RESTORE_PERCENT, true);
+        player->ResurrectPlayer(RESURRECT_RESTORE_PERCENT, false);
 
         if (!player->IsAlive())
             return;
