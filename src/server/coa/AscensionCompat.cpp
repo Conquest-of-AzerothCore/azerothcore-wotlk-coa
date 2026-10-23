@@ -2038,6 +2038,13 @@ public:
       }
       if (entry->AECost || entry->TECost || GetSelectableFreeGroup(entry->EntryId))
         wanted[entry->EntryId] = item.Rank;
+      if (item.Rank && !entry->AECost && !entry->TECost && !GetSelectableFreeGroup(entry->EntryId) &&
+          !CanGrantAutomaticEntry(player, *entry, targetSpec))
+      {
+        refusal = { "CA_UPDATE_ENTRIES_BAD_ENTRY", "CA_LEARN_BAD_ABILITY", item.EntryId, item.Rank,
+                    Acore::StringFormat("Talent entry {} is not purchasable and cannot be granted automatically.", item.EntryId) };
+        return false;
+      }
     }
 
     std::vector<AscensionCoATalentState::KnownEntry> priced;
