@@ -138,6 +138,7 @@ void ConsumeSelected(Player* player, Spell* spell)
             }
 }
 constexpr char FlayedCorpseKey[] = "AscensionXoroth.FlayedCorpse";
+constexpr uint32 FLAYED_CORPSE_DISPLAY = 28209;
 struct FlayedCorpse : DataMap::Base
 {
 };
@@ -151,8 +152,13 @@ void MarkFlayed(WorldObject* object)
 {
     object->CustomData.GetDefault<FlayedCorpse>(FlayedCorpseKey);
     if (Corpse* corpse = object->ToCorpse())
+    {
+        corpse->SetUInt32Value(CORPSE_FIELD_DISPLAY_ID, FLAYED_CORPSE_DISPLAY);
         if (Player* owner = ObjectAccessor::FindConnectedPlayer(corpse->GetOwnerGUID()))
             owner->CustomData.GetDefault<FlayedCorpse>(FlayedCorpseKey);
+    }
+    if (Creature* creature = object->ToCreature())
+        creature->SetDisplayId(FLAYED_CORPSE_DISPLAY);
     if (Player* player = object->ToPlayer())
         if (Corpse* corpse = player->GetCorpse())
             corpse->CustomData.GetDefault<FlayedCorpse>(FlayedCorpseKey);
@@ -227,7 +233,10 @@ public:
     {
         if (Flayed(player))
             if (Corpse* corpse = player->GetCorpse())
+            {
                 corpse->CustomData.GetDefault<FlayedCorpse>(FlayedCorpseKey);
+                corpse->SetUInt32Value(CORPSE_FIELD_DISPLAY_ID, FLAYED_CORPSE_DISPLAY);
+            }
     }
 
     void OnPlayerReleasedGhost(Player* player) override
