@@ -806,7 +806,7 @@ inline int SkillGainChance(uint32 SkillValue, uint32 GrayLevel,
 }
 
 void Player::RewardProfessionXP(uint32 skillId, uint32 current, uint32 gray, uint32 green, uint32 yellow,
-    bool disenchanting)
+    bool disenchanting, bool crafted)
 {
     if (!IsInWorld() || !GetPureSkillValue(skillId) || !sScriptMgr->OnPlayerCanUpdateSkill(this, skillId))
         return;
@@ -814,7 +814,7 @@ void Player::RewardProfessionXP(uint32 skillId, uint32 current, uint32 gray, uin
     ServerConfigs profession;
     switch (skillId)
     {
-        case SKILL_MINING: profession = RATE_XP_PROFESSION_MINING; break;
+        case SKILL_MINING: profession = crafted ? RATE_XP_PROFESSION_SMELTING : RATE_XP_PROFESSION_MINING; break;
         case SKILL_HERBALISM: profession = RATE_XP_PROFESSION_HERBALISM; break;
         case SKILL_SKINNING: profession = RATE_XP_PROFESSION_SKINNING; break;
         case SKILL_FISHING: profession = RATE_XP_PROFESSION_FISHING; break;
@@ -951,7 +951,7 @@ bool Player::UpdateCraftSkill(uint32 spellid)
                 _spell_idx->second->TrivialSkillLineRankHigh,
                 (_spell_idx->second->TrivialSkillLineRankHigh + _spell_idx->second->TrivialSkillLineRankLow) / 2,
                 _spell_idx->second->TrivialSkillLineRankLow,
-                spellInfo && spellInfo->HasEffect(SPELL_EFFECT_DISENCHANT));
+                spellInfo && spellInfo->HasEffect(SPELL_EFFECT_DISENCHANT), true);
 
             return UpdateSkillPro(
                 _spell_idx->second->SkillLine,

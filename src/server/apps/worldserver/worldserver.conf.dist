@@ -2582,6 +2582,8 @@ Rate.XP.Global = 0.9295
 #        Set Profession to 0 to disable ordinary profession awards. All rates reload with .reload config.
 #        Profession-only challenges retain their separate per-skill-up formula and group sharing;
 #        those awards also use Global and dynamic XP. Woodcutting/woodworking have no core action path here.
+#        Smelting is a Mining craft and uses Rate.XP.Profession.Smelting instead of the Mining rate, so
+#        ore pays once when mined; 0 (default) gives smelting no XP.
 Rate.XP.Profession = 0.2
 Rate.XP.Profession.BaseFraction = 0.02
 Rate.XP.Profession.Gray = 0
@@ -2591,6 +2593,7 @@ Rate.XP.Profession.Orange = 1.05
 Rate.XP.Profession.Mining = 2.11
 Rate.XP.Profession.Herbalism = 1.44
 Rate.XP.Profession.Disenchanting = 1.44
+Rate.XP.Profession.Smelting = 0
 Rate.XP.Profession.Skinning = 0.55
 Rate.XP.Profession.Fishing = 0.33
 Rate.XP.Profession.Blacksmithing = 3.77

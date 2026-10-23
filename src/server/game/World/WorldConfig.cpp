@@ -74,6 +74,8 @@ void WorldConfig::BuildConfigCache()
         ConfigValueCache::Reloadable::Yes, validXPRate, "finite and >= 0");
     SetConfigValue<float>(RATE_XP_PROFESSION_DISENCHANTING, "Rate.XP.Profession.Disenchanting", 1.44f,
         ConfigValueCache::Reloadable::Yes, validXPRate, "finite and >= 0");
+    SetConfigValue<float>(RATE_XP_PROFESSION_SMELTING, "Rate.XP.Profession.Smelting", 0.0f,
+        ConfigValueCache::Reloadable::Yes, validXPRate, "finite and >= 0");
     SetConfigValue<float>(RATE_XP_PROFESSION_SKINNING, "Rate.XP.Profession.Skinning", 0.55f,
         ConfigValueCache::Reloadable::Yes, validXPRate, "finite and >= 0");
     SetConfigValue<float>(RATE_XP_PROFESSION_FISHING, "Rate.XP.Profession.Fishing", 0.33f,
