@@ -46,8 +46,14 @@ client's `CacheRecord` builder; its broader meaning in original server replies r
 Captured rows take precedence over estimates by default. The original server's row-selection rules have
 not been captured; lookup supplies the existing fixed item lifts and explicit item-stat requests.
 It does not implement continuous scaling of equipped items with player level, change lift selection,
-apply reborn armor to combat, or set player addon field 87. Enabling field 87 would make the client choose
-additional player-level scaling rows before the server has matching equip and level-change behavior.
+or set player addon field 87. Enabling field 87 would make the client choose additional player-level
+scaling rows before the server has matching equip and level-change behavior.
+
+The reply carries full armor at `0x78` and reborn armor at `0x7C`. The client displays reborn armor to every
+class except Hero; no capture shows that Ascension's server applied it, so worn native-scaled items give
+classes 1-9, 11 and 12-32 their reborn armor and Hero its full armor by inference from the client, to keep
+the character sheet in line with the tooltip. `CoA.ItemScaling.Native.RebornArmor = 0` restores full armor
+for every class. An item whose `ItemAddon.dbc` reborn armor is 0 keeps its own armor.
 
 Verify through `python -B tools/verify_all.py --stages source,build,harness --harness captured_item_stats
 item_scaling extension_packets --base origin/main`. The harness exercises the production startup hooks,

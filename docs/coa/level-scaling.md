@@ -285,6 +285,11 @@ The preview lets each character see the version they would receive before it is 
 An item whose key equals its own item level is the authored item: the server answers the client's
 `0x6FF` query for that key with the authored stats instead of a ladder row.
 
+A stat query carries only `(item ID, level)`. Carried, banked and mailed items resolve the ambiguity between
+a stored key that equals the item level and an unowned preview by asking whether the character owns an
+instance stored at that key. Inspect, trade and auction queries cannot be tied to the viewer's own items, so
+for them a key equal to the item level is still answered with the authored item.
+
 ### Many characters, one creature
 
 The question a crowded realm asks is: *can two characters change each other's world, and does anything
