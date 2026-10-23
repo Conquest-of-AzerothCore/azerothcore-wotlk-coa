@@ -5875,6 +5875,25 @@ public:
             std::find(MysticAltarVanityItems.begin(), MysticAltarVanityItems.end(), itemId) != MysticAltarVanityItems.end();
     }
 
+    // A companion whose creature has no template can't be summoned, and granting it only adds a blank
+    // entry to the pet window.
+    [[nodiscard]] bool IsUnsummonableCompanion(uint32 itemId) const
+    {
+        auto const vanity = _vanityItems.find(itemId);
+        if (vanity == _vanityItems.end() || !vanity->second.LearnedSpell ||
+            !(vanity->second.CategoryMask & VANITY_CATEGORY_COMPANIONS))
+            return false;
+
+        SpellInfo const* spell = sSpellMgr->GetSpellInfo(vanity->second.LearnedSpell);
+        if (!spell)
+            return false;
+
+        for (SpellEffectInfo const& effect : spell->Effects)
+            if (effect.Effect == SPELL_EFFECT_SUMMON && !sObjectMgr->GetCreatureTemplate(effect.MiscValue))
+                return true;
+        return false;
+    }
+
     [[nodiscard]] bool OwnsBankVanityItem(Player* player, PlayerCollectionState const& state, uint32 itemId) const
     {
         if (state.OwnedVanityItems.contains(itemId) || player->HasItemCount(itemId))
@@ -6345,9 +6364,15 @@ public:
       return false;
 
     std::size_t vanityBefore = state->OwnedVanityItems.size();
+    std::size_t unsummonable = 0;
     for (uint32 itemId : _allVanityItemIds) {
       if (IsWithheldVanityItem(itemId))
         continue;
+
+      if (IsUnsummonableCompanion(itemId)) {
+        ++unsummonable;
+        continue;
+      }
 
       if (state->OwnedVanityItems.insert(itemId).second) {
         CharacterDatabasePreparedStatement *stmt =
@@ -6364,9 +6389,9 @@ public:
 
     LOG_INFO("coa",
              "Granted full Ascension vanity collection to {} (account {}): "
-             "+{} vanity items",
+             "+{} vanity items, {} companions without a creature skipped",
              player->GetName(), state->AccountId,
-             state->OwnedVanityItems.size() - vanityBefore);
+             state->OwnedVanityItems.size() - vanityBefore, unsummonable);
     return true;
   }
 
