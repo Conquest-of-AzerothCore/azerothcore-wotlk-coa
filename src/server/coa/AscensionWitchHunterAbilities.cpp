@@ -475,10 +475,28 @@ class spell_ascension_witch_hunter_ability : public SpellScript
         AfterCast += SpellCastFn(spell_ascension_witch_hunter_ability::After);
     }
 };
+
+class spell_ascension_witch_hunter_greater_knights_edict : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_witch_hunter_greater_knights_edict);
+
+    void FilterPlayers(std::list<WorldObject*>& targets)
+    {
+        targets.remove_if([](WorldObject* object) { return !object->ToPlayer(); });
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(
+            spell_ascension_witch_hunter_greater_knights_edict::FilterPlayers, EFFECT_ALL,
+            TARGET_UNIT_CASTER_AREA_RAID);
+    }
+};
 }
 
 void AddAscensionWitchHunterAbilityScripts()
 {
     new witch_hunter_casts();
     RegisterSpellScript(spell_ascension_witch_hunter_ability);
+    RegisterSpellScript(spell_ascension_witch_hunter_greater_knights_edict);
 }
