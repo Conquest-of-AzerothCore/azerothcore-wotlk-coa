@@ -3,8 +3,8 @@ CLI_DESCRIPTION = """Check the mystic enchant rules the server shares with the c
 Compiles the mystic enchant rule code against the client DBC set the server loads (--dbc-dir), then checks the
 catalog, the realm, class and quality columns, slot validity, the per-quality caps, and the result each apply,
 destroy, scroll purchase, inspect, preset, reforge, collection reforge, save-to-collection and extract
-purchase request receives, with its price and the altar progress it earns, and how a followed Hero Architect
-build's enchants fill the slots.
+purchase request receives, with its price and the altar progress it earns, how a followed Hero Architect
+build's enchants fill the slots, and which missing enchants a bot's build teaches first.
 No database, server build or game client is needed.
 """
 
@@ -403,6 +403,28 @@ int main(int, char** argv)
     wildcardFollower.Known = &allRares;
     Check(GuideSlots(catalog, wildcardFollower, Slots{}, { { rares[0], 1, 1 } }) == Slots{},
         "Wildcard applies no enchants");
+    std::vector<std::uint32_t> firstOnly(rares.begin(), rares.begin() + 1);
+    Character student = Hero(fusion, 20);
+    student.Known = &firstOnly;
+    Check(GuideLessons(catalog, student, { { rares[0], 1, 1 }, { rares[1], 2, 1 }, { rares[1], 1, 1 },
+        { rares[2], 1, 30 }, { 1, 1, 1 } }) == std::vector<std::uint32_t>{ rares[1] },
+        "a bot's build teaches each missing enchant of its level once");
+    Check(holyPower && GuideLessons(catalog, student, { { holyPower->Spell, 1, 1 } }).empty(),
+        "a bot's build never teaches an enchant its realm refuses");
+    Character warriorStudent = student;
+    warriorStudent.Class = WARRIOR;
+    Check(GuideLessons(catalog, warriorStudent, { { RUNIC_CONTAGION, 1, 1 } }).empty(),
+        "a bot's build never teaches an enchant of another class");
+    Character wildcardStudent = student;
+    wildcardStudent.GameModes = WILDCARD_MODE;
+    Check(GuideLessons(catalog, wildcardStudent, { { rares[1], 1, 1 } }).empty(), "Wildcard learns no enchants");
+    std::vector<std::uint32_t> taught = firstOnly;
+    for (std::uint32_t spell : GuideLessons(catalog, student, { { rares[1], 1, 1 }, { rares[2], 1, 1 } }))
+        taught.push_back(spell);
+    Character graduate = Hero(fusion, 80);
+    graduate.Known = &taught;
+    guided = GuideSlots(catalog, graduate, Slots{}, { { rares[1], 1, 1 }, { rares[2], 1, 1 } });
+    Check(guided[1] == rares[1] && guided[2] == rares[2], "once taught, a bot's build fills its slots");
 
     Character nowhere = Hero(plain, 80);
     nowhere.RealmGates = {};

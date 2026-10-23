@@ -399,6 +399,8 @@ struct GuideEnchant
 
 Slots GuideSlots(Catalog const& catalog, Character const& character, Slots const& current,
     std::vector<GuideEnchant> const& guide);
+std::vector<std::uint32_t> GuideLessons(Catalog const& catalog, Character const& character,
+    std::vector<GuideEnchant> const& guide);
 std::uint64_t LevelProgress(std::uint32_t level);
 std::uint64_t ReforgeProgressGain(Enchant const& enchant, double multiplier);
 std::uint32_t AddProgress(Progress& progress, std::uint64_t gain);

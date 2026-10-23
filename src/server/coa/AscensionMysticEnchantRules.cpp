@@ -724,6 +724,23 @@ Slots GuideSlots(Catalog const& catalog, Character const& character, Slots const
     return slots;
 }
 
+std::vector<std::uint32_t> GuideLessons(Catalog const& catalog, Character const& character,
+    std::vector<GuideEnchant> const& guide)
+{
+    std::vector<std::uint32_t> lessons;
+    if (character.Wildcard())
+        return lessons;
+    for (GuideEnchant const& entry : guide)
+    {
+        Enchant const* enchant = catalog.FindSpell(entry.Spell);
+        if (enchant && entry.Level <= character.Level && !character.Knows(entry.Spell) &&
+            RealmAllows(*enchant, character.RealmGates) && ClassAllowed(*enchant, character.Class) &&
+            std::find(lessons.begin(), lessons.end(), entry.Spell) == lessons.end())
+            lessons.push_back(entry.Spell);
+    }
+    return lessons;
+}
+
 bool Character::Knows(std::uint32_t spell) const
 {
     return Known && std::find(Known->begin(), Known->end(), spell) != Known->end();
