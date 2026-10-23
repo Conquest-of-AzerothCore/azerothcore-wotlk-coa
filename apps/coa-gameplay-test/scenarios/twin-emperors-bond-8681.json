@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "name": "Twin Emperors Bond heals each twin one percent per second (#8681)",
+  "contract": [
+    "Spell2116600 has one1% heal on its explicit target and one1% heal on its caster.",
+    "With both emperors in combat within50 yards, five seconds should restore about5% each, not10%."
+  ],
+  "timeout_ms": 45000,
+  "location": {
+    "map": 531,
+    "x": -8950,
+    "y": 1190,
+    "z": -104.23,
+    "o": 0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "nilash",
+      "owner": "tank",
+      "entry": 15275,
+      "distance": 2,
+      "health": 1000000,
+      "reaction": 1
+    },
+    {
+      "id": "lor",
+      "owner": "tank",
+      "entry": 15276,
+      "distance": 8,
+      "health": 1000000,
+      "reaction": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "maximum": 10000000,
+      "value": 10000000
+    },
+    {
+      "action": "attack",
+      "actor": "tank",
+      "target": "nilash"
+    },
+    {
+      "action": "assert",
+      "actor": "nilash",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "lor",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "tank"
+    },
+    {
+      "action": "assert",
+      "actor": "nilash",
+      "metric": "max_health",
+      "equals": 1000000
+    },
+    {
+      "action": "set_health",
+      "actor": "nilash",
+      "value": 500000
+    },
+    {
+      "action": "assert",
+      "actor": "lor",
+      "metric": "max_health",
+      "equals": 1000000
+    },
+    {
+      "action": "set_health",
+      "actor": "lor",
+      "value": 500000
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "nilash",
+      "metric": "health_pct",
+      "min": 54,
+      "max": 56.5
+    },
+    {
+      "action": "assert",
+      "actor": "lor",
+      "metric": "health_pct",
+      "min": 54,
+      "max": 56.5
+    }
+  ]
+}
