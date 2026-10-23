@@ -28,13 +28,13 @@ def statement_maps(where_clause):
     return maps
 
 
-def effective_spawn_mask(files, table):
+def effective_spawn_mask(files, table, map_id=MOLTEN_CORE_MAP_ID):
     value, source = None, None
     for path in files:
         text = path.read_text(encoding='utf-8')
         for match in UPDATE_SPAWN_MASK_RE.finditer(text):
             found_table, new_value, where_clause = match.group(1), int(match.group(2)), match.group(3)
-            if found_table == table and MOLTEN_CORE_MAP_ID in statement_maps(where_clause):
+            if found_table == table and map_id in statement_maps(where_clause):
                 value, source = new_value, path
     return value, source
 
@@ -79,6 +79,14 @@ def later_narrow_inserts(files, after):
 
 
 class MoltenCoreSpawnMaskTests(unittest.TestCase):
+    def test_other_released_classic_raids_keep_all_difficulties(self):
+        files = ordered_files()
+        for map_id in (249, 309, 469, 509, 531):
+            for table in ('creature', 'gameobject'):
+                with self.subTest(map_id=map_id, table=table):
+                    value, source = effective_spawn_mask(files, table, map_id)
+                    self.assertEqual(value, 15, f'{table} map {map_id} ends at {value} from {source}')
+
     def test_map_409_spawn_mask_ends_on_all_difficulties(self):
         files = ordered_files()
         creature_value, creature_source = effective_spawn_mask(files, 'creature')
