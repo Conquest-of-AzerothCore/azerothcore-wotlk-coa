@@ -80,8 +80,18 @@ namespace
         TARGET_TANK = 0,
         TARGET_RANDOM_NON_TANK = 1,
         TARGET_SELF = 2,
-        TARGET_AREA = 3         // cast at the tank; the spell's own targeting makes it an area
+        TARGET_AREA = 3,        // cast at the tank; the spell's own targeting makes it an area
+        // CoA addition: a random player beyond DISTANT_TARGET_MIN_DIST yards (within
+        // DISTANT_TARGET_MAX_DIST), or the farthest player when none qualifies - for a cast
+        // the tooltip describes as going at "a distant enemy" rather than the tank. The
+        // distance threshold reuses boss_magmadar.cpp's own MELEE_TARGET_LOOKUP_DIST/100.0f
+        // pair (same module, same "beyond melee range" idea); Spell.dbc has no usable range
+        // index to derive it from (RangeIndex 0 on Conjure Flame Orb, its first user).
+        TARGET_DISTANT = 4
     };
+
+    constexpr float DISTANT_TARGET_MIN_DIST = 10.0f;
+    constexpr float DISTANT_TARGET_MAX_DIST = 100.0f;
 
     struct ScheduleRow
     {
@@ -393,6 +403,16 @@ namespace
                     // Falls back to the tank when there is no one else.
                     if (Unit* other = SelectTarget(SelectTargetMethod::Random, 0, 0.0f, true, false))
                         return other;
+                    return me->GetVictim();
+                case TARGET_DISTANT:
+                    if (Unit* distant = SelectTarget(SelectTargetMethod::Random, 0, [this](Unit* target)
+                        {
+                            return target && target->IsPlayer() && target->GetDistance(me) > DISTANT_TARGET_MIN_DIST
+                                   && target->GetDistance(me) < DISTANT_TARGET_MAX_DIST;
+                        }))
+                        return distant;
+                    if (Unit* farthest = SelectTarget(SelectTargetMethod::MaxDistance, 0, 0.0f, true))
+                        return farthest;
                     return me->GetVictim();
                 case TARGET_TANK:
                 case TARGET_AREA:

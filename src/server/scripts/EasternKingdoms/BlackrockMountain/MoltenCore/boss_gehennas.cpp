@@ -19,7 +19,10 @@
 #include "ScriptedCreature.h"
 #include "SpellScript.h"
 #include "SpellScriptLoader.h"
+#include "TemporarySummon.h"
 #include "molten_core.h"
+
+#include <algorithm>
 
 enum Spells
 {
@@ -40,6 +43,13 @@ constexpr uint32 SPELL_CONJURE_FLAME_ORB   = 2105417;
 constexpr uint32 SPELL_FLAME_ORB_PULSE     = 2105418;
 constexpr uint32 NPC_COA_GEHENNAS_FLAME_ORB = 80644;
 constexpr uint32 FLAME_ORB_LIFETIME_MS     = 11000;
+
+// CoA addition: the orb spawns on Gehennas and walks a straight line to the spot its target
+// occupied when the cast completed (MovePoint, not MoveFollow/chase, so it never retargets a
+// moving player), arriving as its lifetime ends -- no position evidence exists in the combat
+// logs, so speed = distance / lifetime is the best-supported value, floored so a short hop
+// still visibly moves.
+constexpr float FLAME_ORB_MIN_SPEED = 1.0f;
 
 enum Events
 {
@@ -130,8 +140,16 @@ class spell_gehennas_conjure_flame_orb : public SpellScript
         if (!caster || !target)
             return;
 
-        caster->SummonCreature(NPC_COA_GEHENNAS_FLAME_ORB, target->GetPosition(),
-                                TEMPSUMMON_TIMED_DESPAWN, FLAME_ORB_LIFETIME_MS);
+        Position const destination = target->GetPosition();
+        TempSummon* orb = caster->SummonCreature(NPC_COA_GEHENNAS_FLAME_ORB, caster->GetPosition(),
+                                                  TEMPSUMMON_TIMED_DESPAWN, FLAME_ORB_LIFETIME_MS);
+        if (!orb)
+            return;
+
+        float const distance = orb->GetDistance(destination);
+        float const speed = std::max(FLAME_ORB_MIN_SPEED, distance / (FLAME_ORB_LIFETIME_MS / 1000.0f));
+        orb->SetSpeed(MOVE_WALK, speed / baseMoveSpeed[MOVE_WALK], true);
+        orb->GetMotionMaster()->MovePoint(0, destination, FORCED_MOVEMENT_NONE, speed);
     }
 
     void Register() override

@@ -151,10 +151,25 @@ replaced: Magmadar now has his own direct CoA video reading (§5), both heads ca
 | Incinerate 2105405→2105406, area, 9.5s/15.1s | ran, placeholder dmg | Damage Info wired | measured + exiles-kit | — |
 | Curse of Gehennas 2105415→2105416, area, 11.1s/39.9s | ran | unchanged | measured | Dispel-punish proc (2105423/24) needs a `SpellScript`, not a schedule row — not added |
 | Immolate 2105429→2105430, random non-tank, 15.4s/20s | ran, placeholder dmg | Damage Info wired | measured + exiles-kit | — |
-| Conjure Flame Orb 2105417, tank, 50.7s/78.1s | ran | unchanged | measured | — |
+| Conjure Flame Orb 2105417, distant, 50.7s/78.1s | cast produced nothing | fixed (summons + moves the orb) | measured + [designed] | Orb travel speed is [designed]: no position evidence exists in the combat logs |
 
 Health: `hp_d0..d3` 884,118/1,178,824/1,774,235/2,586,957 (rebuilt from a direct CoA video reading at
 Ascended — see §5).
+
+**Conjure Flame Orb (2105417), fixed.** EFFECT_0 is a plain dummy and EFFECT_1 only triggers 2180023
+"Cosmetic - Camera Shake Big" (a client-only visual, confirmed by parsing the live server-data Spell.dbc
+this session) — nothing in the spell's own kit ever created the orb, so the cast was silently a no-op.
+`spell_gehennas_conjure_flame_orb` (`boss_gehennas.cpp`) now summons the orb (creature 80644, db.exil.es
+export; carries the Flame Orb damage family 2105421/2105422) on Gehennas himself, moving it on a fixed
+`MovePoint` (not `MoveFollow`, so it never retargets a moving player) to the position its target held when
+the dummy effect fired, at `distance / 11000ms` (floored at 1 yd/s) — arriving as its measured 11000ms
+lifetime (12 orb instances across 3 archived fights, first-to-last-tick span 10.1-11.0s = 37-40 ticks of
+the DBC's 275ms amplitude) ends. The orb self-casts the periodic pulse 2105418 every tick regardless of its
+current position, so it burns anything it passes through on the way, not only its destination. Target
+selection also changed from the tank (`coa_boss_schedule`'s `target` column was 0) to a new CoaBossAI
+`TargetMode`, `TARGET_DISTANT` (4): a random player beyond 10 yards (within 100), reusing
+`boss_magmadar.cpp`'s own "beyond melee range" pair, since Spell.dbc carries no usable range index for
+2105417 to derive a threshold from.
 
 ### Garr (12057)
 
