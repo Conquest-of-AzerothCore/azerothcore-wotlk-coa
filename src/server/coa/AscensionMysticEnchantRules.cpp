@@ -265,7 +265,6 @@ std::unordered_map<std::uint32_t, std::uint32_t> TaughtSpells()
     {
         ClientDBC::Record const record = spells.GetRecord(index);
         std::string_view const description = record.GetString(SPELL_DESCRIPTION);
-        // "Teaches you" opens a line: the first, or the one after a prerequisite line ("@req:12294@")
         std::size_t const teaches = description.starts_with("Teaches you") ? 0 : description.find("\nTeaches you");
         if (teaches == std::string_view::npos)
             continue;

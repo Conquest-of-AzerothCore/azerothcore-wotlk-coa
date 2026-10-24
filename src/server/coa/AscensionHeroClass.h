@@ -36,7 +36,6 @@ enum Context : std::uint8_t
 
 constexpr std::array<std::uint32_t, 4> OVERPOWER_RANKS = { 7384, 7887, 11584, 11585 };
 constexpr std::array<std::uint32_t, 7> COUNTERATTACK_RANKS = { 19306, 19308, 20909, 20910, 27067, 48998, 48999 };
-// Ascension's Riposte asks the hunter parry state (CasterAuraState 7) rather than stock's defense state
 constexpr std::array<std::uint32_t, 1> RIPOSTE_RANKS = { 14251 };
 
 template <std::size_t Count, class HasSpell>

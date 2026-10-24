@@ -68,7 +68,7 @@ class aura_hero_warrior_dance_of_death : public AuraScript
 {
     PrepareAuraScript(aura_hero_warrior_dance_of_death);
 
-    void HandlePeriodic(AuraEffect const* /*aurEff*/)
+    void HandlePeriodic(AuraEffect const*)
     {
         if (!GetTarget()->HealthBelowPct(int32(DANCE_OF_DEATH_HEALTH_PCT)))
             PreventDefaultAction();
@@ -81,8 +81,6 @@ class aura_hero_warrior_dance_of_death : public AuraScript
     }
 };
 
-// Commanding Presence: the proc trigger is the Battle Shout Strength buff; Commanding Shout gets the Stamina twin,
-// which follows it in Spell.dbc (812316/812317, 812318/812319).
 class aura_hero_warrior_commanding_presence : public AuraScript
 {
     PrepareAuraScript(aura_hero_warrior_commanding_presence);
@@ -103,12 +101,11 @@ class aura_hero_warrior_commanding_presence : public AuraScript
     }
 };
 
-// Improved Victory Rush rank 1 has the 33% parry chance in its tooltip but no trigger effect; ranks 2-3 carry it.
 class aura_hero_warrior_improved_victory_rush : public AuraScript
 {
     PrepareAuraScript(aura_hero_warrior_improved_victory_rush);
 
-    void HandleProc(ProcEventInfo& /*eventInfo*/)
+    void HandleProc(ProcEventInfo&)
     {
         if (!GetSpellInfo()->HasAura(SPELL_AURA_PROC_TRIGGER_SPELL))
             GetTarget()->CastSpell(GetTarget(), Victorious, true);
@@ -128,7 +125,6 @@ bool KnowsRageChargeSpender(Player const* player)
     return false;
 }
 
-// Wrecking Crew's buffs are named "Enrage"; its tooltip says they trigger no Enrage effects.
 bool IsEnrageEffect(SpellInfo const* spell)
 {
     return spell && spell->Dispel == DISPEL_ENRAGE && spell->IsPositive() && spell->Id != WreckingCrewEnrage &&
@@ -143,12 +139,11 @@ bool IsEnraged(Unit const* unit, Aura const* ignore = nullptr)
     return false;
 }
 
-// Improved Berserker Stance: "This effect is doubled while Enrage is active."
 class aura_hero_warrior_improved_berserker_stance : public AuraScript
 {
     PrepareAuraScript(aura_hero_warrior_improved_berserker_stance);
 
-    void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& canBeRecalculated)
+    void CalculateAmount(AuraEffect const*, int32& amount, bool& canBeRecalculated)
     {
         canBeRecalculated = true;
         if (IsEnraged(GetUnitOwner(), _ignore))
@@ -213,14 +208,13 @@ public:
         charges->RefreshDuration();
     }
 
-    void OnAuraRemove(Unit* unit, AuraApplication* aurApp, AuraRemoveMode /*mode*/) override
+    void OnAuraRemove(Unit* unit, AuraApplication* aurApp, AuraRemoveMode) override
     {
         if (unit && unit->IsPlayer() && aurApp && IsEnrageEffect(aurApp->GetBase()->GetSpellInfo()))
             RecalculateImprovedBerserkerStance(unit, aurApp->GetBase());
     }
 };
 
-// Bloodsurge 46916: "Your next Bloodthirst triggers no cooldown"; the buff is spent by that Bloodthirst.
 class spell_hero_warrior_bloodsurge_bloodthirst : public SpellScript
 {
     PrepareSpellScript(spell_hero_warrior_bloodsurge_bloodthirst);
@@ -246,7 +240,6 @@ class spell_hero_warrior_spend_rage_charge : public SpellScript
 
     void HandleAfterCast()
     {
-        // Improved Berserker Stance capstone: "Raging Blow increases the duration of your Recklessness by 1 second".
         if (GetSpellInfo()->Id == RagingBlow && GetCaster()->HasAura(ImprovedBerserkerStanceCapstone))
             GetCaster()->CastSpell(GetCaster(), RecklessnessExtension, true);
 
@@ -266,19 +259,13 @@ class spell_hero_warrior_spend_rage_charge : public SpellScript
 };
 }
 
-// Victory Rush: "causing {AP*0.45...} damage". The core deals the effect's base points as a percent of attack power
-// (stock 45); Ascension's row carries 0, so it hit for 1% of attack power.
 constexpr int32 VICTORY_RUSH_STOCK_PERCENT = 45;
 constexpr uint32 VICTORY_RUSH = 34428;
 
-// Victory Rush 34428: "{AP*0.45+SP*0.45}". The stock base gives the attack power part; the spell power part is added
-// to the hit (a melee-class spell takes no spell_bonus_data, and the core scales the whole effect value by attack
-// power, so it cannot go there).
 class spell_hero_warrior_victory_rush : public SpellScript
 {
     PrepareSpellScript(spell_hero_warrior_victory_rush);
 
-    // the Warcraft Reborn twin (1134428, "{AP*0.45}") gets this script copied but no spell power part
     bool Load() override
     {
         return GetSpellInfo()->Id == VICTORY_RUSH;
@@ -286,12 +273,10 @@ class spell_hero_warrior_victory_rush : public SpellScript
 
     void HandleDamage(SpellEffIndex effIndex)
     {
-        // a physical spell matches no spell power aura: "SP" is the character sheet's, the lowest magic school
         Unit* caster = GetCaster();
         int32 spellPower = caster->SpellBaseDamageBonusDone(SpellSchoolMask(1 << SPELL_SCHOOL_HOLY));
         for (uint8 school = SPELL_SCHOOL_FIRE; school < MAX_SPELL_SCHOOL; ++school)
             spellPower = std::min(spellPower, caster->SpellBaseDamageBonusDone(SpellSchoolMask(1 << school)));
-        // the done and taken modifiers the core gave the attack power part
         Unit* target = GetHitUnit();
         uint32 bonus = CalculatePct(uint32(std::max(spellPower, 0)), VICTORY_RUSH_STOCK_PERCENT);
         bonus = caster->SpellDamageBonusDone(target, GetSpellInfo(), bonus, SPELL_DIRECT_DAMAGE, effIndex);
@@ -306,8 +291,6 @@ class spell_hero_warrior_victory_rush : public SpellScript
     }
 };
 
-// Enrage buffs 12880, 14201-14204: "Physical damage increased by N%". Spell.dbc keeps the damage aura's values in
-// effect 0 but zeroes its effect type, so only the haste effects applied.
 void ApplyAscensionHeroWarriorContracts(SpellInfo* spellInfo)
 {
     switch (spellInfo->Id)
@@ -325,8 +308,6 @@ void ApplyAscensionHeroWarriorContracts(SpellInfo* spellInfo)
                 spellInfo->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_MOD_DAMAGE_PERCENT_DONE)
                 spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_APPLY_AURA;
             break;
-        // Battle Presence / Commanding Presence 812316-812319: "{PL*0.2}" and "{PL*0.4}" of the full level; Spell.dbc's
-        // base level 1 made the core scale from level - 1 (15 Strength at 80 where the tooltip shows 16).
         case 812316:
         case 812317:
         case 812318:

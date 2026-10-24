@@ -114,7 +114,6 @@ constexpr Milliseconds CAUTERIZE_COOLDOWN = 1min;
 constexpr uint32 CAUTERIZE_HEALTH_PCT = 35;
 constexpr uint32 SHIELD_MASTERS_RESOLVE_HEALTH_PCT = 50;
 
-// "applies Corruption": the highest rank the player knows, else the first
 uint32 CorruptionRank(Unit const* caster)
 {
     uint32 rank = SPELL_CORRUPTION_R1;
@@ -224,8 +223,6 @@ public:
     static std::unordered_map<ObjectGuid, uint32> AbyssStored;
 
 private:
-    // Physics in Practice 277460: "Your Deadly Throw and Shuriken Toss deal increased damage based on the movement
-    // speed bonus of your active Sprint. The damage increase is 15% as effective versus players."
     static void PhysicsInPractice(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo)
     {
         if (!attacker || damage <= 0 || !spellInfo || spellInfo->SpellFamilyName != SPELLFAMILY_ROGUE ||
@@ -568,8 +565,6 @@ class spell_ascension_mystic_demonic_whirl : public AuraScript
     }
 };
 
-// Vampiric Death (Warcraft Reborn 1180080, Freepick 278087): Shadow Word: Death consumes Vampiric Touch for a share
-// of its total damage; the Freepick enchant keeps its critical share (220%) in 278086.
 class spell_ascension_mystic_vampiric_death : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_vampiric_death);
@@ -603,12 +598,11 @@ class spell_ascension_mystic_vampiric_death : public AuraScript
     }
 };
 
-// Corrupted Shiv 285943: "Dealing damage with Shiv now applies Corruption and refreshes Shadow Word: Pain."
 class spell_ascension_mystic_corrupted_shiv : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_corrupted_shiv);
 
-    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+    void HandleProc(AuraEffect const*, ProcEventInfo& eventInfo)
     {
         PreventDefaultAction();
         Unit* caster = GetTarget();
@@ -628,14 +622,11 @@ class spell_ascension_mystic_corrupted_shiv : public AuraScript
     }
 };
 
-// Nightmare Mauling 271401: "Dealing damage with Maul and Mangle (Bear) now applies Corruption."
-// Growing Corruption 283922: "Seed of Corruption's explosion applies Corruption to targets it hits."
-// The rule picks the event; both put the caster's Corruption on the unit hit.
 class spell_ascension_mystic_apply_corruption : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_apply_corruption);
 
-    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+    void HandleProc(AuraEffect const*, ProcEventInfo& eventInfo)
     {
         PreventDefaultAction();
         Unit* caster = GetTarget();
@@ -650,13 +641,11 @@ class spell_ascension_mystic_apply_corruption : public AuraScript
     }
 };
 
-// Widowmaker 979019: "Widowhail deals 40% of the triggering damage as Shadow damage to enemies in a 5-yard area and
-// increases the damage they take from your Black Arrow and Black Widow Strike by 30% for 12 sec." The 40% is 979041's.
 class spell_ascension_mystic_widowmaker : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_widowmaker);
 
-    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+    void HandleProc(AuraEffect const*, ProcEventInfo& eventInfo)
     {
         PreventDefaultAction();
         Unit* caster = GetTarget();
@@ -678,13 +667,11 @@ class spell_ascension_mystic_widowmaker : public AuraScript
     }
 };
 
-// Cryotherapist 271313: Frostbolt, Frostfire Bolt or Ice Lance damage heals a nearby ally (271310); Deep Freeze heals
-// 5 and applies Cryotherapy (271308); Icy Penance heals 3 (271307). The heals pick their own allies.
 class spell_ascension_mystic_cryotherapist : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_cryotherapist);
 
-    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+    void HandleProc(AuraEffect const*, ProcEventInfo& eventInfo)
     {
         PreventDefaultAction();
         SpellInfo const* spell = eventInfo.GetSpellInfo();

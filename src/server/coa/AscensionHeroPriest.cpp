@@ -17,15 +17,11 @@ enum HeroPriestSpells : uint32
 };
 
 constexpr uint32 MIND_BLAST_FLAG0 = 0x00002000;
-// Mind Flay's channel (flags2 0x40) deals its damage through the triggered tick 58381 (flags0 0x800000)
 constexpr uint32 MIND_FLAY_TICK_FLAG0 = 0x00800000;
 
-// "a target further than 20 yards away from you" (Holy Reach and Shadow Reach capstones)
 constexpr float REACH_CAPSTONE_YARDS = 20.0f;
 }
 
-// Holy Reach 827790 and Shadow Reach 817323 capstones: "Directly healing or directly damaging a target further than 20
-// yards away from you"
 class aura_hero_priest_reach_capstone : public AuraScript
 {
     PrepareAuraScript(aura_hero_priest_reach_capstone);
@@ -42,8 +38,6 @@ class aura_hero_priest_reach_capstone : public AuraScript
     }
 };
 
-// Halo rank 1's heal 954875 also triggers Lesser Frozen Light 300024, the Cryotherapist's Holy-heal buff (ranks 2-5
-// carry no such effect, and the tooltip names none). Only a caster holding the Cryotherapist proc grants it.
 class spell_hero_priest_halo_frozen_light : public SpellScript
 {
     PrepareSpellScript(spell_hero_priest_halo_frozen_light);
@@ -64,10 +58,6 @@ class spell_hero_priest_halo_frozen_light : public SpellScript
     }
 };
 
-// Void-touched Mind 33215 capstone: "Your Mind Blast extends the duration of Void Eruption by up to 3 seconds and your
-// Mind Flay ticks increase the periodic damage increase of Void Eruption by an additional 3%, stacks up to 10 times."
-// The rank's proc aura triggered 833215 (Void Eruption +3 sec) with no proc flags, and nothing granted the stacking
-// 833216 (+3% periodic Shadow damage, 10 stacks).
 class aura_hero_priest_void_touched_mind : public AuraScript
 {
     PrepareAuraScript(aura_hero_priest_void_touched_mind);
@@ -106,12 +96,11 @@ class aura_hero_priest_void_touched_mind : public AuraScript
     }
 };
 
-// The Void-touched stacks are an increase "of Void Eruption": they end with it
 class aura_hero_priest_void_eruption_buff : public AuraScript
 {
     PrepareAuraScript(aura_hero_priest_void_eruption_buff);
 
-    void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    void AfterRemove(AuraEffect const*, AuraEffectHandleModes)
     {
         GetTarget()->RemoveAurasDueToSpell(VoidTouchedStack);
     }
@@ -125,12 +114,8 @@ class aura_hero_priest_void_eruption_buff : public AuraScript
 
 void ApplyAscensionHeroPriestContracts(SpellInfo* spellInfo)
 {
-    // Penance ranks 7-9 carry Ascension's Stances bit (form 32) without SPELL_ATTR2_ALLOW_WHILE_NOT_SHAPESHIFTED, which every
-    // lower rank has: the core refused them with SPELL_FAILED_ONLY_SHAPESHIFT
     if (spellInfo->Id == 53005 || spellInfo->Id == 53006 || spellInfo->Id == 53007)
         spellInfo->AttributesEx2 |= SPELL_ATTR2_ALLOW_WHILE_NOT_SHAPESHIFTED;
-    // Mind Flay r9 48156: "causing 588 Shadow damage over 3 sec". Spell.dbc ticks it every 10 sec (ranks 1-8: 1 sec), so
-    // the 3 sec channel never dealt damage
     else if (spellInfo->Id == 48156)
     {
         for (SpellEffectInfo& effect : spellInfo->Effects)

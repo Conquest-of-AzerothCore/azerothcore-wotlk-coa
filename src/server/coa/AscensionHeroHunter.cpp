@@ -38,14 +38,11 @@ uint32 EntrapmentRoot(uint32 rank)
 }
 }
 
-// Entrapment 19184/19387/19388: "When your Frost Trap or Snake Trap is triggered you entrap all afflicted targets,
-// preventing them from moving for 2/3/4 sec." Spell.dbc carries a dummy aura instead of the trigger aura, so the
-// trap activation procs nothing; root each trapped target with the rank's own root.
 class aura_hero_hunter_entrapment : public AuraScript
 {
     PrepareAuraScript(aura_hero_hunter_entrapment);
 
-    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+    void HandleProc(AuraEffect const*, ProcEventInfo& eventInfo)
     {
         Unit* target = eventInfo.GetActionTarget();
         uint32 const root = EntrapmentRoot(GetId());
@@ -59,7 +56,6 @@ class aura_hero_hunter_entrapment : public AuraScript
     }
 };
 
-// Improved Glaive Toss capstone: "if you are further than 15 yards away targets hit are slowed by 30% for 3 sec."
 class aura_hero_hunter_improved_glaive_toss : public AuraScript
 {
     PrepareAuraScript(aura_hero_hunter_improved_glaive_toss);
@@ -80,14 +76,11 @@ void ApplyAscensionHeroHunterContracts(SpellInfo* spellInfo)
 {
     switch (spellInfo->Id)
     {
-        // Entrapment rank 2 has no effects in Spell.dbc: give it rank 1's dummy aura so it can proc.
         case EntrapmentRank2:
             if (!spellInfo->Effects[EFFECT_0].Effect)
                 if (SpellInfo const* rank1 = sSpellMgr->GetSpellInfo(EntrapmentRank1))
                     spellInfo->Effects[EFFECT_0] = rank1->Effects[EFFECT_0];
             break;
-        // Improved Glaive Toss capstone: "Your Glaive Toss jumps to 2 additional nearby targets." Spell.dbc has no
-        // effect for it; add the jump-target modifier on Glaive Toss in the empty third slot.
         case ImprovedGlaiveTossCapstone:
             if (!spellInfo->Effects[EFFECT_2].Effect)
             {
@@ -101,7 +94,6 @@ void ApplyAscensionHeroHunterContracts(SpellInfo* spellInfo)
                 jumps.SpellClassMask = flag96(0, 0, GLAIVE_TOSS_FLAG2);
             }
             break;
-        // Wing Clip: "{RAP*0.4+96}" scales from ranged attack power although it is a melee ability.
         case WingClip:
             spellInfo->UseRangedAttackPowerForDamage = true;
             break;

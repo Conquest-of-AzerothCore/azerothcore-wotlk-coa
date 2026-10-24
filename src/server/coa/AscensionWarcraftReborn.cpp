@@ -68,9 +68,6 @@ bool SameValues(SpellInfo const* a, SpellInfo const* b)
     return true;
 }
 
-// Seasonal (Dawnrise) Hero enchants that are a stock spell under a new id (Glyph of Rejuvenation 118009 = 54754):
-// same name and effect layout. They take the stock spell's scripts, procs and bonus data as twins do; a retuned copy
-// keeps its own values. Several stock ranks match: the one with the same values, else the highest.
 std::vector<std::pair<uint32, uint32>> EnchantTwins()
 {
     constexpr std::size_t SEASONAL = 1;

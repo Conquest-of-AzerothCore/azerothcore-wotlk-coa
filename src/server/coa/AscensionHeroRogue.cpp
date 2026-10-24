@@ -35,8 +35,6 @@ bool IsAnyOf(std::array<uint32, Count> const& ranks, uint32 spellId)
     return std::find(ranks.begin(), ranks.end(), spellId) != ranks.end();
 }
 
-// The effect carrying the damage: Spell.dbc order differs between ranks and from the client's (Envenom's school damage
-// runs as effect 2 on the server), so the coefficient follows the effect, not a fixed index.
 void SetPowerBonus(SpellInfo* spellInfo, bool periodic, float square, float flat)
 {
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
@@ -58,8 +56,6 @@ uint32 ComboPoints(Unit* caster)
 }
 }
 
-// Crimson Tempest's bleed: "(17+46*cp+(SP+AP)*cp*cp*0.002+(SP+AP)*0.01)*4 damage over 8 sec". Spell.dbc carries the
-// per-point base; the (AP+SP) part has no stock code.
 class aura_hero_rogue_crimson_tempest_bleed : public AuraScript
 {
     PrepareAuraScript(aura_hero_rogue_crimson_tempest_bleed);
@@ -80,8 +76,6 @@ class aura_hero_rogue_crimson_tempest_bleed : public AuraScript
     }
 };
 
-// Blade Twisting 31124/31126: "your Shiv and Grappling Hook Follow-Up have a 50%/100% chance to Daze the target".
-// The proc aura has no class mask, and the Follow-Up has no family flags to put in one.
 class aura_hero_rogue_blade_twisting : public AuraScript
 {
     PrepareAuraScript(aura_hero_rogue_blade_twisting);
@@ -101,8 +95,6 @@ class aura_hero_rogue_blade_twisting : public AuraScript
     }
 };
 
-// Killing Spree's teleport 57840 triggers Massacre 415004 and 415003 with no gate, so every Killing Spree applied the
-// Massacre debuff. Only the Massacre Mystic Enchant 415001 promises it: "It also applies Massacre to all targets hit".
 class spell_hero_rogue_killing_spree_massacre : public SpellScript
 {
     PrepareSpellScript(spell_hero_rogue_killing_spree_massacre);
@@ -129,18 +121,15 @@ class spell_hero_rogue_killing_spree_massacre : public SpellScript
 void ApplyAscensionHeroRogueContracts(SpellInfo* spellInfo)
 {
     uint32 const id = spellInfo->Id;
-    // Eviscerate, Envenom: "(AP+SP)*cp*cp*0.02"; Rupture: "(AP+SP)*0.0039*cp*cp" per tick
     if (IsAnyOf(EVISCERATE_RANKS, id) || IsAnyOf(ENVENOM_RANKS, id))
         SetPowerBonus(spellInfo, false, 0.02f, 0.0f);
     else if (IsAnyOf(RUPTURE_RANKS, id))
         SetPowerBonus(spellInfo, true, 0.0039f, 0.0f);
-    // Crimson Tempest: "(SP+AP)*cp*cp*0.015+(SP+AP)*0.02" on the hit, "(SP+AP)*cp*cp*0.002+(SP+AP)*0.01" per tick
     else if (IsAnyOf(CRIMSON_TEMPEST_RANKS, id))
     {
         SetPowerBonus(spellInfo, false, 0.015f, 0.02f);
         SetPowerBonus(spellInfo, true, 0.002f, 0.01f);
     }
-    // Shuriken Toss: "SP*0.375+RAP*0.4" (spell_bonus_data), from ranged attack power
     else if (IsAnyOf(SHURIKEN_TOSS_RANKS, id))
         spellInfo->UseRangedAttackPowerForDamage = true;
 }

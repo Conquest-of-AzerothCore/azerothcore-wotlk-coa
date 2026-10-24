@@ -6,8 +6,6 @@
 #include "SpellScript.h"
 #include "Unit.h"
 
-// Grim Reach 818219 capstone: "Dealing periodic Shadow damage to an enemy within melee range has a 33% chance to
-// trigger a Grim Strike"
 class aura_hero_warlock_grim_reach : public AuraScript
 {
     PrepareAuraScript(aura_hero_warlock_grim_reach);
@@ -24,10 +22,6 @@ class aura_hero_warlock_grim_reach : public AuraScript
     }
 };
 
-// Seed of Corruption 27243-47836: "When the target takes $s2 total damage or dies, the seed will inflict ...". This
-// server's Spell.dbc zeroes $s2 on every rank, so any damage detonated the seed. Ascension's extract (2026-09-02) carries
-// 515 / - / - / - / 1296 / 1518: ranks 5 and 6 equal the seed's own damage over time (6 ticks), so ranks 2-4 take the
-// same rule from their ticks (109 / 141 / 174). The stock script still adds the spell power bonus on top.
 void ApplyAscensionHeroWarlockContracts(SpellInfo* spellInfo)
 {
     int32 threshold = 0;

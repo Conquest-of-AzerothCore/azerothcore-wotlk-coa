@@ -476,12 +476,8 @@ std::uint32_t InvestedEssence(Player const* player, std::uint32_t classType, std
     return talent ? build.TabTE(classType, tab, 0) : build.TabAE(classType, tab, 0);
 }
 
-// spells whose skill-line companion an existing character may lack (see LearnSkillCompanions)
-constexpr std::array<uint32, 1> SKILL_COMPANION_SPELLS = { 56815 /* Rune Strike */ };
+constexpr std::array<uint32, 1> SKILL_COMPANION_SPELLS = { 56815 };
 
-// A spell's companion learned with its class skill line: Rune Strike 56815's passive 56816 (skill 770, "learned on
-// skill learn") makes Rune Strike usable after a dodge or parry. A player who learns the spell without the skill line
-// (a Hero from the board) never gets the line, so never the companion: learn the same-name spells of the line.
 void LearnSkillCompanions(Player* player, uint32 spellId)
 {
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);

@@ -22,14 +22,11 @@ enum HeroPaladinSpells : uint32
     Unsealed          = 825958
 };
 
-// Fanaticism's debuff: "Increases the damage of your Crusader Strike, Seals and Judgements on targets affected by your
-// Execution Sentence by 20%"
 constexpr int32 FANATICISM_PCT = 20;
-flag96 const FANATICISM_MASK(0x02800400 /* Judgements, Seal of Command */,
-    0x20008800 /* Seal of Righteousness, Crusader Strike, Seal of Vengeance */, 0);
+flag96 const FANATICISM_MASK(0x02800400,
+    0x20008800, 0);
 }
 
-// Touched by the Light 53590-53592: "When you receive effective healing from another player"
 class aura_hero_paladin_touched_by_the_light : public AuraScript
 {
     PrepareAuraScript(aura_hero_paladin_touched_by_the_light);
@@ -47,8 +44,6 @@ class aura_hero_paladin_touched_by_the_light : public AuraScript
     }
 };
 
-// Sanctified Light 20361 capstone: "After using Blinding Light your next Holy Light, Flash of Light, Holy Shock or
-// Light of Dawn has a 100% increased critical effect chance"
 class aura_hero_paladin_sanctified_light : public AuraScript
 {
     PrepareAuraScript(aura_hero_paladin_sanctified_light);
@@ -65,7 +60,6 @@ class aura_hero_paladin_sanctified_light : public AuraScript
     }
 };
 
-// Benediction 20101-20103: "Restores 30% base mana when you kill a target that gives experience or honor"
 class aura_hero_paladin_benediction : public AuraScript
 {
     PrepareAuraScript(aura_hero_paladin_benediction);
@@ -83,9 +77,6 @@ class aura_hero_paladin_benediction : public AuraScript
     }
 };
 
-// Improved Blessing of Might 20042/20045: "Casting Blessing of Might on an ally increases their and your attack power
-// ... Can only be active on one ally at a time." The rank's two triggers fire at the proc target; 920042 cannot be
-// self-cast and 920043 is the paladin's own copy.
 class aura_hero_paladin_improved_blessing_of_might : public AuraScript
 {
     PrepareAuraScript(aura_hero_paladin_improved_blessing_of_might);
@@ -108,7 +99,7 @@ class aura_hero_paladin_improved_blessing_of_might : public AuraScript
         paladin->CastSpell(ally, SharedMightAlly, true, nullptr, aurEff);
     }
 
-    void HandleSelf(AuraEffect const* aurEff, ProcEventInfo& /*eventInfo*/)
+    void HandleSelf(AuraEffect const* aurEff, ProcEventInfo&)
     {
         PreventDefaultAction();
         GetTarget()->CastSpell(GetTarget(), SharedMightSelf, true, nullptr, aurEff);
@@ -126,9 +117,6 @@ class aura_hero_paladin_improved_blessing_of_might : public AuraScript
     ObjectGuid _ally;
 };
 
-// Improved Judgements 25958 capstone: "For 10 seconds after using Judgement, your non-instant damaging Holy spells and
-// ranged abilities can trigger your active seal". Judgement 20271/53407/53408 cannot trigger procs
-// (SPELL_ATTR3_SUPPRESS_CASTER_PROCS) and its damage is cast with procs disabled: the cast grants Unsealed.
 class spell_hero_paladin_judgement_unsealed : public SpellScript
 {
     PrepareSpellScript(spell_hero_paladin_judgement_unsealed);
@@ -146,7 +134,6 @@ class spell_hero_paladin_judgement_unsealed : public SpellScript
     }
 };
 
-// Fanaticism 31881 capstone: Execution Sentence marks the target (31882) for the 20% bonus
 class aura_hero_paladin_fanaticism : public AuraScript
 {
     PrepareAuraScript(aura_hero_paladin_fanaticism);
@@ -168,14 +155,11 @@ class aura_hero_paladin_fanaticism : public AuraScript
     }
 };
 
-// Shield of Righteousness 53600: "causing Holy damage based on your block value plus an additional $s2". Ascension
-// moved the damage to effect 2 (5 + 2 per level); the stock handler reads that effect as the block value percent
-// (5%). Stock: 100% of block value.
 class spell_hero_paladin_shield_of_righteousness : public SpellScript
 {
     PrepareSpellScript(spell_hero_paladin_shield_of_righteousness);
 
-    void HandleDamage(SpellEffIndex /*effIndex*/)
+    void HandleDamage(SpellEffIndex)
     {
         Unit* caster = GetCaster();
         uint8 const level = caster->GetLevel();
@@ -193,7 +177,6 @@ class spell_hero_paladin_shield_of_righteousness : public SpellScript
 
 void ApplyAscensionHeroPaladinContracts(SpellInfo* spellInfo)
 {
-    // Fanaticism's debuff 31882: limited to the abilities the tooltip names
     if (spellInfo->Id == FanaticismDebuff)
         spellInfo->Effects[EFFECT_0].SpellClassMask = FANATICISM_MASK;
 }

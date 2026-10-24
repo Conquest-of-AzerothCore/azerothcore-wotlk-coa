@@ -28,10 +28,6 @@ AuraEffect const* CastersInsectSwarm(Unit* target, Unit* caster)
 }
 }
 
-// Nature's Reach 816819 capstone: "Your Nature non-periodic spells have a 100% chance to spread your Insect Swarm to
-// all enemies within 5 yards, if hitting a target affected by Insect Swarm. This effect has a 6 sec internal
-// cooldown." Spell.dbc's trigger 816818 is SPELL_EFFECT_ASCENSION_SPREAD_AURA (169), which this core does not
-// implement; the spread is done here with the same rank of Insect Swarm.
 class aura_hero_druid_natures_reach : public AuraScript
 {
     PrepareAuraScript(aura_hero_druid_natures_reach);
@@ -74,20 +70,17 @@ class aura_hero_druid_natures_reach : public AuraScript
             SPELL_AURA_PROC_TRIGGER_SPELL);
     }
 
-    // the second trigger 277109 spreads other classes' effects (Ascension's shared helper): not a Druid's
-    void PreventSecond(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
+    void PreventSecond(AuraEffect const*, ProcEventInfo&)
     {
         PreventDefaultAction();
     }
 };
 
-// Vengeance 816913 (the capstone's Vengeful Soul): "When this effect ends the Soul leaves your body, restoring 5% of
-// your missing mana."
 class aura_hero_druid_vengeful_soul : public AuraScript
 {
     PrepareAuraScript(aura_hero_druid_vengeful_soul);
 
-    void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    void AfterRemove(AuraEffect const*, AuraEffectHandleModes)
     {
         if (GetTargetApplication()->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
             return;
@@ -95,7 +88,6 @@ class aura_hero_druid_vengeful_soul : public AuraScript
         int32 const missing = int32(druid->GetMaxPower(POWER_MANA)) - int32(druid->GetPower(POWER_MANA));
         if (missing <= 0)
             return;
-        // 816914 restores a share of MAXIMUM mana (energize pct); the tooltip says missing mana
         druid->EnergizeBySpell(druid, VengefulSoulRestore, CalculatePct(missing, 5), POWER_MANA);
     }
 

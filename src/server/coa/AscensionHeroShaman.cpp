@@ -17,14 +17,10 @@ enum HeroShamanSpells : uint32
     TidalWavesFinalRank         = 51564
 };
 
-// "a target further than 20 yards away from you" (Elemental Reach capstone)
 constexpr float ELEMENTAL_REACH_YARDS = 20.0f;
-// "This effect can occur once every 5 seconds" (Improved Earth Shield capstone)
 constexpr uint32 IMPROVED_EARTH_SHIELD_COOLDOWN_MS = 5000;
 }
 
-// Elemental Reach 829000 capstone: "Your direct damage Fire, Nature and Frost spells on targets further than 20 yards
-// away from you have a 33% chance to increase your magic damage by 6% for 10 sec"
 class aura_hero_shaman_elemental_reach : public AuraScript
 {
     PrepareAuraScript(aura_hero_shaman_elemental_reach);
@@ -41,7 +37,6 @@ class aura_hero_shaman_elemental_reach : public AuraScript
     }
 };
 
-// Enhancing Totems 16259/16295/52456: "Placing a totem increases your attack power ... and spell power ..."
 class aura_hero_shaman_enhancing_totems : public AuraScript
 {
     PrepareAuraScript(aura_hero_shaman_enhancing_totems);
@@ -68,8 +63,6 @@ class aura_hero_shaman_enhancing_totems : public AuraScript
     }
 };
 
-// Dual Wield Specialization 30816-30819: "Your off-hand auto attacks have a chance to increase your Fire, Frost, and
-// Nature damage dealt by 6% for 8 sec"
 class aura_hero_shaman_dual_wield_specialization : public AuraScript
 {
     PrepareAuraScript(aura_hero_shaman_dual_wield_specialization);
@@ -86,9 +79,6 @@ class aura_hero_shaman_dual_wield_specialization : public AuraScript
     }
 };
 
-// Improved Earth Shield 851561 capstone: "Healing with Earth Shield grants you one stack of Tidal Waves. This effect
-// can occur once every 5 seconds. This requires the final rank of Tidal Waves." The heal 379 is cast by the shielded
-// unit for the shaman (original caster), so the shaman's own proc never sees it.
 class spell_hero_shaman_earth_shield_heal : public SpellScript
 {
     PrepareSpellScript(spell_hero_shaman_earth_shield_heal);
@@ -110,13 +100,11 @@ class spell_hero_shaman_earth_shield_heal : public SpellScript
     }
 };
 
-// Sundering 760121-760399: "causing {365+(SP+AP)*0.5} Firestrike damage". A melee-class spell takes no
-// spell_bonus_data, and Spell.dbc carries the base only: the (SP+AP) half is added here.
 class spell_hero_shaman_sundering : public SpellScript
 {
     PrepareSpellScript(spell_hero_shaman_sundering);
 
-    void HandleDamage(SpellEffIndex /*effIndex*/)
+    void HandleDamage(SpellEffIndex)
     {
         Unit* caster = GetCaster();
         int32 const power = int32(caster->GetTotalAttackPowerValue(BASE_ATTACK)) +
