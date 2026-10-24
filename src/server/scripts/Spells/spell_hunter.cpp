@@ -417,7 +417,7 @@ class spell_hun_ascpect_of_the_viper : public AuraScript
         uint32 maxMana = GetTarget()->GetMaxPower(POWER_MANA);
         int32 mana = CalculatePct(maxMana, GetTarget()->GetAttackTime(RANGED_ATTACK) / 1000.0f);
 
-        if (AuraEffect const* glyph = GetTarget()->GetAuraEffect(SPELL_HUNTER_GLYPH_OF_ASPECT_OF_THE_VIPER, EFFECT_0))
+        if (AuraEffect const* glyph = GetTarget()->GetAuraEffectOfRankedSpellOrTwin(SPELL_HUNTER_GLYPH_OF_ASPECT_OF_THE_VIPER, EFFECT_0))
             AddPct(mana, glyph->GetAmount());
 
         GetTarget()->CastCustomSpell(SPELL_HUNTER_ASPECT_OF_THE_VIPER_ENERGIZE, SPELLVALUE_BASE_POINT0, mana, GetTarget(), true, nullptr, aurEff);

@@ -874,7 +874,7 @@ class spell_pal_hand_of_salvation : public AuraScript
         {
             // Glyph of Salvation
             if (caster->GetGUID() == GetUnitOwner()->GetGUID())
-                if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_PALADIN_GLYPH_OF_SALVATION, EFFECT_0))
+                if (AuraEffect const* aurEff = caster->GetAuraEffectOfRankedSpellOrTwin(SPELL_PALADIN_GLYPH_OF_SALVATION, EFFECT_0))
                     amount -= aurEff->GetAmount();
         }
     }
@@ -1102,7 +1102,7 @@ class spell_pal_lay_on_hands : public SpellScript
             caster->CastSpell(caster, SPELL_PALADIN_IMMUNE_SHIELD_MARKER, true);
         }
         // Xinef: Glyph of Divinity
-        else if (target && caster->HasAura(54939) && GetSpellInfo()->Id != 633 && _manaAmount > 0) // excluding first rank
+        else if (target && caster->HasAuraOrTwin(54939) && GetSpellInfo()->Id != 633 && _manaAmount > 0) // excluding first rank
         {
             _manaAmount = target->GetPower(POWER_MANA) - _manaAmount;
             if (_manaAmount > 0)

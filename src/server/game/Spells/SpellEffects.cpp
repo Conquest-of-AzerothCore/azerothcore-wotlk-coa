@@ -954,7 +954,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
 
                             apply_direct_bonus = false;
                             // Glyph of Conflagrate
-                            if (!m_caster->HasAura(56235))
+                            if (!m_caster->HasAuraOrTwin(56235))
                                 unitTarget->RemoveAurasDueToSpell(aura->GetId(), m_caster->GetGUID());
 
                             break;
@@ -3267,7 +3267,7 @@ void Spell::EffectDispel(SpellEffIndex effIndex)
         m_caster->CastCustomSpell(m_caster, 19658, &heal_amount, nullptr, nullptr, true);
         // Glyph of Felhunter
         if (Unit* owner = m_caster->GetOwner())
-            if (owner->GetAura(56249))
+            if (owner->GetAuraOfRankedSpellOrTwin(56249))
                 owner->CastCustomSpell(owner, 19658, &heal_amount, nullptr, nullptr, true);
     }
 }
@@ -4004,7 +4004,7 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                     if (Aura* aur = unitTarget->GetAura(sunderArmor))
                     {
                         // 58388 - Glyph of Devastate dummy aura.
-                        if (m_caster->HasAura(58388))
+                        if (m_caster->HasAuraOrTwin(58388))
                             aur->ModStackAmount(1);
 
                         spell_bonus += (aur->GetStackAmount() - 1) * CalculateSpellDamage(2, unitTarget);
@@ -4112,7 +4112,7 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                 if (m_spellInfo->SpellFamilyFlags[0] & 0x1)
                 {
                     // Glyph of Plague Strike
-                    if (AuraEffect const* aurEff = m_caster->GetAuraEffect(58657, EFFECT_0))
+                    if (AuraEffect const* aurEff = m_caster->GetAuraEffectOfRankedSpellOrTwin(58657, EFFECT_0))
                         AddPct(totalDamagePercentMod, aurEff->GetAmount());
                     break;
                 }
@@ -4127,7 +4127,7 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                     AddPct(totalDamagePercentMod, disease_amt * unitTarget->GetDiseasesByCaster(m_caster->GetGUID()) / 2.0f);
 
                     // Glyph of Blood Strike
-                    if (m_caster->GetAuraEffect(59332, EFFECT_0))
+                    if (m_caster->GetAuraEffectOfRankedSpellOrTwin(59332, EFFECT_0))
                         if (unitTarget->HasDecreaseSpeedAura())
                             AddPct(totalDamagePercentMod, 20.0f);
                     break;
@@ -4136,7 +4136,7 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                 if (m_spellInfo->SpellFamilyFlags[0] & 0x10)
                 {
                     // Glyph of Death Strike
-                    if (AuraEffect const* aurEff = m_caster->GetAuraEffect(59336, EFFECT_0))
+                    if (AuraEffect const* aurEff = m_caster->GetAuraEffectOfRankedSpellOrTwin(59336, EFFECT_0))
                         if (uint32 runic = std::min<uint32>(m_caster->GetPower(POWER_RUNIC_POWER), aurEff->GetSpellInfo()->Effects[EFFECT_1].CalcValue()))
                             AddPct(totalDamagePercentMod, runic);
                     break;

@@ -473,7 +473,7 @@ class spell_rog_preparation : public SpellScript
         Player* caster = GetCaster()->ToPlayer();
         //immediately finishes the cooldown on certain Rogue abilities
 
-        bool hasGlyph = caster->HasAura(SPELL_ROGUE_GLYPH_OF_PREPARATION);
+        bool hasGlyph = caster->HasAuraOrTwin(SPELL_ROGUE_GLYPH_OF_PREPARATION);
         PlayerSpellMap const& spellMap = caster->GetSpellMap();
         for (PlayerSpellMap::const_iterator itr = spellMap.begin(); itr != spellMap.end(); ++itr)
         {

@@ -1134,7 +1134,7 @@ class spell_dru_typhoon : public SpellScript
     void HandleKnockBack(SpellEffIndex effIndex)
     {
         // Glyph of Typhoon
-        if (GetCaster()->HasAura(SPELL_DRUID_GLYPH_OF_TYPHOON))
+        if (GetCaster()->HasAuraOrTwin(SPELL_DRUID_GLYPH_OF_TYPHOON))
             PreventHitDefaultEffect(effIndex);
     }
 
@@ -1204,7 +1204,7 @@ class spell_dru_wild_growth : public SpellScript
     {
         targets.remove_if(Acore::RaidCheck(GetCaster(), false));
 
-        uint32 const maxTargets = GetCaster()->HasAura(SPELL_DRUID_GLYPH_OF_WILD_GROWTH) ? 6 : 5;
+        uint32 const maxTargets = GetCaster()->HasAuraOrTwin(SPELL_DRUID_GLYPH_OF_WILD_GROWTH) ? 6 : 5;
 
         if (targets.size() > maxTargets)
         {
@@ -1808,7 +1808,7 @@ class spell_dru_glyph_of_shred : public AuraScript
 
             // Add possible auras' and Glyph of Shred's max duration
             countMax += 3 * aurEff->GetAmount() * IN_MILLISECONDS;                                          // Glyph of Shred -> +6 seconds
-            countMax += caster->HasAura(SPELL_DRUID_GLYPH_OF_RIP) ? 4 * IN_MILLISECONDS : 0;                // Glyph of Rip -> +4 seconds
+            countMax += caster->HasAuraOrTwin(SPELL_DRUID_GLYPH_OF_RIP) ? 4 * IN_MILLISECONDS : 0;                // Glyph of Rip -> +4 seconds
             countMax += caster->HasAura(SPELL_DRUID_RIP_DURATION_LACERATE_DMG) ? 4 * IN_MILLISECONDS : 0;   // T7 set bonus -> +4 seconds
 
             // If min < max that means caster didn't cast 3 shred yet
@@ -2038,7 +2038,7 @@ class spell_dru_nourish : public SpellScript
         int32 heal = GetHitHeal();
 
         // Glyph of Nourish
-        if (AuraEffect const* aurEff = caster->GetAuraEffect(SPELL_DRUID_GLYPH_OF_NOURISH, EFFECT_0))
+        if (AuraEffect const* aurEff = caster->GetAuraEffectOfRankedSpellOrTwin(SPELL_DRUID_GLYPH_OF_NOURISH, EFFECT_0))
         {
             uint32 auraCount = 0;
 

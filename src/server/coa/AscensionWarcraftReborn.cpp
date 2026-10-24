@@ -2,6 +2,7 @@
 
 #include "AscensionWarcraftReborn.h"
 #include "AscensionFreepick.h"
+#include "AscensionMysticEnchantRules.h"
 #include "AscensionWarcraftRebornRules.h"
 #include "DBCStores.h"
 #include "Log.h"
@@ -58,6 +59,55 @@ std::optional<SpellLayout> LayoutOf(std::uint32_t spellId)
 
 std::vector<std::pair<uint32, uint32>> BaseTwins;
 
+bool SameValues(SpellInfo const* a, SpellInfo const* b)
+{
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (a->Effects[i].BasePoints != b->Effects[i].BasePoints || a->Effects[i].MiscValue != b->Effects[i].MiscValue ||
+            a->Effects[i].SpellClassMask != b->Effects[i].SpellClassMask)
+            return false;
+    return true;
+}
+
+// Seasonal (Dawnrise) Hero enchants that are a stock spell under a new id (Glyph of Rejuvenation 118009 = 54754):
+// same name and effect layout. They take the stock spell's scripts, procs and bonus data as twins do; a retuned copy
+// keeps its own values. Several stock ranks match: the one with the same values, else the highest.
+std::vector<std::pair<uint32, uint32>> EnchantTwins()
+{
+    constexpr std::size_t SEASONAL = 1;
+    AscensionMysticEnchant::Catalog catalog;
+    if (!AscensionMysticEnchant::LoadCatalog(catalog))
+        return {};
+    std::unordered_map<std::string, std::vector<uint32>> stockByName;
+    for (uint32 spellId = 1; spellId < BLIZZARD_SPELL_END && spellId < sSpellMgr->GetSpellInfoStoreSize(); ++spellId)
+        if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId))
+            stockByName[spellInfo->SpellName[0]].push_back(spellId);
+
+    std::vector<std::pair<uint32, uint32>> twins;
+    for (AscensionMysticEnchant::Enchant const& enchant : catalog.Rows)
+    {
+        if (!enchant.Realms[SEASONAL] || !AscensionMysticEnchant::ClassAllowed(enchant, AscensionMysticEnchant::HERO_CLASS) ||
+            enchant.Taught || enchant.Spell < BLIZZARD_SPELL_END)
+            continue;
+        SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(enchant.Spell);
+        std::optional<SpellLayout> const layout = LayoutOf(enchant.Spell);
+        auto const stock = layout ? stockByName.find(layout->Name) : stockByName.end();
+        if (stock == stockByName.end())
+            continue;
+        uint32 source = 0;
+        for (uint32 candidate : stock->second)
+        {
+            if (LayoutOf(candidate) != layout)
+                continue;
+            source = candidate;
+            if (SameValues(sSpellMgr->GetSpellInfo(candidate), spellInfo))
+                break;
+        }
+        if (source)
+            twins.emplace_back(source, enchant.Spell);
+    }
+    return twins;
+}
+
 std::vector<std::pair<uint32, uint32>> LoadNamesakes()
 {
     if (!AscensionFreepick::ReadRealm().WarcraftReborn)
@@ -72,7 +122,11 @@ std::vector<std::pair<uint32, uint32>> LoadTwins(bool ranked)
         BaseTwins.clear();
         if (AscensionFreepick::ReadRealm().WarcraftReborn)
             BaseTwins = SpellTwins(sSpellMgr->GetSpellInfoStoreSize(), &LayoutOf);
-        return BaseTwins;
+        std::vector<std::pair<uint32, uint32>> twins = BaseTwins;
+        if (AscensionFreepick::ReadRealm().Seasonal)
+            for (auto const& pair : EnchantTwins())
+                twins.push_back(pair);
+        return twins;
     }
     if (!RebornRealm)
         return {};

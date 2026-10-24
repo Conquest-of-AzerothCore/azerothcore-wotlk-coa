@@ -350,7 +350,7 @@ class spell_warl_generic_scaling : public AuraScript
                 // Glyph of felguard, 99% sure this is a HACK
                 if (GetStockPetEntry(pet->GetEntry()) == NPC_FELGUARD)
                 {
-                    if (AuraEffect* glyph = owner->GetAuraEffect(SPELL_GLYPH_OF_FELGUARD, EFFECT_0))
+                    if (AuraEffect* glyph = owner->GetAuraEffectOfRankedSpellOrTwin(SPELL_GLYPH_OF_FELGUARD, EFFECT_0))
                     {
                         amount += CalculatePct(pet->GetTotalAuraModValue(UNIT_MOD_ATTACK_POWER) - aurEff->GetAmount() + amount, glyph->GetAmount());
                     }
@@ -796,7 +796,7 @@ class spell_warl_siphon_life : public AuraScript
 
         int32 amount = CalculatePct(static_cast<int32>(eventInfo.GetDamageInfo()->GetDamage()), aurEff->GetAmount());
         // Glyph of Siphon Life
-        if (AuraEffect const* glyph = GetTarget()->GetAuraEffect(SPELL_WARLOCK_GLYPH_OF_SIPHON_LIFE, EFFECT_0))
+        if (AuraEffect const* glyph = GetTarget()->GetAuraEffectOfRankedSpellOrTwin(SPELL_WARLOCK_GLYPH_OF_SIPHON_LIFE, EFFECT_0))
             AddPct(amount, glyph->GetAmount());
 
         GetTarget()->CastCustomSpell(SPELL_WARLOCK_SIPHON_LIFE_HEAL, SPELLVALUE_BASE_POINT0, amount, GetTarget(), true, nullptr, aurEff);
@@ -1302,7 +1302,7 @@ class spell_warl_voidwalker_pet_passive : public AuraScript
         if (Unit* pet = GetUnitOwner())
             if (pet->IsPet())
                 if (Unit* owner = pet->ToPet()->GetOwner())
-                    if (AuraEffect* aurEff = owner->GetAuraEffect(SPELL_WARLOCK_GLYPH_OF_VOIDWALKER, EFFECT_0))
+                    if (AuraEffect* aurEff = owner->GetAuraEffectOfRankedSpellOrTwin(SPELL_WARLOCK_GLYPH_OF_VOIDWALKER, EFFECT_0))
                         amount += aurEff->GetAmount();
     }
 
