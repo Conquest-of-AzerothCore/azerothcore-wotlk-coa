@@ -17,7 +17,6 @@
     { "action": "assert", "label": "Panel melee hit bonus is 3", "actor": "reaper", "metric": "server_packet_u32", "opcode": 1901, "row": 1, "offset": 4, "equals": 3, "within_ms": 5000 },
     { "action": "assert", "label": "Panel ranged hit bonus is 3", "actor": "reaper", "metric": "server_packet_u32", "opcode": 1901, "row": 2, "offset": 4, "equals": 3, "within_ms": 5000 },
     { "action": "assert", "label": "Panel spell hit bonus is 3", "actor": "reaper", "metric": "server_packet_u32", "opcode": 1901, "row": 4, "offset": 4, "equals": 3, "within_ms": 5000 },
-    { "action": "command", "label": "Hit chance command answers", "actor": "reaper", "command": ".hitchance" },
     { "action": "assert", "label": "Melee hit chance rises by 3", "actor": "reaper", "metric": "melee_hit_chance", "relative_to": "mhit0", "min": 2.9, "max": 3.1 },
     { "action": "assert", "label": "Spell hit chance rises by 3", "actor": "reaper", "metric": "spell_hit_chance", "relative_to": "shit0", "min": 2.9, "max": 3.1 },
     { "action": "unlearn", "actor": "reaper", "spell": 560490 },

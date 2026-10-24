@@ -47,7 +47,6 @@ void AddSC_AscensionThreatRedirect();
 void AddSC_AscensionTalentDataProcs();
 void AddSC_AscensionTreeOfLife();
 void AddSC_CoALfgStartPoint();
-void AddSC_CoAHitChance();
 void AddSC_CoAStatisticQuery();
 void AddSC_CoABossProbe();
 void AddSC_CoADungeonSpellDamage();
@@ -750,7 +749,6 @@ void AddCoAScripts()
     AddSC_AscensionTalentDataProcs();
     AddSC_AscensionTreeOfLife();
     AddSC_CoALfgStartPoint();
-    AddSC_CoAHitChance();
     AddSC_CoAStatisticQuery();
     AddSC_CoABossProbe();
     AddSC_CoADungeonSpellDamage();
