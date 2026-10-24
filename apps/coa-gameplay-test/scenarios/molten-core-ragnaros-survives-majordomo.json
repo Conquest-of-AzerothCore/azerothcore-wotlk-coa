@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "name": "Molten Core: Ragnaros stays after killing Majordomo at the end of his summon intro",
+  "contract": [
+    "Majordomo Executus summons Ragnaros (spell 19774) and Ragnaros kills him with Elemental Fire.",
+    "The boss summons cleanup that runs on a boss's death must not take Ragnaros with Majordomo:",
+    "Ragnaros still exists after his intro and 15s after becoming attackable."
+  ],
+  "timeout_ms": 150000,
+  "location": {
+    "map": 409,
+    "x": 848.933,
+    "y": -812.875,
+    "z": -229.601,
+    "o": 4.046,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000,
+      "label": "Let the fixtures settle"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Molten Core",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 409
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Ragnaros does not exist yet",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 11502,
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "label": "Spawn the friendly Majordomo and start the Ragnaros summon sequence",
+      "actor": "hero",
+      "entry": 12018,
+      "as": "majordomo",
+      "distance": 2,
+      "ai_action": -1
+    },
+    {
+      "action": "wait",
+      "ms": 72000,
+      "label": "Let the summon sequence run up to Majordomo casting Elemental Fire and Ragnaros's DoAction(ACTION_FINISH_RAGNAROS_INTRO)"
+    },
+    {
+      "action": "assert",
+      "label": "Ragnaros exists right after his intro is triggered to finish",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 11502,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 4000,
+      "label": "Let EVENT_INTRO_SAY (5s) fire; EVENT_INTRO_MAKE_ATTACKABLE (2.5s more) has not fired yet"
+    },
+    {
+      "action": "assert",
+      "label": "Ragnaros still exists right after EVENT_INTRO_SAY, before EVENT_INTRO_MAKE_ATTACKABLE",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 11502,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000,
+      "label": "Let EVENT_INTRO_MAKE_ATTACKABLE fire"
+    },
+    {
+      "action": "assert",
+      "label": "Ragnaros still exists right after EVENT_INTRO_MAKE_ATTACKABLE",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 11502,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000,
+      "label": "A few more seconds past EVENT_INTRO_MAKE_ATTACKABLE"
+    },
+    {
+      "action": "assert",
+      "label": "Ragnaros still exists a few seconds after EVENT_INTRO_MAKE_ATTACKABLE",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 11502,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 15000,
+      "label": "Give any delayed evade/despawn path time to run"
+    },
+    {
+      "action": "assert",
+      "label": "Ragnaros still exists 15s after becoming attackable",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 11502,
+      "min": 1
+    }
+  ]
+}

@@ -15182,15 +15182,22 @@ namespace
         void Visit(std::unordered_map<ObjectGuid, T*>&) { }
     };
 
+    bool IsBossCreature(Creature const* creature)
+    {
+        return creature->IsDungeonBoss() || creature->isWorldBoss()
+            || creature->GetCreatureTemplate()->rank == CREATURE_ELITE_WORLDBOSS;
+    }
+
     // CoA: when a boss dies in an instance, the adds and totems it summoned (and
     // what those summoned in turn) despawn with it. Runs before the boss's
-    // JustDied, so anything its script summons on death stays.
+    // JustDied, so anything its script summons on death stays. A boss it summoned
+    // stays too: Majordomo Executus summons Ragnaros, who then kills him.
     void DespawnBossSummons(Creature* boss)
     {
         Map* map = boss->GetMap();
         if (!map || !map->Instanceable() || boss->IsCharmedOwnedByPlayerOrPlayer())
             return;
-        if (!boss->IsDungeonBoss() && !boss->isWorldBoss() && boss->GetCreatureTemplate()->rank != CREATURE_ELITE_WORLDBOSS)
+        if (!IsBossCreature(boss))
             return;
 
         BossSummonCollector collector;
@@ -15205,7 +15212,7 @@ namespace
             added = false;
             for (Creature* summon : collector.summons)
             {
-                if (summon->IsCharmedOwnedByPlayerOrPlayer() || summon->IsDungeonBoss() || !summon->IsHostileToPlayers())
+                if (summon->IsCharmedOwnedByPlayerOrPlayer() || IsBossCreature(summon) || !summon->IsHostileToPlayers())
                     continue;
                 if (parents.count(summon->ToTempSummon()->GetSummonerGUID()) && parents.insert(summon->GetGUID()).second)
                 {
