@@ -3986,9 +3986,11 @@ private:
             return count;
         }
         if (metric == "carried_item_level" || metric == "carried_item_required_level" ||
-            metric == "carried_item_armor" || metric == "carried_item_scaling_level")
+            metric == "carried_item_armor" || metric == "carried_item_scaling_level" ||
+            metric == "carried_item_stat")
         {
             uint32 const baseEntry = step.get<uint32>("item");
+            uint32 const statType = metric == "carried_item_stat" ? step.get<uint32>("stat") : 0;
             Require(sObjectMgr->GetItemTemplate(baseEntry) != nullptr, "Unknown item in metric");
             uint32 highest = 0;
             auto inspect = [&](Item* item)
@@ -4003,6 +4005,13 @@ private:
                     value = proto->Armor;
                 else if (metric == "carried_item_scaling_level")
                     value = NativeItemScaling::InstanceLevel(item);
+                else if (metric == "carried_item_stat")
+                {
+                    value = 0;
+                    for (uint32 i = 0; i < proto->StatsCount && i < MAX_ITEM_PROTO_STATS; ++i)
+                        if (proto->ItemStat[i].ItemStatType == statType && proto->ItemStat[i].ItemStatValue > 0)
+                            value += uint32(proto->ItemStat[i].ItemStatValue);
+                }
                 highest = std::max(highest, value);
             };
             for (uint8 slot = EQUIPMENT_SLOT_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)

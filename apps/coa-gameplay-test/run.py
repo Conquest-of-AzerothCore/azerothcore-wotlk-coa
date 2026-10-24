@@ -90,6 +90,7 @@ METRICS = {
     'who_count', 'who_class', 'player_name', 'name_lookup', 'loot_count', 'loot_entry', 'loot_received',
     'loot_gold', 'loot_bloodforged', 'loot_required_level', 'loot_item_level', 'loot_base_entry', 'loot_item_armor',
     'carried_item_level', 'carried_item_required_level', 'carried_item_armor', 'carried_item_scaling_level',
+    'carried_item_stat',
     'nearby_gameobject_count', 'nearby_gameobject_quest_active', 'nearby_gameobject_state', 'nearby_gameobject_scale',
     'nearby_creature_count', 'map_creature_count', 'nearby_gameobject_at_client',
     'carried_money',
@@ -815,8 +816,10 @@ def validate(scenario):
             if 'school' in step and metric == 'spell_crit_chance':
                 number(step['school'], f'{where}.school', 0, 6, True)
             if metric in {'item_count', 'carried_item_level', 'carried_item_required_level', 'carried_item_armor',
-                          'carried_item_scaling_level'}:
+                          'carried_item_scaling_level', 'carried_item_stat'}:
                 require('item' in step, f'{where}: metric needs item')
+            if metric == 'carried_item_stat':
+                number(step.get('stat'), f'{where}.stat', 0, 255, True)
             if metric in {'item_random_property', 'item_suffix_factor', 'item_enchantment',
                           'item_guid', 'item_soulbound', 'item_duration'}:
                 require(step['actor'] in player_ids, f'{where}: item observation needs a player')
@@ -975,7 +978,7 @@ def validate(scenario):
                           'quest_rewarded', 'has_achievement',
                           'loot_base_entry', 'loot_item_armor',
                           'carried_item_level', 'carried_item_required_level', 'carried_item_armor',
-                          'carried_item_scaling_level',
+                          'carried_item_scaling_level', 'carried_item_stat',
                           'has_title',
                           'quest_status', 'quest_takeable', 'quest_objective_count', 'dialog_status',
                           'ball_offer_count', 'ball_offers_quest',

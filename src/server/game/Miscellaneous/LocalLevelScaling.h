@@ -76,6 +76,24 @@ inline std::uint8_t ScalingBlocksFor(Player const* player)
     return ChallengeBlocksFor(player);
 }
 
+/// Whether the character stands in a dungeon that scales for everyone inside it, whatever their own or
+/// their leader's choice. The module that owns the dungeon list installs the resolver.
+using ScaledDungeonResolver = bool (*)(Player const*);
+inline std::atomic<ScaledDungeonResolver> ScaledDungeonOwner{nullptr};
+
+inline bool InScaledDungeon(Player const* player)
+{
+    ScaledDungeonResolver const owner = ScaledDungeonOwner.load(std::memory_order_relaxed);
+    return owner && player && owner(player);
+}
+
+/// Whether the loot this character takes is scaled to them: only inside a scaled dungeon, and never
+/// while a challenge holds them to the authored world. Open-world loot keeps its authored stats.
+inline bool DungeonLootScales(Player const* player)
+{
+    return InScaledDungeon(player) && !(ScalingBlocksFor(player) & ChallengeBlocksCreatureScaling);
+}
+
 /// Something other than the character's own choice changed whether they see scaled content: a
 /// challenge started or stopped, or the open-world ruleset changed. The module that owns the creature
 /// view installs the resolver and re-sends what the client is holding; false means nobody did, so the

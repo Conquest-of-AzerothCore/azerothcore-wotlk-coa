@@ -721,7 +721,9 @@ The `loot_*` item metrics accept an optional `item` that keeps only the slots ho
 copy of it (entries 4400001 and up). `loot_item_armor` reads the first such slot's armor, and `loot_base_entry`
 names the authored item a copy was made from. `carried_item_level`, `carried_item_required_level` and `carried_item_armor`
 require `item` and return the highest item level, required level or armor among equipped and bagged items that are
-that item or a copy of it, read from the item's own scaled template, or zero without one. `carried_item_scaling_level`
+that item or a copy of it, read from the item's own scaled template, or zero without one. `carried_item_stat` also
+requires `stat`, an item stat type such as 7 (stamina), and returns the highest total of that stat among such items.
+`carried_item_scaling_level`
 returns the highest per-item level that native item scaling stored for such an item, or zero when none was stored.
 `loot_slot` with `item` also picks up a copy of that item.
 `creature_loot_quality_rate` requires `entry` (a creature loot id), fills that template `rolls` times (default 10000)
