@@ -699,3 +699,55 @@ FROM (VALUES
 ) n (`ItemID`)
 WHERE EXISTS (SELECT 1 FROM `coa_client_vanity_collection` WHERE `BazaarTokenCost` > 0)
 ON DUPLICATE KEY UPDATE `DonationPointCost` = 0, `SeasonalPointCost` = 0, `BazaarTokenCost` = 0;
+
+-- PvP mounts (honor, arena rating, PvP seasons and leaderboards) are earned in PvP, not bought with Bazaar Tokens.
+INSERT INTO `coa_client_vanity_collection` (`ItemID`, `DonationPointCost`, `SeasonalPointCost`, `BazaarTokenCost`)
+SELECT n.`ItemID`, 0, 0, 0
+FROM (VALUES
+  ROW(29465),  -- Black Battlestrider
+  ROW(29466),  -- Black War Kodo
+  ROW(29467),  -- Black War Ram
+  ROW(29468),  -- Black War Steed Bridle
+  ROW(43516),  -- Brutal Nether Drake
+  ROW(334410),  -- Corrupted Gladiator's Proto-Drake
+  ROW(978312),  -- Cruel Gladiator's Storm Dragon
+  ROW(699639),  -- Demonic Gladiator's Storm Dragon
+  ROW(978315),  -- Dominant Gladiator's Storm Dragon
+  ROW(334415),  -- Dread Gladiator's Proto-Drake
+  ROW(978311),  -- Fearless Gladiator's Storm Dragon
+  ROW(978313),  -- Ferocious Gladiator's Storm Dragon
+  ROW(978314),  -- Fierce Gladiator's Storm Dragon
+  ROW(259654),  -- Gladiator's Abyssal Crocolisk
+  ROW(259965),  -- Gladiator's Crag Crocolisk
+  ROW(259633),  -- Gladiator's Jade Crocolisk
+  ROW(416601),  -- Gladiator's Jungle Crocolisk
+  ROW(416602),  -- Gladiator's Magma Crocolisk
+  ROW(236292),  -- Gladiator's Void Crocolisk
+  ROW(29469),  -- Horn of the Black War Wolf
+  ROW(334414),  -- Malevolent Gladiator's Proto-Drake
+  ROW(34092),  -- Merciless Nether Drake
+  ROW(334416),  -- Notorious Gladiator's Proto-Drake
+  ROW(699636),  -- Primal Gladiator's Felblood Gronnling
+  ROW(29470),  -- Red Skeletal Warhorse
+  ROW(35906),  -- Reins of the Black War Elekk
+  ROW(29471),  -- Reins of the Black War Tiger
+  ROW(499987),  -- Reins of the Silverwing Nightsaber
+  ROW(499984),  -- Reins of the Warsong Wolf
+  ROW(1777320),  -- Rocktusk Battleboar
+  ROW(334411),  -- Sinister Gladiator's Proto-Drake
+  ROW(334412),  -- Spiteful Gladiator's Proto-Drake
+  ROW(30609),  -- Swift Nether Drake
+  ROW(34129),  -- Swift Warstrider
+  ROW(1777436),  -- Umberhoof Warboar
+  ROW(37676),  -- Vengeful Nether Drake
+  ROW(1179149),  -- Vicious War Spider (Alliance)
+  ROW(1179152),  -- Vicious War Spider (Horde)
+  ROW(334413),  -- Vile Gladiator's Proto-Drake
+  ROW(978310),  -- Vindictive Gladiator's Storm Dragon
+  ROW(499636),  -- Warforged Nightmare
+  ROW(699638),  -- Warmongering Gladiator's Felblood Gronnling
+  ROW(29472),  -- Whistle of the Black War Raptor
+  ROW(699637)  -- Wild Gladiator's Felblood Gronnling
+) n (`ItemID`)
+WHERE EXISTS (SELECT 1 FROM `coa_client_vanity_collection` WHERE `BazaarTokenCost` > 0)
+ON DUPLICATE KEY UPDATE `DonationPointCost` = 0, `SeasonalPointCost` = 0, `BazaarTokenCost` = 0;
