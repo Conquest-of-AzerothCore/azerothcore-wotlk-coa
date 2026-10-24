@@ -362,7 +362,7 @@ void WorldConfig::BuildConfigCache()
     SetConfigValue<bool>(CONFIG_CLASSIC_PLUS_COMBAT_RULES, "ClassicPlus.CombatRules", true);
     SetConfigValue<bool>(CONFIG_CLASSIC_PLUS_STAT_FORMULAS, "ClassicPlus.StatFormulas", true);
     SetConfigValue<bool>(CONFIG_CLASSIC_PLUS_REPUTATION_SPILLOVER, "ClassicPlus.ReputationSpillover", true);
-    SetConfigValue<bool>(CONFIG_MONSTER_RESISTANCE_ENABLE, "CoA.MonsterResistance.Enable", false);
+    SetConfigValue<bool>(CONFIG_MONSTER_RESISTANCE_ENABLE, "CoA.MonsterResistance.Enable", true);
     SetConfigValue<float>(CONFIG_MONSTER_RESISTANCE_PER_LEVEL, "CoA.MonsterResistance.PerLevel", 1.0f,
         ConfigValueCache::Reloadable::Yes,
         [](float const& value) { return std::isfinite(value) && value >= 0.0f; }, "finite and >= 0");

@@ -2456,24 +2456,6 @@ Stats.Limits.Crit  = 95.0
 
 ClassicPlus.CombatRules = 1
 
-#    CoA.MonsterResistance
-#        Description: Optional linear magic resistance for NPCs not controlled by players, including Holy.
-#                     Add PerLevel resistance per combat level to existing school resistance, then subtract
-#                     penetration/debuffs and floor at zero. Every PerPercent resistance adds 1% average resist,
-#                     capped by MaxReductionPct. Direct hits and DoT ticks roll native 10% partial resist steps
-#                     around that average, as on live CoA. Damaging spells are never fully resisted; binary
-#                     crowd control keeps its full-resist roll. Hidden level-difference resistance is not added.
-#                     Spell accuracy, mechanic/debuff resistance, explicit immunities and bypasses stay native.
-#                     Players and player-controlled creatures retain the existing resistance rules.
-#                     The baseline is calculated during combat; stored/displayed resistance stats are unchanged.
-#                     PerPercent is a reconstruction choice, not a verified live CoA value.
-#        Default:     0 - Disabled
-
-CoA.MonsterResistance.Enable = 0
-CoA.MonsterResistance.PerLevel = 1.0
-CoA.MonsterResistance.PerPercent = 5.0
-CoA.MonsterResistance.MaxReductionPct = 75.0
-
 #
 #    ClassicPlus.StatFormulas
 #        Description: Use the vanilla 1.12 stat formulas (critical strike and dodge from agility,

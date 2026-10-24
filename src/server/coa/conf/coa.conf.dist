@@ -74,6 +74,19 @@ CoA.CreatureScaling.Dungeon.Damage = 1.5
 CoA.CreatureScaling.Raid.Damage = 1.0
 CoA.CreatureScaling.MapDamage = ""
 
+# Live-like magic resistance for NPCs not controlled by players, including Holy
+# (docs/coa/monster-linear-resistance.md). Each combat level adds PerLevel resistance to every magic school;
+# penetration and debuffs reduce it to at least 0. Every PerPercent resistance adds 1% average resist, capped by
+# MaxReductionPct. Direct hits and DoT ticks roll the native 10% partial-resist steps around that average; damaging
+# spells are never fully resisted, crowd control can be. Players, pets and charmed creatures keep the native rules.
+# PerPercent is a reconstruction choice, not a verified live value.
+# 1 - enabled (default).
+# 0 - native resistance, including the hidden level-difference term and the Classic+ resist table.
+CoA.MonsterResistance.Enable = 1
+CoA.MonsterResistance.PerLevel = 1.0
+CoA.MonsterResistance.PerPercent = 5.0
+CoA.MonsterResistance.MaxReductionPct = 75.0
+
 # Wardrobe, outfits, vanity and mount/companion collections for characters played by bots.
 # 0 - never: bot sessions skip the collections (default).
 # 1 - only characters of player accounts played as bots (alts), never random bot accounts:
