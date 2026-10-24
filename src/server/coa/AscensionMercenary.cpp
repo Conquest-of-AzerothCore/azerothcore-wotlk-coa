@@ -53,6 +53,17 @@ void SetMercenaryFaction(Player* player, uint32 factionTemplate)
             controlled->SetFaction(factionTemplate);
 }
 
+void SetMercenaryFreeForAll(Player* player)
+{
+    if (player->pvpInfo.IsInNoPvPArea || player->IsGameMaster() || player->IsFFAPvP())
+        return;
+
+    player->SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
+    for (Unit* controlled : player->m_Controlled)
+        if (controlled->GetOwnerGUID() == player->GetGUID())
+            controlled->SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
+}
+
 class spell_ascension_mercenary_aura : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mercenary_aura);
@@ -60,7 +71,10 @@ class spell_ascension_mercenary_aura : public AuraScript
     void HandleApply(AuraEffect const*, AuraEffectHandleModes)
     {
         if (Player* player = GetTarget()->ToPlayer())
+        {
             SetMercenaryFaction(player, MERCENARY_FACTION_TEMPLATE);
+            SetMercenaryFreeForAll(player);
+        }
     }
 
     void HandleRemove(AuraEffect const*, AuraEffectHandleModes)
@@ -69,6 +83,7 @@ class spell_ascension_mercenary_aura : public AuraScript
         {
             player->SetFactionForRace(player->getRace(true));
             SetMercenaryFaction(player, player->GetFaction());
+            player->UpdateFFAPvPState(true);
         }
     }
 
@@ -137,13 +152,19 @@ class ascension_mercenary_player : public PlayerScript
 public:
     ascension_mercenary_player()
         : PlayerScript("ascension_mercenary_player", {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LEVEL_CHANGED,
-                                                      PLAYERHOOK_ON_PVP_KILL})
+                                                      PLAYERHOOK_ON_PVP_KILL, PLAYERHOOK_ON_FFA_PVP_STATE_UPDATE})
     {
     }
 
     void OnPlayerLogin(Player* player) override { LearnSpells(player); }
 
     void OnPlayerLevelChanged(Player* player, uint8) override { LearnSpells(player); }
+
+    void OnPlayerFfaPvpStateUpdate(Player* player, bool result) override
+    {
+        if (!result && player && player->HasAura(SPELL_MERCENARY))
+            SetMercenaryFreeForAll(player);
+    }
 
     void OnPlayerPVPKill(Player* killer, Player* killed) override
     {
