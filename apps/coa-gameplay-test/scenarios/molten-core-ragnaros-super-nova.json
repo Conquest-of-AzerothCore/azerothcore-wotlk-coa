@@ -4,15 +4,19 @@
   "contract": [
     "Archive WoWCombatLog evidence (12 Ragnaros pulls): Super Nova group A (2108627-30) first lands 10.0s after the pull and group B (2108662-65) 15.0s after it,",
     "each repeating every 12.0s (12.0-12.2s between salvos) while Ragnaros is emerged. The Normal ids 2108627 and 2108662 are the ones this fixture",
-    "resolves. The scenario asserts both groups are silent before their first cast, then land, then repeat."
+    "resolves. The scenario asserts both groups are silent before their first cast, then land, then repeat.",
+    "Ragnaros carries UNIT_FLAG_IMMUNE_TO_PC until his real summon intro clears it, so a raw aggressive fixture cannot be attacked at all; this case reaches",
+    "him through the real Majordomo summon sequence (spell_summon_ragnaros/EVENT_RAGNAROS_SUMMON_1..6, EVENT_INTRO_SAY, EVENT_INTRO_MAKE_ATTACKABLE), the",
+    "same path molten-core-ragnaros-survives-majordomo.json drives, instead of spawning him directly. EVENT_INTRO_MAKE_ATTACKABLE calls DoZoneInCombat(),",
+    "which pulls the nearby hero into combat on its own, so the pull timestamp is that event, not an explicit attack."
   ],
   "timeout_ms": 150000,
   "location": {
     "map": 409,
-    "x": 1144.6,
-    "y": -1020.5,
-    "z": -185.6,
-    "o": 0.0,
+    "x": 848.933,
+    "y": -812.875,
+    "z": -229.601,
+    "o": 4.046,
     "ignore_access": true
   },
   "players": [
@@ -23,28 +27,18 @@
       "level": 60
     }
   ],
-  "creatures": [
-    {
-      "id": "boss",
-      "owner": "hero",
-      "entry": 11502,
-      "health": 4000000,
-      "reaction": 2,
-      "distance": 4
-    }
-  ],
   "steps": [
     {
       "action": "set_health",
       "actor": "hero",
       "value": 2000000000,
       "maximum": 2000000000,
-      "label": "Configure the survival health before aggressive creatures can attack"
+      "label": "Configure the survival health before Ragnaros can attack"
     },
     {
       "action": "wait",
       "label": "Let the fixtures settle",
-      "ms": 3000
+      "ms": 2000
     },
     {
       "action": "assert",
@@ -55,37 +49,57 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: the hero survives the settling",
+      "label": "CONTROL: Ragnaros does not exist yet",
       "actor": "hero",
-      "metric": "alive",
-      "equals": 1
+      "metric": "nearby_creature_count",
+      "entry": 11502,
+      "equals": 0
     },
     {
-      "action": "attack",
-      "label": "Engage the boss",
+      "action": "summon",
+      "label": "Spawn the friendly Majordomo and start the Ragnaros summon sequence",
       "actor": "hero",
-      "target": "boss"
+      "entry": 12018,
+      "as": "majordomo",
+      "distance": 2,
+      "ai_action": -1
     },
     {
       "action": "wait",
-      "ms": 1000
-    },
-    {
-      "action": "attack",
-      "actor": "hero",
-      "target": "boss"
+      "ms": 72000,
+      "label": "Let the summon sequence run up to Majordomo casting Elemental Fire and Ragnaros's DoAction(ACTION_FINISH_RAGNAROS_INTRO)"
     },
     {
       "action": "assert",
-      "label": "CONTROL: the boss fights the hero",
-      "actor": "boss",
-      "metric": "combat",
-      "equals": 1,
-      "within_ms": 10000
+      "label": "Ragnaros exists right after his intro is triggered to finish",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 11502,
+      "min": 1,
+      "within_ms": 5000
     },
     {
       "action": "wait",
-      "ms": 6000
+      "ms": 4000,
+      "label": "Let EVENT_INTRO_SAY (5s) fire; EVENT_INTRO_MAKE_ATTACKABLE (2.5s more) has not fired yet"
+    },
+    {
+      "action": "wait",
+      "ms": 3000,
+      "label": "Let EVENT_INTRO_MAKE_ATTACKABLE fire: this is the pull, via its own DoZoneInCombat()"
+    },
+    {
+      "action": "assert",
+      "label": "The pull: Ragnaros's DoZoneInCombat() put the hero in combat without an explicit attack",
+      "actor": "hero",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 6000,
+      "label": "6s past the pull: still short of Super Nova's 10s/15s first casts"
     },
     {
       "action": "assert",
