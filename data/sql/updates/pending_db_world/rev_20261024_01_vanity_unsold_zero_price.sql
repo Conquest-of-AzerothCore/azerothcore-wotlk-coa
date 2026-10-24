@@ -695,7 +695,8 @@ FROM (VALUES
   ROW(558601),  -- Yellow Nitro Junk
   ROW(558798),  -- Yellow Winged Wonka
   ROW(559551),  -- Yellow Wonka
-  ROW(559565)  -- Zandalari Gong
+  ROW(559565),  -- Zandalari Gong
+  ROW(101172)  -- Kleptomanic Demon Leash
 ) n (`ItemID`)
 WHERE EXISTS (SELECT 1 FROM `coa_client_vanity_collection` WHERE `BazaarTokenCost` > 0)
 ON DUPLICATE KEY UPDATE `DonationPointCost` = 0, `SeasonalPointCost` = 0, `BazaarTokenCost` = 0;
