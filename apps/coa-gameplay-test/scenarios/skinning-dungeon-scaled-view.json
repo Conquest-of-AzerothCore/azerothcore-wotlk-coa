@@ -10,9 +10,9 @@
     "level it was sent, and the server requirement (Spell::CheckCast: skill < 100 needs (level - 10) * 10) must be",
     "computed from the same level: 50 for the level-15 view, 100 for the authored level 20. Skinning 55 therefore",
     "skins the corpse the client shows as skinnable, Skinning 45 is refused with SPELL_FAILED_LOW_CASTLEVEL (49) as",
-    "the client's red line says, and with scaling off the authored level 20 applies again and 85 is refused. Black",
-    "Riding Wolf 5194 is a beast with skinning table 100001 and no creature loot or money, so its corpse becomes",
-    "skinnable as soon as it dies."
+    "the client's red line says, and with open world scaling off the dungeon keeps the level-15 view, so 85 skins",
+    "the third corpse. Black Riding Wolf 5194 is a beast with skinning table 100001 and no creature loot or money,",
+    "so its corpse becomes skinnable as soon as it dies."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -51,7 +51,7 @@
       "distance": 2
     },
     {
-      "id": "unscaled",
+      "id": "switched_off",
       "owner": "ranger",
       "entry": 5194,
       "level": 20,
@@ -211,21 +211,21 @@
     },
     {
       "action": "assert",
-      "label": "Scaling off shows the authored level",
+      "label": "Open world scaling off keeps the dungeon view at 15",
       "actor": "ranger",
       "metric": "view_level",
-      "target": "unscaled",
-      "equals": 20,
+      "target": "switched_off",
+      "equals": 15,
       "within_ms": 2000
     },
     {
       "action": "attack",
       "actor": "ranger",
-      "target": "unscaled"
+      "target": "switched_off"
     },
     {
       "action": "assert",
-      "actor": "unscaled",
+      "actor": "switched_off",
       "metric": "alive",
       "equals": 0,
       "within_ms": 30000
@@ -238,24 +238,24 @@
       "action": "cast",
       "actor": "ranger",
       "spell": 8613,
-      "target": "unscaled"
+      "target": "switched_off"
     },
     {
       "action": "assert",
-      "label": "Without scaling the authored level 20 needs 100",
-      "actor": "ranger",
-      "metric": "cast_failure",
-      "spell": 8613,
-      "equals": 49,
-      "within_ms": 2000
-    },
-    {
-      "action": "assert",
-      "label": "Nothing more was skinned",
+      "label": "Skinning 85 skins the corpse still shown at level 15",
       "actor": "ranger",
       "metric": "spell_cast_count",
       "spell": 8613,
-      "equals": 1
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The skinning loot window opens again",
+      "actor": "ranger",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 2000
     }
   ]
 }

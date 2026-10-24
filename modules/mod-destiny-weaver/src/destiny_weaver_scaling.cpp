@@ -276,9 +276,9 @@ namespace
     /// scales on its regular difficulty only: Heroic and Mythic carry authored level-60 health
     /// (coa_dungeon_health) and Mythic+ scales it; a per-character view would scale it a second time.
     ///
-    /// There is no realm switch in front of the list: whether a character scales at all is their own
-    /// choice (`ScalingChoiceEnabled`), and the module's switch only decides whether that choice is
-    /// consulted.
+    /// There is no realm switch in front of the list: whether a character scales in the open world is
+    /// their own choice (`ScalingChoiceEnabled`), and the module's switch only decides whether that
+    /// choice is consulted. A scaled dungeon does not ask the choice at all (`ViewFor`).
     bool ViewableCreature(Creature const* creature)
     {
         if (!creature)
@@ -356,10 +356,6 @@ namespace
         if (!creature || !viewer || !ScalingAvailable())
             return false;
 
-        // The character's own answer, never a neighbour's: this is what makes scaling a choice.
-        if (!LocalLevelScaling::ScalingChoiceEnabled(viewer))
-            return false;
-
         // A challenge rule or an open-world PvP ruleset holds the character to the authored world.
         if (LocalLevelScaling::ScalingBlocksFor(viewer) & LocalLevelScaling::ChallengeBlocksCreatureScaling)
             return false;
@@ -367,9 +363,16 @@ namespace
         if (!ViewableCreature(creature) || !ViewableBy(viewer, creature))
             return false;
 
+        // The Weaver's switch is open world scaling, as its menu and its messages say. A scaled dungeon
+        // scales for everyone inside it: the finder admits a group well below its authored level, and
+        // a level-60 leader whose open world switch is off must not hold the rest of the party to
+        // creatures twenty levels above them.
+        Map const* map = creature->GetMap();
+        if (!map->IsDungeon() && !LocalLevelScaling::ScalingChoiceEnabled(viewer))
+            return false;
+
         uint8 const own = creature->GetLevel();
         uint8 level = own;
-        Map const* map = creature->GetMap();
         if (map->IsDungeon())
         {
             LocalLevelScaling::LevelBand const* band = DungeonBandFor(map);

@@ -6,7 +6,8 @@
     "Inside a scaled five-player dungeon a creature stands at the viewer's own level, held inside the dungeon's band.",
     "The band's floor is LFGDungeons.dbc TargetLevelMin, not the finder's MinLevel: Maraudon (map 349, entries 26,",
     "272 and 273) has MinLevel 35 and TargetLevelMin 20, so a level-26 character sees a level-45 creature at 26",
-    "instead of 35, and a level-15 character sees it at the floor of 20. Black Riding Wolf 5194 is the fixture."
+    "instead of 35, and a level-15 character sees it at the floor of 20. The Destiny Weaver's switch is open world",
+    "scaling, so turning it off leaves the dungeon view in place. Black Riding Wolf 5194 is the fixture."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -59,11 +60,11 @@
     { "action": "level_scaling_packet", "actor": "mid", "value": 0 },
     {
       "action": "assert",
-      "label": "Scaling off shows the authored level",
+      "label": "Open world scaling off keeps the dungeon view",
       "actor": "mid",
       "metric": "view_level",
       "target": "mid_target",
-      "equals": 45,
+      "equals": 26,
       "within_ms": 2000
     }
   ]

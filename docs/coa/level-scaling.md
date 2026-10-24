@@ -53,6 +53,12 @@ authored level. The band is the `TargetLevelMin`-`MaxLevel` of the dungeon's `LF
 merged per map; entries with placeholder levels (100/100 for Wailing Caverns, Gnomeregan and Uldaman)
 use 15-59.
 
+A scaled dungeon does not consult the Destiny Weaver's switch, which is open-world scaling, as its menu
+row and its messages say. Every character inside sees their own version, whatever their own choice or
+their leader's: a level-60 leader with the switch off would otherwise hold a level-20 party to Maraudon's
+level-45 creatures. Only a challenge rule (`ScalingBlocksFor`) keeps a character on the authored
+dungeon.
+
 #### Where a creature scales
 
 | scope | rule |
@@ -158,7 +164,7 @@ already changed it, takes the ratio of its place in the real range.
 ### Groups: the leader sets the switch, never the level
 
 While a character is grouped, `DestinyWeaver::LevelScalingEnabled` answers with the **leader's**
-switch — on, or off, for every member. It answers with nothing else of the leader's, and that is
+switch — on, or off, for every member, in the open world and for quests; a scaled dungeon ignores it. It answers with nothing else of the leader's, and that is
 load-bearing rather than incidental:
 
 - the level a creature is shown at is `ScaleCreatureLevelForViewer(original, viewer->GetLevel(), offset)` —
