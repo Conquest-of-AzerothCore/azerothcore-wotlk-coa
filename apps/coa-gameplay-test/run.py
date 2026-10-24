@@ -304,7 +304,7 @@ def read_json(path):
 def validate(scenario):
     keys(scenario, {'schema', 'name', 'players', 'steps'},
          {'schema', 'name', 'players', 'creatures', 'steps', 'timeout_ms', 'location', 'contract', 'hour',
-          'creature_scaling', 'vanity_ownership'}, 'scenario')
+          'creature_scaling', 'vanity_ownership', 'two_side'}, 'scenario')
     require(type(scenario['schema']) is int and scenario['schema'] == 1, 'Unsupported scenario schema')
     require(isinstance(scenario['name'], str) and scenario['name'].strip(), 'Scenario needs a name')
     number(scenario.get('timeout_ms', 90000), 'timeout_ms', 1, 600000, True)
@@ -319,6 +319,11 @@ def validate(scenario):
         require(isinstance(starter_items, list), 'vanity_ownership.starter_items must be a list')
         for item in starter_items:
             number(item, 'vanity_ownership.starter_items', 1, 2**32 - 1, True)
+    if 'two_side' in scenario:
+        two_side = scenario['two_side']
+        keys(two_side, set(), {'trade', 'mail'}, 'two_side')
+        for name, value in two_side.items():
+            require(type(value) is bool, f'two_side.{name} must be boolean')
     players = scenario['players']
     creatures = scenario.get('creatures', [])
     require(isinstance(players, list) and 1 <= len(players) <= 8, 'Expected 1..8 players')

@@ -357,7 +357,9 @@ jumps ahead to it, and the real clock runs the case in single mode with a fixed 
 for that case, whatever the module config says, and restores the configured state when the case ends; the batch
 runs such a case exclusively because the setting is process-global. Optional
 `vanity_ownership: {"unlock_all": false, "starter_items": [98457]}` replaces `CoA.UnlockAllVanity` and
-`CoA.StarterVanityItems` for that case in the same way, and is likewise run exclusively.
+`CoA.StarterVanityItems` for that case in the same way, and is likewise run exclusively. Optional
+`two_side: {"trade": true, "mail": false}` sets `AllowTwoSide.Trade` and `AllowTwoSide.Interaction.Mail` for that
+case (an omitted field is disabled) and is likewise run exclusively.
 The [talent and item scenario](scenarios/talent-and-items.json) exercises talent learning, passive removal,
 equipping a shirt and consuming a healing potion. It does not measure the talent's damage coefficient.
 The [Shadowblast scenario](scenarios/shadowblast-shadow-rage.json) reproduces a Shadow Rage pet-targeting crash

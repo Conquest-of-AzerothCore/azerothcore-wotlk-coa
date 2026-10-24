@@ -296,6 +296,34 @@ private:
     std::map<uint16, bool> _original;
 };
 
+class TwoSideConfig
+{
+public:
+    explicit TwoSideConfig(boost::property_tree::ptree const& settings)
+    {
+        Set(CONFIG_ALLOW_TWO_SIDE_TRADE, settings.get<bool>("trade", false));
+        Set(CONFIG_ALLOW_TWO_SIDE_INTERACTION_MAIL, settings.get<bool>("mail", false));
+    }
+
+    TwoSideConfig(TwoSideConfig const&) = delete;
+    TwoSideConfig& operator=(TwoSideConfig const&) = delete;
+
+    ~TwoSideConfig()
+    {
+        for (auto const& [config, value] : _original)
+            sWorld->setBoolConfig(config, value);
+    }
+
+private:
+    void Set(ServerConfigs config, bool value)
+    {
+        _original.try_emplace(config, sWorld->getBoolConfig(config));
+        sWorld->setBoolConfig(config, value);
+    }
+
+    std::map<ServerConfigs, bool> _original;
+};
+
 struct CaseAccounts
 {
     std::vector<std::string> accounts;
@@ -695,7 +723,8 @@ void ObserveExtensionPacket(Actor& actor, WorldPacket const& packet)
         packet.GetOpcode() != SMSG_DUEL_REQUESTED && packet.GetOpcode() != SMSG_DUEL_COUNTDOWN &&
         packet.GetOpcode() != SMSG_DUEL_COMPLETE && packet.GetOpcode() != SMSG_FRIEND_STATUS &&
         packet.GetOpcode() != SMSG_SEND_MAIL_RESULT && packet.GetOpcode() != SMSG_GOSSIP_MESSAGE &&
-        packet.GetOpcode() != SMSG_BINDPOINTUPDATE && packet.GetOpcode() != SMSG_PET_SPELLS)
+        packet.GetOpcode() != SMSG_BINDPOINTUPDATE && packet.GetOpcode() != SMSG_PET_SPELLS &&
+        packet.GetOpcode() != SMSG_TRADE_STATUS)
         return;
 
     ++actor.extensionPackets[packet.GetOpcode()];
@@ -1260,6 +1289,8 @@ public:
                     starterItems += (starterItems.empty() ? "" : " ") + item.second.get_value<std::string>();
             _vanityOwnership.emplace(ownership->get<bool>("unlock_all"), starterItems);
         }
+        if (auto twoSide = _scenario.get_child_optional("two_side"))
+            _twoSide.emplace(*twoSide);
         _report.put("schema", 1);
         _report.put("run_id", _runId);
         _report.put("scenario", _scenario.get<std::string>("name"));
@@ -5762,6 +5793,7 @@ private:
     QueryCallbackProcessor _queries;
     std::optional<CreatureScaling::TestOverride> _creatureScaling;
     std::optional<AscensionVanityOwnership::TestOverride> _vanityOwnership;
+    std::optional<TwoSideConfig> _twoSide;
     GameEventStates _gameEvents;
 };
 
