@@ -13,6 +13,22 @@ def statements(database):
     return result
 
 
+def connections(database):
+    text = (ROOT / ('src/server/database/Database/Implementation/' + database + 'Database.cpp')).read_text()
+    return dict(re.findall(r'PrepareStatement\((\w+),\s*(?:"[^"\n]*"\s*)+,\s*(CONNECTION_\w+)\)', text))
+
+
+def method(path, signature):
+    text = (ROOT / path).read_text()
+    start = text.index(signature)
+    end = text.index('{', start) + 1
+    depth = 1
+    while depth:
+        depth += (text[end] == '{') - (text[end] == '}')
+        end += 1
+    return text[start:end]
+
+
 def main():
     sql = statements('Login')
     char_sql = statements('Character')
@@ -127,6 +143,16 @@ def main():
     check(db.execute(cycle_sql, (3, 6)).fetchone()[0] == 0, 'Unrelated root may join an existing chain')
     db.execute('UPDATE account SET recruiter=3 WHERE id=1')
     check(db.execute(cycle_sql, (3, 1)).fetchone()[0] == 1, 'Preexisting cycles terminate safely via UNION DISTINCT')
+    recovery = method('src/server/game/Handlers/ReferAFriendHandler.cpp', 'void WorldSession::RecoverRecruitAFriendRewards(')
+    mail_rows = method('src/server/game/Mails/Mail.cpp', 'StagedMail MailDraft::AppendMailRows(')
+    new_item = method('src/server/game/Entities/Item/Item.cpp', 'void Item::SaveToDB(')
+    check('CharacterDatabase.DirectCommitTransaction(trans)' in recovery and 'StageMailTo(trans' in recovery,
+          'Reward delivery commits its staged mail directly')
+    check('uState == ITEM_NEW ? CHAR_REP_ITEM_INSTANCE' in new_item, 'A created reward item saves with its insert')
+    flags = {**connections('Login'), **connections('Character')}
+    delivery = set(re.findall(r'\b(?:CHAR|LOGIN)_[A-Z_]+\b', recovery + mail_rows)) | {'CHAR_REP_ITEM_INSTANCE'}
+    async_only = sorted(name for name in delivery if flags[name] == 'CONNECTION_ASYNC')
+    check(not async_only, 'Direct delivery runs on a synchronous connection, so it needs ' + ', '.join(async_only))
     print(str(checks) + ' focused production-SQL checks passed (in-memory SQLite; no live DB writes).')
 
 
