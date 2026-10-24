@@ -91,6 +91,7 @@ CurveKey KeyOf(ItemTemplate const& proto)
 { return {proto.Class, proto.SubClass, proto.InventoryType, proto.Quality}; }
 double SetRatio(CurveSet const&, CurveKey const&, uint32, uint32, double fallback) { return fallback; }
 uint32 BaseEntry(uint32 item) { return item == FirstScaledEntry ? 720 : item; }
+void RebracketDisenchant(ItemTemplate&, ItemTemplate const&, uint32, Curves const&) { }
 
 // ACTUAL_BUILD_TEMPLATE
 // ACTUAL_HANDLE_QUERY
