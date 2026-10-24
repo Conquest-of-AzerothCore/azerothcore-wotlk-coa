@@ -175,8 +175,9 @@ void ApplyContracts(SpellInfo* info)
         dummy(1);
     if (id == 300353)
     {
-        dummy(1);
-        dummy(2);
+        aura(1, SPELL_AURA_IGNORE_COMBAT_RESULT, 0, MELEE_HIT_DODGE, TARGET_UNIT_CASTER);
+        aura(2, SPELL_AURA_IGNORE_COMBAT_RESULT, 0, MELEE_HIT_PARRY, TARGET_UNIT_CASTER);
+        info->Effects[1].SpellClassMask = info->Effects[2].SpellClassMask = flag96(0, 32, 0);
     }
     if (id == 805816)
         dummy(0);
