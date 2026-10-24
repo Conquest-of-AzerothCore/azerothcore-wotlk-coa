@@ -1004,7 +1004,7 @@ enum PlayerCommandStates
     CHEAT_SPELLCHARGES = 0x20
 };
 
-// Used for OnGiveXP PlayerScript hook
+// Used for XP awards and the OnGiveXP PlayerScript hook
 enum PlayerXPSource
 {
     XPSOURCE_KILL = 0,
@@ -1197,7 +1197,8 @@ public:
     void SetHas310Flyer(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_HAS_310_FLYER; else m_ExtraFlags &= ~PLAYER_EXTRA_HAS_310_FLYER; }
     void SetPvPDeath(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; else m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; }
 
-    void GiveXP(uint32 xp, Unit* victim, float group_rate = 1.0f, bool isLFGReward = false);
+    void GiveXP(uint32 xp, Unit* victim, float group_rate = 1.0f, bool isLFGReward = false,
+        PlayerXPSource xpSource = XPSOURCE_KILL);
     void GiveLevel(uint8 level);
 
     void InitStatsForLevel(bool reapplyMods = false);
@@ -2233,7 +2234,7 @@ public:
 
     bool IsAtGroupRewardDistance(WorldObject const* pRewardSource) const;
     bool IsAtLootRewardDistance(WorldObject const* pRewardSource) const;
-    bool IsAtRecruitAFriendDistance(WorldObject const* pOther) const;
+    bool IsAtRecruitAFriendDistance(WorldObject const* pOther, bool forXP = false) const;
     void RewardPlayerAndGroupAtKill(Unit* victim, bool isBattleGround);
     void RewardPlayerAndGroupAtEvent(uint32 creature_id, WorldObject* pRewardSource);
     bool isHonorOrXPTarget(Unit* victim) const;

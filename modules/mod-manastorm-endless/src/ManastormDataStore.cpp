@@ -144,6 +144,8 @@ bool ManastormDataStore::Load()
     _segments.clear();
     _scalingCurve.clear();
     _groupScalingRanges.clear();
+    _endgameScalingCurve.clear();
+    _endgameGroupScalingRanges.clear();
     _creaturePools.clear();
     _hubReturns.clear();
     _affixes.clear();
@@ -168,6 +170,9 @@ bool ManastormDataStore::Load()
 
     bool const groupScalingLoaded =
         LoadGroupScaling();
+
+    bool const endgameScalingLoaded = LoadScalingCurve(true);
+    bool const endgameGroupScalingLoaded = LoadGroupScaling(true);
 
     bool const hubReturnsLoaded =
         LoadHubReturns();
@@ -202,6 +207,8 @@ bool ManastormDataStore::Load()
         creaturePoolsLoaded &&
         scalingLoaded &&
         groupScalingLoaded &&
+        endgameScalingLoaded &&
+        endgameGroupScalingLoaded &&
         hubReturnsLoaded &&
         affixesLoaded &&
         affixRanksLoaded &&
@@ -216,12 +223,14 @@ bool ManastormDataStore::Load()
             LOG_FILTER,
             "Manastorm datastore loaded: {} segments, "
             "{} creature pools, {} depth scaling points, "
-            "{} group scaling ranges, {} hub return pads, "
+            "{} group scaling ranges, {} endgame depth points, {} endgame group ranges, {} hub return pads, "
             "{} affixes, {} affix policies, {} progression unlocks.",
             _segments.size(),
             _creaturePools.size(),
             _scalingCurve.size(),
             _groupScalingRanges.size(),
+            _endgameScalingCurve.size(),
+            _endgameGroupScalingRanges.size(),
             _hubReturns.size(),
             _affixes.size(),
             _affixPolicies.size(),
@@ -2397,15 +2406,17 @@ bool ManastormDataStore::LoadAffixPolicies()
     return valid;
 }
 
-bool ManastormDataStore::LoadScalingCurve()
+bool ManastormDataStore::LoadScalingCurve(bool endgame)
 {
+    char const* table = endgame ? "manastorm_Endgame_scaling_curve" : "manastorm_scaling_curve";
+    auto& curve = endgame ? _endgameScalingCurve : _scalingCurve;
     QueryResult countResult = WorldDatabase.Query(
-        "SELECT COUNT(*) FROM `manastorm_scaling_curve`");
+        "SELECT COUNT(*) FROM `{}`", table);
 
     if (!countResult)
     {
         LOG_ERROR(LOG_FILTER,
-            "Unable to query `manastorm_scaling_curve`. The table is missing or inaccessible.");
+            "Unable to query `{}`. The table is missing or inaccessible.", table);
         return false;
     }
 
@@ -2413,8 +2424,8 @@ bool ManastormDataStore::LoadScalingCurve()
     if (!configuredRows)
     {
         LOG_WARN(LOG_FILTER,
-            "`manastorm_scaling_curve` is empty. "
-            "Depths without a curve point will use neutral 1.0 multipliers.");
+            "`{}` is empty. "
+            "Depths without a curve point will use neutral 1.0 multipliers.", table);
         return true;
     }
 
@@ -2422,8 +2433,8 @@ bool ManastormDataStore::LoadScalingCurve()
         "SELECT "
         "`depth`, `health_multiplier`, `global_damage_multiplier`, "
         "`melee_multiplier`, `spell_multiplier` "
-        "FROM `manastorm_scaling_curve` "
-        "ORDER BY `depth`");
+        "FROM `{}` "
+        "ORDER BY `depth`", table);
 
     if (!result)
         return true;
@@ -2457,28 +2468,30 @@ bool ManastormDataStore::LoadScalingCurve()
             continue;
         }
 
-        _scalingCurve[point.Depth] = point;
+        curve[point.Depth] = point;
     }
     while (result->NextRow());
 
     LOG_INFO(LOG_FILTER,
-        "Loaded {} valid Manastorm scaling points from {} configured rows.",
-        _scalingCurve.size(), configuredRows);
+        "Loaded {} valid Manastorm scaling points from {} configured rows in `{}`.",
+        curve.size(), configuredRows, table);
 
     return true;
 }
 
-bool ManastormDataStore::LoadGroupScaling()
+bool ManastormDataStore::LoadGroupScaling(bool endgame)
 {
+    char const* table = endgame ? "manastorm_Endgame_group_scaling" : "manastorm_group_scaling";
+    auto& ranges = endgame ? _endgameGroupScalingRanges : _groupScalingRanges;
     QueryResult countResult = WorldDatabase.Query(
-        "SELECT COUNT(*) FROM `manastorm_group_scaling`");
+        "SELECT COUNT(*) FROM `{}`", table);
 
     if (!countResult)
     {
         LOG_ERROR(
             LOG_FILTER,
-            "Unable to query `manastorm_group_scaling`. "
-            "The table is missing or inaccessible.");
+            "Unable to query `{}`. "
+            "The table is missing or inaccessible.", table);
         return false;
     }
 
@@ -2489,8 +2502,8 @@ bool ManastormDataStore::LoadGroupScaling()
     {
         LOG_INFO(
             LOG_FILTER,
-            "`manastorm_group_scaling` is empty. "
-            "Member-count scaling will use neutral 1.0 multipliers.");
+            "`{}` is empty. "
+            "Member-count scaling will use neutral 1.0 multipliers.", table);
         return true;
     }
 
@@ -2499,16 +2512,16 @@ bool ManastormDataStore::LoadGroupScaling()
         "`min_members`, `max_members`, "
         "`health_multiplier`, `global_damage_multiplier`, "
         "`melee_multiplier`, `spell_multiplier` "
-        "FROM `manastorm_group_scaling` "
+        "FROM `{}` "
         "WHERE `enabled` = 1 "
-        "ORDER BY `min_members`, `max_members`");
+        "ORDER BY `min_members`, `max_members`", table);
 
     if (!result)
     {
         LOG_INFO(
             LOG_FILTER,
-            "`manastorm_group_scaling` contains no enabled rows. "
-            "Member-count scaling will use neutral 1.0 multipliers.");
+            "`{}` contains no enabled rows. "
+            "Member-count scaling will use neutral 1.0 multipliers.", table);
         return true;
     }
 
@@ -2577,7 +2590,7 @@ bool ManastormDataStore::LoadGroupScaling()
         previousMaxMembers =
             range.MaxMembers;
 
-        _groupScalingRanges.push_back(
+        ranges.push_back(
             range);
 
         ++loadedRows;
@@ -2587,26 +2600,28 @@ bool ManastormDataStore::LoadGroupScaling()
     LOG_INFO(
         LOG_FILTER,
         "Loaded {} enabled Manastorm group scaling ranges "
-        "from {} configured rows.",
+        "from {} configured rows in `{}`.",
         loadedRows,
-        configuredRows);
+        configuredRows,
+        table);
 
     return valid;
 }
 
-ManastormScalingPoint ManastormDataStore::GetScalingForDepth(uint32 depth) const
+ManastormScalingPoint ManastormDataStore::GetScalingForDepth(uint32 depth, bool endgame) const
 {
+    auto const& curve = endgame ? _endgameScalingCurve : _scalingCurve;
     ManastormScalingPoint neutral;
     neutral.Depth = depth;
 
-    if (!depth || _scalingCurve.empty())
+    if (!depth || curve.empty())
         return neutral;
 
     // Curve rows are breakpoints. Use the newest configured point at or below
     // the requested depth. This lets us tune depth brackets without requiring
     // one SQL row for every possible Endless depth.
-    auto itr = _scalingCurve.upper_bound(depth);
-    if (itr == _scalingCurve.begin())
+    auto itr = curve.upper_bound(depth);
+    if (itr == curve.begin())
         return neutral;
 
     --itr;
@@ -2617,10 +2632,10 @@ ManastormScalingPoint ManastormDataStore::GetScalingForDepth(uint32 depth) const
 
 ManastormScalingPoint ManastormDataStore::GetScalingForDepth(
     uint32 depth,
-    uint32 memberCount) const
+    uint32 memberCount, bool endgame) const
 {
     ManastormScalingPoint effective =
-        GetScalingForDepth(depth);
+        GetScalingForDepth(depth, endgame);
 
     if (!memberCount ||
         memberCount > ManastormLimits::MaxMembers)
@@ -2628,8 +2643,8 @@ ManastormScalingPoint ManastormDataStore::GetScalingForDepth(
         return effective;
     }
 
-    for (ManastormGroupScalingRange const& range :
-        _groupScalingRanges)
+    auto const& ranges = endgame ? _endgameGroupScalingRanges : _groupScalingRanges;
+    for (ManastormGroupScalingRange const& range : ranges)
     {
         if (!range.Matches(memberCount))
             continue;

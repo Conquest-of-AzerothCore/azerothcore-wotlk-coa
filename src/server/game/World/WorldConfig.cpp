@@ -240,6 +240,7 @@ void WorldConfig::BuildConfigCache()
 
     SetConfigValue<float>(CONFIG_GROUP_XP_DISTANCE, "MaxGroupXPDistance", 74.0f);
     SetConfigValue<float>(CONFIG_MAX_RECRUIT_A_FRIEND_DISTANCE, "MaxRecruitAFriendBonusDistance", 100.0f);
+    SetConfigValue<float>(CONFIG_MAX_RECRUIT_A_FRIEND_XP_DISTANCE, "MaxRecruitAFriendXPDistance", 200.0f);
 
     SetConfigValue<float>(CONFIG_SIGHT_MONSTER, "MonsterSight", 50.0f);
 

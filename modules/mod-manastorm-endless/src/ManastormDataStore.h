@@ -73,13 +73,13 @@ public:
     std::vector<ManastormSegment> const& GetSegments() const { return _segments; }
 
     // Generic depth-only curve.
-    ManastormScalingPoint GetScalingForDepth(uint32 depth) const;
+    ManastormScalingPoint GetScalingForDepth(uint32 depth, bool endgame = false) const;
 
     // Effective runtime scaling = generic depth curve x matching
     // member-count range. Missing group ranges are neutral 1.0x.
     ManastormScalingPoint GetScalingForDepth(
         uint32 depth,
-        uint32 memberCount) const;
+        uint32 memberCount, bool endgame = false) const;
 
     std::size_t GetSegmentCount() const { return _segments.size(); }
     std::size_t GetScalingPointCount() const { return _scalingCurve.size(); }
@@ -94,8 +94,8 @@ private:
     bool LoadSegments();
     bool LoadSegmentSpawns();
     bool LoadCreaturePools();
-    bool LoadScalingCurve();
-    bool LoadGroupScaling();
+    bool LoadScalingCurve(bool endgame = false);
+    bool LoadGroupScaling(bool endgame = false);
     bool LoadHubReturns();
     bool LoadAffixes();
     bool LoadAffixRankSpells();
@@ -109,6 +109,8 @@ private:
     std::vector<ManastormSegment> _segments;
     std::map<uint32, ManastormScalingPoint> _scalingCurve;
     std::vector<ManastormGroupScalingRange> _groupScalingRanges;
+    std::map<uint32, ManastormScalingPoint> _endgameScalingCurve;
+    std::vector<ManastormGroupScalingRange> _endgameGroupScalingRanges;
     std::map<uint8, ManastormHubReturn> _hubReturns;
     std::map<uint32, ManastormCreaturePoolDefinition> _creaturePools;
     std::map<uint32, ManastormAffixDefinition> _affixes;

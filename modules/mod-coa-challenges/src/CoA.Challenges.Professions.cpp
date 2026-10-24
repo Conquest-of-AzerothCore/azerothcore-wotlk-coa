@@ -38,6 +38,6 @@ namespace CoAChallenges
             perLevel = 50;
         uint32 xp = sObjectMgr->GetXPForLevel(member->GetLevel()) / perLevel * rarityMult;
         sScriptMgr->OnPlayerGiveXP(member, xp, nullptr, XPSOURCE_PROFESSION_SKILL);
-        member->GiveXP(xp, nullptr);
+        member->GiveXP(xp, nullptr, 1.0f, false, XPSOURCE_PROFESSION_SKILL);
     }
 } // namespace CoAChallenges
