@@ -18,6 +18,8 @@ namespace
 constexpr uint32 SINGLE_MINDED_FURY_DAMAGE = 1988257;
 constexpr uint32 REBORN_SPELL_OFFSET = 1100000;
 constexpr uint32 MORTAL_STRIKE_FLAG = 0x2000000;
+constexpr uint32 VICTORY_RUSH_FLAG = 0x100;  // SpellFamilyFlags[1]
+constexpr int32 VICTORY_RUSH_STOCK_PERCENT = 45;
 constexpr uint32 PIERCING_HOWL_FLAG = 0x20;
 constexpr uint32 DAZED_FLAG = 0x200000;
 constexpr int32 HEROIC_STRIKE_DAZED_PCT = 35;
@@ -221,6 +223,12 @@ void ApplyAscensionWarcraftRebornWarriorContracts(SpellInfo* spellInfo)
     using namespace AscensionWarcraftReborn;
     if (!spellInfo || spellInfo->Id < REBORN_SPELL_OFFSET || spellInfo->SpellFamilyName != SPELLFAMILY_WARRIOR)
         return;
+
+    // Victory Rush 1134428: "{AP*0.45}". The core deals the effect's base points as a percent of attack power (stock
+    // 45); the Reborn row carries 0, so it hit for 1% of attack power.
+    if ((spellInfo->SpellFamilyFlags[1] & VICTORY_RUSH_FLAG) && !spellInfo->Effects[EFFECT_0].BasePoints &&
+        spellInfo->Effects[EFFECT_0].Effect == SPELL_EFFECT_SCHOOL_DAMAGE)
+        spellInfo->Effects[EFFECT_0].BasePoints = VICTORY_RUSH_STOCK_PERCENT - 1;
 
     if ((spellInfo->SpellFamilyFlags[0] & MORTAL_STRIKE_FLAG) && FlatBonusBeforeWeaponPercent(spellInfo))
     {

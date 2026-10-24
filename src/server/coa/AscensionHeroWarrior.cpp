@@ -266,12 +266,56 @@ class spell_hero_warrior_spend_rage_charge : public SpellScript
 };
 }
 
+// Victory Rush: "causing {AP*0.45...} damage". The core deals the effect's base points as a percent of attack power
+// (stock 45); Ascension's row carries 0, so it hit for 1% of attack power.
+constexpr int32 VICTORY_RUSH_STOCK_PERCENT = 45;
+constexpr uint32 VICTORY_RUSH = 34428;
+
+// Victory Rush 34428: "{AP*0.45+SP*0.45}". The stock base gives the attack power part; the spell power part is added
+// to the hit (a melee-class spell takes no spell_bonus_data, and the core scales the whole effect value by attack
+// power, so it cannot go there).
+class spell_hero_warrior_victory_rush : public SpellScript
+{
+    PrepareSpellScript(spell_hero_warrior_victory_rush);
+
+    // the Warcraft Reborn twin (1134428, "{AP*0.45}") gets this script copied but no spell power part
+    bool Load() override
+    {
+        return GetSpellInfo()->Id == VICTORY_RUSH;
+    }
+
+    void HandleDamage(SpellEffIndex effIndex)
+    {
+        // a physical spell matches no spell power aura: "SP" is the character sheet's, the lowest magic school
+        Unit* caster = GetCaster();
+        int32 spellPower = caster->SpellBaseDamageBonusDone(SpellSchoolMask(1 << SPELL_SCHOOL_HOLY));
+        for (uint8 school = SPELL_SCHOOL_FIRE; school < MAX_SPELL_SCHOOL; ++school)
+            spellPower = std::min(spellPower, caster->SpellBaseDamageBonusDone(SpellSchoolMask(1 << school)));
+        // the done and taken modifiers the core gave the attack power part
+        Unit* target = GetHitUnit();
+        uint32 bonus = CalculatePct(uint32(std::max(spellPower, 0)), VICTORY_RUSH_STOCK_PERCENT);
+        bonus = caster->SpellDamageBonusDone(target, GetSpellInfo(), bonus, SPELL_DIRECT_DAMAGE, effIndex);
+        bonus = target->SpellDamageBonusTaken(caster, GetSpellInfo(), bonus, SPELL_DIRECT_DAMAGE);
+        SetHitDamage(GetHitDamage() + int32(bonus));
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_hero_warrior_victory_rush::HandleDamage, EFFECT_0,
+            SPELL_EFFECT_SCHOOL_DAMAGE);
+    }
+};
+
 // Enrage buffs 12880, 14201-14204: "Physical damage increased by N%". Spell.dbc keeps the damage aura's values in
 // effect 0 but zeroes its effect type, so only the haste effects applied.
 void ApplyAscensionHeroWarriorContracts(SpellInfo* spellInfo)
 {
     switch (spellInfo->Id)
     {
+        case VICTORY_RUSH:
+            if (!spellInfo->Effects[EFFECT_0].BasePoints)
+                spellInfo->Effects[EFFECT_0].BasePoints = VICTORY_RUSH_STOCK_PERCENT - 1;
+            break;
         case 12880:
         case 14201:
         case 14202:
@@ -303,5 +347,6 @@ void AddSC_AscensionHeroWarrior()
     RegisterSpellScript(aura_hero_warrior_improved_victory_rush);
     RegisterSpellScript(aura_hero_warrior_improved_berserker_stance);
     RegisterSpellScript(spell_hero_warrior_bloodsurge_bloodthirst);
+    RegisterSpellScript(spell_hero_warrior_victory_rush);
     new hero_warrior_enrage_effects();
 }
