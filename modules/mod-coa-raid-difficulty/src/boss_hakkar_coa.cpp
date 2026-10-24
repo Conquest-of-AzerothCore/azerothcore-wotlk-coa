@@ -154,6 +154,7 @@ namespace
             _siphoning = false;
             _heartDamage = 0;
             _pools.clear();
+            _clock.Reset();
         }
 
         void JustEngagedWith(Unit* /*who*/) override
@@ -215,8 +216,8 @@ namespace
             _heartDamage += value;
             if (_heartDamage >= me->CountPctFromMaxHealth(HEART_BREAK_PCT))
             {
-                events.CancelEvent(EVENT_SIPHON_END);
-                events.ScheduleEvent(EVENT_SIPHON_END, 0ms);
+                _clock.CancelEvent(EVENT_SIPHON_END);
+                _clock.ScheduleEvent(EVENT_SIPHON_END, 0ms);
             }
         }
 
@@ -247,8 +248,8 @@ namespace
                         heart->AddAura(SPELL_HEART_EXPOSED, heart);
                         _heart = heart->GetGUID();
                     }
-                    events.ScheduleEvent(EVENT_SIPHON_TICK, 2s);
-                    events.ScheduleEvent(EVENT_SIPHON_END, SIPHON_LENGTH);
+                    _clock.ScheduleEvent(EVENT_SIPHON_TICK, 2s);
+                    _clock.ScheduleEvent(EVENT_SIPHON_END, SIPHON_LENGTH);
                     break;
                 }
                 case SPELL_BLOOD_SCYTHE:
@@ -286,7 +287,8 @@ namespace
         void EndSiphon()
         {
             _siphoning = false;
-            events.CancelEvent(EVENT_SIPHON_TICK);
+            _clock.CancelEvent(EVENT_SIPHON_TICK);
+            me->InterruptSpell(CURRENT_CHANNELED_SPELL);
             if (Creature* heart = ObjectAccessor::GetCreature(*me, _heart))
                 heart->DespawnOrUnsummon();
             _heart.Clear();
@@ -309,6 +311,23 @@ namespace
                 return;
 
             events.Update(diff);
+            _clock.Update(diff);
+
+            while (uint32 tick = _clock.ExecuteEvent())
+            {
+                switch (tick)
+                {
+                    case EVENT_SIPHON_TICK:
+                        SiphonTick();
+                        _clock.ScheduleEvent(EVENT_SIPHON_TICK, 2s);
+                        break;
+                    case EVENT_SIPHON_END:
+                        EndSiphon();
+                        break;
+                    default:
+                        break;
+                }
+            }
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
@@ -320,13 +339,6 @@ namespace
                     case EVENT_BLOOD_SIPHON:
                         DoCastSelf(SPELL_BLOOD_SIPHON);
                         events.ScheduleEvent(EVENT_BLOOD_SIPHON, 90s);
-                        break;
-                    case EVENT_SIPHON_TICK:
-                        SiphonTick();
-                        events.ScheduleEvent(EVENT_SIPHON_TICK, 2s);
-                        break;
-                    case EVENT_SIPHON_END:
-                        EndSiphon();
                         break;
                     case EVENT_CORRUPTED_BLOOD:
                         DoCastSelf(SPELL_CORRUPTED_BLOOD, true);
@@ -388,6 +400,7 @@ namespace
         }
 
     private:
+        EventMap _clock;
         bool _siphoning = false;
         uint32 _heartDamage = 0;
         ObjectGuid _heart;
