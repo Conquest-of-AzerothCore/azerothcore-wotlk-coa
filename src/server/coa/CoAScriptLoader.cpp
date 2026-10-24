@@ -64,7 +64,6 @@ void AddSC_CoADungeonTuning();
 void AddSC_CoAGuardLevel();
 void AddSC_CoATestZoneBonus();
 void AddSC_CoADungeonBossSpells();
-void AddSC_AscensionKeepersScrollSteadfast();
 void AddSC_AscensionProfessionSpellAffect();
 void AddSC_AscensionPerforatingShots();
 void AddSC_AscensionSummonedEffects();
@@ -766,7 +765,6 @@ void AddCoAScripts()
     AddSC_CoAGuardLevel();
     AddSC_CoATestZoneBonus();
     AddSC_CoADungeonBossSpells();
-    AddSC_AscensionKeepersScrollSteadfast();
     AddSC_AscensionProfessionSpellAffect();
     AddSC_AscensionPerforatingShots();
     AddSC_AscensionSummonedEffects();

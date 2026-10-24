@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Keeper's Scroll: Steadfast blesses the zone with its tooltip aura",
+  "contract": "Using Keeper's Scroll: Steadfast gives the user and the user's faction in the zone the aura spell 91769 (+25% mounted speed for one hour, with the client's tooltip), not the empty item spell 91770.",
+  "timeout_ms": 90000,
+  "location": { "map": 1, "x": 340.0, "y": -4686.0, "z": 16.5 },
+  "players": [
+    { "id": "user", "race": 2, "class": 1, "level": 60 },
+    { "id": "horde", "race": 2, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "add_item", "actor": "user", "item": 1179240 },
+    { "action": "use_item", "actor": "user", "item": 1179240, "spell": 91770 },
+    { "action": "assert", "label": "the user gets the Steadfast aura with a tooltip", "actor": "user",
+      "metric": "aura", "spell": 91769, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "a player of the user's faction in the zone gets it too", "actor": "horde",
+      "metric": "aura", "spell": 91769, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "the empty item spell is not left as a buff", "actor": "user",
+      "metric": "aura", "spell": 91770, "equals": 0 }
+  ]
+}
