@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "The final boss of a normal dungeon gives Dungeon Spoils without the Dungeon Finder",
-  "contract": "A level 30 player in normal Scarlet Monastery - Graveyard, outside the Dungeon Finder, gets nothing for Interrogator Vishas and one Dungeon Spoils (2021814) for the final boss Bloodmage Thalnos. Opened at level 30 the spoils are used up and put exactly one vanilla dungeon item that requires level 25-30 in the bags.",
+  "contract": "A level 30 player in normal Scarlet Monastery - Graveyard, outside the Dungeon Finder, gets nothing for Interrogator Vishas and one Dungeon Spoils (2021814) for the final boss Bloodmage Thalnos. Opened at level 30 the spoils are used up and put exactly one vanilla dungeon item that requires level 28-30 in the bags.",
   "timeout_ms": 120000,
   "location": {
     "map": 189,
@@ -90,12 +90,12 @@
     },
     {
       "action": "assert",
-      "label": "The item opened at level 30 requires level 25-30",
+      "label": "The item opened at level 30 requires level 28-30",
       "actor": "p1",
       "metric": "carried_pool_item_count",
       "cache": 2021814,
       "table": "loot",
-      "min_required_level": 25,
+      "min_required_level": 28,
       "max_required_level": 30,
       "equals": 1
     }

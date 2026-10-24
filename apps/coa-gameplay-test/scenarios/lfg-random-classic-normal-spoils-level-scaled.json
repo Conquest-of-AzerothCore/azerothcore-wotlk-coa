@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "A Random Classic Dungeon run gives one Dungeon Spoils whose single item fits the level it is opened at",
-  "contract": "A level 20 group finishes a Random Classic Dungeon (258) from the Dungeon Finder. The Classic Random 15-25 reward quest gives every member one Dungeon Spoils (2021814), and the final boss does not add a second. Used or opened as a container, the spoils are used up and put exactly one vanilla dungeon item in the bags, chosen when they are opened from the items that fit the opener's level: opened at level 20 the item requires level 15-20, kept unopened until level 60 it requires level 50-60.",
+  "contract": "A level 20 group finishes a Random Classic Dungeon (258) from the Dungeon Finder. The Classic Random 15-25 reward quest gives every member one Dungeon Spoils (2021814), and the final boss does not add a second. Used or opened as a container, the spoils are used up and put exactly one vanilla dungeon item in the bags, chosen when they are opened from the items that fit the opener's level: opened at level 20 the item requires level 18-20, kept unopened until level 60 it requires level 58-60.",
   "timeout_ms": 180000,
   "location": {
     "map": 0,
@@ -227,12 +227,12 @@
     },
     {
       "action": "assert",
-      "label": "The item opened at level 20 requires level 15-20",
+      "label": "The item opened at level 20 requires level 18-20",
       "actor": "p1",
       "metric": "carried_pool_item_count",
       "cache": 2021814,
       "table": "loot",
-      "min_required_level": 15,
+      "min_required_level": 18,
       "max_required_level": 20,
       "equals": 1
     },
@@ -268,12 +268,12 @@
     },
     {
       "action": "assert",
-      "label": "The item opened at level 60 requires level 50-60",
+      "label": "The item opened at level 60 requires level 58-60",
       "actor": "p2",
       "metric": "carried_pool_item_count",
       "cache": 2021814,
       "table": "loot",
-      "min_required_level": 50,
+      "min_required_level": 58,
       "max_required_level": 60,
       "equals": 1
     }

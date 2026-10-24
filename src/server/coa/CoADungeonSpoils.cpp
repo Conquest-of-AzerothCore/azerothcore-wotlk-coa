@@ -32,7 +32,7 @@ namespace
     constexpr uint32 DungeonSpoils = 2021814;
     constexpr uint32 DungeonSpoilsHeroic = 1202039;
     constexpr uint32 DungeonSpoilsMythic = 1027965;
-    constexpr uint32 SpoilsLevelWindow = 5;
+    constexpr uint32 SpoilsLevelWindow = 2;
 
     std::unordered_set<uint32> MarkBosses;
 
