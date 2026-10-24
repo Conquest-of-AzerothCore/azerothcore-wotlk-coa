@@ -416,8 +416,36 @@ namespace
     };
 }
 
+class spell_coa_summon_hearty_heart : public SpellScript
+{
+    PrepareSpellScript(spell_coa_summon_hearty_heart);
+
+    void SnapToGround()
+    {
+        WorldLocation const* dest = GetExplTargetDest();
+        Unit* caster = GetCaster();
+        if (!dest || !caster)
+            return;
+
+        float const ground = caster->GetMap()->GetHeight(caster->GetPhaseMask(), dest->GetPositionX(),
+            dest->GetPositionY(), dest->GetPositionZ() + 2.0f);
+        if (ground <= INVALID_HEIGHT)
+            return;
+
+        WorldLocation grounded(dest->GetMapId(), dest->GetPositionX(), dest->GetPositionY(), ground,
+            dest->GetOrientation());
+        SetExplTargetDest(grounded);
+    }
+
+    void Register() override
+    {
+        BeforeCast += SpellCastFn(spell_coa_summon_hearty_heart::SnapToGround);
+    }
+};
+
 void AddSC_CoADungeonBossSpells()
 {
+    RegisterSpellScript(spell_coa_summon_hearty_heart);
     RegisterSpellScript(spell_coa_massive_fire_nova);
     RegisterSpellScript(spell_coa_torrent_spin);
     RegisterSpellScript(spell_coa_bouncing_saw_blade);
