@@ -362,6 +362,17 @@ void WorldConfig::BuildConfigCache()
     SetConfigValue<bool>(CONFIG_CLASSIC_PLUS_COMBAT_RULES, "ClassicPlus.CombatRules", true);
     SetConfigValue<bool>(CONFIG_CLASSIC_PLUS_STAT_FORMULAS, "ClassicPlus.StatFormulas", true);
     SetConfigValue<bool>(CONFIG_CLASSIC_PLUS_REPUTATION_SPILLOVER, "ClassicPlus.ReputationSpillover", true);
+    SetConfigValue<bool>(CONFIG_MONSTER_RESISTANCE_ENABLE, "CoA.MonsterResistance.Enable", false);
+    SetConfigValue<float>(CONFIG_MONSTER_RESISTANCE_PER_LEVEL, "CoA.MonsterResistance.PerLevel", 1.0f,
+        ConfigValueCache::Reloadable::Yes,
+        [](float const& value) { return std::isfinite(value) && value >= 0.0f; }, "finite and >= 0");
+    SetConfigValue<float>(CONFIG_MONSTER_RESISTANCE_PER_PERCENT, "CoA.MonsterResistance.PerPercent", 5.0f,
+        ConfigValueCache::Reloadable::Yes,
+        [](float const& value) { return std::isfinite(value) && value > 0.0f; }, "finite and > 0");
+    SetConfigValue<float>(CONFIG_MONSTER_RESISTANCE_MAX_REDUCTION_PCT, "CoA.MonsterResistance.MaxReductionPct", 75.0f,
+        ConfigValueCache::Reloadable::Yes,
+        [](float const& value) { return std::isfinite(value) && value >= 0.0f && value <= 100.0f; },
+        "finite and between 0 and 100");
 
     SetConfigValue<bool>(CONFIG_OBJECT_QUEST_MARKERS, "Visibility.ObjectQuestMarkers", true);
 

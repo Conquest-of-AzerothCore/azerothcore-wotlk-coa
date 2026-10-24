@@ -22,6 +22,11 @@ ROOT = HERE.parents[2]
 method = runpy.run_path(str(HERE.parent / "client_compat/run.py"))["method"]
 UNIT = "src/server/game/Entities/Unit/Unit.cpp"
 FALLBACKS = {
+    "static bool UsesLinearMonsterResistance(":
+        "[[maybe_unused]] static bool UsesLinearMonsterResistance(Unit const*, SpellSchoolMask)\n"
+        "{\n    return false;\n}\n",
+    "static bool DealsSpellDamage(":
+        "[[maybe_unused]] static bool DealsSpellDamage(SpellInfo const*)\n{\n    return false;\n}\n",
     "static bool IsClassicPlusCombat(":
         "[[maybe_unused]] static bool IsClassicPlusCombat(Unit const*, Unit const*)\n{\n    return false;\n}\n",
     "static float ClassicCreatureAvoidanceChance(":
@@ -83,6 +88,11 @@ def main():
 
     enums = "".join(method(unit_header, "enum " + name) + ";\n" for name in ("WeaponAttackType", "MeleeHitOutcome"))
     enums += method(shared, "enum Classes\n") + ";\n"
+    enums += method(shared, "enum SpellMissInfo\n") + ";\n"
+    enums += method(unit_header, "enum DamageEffectType : uint8") + ";\n"
+    enums += "".join(method(unit_header, "enum " + name) + ";\n"
+                     for name in ("UnitMods", "UnitModifierFlatType", "UnitModifierPctType"))
+    enums += method(shared, "enum SpellSchools\n") + ";\n"
     enums += re.search(r"^#define CLASSMASK_WAND_USERS .*$", shared, re.M)[0] + "\n"
     enums += method(shared, "constexpr Classes GetLegacyClassForCustomClass(") + "\n"
 
@@ -91,21 +101,26 @@ def main():
                        for signature, fallback in FALLBACKS.items())
     for signature in ("MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(Unit const* victim, WeaponAttackType attType, "
                       "int32 crit_chance", "float Unit::MeleeSpellMissChance(",
-                      "float Unit::GetEffectiveResistChance("):
+                      "float Unit::GetEffectiveResistChance(", "SpellMissInfo Unit::MagicSpellHitResult("):
         methods += method(unit, signature) + "\n"
+    absorb = method(unit, "void Unit::CalcAbsorbResist(")
+    resistance_stage = absorb[:absorb.index("    // Ignore Absorption Auras")]
+    methods += resistance_stage.replace("bool Splited", "[[maybe_unused]] bool Splited") + "}\n"
     glancing = method(method(unit, "void Unit::CalculateMeleeDamage("), "case MELEE_HIT_GLANCING:")
 
     code = (HERE / "harness.cpp").read_text(encoding="utf-8")
     code = code.replace("// NATIVE_ENUMS", enums)
     code = code.replace("// SOURCE", re.sub(r"^#include.*\n", "", classic, flags=re.M))
+    if os.name == "nt":
+        methods = "#pragma warning(push)\n#pragma warning(disable: 4244)\n" + methods + "#pragma warning(pop)\n"
     code = code.replace("// METHODS", methods)
     code = code.replace("// NATIVE_GLANCING", glancing)
     result = compile_and_run(code)
     assert result.returncode == 0, result.stdout + result.stderr
     if not args.source_ref:
         check_wiring(unit)
-    print("PASS: vanilla melee table, crushing gate, glancing bounds, miss, armor, resist and spell-hit rules; "
-          "level 61-80 and rules-off paths keep WotLK values")
+    print("PASS: native Classic+ combat plus optional monster linear resistance, penetration floor, "
+          "Holy, direct/periodic damage, binary hit handling and player/pet exclusions")
 
 
 if __name__ == "__main__":

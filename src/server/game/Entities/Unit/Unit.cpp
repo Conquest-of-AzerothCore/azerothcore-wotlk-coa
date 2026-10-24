@@ -113,6 +113,19 @@ float playerBaseMoveSpeed[MAX_MOVE_TYPE] =
     3.14f                  // MOVE_PITCH_RATE
 };
 
+static bool UsesLinearMonsterResistance(Unit const* victim, SpellSchoolMask schoolMask)
+{
+    return victim && victim->IsCreature() && !victim->IsControlledByPlayer() &&
+        !(schoolMask & SPELL_SCHOOL_MASK_NORMAL) && sWorld->getBoolConfig(CONFIG_MONSTER_RESISTANCE_ENABLE);
+}
+
+static bool DealsSpellDamage(SpellInfo const* spellInfo)
+{
+    return spellInfo->HasEffect(SPELL_EFFECT_SCHOOL_DAMAGE) || spellInfo->HasEffect(SPELL_EFFECT_HEALTH_LEECH) ||
+        spellInfo->HasAura(SPELL_AURA_PERIODIC_DAMAGE) || spellInfo->HasAura(SPELL_AURA_PERIODIC_LEECH) ||
+        spellInfo->HasAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
+}
+
 static bool IsClassicPlusCombat(Unit const* attacker, Unit const* victim)
 {
     return sWorld->getBoolConfig(CONFIG_CLASSIC_PLUS_COMBAT_RULES) &&
@@ -2529,6 +2542,29 @@ uint32 Unit::CalcArmorReducedDamage(Unit const* attacker, Unit const* victim, co
 float Unit::GetEffectiveResistChance(Unit const* owner, SpellSchoolMask schoolMask, Unit const* victim, SpellInfo const* spellInfo /*= nullptr*/)
 {
     float victimResistance = static_cast<float>(victim->GetResistance(schoolMask));
+    bool const linearResistance = UsesLinearMonsterResistance(victim, schoolMask);
+    if (linearResistance)
+    {
+        float const levelResistance = float(victim->getLevelForTarget(owner)) *
+            sWorld->getFloatConfig(CONFIG_MONSTER_RESISTANCE_PER_LEVEL);
+        bool firstSchool = true;
+        for (uint32 school = SPELL_SCHOOL_HOLY; school < MAX_SPELL_SCHOOL; ++school)
+        {
+            if (!(schoolMask & (1u << school)))
+                continue;
+
+            UnitMods const unitMod = UnitMods(UNIT_MOD_RESISTANCE_START + school);
+            float resistance = victim->GetFlatModifierValue(unitMod, BASE_VALUE) + levelResistance;
+            resistance *= victim->GetPctModifierValue(unitMod, BASE_PCT);
+            resistance += victim->GetFlatModifierValue(unitMod, TOTAL_VALUE);
+            resistance *= std::max(0.0f, victim->GetPctModifierValue(unitMod, TOTAL_PCT));
+            if (firstSchool || resistance < victimResistance)
+            {
+                victimResistance = resistance;
+                firstSchool = false;
+            }
+        }
+    }
     if (owner)
     {
         // Xinef: pets inherit 100% of masters penetration
@@ -2544,6 +2580,10 @@ float Unit::GetEffectiveResistChance(Unit const* owner, SpellSchoolMask schoolMa
     }
 
     victimResistance = std::max(victimResistance, 0.0f);
+
+    if (linearResistance)
+        return std::min(victimResistance / sWorld->getFloatConfig(CONFIG_MONSTER_RESISTANCE_PER_PERCENT) / 100.0f,
+            sWorld->getFloatConfig(CONFIG_MONSTER_RESISTANCE_MAX_REDUCTION_PCT) / 100.0f);
 
     if (owner && IsClassicPlusCombat(owner, victim))
     {
@@ -2588,12 +2628,13 @@ void Unit::CalcAbsorbResist(DamageInfo& dmgInfo, bool Splited)
     // Magic damage, check for resists
     // Ignore spells that cant be resisted
     // Xinef: holy resistance exists for npcs
-    if (!(schoolMask & SPELL_SCHOOL_MASK_NORMAL) && (!(schoolMask & SPELL_SCHOOL_MASK_HOLY) || victim->IsCreature()) && (!spellInfo || (!spellInfo->HasAttribute(SPELL_ATTR0_CU_BINARY_SPELL) && !spellInfo->HasAttribute(SPELL_ATTR4_NO_CAST_LOG))))
+    bool const linearResistance = UsesLinearMonsterResistance(victim, schoolMask);
+    if (!(schoolMask & SPELL_SCHOOL_MASK_NORMAL) && (!(schoolMask & SPELL_SCHOOL_MASK_HOLY) || victim->IsCreature()) && (!spellInfo || ((linearResistance || !spellInfo->HasAttribute(SPELL_ATTR0_CU_BINARY_SPELL)) && !spellInfo->HasAttribute(SPELL_ATTR4_NO_CAST_LOG))))
     {
         float averageResist = Unit::GetEffectiveResistChance(attacker, schoolMask, victim);
         float damageResisted = 0.0f;
 
-        if (attacker && IsClassicPlusCombat(attacker, victim))
+        if (!linearResistance && attacker && IsClassicPlusCombat(attacker, victim))
         {
             if (dmgInfo.GetDamageType() == DOT && spellInfo &&
                 !ClassicPlusCombat::ResistsDotAsDirectDamage(spellInfo->Id))
@@ -3974,7 +4015,9 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* victim, SpellInfo const* spellInfo
             tmp += victim->GetMaxNegativeAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(spellInfo->Dispel)) * 100;
         }
 
-        if (spellInfo->HasAttribute(SPELL_ATTR0_CU_BINARY_SPELL) && (spellInfo->GetSchoolMask() & (SPELL_SCHOOL_MASK_NORMAL | SPELL_SCHOOL_MASK_HOLY)) == 0)
+        if (spellInfo->HasAttribute(SPELL_ATTR0_CU_BINARY_SPELL) &&
+            !(UsesLinearMonsterResistance(victim, spellInfo->GetSchoolMask()) && DealsSpellDamage(spellInfo)) &&
+            (spellInfo->GetSchoolMask() & (SPELL_SCHOOL_MASK_NORMAL | SPELL_SCHOOL_MASK_HOLY)) == 0)
         {
             float const resistChance =
                 Unit::GetEffectiveResistChance(this, spellInfo->GetSchoolMask(), victim, spellInfo);
