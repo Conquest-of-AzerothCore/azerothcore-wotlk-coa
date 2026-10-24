@@ -81,17 +81,24 @@ namespace
         TARGET_RANDOM_NON_TANK = 1,
         TARGET_SELF = 2,
         TARGET_AREA = 3,        // cast at the tank; the spell's own targeting makes it an area
-        // CoA addition: a random player beyond DISTANT_TARGET_MIN_DIST yards (within
-        // DISTANT_TARGET_MAX_DIST), or the farthest player when none qualifies - for a cast
-        // the tooltip describes as going at "a distant enemy" rather than the tank. The
-        // distance threshold reuses boss_magmadar.cpp's own MELEE_TARGET_LOOKUP_DIST/100.0f
-        // pair (same module, same "beyond melee range" idea); Spell.dbc has no usable range
-        // index to derive it from (RangeIndex 0 on Conjure Flame Orb, its first user).
+        // CoA addition: candidates are alive players beyond DISTANT_TARGET_MIN_DIST yards
+        // (within DISTANT_TARGET_MAX_DIST), falling back to every alive player when none
+        // qualify - for a cast the tooltip describes as going at "a distant enemy" rather than
+        // the tank. The distance window reuses boss_magmadar.cpp's own
+        // MELEE_TARGET_LOOKUP_DIST/100.0f pair (same module, same "beyond melee range" idea);
+        // Spell.dbc has no usable range index to derive it from (RangeIndex 0 on Conjure Flame
+        // Orb, its first user). Among the candidates, the one with the most other candidates
+        // within DISTANT_TARGET_CLUSTER_RADIUS of it wins (ties go to the one farthest from the
+        // boss) - a group, not a lone player, so the orb's own AoE actually has to be played
+        // around. DISTANT_TARGET_CLUSTER_RADIUS is Conjure Flame Orb's own damage radius
+        // (2105419-22 all share Spell.dbc RadiusIndex 9 = SpellRadius.dbc row 9 = 20 yards); a
+        // future user of this mode with a different radius would need its own constant.
         TARGET_DISTANT = 4
     };
 
     constexpr float DISTANT_TARGET_MIN_DIST = 10.0f;
     constexpr float DISTANT_TARGET_MAX_DIST = 100.0f;
+    constexpr float DISTANT_TARGET_CLUSTER_RADIUS = 20.0f;
 
     struct ScheduleRow
     {
@@ -393,6 +400,50 @@ namespace
             return effect ? effect : row.effect[0];
         }
 
+        // CoA addition: TARGET_DISTANT's own pick - see its own comment on the enum.
+        Unit* DistantClusterTarget()
+        {
+            constexpr uint32 MAX_CANDIDATES = 100; // above any raid size this engine ever sees
+
+            std::list<Unit*> candidates;
+            SelectTargetList(candidates, MAX_CANDIDATES, SelectTargetMethod::Random, 0, [this](Unit* target)
+            {
+                return target && target->IsPlayer() && target->IsAlive()
+                       && target->GetDistance(me) > DISTANT_TARGET_MIN_DIST
+                       && target->GetDistance(me) < DISTANT_TARGET_MAX_DIST;
+            });
+
+            if (candidates.empty())
+                SelectTargetList(candidates, MAX_CANDIDATES, SelectTargetMethod::Random, 0, [](Unit* target)
+                {
+                    return target && target->IsPlayer() && target->IsAlive();
+                });
+
+            if (candidates.empty())
+                return me->GetVictim();
+
+            Unit* best = nullptr;
+            uint32 bestCount = 0;
+            float bestBossDist = 0.0f;
+            for (Unit* candidate : candidates)
+            {
+                uint32 count = 0;
+                for (Unit* other : candidates)
+                    if (candidate->GetDistance(other) <= DISTANT_TARGET_CLUSTER_RADIUS)
+                        ++count;
+
+                float const bossDist = candidate->GetDistance(me);
+                if (!best || count > bestCount || (count == bestCount && bossDist > bestBossDist))
+                {
+                    best = candidate;
+                    bestCount = count;
+                    bestBossDist = bossDist;
+                }
+            }
+
+            return best;
+        }
+
         Unit* TargetFor(ScheduleRow const& row)
         {
             switch (row.target)
@@ -405,15 +456,7 @@ namespace
                         return other;
                     return me->GetVictim();
                 case TARGET_DISTANT:
-                    if (Unit* distant = SelectTarget(SelectTargetMethod::Random, 0, [this](Unit* target)
-                        {
-                            return target && target->IsPlayer() && target->GetDistance(me) > DISTANT_TARGET_MIN_DIST
-                                   && target->GetDistance(me) < DISTANT_TARGET_MAX_DIST;
-                        }))
-                        return distant;
-                    if (Unit* farthest = SelectTarget(SelectTargetMethod::MaxDistance, 0, 0.0f, true))
-                        return farthest;
-                    return me->GetVictim();
+                    return DistantClusterTarget();
                 case TARGET_TANK:
                 case TARGET_AREA:
                 default:

@@ -167,9 +167,13 @@ lifetime (12 orb instances across 3 archived fights, first-to-last-tick span 10.
 the DBC's 275ms amplitude) ends. The orb self-casts the periodic pulse 2105418 every tick regardless of its
 current position, so it burns anything it passes through on the way, not only its destination. Target
 selection also changed from the tank (`coa_boss_schedule`'s `target` column was 0) to a new CoaBossAI
-`TargetMode`, `TARGET_DISTANT` (4): a random player beyond 10 yards (within 100), reusing
+`TargetMode`, `TARGET_DISTANT` (4): candidates are players beyond 10 yards (within 100, reusing
 `boss_magmadar.cpp`'s own "beyond melee range" pair, since Spell.dbc carries no usable range index for
-2105417 to derive a threshold from.
+2105417 to derive a threshold from), falling back to every alive player when none qualify. Among the
+candidates the orb goes for the one with the most other candidates within 20 yards of it (ties go to the
+one farthest from Gehennas) — a group, not a lone player, so Conjure Flame Orb's own AoE actually has to
+be played around. 20 yards is Conjure Flame Orb's own damage radius: 2105419-22 all share Spell.dbc
+RadiusIndex 9 = SpellRadius.dbc row 9 = 20 yards.
 
 ### Garr (12057)
 
