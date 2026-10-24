@@ -168,7 +168,7 @@ ACTIONS = {
     'client_packet': ({'actor', 'opcode'},
                       {'actor', 'opcode', 'fields', 'consumed', 'early', 'cast_before', 'pet_loading_before'}),
     'discover_taxi_node': ({'actor', 'entry'}, {'actor', 'entry'}),
-    'specialization': ({'actor', 'id'}, {'actor', 'id', 'refused'}),
+    'specialization': ({'actor', 'id'}, {'actor', 'id', 'entries', 'refused'}),
     'advancement_rank': ({'actor', 'entry', 'rank'}, {'actor', 'entry', 'rank', 'refused'}),
     'apply_appearances': ({'actor', 'selection'}, {'actor', 'selection'}),
     'sell_item': ({'actor', 'entry', 'item'}, {'actor', 'entry', 'item', 'count'}),
@@ -552,6 +552,11 @@ def validate(scenario):
         if action == 'specialization':
             require(step['actor'] in player_ids, f'{where}: specialization needs a player')
             number(step['id'], f'{where}.id', 1, 0xFFFF, True)
+            if 'entries' in step:
+                require(type(step['entries']) is list and 0 < len(step['entries']) <= 50,
+                        f'{where}: entries must list 1-50 CharacterAdvancement entries')
+                for index, entry in enumerate(step['entries']):
+                    number(entry, f'{where}.entries[{index}]', 1, 2**32 - 1, True)
             require(type(step.get('refused', False)) is bool, f'{where}: refused must be boolean')
         if action == 'advancement_rank':
             require(step['actor'] in player_ids, f'{where}: advancement_rank needs a player')

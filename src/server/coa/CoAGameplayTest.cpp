@@ -4349,10 +4349,14 @@ private:
                 _talentRequestSent = true;
                 _talentResultsBefore = results;
                 auto const current = GetAscensionKnownTalentEntries(player);
-                WorldPacket upload = KnownEntriesUpload(specialization
+                std::vector<AscensionCoATalentState::KnownEntry> known = specialization
                     ? AscensionCoATalentState::SpecializationSwitch(player->getClass(), SpellbookOf(player),
                         step.get<uint32>("id"), &current)
-                    : KnownEntriesWithRank(player, step.get<uint32>("entry"), step.get<uint32>("rank")));
+                    : KnownEntriesWithRank(player, step.get<uint32>("entry"), step.get<uint32>("rank"));
+                if (auto const entries = step.get_child_optional("entries"))
+                    for (auto const& [unused, listed] : *entries)
+                        known.push_back({ listed.get_value<uint32>(), 1 });
+                WorldPacket upload = KnownEntriesUpload(known);
                 Require(ReceiveEarly(player, upload), "No early packet hook consumed the known-entries upload");
                 return;
             }
