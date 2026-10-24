@@ -197,8 +197,8 @@
     },
     {
       "action": "wait",
-      "label": "Let one Burning Ground tick (1000 ms Amplitude) land",
-      "ms": 1500
+      "label": "Let exactly one Burning Ground tick land: the zone's single periodic timer started when it was created, not when the player stepped into it, so the total wait since creation must land inside the (1000, 2000) ms window for the first tick and stay short of the second",
+      "ms": 1000
     },
     {
       "action": "assert",
