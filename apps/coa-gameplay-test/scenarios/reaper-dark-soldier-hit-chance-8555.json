@@ -13,6 +13,10 @@
     { "action": "learn", "actor": "reaper", "spell": 560490 },
     { "action": "assert", "label": "Dark Soldier is applied", "actor": "reaper", "metric": "aura", "spell": 560490, "equals": 1, "within_ms": 15000 },
     { "action": "assert", "label": "Hit effect resolves to 3", "actor": "reaper", "metric": "aura_amount", "spell": 560490, "effect": 1, "equals": 3 },
+    { "action": "client_packet", "label": "The panel asks for its hit statistics", "actor": "reaper", "opcode": 1911, "fields": [ { "u32": 7 } ] },
+    { "action": "assert", "label": "Panel melee hit bonus is 3", "actor": "reaper", "metric": "server_packet_u32", "opcode": 1901, "row": 1, "offset": 4, "equals": 3, "within_ms": 5000 },
+    { "action": "assert", "label": "Panel ranged hit bonus is 3", "actor": "reaper", "metric": "server_packet_u32", "opcode": 1901, "row": 2, "offset": 4, "equals": 3, "within_ms": 5000 },
+    { "action": "assert", "label": "Panel spell hit bonus is 3", "actor": "reaper", "metric": "server_packet_u32", "opcode": 1901, "row": 4, "offset": 4, "equals": 3, "within_ms": 5000 },
     { "action": "command", "label": "Hit chance command answers", "actor": "reaper", "command": ".hitchance" },
     { "action": "assert", "label": "Melee hit chance rises by 3", "actor": "reaper", "metric": "melee_hit_chance", "relative_to": "mhit0", "min": 2.9, "max": 3.1 },
     { "action": "assert", "label": "Spell hit chance rises by 3", "actor": "reaper", "metric": "spell_hit_chance", "relative_to": "shit0", "min": 2.9, "max": 3.1 },
@@ -21,6 +25,8 @@
     { "action": "assert", "label": "Rank 2 hit effect resolves to 6", "actor": "reaper", "metric": "aura_amount", "spell": 561338, "effect": 1, "equals": 6, "within_ms": 15000 },
     { "action": "assert", "label": "Rank 2 melee hit chance rises by 6", "actor": "reaper", "metric": "melee_hit_chance", "relative_to": "mhit0", "min": 5.9, "max": 6.1 },
     { "action": "assert", "label": "Rank 2 spell hit chance rises by 6", "actor": "reaper", "metric": "spell_hit_chance", "relative_to": "shit0", "min": 5.9, "max": 6.1 },
+    { "action": "client_packet", "label": "The panel asks again after rank 2", "actor": "reaper", "opcode": 1911, "fields": [ { "u32": 1 } ] },
+    { "action": "assert", "label": "Panel melee hit bonus is 6", "actor": "reaper", "metric": "server_packet_u32", "opcode": 1901, "row": 1, "offset": 4, "equals": 6, "within_ms": 5000 },
     { "action": "unlearn", "actor": "reaper", "spell": 561338 }
   ]
 }
