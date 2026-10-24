@@ -44,7 +44,22 @@ enum MysticEnchantScriptSpells : uint32
     NPC_FERAL_SPIRIT_WOLF                  = 1129264,
     SPELL_DEMONIC_WHIRL_WHIRLWIND          = 1180111,
     SPELL_VAMPIRIC_DEATH                   = 1180080,
+    SPELL_VAMPIRIC_DEATH_HERO              = 278087,
+    SPELL_VAMPIRIC_DEATH_HERO_CRIT         = 278086,
     SPELL_VAMPIRIC_DEATH_DAMAGE            = 1180081,
+    SPELL_SHADOW_WORD_DEATH_BACKLASH_STOCK = 32409,
+    SPELL_CORRUPTION_R1                    = 172,
+    SPELL_CORRUPTED_SHIV                   = 285943,
+    SPELL_NIGHTMARE_MAULING                = 271401,
+    SPELL_GROWING_CORRUPTION               = 283922,
+    SPELL_WIDOWMAKER                       = 979019,
+    SPELL_WIDOWMAKER_PROC                  = 979041,
+    SPELL_WIDOWHAIL                        = 979058,
+    SPELL_PHYSICS_IN_PRACTICE              = 277460,
+    SPELL_CRYOTHERAPIST                    = 271313,
+    SPELL_CRYOTHERAPIST_BOLT               = 271310,
+    SPELL_CRYOTHERAPIST_DEEP_FREEZE        = 271308,
+    SPELL_CRYOTHERAPIST_ICY_PENANCE        = 271307,
     SPELL_SHADOW_WORD_DEATH_BACKLASH       = 1132409,
     SPELL_ARCANE_CONDUIT                   = 1181430,
     SPELL_ARCANE_SURGE                     = 1181431,
@@ -77,6 +92,13 @@ constexpr uint32 PRIEST_RENEW_FLAG0 = 0x40;
 constexpr uint32 PRIEST_PENANCE_FLAG1 = 0x8000;
 constexpr uint32 PRIEST_SHIELD_FLAG0 = 0x1;
 constexpr uint32 PRIEST_VAMPIRIC_TOUCH_FLAG1 = 0x400;
+constexpr uint32 PRIEST_SHADOW_WORD_PAIN_FLAG0 = 0x8000;
+constexpr uint32 PRIEST_ICY_PENANCE_FLAG1 = 0x800000;
+constexpr uint32 MAGE_DEEP_FREEZE_FLAG1 = 0x100000;
+constexpr uint32 ROGUE_DEADLY_THROW_FLAG1 = 0x1;
+constexpr uint32 ROGUE_SHURIKEN_TOSS_FLAG2 = 0x40000000;
+constexpr uint32 ROGUE_SPRINT_FLAG0 = 0x40;
+constexpr int32 PHYSICS_IN_PRACTICE_PVP_PCT = 15;
 constexpr uint32 WARLOCK_HEALTH_FUNNEL_FLAG0 = 0x1000000;
 constexpr uint32 WARLOCK_LIFE_TAP_FLAG0 = 0x40000;
 constexpr uint32 SHAMAN_FROST_SHOCK_FLAG0 = 0x80000000;
@@ -91,6 +113,17 @@ constexpr Milliseconds SHATTERED_RENEWAL_COOLDOWN = 1s;
 constexpr Milliseconds CAUTERIZE_COOLDOWN = 1min;
 constexpr uint32 CAUTERIZE_HEALTH_PCT = 35;
 constexpr uint32 SHIELD_MASTERS_RESOLVE_HEALTH_PCT = 50;
+
+// "applies Corruption": the highest rank the player knows, else the first
+uint32 CorruptionRank(Unit const* caster)
+{
+    uint32 rank = SPELL_CORRUPTION_R1;
+    Player const* player = caster->ToPlayer();
+    for (SpellInfo const* spell = sSpellMgr->GetSpellInfo(SPELL_CORRUPTION_R1); player && spell; spell = spell->GetNextRankSpell())
+        if (player->HasSpell(spell->Id))
+            rank = spell->Id;
+    return rank;
+}
 
 bool IsPriestSpell(SpellInfo const* spell, uint32 flag0, uint32 flag1)
 {
@@ -120,9 +153,13 @@ public:
 
     void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage, SpellInfo const* spellInfo) override
     {
-        if (!spellInfo || spellInfo->Id != SPELL_SHADOW_WORD_DEATH_BACKLASH || target != attacker)
+        if (!spellInfo || target != attacker || (spellInfo->Id != SPELL_SHADOW_WORD_DEATH_BACKLASH &&
+            spellInfo->Id != SPELL_SHADOW_WORD_DEATH_BACKLASH_STOCK))
             return;
-        if (AuraEffect const* reduction = target->GetAuraEffect(SPELL_VAMPIRIC_DEATH, EFFECT_1))
+        AuraEffect const* reduction = target->GetAuraEffect(SPELL_VAMPIRIC_DEATH, EFFECT_1);
+        if (!reduction)
+            reduction = target->GetAuraEffect(SPELL_VAMPIRIC_DEATH_HERO, EFFECT_1);
+        if (reduction)
             damage = uint32(uint64(damage) * uint32(std::max(0, 100 + reduction->GetAmount())) / 100);
     }
 
@@ -176,6 +213,7 @@ public:
     void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo) override
     {
         HeavyThunder(attacker, damage, spellInfo);
+        PhysicsInPractice(target, attacker, damage, spellInfo);
         if (!spellInfo || !(spellInfo->GetSchoolMask() & SPELL_SCHOOL_MASK_NORMAL) || damage <= 0)
             return;
         uint32 amount = uint32(damage);
@@ -186,6 +224,25 @@ public:
     static std::unordered_map<ObjectGuid, uint32> AbyssStored;
 
 private:
+    // Physics in Practice 277460: "Your Deadly Throw and Shuriken Toss deal increased damage based on the movement
+    // speed bonus of your active Sprint. The damage increase is 15% as effective versus players."
+    static void PhysicsInPractice(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo)
+    {
+        if (!attacker || damage <= 0 || !spellInfo || spellInfo->SpellFamilyName != SPELLFAMILY_ROGUE ||
+            !attacker->HasAura(SPELL_PHYSICS_IN_PRACTICE) ||
+            !((spellInfo->SpellFamilyFlags[1] & ROGUE_DEADLY_THROW_FLAG1) ||
+              (spellInfo->SpellFamilyFlags[2] & ROGUE_SHURIKEN_TOSS_FLAG2)))
+            return;
+        AuraEffect const* sprint = attacker->GetAuraEffect(SPELL_AURA_MOD_INCREASE_SPEED, SPELLFAMILY_ROGUE,
+            ROGUE_SPRINT_FLAG0, 0, 0);
+        if (!sprint || sprint->GetAmount() <= 0)
+            return;
+        int32 pct = sprint->GetAmount();
+        if (target && target->IsPlayer())
+            pct = CalculatePct(pct, PHYSICS_IN_PRACTICE_PVP_PCT);
+        AddPct(damage, pct);
+    }
+
     static void HeavyThunder(Unit* attacker, int32& damage, SpellInfo const* spellInfo)
     {
         Player* player = attacker ? attacker->ToPlayer() : nullptr;
@@ -511,6 +568,8 @@ class spell_ascension_mystic_demonic_whirl : public AuraScript
     }
 };
 
+// Vampiric Death (Warcraft Reborn 1180080, Freepick 278087): Shadow Word: Death consumes Vampiric Touch for a share
+// of its total damage; the Freepick enchant keeps its critical share (220%) in 278086.
 class spell_ascension_mystic_vampiric_death : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_vampiric_death);
@@ -527,7 +586,11 @@ class spell_ascension_mystic_vampiric_death : public AuraScript
         if (!touch)
             return;
         int32 const total = touch->GetAmount() * std::max(touch->GetTotalTicks(), 1);
-        int32 const damage = CalculatePct(total, aurEff->GetAmount());
+        int32 percent = aurEff->GetAmount();
+        if (GetId() == SPELL_VAMPIRIC_DEATH_HERO && (eventInfo.GetHitMask() & PROC_HIT_CRITICAL))
+            if (SpellInfo const* crit = sSpellMgr->GetSpellInfo(SPELL_VAMPIRIC_DEATH_HERO_CRIT))
+                percent = crit->Effects[EFFECT_0].CalcValue();
+        int32 const damage = CalculatePct(total, percent);
         touch->GetBase()->Remove();
         if (damage > 0)
             caster->CastCustomSpell(SPELL_VAMPIRIC_DEATH_DAMAGE, SPELLVALUE_BASE_POINT0, damage, target, true);
@@ -536,6 +599,108 @@ class spell_ascension_mystic_vampiric_death : public AuraScript
     void Register() override
     {
         OnEffectProc += AuraEffectProcFn(spell_ascension_mystic_vampiric_death::HandleProc, EFFECT_0,
+            SPELL_AURA_PROC_TRIGGER_SPELL);
+    }
+};
+
+// Corrupted Shiv 285943: "Dealing damage with Shiv now applies Corruption and refreshes Shadow Word: Pain."
+class spell_ascension_mystic_corrupted_shiv : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_mystic_corrupted_shiv);
+
+    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        Unit* caster = GetTarget();
+        Unit* target = eventInfo.GetActionTarget();
+        if (!target || target == caster)
+            return;
+        caster->CastSpell(target, CorruptionRank(caster), true);
+        if (AuraEffect* pain = target->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST,
+                PRIEST_SHADOW_WORD_PAIN_FLAG0, 0, 0, caster->GetGUID()))
+            pain->GetBase()->RefreshDuration();
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(spell_ascension_mystic_corrupted_shiv::HandleProc, EFFECT_0,
+            SPELL_AURA_PROC_TRIGGER_SPELL);
+    }
+};
+
+// Nightmare Mauling 271401: "Dealing damage with Maul and Mangle (Bear) now applies Corruption."
+// Growing Corruption 283922: "Seed of Corruption's explosion applies Corruption to targets it hits."
+// The rule picks the event; both put the caster's Corruption on the unit hit.
+class spell_ascension_mystic_apply_corruption : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_mystic_apply_corruption);
+
+    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        Unit* caster = GetTarget();
+        if (Unit* target = eventInfo.GetActionTarget(); target && target != caster)
+            caster->CastSpell(target, CorruptionRank(caster), true);
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(spell_ascension_mystic_apply_corruption::HandleProc, EFFECT_0,
+            SPELL_AURA_PROC_TRIGGER_SPELL);
+    }
+};
+
+// Widowmaker 979019: "Widowhail deals 40% of the triggering damage as Shadow damage to enemies in a 5-yard area and
+// increases the damage they take from your Black Arrow and Black Widow Strike by 30% for 12 sec." The 40% is 979041's.
+class spell_ascension_mystic_widowmaker : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_mystic_widowmaker);
+
+    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        Unit* caster = GetTarget();
+        Unit* target = eventInfo.GetActionTarget();
+        DamageInfo* damage = eventInfo.GetDamageInfo();
+        SpellInfo const* proc = sSpellMgr->GetSpellInfo(SPELL_WIDOWMAKER_PROC);
+        if (!target || !damage || !proc)
+            return;
+        int32 const share = int32(CalculatePct(damage->GetDamage() + damage->GetAbsorb(),
+            proc->Effects[EFFECT_0].CalcValue()));
+        if (share > 0)
+            caster->CastCustomSpell(SPELL_WIDOWHAIL, SPELLVALUE_BASE_POINT0, share, target, true);
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(spell_ascension_mystic_widowmaker::HandleProc, EFFECT_0,
+            SPELL_AURA_PROC_TRIGGER_SPELL);
+    }
+};
+
+// Cryotherapist 271313: Frostbolt, Frostfire Bolt or Ice Lance damage heals a nearby ally (271310); Deep Freeze heals
+// 5 and applies Cryotherapy (271308); Icy Penance heals 3 (271307). The heals pick their own allies.
+class spell_ascension_mystic_cryotherapist : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_mystic_cryotherapist);
+
+    void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        SpellInfo const* spell = eventInfo.GetSpellInfo();
+        if (!spell)
+            return;
+        uint32 heal = SPELL_CRYOTHERAPIST_BOLT;
+        if (spell->SpellFamilyName == SPELLFAMILY_MAGE && (spell->SpellFamilyFlags[1] & MAGE_DEEP_FREEZE_FLAG1))
+            heal = SPELL_CRYOTHERAPIST_DEEP_FREEZE;
+        else if (spell->SpellFamilyName == SPELLFAMILY_PRIEST && (spell->SpellFamilyFlags[1] & PRIEST_ICY_PENANCE_FLAG1))
+            heal = SPELL_CRYOTHERAPIST_ICY_PENANCE;
+        GetTarget()->CastSpell(GetTarget(), heal, true);
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(spell_ascension_mystic_cryotherapist::HandleProc, EFFECT_0,
             SPELL_AURA_PROC_TRIGGER_SPELL);
     }
 };
@@ -744,4 +909,8 @@ void AddSC_AscensionMysticEnchantScripts()
     RegisterSpellScript(spell_ascension_mystic_blessing_of_the_divines);
     RegisterSpellScript(spell_ascension_mystic_shield_masters_resolve);
     RegisterSpellScript(spell_ascension_mystic_cauterize);
+    RegisterSpellScript(spell_ascension_mystic_corrupted_shiv);
+    RegisterSpellScript(spell_ascension_mystic_apply_corruption);
+    RegisterSpellScript(spell_ascension_mystic_widowmaker);
+    RegisterSpellScript(spell_ascension_mystic_cryotherapist);
 }
