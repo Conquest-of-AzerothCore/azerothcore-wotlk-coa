@@ -2128,6 +2128,8 @@ private:
         uint32 spell = step.get<uint32>("spell", 0);
         if (metric == "victim")
             return unit->GetVictim() == GetUnit(step.get<std::string>("target")) ? 1.0 : 0.0;
+        if (metric == "has_redirects")
+            return unit->GetThreatMgr().HasRedirects() ? 1.0 : 0.0;
         if (metric == "player_name")
             return unit->GetName() == step.get<std::string>("name") ? 1.0 : 0.0;
         if (metric == "race")
