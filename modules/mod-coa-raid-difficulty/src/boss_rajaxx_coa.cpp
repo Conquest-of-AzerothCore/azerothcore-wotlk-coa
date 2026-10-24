@@ -425,9 +425,16 @@ namespace
                         LegionMelee(me, events, eventId);
                         break;
                     case EVENT_DECIMATE:
-                        DoCastSelf(SPELL_DECIMATE);
+                    {
+                        // Effect 0 of Decimate is Ascension effect 174, 90% of maximum health. Cast plainly, it
+                        // lands before OnSpellCast takes 90% of what is left: a full-health player ends at 1%,
+                        // anyone below 90% dies. Base points 0 turn that share off (EffectAscensionPctDamage
+                        // returns at damage <= 0); the 6s cast, the knockback and the hit in OnSpellCast stay.
+                        int32 const noPctDamage = 0;
+                        me->CastCustomSpell(me, SPELL_DECIMATE, &noPctDamage, nullptr, nullptr, false);
                         events.ScheduleEvent(EVENT_DECIMATE, 30s);
                         break;
+                    }
                     case EVENT_COMMAND:
                         UpdateCommand();
                         events.ScheduleEvent(EVENT_COMMAND, 2s);
