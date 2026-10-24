@@ -3043,7 +3043,7 @@ public:
 
     void OnPlayerLogin(Player* player) const
     {
-        _staticDecayTimers.erase(player->GetGUID());
+        ForgetStaticDecay(player->GetGUID());
         if (IsAscensionCustomClass(player))
             SynchronizeThresholdResources(player);
     }
@@ -3060,7 +3060,7 @@ public:
     void OnPlayerLogout(Player* player) const
     {
         if (player)
-            _staticDecayTimers.erase(player->GetGUID());
+            ForgetStaticDecay(player->GetGUID());
     }
 
     [[nodiscard]] bool CanPrepare(Spell* spell) const
@@ -3690,25 +3690,39 @@ private:
         uint8 const stacks = GetAuraStacks(player, SPELL_STORMBRINGER_STATIC);
         if (player->getClass() != CLASS_STORMBRINGER || !player->IsAlive() || !stacks || player->IsInCombat())
         {
-            _staticDecayTimers.erase(guid);
+            ForgetStaticDecay(guid);
             return;
         }
 
+        if (uint32 const loss = AdvanceStaticDecay(guid, stacks, diff))
+            ModifyAuraStacks(player, SPELL_STORMBRINGER_STATIC, -int32(loss));
+    }
+
+    uint32 AdvanceStaticDecay(ObjectGuid guid, uint8 stacks, uint32 diff) const
+    {
         constexpr uint32 graceMs = 5000;
         constexpr uint32 intervalMs = 1000;
+        std::lock_guard<std::mutex> lock(_staticDecayTimersLock);
         uint32& timer = _staticDecayTimers[guid];
         uint64 const elapsed = uint64(timer) + diff;
         if (elapsed < graceMs + intervalMs)
         {
             timer = uint32(elapsed);
-            return;
+            return 0;
         }
 
         uint32 const loss = uint32(std::min<uint64>(stacks, (elapsed - graceMs) / intervalMs));
-        timer = graceMs + uint32((elapsed - graceMs) % intervalMs);
-        ModifyAuraStacks(player, SPELL_STORMBRINGER_STATIC, -int32(loss));
         if (loss == stacks)
             _staticDecayTimers.erase(guid);
+        else
+            timer = graceMs + uint32((elapsed - graceMs) % intervalMs);
+        return loss;
+    }
+
+    void ForgetStaticDecay(ObjectGuid guid) const
+    {
+        std::lock_guard<std::mutex> lock(_staticDecayTimersLock);
+        _staticDecayTimers.erase(guid);
     }
 
     static void SynchronizeThresholdResources(Player* player)
@@ -3765,6 +3779,7 @@ private:
         }
     }
 
+    mutable std::mutex _staticDecayTimersLock;
     mutable std::unordered_map<ObjectGuid, uint32> _staticDecayTimers;
 };
 
