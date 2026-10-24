@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "Gehennas's Conjure Flame Orb summons a Flame Orb that pulses Flame Orb damage",
+  "contract": "Conjure Flame Orb (2105417) cast but produced nothing: Spell.dbc EFFECT_1 only triggers 2180023 'Cosmetic - Camera Shake Big', a client-only visual with no SUMMON effect, so the orb creature has to be summoned by script on the dummy effect (EFFECT_0). The summoned orb (entry 80644, db.exil.es export) self-casts the periodic pulse 2105418 (Spell.dbc amplitude 275ms), which triggers the Flame Orb damage family (2105419-22, SpellDifficulty.dbc row 2106) on nearby enemies. Gehennas's own cast time for 2105417 is 5000ms (SpellCastTimes.dbc index 6).",
+  "timeout_ms": 30000,
+  "location": {
+    "map": 409,
+    "x": 1144.6,
+    "y": -1020.5,
+    "z": -185.6,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 12259,
+      "health": 4000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Molten Core",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 409
+    },
+    {
+      "action": "set_health",
+      "label": "Controlled baseline health so the orb's damage delta is unambiguous",
+      "actor": "hero",
+      "value": 50000,
+      "maximum": 50000
+    },
+    {
+      "action": "snapshot",
+      "label": "Hero health before Conjure Flame Orb",
+      "actor": "hero",
+      "metric": "health",
+      "save_as": "pre_orb"
+    },
+    {
+      "action": "cast",
+      "label": "Gehennas casts Conjure Flame Orb at the hero",
+      "actor": "boss",
+      "spell": 2105417,
+      "target": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the cast went out",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 12259,
+      "spell": 2105417,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the 5000ms cast and the orb's first 275ms tick complete",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "The summoned orb (entry 80644) self-cast its periodic Flame Orb pulse: it was summoned and is ticking",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 80644,
+      "spell": 2105418,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The hero lost health to the Flame Orb damage family (2105419-22), not just a visual cast",
+      "actor": "hero",
+      "metric": "health",
+      "relative_to": "pre_orb",
+      "min": -3000,
+      "max": -1
+    }
+  ]
+}
