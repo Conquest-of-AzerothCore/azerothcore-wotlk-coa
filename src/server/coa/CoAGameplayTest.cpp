@@ -5147,6 +5147,11 @@ private:
             TempSummon* creature = player->SummonCreature(step.get<uint32>("entry"), position, TEMPSUMMON_MANUAL_DESPAWN);
             Require(creature != nullptr, "Could not summon creature: " + id);
             creature->SetPhaseMask(player->GetPhaseMask(), true);
+            if (auto aiAction = step.get_optional<int32>("ai_action"))
+            {
+                Require(creature->AI() != nullptr, "Summoned creature has no AI for its action");
+                creature->AI()->DoAction(*aiAction);
+            }
             _targets.emplace(id, Target{ creature->GetMapId(), creature->GetInstanceId(), creature->GetGUID() });
             record.put("result", creature->GetCreatureTemplate()->Entry);
         }

@@ -6737,7 +6737,13 @@ void ObjectMgr::LoadInstanceEncounters()
                         LOG_ERROR("sql.sql", "Table `instance_encounters` has an invalid creature (entry {}) linked to the encounter {} ({}), skipped!", creditEntry, entry, dungeonEncounter->encounterName[0]);
                         continue;
                     }
-                    const_cast<CreatureTemplate*>(creatureInfo)->flags_extra |= CREATURE_FLAG_EXTRA_DUNGEON_BOSS;
+                    // Raid bosses get encounter credit without the dungeon-boss flag, which also drives
+                    // 5-man rewards and mechanics.
+                    MapEntry const* mapEntry = sMapStore.LookupEntry(dungeonEncounter->mapId);
+                    if (mapEntry && mapEntry->IsRaid())
+                        _raidEncounterKillCreditStore.insert(creditEntry);
+                    else
+                        const_cast<CreatureTemplate*>(creatureInfo)->flags_extra |= CREATURE_FLAG_EXTRA_DUNGEON_BOSS;
                     break;
                 }
             case ENCOUNTER_CREDIT_CAST_SPELL:

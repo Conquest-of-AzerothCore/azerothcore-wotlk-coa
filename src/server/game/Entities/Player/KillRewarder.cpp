@@ -331,7 +331,8 @@ void KillRewarder::Reward()
 
     // 5. Credit instance encounter.
     if (Creature* victim = _victim->ToCreature())
-        if (victim->IsDungeonBoss())
+        if (victim->IsDungeonBoss() ||
+            (!victim->GetOwnerGUID().IsPlayer() && sObjectMgr->IsRaidEncounterKillCredit(victim->GetEntry())))
             if (Map* map = _victim->FindMap())
                 map->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, _victim->GetEntry(), _victim);
 }

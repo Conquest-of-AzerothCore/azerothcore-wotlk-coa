@@ -1001,7 +1001,7 @@ public:
         Unit* /*source*/, Difficulty /*difficulty*/, std::list<DungeonEncounter const*> const* /*encounters*/,
         uint32 dungeonCompleted, bool /*updated*/) override
     {
-        if (!dungeonCompleted || !map)
+        if (!dungeonCompleted || !map || !map->IsNonRaidDungeon())
             return;
 
         for (Map::PlayerList::const_iterator it = map->GetPlayers().begin(); it != map->GetPlayers().end(); ++it)
