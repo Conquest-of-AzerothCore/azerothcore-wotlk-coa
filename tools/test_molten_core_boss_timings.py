@@ -7,6 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MODULE_SRC = ROOT / 'modules/mod-coa-raid-difficulty/src'
 RAGNAROS = ROOT / 'src/server/scripts/EasternKingdoms/BlackrockMountain/MoltenCore/boss_ragnaros.cpp'
 LUCIFRON_SQL = ROOT / 'data/sql/updates/pending_db_world/rev_20261005_20_molten_core_lucifron_impending_doom.sql'
+SPELL_INFO_CORRECTIONS = ROOT / 'src/server/game/Spells/SpellInfoCorrections.cpp'
 
 
 def source(path):
@@ -45,6 +46,27 @@ class MoltenCoreBossTimingTests(unittest.TestCase):
         text = source(MODULE_SRC / 'boss_geddon_coa.cpp')
         self.assertIn('SPELL_HEATING_UP                   = 2105746', text)
         self.assertIn('AfterCast += SpellCastFn(spell_geddon_inferno_damage_coa::AddHeatingUp)', text)
+
+    def test_geddon_living_bomb_leaves_burning_ground_at_the_carrier(self):
+        text = source(MODULE_SRC / 'boss_geddon_coa.cpp')
+        self.assertIn('SPELL_LIVING_BOMB_BURNING_GROUND_NORMAL = 2105713', text)
+        self.assertIn('uint32 const burningGround = SPELL_LIVING_BOMB_BURNING_GROUND_NORMAL + offset', text)
+        self.assertIn(
+            'source->CastSpell(carrier->GetPositionX(), carrier->GetPositionY(), carrier->GetPositionZ(), '
+            'burningGround, true)',
+            text)
+
+    def test_geddon_knock_up_apex_is_halved(self):
+        text = source(SPELL_INFO_CORRECTIONS)
+        match = re.search(r'ApplySpellFix\(\{ 2105712 \}, \[\]\(SpellInfo\* spellInfo\)\s*\{\s*'
+                           r'spellInfo->Effects\[EFFECT_0\]\.BasePoints = (\d+);', text)
+        self.assertIsNotNone(match)
+        base_points = int(match.group(1))
+        gravity = 19.29110527038574
+        old_apex = (499 + 1) ** 2 * 0.1 ** 2 / (2 * gravity)
+        new_apex = (base_points + 1) ** 2 * 0.1 ** 2 / (2 * gravity)
+        self.assertLess(new_apex, old_apex / 1.9)
+        self.assertGreater(new_apex, old_apex / 2.1)
 
 
 if __name__ == '__main__':

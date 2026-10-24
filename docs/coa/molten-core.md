@@ -242,14 +242,27 @@ Normal, 08-16 and 08-23 Mythic) show one `Living Bomb Explosion` per carrier at 
 dealt to the carrier itself and to a pet inside 5 yd; no player bystander was ever caught in one. The carrier
 aura (2105702 N / 03 H / 04 M / 05 A) applies `SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE` (227) on effect 0.
 `Spell.dbc` already holds the rest of the kit: the explosion 2105708/09/10/11 (its own damage: 1400-1600,
-1867-2133, 2334-2666, 2800-3200) and 2105712 `Living Bomb - Knock Up` (vertical `KNOCK_BACK`, Feather Fall 3s),
-radius from the hidden hit trigger 2105707 (SpellRadius 8, 5 yd). `spell_geddon_living_bomb_explosion_coa`
-(`boss_geddon_coa.cpp`) only adds the missing trigger: on `AURA_REMOVE_BY_EXPIRE` (not dispel, not death) Geddon
-casts explosion `2105708 + (carrierAura - 2105702)` on every hostile unit within 5 yd of the carrier, the carrier
-included, then Knock Up on the carrier. It had registered its `AfterEffectRemove` hook against aura name 23
-instead of 227, so it never ran before `d8c078a7b`; an earlier version also invented a 3200 x difficulty
-ladder, logged under the tick id 2105706, spared the carrier and launched at speed 10 without Feather Fall.
-Burning Ground (2105713-16), which the logs show landing on carriers after the explosion, is not implemented.
+1867-2133, 2334-2666, 2800-3200), 2105712 `Living Bomb - Knock Up` (vertical `KNOCK_BACK`, Feather Fall 3s),
+radius from the hidden hit trigger 2105707 (SpellRadius 8, 5 yd), and the ground fire 2105713/14/15/16
+`Burning Ground` (`SPELL_EFFECT_PERSISTENT_AREA_AURA`, `SpellRadius` 7 = 2 yd, `SPELL_AURA_PERIODIC_DAMAGE`
+every 1000 ms, DBC damage 800/1067/1333/1600). The same four logs show `Burning Ground` applied to the carrier
+at the same millisecond as the explosion (fight 317, 2026-05-28 Ascended: 2105716; fights 1630/1752, 08-16 and
+08-23 Mythic: 2105715). `spell_geddon_living_bomb_explosion_coa` (`boss_geddon_coa.cpp`) adds the missing
+trigger: on `AURA_REMOVE_BY_EXPIRE` (not dispel, not death) Geddon casts explosion
+`2105708 + (carrierAura - 2105702)` on every hostile unit within 5 yd of the carrier, the carrier included,
+then Knock Up on the carrier, then `2105713 + (carrierAura - 2105702)` `Burning Ground` at the carrier's exact
+position (a dynobject, so the fire patch persists on the ground after the carrier moves or dies). It had
+registered its `AfterEffectRemove` hook against aura name 23 instead of 227, so it never ran before
+`d8c078a7b`; an earlier version also invented a 3200 x difficulty ladder, logged under the tick id 2105706,
+spared the carrier and launched at speed 10 without Feather Fall.
+
+Knock Up's vertical launch speed (`EffectKnockBack`: `speedz = EffectBasePoints[0] * 0.1`, `MiscValue` 0 so no
+horizontal component) was the raw DBC value, `EffectBasePoints[0]` 499 -> damage 500 -> speedz 50.0 yd/s. With
+`Movement::gravity` 19.29110527038574 (`src/server/game/Movement/Spline/MovementUtil.cpp`), the apex
+(`speedz^2 / (2 * gravity)`) is about 64.8 yards, and the owner confirmed in-game that a player goes through
+the ceiling of Geddon's room (spawn `position_z` -178.401, map 409, guid 56655). The vmap ceiling height could
+not be measured without a server deploy. `SpellInfoCorrections.cpp` halves the apex instead
+(`speedz / sqrt(2)`): `EffectBasePoints[0]` 353 -> damage 354 -> speedz 35.4 yd/s -> apex about 32.5 yards.
 
 ### Sulfuron Harbinger (12098)
 

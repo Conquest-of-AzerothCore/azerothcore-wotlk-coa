@@ -5464,6 +5464,18 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_10_YARDS);
     });
 
+    // CoA: Baron Geddon's Living Bomb - Knock Up (2105712) is a pure vertical KNOCK_BACK (MiscValue 0,
+    // so Spell::EffectKnockBack's speedxy stays 0) whose EffectBasePoints 499 gives a fixed damage value
+    // of 500 (DieSides 1), read by EffectKnockBack as speedz = damage * 0.1 = 50.0 yd/s. With
+    // Movement::gravity = 19.29110527038574, the DBC apex (speedz^2 / (2 * gravity)) is about 64.8 yards,
+    // which a player confirmed in-game by going through the ceiling of Geddon's room. Geddon's own vmap
+    // ceiling height could not be measured without a server deploy, so this halves the apex instead
+    // (speedz / sqrt(2)): BasePoints 353 gives damage 354, speedz 35.4 yd/s, apex about 32.5 yards.
+    ApplySpellFix({ 2105712 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->Effects[EFFECT_0].BasePoints = 353;
+    });
+
     for (uint32 i = 0; i < GetSpellInfoStoreSize(); ++i)
     {
         SpellInfo* spellInfo = mSpellInfoMap[i];

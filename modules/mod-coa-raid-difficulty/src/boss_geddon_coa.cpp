@@ -3,11 +3,15 @@
  * 2105706 self-damage) explodes when the carrier aura expires naturally (not a dispel, not the
  * carrier's death). Ascension's combat logs (2026-05-28, 08-09, 08-16, 08-23) show one
  * "Living Bomb Explosion" per carrier at the aura-removal millisecond, dealt to the carrier
- * itself and to a pet standing within the hidden hit trigger's 5 yd (2105707, SpellRadius 8).
+ * itself and to a pet standing within the hidden hit trigger's 5 yd (2105707, SpellRadius 8),
+ * immediately followed by a "Burning Ground" aura on the same carrier at the same millisecond
+ * (2026-05-28 fight 317: Ascended 2105716; 2026-08-16/08-23 fights 1630/1752: Mythic 2105715).
  * The DBC carries the whole kit: the per-difficulty explosion 2105708/09/10/11 (damage is its
- * own EffectBasePoints/EffectDieSides) and 2105712 Knock Up (vertical KNOCK_BACK plus Feather
- * Fall). Only the trigger on expiry is missing, so it casts those spells: carrier aura id
- * 2105702 + n maps to explosion 2105708 + n.
+ * own EffectBasePoints/EffectDieSides), 2105712 Knock Up (vertical KNOCK_BACK plus Feather
+ * Fall), and the per-difficulty ground fire 2105713/14/15/16 (SPELL_EFFECT_PERSISTENT_AREA_AURA,
+ * SpellRadius 7 = 2 yd, SPELL_AURA_PERIODIC_DAMAGE every 1000 ms, DBC damage 800/1067/1333/1600).
+ * Only the trigger on expiry is missing, so it casts those spells: carrier aura id 2105702 + n
+ * maps to explosion 2105708 + n and to ground fire 2105713 + n.
  *
  * Inferno's per-wave damage (2105741 Normal, 2105742 Heroic, 2105743 Mythic, 2105744 Ascended,
  * grouped by SpellDifficulty.dbc row 2119, EffectTriggerSpell[1] of the channel 2105740) is real
@@ -41,6 +45,7 @@ namespace
         SPELL_LIVING_BOMB_CARRIER_NORMAL   = 2105702,
         SPELL_LIVING_BOMB_EXPLOSION_NORMAL = 2105708,
         SPELL_LIVING_BOMB_KNOCK_UP         = 2105712,
+        SPELL_LIVING_BOMB_BURNING_GROUND_NORMAL = 2105713,
         SPELL_HEATING_UP                   = 2105746,
     };
 
@@ -63,7 +68,9 @@ namespace
             if (!carrier || !source)
                 return;
 
-            uint32 const explosion = SPELL_LIVING_BOMB_EXPLOSION_NORMAL + (GetId() - SPELL_LIVING_BOMB_CARRIER_NORMAL);
+            uint32 const offset = GetId() - SPELL_LIVING_BOMB_CARRIER_NORMAL;
+            uint32 const explosion = SPELL_LIVING_BOMB_EXPLOSION_NORMAL + offset;
+            uint32 const burningGround = SPELL_LIVING_BOMB_BURNING_GROUND_NORMAL + offset;
 
             std::list<Unit*> targets;
             Acore::AnyUnfriendlyUnitInObjectRangeCheck check(carrier, source, EXPLOSION_RADIUS);
@@ -74,6 +81,7 @@ namespace
                 source->CastSpell(target, explosion, true);
 
             source->CastSpell(carrier, SPELL_LIVING_BOMB_KNOCK_UP, true);
+            source->CastSpell(carrier->GetPositionX(), carrier->GetPositionY(), carrier->GetPositionZ(), burningGround, true);
         }
 
         void Register() override
