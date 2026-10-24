@@ -223,7 +223,8 @@ public:
                     break;
                 case GO_FORCEFIELD:
                     _forcefieldGUID = gameobject->GetGUID();
-                    gameobject->SetGoState(GO_STATE_ACTIVE);
+                    if (_encounters[TYPE_HAKKAR_EVENT] == DONE)
+                        gameobject->SetGoState(GO_STATE_ACTIVE);
                     break;
                 case GO_ETERNAL_FLAME1:
                 case GO_ETERNAL_FLAME2:
@@ -253,12 +254,8 @@ public:
                 case DATA_DEFENDER_KILLED:
                     ++_defendersKilled;
                     if (_defendersKilled == DEFENDERS_COUNT)
-                    {
                         if (Creature* jammal = instance->GetCreature(_jammalanGUID))
                             jammal->AI()->Talk(0);
-                        if (GameObject* forcefield = instance->GetGameObject(_forcefieldGUID))
-                            forcefield->SetGoState(GO_STATE_ACTIVE);
-                    }
                     break;
                 case DATA_ERANIKUS_FIGHT:
                     for (ObjectGuid const& guid : _dragonkinList)
@@ -271,8 +268,12 @@ public:
                 case TYPE_HAKKAR_EVENT:
                     _encounters[type] = data;
                     if (data == DONE)
+                    {
                         if (GameObject* altar = instance->GetGameObject(_worshipAltarGUID))
                             altar->SetGameObjectFlag(GO_FLAG_NOT_SELECTABLE);
+                        if (GameObject* forcefield = instance->GetGameObject(_forcefieldGUID))
+                            forcefield->SetGoState(GO_STATE_ACTIVE);
+                    }
                     break;
                 case TYPE_ATAL_ALARION:
                 case TYPE_JAMMAL_AN:
