@@ -80,7 +80,8 @@ enum Misc
 
 enum GroupAlar
 {
-    GROUP_FLAME_BUFFET          = 1
+    GROUP_FLAME_BUFFET          = 1,
+    GROUP_BERSERK               = 2
 };
 
 // Xinef: Ruse of the Ashtongue (10946)
@@ -175,6 +176,7 @@ struct boss_alar : public BossAI
     void JustDied(Unit* killer) override
     {
         BossAI::JustDied(killer);
+        me->m_Events.CancelEventGroup(GROUP_BERSERK);
         me->SetModelVisible(true);
 
         me->GetMap()->DoForAllPlayers([&](Player* player)
@@ -260,7 +262,7 @@ struct boss_alar : public BossAI
 
         me->m_Events.AddEventAtOffset([&] {
             DoCastSelf(SPELL_BERSERK, true);
-        }, 10min);
+        }, 10min, GROUP_BERSERK);
 
         ScheduleMainSpellAttack(0s);
     }
