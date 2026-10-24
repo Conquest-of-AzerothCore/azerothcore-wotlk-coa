@@ -51,6 +51,7 @@ void ApplyRuleset(Player* player, uint32 selectionId)
         player->CastSpell(player, SPELL_PVE, true);
     else
         player->CastSpell(player, SPELL_WAR_MODE, true);
+    player->ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
 
     if (player->IsInWorld() && RulesetBlocksLevelScaling(player) != blockedBefore &&
         !LocalLevelScaling::NotifyScalingChanged(player))

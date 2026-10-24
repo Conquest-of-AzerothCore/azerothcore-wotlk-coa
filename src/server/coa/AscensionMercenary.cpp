@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "Map.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "SpellAuras.h"
@@ -53,6 +54,24 @@ void SetMercenaryFaction(Player* player, uint32 factionTemplate)
             controlled->SetFaction(factionTemplate);
 }
 
+bool ShowsFreeForAllTo(Player const* player, Player const* viewer)
+{
+    if (!player || !viewer || player->HasAura(SPELL_MERCENARY) || !IsPvPRuleset(player) ||
+        player->pvpInfo.IsInNoPvPArea || player->IsGameMaster())
+        return false;
+    return viewer == player || viewer->HasAura(SPELL_MERCENARY);
+}
+
+void RefreshRulesetPlayersFor(Player* mercenary)
+{
+    if (Map* map = mercenary->FindMap())
+        map->DoForAllPlayers([mercenary](Player* player)
+        {
+            if (player != mercenary && IsPvPRuleset(player))
+                player->ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
+        });
+}
+
 void SetMercenaryFreeForAll(Player* player)
 {
     if (player->pvpInfo.IsInNoPvPArea || player->IsGameMaster() || player->IsFFAPvP())
@@ -74,6 +93,7 @@ class spell_ascension_mercenary_aura : public AuraScript
         {
             SetMercenaryFaction(player, MERCENARY_FACTION_TEMPLATE);
             SetMercenaryFreeForAll(player);
+            RefreshRulesetPlayersFor(player);
         }
     }
 
@@ -84,6 +104,7 @@ class spell_ascension_mercenary_aura : public AuraScript
             player->SetFactionForRace(player->getRace(true));
             SetMercenaryFaction(player, player->GetFaction());
             player->UpdateFFAPvPState(true);
+            RefreshRulesetPlayersFor(player);
         }
     }
 
@@ -147,6 +168,20 @@ public:
     }
 };
 
+class ascension_mercenary_view : public UnitScript
+{
+public:
+    ascension_mercenary_view() : UnitScript("ascension_mercenary_view", true, {UNITHOOK_ON_PATCH_VALUES_UPDATE}) { }
+
+    void OnPatchValuesUpdate(Unit const* unit, ByteBuffer& data, BuildValuesCachePosPointers& pos, Player* target) override
+    {
+        if (pos.UnitFieldBytes2Pos < 0 || !unit || !ShowsFreeForAllTo(unit->ToPlayer(), target))
+            return;
+        uint32 const bytes = data.read<uint32>(pos.UnitFieldBytes2Pos);
+        data.put(pos.UnitFieldBytes2Pos, bytes | (uint32(UNIT_BYTE2_FLAG_FFA_PVP) << 8));
+    }
+};
+
 class ascension_mercenary_player : public PlayerScript
 {
 public:
@@ -198,5 +233,6 @@ void AddSC_AscensionMercenary()
     RegisterSpellAndAuraScriptPair(spell_ascension_mercenary, spell_ascension_mercenary_aura);
     RegisterSpellScript(spell_ascension_mercenary_loyalty);
     new ascension_mercenary_reaction();
+    new ascension_mercenary_view();
     new ascension_mercenary_player();
 }
