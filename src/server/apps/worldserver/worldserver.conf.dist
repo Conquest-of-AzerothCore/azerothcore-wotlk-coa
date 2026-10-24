@@ -4707,18 +4707,18 @@ AllowTwoSide.Interaction.Auction = 0
 #
 #    AllowTwoSide.Interaction.Mail
 #        Description: Allow sending mails between factions.
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
 
-AllowTwoSide.Interaction.Mail = 0
+AllowTwoSide.Interaction.Mail = 1
 
 #
 #    AllowTwoSide.Trade
 #        Description: Allow trading between factions.
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
 
-AllowTwoSide.Trade = 0
+AllowTwoSide.Trade = 1
 
 #
 #    AllowTwoSide.WhoList
