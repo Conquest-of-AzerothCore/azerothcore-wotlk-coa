@@ -1429,8 +1429,10 @@ class BatchTests(unittest.TestCase):
         self.assertTrue(lost)
         self.assertTrue(all('before readiness' in server['message'] and 'max_prepared_stmt_count' in server['message']
                             for server in lost))
-        self.assertTrue(any('raise max_prepared_stmt_count on the MySQL server or lower --character-db-workers'
-                            in failure for failure in result['failures']))
+        remedy = ('raise max_prepared_stmt_count on the MySQL server or lower the character database workers '
+                  '(verify_all.py --gameplay-db-workers or setting gameplay_db_workers; '
+                  'batch.py --character-db-workers)')
+        self.assertTrue(any(remedy in failure for failure in result['failures']))
 
     def test_single_simulated_server_still_restarts_after_a_startup_exit(self):
         command = self.command
@@ -1440,6 +1442,15 @@ class BatchTests(unittest.TestCase):
         self.assertEqual((result['status'], result['failures']), ('passed', []))
         self.assertEqual([server['status'] for server in result['servers']], ['failed', 'stopped'])
         self.assertIn('max_prepared_stmt_count', result['servers'][0]['message'])
+
+    def test_one_queued_case_keeps_the_restart_behaviour_whatever_the_jobs(self):
+        command = self.command
+        self.command = lambda config: [*command(config), '--statement-limit-once']
+        code, result = self.simulated('--jobs', '4', '--lanes', '2', '--scenario', 'beta')
+        self.assertEqual(code, 0, self.stderr.getvalue())
+        self.assertEqual((result['status'], result['failures']), ('passed', []))
+        self.assertEqual([(server['slot'], server['status']) for server in result['servers']],
+                         [(0, 'failed'), (0, 'stopped')])
 
     def test_real_pace_reruns_wait_for_every_server(self):
         self.write(self.definitions / 'scenarios' / 'linger.json', scenario('Linger', 'linger', wait=5000))

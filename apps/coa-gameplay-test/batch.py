@@ -367,7 +367,9 @@ class Server:
             exited_early = isinstance(error, ServerExited) and self.phase == 'starting'
             if exited_early and self.statement_limit_reached():
                 message += ('; MySQL refused its prepared statements (max_prepared_stmt_count): raise '
-                            'max_prepared_stmt_count on the MySQL server or lower --character-db-workers')
+                            'max_prepared_stmt_count on the MySQL server or lower the character database workers '
+                            '(verify_all.py --gameplay-db-workers or setting gameplay_db_workers; '
+                            'batch.py --character-db-workers)')
             self.fail(message, unattributed=self.phase == 'stopping' or (exited_early and batch.spread))
         finally:
             try:
@@ -733,7 +735,6 @@ class Batch:
         self.cases = cases
         self.directory = directory
         self.simulated = args.clock == SIMULATED_CLOCK
-        self.spread = self.simulated and args.jobs > 1
         self.lanes = args.lanes
         self.window = 2 * args.lanes if self.simulated else 1
         self.clock_settings = None
@@ -745,6 +746,8 @@ class Batch:
         self.singles = longest_first(case for case in cases if self.single(case))
         self.queue = deque(longest_first(case for case in cases if not self.single(case)))
         self.queued = len(self.queue)
+        self.queue_servers = min(args.jobs, self.queued)
+        self.spread = self.simulated and self.queue_servers > 1
         self.lock = threading.Lock()
         self.console_lock = threading.Lock()
         self.stopping = threading.Event()
@@ -1173,7 +1176,7 @@ class Batch:
                 self.staged = run.stage_modules(self.module_source, self.module_target, run.reserved_settings())
                 try:
                     self.module_hashes = {path.name: run.sha256(path) for path in self.staged}
-                    self.run_threads(self.work, range(min(self.args.jobs, self.queued)))
+                    self.run_threads(self.work, range(self.queue_servers))
                     if not self.interrupted():
                         self.run_singles()
                     self.interrupted()
