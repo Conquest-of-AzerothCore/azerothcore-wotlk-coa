@@ -873,11 +873,13 @@ wowhead.com/classic/guide/majordomo-executus-molten-core-strategy-wow-classic, W
    Lucifron) as outweighing a "no adds" report. On a direct, later in-game account of the correct spot and "no
    adds", the player's memory is the decision: Flamewaker Protector (12119, guids 56606/56607) is removed
    outright, not relocated with Lucifron to his corrected alcove position (also `rev_20260930_98`, see §3).
-8. **Shadow of Lucifron (12268) timing.** The 5s summon delay and its Shadow Bolt/Cleave/Dark Sundering
-   cadences are still `designed`, not measured — no static spawn or summon-spell evidence exists for this
-   creature anywhere in the export. Its health is no longer designed (§5: a Bronzebeard video reading × the
-   BB→CoA coefficient, replacing the old 25%-of-Lucifron placeholder). Awaiting the player's own logs for the
-   remaining timings.
+8. **Shadow of Lucifron (12268) timing.** Combat logs 294, 1289, 1602 and 1734 (`coa-log-history`) bound the
+   summon: players first hit the Shadow 10.08, 10.20, 10.07 and 10.06 s after Lucifron's first log line, so it
+   exists within about 10 s of the pull; the logs do not record the spawn itself. The 5s `coa_boss_summon`
+   delay fits that bound but stays `designed`, as do its Shadow Bolt/Cleave/Dark Sundering cadences — no static
+   spawn or summon-spell evidence exists for this creature anywhere in the export. Its health is no longer
+   designed (§5: a Bronzebeard video reading × the BB→CoA coefficient, replacing the old 25%-of-Lucifron
+   placeholder).
 9. **Magmadar's Core Hound cadence.** The Core Hound (11671) reinforcement cadence (first 45s, repeat 50s) is
    still `designed` — no CoA log or export evidence places it. The head/body health split is resolved: the
    heads now mirror the body's own health (§3/§5) instead of holding a designed fraction of it.
@@ -1031,7 +1033,8 @@ combat on a chained multi-tier session's 2nd/3rd pull). No repository bugs found
 leader's instance; a fresh group gets a fresh instance, which the scenario checks by requiring an undamaged
 Lucifron before the pull. After 80 s of fighting it asserts on the recorded encounter timeline:
 
-- Shadow of Lucifron (12268) appears 4-7 s after the engage (`coa_boss_summon`, 5000 ms, designed).
+- Shadow of Lucifron (12268) appears within 11 s of the engage (combat logs 294, 1289, 1602 and 1734: players
+  first hit it 10.06-10.20 s after Lucifron's first line; the designed 5000 ms summon row is context only).
 - Shadow Bolt (2105212) completes its first 1.5 s cast 5.8-7.8 s after the engage and repeats every
   14.0-16.2 s (combat logs 294, 1289, 1602 and 1734: cast start 5.93-5.98 s, then every 15.0-15.1 s).
 - Fierce Blow (975011) is cast at least five times, only on the tank (tank-only in all four logs).

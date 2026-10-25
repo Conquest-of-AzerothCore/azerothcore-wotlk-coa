@@ -20,9 +20,11 @@
     "Health fixtures (set_health maximum) keep the tank and the raid alive through the window: they are",
     "calibration, not a claim about real damage: in calibration slot run 20261025T141348198910288Z the tank",
     "kept 96.5 percent of 2,000,000 and every other player at least 89 percent of 500,000 after 80 s.",
-    "Asserted, with their independent sources: Shadow of Lucifron 12268 appears 4-7 s after the engage:",
-    "coa_boss_summon summons it 5000 ms after engage (rev_20260930_92); medium confidence, the delay is",
-    "designed, not measured. Shadow Bolt 2105212 has a 1500 ms cast (Spell.dbc CastingTimeIndex 16) and the",
+    "Asserted, with their independent sources: Shadow of Lucifron 12268 appears within 11 s of the engage: in",
+    "combat logs 294, 1289, 1602 and 1734 (coa-log-history) players first hit it 10.08, 10.20, 10.07 and 10.06",
+    "s after Lucifron's first log line, so it exists by then (the logs do not show its spawn itself); 11 s is",
+    "that bound rounded up. The designed coa_boss_summon row (5000 ms after engage, rev_20260930_92) is",
+    "context, not the source. Shadow Bolt 2105212 has a 1500 ms cast (Spell.dbc CastingTimeIndex 16) and the",
     "timeline records a cast when it completes. Combat logs 294, 1289, 1602 and 1734 (coa-log-history) start",
     "it 5.93-5.98 s after Lucifron's first log line and every 15.0-15.1 s (its 2105213 hits follow 1.6-1.7 s",
     "later), matching the 5300/15100 ms schedule within a second; so the first completed cast lands 5.8-7.8 s",
@@ -998,13 +1000,13 @@
     },
     {
       "action": "assert",
-      "label": "Shadow of Lucifron appears 4-7 s after the engage (coa_boss_summon 5000 ms)",
+      "label": "Shadow of Lucifron appears within 11 s of the engage (combat logs: first hit at 10.06-10.20 s)",
       "actor": "tank",
       "metric": "timeline_first_ms",
       "event": "spawn",
       "source_entry": 12268,
-      "min": 4000,
-      "max": 7000
+      "min": 0,
+      "max": 11000
     },
     {
       "action": "assert",
