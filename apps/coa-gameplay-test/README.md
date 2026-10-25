@@ -1038,7 +1038,7 @@ Bots do not dodge mechanics. The [raid bot scenario](scenarios/raid-bots-tank-he
 bot casting its rotation and a healer against a defensive fixture, whose swings must land only on the tank.
 [`raid-bots-rotation-assist`](scenarios/raid-bots-rotation-assist.json) adds an Incineration Pyromancer with
 `rotation_assist` next to a tank and a healer that use their scenario spells, and checks that it casts Ignite once
-and then Flare Bolt, never its scenario fallback Fire Blast.
+and then Flare Bolt, never its scenario fallback Fire Blast, while it stands within Fire Blast's 20 yd range.
 
 ## Evidence boundaries
 

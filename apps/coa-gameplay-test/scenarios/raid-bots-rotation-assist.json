@@ -14,9 +14,11 @@
     "required. All three share global cooldown category 133 (1500 ms). Ignite outlasts the 20000 ms window, so",
     "the rotation casts it once and Flare Bolt fills the remaining global cooldowns. Fire Blast is the",
     "Pyromancer's scenario rotation, the fallback a bot casts without rotation_assist; it is castable in range,",
-    "so any fallback would show as a Fire Blast cast. The tank (Barbarian, class 12, Ancestral Strike 801576)",
-    "and the healer (Sun Cleric, class 27, Illumination 500143) keep the raid-bots-tank-healer fixture without",
-    "rotation_assist and without a specialization, so they act from their scenario spells in the same fight.",
+    "so any fallback would show as a Fire Blast cast; the case asserts that the Pyromancer stays within",
+    "its 20 yd range of the boss (2D distance), since a ranged bot casts in place. The tank (Barbarian, class 12,",
+    "Ancestral Strike 801576) and the healer (Sun Cleric, class 27, Illumination 500143) keep the",
+    "raid-bots-tank-healer fixture without rotation_assist and without a specialization, so they act from their",
+    "scenario spells in the same fight.",
     "The boss has 100000 health so the level-14 Pyromancer cannot end the encounter inside the window. All",
     "asserted values come from the harness's own observation of native packets and the encounter timeline."
   ],
@@ -198,6 +200,14 @@
       "metric": "spell_go_count",
       "spell": 800790,
       "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "The Pyromancer stayed within Fire Blast's 20 yd range of the boss",
+      "actor": "pyro",
+      "metric": "distance",
+      "target": "boss",
+      "max": 20
     },
     {
       "action": "assert",

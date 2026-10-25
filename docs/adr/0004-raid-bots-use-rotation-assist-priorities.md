@@ -15,8 +15,10 @@ the CoA classes (12-32), which means using CoA's own rotation priorities. The se
 
 1. Reuse the `.rotation` selection (`CoARotationAssist::ChooseSpell`), keyed by the bot's active specialization.
 2. Keep hand-picked spell lists per scenario.
-3. Drive bots with the Ghost Lua AI or mod-playerbots. ADR 0002 already found that both provide rotations for the
-   ten stock classes only.
+3. Drive bots with the Ghost Lua AI or mod-playerbots. ADR 0002 rejected both for the harness: Ghost's Lua AI
+   provides class rotations for the ten stock classes only, and mod-playerbots is heavy to embed and brings no
+   assertion framework. The CoA rules reused by option 1 already come from the Zyth45/mod-playerbots fork's CoA
+   rotation data (`CoARotationData.h`, attribution in `docs/coa/rotation-assist.md`).
 
 ## Decision
 
