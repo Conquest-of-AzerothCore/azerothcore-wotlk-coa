@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Tinker: Strength Bionics 510176 is a buff, not a debuff (COA-4688)",
+  "contract": "Strength Bionics is the Tinker's party buff paired with Arcane Bionics 541493. Its damage-taken effect made the aura count as negative, so it showed among the debuffs. Like Arcane Bionics, it is applied as a positive aura.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "target", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_aura", "actor": "target", "spell": 510176, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: Strength Bionics is on the target", "actor": "target",
+      "metric": "aura", "spell": 510176, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "Strength Bionics is applied as a buff", "actor": "target",
+      "metric": "aura_positive", "spell": 510176, "equals": 1 },
+    { "action": "set_aura", "actor": "target", "spell": 541493, "stacks": 1 },
+    { "action": "assert", "label": "Arcane Bionics stays a buff too", "actor": "target",
+      "metric": "aura_positive", "spell": 541493, "equals": 1, "within_ms": 2000 }
+  ]
+}
