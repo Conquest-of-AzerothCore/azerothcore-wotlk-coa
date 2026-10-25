@@ -745,6 +745,12 @@ namespace
         if (it != pos.other.end())
             data.put(it->second, value);
     }
+
+    uint32 FieldValue(ByteBuffer const& data, BuildValuesCachePosPointers const& pos, uint16 index, uint32 fallback)
+    {
+        auto it = pos.other.find(index);
+        return it != pos.other.end() ? data.read<uint32>(it->second) : fallback;
+    }
 }
 
 namespace DestinyWeaver
@@ -841,10 +847,15 @@ public:
 
         CreatureTemplate const* info = creature->GetCreatureTemplate();
         uint32 const realMaxHealth = std::max<uint32>(creature->GetMaxHealth(), 1);
-        uint32 const health = uint32(uint64(creature->GetHealth()) * view.MaxHealth / realMaxHealth);
+        // Another script may already have changed the health this recipient is sent (Adventure Mode shows
+        // its scaled pool before the first hit): the view scales what is in the block, not the real pool.
+        uint32 const sentMaxHealth = FieldValue(data, pos, UNIT_FIELD_MAXHEALTH, realMaxHealth);
+        uint32 const sentHealth = FieldValue(data, pos, UNIT_FIELD_HEALTH, creature->GetHealth());
+        uint32 const maxHealth = uint32(uint64(view.MaxHealth) * sentMaxHealth / realMaxHealth);
+        uint32 const health = uint32(uint64(sentHealth) * view.MaxHealth / realMaxHealth);
 
         PatchField(data, pos, UNIT_FIELD_LEVEL, view.Level);
-        PatchField(data, pos, UNIT_FIELD_MAXHEALTH, view.MaxHealth);
+        PatchField(data, pos, UNIT_FIELD_MAXHEALTH, maxHealth);
         PatchField(data, pos, UNIT_FIELD_HEALTH, health);
 
         // The mana row scales with the level the same way, so the bar that goes with it does too.
