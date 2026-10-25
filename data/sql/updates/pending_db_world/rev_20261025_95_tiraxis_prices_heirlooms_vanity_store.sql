@@ -4,10 +4,11 @@
 
 -- 1) Heirlooms on Tiraxis' heirloom list (900011, rev_20261023_02) and in the Vanity Store, at the same price in both:
 --    one-hand weapons, shields and off-hands 1800 (was 900), ranged weapons, wands and relics 2000 (was 1000), two-hand
---    weapons 3600 (was 1800), Stick on a Carrot 2000, the heirloom pendants 1500.
+--    weapons 3600 (was 1800), Stick on a Carrot 2000, Pendant of the Bulwark / Sorcerer / Warrior 1500.
 --    Heirloom armor, rings and trinkets are not sold piece by piece (price 0): they come in the set caches, 4500 each on
 --    Tiraxis (Heirloom Cache and Experience Heirloom Cache; the caches have no VanityCollection.dbc row). The Drakefire
---    Amulet, the raid medallions and the Insignias of the Burning Legion are not sold.
+--    Amulet, Pendant of Adventure, Pendant of Discovery, the raid medallions and the Insignias of the Burning Legion are
+--    not sold.
 -- 2) Tiraxis' Convenience Items (900008): new prices, and the Vanity Store sells the same items at the same price.
 INSERT INTO `coa_client_vanity_collection` (`ItemID`, `DonationPointCost`, `SeasonalPointCost`, `BazaarTokenCost`)
 SELECT `n`.`ItemID`, 0, 0, `n`.`BazaarTokenCost`
@@ -79,8 +80,8 @@ FROM (VALUES
   ROW(666003, 0),   -- Serpentshrine Cavern Medallion
   ROW(339075, 2000),   -- Stick on a Carrot
   ROW(16309, 0),    -- Drakefire Amulet
-  ROW(339076, 1500),   -- Pendant of Adventure
-  ROW(339100, 1500),   -- Pendant of Discovery
+  ROW(339076, 0),   -- Pendant of Adventure
+  ROW(339100, 0),   -- Pendant of Discovery
   ROW(1339078, 1500),  -- Pendant of the Bulwark
   ROW(1339077, 1500),  -- Pendant of the Sorcerer
   ROW(1339076, 1500),  -- Pendant of the Warrior
@@ -261,8 +262,6 @@ FROM (VALUES
   ROW(43, 1339055, 10374),  -- Polished Battlegear of Valor - Experience Heirloom Cache, 4500 tokens
   ROW(44, 1339056, 10374),  -- Armor of Might - Experience Heirloom Cache, 4500 tokens
   ROW(45, 1339057, 10374),  -- The Mystical Elements - Experience Heirloom Cache, 4500 tokens
-  ROW(46, 339076, 10344),   -- Pendant of Adventure, 1500 tokens
-  ROW(47, 339100, 10344),   -- Pendant of Discovery, 1500 tokens
   ROW(48, 1339078, 10344),  -- Pendant of the Bulwark, 1500 tokens
   ROW(49, 1339077, 10344),  -- Pendant of the Sorcerer, 1500 tokens
   ROW(50, 1339076, 10344),  -- Pendant of the Warrior, 1500 tokens
