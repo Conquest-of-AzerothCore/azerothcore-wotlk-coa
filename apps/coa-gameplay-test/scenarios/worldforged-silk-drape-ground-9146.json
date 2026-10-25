@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "name": "Worldforged Silk Drape sits on the ground in Dalaran Crater and can be picked up (#9146)",
+  "contract": "The Silk Drape pickup (95535, guid 6901050) floated out of reach on the PTR. It is pinned to the spot reported in game, (307.660, 174.979, 47.629) on map 0, so a character standing there can open it.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": 307.66, "y": 174.98, "z": 47.8, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 1, "level": 32 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the Silk Drape is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95535, "equals": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 95535 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "the Silk Drape is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}
