@@ -1926,7 +1926,7 @@ void Unit::CalculateMeleeDamage(Unit* victim, CalcDamageInfo* damageInfo, Weapon
         uint32 damage = 0;
         uint8 itemDamagesMask = (IsPlayer()) ? (1 << i) : 0;
 
-        damage += CalculateDamage(damageInfo->attackType, false, addPctMods, itemDamagesMask);
+        damage += CalculateDamage(damageInfo->attackType, false, addPctMods, itemDamagesMask, damageInfo->target);
         // Add melee damage bonus
         damage = MeleeDamageBonusDone(damageInfo->target, damage, damageInfo->attackType, nullptr, schoolMask);
         damage = damageInfo->target->MeleeDamageBonusTaken(this, damage, damageInfo->attackType, nullptr, schoolMask);
@@ -3528,7 +3528,8 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(Unit const* victim, WeaponAttackTy
     return MELEE_HIT_NORMAL;
 }
 
-uint32 Unit::CalculateDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, uint8 itemDamagesMask /*= 0*/)
+uint32 Unit::CalculateDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, uint8 itemDamagesMask /*= 0*/,
+    Unit* victim /*= nullptr*/)
 {
     float minDamage = 0.0f;
     float maxDamage = 0.0f;
@@ -3579,6 +3580,15 @@ uint32 Unit::CalculateDamage(WeaponAttackType attType, bool normalized, bool add
     if (minDamage > maxDamage)
     {
         std::swap(minDamage, maxDamage);
+    }
+
+    if (victim)
+    {
+        float const stockMin = minDamage;
+        float const stockMax = maxDamage;
+        sScriptMgr->ModifyMeleeDamageRange(victim, this, minDamage, maxDamage);
+        if (minDamage != stockMin || maxDamage != stockMax)
+            return uint32(std::max(0.0f, frand(std::min(minDamage, maxDamage), std::max(minDamage, maxDamage))) + 0.5f);
     }
 
     return urand(uint32(minDamage), uint32(maxDamage));

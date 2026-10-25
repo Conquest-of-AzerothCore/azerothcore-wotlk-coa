@@ -292,6 +292,7 @@ struct Settings
     Multipliers health{ Formula::Of(WorldDefault), 2.5f, 2.2f,
         { { 36, 2.2f }, { 43, 2.0f }, { 229, 4.0f }, { 389, 3.0f }, { 469, 5.0f } } };
     Multipliers damage{ Formula::Of(WorldDefault), 1.5f, 1.0f, {} };
+    Multipliers damageSpread{ 1.55f, 0.0f, 0.0f, {} };
 };
 
 inline Context ContextOf(bool battlegroundOrArena, bool scriptedPrivateInstance, bool regularDifficulty, bool raid,
@@ -318,6 +319,21 @@ inline float Multiplier(Multipliers const& multipliers, Context context, std::ui
             return multipliers.dungeon.Evaluate(level);
         default:
             return multipliers.raid.Evaluate(level);
+    }
+}
+
+inline void ScaleRange(float& minDamage, float& maxDamage, float multiplier, float spread)
+{
+    if (multiplier > 0.0f)
+    {
+        minDamage *= multiplier;
+        maxDamage *= multiplier;
+    }
+    if (spread > 1.0f && maxDamage > 0.0f)
+    {
+        float const average = (minDamage + maxDamage) / 2.0f;
+        minDamage = average * 2.0f / (1.0f + spread);
+        maxDamage = minDamage * spread;
     }
 }
 

@@ -73,6 +73,12 @@ CoA.CreatureScaling.World.Damage = "1.17 + 0.013 * level"
 CoA.CreatureScaling.Dungeon.Damage = 1.5
 CoA.CreatureScaling.Raid.Damage = 1.0
 CoA.CreatureScaling.MapDamage = ""
+# Melee damage spread: the creature's highest normal hit over its lowest, around the same average (live open-world
+# normal creatures 1.5-1.6, from player combat logs). 0 keeps the stock range. Formulas and MapDamageSpread as above.
+CoA.CreatureScaling.World.DamageSpread = 1.55
+CoA.CreatureScaling.Dungeon.DamageSpread = 0
+CoA.CreatureScaling.Raid.DamageSpread = 0
+CoA.CreatureScaling.MapDamageSpread = ""
 
 # Live-like magic resistance for NPCs not controlled by players, including Holy
 # (docs/coa/monster-linear-resistance.md). Each combat level adds PerLevel resistance to every magic school;

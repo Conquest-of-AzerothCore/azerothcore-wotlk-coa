@@ -97,4 +97,20 @@ int main()
     auto const separated = ParseMapMultipliers("43: 0.3 + 0.08 * level; 36: 2.2 ;bad; 7:");
     assert(separated.size() == 2 && Near(separated.at(43).Evaluate(25), 2.3f) && Near(separated.at(36).Evaluate(1), 2.2f));
     assert(ParseMapMultipliers(FormatMapMultipliers(separated)) == separated);
+
+    assert(Near(Multiplier(settings.damageSpread, Context::World, 0, 1), 1.55f));
+    assert(Multiplier(settings.damageSpread, Context::Dungeon, 36, 20) == 0.0f);
+    assert(Multiplier(settings.damageSpread, Context::Raid, 409, 63) == 0.0f);
+    float low = 1.55f;
+    float high = 1.68f;
+    ScaleRange(low, high, 4.0f, 1.55f);
+    assert(Near((low + high) / 2.0f, 6.46f) && Near(high / low, 1.55f));
+    low = 2.0f;
+    high = 3.0f;
+    ScaleRange(low, high, 2.0f, 0.0f);
+    assert(Near(low, 4.0f) && Near(high, 6.0f));
+    low = 2.0f;
+    high = 3.0f;
+    ScaleRange(low, high, 0.0f, 1.0f);
+    assert(Near(low, 2.0f) && Near(high, 3.0f));
 }
