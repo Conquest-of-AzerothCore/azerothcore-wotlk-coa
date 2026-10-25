@@ -7,7 +7,7 @@
 --    and relics 1000 -> 2000, two-hand 1800 -> 3600); trinkets, rings, necklaces and Stick on a Carrot cost 3000. The
 --    raid medallions and the Insignias of the Burning Legion are not sold (price 0).
 --    Heirloom armor is not sold piece by piece (price 0): it comes in the set caches, which stay on Tiraxis at
---    3500 (Heirloom Cache) and 4500 (Experience Heirloom Cache). The caches have no VanityCollection.dbc row.
+--    4500 each (Heirloom Cache and Experience Heirloom Cache). The caches have no VanityCollection.dbc row.
 -- 2) Tiraxis' Convenience Items (900008): new prices, and the Vanity Store sells the same items at the same price.
 INSERT INTO `coa_client_vanity_collection` (`ItemID`, `DonationPointCost`, `SeasonalPointCost`, `BazaarTokenCost`)
 SELECT `n`.`ItemID`, 0, 0, `n`.`BazaarTokenCost`
@@ -213,13 +213,13 @@ WHERE `entry` = 900011 AND EXISTS (SELECT 1 FROM `coa_client_vanity_collection` 
 INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`)
 SELECT 900011, `c`.`slot`, `c`.`item`, 0, 0, `c`.`ExtendedCost`
 FROM (VALUES
-  ROW(0, 1339058, 10364),   -- Tattered Dreadmist Raiment - Heirloom Cache, 3500 tokens
-  ROW(1, 1339059, 10364),   -- Preened Ironfeather Armor - Heirloom Cache, 3500 tokens
-  ROW(2, 1339060, 10364),   -- Stained Shadowcraft Armor - Heirloom Cache, 3500 tokens
-  ROW(3, 1339061, 10364),   -- Champion's Battlegear - Heirloom Cache, 3500 tokens
-  ROW(4, 1339062, 10364),   -- Polished Battlegear of Valor - Heirloom Cache, 3500 tokens
-  ROW(5, 1339063, 10364),   -- Armor of Might - Heirloom Cache, 3500 tokens
-  ROW(6, 1339064, 10364),   -- The Mystical Elements - Heirloom Cache, 3500 tokens
+  ROW(0, 1339058, 10374),   -- Tattered Dreadmist Raiment - Heirloom Cache, 4500 tokens
+  ROW(1, 1339059, 10374),   -- Preened Ironfeather Armor - Heirloom Cache, 4500 tokens
+  ROW(2, 1339060, 10374),   -- Stained Shadowcraft Armor - Heirloom Cache, 4500 tokens
+  ROW(3, 1339061, 10374),   -- Champion's Battlegear - Heirloom Cache, 4500 tokens
+  ROW(4, 1339062, 10374),   -- Polished Battlegear of Valor - Heirloom Cache, 4500 tokens
+  ROW(5, 1339063, 10374),   -- Armor of Might - Heirloom Cache, 4500 tokens
+  ROW(6, 1339064, 10374),   -- The Mystical Elements - Heirloom Cache, 4500 tokens
   ROW(39, 1339051, 10374),  -- Tattered Dreadmist Raiment - Experience Heirloom Cache, 4500 tokens
   ROW(40, 1339052, 10374),  -- Preened Ironfeather Armor - Experience Heirloom Cache, 4500 tokens
   ROW(41, 1339053, 10374),  -- Stained Shadowcraft Armor - Experience Heirloom Cache, 4500 tokens
