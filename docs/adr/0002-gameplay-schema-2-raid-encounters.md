@@ -35,11 +35,11 @@ Option 1. Scenario `"schema": 2` is accepted next to schema 1:
 
 Option 2 is heavy to embed and brings no assertion framework. Option 3 was rejected for reasons read in
 `~/Projects/ConquestOfAzerothGhost` (head `ee9c9cc`): its README states the goal as E2E testing of classes, talents
-and features; it has no role routines in its client library (tank and healer appear only in e2e harness helpers and
-tests); its Molten Core raid tests (`e2e/zzmcraid/`) drive a raid with raw opcodes and GM commands such as
-`.modify hp`, and read server state by parsing chat output (for example `.npc info` health and position), so
-`enter_combat`, evade and boss state transitions are not observable there as events. Ghost stays the end-to-end
-network test.
+and features; its Go client library has no role routines, and its Lua AI (`scripts/ai/`) provides class rotations
+for the ten stock classes only, not the CoA classes; its Molten Core raid tests (`e2e/zzmcraid/`) drive a raid with
+raw opcodes and GM commands such as `.modify hp`, and read server state by parsing chat output (for example
+`.npc info` health and position), so `enter_combat`, evade and boss state transitions are inferred from chat and
+server logs rather than recorded as timestamped events. Ghost stays the end-to-end network test.
 
 ## Consequences
 
