@@ -1133,6 +1133,18 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual([table for table, _ in server.scripts], ['broken'])
         self.assertEqual(server.queries[-1], 'DROP DATABASE `coa_test_012345abcdef_world`;')
 
+    def test_parallel_copy_failure_is_wrapped_and_the_partial_copy_dropped(self):
+        server = CopyServer({f'table_{index}': 100 - index for index in range(20)}, fail='table_0')
+        with tempfile.TemporaryDirectory() as temporary:
+            database = self.database(Path(temporary), copy_workers=3)
+            with patch.object(database, 'sql', side_effect=server.sql), patch('sys.stdout', new=io.StringIO()):
+                with self.assertRaisesRegex(ValueError, 'Database copy failed for world: .*ERROR 1062'):
+                    database.prepare(roles=('world',))
+                self.assertEqual(database.cleanup(), [])
+            database.remove_credentials()
+        self.assertLess(len(server.scripts), 20)
+        self.assertEqual(server.queries[-1], 'DROP DATABASE `coa_test_012345abcdef_world`;')
+
     def test_admin_credentials_preserve_source_endpoint_and_schema(self):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / 'admin.ini'

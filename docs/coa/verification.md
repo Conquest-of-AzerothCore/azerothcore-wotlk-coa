@@ -53,7 +53,7 @@ Keep secrets out of this file: credentials stay in the worldserver config or the
 | `jobs` | the CPU count |
 | `gameplay_jobs` | `max(1, min(4, cpu // 3))`; used only with `--gameplay-clock real` |
 | `gameplay_db_workers` | `16` (1-32); character database workers, used only with the simulated clock |
-| `gameplay_copy_workers` | `min(8, cpu)` (1-32); MySQL connections that copy each test schema |
+| `gameplay_copy_workers` | `min(8, cpu)` (1-32); MySQL connections that copy each test schema and, capped at 8, checksum the world |
 
 `cmake_args` is used only to configure a build directory that has no `CMakeCache.txt` or whose last configure
 did not generate build files. Its default adds `-G` with the generator already in the cache, else `-G Ninja`

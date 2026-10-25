@@ -18,10 +18,9 @@ import socket
 import subprocess
 import sys
 import tempfile
-import threading
 import time
 
-from world_cache import WorldCache, input_fingerprint
+from world_cache import WorldCache, input_fingerprint, run_parallel
 
 ROOT = Path(__file__).resolve().parents[2]
 CREATE_FLAGS = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
@@ -1372,40 +1371,10 @@ class Databases:
         self.run_copies(role, scripts)
 
     def run_copies(self, role, scripts):
-        pending = iter(scripts)
-        lock = threading.Lock()
-        stop = threading.Event()
-        failures = []
-
-        def work():
-            while not stop.is_set():
-                with lock:
-                    script = next(pending, None)
-                if script is None:
-                    return
-                try:
-                    self.sql(role, script, timeout=COPY_TIMEOUT)
-                except Exception as error:
-                    with lock:
-                        failures.append(error)
-                    stop.set()
-
-        if self.copy_workers == 1:
-            work()
-        else:
-            threads = [threading.Thread(target=work) for _ in range(min(self.copy_workers, len(scripts)))]
-            for thread in threads:
-                thread.start()
-            try:
-                for thread in threads:
-                    thread.join()
-            except BaseException:
-                stop.set()
-                for thread in threads:
-                    thread.join()
-                raise
-        if failures:
-            raise ValueError(f'Database copy failed for {role}: {failures[0]}') from failures[0]
+        try:
+            run_parallel(lambda script: self.sql(role, script, timeout=COPY_TIMEOUT), scripts, self.copy_workers)
+        except Exception as error:
+            raise ValueError(f'Database copy failed for {role}: {error}') from error
 
     def dump_copy(self, role, schema_only, tables, where):
         connection = self.connections[role]
@@ -1808,8 +1777,8 @@ def add_run_arguments(run):
     run.add_argument('--world-cache-dir', type=Path, default=ROOT / '.cache/coa-gameplay-tests/world-cache',
                      help='Local cache metadata/lease directory; database ownership is verified separately')
     run.add_argument('--copy-workers', type=copy_worker_count, default=DEFAULT_COPY_WORKERS,
-                     help=f'MySQL connections that copy test schemas in parallel (1-{MAX_COPY_WORKERS}, '
-                          f'default {DEFAULT_COPY_WORKERS}: min(8, CPU count))')
+                     help='MySQL connections that copy test schemas in parallel and, capped at 8, checksum the world '
+                          f'(1-{MAX_COPY_WORKERS}, default {DEFAULT_COPY_WORKERS}: min(8, CPU count))')
 
 
 def main(argv=None):

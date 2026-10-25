@@ -51,41 +51,63 @@ def input_fingerprint(root, source_config, module_source, environment=None):
     return result.hexdigest()
 
 
+def run_parallel(function, items, workers):
+    items = list(items)
+    results = [None] * len(items)
+    if workers <= 1 or len(items) <= 1:
+        for index, item in enumerate(items):
+            results[index] = function(item)
+        return results
+    pending = iter(enumerate(items))
+    lock = threading.Lock()
+    stop = threading.Event()
+    failures = []
+
+    def work():
+        while not stop.is_set():
+            with lock:
+                entry = next(pending, None)
+            if entry is None:
+                return
+            index, item = entry
+            try:
+                results[index] = function(item)
+            except BaseException as error:
+                with lock:
+                    failures.append(error)
+                stop.set()
+
+    threads = []
+    try:
+        for _ in range(min(workers, len(items))):
+            thread = threading.Thread(target=work)
+            thread.start()
+            threads.append(thread)
+    except BaseException:
+        stop.set()
+        raise
+    finally:
+        try:
+            for thread in threads:
+                thread.join()
+        except BaseException:
+            stop.set()
+            for thread in threads:
+                thread.join()
+            raise
+    if failures:
+        raise failures[0]
+    return results
+
+
 def checksum_batches(database, name, tables):
     workers = max(1, min(getattr(database, 'copy_workers', 1), MAX_CHECKSUM_WORKERS, len(tables)))
     statements = [
         'CHECKSUM TABLE ' + ', '.join(f'`{name}`.`{table}`' for table in tables[index::workers]) + ' EXTENDED;'
         for index in range(workers)
     ]
-    if workers == 1:
-        return [database.sql('world', statements[0], timeout=CHECKSUM_TIMEOUT).splitlines()]
-    results = [None] * workers
-    failures = []
-    stop = threading.Event()
-    lock = threading.Lock()
-
-    def work(index):
-        if stop.is_set():
-            return
-        try:
-            results[index] = database.sql('world', statements[index], timeout=CHECKSUM_TIMEOUT).splitlines()
-        except Exception as error:
-            with lock:
-                failures.append(error)
-            stop.set()
-
-    threads = [threading.Thread(target=work, args=(index,), daemon=True) for index in range(workers)]
-    try:
-        for thread in threads:
-            thread.start()
-        for thread in threads:
-            thread.join()
-    except BaseException:
-        stop.set()
-        raise
-    if failures:
-        raise failures[0]
-    return results
+    return run_parallel(lambda statement: database.sql('world', statement, timeout=CHECKSUM_TIMEOUT).splitlines(),
+                        statements, workers)
 
 
 def world_fingerprint(database, name):

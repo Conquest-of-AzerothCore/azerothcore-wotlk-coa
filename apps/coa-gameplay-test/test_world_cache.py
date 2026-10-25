@@ -8,7 +8,7 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
-from world_cache import WorldCache, input_fingerprint, world_fingerprint
+from world_cache import WorldCache, input_fingerprint, run_parallel, world_fingerprint
 
 SERVER_UUID = '11111111-2222-3333-4444-555555555555'
 
@@ -357,6 +357,65 @@ class FingerprintTests(unittest.TestCase):
         capped = world_fingerprint(SimpleNamespace(sql=sql, copy_workers=64), 'world')
         self.assertEqual(capped, serial)
         self.assertEqual(len([item for item in statements if item.startswith('CHECKSUM')]), 8)
+
+    def test_run_parallel_runs_inline_for_one_worker_or_one_item(self):
+        threads = []
+
+        def record(item):
+            threads.append(threading.get_ident())
+            return item * 2
+
+        self.assertEqual(run_parallel(record, [1, 2, 3], 1), [2, 4, 6])
+        self.assertEqual(run_parallel(record, [5], 4), [10])
+        self.assertEqual(set(threads), {threading.get_ident()})
+
+    def test_run_parallel_preserves_item_order(self):
+        barrier = threading.Barrier(3, timeout=10)
+
+        def slow_first(item):
+            if item < 3:
+                barrier.wait()
+            return item
+
+        self.assertEqual(run_parallel(slow_first, list(range(8)), 3), list(range(8)))
+
+    def test_run_parallel_reraises_first_failure_and_starts_nothing_after_it(self):
+        started = []
+
+        def fail(item):
+            started.append(item)
+            raise ValueError(f'failed {item}')
+
+        with self.assertRaisesRegex(ValueError, 'failed 0'):
+            run_parallel(fail, list(range(50)), 1)
+        self.assertEqual(started, [0])
+        started.clear()
+        with self.assertRaises(ValueError):
+            run_parallel(fail, list(range(50)), 2)
+        self.assertLessEqual(len(started), 2)
+
+    def test_run_parallel_stops_and_joins_started_threads_when_a_start_fails(self):
+        release = threading.Event()
+        started = []
+        original = threading.Thread.start
+        calls = []
+
+        def start(thread):
+            calls.append(thread)
+            if len(calls) == 2:
+                release.set()
+                raise RuntimeError("can't start new thread")
+            original(thread)
+
+        def work(item):
+            started.append(item)
+            release.wait(10)
+
+        with patch.object(threading.Thread, 'start', start):
+            with self.assertRaisesRegex(RuntimeError, "can't start"):
+                run_parallel(work, list(range(10)), 4)
+        self.assertEqual(len(started), 1)
+        self.assertFalse([item for item in threading.enumerate() if item is calls[0]])
 
     def test_parallel_checksum_failure_is_raised(self):
         def sql(role, statement, timeout=None):
