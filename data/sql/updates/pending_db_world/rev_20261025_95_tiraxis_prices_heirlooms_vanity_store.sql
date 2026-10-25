@@ -2,14 +2,12 @@
 -- Like rev_20261024_01 every statement only acts on a realm that fills the Vanity Store price table, and every
 -- statement writes fixed values, so a reapply leaves the result unchanged.
 
--- 1) Heirloom weapons, shields, off-hands and relics leave Tiraxis (900011, rev_20261023_02) and are sold in the Vanity
---    Store only, at twice their old Tiraxis price (one-hand, shield and off-hand 900 -> 1800, ranged and relics
---    1000 -> 2000, two-hand 1800 -> 3600).
---    Heirloom armor, rings and trinkets are not sold piece by piece (price 0): they come in the set caches, which stay on
---    Tiraxis at 4500 each (Heirloom Cache and Experience Heirloom Cache). The heirloom pendants, which no cache
---    holds, are sold by Tiraxis and in the Vanity Store at 1500 (not the Drakefire Amulet, which is not sold). The caches
---    have no VanityCollection.dbc row. Stick on a Carrot is sold on its own at 2000. The raid medallions and the
---    Insignias of the Burning Legion are not sold.
+-- 1) Heirlooms on Tiraxis' heirloom list (900011, rev_20261023_02) and in the Vanity Store, at the same price in both:
+--    one-hand weapons, shields and off-hands 1800 (was 900), ranged weapons, wands and relics 2000 (was 1000), two-hand
+--    weapons 3600 (was 1800), Stick on a Carrot 2000, the heirloom pendants 1500.
+--    Heirloom armor, rings and trinkets are not sold piece by piece (price 0): they come in the set caches, 4500 each on
+--    Tiraxis (Heirloom Cache and Experience Heirloom Cache; the caches have no VanityCollection.dbc row). The Drakefire
+--    Amulet, the raid medallions and the Insignias of the Burning Legion are not sold.
 -- 2) Tiraxis' Convenience Items (900008): new prices, and the Vanity Store sells the same items at the same price.
 INSERT INTO `coa_client_vanity_collection` (`ItemID`, `DonationPointCost`, `SeasonalPointCost`, `BazaarTokenCost`)
 SELECT `n`.`ItemID`, 0, 0, `n`.`BazaarTokenCost`
@@ -160,8 +158,7 @@ FROM (VALUES
 WHERE EXISTS (SELECT 1 FROM `coa_client_vanity_collection` WHERE `BazaarTokenCost` > 0)
 ON DUPLICATE KEY UPDATE `DonationPointCost` = 0, `SeasonalPointCost` = 0, `BazaarTokenCost` = `n`.`BazaarTokenCost`;
 
--- Tiraxis' heirloom list (900011): every heirloom and every heirloom cache; the caches and the necklaces are added
--- back below at their new price (the primary key includes ExtendedCost, so delete-and-insert keeps a reapply from adding a second row).
+-- Tiraxis' heirloom list (900011): every heirloom and every heirloom cache; the list is rebuilt below at the new prices (the primary key includes ExtendedCost, so delete-and-insert keeps a reapply from adding a second row).
 DELETE FROM `npc_vendor`
 WHERE `entry` = 900011 AND EXISTS (SELECT 1 FROM `coa_client_vanity_collection` WHERE `BazaarTokenCost` > 0) AND `item` IN (
   1339056,    -- Armor of Might - Experience Heirloom Cache
@@ -215,7 +212,8 @@ WHERE `entry` = 900011 AND EXISTS (SELECT 1 FROM `coa_client_vanity_collection` 
   339100,     -- Pendant of Discovery
   1339078,    -- Pendant of the Bulwark
   1339077,    -- Pendant of the Sorcerer
-  1339076     -- Pendant of the Warrior
+  1339076,    -- Pendant of the Warrior
+  339075      -- Stick on a Carrot
 );
 
 INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`)
@@ -228,18 +226,47 @@ FROM (VALUES
   ROW(4, 1339062, 10374),   -- Polished Battlegear of Valor - Heirloom Cache, 4500 tokens
   ROW(5, 1339063, 10374),   -- Armor of Might - Heirloom Cache, 4500 tokens
   ROW(6, 1339064, 10374),   -- The Mystical Elements - Heirloom Cache, 4500 tokens
-  ROW(8, 339076, 10344),    -- Pendant of Adventure, 1500 tokens
-  ROW(9, 339100, 10344),    -- Pendant of Discovery, 1500 tokens
-  ROW(10, 1339078, 10344),  -- Pendant of the Bulwark, 1500 tokens
-  ROW(11, 1339077, 10344),  -- Pendant of the Sorcerer, 1500 tokens
-  ROW(12, 1339076, 10344),  -- Pendant of the Warrior, 1500 tokens
+  ROW(11, 1642999, 10349),  -- Ancient Crossbow, 2000 tokens
+  ROW(12, 1642944, 10347),  -- Balanced Heartseeker, 1800 tokens
+  ROW(13, 1644096, 10347),  -- Battleworn Thrash Blade, 1800 tokens
+  ROW(14, 1642943, 10365),  -- Bloodied Arcanite Reaper, 3600 tokens
+  ROW(15, 1642946, 10349),  -- Charmed Ancient Bone Bow, 2000 tokens
+  ROW(16, 1642948, 10347),  -- Devout Aurastone Hammer, 1800 tokens
+  ROW(17, 1642947, 10365),  -- Dignified Headmaster's Charge, 3600 tokens
+  ROW(18, 1644095, 10365),  -- Grand Staff of Jordan, 3600 tokens
+  ROW(19, 1644092, 10365),  -- Reforged Truesilver Champion, 3600 tokens
+  ROW(20, 1648718, 10365),  -- Repurposed Lava Dredger, 3600 tokens
+  ROW(21, 1518202, 10347),  -- Rethreaded Left Bear Claw, 1800 tokens
+  ROW(22, 1518203, 10347),  -- Rethreaded Right Bear Claw, 1800 tokens
+  ROW(23, 1644091, 10347),  -- Sharpened Scarlet Kris, 1800 tokens
+  ROW(24, 3142943, 10365),  -- Sturdied Arcanite Spear, 3600 tokens
+  ROW(25, 1644094, 10347),  -- The Blessed Hammer of Grace, 1800 tokens
+  ROW(26, 1642902, 10349),  -- Thrown Axe of the Executioner, 2000 tokens
+  ROW(27, 1644093, 10349),  -- Upgraded Dwarven Hand Cannon, 2000 tokens
+  ROW(28, 1642945, 10347),  -- Venerable Dal'Rend's Sacred Charge, 1800 tokens
+  ROW(29, 1648716, 10347),  -- Venerable Mass of McGowan, 1800 tokens
+  ROW(30, 1642846, 10349),  -- Wand of the Forgotten Lich, 2000 tokens
+  ROW(31, 1642896, 10349),  -- Druid Idol of Agility, 2000 tokens
+  ROW(32, 1642897, 10349),  -- Druid Idol of Spells, 2000 tokens
+  ROW(33, 1642901, 10349),  -- Paladin Libram of Healing, 2000 tokens
+  ROW(34, 1642900, 10349),  -- Paladin Libram of Strength, 2000 tokens
+  ROW(35, 3148335, 10347),  -- Polished Observer's Shield, 1800 tokens
+  ROW(36, 1642898, 10349),  -- Shaman Totem of Agility, 2000 tokens
+  ROW(37, 1642899, 10349),  -- Shaman Totem of Spells, 2000 tokens
+  ROW(38, 3140350, 10347),  -- Urn of Aspiring Light, 1800 tokens
   ROW(39, 1339051, 10374),  -- Tattered Dreadmist Raiment - Experience Heirloom Cache, 4500 tokens
   ROW(40, 1339052, 10374),  -- Preened Ironfeather Armor - Experience Heirloom Cache, 4500 tokens
   ROW(41, 1339053, 10374),  -- Stained Shadowcraft Armor - Experience Heirloom Cache, 4500 tokens
   ROW(42, 1339054, 10374),  -- Champion's Battlegear - Experience Heirloom Cache, 4500 tokens
   ROW(43, 1339055, 10374),  -- Polished Battlegear of Valor - Experience Heirloom Cache, 4500 tokens
   ROW(44, 1339056, 10374),  -- Armor of Might - Experience Heirloom Cache, 4500 tokens
-  ROW(45, 1339057, 10374)   -- The Mystical Elements - Experience Heirloom Cache, 4500 tokens
+  ROW(45, 1339057, 10374),  -- The Mystical Elements - Experience Heirloom Cache, 4500 tokens
+  ROW(46, 339076, 10344),   -- Pendant of Adventure, 1500 tokens
+  ROW(47, 339100, 10344),   -- Pendant of Discovery, 1500 tokens
+  ROW(48, 1339078, 10344),  -- Pendant of the Bulwark, 1500 tokens
+  ROW(49, 1339077, 10344),  -- Pendant of the Sorcerer, 1500 tokens
+  ROW(50, 1339076, 10344),  -- Pendant of the Warrior, 1500 tokens
+  ROW(51, 339075, 10349)    -- Stick on a Carrot, 2000 tokens
 ) `c` (`slot`, `item`, `ExtendedCost`)
 WHERE EXISTS (SELECT 1 FROM `coa_client_vanity_collection` WHERE `BazaarTokenCost` > 0);
 
