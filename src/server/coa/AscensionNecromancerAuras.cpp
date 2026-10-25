@@ -103,7 +103,7 @@ class aura_ascension_necromancer_lifecycle : public AuraScript
         if (Named(GetSpellInfo(), 500217))
             _cost = GetSpellInfo()->CalcPowerCost(player, GetSpellInfo()->GetSchoolMask());
         if (Named(GetSpellInfo(), 500968))
-            _harvestPlagueRoll = GetSpellInfo()->Effects[EFFECT_0].CalcValue(nullptr);
+            _harvestPlagueRoll = HarvestPlagueRoll(player);
         if (GetTarget() != player)
             return;
         if (id == SPELL_FETID_WARD || id == SPELL_GLACIAL_WARD || id == SPELL_BONE_WARD)
@@ -131,6 +131,19 @@ class aura_ascension_necromancer_lifecycle : public AuraScript
                 GetAura()->SetCharges(id == 801747 ? 2 : 1);
                 GetAura()->SetScriptValue(805011, ++State(player).sequence);
             }
+    }
+    int32 HarvestPlagueRoll(Player const* player) const
+    {
+        SpellInfo const* info = GetSpellInfo();
+        SpellEffectInfo const& effect = info->Effects[EFFECT_0];
+        int32 level = int32(player->GetLevel());
+        if (info->MaxLevel > 0 && level > int32(info->MaxLevel))
+            level = int32(info->MaxLevel);
+        else if (level < int32(info->BaseLevel))
+            level = int32(info->BaseLevel);
+        level -= int32(std::max(info->BaseLevel, info->SpellLevel));
+        int32 basePoints = effect.BasePoints + int32(level * effect.RealPointsPerLevel);
+        return effect.CalcValue(nullptr, &basePoints);
     }
     void HarvestPlagueSiphon(Player* player)
     {
