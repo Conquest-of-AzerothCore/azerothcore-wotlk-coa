@@ -507,13 +507,6 @@ struct npc_ascension_tinker_device : ScriptedAI
                     else
                         Pursue(target);
                 }
-                if (entry == 50045)
-                    for (Unit* enemy : Nearby(me,2))
-                        if (player->IsValidAttackTarget(enemy))
-                        {
-                            Explode();
-                            break;
-                        }
                 events.ScheduleEvent(1,200ms);
             }
             if (event == 2)
