@@ -13,6 +13,7 @@
     "vanilla-dungeons-heroic": "Uses phase 1 for real dungeon database spawns and boss loot",
     "vanilla-dungeons-mythic": "Uses phase 1 for real dungeon database spawns and boss loot",
     "vanilla-dungeons-health": "Uses phase 1 to inspect real database creature health in dungeon instances",
+    "molten-core-lucifron-encounter": "Uses phase 1 for the real Molten Core spawn of Lucifron and its encounter state",
     "void-portal-capture": "Uses phase 1 for the real marker spawns and drives the process-global one-portal manager whose capture announces to every session",
     "mythic-plus-keystone-run": "Sets the process-global Mythic+ affix week (.mythic week) that other running cases read",
     "mythic-plus-client-data-at-login": "Sets the process-global Mythic+ affix week (.mythic week) that other running cases read",

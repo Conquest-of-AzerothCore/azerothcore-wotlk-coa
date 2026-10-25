@@ -1023,6 +1023,27 @@ clean single-pull session at the expected health; a Ghost-harness artifact, not 
 combat on a chained multi-tier session's 2nd/3rd pull). No repository bugs found; the one bug found
 (Majordomo-pull facing) was in the throwaway test, fixed in the scratchpad, not committed.
 
+### Automated Lucifron encounter
+
+`apps/coa-gameplay-test/scenarios/molten-core-lucifron-encounter.json` fights the real Lucifron spawn
+(guid 56605) with ten CoA-class level-60 bots of the in-process gameplay harness (1 tank, 2 healers, 4 melee,
+3 ranged), without a client or a human. The bots form one raid before entering Molten Core, so they share the
+leader's instance; a fresh group gets a fresh instance, which the scenario checks by requiring an undamaged
+Lucifron before the pull. After 80 s of fighting it asserts on the recorded encounter timeline:
+
+- Shadow of Lucifron (12268) appears 4-7 s after the engage (`coa_boss_summon`, 5000 ms, designed).
+- Shadow Bolt (2105212) completes its first 1.5 s cast 5.8-7.8 s after the engage and repeats every
+  14.0-16.2 s (combat logs 294, 1289, 1602 and 1734: cast start 5.93-5.98 s, then every 15.0-15.1 s).
+- Fierce Blow (975011) is cast at least five times, only on the tank (tank-only in all four logs).
+- Nothing evades, and the killing blow marks the boss state `DONE`.
+
+Recorded without assertion, because the expectation is still uncertain: Curse of Lucifron (schedule 79.9 s;
+the logs repeat it every 66.6-70.7 s, 79.9 s only in fight 1289), Suppressing Shadows (cast every 25.0-25.1 s
+in the logs, matching the schedule; only its per-target aura events recur every 1-5 s) and Impending Doom
+(schedule 7 s/20 s, a DBM borrow; fight 1289 alone logs it, first at 13.3 s and then every 26.5-27.7 s). Each
+run's result keeps their casts in its `timeline`. Health fixtures keep the raid alive through the window, and
+the tank's threat floor is a harness fixture, so the scenario does not measure Lucifron's damage or threat.
+
 ## 9. Batch G mechanics (2026-10-01)
 
 Confirmed defects from `.agents/plans/mc-restoration/diag-G1.md`, `diag-G2.md` and `diag-G3.md` (combat-log
