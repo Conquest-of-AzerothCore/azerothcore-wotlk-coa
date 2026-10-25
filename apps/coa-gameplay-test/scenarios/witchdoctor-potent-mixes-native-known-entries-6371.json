@@ -49,6 +49,21 @@
       "actor": "p",
       "id": 6
     },
+    { "action": "advancement_rank", "actor": "p", "entry": 5055, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 6645, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 7128, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 7129, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 29736, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 30884, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 6030, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 6044, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 6047, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 6054, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 7088, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 7092, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 7154, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 11154, "rank": 1 },
+    { "action": "advancement_rank", "actor": "p", "entry": 29301, "rank": 1 },
     {
       "action": "wait",
       "ms": 2000
@@ -178,42 +193,6 @@
     {
       "action": "advancement_rank",
       "actor": "p",
-      "entry": 5055,
-      "rank": 1
-    },
-    {
-      "action": "advancement_rank",
-      "actor": "p",
-      "entry": 6645,
-      "rank": 1
-    },
-    {
-      "action": "advancement_rank",
-      "actor": "p",
-      "entry": 7128,
-      "rank": 1
-    },
-    {
-      "action": "advancement_rank",
-      "actor": "p",
-      "entry": 7129,
-      "rank": 1
-    },
-    {
-      "action": "advancement_rank",
-      "actor": "p",
-      "entry": 29736,
-      "rank": 1
-    },
-    {
-      "action": "advancement_rank",
-      "actor": "p",
-      "entry": 30884,
-      "rank": 1
-    },
-    {
-      "action": "advancement_rank",
-      "actor": "p",
       "entry": 7132,
       "rank": 1
     },
@@ -330,60 +309,6 @@
       "metric": "knows_spell",
       "spell": 504888,
       "equals": 0
-    },
-    {
-      "action": "advancement_rank",
-      "actor": "p",
-      "entry": 6030,
-      "rank": 1
-    },
-    {
-      "action": "advancement_rank",
-      "actor": "p",
-      "entry": 6044,
-      "rank": 1
-    },
-    {
-      "action": "advancement_rank",
-      "actor": "p",
-      "entry": 6047,
-      "rank": 1
-    },
-    {
-      "action": "advancement_rank",
-      "actor": "p",
-      "entry": 6054,
-      "rank": 1
-    },
-    {
-      "action": "advancement_rank",
-      "actor": "p",
-      "entry": 7088,
-      "rank": 1
-    },
-    {
-      "action": "advancement_rank",
-      "actor": "p",
-      "entry": 7092,
-      "rank": 1
-    },
-    {
-      "action": "advancement_rank",
-      "actor": "p",
-      "entry": 7154,
-      "rank": 1
-    },
-    {
-      "action": "advancement_rank",
-      "actor": "p",
-      "entry": 11154,
-      "rank": 1
-    },
-    {
-      "action": "advancement_rank",
-      "actor": "p",
-      "entry": 29301,
-      "rank": 1
     },
     {
       "action": "advancement_rank",

@@ -58,18 +58,8 @@
     },
     {
       "action": "learn",
-      "actor": "gift",
-      "spell": 800054
-    },
-    {
-      "action": "learn",
       "actor": "manual",
       "spell": 804584
-    },
-    {
-      "action": "learn",
-      "actor": "manual",
-      "spell": 800054
     },
     { "action": "advancement_rank", "actor": "gift", "entry": 34018, "rank": 2 },
     { "action": "advancement_rank", "actor": "gift", "entry": 29513, "rank": 2 },
@@ -78,6 +68,7 @@
     { "action": "advancement_rank", "actor": "gift", "entry": 33979, "rank": 1 },
     { "action": "advancement_rank", "actor": "gift", "entry": 31150, "rank": 1 },
     { "action": "advancement_rank", "actor": "gift", "entry": 30816, "rank": 1 },
+    { "action": "advancement_rank", "actor": "gift", "entry": 7910, "rank": 1 },
     {
       "action": "advancement_rank",
       "actor": "gift",
@@ -99,6 +90,7 @@
     { "action": "advancement_rank", "actor": "manual", "entry": 33979, "rank": 1 },
     { "action": "advancement_rank", "actor": "manual", "entry": 31150, "rank": 1 },
     { "action": "advancement_rank", "actor": "manual", "entry": 30816, "rank": 1 },
+    { "action": "advancement_rank", "actor": "manual", "entry": 7910, "rank": 1 },
     {
       "action": "advancement_rank",
       "actor": "manual",
