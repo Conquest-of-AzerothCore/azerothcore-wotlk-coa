@@ -82,6 +82,22 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(field=field), self.assertRaises(ValueError):
                 run.validate(scenario)
 
+    def test_nearby_creature_health_pct_needs_a_player_and_entry(self):
+        step = {'action': 'assert', 'actor': 'caster', 'metric': 'nearby_creature_health_pct', 'entry': 12118,
+                'equals': 100}
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].append(step)
+        self.assertIs(run.validate(scenario), scenario)
+        for change in ({'actor': 'target'}, {'entry': 0}, {'entry': '12118'}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({**step, **change})
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                run.validate(scenario)
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].append({key: value for key, value in step.items() if key != 'entry'})
+        with self.assertRaises(ValueError):
+            run.validate(scenario)
+
     def test_player_packet_fields_require_a_player(self):
         step = {'action': 'client_packet', 'actor': 'caster', 'opcode': 364, 'consumed': False}
         self.scenario['steps'].append(step)
