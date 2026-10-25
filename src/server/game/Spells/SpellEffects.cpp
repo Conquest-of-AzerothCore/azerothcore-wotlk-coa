@@ -38,6 +38,7 @@
 #include "MapMgr.h"
 #include <limits>
 #include "MiscPackets.h"
+#include "MoveSpline.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
@@ -1597,6 +1598,73 @@ void Spell::EffectJump(SpellEffIndex effIndex)
     }
 }
 
+namespace
+{
+    // The 3.3.5 client ignores the final facing of a jump spline it plays for its own character, so a player's jump
+    // that should end facing its target (EffectJumpDest, the Bloodmage's Lunge) lands with the old facing; only the
+    // server thinks the player faces the target. A teleport does set the client's facing. Once the jump is over and
+    // the player stands still, this event moves the player to the spot it stands on, facing the target. Same map and
+    // no distance, so auras, combat, the pet and a running cast stay as they are.
+    class JumpLandingFacingEvent : public BasicEvent
+    {
+    public:
+        JumpLandingFacingEvent(Player* player, ObjectGuid target, float orientation)
+            : _player(player), _target(target), _orientation(orientation) { }
+
+        bool Execute(uint64 /*time*/, uint32 /*diff*/) override
+        {
+            if (!_player->IsInWorld() || !_player->IsAlive() || _player->IsBeingTeleported() || _player->IsInFlight() ||
+                _player->GetVehicle() || _player->GetTransport() || _player->m_mover != _player || _player->IsCharmed() ||
+                _player->HasUnitState(UNIT_STATE_FLEEING | UNIT_STATE_CONFUSED))
+                return true;
+
+            bool const inAir = !_player->movespline->Finalized() ||
+                               _player->GetMotionMaster()->GetCurrentMovementGeneratorType() == EFFECT_MOTION_TYPE;
+            if (inAir)
+            {
+                if (++_checks > MaxChecksInAir)
+                    return true;
+                return Retry();
+            }
+
+            // One step after the landing lets the client finish the spline as well. A player that walks on steers
+            // its own facing; wait up to a second for it to stop.
+            if (!_landedChecks++ || _player->HasUnitMovementFlag(MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_BACKWARD |
+                                                                 MOVEMENTFLAG_STRAFE_LEFT | MOVEMENTFLAG_STRAFE_RIGHT |
+                                                                 MOVEMENTFLAG_FALLING | MOVEMENTFLAG_FALLING_FAR))
+            {
+                if (_landedChecks > MaxChecksLanded)
+                    return true;
+                return Retry();
+            }
+
+            float orientation = _orientation;
+            if (Unit const* target = ObjectAccessor::GetUnit(*_player, _target);
+                target && target->IsInWorld() && _player->IsWithinDist(target, 40.0f) && _player->GetExactDist2d(target) > 0.5f)
+                orientation = _player->GetAngle(target);
+
+            _player->NearTeleportTo(_player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), orientation, true);
+            return true;
+        }
+
+    private:
+        bool Retry()
+        {
+            _player->m_Events.AddEventAtOffset(this, 100ms);
+            return false; // re-added, keep it
+        }
+
+        static constexpr uint8 MaxChecksInAir = 40; // 4 s
+        static constexpr uint8 MaxChecksLanded = 10; // 1 s
+
+        Player* _player; // the event lives in the player's own event list
+        ObjectGuid _target;
+        float _orientation;
+        uint8 _checks = 0;
+        uint8 _landedChecks = 0;
+    };
+}
+
 void Spell::EffectJumpDest(SpellEffIndex effIndex)
 {
     if (effectHandleMode != SPELL_EFFECT_HANDLE_LAUNCH)
@@ -1652,7 +1720,29 @@ void Spell::EffectJumpDest(SpellEffIndex effIndex)
     {
         player->SetCanTeleport(true);
     }
+
+    // A player's leap onto, in front of or behind its target ends facing that target (Templar Divine Force
+    // 806153/807800-807805 landed on the target with its back to it). The Bloodmage's Lunge sets the same by script
+    // (spell_ascension_bloodmage_lunge); a script that set an orientation keeps it. The spline facing serves the
+    // server and bots, JumpLandingFacingEvent the player's client.
+    if (!m_jumpFinalOrientation && m_caster->IsPlayer() &&
+        m_spellInfo->Effects[effIndex].TargetA.GetReferenceType() == TARGET_REFERENCE_TYPE_TARGET)
+    {
+        if (Unit const* target = m_targets.GetUnitTarget(); target && target != m_caster)
+        {
+            // A destination on the target itself (TARGET_DEST_TARGET_ENEMY/ANY) gives no angle; face along the leap.
+            m_jumpFinalOrientation = destTarget->GetExactDist2d(target) > 0.5f ? destTarget->GetAngle(target)
+                                                                             : m_caster->GetAngle(target);
+        }
+    }
+
     m_caster->GetMotionMaster()->MoveJump(x, y, z, speedXY, speedZ, 0, nullptr, m_jumpFinalOrientation);
+
+    // The client of the player does not take the spline's final facing; turn it after the landing (see above). Bots
+    // have no client, the server facing is theirs.
+    if (Player* player = m_caster->ToPlayer(); player && m_jumpFinalOrientation && !player->GetSession()->IsBot())
+        player->m_Events.AddEventAtOffset(new JumpLandingFacingEvent(player, m_targets.GetUnitTargetGUID(),
+                                                                     *m_jumpFinalOrientation), 100ms);
 
     if (m_caster->IsPlayer())
     {
