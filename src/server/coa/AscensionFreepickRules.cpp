@@ -305,21 +305,31 @@ std::uint32_t Build::TEBudget() const
     return essence ? essence->TE : 0;
 }
 
+std::uint32_t InvestedBelowThreshold(std::vector<std::pair<std::uint32_t, std::uint32_t>> const& costAndThreshold,
+    std::uint32_t minimum)
+{
+    std::uint32_t total = 0;
+    for (auto const& [cost, threshold] : costAndThreshold)
+        if (!minimum || threshold < minimum)
+            total += cost;
+    return total;
+}
+
 std::uint32_t Build::Spent(bool talentEssence, std::uint32_t Row::* minimumField, std::uint32_t minimum,
     std::int64_t classType, std::int64_t tab) const
 {
-    std::uint32_t total = 0;
+    std::vector<std::pair<std::uint32_t, std::uint32_t>> contributions;
     for (Entry const& entry : _entries)
     {
         Row const* row = _catalog->Find(entry.EntryId);
-        if (!row || (minimum && row->*minimumField >= minimum))
+        if (!row)
             continue;
         bool const matches = (classType < 0 || row->ClassType == std::uint32_t(classType)) &&
             (tab < 0 || row->Tab == std::uint32_t(tab));
         if (matches)
-            total += (talentEssence ? row->TECost : row->AECost) * entry.Rank;
+            contributions.emplace_back((talentEssence ? row->TECost : row->AECost) * entry.Rank, row->*minimumField);
     }
-    return total;
+    return InvestedBelowThreshold(contributions, minimum);
 }
 
 std::uint32_t Build::GlobalAE(std::uint32_t minimum) const

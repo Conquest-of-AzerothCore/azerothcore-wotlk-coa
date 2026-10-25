@@ -67,6 +67,10 @@
       "spell": 520009,
       "equals": 1
     },
+    { "action": "advancement_rank", "actor": "templar", "entry": 31174, "rank": 2 },
+    { "action": "advancement_rank", "actor": "templar", "entry": 30440, "rank": 2 },
+    { "action": "advancement_rank", "actor": "templar", "entry": 34382, "rank": 1 },
+    { "action": "advancement_rank", "actor": "templar", "entry": 34372, "rank": 1 },
     {
       "action": "advancement_rank",
       "actor": "templar",

@@ -13,6 +13,11 @@
   "steps": [
     { "action": "wait", "ms": 3000 },
     { "action": "specialization", "actor": "cleric", "id": 46 },
+    { "action": "advancement_rank", "actor": "cleric", "entry": 7280, "rank": 3 },
+    { "action": "advancement_rank", "actor": "cleric", "entry": 30308, "rank": 2 },
+    { "action": "advancement_rank", "actor": "cleric", "entry": 34050, "rank": 1 },
+    { "action": "advancement_rank", "actor": "cleric", "entry": 30957, "rank": 1 },
+    { "action": "advancement_rank", "actor": "cleric", "entry": 30311, "rank": 1 },
     { "action": "advancement_rank", "actor": "cleric", "entry": 30814, "rank": 1 },
     { "action": "assert", "label": "Sunwell is acquired from Piety", "actor": "cleric", "metric": "knows_spell", "spell": 560123, "equals": 1 },
     { "action": "group", "actor": "cleric", "target": "ally" },

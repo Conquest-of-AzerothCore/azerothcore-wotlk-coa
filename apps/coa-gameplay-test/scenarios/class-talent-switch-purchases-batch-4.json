@@ -51,6 +51,11 @@
       "actor": "wind",
       "id": 13
     },
+    { "action": "advancement_rank", "actor": "wind", "entry": 30819, "rank": 2 },
+    { "action": "advancement_rank", "actor": "wind", "entry": 30141, "rank": 2 },
+    { "action": "advancement_rank", "actor": "wind", "entry": 7838, "rank": 2 },
+    { "action": "advancement_rank", "actor": "wind", "entry": 34948, "rank": 1 },
+    { "action": "advancement_rank", "actor": "wind", "entry": 31267, "rank": 1 },
     {
       "action": "advancement_rank",
       "actor": "wind",

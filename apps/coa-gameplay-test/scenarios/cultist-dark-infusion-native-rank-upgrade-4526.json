@@ -48,6 +48,13 @@
       "actor": "c",
       "id": 40
     },
+    { "action": "advancement_rank", "actor": "c", "entry": 29263, "rank": 3 },
+    { "action": "advancement_rank", "actor": "c", "entry": 33892, "rank": 1 },
+    { "action": "advancement_rank", "actor": "c", "entry": 30323, "rank": 1 },
+    { "action": "advancement_rank", "actor": "c", "entry": 29880, "rank": 1 },
+    { "action": "advancement_rank", "actor": "c", "entry": 29470, "rank": 1 },
+    { "action": "advancement_rank", "actor": "c", "entry": 29455, "rank": 1 },
+    { "action": "advancement_rank", "actor": "c", "entry": 29268, "rank": 1 },
     {
       "action": "advancement_rank",
       "actor": "c",
