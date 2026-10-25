@@ -907,6 +907,9 @@ server lists for that dungeon in the player's Dungeon Finder info (0 when it is 
 `LfgLockStatusType`, such as 2 too low level or 4 too low gear score).
 `lfg_state` takes a player `actor` and returns its native Dungeon Finder state (0 none, 1 role check, 2 queued,
 3 proposal, 4 vote kick, 5 in dungeon, 6 finished dungeon, 7 raid browser).
+`lfg_need_allowed` takes a player `actor` and an `item` entry and returns 1 when the native Dungeon Finder
+loot rule lets the actor roll Need on that item at the actor's position, otherwise 0. Outside a Dungeon Finder
+group or its dungeon every item returns 1.
 `in_arena` takes a player `actor` and returns 1 while that player is inside an arena match.
 `arena_team_members`, `arena_team_season_games` and `arena_team_season_wins` take a player `actor` and arena
 `slot` (0 2v2, 1 3v3, 2 5v5) and read the team in that slot: its member count (0 without a team), or its

@@ -2284,6 +2284,14 @@ private:
             Require(unit->IsPlayer(), "LFG state needs a player");
             return double(sLFGMgr->GetState(unit->GetGUID()));
         }
+        if (metric == "lfg_need_allowed")
+        {
+            Player* player = unit->ToPlayer();
+            Require(player != nullptr, "LFG Need metric needs a player");
+            ItemTemplate const* item = sObjectMgr->GetItemTemplate(step.get<uint32>("item"));
+            Require(item != nullptr, "LFG Need metric needs a known item");
+            return player->CanRollForItemInLFG(item, player) == EQUIP_ERR_OK ? 1 : 0;
+        }
         if (metric == "in_arena")
         {
             Player* player = unit->ToPlayer();

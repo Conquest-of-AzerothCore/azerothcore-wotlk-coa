@@ -2510,7 +2510,8 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
         if (proto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD && !(
             IsClass(CLASS_PALADIN, CLASS_CONTEXT_EQUIP_SHIELDS)
             || IsClass(CLASS_WARRIOR, CLASS_CONTEXT_EQUIP_SHIELDS)
-            || IsClass(CLASS_SHAMAN, CLASS_CONTEXT_EQUIP_SHIELDS)))
+            || IsClass(CLASS_SHAMAN, CLASS_CONTEXT_EQUIP_SHIELDS)
+            || (IsAscensionClass(getClass()) && HasSkill(SKILL_SHIELD))))
         {
             return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
         }
@@ -2571,6 +2572,19 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
                 return EQUIP_ERR_CANT_DO_RIGHT_NOW;
             }
             subclassToCompare = ITEM_SUBCLASS_ARMOR_LEATHER;
+        }
+
+        // Ascension classes borrow stock-class formulas, not armor: their best armor skill is their main type.
+        if (IsAscensionClass(getClass()))
+        {
+            if (HasSkill(SKILL_PLATE_MAIL))
+                subclassToCompare = ITEM_SUBCLASS_ARMOR_PLATE;
+            else if (HasSkill(SKILL_MAIL))
+                subclassToCompare = ITEM_SUBCLASS_ARMOR_MAIL;
+            else if (HasSkill(SKILL_LEATHER))
+                subclassToCompare = ITEM_SUBCLASS_ARMOR_LEATHER;
+            else
+                subclassToCompare = ITEM_SUBCLASS_ARMOR_CLOTH;
         }
 
         if (proto->SubClass > subclassToCompare)
