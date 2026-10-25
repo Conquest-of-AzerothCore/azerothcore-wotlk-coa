@@ -44,8 +44,8 @@ int main()
     assert(Multiplier(settings.health, Context::Raid, 409, 60) == 2.2f);
     assert(Multiplier(settings.health, Context::Raid, 469, 60) == 5.0f);
     assert(Multiplier(settings.health, Context::None, 469, 60) == 1.0f);
-    for (std::uint8_t level : { 1, 10, 20, 30, 40, 50, 60 })
-        assert(Multiplier(settings.damage, Context::World, 0, level) == Multiplier(settings.health, Context::World, 0, level));
+    assert(Near(Multiplier(settings.damage, Context::World, 0, 1), 4.333f));
+    assert(Near(Multiplier(settings.damage, Context::World, 1, 60), 5.1f));
     assert(Multiplier(settings.damage, Context::Dungeon, 36, 20) == 1.5f);
     assert(Multiplier(settings.damage, Context::Raid, 469, 60) == 1.0f);
     assert(Multiplier(settings.damage, Context::None, 36, 20) == 1.0f);
@@ -98,7 +98,9 @@ int main()
     assert(separated.size() == 2 && Near(separated.at(43).Evaluate(25), 2.3f) && Near(separated.at(36).Evaluate(1), 2.2f));
     assert(ParseMapMultipliers(FormatMapMultipliers(separated)) == separated);
 
-    assert(Near(Multiplier(settings.damageSpread, Context::World, 0, 1), 1.55f));
+    assert(Near(Multiplier(settings.damageSpread, Context::World, 0, 1), 1.8f));
+    assert(Near(Multiplier(settings.damageSpread, Context::World, 0, 5), 1.6f));
+    assert(Near(Multiplier(settings.damageSpread, Context::World, 0, 60), 1.55f));
     assert(Multiplier(settings.damageSpread, Context::Dungeon, 36, 20) == 0.0f);
     assert(Multiplier(settings.damageSpread, Context::Raid, 409, 63) == 0.0f);
     float low = 1.55f;

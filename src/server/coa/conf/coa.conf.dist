@@ -61,21 +61,23 @@ CoA.EquippedGearLootChance = 5
 # Every value may also be a formula of the creature's level: numbers, level, + - * /, parentheses, min(a, b) and
 # max(a, b), e.g. CoA.CreatureScaling.World.Health = "1.17 + 0.013 * level". In MapHealth/MapDamage write a formula
 # without spaces ("43:0.3+0.08*level"), or separate the entries with ';' ("43: 0.3 + 0.08 * level; 36: 2.2").
-# World is fitted to live open-world creature health seen in videos of live Ascension (levels 1-59); world damage uses
-# the same formula. Dungeon and Raid keep their earlier estimates.
+# World health is fitted to live open-world creature health seen in videos of live Ascension (levels 1-59). World
+# damage is fitted to a live video of a level 1 Duskbat hitting a new level 1 character (72 armor) for 5-8. Dungeon
+# and Raid keep their earlier estimates.
 # Without this section the server keeps these multipliers but leaves the feature disabled.
 CoA.CreatureScaling.Enable = 1
 CoA.CreatureScaling.World.Health = "1.17 + 0.013 * level"
 CoA.CreatureScaling.Dungeon.Health = 2.5
 CoA.CreatureScaling.Raid.Health = 2.2
 CoA.CreatureScaling.MapHealth = "36:2.2 43:2.0 229:4.0 389:3.0 469:5.0"
-CoA.CreatureScaling.World.Damage = "1.17 + 0.013 * level"
+CoA.CreatureScaling.World.Damage = "4.32 + 0.013 * level"
 CoA.CreatureScaling.Dungeon.Damage = 1.5
 CoA.CreatureScaling.Raid.Damage = 1.0
 CoA.CreatureScaling.MapDamage = ""
 # Melee damage spread: the creature's highest normal hit over its lowest, around the same average (live open-world
-# normal creatures 1.5-1.6, from player combat logs). 0 keeps the stock range. Formulas and MapDamageSpread as above.
-CoA.CreatureScaling.World.DamageSpread = 1.55
+# normal creatures 1.5-1.6 from player combat logs; wider at level 1, where the same Duskbat video hits 5-8).
+# 0 keeps the stock range. Formulas and MapDamageSpread as above.
+CoA.CreatureScaling.World.DamageSpread = "max(1.55, 1.85 - 0.05 * level)"
 CoA.CreatureScaling.Dungeon.DamageSpread = 0
 CoA.CreatureScaling.Raid.DamageSpread = 0
 CoA.CreatureScaling.MapDamageSpread = ""

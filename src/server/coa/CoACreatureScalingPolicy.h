@@ -285,14 +285,16 @@ struct Multipliers
 };
 
 inline constexpr char WorldDefault[] = "1.17 + 0.013 * level";
+inline constexpr char WorldDamageDefault[] = "4.32 + 0.013 * level";
+inline constexpr char WorldDamageSpreadDefault[] = "max(1.55, 1.85 - 0.05 * level)";
 
 struct Settings
 {
     bool enabled = false;
     Multipliers health{ Formula::Of(WorldDefault), 2.5f, 2.2f,
         { { 36, 2.2f }, { 43, 2.0f }, { 229, 4.0f }, { 389, 3.0f }, { 469, 5.0f } } };
-    Multipliers damage{ Formula::Of(WorldDefault), 1.5f, 1.0f, {} };
-    Multipliers damageSpread{ 1.55f, 0.0f, 0.0f, {} };
+    Multipliers damage{ Formula::Of(WorldDamageDefault), 1.5f, 1.0f, {} };
+    Multipliers damageSpread{ Formula::Of(WorldDamageSpreadDefault), 0.0f, 0.0f, {} };
 };
 
 inline Context ContextOf(bool battlegroundOrArena, bool scriptedPrivateInstance, bool regularDifficulty, bool raid,
