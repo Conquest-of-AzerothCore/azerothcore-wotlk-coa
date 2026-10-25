@@ -59,6 +59,7 @@ class SpecBuildMemoryTests(unittest.TestCase):
         self.lua = LuaRuntime(unpack_returned_tuples=True)
         self.lua.execute(MOCK)
         self.lua.execute((ROOT / 'client/Interface/FrameXML/CoASpecBuildMemory.lua').read_text(encoding='utf-8'))
+        self.lua.execute('CoASpecBuildMemory.debug = false')
         self.lua.execute('CoASpecBuildMemory.OnEvent("PLAYER_ENTERING_WORLD")')
 
     def ranks(self):
@@ -119,8 +120,23 @@ class SpecBuildMemoryTests(unittest.TestCase):
 
     def test_the_driver_listens_for_the_events_it_needs(self):
         events = set(self.lua.eval('(function() local e={} for k in pairs(frames[1].events) do e[#e+1]=k end return e end)()').values())
-        self.assertEqual(events, {'PLAYER_ENTERING_WORLD', 'ASCENSION_KNOWN_ENTRY_UPDATED',
-                                  'ASCENSION_KNOWN_ENTRY_REMOVED'})
+        self.assertEqual(events, {'ADDON_LOADED', 'PLAYER_LOGIN', 'PLAYER_ENTERING_WORLD',
+                                  'ASCENSION_KNOWN_ENTRY_UPDATED', 'ASCENSION_KNOWN_ENTRY_REMOVED'})
+
+    def test_install_is_retried_until_the_api_is_complete(self):
+        lua = LuaRuntime(unpack_returned_tuples=True)
+        lua.execute(MOCK)
+        lua.execute('full = C_CharacterAdvancement; C_CharacterAdvancement = {}')
+        lua.execute((ROOT / 'client/Interface/FrameXML/CoASpecBuildMemory.lua').read_text(encoding='utf-8'))
+        lua.execute('CoASpecBuildMemory.debug = false')
+        self.assertFalse(lua.eval('CoASpecBuildMemory.Install(C_CharacterAdvancement)'))
+        lua.execute('C_CharacterAdvancement = full')
+        lua.execute('frames[1].scripts.OnUpdate(frames[1], 2)')
+        self.assertIsNone(lua.eval('frames[1].scripts.OnUpdate'))
+        lua.execute('Build(10, {[10]=1,[101]=3})')
+        lua.execute('C_CharacterAdvancement.SwitchActiveChrSpec(20)')
+        lua.execute('C_CharacterAdvancement.SwitchActiveChrSpec(10)')
+        self.assertEqual(lua.eval('Ranks()'), '10:1,101:3')
 
 
 if __name__ == '__main__':

@@ -1,7 +1,13 @@
-CoASpecBuildMemory = {}
+CoASpecBuildMemory = { debug = true }
 
 local snapshots = {}
 local installed = false
+
+local function Say(text)
+    if CoASpecBuildMemory.debug and DEFAULT_CHAT_FRAME then
+        DEFAULT_CHAT_FRAME:AddMessage("|cff66ddffCoA spec memory:|r " .. text)
+    end
+end
 
 local function Forget()
     for key in pairs(snapshots) do
@@ -19,6 +25,7 @@ function CoASpecBuildMemory.Install(api)
         end
     end
     installed = true
+    Say("active")
 
     local switch = api.SwitchActiveChrSpec
     api.SwitchActiveChrSpec = function(specID, ...)
@@ -27,13 +34,18 @@ function CoASpecBuildMemory.Install(api)
             local ok, build = pcall(api.ExportBuild, false)
             if ok and type(build) == "string" and build ~= "" then
                 snapshots[from] = build
+                Say("remembered spec " .. tostring(from) .. " (" .. #build .. " chars)")
+            else
+                Say("could not export spec " .. tostring(from) .. ": " .. tostring(build))
             end
         end
         local results = { switch(specID, ...) }
         local saved = snapshots[specID]
         if saved and from ~= specID then
             snapshots[specID] = nil
-            pcall(api.ImportPendingBuild, saved)
+            local ok, imported, reason, entry, rank = pcall(api.ImportPendingBuild, saved)
+            Say("restore spec " .. tostring(specID) .. ": " .. tostring(ok) .. " " .. tostring(imported) .. " " ..
+                tostring(reason) .. " " .. tostring(entry) .. " " .. tostring(rank))
         end
         return unpack(results)
     end
@@ -51,17 +63,29 @@ function CoASpecBuildMemory.Install(api)
 end
 
 function CoASpecBuildMemory.OnEvent(event)
-    if event == "PLAYER_ENTERING_WORLD" then
-        CoASpecBuildMemory.Install(C_CharacterAdvancement)
-    else
+    if event == "ASCENSION_KNOWN_ENTRY_UPDATED" or event == "ASCENSION_KNOWN_ENTRY_REMOVED" then
         Forget()
+    else
+        CoASpecBuildMemory.Install(C_CharacterAdvancement)
     end
 end
 
 local driver = CreateFrame("Frame")
-driver:RegisterEvent("PLAYER_ENTERING_WORLD")
-driver:RegisterEvent("ASCENSION_KNOWN_ENTRY_UPDATED")
-driver:RegisterEvent("ASCENSION_KNOWN_ENTRY_REMOVED")
+for _, event in ipairs({ "ADDON_LOADED", "PLAYER_LOGIN", "PLAYER_ENTERING_WORLD", "ASCENSION_KNOWN_ENTRY_UPDATED",
+                         "ASCENSION_KNOWN_ENTRY_REMOVED" }) do
+    driver:RegisterEvent(event)
+end
 driver:SetScript("OnEvent", function(_, event)
     CoASpecBuildMemory.OnEvent(event)
+end)
+local waited = 0
+driver:SetScript("OnUpdate", function(self, elapsed)
+    waited = waited + elapsed
+    if waited < 1 then
+        return
+    end
+    waited = 0
+    if installed or CoASpecBuildMemory.Install(C_CharacterAdvancement) then
+        self:SetScript("OnUpdate", nil)
+    end
 end)
