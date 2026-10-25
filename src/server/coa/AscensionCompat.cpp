@@ -5782,6 +5782,8 @@ public:
     state->LoginResyncTimer = APPEARANCE_LOGIN_RESYNC_DELAY_MS;
     SendActiveAppearances(player, *state);
     SendOutfitCollection(player, *state);
+    if (!state->Outfits.empty())
+      sScriptMgr->OnPlayerCoAProgress(player, CoAProgressEvent::OutfitSaved, 0);
     SendAppearanceVisibility(player, *state);
     SendRealmInfo(player);
     SendGameModeState(player);
@@ -7676,7 +7678,10 @@ private:
                 return;
 
             if (success)
+            {
                 currentState->Outfits[name] = std::move(appearances);
+                sScriptMgr->OnPlayerCoAProgress(current, CoAProgressEvent::OutfitSaved, 0);
+            }
             if (currentState == state)
                 SendOutfitResult(current, SMSG_SAVE_APPEARANCE_OUTFIT_RESULT,
                     success ? "SAVE_APPEARANCE_OUTFIT_OK" : "SAVE_APPEARANCE_OUTFIT_UNKNOWN");

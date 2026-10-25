@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "name": "Path to Ascension: Prestige, the Hero's stat path, Wildcard level 10 and store deliveries verify their tutorials",
+  "contract": "Tutorial.dbc names five tutorials whose objectives the server performs but never reported, so the client showed them fulfilled while a claim answered 'not available for your character'. Prestige (40, achievement 87239, after 101 'Reach Level 60!') needs the level cap (MaxPlayerLevel) and reads 'Obtain a Prestigious Pamphlet from Chromie and Prestige, resetting to level 1.' and excludes game modes 0x840, Wildcard among them. Wildcard: Prestige Rerolling! (241, achievement 87384, after 101) reads 'Prestige in Wildcard!' and requires game mode 0x40 (Wildcard). Choose Your Path (50, achievement 87240) is for the Hero class (class mask 0x200), excludes game mode 0x800 and reads 'Open Character Advancement (Hotkey N) and choose a Path'; a path is entry 1149, 1150, 1151, 1152 or 18149, which teaches 84864, 84865, 84866, 84867 or 129243. Wildcard: Basics (239, achievement 87381) requires game mode 0x40 and reads 'Reach level 10 in Wildcard to roll your first Ability!'. Deliver LP Items (244, achievement 87389) reads 'Deliver any item from the Store on the website or launcher.' with class mask 0xfffffa00 (Hero and the classes from 12 up); the server's only store delivery is the Vanity collection's Deliver Item (CMSG 0x0523), which also completes Collection and Capitals (51). Expected: a Wildcard Hero that picks the Agility path verifies 50 and on reaching level 10 verifies 239, while a Hero at level 10 outside Wildcard does not verify 239. Prestiging at Chromie verifies 40 outside Wildcard but not 241, and 241 inside Wildcard but not 40; at level 10 again the Prestige tutorial can be claimed. Delivering a vanity item verifies 244 for a class 20 character and only 51 for a Warrior.",
+  "timeout_ms": 240000,
+  "location": { "map": 0, "x": -8816.5, "y": 627.0, "z": 94.1, "o": 3.8 },
+  "players": [
+    { "id": "wild", "race": 1, "class": 10, "level": 1 },
+    { "id": "plain", "race": 1, "class": 10, "level": 10 },
+    { "id": "veteran", "race": 1, "class": 20, "level": 80 },
+    { "id": "wildvet", "race": 1, "class": 10, "level": 80 },
+    { "id": "shopper", "race": 1, "class": 20, "level": 10 },
+    { "id": "warrior", "race": 1, "class": 1, "level": 10 }
+  ],
+  "creatures": [
+    { "id": "chromie", "owner": "veteran", "entry": 178081, "distance": 2, "faction": 35 },
+    { "id": "wildchromie", "owner": "wildvet", "entry": 178081, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "console", "command": "coa gamemode WildCard on Harnessa" },
+    { "action": "console", "command": "coa gamemode WildCard on Harnessd" },
+    { "action": "login_hooks", "actor": "wildvet" },
+    { "action": "wait", "ms": 2000 },
+
+    { "action": "assert", "label": "No path yet: Choose Your Path is not verified", "actor": "wild", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 50, "equals": 0 },
+    { "action": "assert", "label": "Wildcard: Basics waits for level 10", "actor": "wild", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 239, "equals": 0 },
+    { "action": "client_packet", "label": "Roll the starting abilities", "actor": "wild", "opcode": 1611 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "client_packet", "label": "Pick the Agility path", "actor": "wild", "opcode": 1831, "fields": [
+      { "u32": 5 },
+      { "wildcard_entry": 0 }, { "u32": 1 }, { "u32": 1 }, { "u8": 0 }, { "u32": 1 }, { "u32": 0 },
+      { "wildcard_entry": 1 }, { "u32": 1 }, { "u32": 1 }, { "u8": 0 }, { "u32": 2 }, { "u32": 0 },
+      { "wildcard_entry": 2 }, { "u32": 1 }, { "u32": 1 }, { "u8": 0 }, { "u32": 3 }, { "u32": 0 },
+      { "wildcard_entry": 3 }, { "u32": 1 }, { "u32": 1 }, { "u8": 0 }, { "u32": 4 }, { "u32": 0 },
+      { "u32": 1150 }, { "u32": 1 }, { "u32": 1 }, { "u8": 0 }, { "u32": 0 }, { "u32": 0 }
+    ] },
+    { "action": "assert", "label": "Path of Agility is learned", "actor": "wild", "metric": "knows_spell", "spell": 84865, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: choosing a path verifies Choose Your Path", "actor": "wild", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 50, "equals": 1, "within_ms": 3000 },
+    { "action": "set_level", "actor": "wild", "value": 10 },
+    { "action": "assert", "label": "DISCRIMINATING: level 10 in Wildcard verifies Wildcard: Basics", "actor": "wild", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 239, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "A Hero at level 10 outside Wildcard does not", "actor": "plain", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 239, "equals": 0 },
+
+    { "action": "assert", "label": "The level cap verified Reach Level 60!", "actor": "veteran", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 101, "equals": 1 },
+    { "action": "assert", "label": "Before prestiging the Prestige tutorial is not verified", "actor": "veteran", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 40, "equals": 0 },
+    { "action": "specialization", "actor": "veteran", "id": 25 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "gossip_hello", "actor": "veteran", "target": "chromie", "label": "Speak to Chromie" },
+    { "action": "gossip_select", "actor": "veteran", "option": 0, "label": "I would like to prestige!" },
+    { "action": "assert", "label": "Back to level 1", "actor": "veteran", "metric": "level", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "DISCRIMINATING: prestiging verifies the Prestige tutorial", "actor": "veteran", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 40, "equals": 1, "within_ms": 3000 },
+
+    { "action": "client_packet", "label": "Roll the Wildcard veteran's starting abilities", "actor": "wildvet", "opcode": 1611 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "gossip_hello", "actor": "wildvet", "target": "wildchromie", "label": "Speak to Chromie in Wildcard" },
+    { "action": "gossip_select", "actor": "wildvet", "option": 0, "label": "I would like to prestige!" },
+    { "action": "assert", "label": "The Wildcard veteran is back to level 1", "actor": "wildvet", "metric": "level", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "DISCRIMINATING: prestiging in Wildcard verifies Wildcard: Prestige Rerolling!", "actor": "wildvet", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 241, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Give the other prestige tutorials a state check", "ms": 2000 },
+    { "action": "assert", "label": "Outside Wildcard the Wildcard prestige tutorial stays open", "actor": "veteran", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 241, "equals": 0 },
+    { "action": "assert", "label": "In Wildcard the ordinary Prestige tutorial stays open", "actor": "wildvet", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 40, "equals": 0 },
+
+    { "action": "set_level", "actor": "veteran", "value": 10 },
+    { "action": "client_packet", "label": "Claim the Prestige tutorial", "actor": "veteran", "opcode": 1704, "fields": [{ "u32": 40 }] },
+    { "action": "assert", "label": "The claim is accepted", "actor": "veteran", "metric": "server_packet_contains", "opcode": 1711, "text": "CLAIM_TUTORIAL_OK", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "and recorded", "actor": "veteran", "metric": "player_setting", "source": "core.ascension.tutorial_rewards", "index": 40, "equals": 1 },
+
+    { "action": "assert", "label": "Before a delivery Deliver LP Items is not verified", "actor": "shopper", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 244, "equals": 0 },
+    { "action": "client_packet", "label": "Deliver Twilight Antlers from the Vanity collection", "actor": "shopper", "opcode": 1315, "fields": [{ "u8": 2 }, { "u32": 560478 }] },
+    { "action": "assert", "label": "The antlers are delivered", "actor": "shopper", "metric": "item_count", "item": 560478, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the delivery verifies Deliver LP Items", "actor": "shopper", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 244, "equals": 1, "within_ms": 2000 },
+    { "action": "client_packet", "label": "A Warrior delivers the same item", "actor": "warrior", "opcode": 1315, "fields": [{ "u8": 2 }, { "u32": 560478 }] },
+    { "action": "assert", "label": "The Warrior's antlers are delivered", "actor": "warrior", "metric": "item_count", "item": 560478, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "and complete Collection and Capitals", "actor": "warrior", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 51, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "but Deliver LP Items is not for the Warrior class", "actor": "warrior", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 244, "equals": 0 }
+  ]
+}

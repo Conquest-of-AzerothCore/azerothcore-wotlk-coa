@@ -8,6 +8,7 @@
 #include "AllSpellScript.h"
 #include "AscensionAverageItemLevel.h"
 #include "AscensionItemPower.h"
+#include "AscensionWildcard.h"
 #include "AuctionHouseMgr.h"
 #include "Battleground.h"
 #include "Config.h"
@@ -152,6 +153,28 @@ namespace PathToAscension
                     CompleteVerifiedTutorial(player, tutorialId);
         }
 
+        void CompleteGameModeTutorial(Player* player, uint32 tutorialId)
+        {
+            Tutorial const* tutorial = catalog.Find(tutorialId);
+            if (tutorial && MatchesGameModes(player, *tutorial))
+                CompleteVerifiedTutorial(player, tutorialId);
+        }
+
+        void CompletePrestigeTutorials(Player* player)
+        {
+            CompleteGameModeTutorial(player, 40);
+            CompleteGameModeTutorial(player, 241);
+        }
+
+        bool KnowsPrimaryStatPath(Player const* player)
+        {
+            return std::any_of(AscensionWildcard::PRIMARY_STAT_PATHS.begin(),
+                AscensionWildcard::PRIMARY_STAT_PATHS.end(), [player](AscensionWildcard::PrimaryStatPath const& path)
+            {
+                return player->HasSpell(path.SpellId);
+            });
+        }
+
         struct StarterMount
         {
             uint32 race;
@@ -214,6 +237,16 @@ namespace PathToAscension
             // Item 106954 teaches Specialization II (979994).
             if (player->HasSpell(979994) || player->GetSpecsCount() >= 2)
                 CompleteVerifiedTutorial(player, 28);
+
+            constexpr uint32 FirstPrestigeAchievement = 13100;
+            if (player->HasAchieved(FirstPrestigeAchievement))
+                CompletePrestigeTutorials(player);
+
+            if (KnowsPrimaryStatPath(player))
+                CompleteGameModeTutorial(player, 50);
+
+            if (player->GetLevel() >= 10)
+                CompleteGameModeTutorial(player, 239);
 
             if (SettingValue(player, VerifiedSetting, 89) != 1)
             {
@@ -549,9 +582,15 @@ namespace PathToAscension
         return !classes || (playerClass && playerClass <= 64 && (classes & (uint64(1) << (playerClass - 1))));
     }
 
-    std::optional<uint32> GameModeMask(Player const* player)
+    bool MatchesGameModes(Player const* player, Tutorial const& tutorial)
     {
-        return sScriptMgr->OnPlayerGetGameModeMask(player);
+        uint32 const required = tutorial.fields[TutorialField::RequiredGameModes];
+        uint32 const excluded = tutorial.fields[TutorialField::ExcludedGameModes];
+        if (!required && !excluded)
+            return true;
+
+        std::optional<uint32> const modes = sScriptMgr->OnPlayerGetGameModeMask(player);
+        return modes && (!required || (required & *modes)) && !(excluded & *modes);
     }
 
     bool IsCallBoard(uint32 entry)
@@ -655,14 +694,14 @@ namespace PathToAscension
         static constexpr uint32 ids[] =
         {
             2, 5, 6, 8, 9, 10, 13, 14, 15, 16, 18, 19, 22, 24, 27, 28, 29, 30, 31, 32,
-            33, 36, 41, 51, 56, 57, 58, 64, 65, 74, 76, 78, 80, 82, 83, 84, 89, 90, 91, 92,
+            33, 36, 40, 41, 50, 51, 56, 57, 58, 64, 65, 74, 76, 78, 80, 82, 83, 84, 89, 90, 91, 92,
             93, 101, 104, 105, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 121, 122, 124, 125,
             126, 128, 129, 131, 132, 133, 135, 136, 138, 139, 140, 142, 143, 145, 146, 147, 149, 150,
             151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166, 167, 168,
             169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 193, 200,
             201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218,
-            219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 237, 245,
-            249, 250, 251, 258, 259, 260, 261, 265, 266, 267, 268, 269, 270, 271
+            219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 237, 239, 241,
+            244, 245, 247, 249, 250, 251, 258, 259, 260, 261, 265, 266, 267, 268, 269, 270, 271
         };
         return std::binary_search(std::begin(ids), std::end(ids), tutorialId);
     }
@@ -724,7 +763,8 @@ public:
           PLAYERHOOK_ON_AFTER_STORE_OR_EQUIP_NEW_ITEM, PLAYERHOOK_ON_REWARD_KILL_REWARDER,
           PLAYERHOOK_ON_BEFORE_CRITERIA_PROGRESS, PLAYERHOOK_ON_SEND_LIST_INVENTORY,
           PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST, PLAYERHOOK_ON_LEARN_PET_TALENT, PLAYERHOOK_ON_LEARN_TRAINER_SPELL,
-          PLAYERHOOK_ON_TAKE_MAIL_ITEM, PLAYERHOOK_ON_COA_PROGRESS, PLAYERHOOK_ON_PLAYER_QUEST_ACCEPT }) { }
+          PLAYERHOOK_ON_TAKE_MAIL_ITEM, PLAYERHOOK_ON_COA_PROGRESS, PLAYERHOOK_ON_PLAYER_QUEST_ACCEPT,
+          PLAYERHOOK_ON_COA_PRESTIGE_SAVED }) { }
 
     void OnPlayerLogin(Player* player) override
     {
@@ -859,6 +899,12 @@ public:
             player->KilledMonsterCredit(NoviceRidingCredit);
     }
 
+    void OnPlayerCoAPrestigeSaved(Player* player) override
+    {
+        if (loaded)
+            CompletePrestigeTutorials(player);
+    }
+
     void OnPlayerTakeMailItem(Player* player, Mail const* mail, uint32 itemEntry) override
     {
         if (loaded && CountsForPlayer(player))
@@ -911,6 +957,7 @@ public:
                 break;
             case CoAProgressEvent::VanityDelivered:
                 CompleteVerifiedTutorial(player, 51);
+                CompleteVerifiedTutorial(player, 244);
                 break;
             case CoAProgressEvent::VanityCollected:
                 if (value == 339041)
@@ -921,6 +968,9 @@ public:
                 break;
             case CoAProgressEvent::ExperimentalTeleporter:
                 CompleteVerifiedTutorial(player, 31);
+                break;
+            case CoAProgressEvent::OutfitSaved:
+                CompleteVerifiedTutorial(player, 247);
                 break;
         }
     }

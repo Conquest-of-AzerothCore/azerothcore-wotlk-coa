@@ -136,13 +136,7 @@ namespace PathToAscension
             if (hasSpell && !spellKnown)
                 return false;
 
-            uint32 const required = f[TutorialField::RequiredGameModes];
-            uint32 const excluded = f[TutorialField::ExcludedGameModes];
-            if (!required && !excluded)
-                return true;
-
-            std::optional<uint32> const modes = GameModeMask(player);
-            return modes && (!required || (required & *modes)) && !(excluded & *modes);
+            return MatchesGameModes(player, tutorial);
         }
 
         void ActivateTracking(Player* player, uint32 questId)
