@@ -361,6 +361,7 @@ constexpr uint32 SPELL_REAPER_SCYTHE_RUSH_MARKER = 500377;
 constexpr uint32 SPELL_REAPER_HARVEST_TIME = 803995;
 constexpr char ASCENSION_ACTIVE_SPEC_SETTING[] = "core.ascension_active_spec";
 constexpr char ASCENSION_TALENT_BUILD_SETTING_PREFIX[] = "core.ascension_build.";
+constexpr char ASCENSION_PURCHASED_RANKS_SETTING[] = "core.ascension_purchased_ranks";
 constexpr char ASCENSION_RESET_CREDITS_SETTING[] = "core.ascension_reset_credits";
 
 enum CompanionLoot : uint32
@@ -2194,6 +2195,8 @@ public:
         refusal.Rank = rank;
         return false;
       }
+    if (switching)
+      RestorePurchasedRanks(player);
 
     if (payment.Marks)
       player->DestroyItemCount(AscensionCoATalentState::MARK_OF_ASCENSION_ITEM, payment.Marks, true);
@@ -2442,6 +2445,53 @@ public:
     StoreBuild(player, specializationId, LivePicks(player, specializationId));
   }
 
+  static std::set<uint32> StoredPurchasedRanks(Player const* player)
+  {
+    std::set<uint32> ranks;
+    PlayerSettingVector const* values = player->FindPlayerSettings(ASCENSION_PURCHASED_RANKS_SETTING);
+    if (!values || values->empty())
+      return ranks;
+
+    std::size_t const count = std::min<std::size_t>((*values)[0].value, values->size() - 1);
+    for (std::size_t index = 1; index <= count; ++index)
+      if (uint32 const spellId = (*values)[index].value)
+        ranks.insert(spellId);
+    return ranks;
+  }
+
+  static void StorePurchasedRanks(Player* player)
+  {
+    std::set<uint32> ranks = StoredPurchasedRanks(player);
+    std::size_t const stored = ranks.size();
+    for (AscensionProgression::Rank const& rank : AscensionProgression::Ranks)
+      if (rank.ClassId == player->getClass() && player->HasSpell(rank.SpellId))
+        ranks.insert(rank.SpellId);
+    if (ranks.size() == stored)
+      return;
+
+    player->UpdatePlayerSetting(ASCENSION_PURCHASED_RANKS_SETTING, 0, uint32(ranks.size()));
+    uint32 index = 0;
+    for (uint32 spellId : ranks)
+      player->UpdatePlayerSetting(ASCENSION_PURCHASED_RANKS_SETTING, ++index, spellId);
+  }
+
+  static uint32 RestorePurchasedRanks(Player* player)
+  {
+    std::set<uint32> const ranks = StoredPurchasedRanks(player);
+    uint32 restored = 0;
+    for (AscensionProgression::Rank const& rank : AscensionProgression::Ranks)
+    {
+      if (rank.ClassId != player->getClass() || !ranks.contains(rank.SpellId) ||
+          rank.RequiredLevel > player->GetLevel() || !player->HasSpell(rank.FirstSpellId) ||
+          player->HasSpell(rank.SpellId) || !sSpellMgr->GetSpellInfo(rank.SpellId))
+        continue;
+
+      player->learnSpell(rank.SpellId, false);
+      ++restored;
+    }
+    return restored;
+  }
+
   uint32 RestoreBuilds(Player* player, uint32 specializationId)
   {
     uint32 restored = 0;
@@ -2512,6 +2562,7 @@ public:
 
     if (restoreStoredBuild)
       StoreBuilds(player, previousSpecialization);
+    StorePurchasedRanks(player);
 
     if (Pet* pet = player->GetPet())
       player->RemovePet(pet, PET_SAVE_NOT_IN_SLOT);
@@ -2555,6 +2606,7 @@ public:
 
     uint32 const restored = restoreStoredBuild ? RestoreBuilds(player, specializationId) : 0;
     uint32 granted = SynchronizeProgression(player);
+    uint32 const purchased = RestorePurchasedRanks(player);
     if (restoreStoredBuild)
       RestoreBarButtons(player, specializationId, previousSpecialization);
     else
@@ -2562,12 +2614,14 @@ public:
     ChatHandler(player->GetSession())
         .PSendSysMessage(
             "Activated specialization {}. Stored the build of specialization {}, removed {} old talent "
-            "spell(s), restored {} stored rank(s) and granted {} automatic ability/passive spell(s).",
-            specializationId, previousSpecialization, removed, restored, granted);
+            "spell(s), restored {} stored rank(s), {} purchased ability rank(s) and granted {} automatic "
+            "ability/passive spell(s).",
+            specializationId, previousSpecialization, removed, restored, purchased, granted);
     LOG_INFO("coa",
              "Switched {} (class {}) to local specialization {}: removed {} CoA spells, restored {} "
-             "stored ranks and granted {} automatic spells",
-             player->GetName(), uint32(player->getClass()), specializationId, removed, restored, granted);
+             "stored ranks and {} purchased ability ranks, granted {} automatic spells",
+             player->GetName(), uint32(player->getClass()), specializationId, removed, restored, purchased,
+             granted);
     return true;
   }
 

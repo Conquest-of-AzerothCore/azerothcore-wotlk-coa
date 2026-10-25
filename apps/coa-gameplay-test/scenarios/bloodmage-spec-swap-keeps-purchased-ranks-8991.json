@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Switching specialization back restores the ability ranks bought for it",
+  "contract": "Blood (spec 26) grants entry 4525's ability 804726 automatically; its ranks 504093 (level 18) and 504094 (level 24) are bought from the Book of Ascension. Leaving Blood removes the ability and its ranks with it. Returning to Blood gives the ranks back without a second purchase, and a rank never bought (504095, level 32) stays unlearned. Issue #8991.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "bloodmage", "race": 1, "class": 20, "level": 25 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "specialization", "actor": "bloodmage", "id": 26 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "Blood grants its automatic ability",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 804726, "equals": 1
+    },
+    { "action": "learn", "actor": "bloodmage", "spell": 504093 },
+    { "action": "learn", "actor": "bloodmage", "spell": 504094 },
+    {
+      "action": "assert", "label": "The bought third rank is known",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 504094, "equals": 1
+    },
+    { "action": "specialization", "actor": "bloodmage", "id": 25 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "Leaving Blood removes its ability ranks",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 504094, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Leaving Blood removes its ability",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 804726, "equals": 0
+    },
+    { "action": "specialization", "actor": "bloodmage", "id": 26 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "Returning to Blood restores the bought second rank",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 504093, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Returning to Blood restores the bought third rank",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 504094, "equals": 1
+    },
+    {
+      "action": "assert", "label": "A rank never bought stays unlearned",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 504095, "equals": 0
+    }
+  ]
+}
