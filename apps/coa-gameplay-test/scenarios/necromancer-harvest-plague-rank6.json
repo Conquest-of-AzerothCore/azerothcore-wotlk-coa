@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Necromancer Harvest Plague rank 6 leeches the target and heals the caster",
+  "contract": "Harvest Plague (rank 6, spell 583256) siphons health from the enemy every 3s and heals the caster for a portion of the damage dealt, like ranks 1-5.",
+  "timeout_ms": 120000,
+  "players": [ { "id": "n", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 } ],
+  "creatures": [ { "id": "dummy", "owner": "n", "entry": 36, "level": 10, "distance": 8, "health": 1000000 } ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 583256 },
+    { "action": "set_health", "actor": "n", "value": 1000 },
+    { "action": "cast", "actor": "n", "spell": 583256, "target": "dummy" },
+    { "action": "wait", "ms": 7000 },
+    { "action": "assert", "label": "Plague ticked on the enemy", "actor": "n", "metric": "spell_damage_count", "spell": 583256, "target": "dummy", "min": 1 },
+    { "action": "assert", "label": "Caster healed by the leech", "actor": "n", "metric": "spell_heal_count", "spell": 583256, "min": 1 },
+    { "action": "assert", "label": "Effective healing is positive", "actor": "n", "metric": "spell_effective_heal_total", "spell": 583256, "min": 1 }
+  ]
+}

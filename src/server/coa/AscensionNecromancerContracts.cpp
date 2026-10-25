@@ -106,6 +106,9 @@ void ApplyContracts(SpellInfo* info)
                 effect.Effect = 0;
     if (id == 804360)
         dummy(0);
+    // The client's rank 6 row lost effect 0's implicit target, so the leech never reached the enemy.
+    if (id == 583256 && !info->Effects[0].TargetA.GetTarget())
+        info->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
     if (id == 573223)
     {
         dummy(0);
