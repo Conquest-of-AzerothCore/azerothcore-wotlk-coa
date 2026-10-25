@@ -12,6 +12,9 @@
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 #include "SpellScriptLoader.h"
+#include "SpellMgr.h"
+#include <algorithm>
+#include <array>
 #include <unordered_map>
 
 namespace AscensionTaming
@@ -305,6 +308,57 @@ public:
         guardian->SetStatFlatModifier(UNIT_MOD_MANA, BASE_VALUE, float(mana));
     }
 };
+
+enum PetKitSpells : uint32
+{
+    SPELL_TAIL_SWEEP            = 891013,
+    SPELL_TREANT_REJUVENATION   = 93717,
+    SPELL_TREANT_RENEW          = 93726,
+    SPELL_RESPLENDENT_LIGHT     = 414260
+};
+
+constexpr std::array<uint32, 4> SOOTHING_KISS = { 6360, 7813, 11784, 11785 };
+constexpr uint32 DURATION_UNTIL_CANCELLED = 21;
+
+class AscensionTamingSpellData final : public GlobalScript
+{
+public:
+    AscensionTamingSpellData() : GlobalScript("AscensionTamingSpellData", { GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR }) { }
+
+    void OnLoadSpellCustomAttr(SpellInfo* info) override
+    {
+        if (info->Id == SPELL_TAIL_SWEEP)
+            info->AttributesEx3 &= ~SPELL_ATTR3_ONLY_ON_PLAYER;
+        else if (std::find(SOOTHING_KISS.begin(), SOOTHING_KISS.end(), info->Id) != SOOTHING_KISS.end() &&
+            !info->DurationEntry)
+            info->DurationEntry = sSpellDurationStore.LookupEntry(DURATION_UNTIL_CANCELLED);
+        else if (info->Id == SPELL_TREANT_REJUVENATION || info->Id == SPELL_TREANT_RENEW)
+        {
+            SpellInfo const* sibling = sSpellMgr->GetSpellInfo(SPELL_RESPLENDENT_LIGHT);
+            for (SpellEffectInfo& effect : info->Effects)
+                if (sibling && effect.TargetA.GetTarget() == TARGET_UNIT_DEST_AREA_ALLY && !effect.RadiusEntry)
+                    effect.RadiusEntry = sibling->Effects[EFFECT_0].RadiusEntry;
+        }
+    }
+};
+
+class spell_ascension_pet_lowest_health_allies : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_pet_lowest_health_allies);
+
+    void FilterTargets(std::list<WorldObject*>& targets)
+    {
+        targets.sort(Acore::HealthPctOrderPred());
+        if (uint32 const limit = GetSpellInfo()->MaxAffectedTargets; targets.size() > limit)
+            targets.resize(limit);
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ascension_pet_lowest_health_allies::FilterTargets,
+            EFFECT_ALL, TARGET_UNIT_DEST_AREA_ALLY);
+    }
+};
 }
 
 void AddAscensionTamingScripts()
@@ -312,4 +366,6 @@ void AddAscensionTamingScripts()
     RegisterSpellScriptWithArgs(AscensionTaming::spell_ascension_family_call, "spell_ascension_family_call");
     new AscensionTaming::AscensionTamingPlayer();
     new AscensionTaming::AscensionTamingPet();
+    new AscensionTaming::AscensionTamingSpellData();
+    RegisterSpellScript(AscensionTaming::spell_ascension_pet_lowest_health_allies);
 }

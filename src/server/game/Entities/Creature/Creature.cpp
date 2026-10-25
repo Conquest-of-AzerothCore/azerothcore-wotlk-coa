@@ -3260,9 +3260,9 @@ void Creature::AddSpellCooldown(uint32 spell_id, uint32 /*itemid*/, uint32 end_t
             _AddCreatureSpellCooldown(i_scset->second, categoryId, categorycooldown);
         }
     }
-    else if (spellcooldown)
+    if (spellcooldown)
     {
-        _AddCreatureSpellCooldown(spellInfo->Id, 0, spellcooldown);
+        _AddCreatureSpellCooldown(spellInfo->Id, categorycooldown ? categoryId : 0, spellcooldown);
     }
 
     if (sSpellMgr->HasSpellCooldownOverride(spellInfo->Id))
