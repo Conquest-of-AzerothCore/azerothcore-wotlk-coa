@@ -106,3 +106,11 @@ parallel run is compared against.
 - A server that dies before its startup barrier still loses its slot's world copy: the SQL updater may have changed
   it, and no baseline exists to audit it. The next run copies it again.
 - Each extra server needs another world copy on first use of its slot, and memory for one more worldserver.
+
+## Optional in-RAM test database
+
+A throwaway MySQL whose data directory is a tmpfs cut cold runs from 378.4 s to 91.3 s in the "before" measurements
+(see [the guide](../coa/verification.md#optional-in-ram-test-database)). It is documented, not required: it needs
+several GB of RAM, loses its data when the container stops and drops durability settings that a shared or
+long-lived server must keep. The standard route stays the reference, and nothing in the runner depends on the
+optional one.

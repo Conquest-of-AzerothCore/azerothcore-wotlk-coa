@@ -608,6 +608,89 @@ every case of that server `cleanup_failed` and fails the batch. Each `cleanup_fa
 a change during the batch stops new servers and fails the batch. Ctrl+C or SIGTERM (a console break on Windows)
 stops all servers and cleans up.
 
+## Optional: in-RAM test database
+
+This route is optional and never required. A run against your normal local MySQL server stays the reference, and
+a result from either route is judged the same way. Use it only when you run the gameplay stage often and have
+the memory to spare: it moves the test MySQL server's data directory into RAM, so the schema copies that dominate
+a cold run no longer wait on disk.
+
+- Everything in the container is lost when it stops or the machine reboots. Seed it again afterwards.
+- It is a throwaway server. Never point `worldserver_config` or `database_client_config` at a real, shared or
+  production database, and never reuse the root password of another server for it. The flags below trade
+  durability for speed (no binary log, no doublewrite, relaxed log flushing), so a crash can corrupt it.
+- The runner needs a local MySQL server (loopback host), so publish the container port on `127.0.0.1` only.
+- Sizes below are measurements from one workstation on 2026-10-25, not guarantees. The data directory of that
+  container, holding the three source schemas and two retained world-cache copies, measured 5.9 GB
+  (`docker exec <container> du -sh /var/lib/mysql`). It ran with `--innodb-buffer-pool-size=8G`. The tmpfs was
+  sized at 12 GB (50% used). Plan for roughly the data directory plus the buffer pool in RAM, and add about 5 GB
+  per simulated worldserver ([several servers](#several-simulated-servers)). Keep the standard route on a machine
+  that cannot spare that memory.
+
+Start the server (set `MYSQL_ROOT_PASSWORD` in an env file that is not in the repository):
+
+```sh
+docker run -d --name coa-test-mysql \
+  -p 127.0.0.1:3706:3306 \
+  --mount type=tmpfs,destination=/var/lib/mysql,tmpfs-size=12884901888 \
+  --env-file ./test-mysql.env \
+  mysql:8.4 \
+  --disable-log-bin \
+  --innodb-flush-log-at-trx-commit=0 \
+  --innodb-doublewrite=OFF \
+  --innodb-buffer-pool-size=8G \
+  --innodb-redo-log-capacity=2G \
+  --innodb-flush-method=fsync \
+  --max-connections=500 \
+  --max-prepared-stmt-count=65528
+```
+
+`--max-prepared-stmt-count=65528` lets more than two simulated servers start; see the
+[`--gameplay-jobs` paragraph](#several-simulated-servers). Drop it if you run one server.
+
+Seed it from the server you already use: dump your own `acore_world`, `acore_auth` and `acore_characters` and load
+them into the container. Put the credentials in two MySQL client files (`[client]` with `host`, `port`, `user`
+and `password`), `source.cnf` for your existing server and `test.cnf` for the container, instead of putting
+passwords on the command line:
+
+```sh
+for db in acore_auth acore_characters acore_world; do
+  mysql --defaults-extra-file=test.cnf \
+    -e "DROP DATABASE IF EXISTS $db; CREATE DATABASE $db DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+  mysqldump --defaults-extra-file=source.cnf --single-transaction --quick --routines --events --triggers \
+    --set-gtid-purged=OFF --no-tablespaces "$db" | mysql --defaults-extra-file=test.cnf "$db" &
+done
+wait
+```
+
+Point the settings at the container: a worldserver config whose three `*DatabaseInfo` entries use the container's
+host (`127.0.0.1`), port and credentials, and `test.cnf` as the client file. Keep both outside the repository:
+
+```json
+{
+  "worldserver_config": "/path/to/test-worldserver.conf",
+  "database_client_config": "/path/to/test.cnf"
+}
+```
+
+Use a separate settings file (`--settings <file>`) so the standard route stays one command away. The first gameplay
+run copies the world database into the container as usual.
+
+Medians of three repetitions from the same workstation and day, from the gameplay stage with the standard route on a
+stock disk MySQL 8.4 (binary log on, `sync_binlog=1`, `innodb_flush_log_at_trx_commit=1`) against the container
+above (wall seconds, container start included; the standard route also shared its disk with other sessions' servers):
+
+| Run | Standard route | In-RAM route |
+| --- | --- | --- |
+| One short scenario, cold (`--refresh-world`) | 378.4 s | 91.3 s |
+| One short scenario, warm | 109.3 s | 33.7 s |
+| Ten short scenarios | 90.7 s | 34.2 s |
+| Four vanilla dungeons (exclusive) | 212.9 s | 156.6 s |
+| One short scenario, real clock, `--gameplay-jobs 1` | 95.6 s | 42.4 s |
+
+These are "before" figures: they predate the server-side copy and the parallel simulated servers, which speed up
+the standard route as well, so the gap is smaller now. They will be refreshed.
+
 ## Harness prerequisites
 
 Before running, the harness stage classifies each script from its source:
