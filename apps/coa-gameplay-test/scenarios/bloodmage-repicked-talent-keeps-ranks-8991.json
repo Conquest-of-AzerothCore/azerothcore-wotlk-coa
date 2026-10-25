@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "A re-picked talent gets back every rank bought for it, free",
+  "contract": "A Bloodmage at level 80 enters Eternal (ChrSpecs 99), buys Rotclaw (entry 30191, spell 804197, one specialization point) and learns its Book of Ascension ranks 2 and 3 (503476, 503477; AscensionProgression ranks at levels 18 and 24). Switching to Sanguine (26) through the client's native upload removes Rotclaw and its ranks. Returning to Eternal does not pick Rotclaw again by itself; picking only its base entry gives back both bought ranks without any gold. Unlearning Rotclaw in the talent window and picking it again does the same. Issues #8991, #8870, #8852, #8987.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "bloodmage", "race": 1, "class": 20, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 5000 },
+    { "action": "specialization", "label": "Enter Eternal", "actor": "bloodmage", "id": 99 },
+    { "action": "advancement_rank", "label": "Buy Rotclaw", "actor": "bloodmage", "entry": 30191, "rank": 1 },
+    { "action": "learn", "label": "Buy Rotclaw rank 2", "actor": "bloodmage", "spell": 503476 },
+    { "action": "learn", "label": "Buy Rotclaw rank 3", "actor": "bloodmage", "spell": 503477 },
+    {
+      "action": "assert", "label": "Rotclaw rank 3 is owned in Eternal",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 503477, "equals": 1
+    },
+    { "action": "set_money", "label": "Fund the original native removal price", "actor": "bloodmage",
+      "value": 1000000 },
+    { "action": "specialization", "label": "Switch to Sanguine", "actor": "bloodmage", "id": 26 },
+    {
+      "action": "assert", "label": "Sanguine is the active specialization",
+      "actor": "bloodmage", "metric": "player_setting", "source": "core.ascension_active_spec", "index": 0,
+      "equals": 26
+    },
+    {
+      "action": "assert", "label": "Leaving Eternal removes Rotclaw",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 804197, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Leaving Eternal removes the bought ranks with it",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 503477, "equals": 0
+    },
+    { "action": "specialization", "label": "Switch back to Eternal", "actor": "bloodmage", "id": 99 },
+    {
+      "action": "assert", "label": "Returning to Eternal leaves Rotclaw to be picked again",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 804197, "equals": 0
+    },
+    { "action": "snapshot", "actor": "bloodmage", "metric": "carried_money", "save_as": "money_before_pick" },
+    { "action": "advancement_rank", "label": "Pick Rotclaw again", "actor": "bloodmage", "entry": 30191,
+      "rank": 1 },
+    {
+      "action": "assert", "label": "Picking Rotclaw gives back rank 2",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 503476, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Picking Rotclaw gives back rank 3",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 503477, "equals": 1
+    },
+    {
+      "action": "assert", "label": "No rank above the bought ones is granted",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 503478, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The returned ranks cost no gold",
+      "actor": "bloodmage", "metric": "carried_money", "relative_to": "money_before_pick", "equals": 0
+    },
+    { "action": "advancement_rank", "label": "Unlearn Rotclaw in the talent window", "actor": "bloodmage",
+      "entry": 30191, "rank": 0 },
+    {
+      "action": "assert", "label": "Unlearning Rotclaw removes its ranks",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 503477, "equals": 0
+    },
+    { "action": "advancement_rank", "label": "Pick Rotclaw once more", "actor": "bloodmage", "entry": 30191,
+      "rank": 1 },
+    {
+      "action": "assert", "label": "Picking Rotclaw again gives back rank 3 once more",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 503477, "equals": 1
+    }
+  ]
+}

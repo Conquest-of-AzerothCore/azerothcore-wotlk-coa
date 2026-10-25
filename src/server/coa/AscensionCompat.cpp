@@ -835,6 +835,8 @@ public:
     if (!IsAscensionCustomClass(player))
       return 0;
 
+    StorePurchasedRanks(player);
+
     uint32 const activeSpec = GetActiveSpecialization(player);
     AscensionClassTuning::Synchronize(player, activeSpec, true);
     auto const racialSpells = GetAscensionRacialSpells(player);
@@ -968,6 +970,7 @@ public:
         }
     }
 
+    learned += RestorePurchasedRanks(player);
     learned += SynchronizeTaughtAbilities(player);
     learned += SynchronizeTalentReplacements(player);
     RemoveAscensionPrimalistWeapons(player);
@@ -1873,6 +1876,7 @@ public:
       }
     }
 
+    StorePurchasedRanks(player);
     if (rank > 0 && freeChoiceGroup)
     {
       for (auto const& other : AscensionCompatData::CoATalentEntries)
@@ -1930,6 +1934,7 @@ public:
 
   uint32 ResetPaidTalents(Player* player)
   {
+    StorePurchasedRanks(player);
     uint32 removed = 0;
     for (AscensionCompatData::CoATalentEntry const& entry : AscensionCompatData::CoATalentEntries)
     {
@@ -2195,8 +2200,6 @@ public:
         refusal.Rank = rank;
         return false;
       }
-    if (switching)
-      RestorePurchasedRanks(player);
 
     if (payment.Marks)
       player->DestroyItemCount(AscensionCoATalentState::MARK_OF_ASCENSION_ITEM, payment.Marks, true);
@@ -2459,13 +2462,40 @@ public:
     return ranks;
   }
 
+  static std::unordered_set<uint32> ClassEntrySpells(Player const* player)
+  {
+    std::unordered_set<uint32> spells;
+    for (AscensionCompatData::CoATalentEntry const& entry : AscensionCompatData::CoATalentEntries)
+      if (entry.ClassId == player->getClass())
+        for (uint32 spellId : entry.SpellIds)
+          if (spellId)
+            spells.insert(spellId);
+    return spells;
+  }
+
+  static uint32 RankRequiredLevel(uint32 spellId, SpellInfo const* spellInfo)
+  {
+    for (AscensionProgression::Rank const& rank : AscensionProgression::Ranks)
+      if (rank.SpellId == spellId)
+        return rank.RequiredLevel;
+    return spellInfo->BaseLevel;
+  }
+
   static void StorePurchasedRanks(Player* player)
   {
     std::set<uint32> ranks = StoredPurchasedRanks(player);
     std::size_t const stored = ranks.size();
-    for (AscensionProgression::Rank const& rank : AscensionProgression::Ranks)
-      if (rank.ClassId == player->getClass() && player->HasSpell(rank.SpellId))
-        ranks.insert(rank.SpellId);
+    std::unordered_set<uint32> const entrySpells = ClassEntrySpells(player);
+    for (uint32 entrySpell : entrySpells)
+    {
+      if (!player->HasSpell(entrySpell))
+        continue;
+
+      for (uint32 spellId = sSpellMgr->GetNextSpellInChain(entrySpell); spellId;
+           spellId = sSpellMgr->GetNextSpellInChain(spellId))
+        if (!entrySpells.contains(spellId) && player->HasSpell(spellId))
+          ranks.insert(spellId);
+    }
     if (ranks.size() == stored)
       return;
 
@@ -2477,16 +2507,23 @@ public:
 
   static uint32 RestorePurchasedRanks(Player* player)
   {
-    std::set<uint32> const ranks = StoredPurchasedRanks(player);
-    uint32 restored = 0;
-    for (AscensionProgression::Rank const& rank : AscensionProgression::Ranks)
+    std::set<uint32> const stored = StoredPurchasedRanks(player);
+    std::vector<uint32> ranks(stored.begin(), stored.end());
+    std::stable_sort(ranks.begin(), ranks.end(), [](uint32 left, uint32 right)
     {
-      if (rank.ClassId != player->getClass() || !ranks.contains(rank.SpellId) ||
-          rank.RequiredLevel > player->GetLevel() || !player->HasSpell(rank.FirstSpellId) ||
-          player->HasSpell(rank.SpellId) || !sSpellMgr->GetSpellInfo(rank.SpellId))
+      return sSpellMgr->GetSpellRank(left) < sSpellMgr->GetSpellRank(right);
+    });
+
+    uint32 restored = 0;
+    for (uint32 spellId : ranks)
+    {
+      SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
+      uint32 const previous = sSpellMgr->GetPrevSpellInChain(spellId);
+      if (!spellInfo || !previous || player->HasSpell(spellId) || !player->HasSpell(previous) ||
+          RankRequiredLevel(spellId, spellInfo) > player->GetLevel())
         continue;
 
-      player->learnSpell(rank.SpellId, false);
+      player->learnSpell(spellId, false);
       ++restored;
     }
     return restored;
@@ -2606,7 +2643,6 @@ public:
 
     uint32 const restored = restoreStoredBuild ? RestoreBuilds(player, specializationId) : 0;
     uint32 granted = SynchronizeProgression(player);
-    uint32 const purchased = RestorePurchasedRanks(player);
     if (restoreStoredBuild)
       RestoreBarButtons(player, specializationId, previousSpecialization);
     else
@@ -2614,14 +2650,12 @@ public:
     ChatHandler(player->GetSession())
         .PSendSysMessage(
             "Activated specialization {}. Stored the build of specialization {}, removed {} old talent "
-            "spell(s), restored {} stored rank(s), {} purchased ability rank(s) and granted {} automatic "
-            "ability/passive spell(s).",
-            specializationId, previousSpecialization, removed, restored, purchased, granted);
+            "spell(s), restored {} stored rank(s) and granted {} automatic ability/passive spell(s).",
+            specializationId, previousSpecialization, removed, restored, granted);
     LOG_INFO("coa",
              "Switched {} (class {}) to local specialization {}: removed {} CoA spells, restored {} "
-             "stored ranks and {} purchased ability ranks, granted {} automatic spells",
-             player->GetName(), uint32(player->getClass()), specializationId, removed, restored, purchased,
-             granted);
+             "stored ranks and granted {} automatic spells",
+             player->GetName(), uint32(player->getClass()), specializationId, removed, restored, granted);
     return true;
   }
 
