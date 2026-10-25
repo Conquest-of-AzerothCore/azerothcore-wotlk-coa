@@ -50,6 +50,7 @@ Keep secrets out of this file: credentials stay in the worldserver config or the
 | `workspace_tools` | `<repo>/../tools`; used only for scripts that declare `--workspace-tools` |
 | `datamine_directory` | none |
 | `mysql_server_bin` | none; a MySQL `bin` directory holding both `mysql` and `mysqld`, for `--mysql-bin` |
+| `client_lab` | none; the client lab harness is unavailable. A lab descriptor (`state/lab.json`), for `--client-lab` |
 | `jobs` | the CPU count |
 | `gameplay_jobs` | `max(1, min(4, cpu // 3))`; used only with `--gameplay-clock real` |
 | `gameplay_db_workers` | `16` (1-32); character database workers, used only with the simulated clock |
@@ -577,8 +578,8 @@ Before running, the harness stage classifies each script from its source:
 - A script that reads a fixed path beside the repository (`ROOT.parent / '<path>'` outside an argument default)
   is `unavailable` when that path is missing.
 - A script with a required argument the settings cannot supply is `unavailable`. The suppliable arguments are
-  `--spell-dbc` (`<dbc>/Spell.dbc`), `--dbc-dir` (`<dbc>`), `--datamine-dir` (`datamine_directory`) and
-  `--mysql-bin` (`mysql_server_bin`); optional
+  `--spell-dbc` (`<dbc>/Spell.dbc`), `--dbc-dir` (`<dbc>`), `--datamine-dir` (`datamine_directory`),
+  `--mysql-bin` (`mysql_server_bin`) and `--client-lab` (`client_lab`, only when that file exists); optional
   ones among them are passed whenever available.
 
 Every other script runs: exit code 0 passes, anything else fails and keeps the end of its output. Optional
@@ -595,8 +596,19 @@ with reasons:
 - Without the external workspace tools: the scripts that reference their `Test-*.py` files.
 - Without `datamine_directory`: `apps/coa-tests/greater_imp`, which also requires MSVC.
 - Without `<repo>/../client-reference/coa-datamine/raw/tables`: `apps/coa-tests/secondary_appearances`.
+- Without a running client lab (`client_lab` unset or its descriptor missing): `apps/coa-tests/client_lab`.
 
 Report these scripts as unavailable, never as passed.
+
+### Client lab
+
+`apps/coa-tests/client_lab` checks a running lab client through the server probe relay
+([client-lab-probe-relay.md](client-lab-probe-relay.md)). The guide's `coa-client-lab login ACCOUNT PASSWORD
+CHARACTER` writes the lab descriptor `state/lab.json` and `coa-client-lab stop` removes it, so the script runs only
+while a lab is logged in. It checks the lab slot's deployed server, not the build stage's binary, and prints the
+slot's deployed commit beside the checkout's `HEAD` for comparison. A containerised run needs host networking (the
+SOAP port is published on the host's loopback) and read-only mounts of the lab state directory and the DBC
+directory.
 
 ## Full runs
 

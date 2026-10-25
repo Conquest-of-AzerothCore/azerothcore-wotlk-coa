@@ -520,6 +520,19 @@ class HarnessClassificationTests(WorkspaceTest):
         self.assertEqual(entry['status'], 'run')
         self.assertEqual(entry['command'][3:], ['--mysql-bin', str(server)])
 
+    def test_client_lab_is_supplied_only_for_an_existing_descriptor(self):
+        workspace = self.workspace()
+        source = "parser.add_argument('--client-lab', type=Path, required=True)\n"
+        descriptor = workspace.base / 'lab.json'
+        for settings in (workspace.settings(), workspace.settings({'client_lab': str(descriptor)})):
+            entry = self.classify(workspace, source, settings=settings)
+            self.assertEqual(entry['status'], 'unavailable')
+            self.assertIn('--client-lab', entry['reason'])
+        write(descriptor, '{}')
+        entry = self.classify(workspace, source, settings=workspace.settings({'client_lab': str(descriptor)}))
+        self.assertEqual(entry['status'], 'run')
+        self.assertEqual(entry['command'][-2:], ['--client-lab', str(descriptor)])
+
     def test_optional_suppliable_arguments_are_passed_when_known(self):
         workspace = self.workspace()
         source = ("parser.add_argument('--dbc-dir', type=Path)\nparser.add_argument('--before')\n"

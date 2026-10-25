@@ -43,7 +43,7 @@ GAMEPLAY_DIRECTORY = 'apps/coa-gameplay-test'
 DEFAULT_SETTINGS = 'conf/verify-all.json'
 PATH_SETTINGS = ('build_directory', 'worldserver', 'worldserver_config', 'mysql', 'mysqldump',
                  'database_client_config', 'server_modules_dir', 'modules_config_dir', 'dbc_directory',
-                 'workspace_tools', 'datamine_directory', 'mysql_server_bin')
+                 'workspace_tools', 'datamine_directory', 'mysql_server_bin', 'client_lab')
 COUNT_SETTINGS = ('jobs', 'gameplay_jobs', 'gameplay_db_workers')
 SETTING_KEYS = frozenset((*PATH_SETTINGS, *COUNT_SETTINGS, 'cmake_args'))
 CONFIGURED_DIRECTORIES = ('dbc_directory', 'datamine_directory', 'workspace_tools', 'mysql_server_bin')
@@ -740,6 +740,9 @@ def supplied_arguments(settings):
         values['--dbc-dir'] = dbc
     if datamine and datamine.is_dir():
         values['--datamine-dir'] = datamine
+    lab = settings.get('client_lab')
+    if lab and lab.is_file():
+        values['--client-lab'] = lab
     server = settings.get('mysql_server_bin')
     if server and all(is_executable(server / executable_name(name)) for name in ('mysql', 'mysqld')):
         values['--mysql-bin'] = server
