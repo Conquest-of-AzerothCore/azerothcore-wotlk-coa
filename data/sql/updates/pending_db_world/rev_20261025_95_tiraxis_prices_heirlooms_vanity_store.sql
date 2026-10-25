@@ -7,7 +7,8 @@
 --    1000 -> 2000, two-hand 1800 -> 3600).
 --    Heirloom armor, rings, necklaces and trinkets are not sold piece by piece (price 0): armor, rings and trinkets come
 --    in the set caches, which stay on Tiraxis at 4500 each (Heirloom Cache and Experience Heirloom Cache). The caches
---    have no VanityCollection.dbc row. The raid medallions and the Insignias of the Burning Legion are not sold either.
+--    have no VanityCollection.dbc row. Stick on a Carrot is sold on its own at 2000. The raid medallions and the
+--    Insignias of the Burning Legion are not sold.
 -- 2) Tiraxis' Convenience Items (900008): new prices, and the Vanity Store sells the same items at the same price.
 INSERT INTO `coa_client_vanity_collection` (`ItemID`, `DonationPointCost`, `SeasonalPointCost`, `BazaarTokenCost`)
 SELECT `n`.`ItemID`, 0, 0, `n`.`BazaarTokenCost`
@@ -77,7 +78,7 @@ FROM (VALUES
   ROW(409, 0),      -- Insignia of the Burning Legion
   ROW(666000, 0),   -- Molten Core Medallion
   ROW(666003, 0),   -- Serpentshrine Cavern Medallion
-  ROW(339075, 0),   -- Stick on a Carrot
+  ROW(339075, 2000),   -- Stick on a Carrot
   ROW(16309, 0),    -- Drakefire Amulet
   ROW(339076, 0),   -- Pendant of Adventure
   ROW(339100, 0),   -- Pendant of Discovery
