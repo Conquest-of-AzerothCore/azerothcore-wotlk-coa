@@ -432,10 +432,20 @@ HighRisk.FelCommutation.ClickToggle = 0
 #                     creatures for a High-Risk attacker in the open world); creature damage received
 #                     there -0.05% per point; healing and shields +0.02% per point in War Mode,
 #                     High-Risk open world and battlegrounds.
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
 
-PvpPower.Enable = 0
+PvpPower.Enable = 1
+
+#    PvePower.Enable
+#        Description: Item spells named "PvE Power (+N)" scale damage and healing at level 60, capped at
+#                     495 points. Damage dealt to creatures +0.05% per point and damage received from
+#                     creatures -0.05% per point on every map; healing and shields +0.02% per point on
+#                     every map except the open world. Stacks with PvP Power.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+PvePower.Enable = 1
 
 #    Bloodforged.Enable
 #        Description: Adds one independent Bloodforged roll to eligible open-world creature corpses
