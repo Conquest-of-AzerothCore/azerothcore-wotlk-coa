@@ -339,6 +339,9 @@ bool ManastormGreedyDemon::Load()
             return false;
         }
 
+        candidate.ItemLevel =
+            itemTemplate->ItemLevel;
+
         _lootPools[
             QualityPoolIndex(
                 candidate.Quality)]
@@ -855,21 +858,30 @@ uint32 ManastormGreedyDemon::SelectLootItem(
             QualityPoolIndex(
                 quality)];
 
+    uint32 const itemLevelCap =
+        ManastormRewards::Instance()
+            .GetReleasedItemLevelCap();
+
+    auto const inLevelWindow =
+        [playerLevel](ManastormGreedyLootCandidate const& candidate)
+        {
+            return playerLevel >=
+                    candidate.MinPlayerLevel &&
+                playerLevel <=
+                    candidate.MaxPlayerLevel;
+        };
+
     uint64 eligibleWeight = 0;
 
     for (ManastormGreedyLootCandidate const& candidate :
         pool)
     {
-        if (playerLevel <
-                candidate.MinPlayerLevel ||
-            playerLevel >
-                candidate.MaxPlayerLevel)
+        if (candidate.ItemLevel <= itemLevelCap &&
+            inLevelWindow(candidate))
         {
-            continue;
+            eligibleWeight +=
+                candidate.Weight;
         }
-
-        eligibleWeight +=
-            candidate.Weight;
     }
 
     bool const useLevelWindow =
@@ -880,8 +892,11 @@ uint32 ManastormGreedyDemon::SelectLootItem(
         for (ManastormGreedyLootCandidate const& candidate :
             pool)
         {
-            eligibleWeight +=
-                candidate.Weight;
+            if (candidate.ItemLevel <= itemLevelCap)
+            {
+                eligibleWeight +=
+                    candidate.Weight;
+            }
         }
     }
 
@@ -901,11 +916,9 @@ uint32 ManastormGreedyDemon::SelectLootItem(
     for (ManastormGreedyLootCandidate const& candidate :
         pool)
     {
-        if (useLevelWindow &&
-            (playerLevel <
-                candidate.MinPlayerLevel ||
-             playerLevel >
-                candidate.MaxPlayerLevel))
+        if (candidate.ItemLevel > itemLevelCap ||
+            (useLevelWindow &&
+             !inLevelWindow(candidate)))
         {
             continue;
         }

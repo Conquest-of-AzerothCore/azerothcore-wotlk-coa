@@ -16,6 +16,7 @@
  */
 
 #include "Player.h"
+#include "AscensionQuestMarkers.h"
 #include "AccountMgr.h"
 #include "AchievementMgr.h"
 #include "AreaDefines.h"
@@ -8214,6 +8215,7 @@ void Player::SendQuestGiverStatusMultiple()
 
     data.put<uint32>(0, count); // write real count
     SendDirectMessage(&data);
+    AscensionQuestMarkers::RefreshVisible(this);
 }
 
 /*  If in a battleground a player dies, and an enemy removes the insignia, the player's bones is lootable

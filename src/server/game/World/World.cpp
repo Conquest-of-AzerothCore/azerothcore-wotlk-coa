@@ -550,6 +550,7 @@ void World::SetInitialWorldSettings()
 
     LOG_INFO("server.loading", "Loading Creature Template Addons...");
     sObjectMgr->LoadCreatureTemplateAddons();
+    sObjectMgr->LoadAscensionNpcOverheadIcons();
 
     LOG_INFO("server.loading", "Loading Reputation Reward Rates...");
     sObjectMgr->LoadReputationRewardRate();
