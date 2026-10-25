@@ -3,9 +3,7 @@
 
 #include "DatabaseEnv.h"
 #include "ManastormDefines.h"
-#include "ManastormReleaseStage.h"
 
-#include <array>
 #include <memory>
 #include <string>
 #include <vector>
@@ -94,8 +92,6 @@ public:
 
     bool IsCacheItemEntry(
         uint32 itemEntry) const;
-
-    uint32 GetReleasedItemLevelCap() const;
 
     double GetGroupRewardMultiplier(
         uint32 memberCount) const;
@@ -201,7 +197,6 @@ private:
 
     bool LoadCacheBrackets();
     bool LoadCacheUnlockRequirements();
-    void LoadReleasedItemLevelCaps();
     bool LoadRewardRules();
     bool LoadGroupRewardMultipliers();
     bool LoadPotentialRewards();
@@ -222,7 +217,6 @@ private:
 
     std::vector<CacheBracket> _cacheBrackets;
     std::vector<CacheUnlockRequirement> _cacheUnlockRequirements;
-    std::array<uint32, ManastormReleaseStage::AllReleased + 1> _releasedItemLevelCaps{};
     RewardRule _bedlam;
     RewardRule _bonzo;
     std::vector<RewardRule> _completionRewards;
