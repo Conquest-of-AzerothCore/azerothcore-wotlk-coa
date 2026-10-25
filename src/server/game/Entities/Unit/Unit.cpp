@@ -12565,7 +12565,10 @@ Unit* Creature::SelectVictim()
     Unit* target = nullptr;
 
     if (CanHaveThreatList())
+    {
+        EndCombatWithUnitsLeftBehind();
         target = m_threatManager.GetCurrentVictim();
+    }
     else if (!HasReactState(REACT_PASSIVE))
     {
         // we have player pet probably
@@ -12588,7 +12591,7 @@ Unit* Creature::SelectVictim()
     else
         return nullptr;
 
-    if (target && _IsTargetAcceptable(target) && CanCreatureAttack(target))
+    if (target && _IsTargetAcceptable(target) && CanCreatureAttack(target, IsNpcFightingMe(target)))
     {
         if (!HasSpellFocus())
             SetInFront(target);
@@ -12599,7 +12602,24 @@ Unit* Creature::SelectVictim()
     // end the bidirectional combat reference and remove us from their threat list,
     // causing them to lose their target (e.g. an NPC fighting a guardian whose
     // CanAIAttack rejects the NPC).
-    if (!m_threatManager.GetThreatenedByMeList().empty())
+    // A victim lost only to the leash must not keep us chasing it while an NPC is hitting us:
+    // turn on an NPC that is fighting us, or evade.
+    bool const lostVictimToLeash = target && _IsTargetAcceptable(target) && CanCreatureAttack(target, true);
+    if (lostVictimToLeash)
+    {
+        for (ThreatReference const* ref : m_threatManager.GetSortedThreatList())
+        {
+            Unit* attacker = ref->GetVictim();
+            if (attacker != target && IsNpcFightingMe(attacker) && _IsTargetAcceptable(attacker)
+                && CanCreatureAttack(attacker, true))
+            {
+                if (!HasSpellFocus())
+                    SetInFront(attacker);
+                return attacker;
+            }
+        }
+    }
+    else if (!m_threatManager.GetThreatenedByMeList().empty())
         return nullptr;
 
     if (GetVehicle())

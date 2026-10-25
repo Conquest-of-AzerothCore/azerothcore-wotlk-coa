@@ -115,7 +115,7 @@ bool ThreatReference::ShouldBeOffline() const
 {
     if (!_owner->CanSeeOrDetect(_victim))
         return true;
-    if (!_owner->_IsTargetAcceptable(_victim) || !_owner->CanCreatureAttack(_victim))
+    if (!_owner->_IsTargetAcceptable(_victim) || !_owner->CanCreatureAttack(_victim, _owner->IsNpcFightingMe(_victim)))
         return true;
     if (!FlagsAllowFighting(_owner, _victim) || !FlagsAllowFighting(_victim, _owner))
         return true;

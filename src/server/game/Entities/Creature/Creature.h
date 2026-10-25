@@ -141,6 +141,9 @@ public:
     bool isCanInteractWithBattleMaster(Player* player, bool msg) const;
     bool CanResetTalents(Player* player) const;
     bool CanCreatureAttack(Unit const* victim, bool skipDistCheck = false) const;
+    bool IsWithinLeashArea() const;
+    bool IsNpcFightingMe(Unit const* who) const;
+    void EndCombatWithUnitsLeftBehind();
     bool IsImmunedToSpell(SpellInfo const* spellInfo, Spell const* spell = nullptr) override;
 
     [[nodiscard]] bool HasMechanicTemplateImmunity(uint64 mask) const;
