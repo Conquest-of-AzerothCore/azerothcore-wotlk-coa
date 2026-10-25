@@ -28,6 +28,13 @@ CoA.AllowRemoteClients = 0
 # 0 - Create a Hero. Use this on a realm with CoA.ClassModel = "hero".
 CoA.MapClass10ToWarrior = 1
 
+# Client lab probe relay: the admin command .labprobe whispers read-only CoaProbe requests to an
+# online lab character as addon messages and collects the chunked answers the addon whispers back.
+# Accepted only for accounts whose name starts with CoA.ProbeRelay.AccountPrefix (case-insensitive).
+# Enable only on a lab server. Default: 0.
+CoA.ProbeRelay.Enable = 0
+CoA.ProbeRelay.AccountPrefix = "COALAB"
+
 # Log each consumed extension packet during protocol discovery.
 CoA.LogConsumedPackets = 1
 
